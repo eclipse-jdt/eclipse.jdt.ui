@@ -56,9 +56,11 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 					&& initializer != null
 					&& initializer.expressions() != null) {
 				if (initializer.expressions().size() == 1) {
-					NullLiteral nullLiteral= ASTNodes.as((Expression) initializer.expressions().get(0), NullLiteral.class);
+					Expression singleElement= (Expression) initializer.expressions().get(0);
+					NullLiteral nullLiteral= ASTNodes.as(singleElement, NullLiteral.class);
 
-					if (nullLiteral != null) {
+					if (nullLiteral != null
+							|| (singleElement.resolveTypeBinding() != null && singleElement.resolveTypeBinding().isArray())) {
 						return true;
 					}
 				}
