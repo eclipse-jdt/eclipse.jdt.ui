@@ -599,8 +599,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			setOrientation(fOrientation);
 		}
 		else {
-			if (fOrientation == VIEW_ORIENTATION_SINGLE)
-				return;
 			Point size= fParent.getSize();
 			if (size.x != 0 && size.y != 0) {
 				if (size.x > size.y)
