@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Hashtable;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -41,10 +40,15 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class PromoteTempToFieldTests extends GenericRefactoringTest{
 	private static final boolean BUG_39363= true;
 	private static final String REFACTORING_PATH= "PromoteTempToField/";
-    private String fCompactPref;
+	private String fCompactPref;
 
-    @Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public PromoteTempToFieldTests() {
+		this.rts= new RefactoringTestSetup();
+	}
+
+	protected PromoteTempToFieldTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
 
 	@Override
 	protected String getRefactoringPath() {

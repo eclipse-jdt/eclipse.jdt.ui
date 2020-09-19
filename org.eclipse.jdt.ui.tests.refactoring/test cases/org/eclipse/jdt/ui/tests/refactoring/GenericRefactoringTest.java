@@ -86,7 +86,17 @@ public abstract class GenericRefactoringTest {
 	protected static final Charset ENCODING= StandardCharsets.UTF_8;
 
 	@Rule
+	public RefactoringTestSetup rts;
+
+	@Rule
 	public TestName tn= new TestName();
+
+	public GenericRefactoringTest() {
+	}
+
+	public GenericRefactoringTest(RefactoringTestSetup rts) {
+		this.rts=rts;
+	}
 
 	/**
 	 * If <code>true</code> a descriptor is created from the change.

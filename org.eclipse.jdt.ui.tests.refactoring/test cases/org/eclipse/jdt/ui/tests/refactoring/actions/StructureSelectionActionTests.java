@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -38,8 +37,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 public class StructureSelectionActionTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "StructureSelectionAction/";
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public StructureSelectionActionTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

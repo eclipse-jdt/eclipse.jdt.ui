@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -43,8 +42,13 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class IntroduceIndirectionTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "IntroduceIndirection/";
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public IntroduceIndirectionTests() {
+		rts= new RefactoringTestSetup();
+	}
+
+	protected IntroduceIndirectionTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
 
 	@Override
 	protected String getRefactoringPath() {

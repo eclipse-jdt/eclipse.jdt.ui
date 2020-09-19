@@ -18,7 +18,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -35,14 +34,14 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeParameterProcessor;
 
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class RenameTypeParameterTests extends GenericRefactoringTest {
 
 	private static final String REFACTORING_PATH= "RenameTypeParameter/";
 
-	@Rule
-	public RefactoringTestSetup fts= new Java1d5Setup();
+	public RenameTypeParameterTests() {
+		rts= new Java1d5Setup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

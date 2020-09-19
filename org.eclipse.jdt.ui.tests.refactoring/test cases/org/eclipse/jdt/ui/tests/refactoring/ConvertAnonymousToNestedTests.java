@@ -28,7 +28,6 @@ import java.util.Hashtable;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -48,8 +47,8 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class ConvertAnonymousToNestedTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "ConvertAnonymousToNested/";
@@ -61,8 +60,13 @@ public class ConvertAnonymousToNestedTests extends GenericRefactoringTest {
 		return REFACTORING_PATH;
 	}
 
-	@Rule
-	public RefactoringTestSetup js= new Java1d5Setup();
+	public ConvertAnonymousToNestedTests() {
+		this.rts= new Java1d5Setup();
+	}
+
+	protected ConvertAnonymousToNestedTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
 
 	private String getSimpleTestFileName(boolean canInline, boolean input){
 		String fileName = "A_" + getName();

@@ -19,7 +19,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -39,8 +38,10 @@ import org.eclipse.ltk.core.refactoring.resource.MoveRenameResourceChange;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class MoveRenameResourceChangeTests extends GenericRefactoringTest {
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+
+	public MoveRenameResourceChangeTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Test
 	public void testFile0() throws Exception{

@@ -16,7 +16,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -31,7 +30,6 @@ import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d8Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -41,8 +39,9 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class IntroduceParameterObjectTests1d8 extends IntroduceParameterObjectTests {
 	private static final String REFACTORING_PATH= "IntroduceParameterObject18/";
 
-	@Rule
-	public RefactoringTestSetup rts= new Java1d8Setup();
+	public IntroduceParameterObjectTests1d8() {
+		super(new Java1d8Setup());
+	}
 
 	@Override
 	protected String getRefactoringPath() {

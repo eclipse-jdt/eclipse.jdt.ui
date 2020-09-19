@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -47,14 +46,15 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 
 import org.eclipse.jdt.ui.tests.refactoring.rules.JavaPreviewSetup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class RenameRecordElementsTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenameRecordElements/";
 
 	private String fPrefixPref;
-	@Rule
-	public RefactoringTestSetup fts= new JavaPreviewSetup();
+
+	public RenameRecordElementsTests() {
+		rts= new JavaPreviewSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

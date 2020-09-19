@@ -26,7 +26,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -71,8 +70,9 @@ public class RenameTypeTests extends GenericRefactoringTest {
 	private static final boolean BUG_54948= false;
 	private static final String REFACTORING_PATH= "RenameType/";
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public RenameTypeTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.swt.SWTError;
@@ -65,8 +64,9 @@ public class PasteActionTest extends GenericRefactoringTest {
 	private Clipboard fClipboard;
 	private static final String REFACTORING_PATH= "Paste/";
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public PasteActionTest() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

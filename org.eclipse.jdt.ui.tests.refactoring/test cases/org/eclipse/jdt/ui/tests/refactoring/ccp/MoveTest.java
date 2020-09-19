@@ -22,7 +22,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Map;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -162,8 +161,9 @@ public class MoveTest extends GenericRefactoringTest {
 
 	private static final String REFACTORING_PATH= "Move/";
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public MoveTest() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	public void genericbefore() throws Exception {

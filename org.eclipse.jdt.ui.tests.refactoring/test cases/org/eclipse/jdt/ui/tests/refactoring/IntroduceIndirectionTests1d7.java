@@ -14,14 +14,12 @@
 
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d7Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 /**
  * Those tests should run on Java Dolphin 1.7 .
@@ -29,10 +27,9 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
 public class IntroduceIndirectionTests1d7 extends IntroduceIndirectionTests {
-	@Rule
-	public RefactoringTestSetup rts= new Java1d7Setup();
-
-// ---
+	public IntroduceIndirectionTests1d7() {
+		super(new Java1d7Setup());
+	}
 
 	@Test
 	public void test17_32() throws Exception {

@@ -24,7 +24,6 @@ import java.util.Hashtable;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -46,7 +45,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefac
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -60,8 +58,9 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 
 	private String fCompactPref;
 
-	@ClassRule
-	public static RefactoringTestSetup fts= new Java1d5Setup();
+	public MoveInnerToTopLevelTests() {
+		rts= new Java1d5Setup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {
@@ -160,6 +159,7 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 
 	private void validateFailingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName, int expectedSeverity) throws Exception {
 		IType parentClas= getClassFromTestFile(getPackageP(), parentClassName);
+		Thread.sleep(800); // its magic..
 		IType clas= parentClas.getType(className);
 
 		MoveInnerToTopRefactoring ref= ((RefactoringAvailabilityTester.isMoveInnerAvailable(clas)) ? new MoveInnerToTopRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject())) : null);

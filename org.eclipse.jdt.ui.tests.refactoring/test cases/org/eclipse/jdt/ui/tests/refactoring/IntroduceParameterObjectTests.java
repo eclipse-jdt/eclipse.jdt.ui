@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -54,11 +53,16 @@ public class IntroduceParameterObjectTests extends GenericRefactoringTest {
 	private static final String DEFAULT_SUB_DIR= "sub";
 	private static final String REFACTORING_PATH= "IntroduceParameterObject/";
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
-
 	private IPackageFragment fPack;
 	protected IntroduceParameterObjectDescriptor fDescriptor;
+
+	public IntroduceParameterObjectTests() {
+		this.rts= new RefactoringTestSetup();
+	}
+
+	protected IntroduceParameterObjectTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
 
 	private void checkAdditionalFile(String subdir, String fileName) throws Exception, JavaModelException, IOException {
 		IPackageFragment pack= getSubPackage(subdir);

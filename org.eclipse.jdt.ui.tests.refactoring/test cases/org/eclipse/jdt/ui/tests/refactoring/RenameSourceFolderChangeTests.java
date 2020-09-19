@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -36,8 +35,10 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderCha
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class RenameSourceFolderChangeTests extends GenericRefactoringTest {
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+
+	public RenameSourceFolderChangeTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Test
 	public void test0() throws Exception {

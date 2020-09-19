@@ -18,7 +18,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,8 +40,9 @@ public class UseSupertypeWherePossibleTests extends GenericRefactoringTest {
 
 	private static final String REFACTORING_PATH= "UseSupertypeWherePossible/";
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public UseSupertypeWherePossibleTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

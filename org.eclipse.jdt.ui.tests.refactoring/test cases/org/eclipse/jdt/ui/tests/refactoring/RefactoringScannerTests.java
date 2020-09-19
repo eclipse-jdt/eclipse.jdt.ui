@@ -18,7 +18,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner;
@@ -37,9 +36,9 @@ public class RefactoringScannerTests extends GenericRefactoringTest {
 		}
 	}
 
-
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public RefactoringScannerTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	private RefactoringScanner fScanner;
 

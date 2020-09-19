@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.Assert;
@@ -53,6 +52,14 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 
 	private static final String REFACTORING_PATH= "MoveInstanceMethod/";
 
+	public MoveInstanceMethodTests() {
+		this.rts= new Java1d5Setup();
+	}
+
+	protected MoveInstanceMethodTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
+
 	public static void chooseNewTarget(MoveInstanceMethodProcessor processor, int newTargetType, String newTargetName) {
 		IVariableBinding target= null;
 		for (IVariableBinding candidate : processor.getPossibleTargets()) {
@@ -72,8 +79,6 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 		return (IMethod) jes[0];
 	}
 
-	@Rule
-	public RefactoringTestSetup fts= new Java1d5Setup();
 
 	private static boolean typeMatches(int newTargetType, IVariableBinding newTarget) {
 		return newTargetType == PARAMETER && !newTarget.isField() || newTargetType == FIELD && newTarget.isField();

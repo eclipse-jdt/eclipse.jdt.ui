@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -45,8 +44,9 @@ public class RenameMethodInInterfaceTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenameMethodInInterface/";
 	private static final String[] NO_ARGUMENTS= new String[0];
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public RenameMethodInInterfaceTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

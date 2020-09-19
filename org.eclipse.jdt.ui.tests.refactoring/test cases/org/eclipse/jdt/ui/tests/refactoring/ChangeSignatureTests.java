@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -62,8 +61,9 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public ChangeSignatureTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

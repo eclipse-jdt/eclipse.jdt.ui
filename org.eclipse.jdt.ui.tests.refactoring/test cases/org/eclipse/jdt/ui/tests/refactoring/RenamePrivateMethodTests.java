@@ -18,7 +18,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -40,8 +39,9 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class RenamePrivateMethodTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenamePrivateMethod/";
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public RenamePrivateMethodTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

@@ -18,7 +18,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -33,15 +32,15 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.rules.JavaPreviewSetup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveInnerToNewTests14 extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "MoveInnerToNew14/";
 
-	@Rule
-	public RefactoringTestSetup fts= new JavaPreviewSetup();
+	public MoveInnerToNewTests14() {
+		rts= new JavaPreviewSetup();
+	}
 
 	@Override
 	public void genericbefore() throws Exception {

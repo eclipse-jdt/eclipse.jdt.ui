@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.zip.ZipInputStream;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -61,8 +60,9 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 	private boolean fAssumeCloneReturnsSameType= true;
 	private boolean fLeaveUnconstrainedRaw= true;
 
-	@Rule
-	public Java1d6Setup fgTestSetup= new Java1d6Setup();
+	public InferTypeArgumentsTests() {
+		rts= new Java1d6Setup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

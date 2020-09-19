@@ -18,7 +18,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -42,8 +41,10 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class RenameJavaProjectTests extends GenericRefactoringTest {
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+
+	public RenameJavaProjectTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	public void genericbefore() throws Exception {

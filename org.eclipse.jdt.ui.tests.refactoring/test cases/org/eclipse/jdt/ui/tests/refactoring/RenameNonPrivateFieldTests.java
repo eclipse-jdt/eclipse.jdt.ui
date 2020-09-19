@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -66,8 +65,9 @@ public class RenameNonPrivateFieldTests extends GenericRefactoringTest {
 	private boolean fRenameGetter= false;
 	private boolean fRenameSetter= false;
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public RenameNonPrivateFieldTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

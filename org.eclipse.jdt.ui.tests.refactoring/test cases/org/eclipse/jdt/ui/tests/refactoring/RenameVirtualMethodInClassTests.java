@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -48,8 +47,9 @@ public class RenameVirtualMethodInClassTests extends GenericRefactoringTest {
 
 	private static final boolean BUG_83217_IMPLICIT_ENUM_METHODS= true;
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public RenameVirtualMethodInClassTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath(){

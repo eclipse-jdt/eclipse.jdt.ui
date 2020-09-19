@@ -18,7 +18,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -43,8 +42,9 @@ public class RenameStaticMethodTests extends GenericRefactoringTest {
 
 	private static final boolean BUG_83332_SPLIT_SINGLE_IMPORT= true;
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public RenameStaticMethodTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

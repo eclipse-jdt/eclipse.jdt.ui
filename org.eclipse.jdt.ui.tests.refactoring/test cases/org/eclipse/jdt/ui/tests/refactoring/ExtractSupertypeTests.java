@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -52,8 +51,10 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * Note: Extract Supertype heavily relies on PullUpRefactoring and its tests
  */
 public final class ExtractSupertypeTests extends GenericRefactoringTest {
-	@Rule
-	public Java1d5Setup js= new Java1d5Setup();
+
+	public ExtractSupertypeTests() {
+		rts= new Java1d5Setup();
+	}
 
 	private static final String REFACTORING_PATH= "ExtractSupertype/";
 

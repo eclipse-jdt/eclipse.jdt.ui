@@ -16,7 +16,6 @@ package org.eclipse.jdt.ui.tests.refactoring.ccp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -51,8 +50,9 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class MultiMoveTest extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "MultiMove/";
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public MultiMoveTest() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	public void genericbefore() throws Exception {

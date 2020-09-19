@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Hashtable;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -53,8 +52,13 @@ public class ExtractConstantTests extends GenericRefactoringTest {
 	private String fCompactPref;
 	private boolean fAddComments;
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public ExtractConstantTests() {
+		this.rts= new RefactoringTestSetup();
+	}
+
+	protected ExtractConstantTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
 
 	@Override
 	protected String getRefactoringPath() {

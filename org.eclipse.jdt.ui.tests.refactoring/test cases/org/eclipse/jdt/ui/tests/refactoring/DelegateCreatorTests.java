@@ -15,7 +15,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.IOException;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -46,8 +45,9 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class DelegateCreatorTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "DelegateCreator/";
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public DelegateCreatorTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

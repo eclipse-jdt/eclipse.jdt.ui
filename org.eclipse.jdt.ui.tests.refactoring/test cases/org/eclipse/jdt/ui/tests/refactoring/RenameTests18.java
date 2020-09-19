@@ -63,7 +63,7 @@ public class RenameTests18 extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenameTests18/";
 
 	@Rule
-	public RefactoringTestSetup fts= new Java1d8Setup() {
+	public RefactoringTestSetup rts= new Java1d8Setup() {
 		@Override
 		public void before() throws Exception {
 			JavaProjectHelper.PERFORM_DUMMY_SEARCH++;

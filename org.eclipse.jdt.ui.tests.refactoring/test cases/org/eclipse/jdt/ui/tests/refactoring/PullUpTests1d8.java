@@ -18,7 +18,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -46,7 +45,6 @@ import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d8Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -56,9 +54,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
 public class PullUpTests1d8 extends PullUpTests {
-	@SuppressWarnings("hiding")
-	@Rule
-	public RefactoringTestSetup fts= new Java1d8Setup();
+	public PullUpTests1d8() {
+		super(new Java1d8Setup());
+	}
 
 	@Test
 	public void test18_1() throws Exception {

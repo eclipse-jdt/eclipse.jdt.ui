@@ -17,7 +17,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.resources.IResource;
@@ -42,8 +41,9 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class MoveInitializerTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "MoveInitializer/";
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public MoveInitializerTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	public void genericbefore() throws Exception {

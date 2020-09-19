@@ -16,7 +16,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -33,8 +32,9 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class CopyPackageChangeTest extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "CopyPackageChange/";
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public CopyPackageChangeTest() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

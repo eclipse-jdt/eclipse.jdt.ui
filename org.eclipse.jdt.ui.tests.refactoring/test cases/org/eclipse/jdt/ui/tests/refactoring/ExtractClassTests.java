@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -56,8 +55,13 @@ public class ExtractClassTests extends GenericRefactoringTest {
 	protected IPackageFragment fPack;
 	protected ExtractClassDescriptor fDescriptor;
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public ExtractClassTests() {
+		this.rts= new RefactoringTestSetup();
+	}
+
+	protected ExtractClassTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
 
 	protected IType setupType() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), getCUName(), true);

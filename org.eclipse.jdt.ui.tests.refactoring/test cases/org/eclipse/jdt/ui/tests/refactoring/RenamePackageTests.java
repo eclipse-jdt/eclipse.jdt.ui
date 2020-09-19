@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -92,7 +91,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
@@ -108,8 +106,9 @@ public class RenamePackageTests extends GenericRefactoringTest {
 	private String fQualifiedNamesFilePatterns;
 	private boolean fRenameSubpackages;
 
-	@Rule
-	public RefactoringTestSetup fts= new Java1d5Setup();
+	public RenamePackageTests() {
+		rts= new Java1d5Setup();
+	}
 
 //	public void run(TestResult result) {
 //		System.out.println("--- " + getName() + " - RenamePackageTests ---");

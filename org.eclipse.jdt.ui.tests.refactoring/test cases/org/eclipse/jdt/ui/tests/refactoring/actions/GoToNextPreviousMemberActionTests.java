@@ -15,7 +15,6 @@ package org.eclipse.jdt.ui.tests.refactoring.actions;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -30,8 +29,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousM
 public class GoToNextPreviousMemberActionTests extends GenericRefactoringTest{
 	private static final String REFACTORING_PATH= "GoToNextPreviousMemberAction/";
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public GoToNextPreviousMemberActionTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

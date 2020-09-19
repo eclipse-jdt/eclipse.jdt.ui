@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -76,8 +75,9 @@ public class DeleteTest extends GenericRefactoringTest {
 	private static final boolean BUG_55221= true;
 	private static final String REFACTORING_PATH= "Delete/";
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public DeleteTest() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Before
 	public void setUp() throws Exception {

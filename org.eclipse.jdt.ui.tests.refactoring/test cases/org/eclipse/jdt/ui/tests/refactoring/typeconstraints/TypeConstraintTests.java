@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -50,8 +49,9 @@ public class TypeConstraintTests extends GenericRefactoringTest {
 		return PATH;
 	}
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public TypeConstraintTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	private String getSimpleTestFileName(){
 		return "A_" + tn.getMethodName() + ".java";

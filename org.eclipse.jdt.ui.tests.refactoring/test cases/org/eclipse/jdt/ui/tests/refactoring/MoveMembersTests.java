@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -45,8 +44,13 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class MoveMembersTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "MoveMembers/";
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public MoveMembersTests() {
+		rts= new RefactoringTestSetup();
+	}
+
+	protected MoveMembersTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
 
 	@Override
 	protected String getRefactoringPath() {

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -43,13 +42,13 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor.MemberActionInfo;
 
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class PushDownTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "PushDown/";
 
-	@Rule
-	public RefactoringTestSetup fts= new Java1d5Setup();
+	public PushDownTests() {
+		rts= new Java1d5Setup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

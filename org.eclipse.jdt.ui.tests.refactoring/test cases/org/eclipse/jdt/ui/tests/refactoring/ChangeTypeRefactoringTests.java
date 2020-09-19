@@ -22,7 +22,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.StringAsserts;
@@ -58,8 +57,9 @@ public class ChangeTypeRefactoringTests extends GenericRefactoringTest {
 		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength, selectedType);
 	}
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public ChangeTypeRefactoringTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

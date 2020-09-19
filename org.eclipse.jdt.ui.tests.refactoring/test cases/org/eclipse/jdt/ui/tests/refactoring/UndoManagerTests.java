@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -30,8 +29,9 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class UndoManagerTests extends GenericRefactoringTest {
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public UndoManagerTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	private void checkState(boolean undo, boolean redo, int undoCount, int redoCount){
 		checkState(0, undo, redo, undoCount, redoCount);

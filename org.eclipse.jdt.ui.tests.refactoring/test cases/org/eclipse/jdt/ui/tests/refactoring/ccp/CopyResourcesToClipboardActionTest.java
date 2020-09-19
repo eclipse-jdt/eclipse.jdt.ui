@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.swt.dnd.Clipboard;
@@ -39,8 +38,10 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 
 public class CopyResourcesToClipboardActionTest extends GenericRefactoringTest{
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+
+	public CopyResourcesToClipboardActionTest() {
+		rts= new RefactoringTestSetup();
+	}
 
 	private ICompilationUnit fCuA;
 	private ICompilationUnit fCuB;

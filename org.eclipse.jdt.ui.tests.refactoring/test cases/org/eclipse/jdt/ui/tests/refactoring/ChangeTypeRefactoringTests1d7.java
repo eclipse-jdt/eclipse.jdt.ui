@@ -15,7 +15,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Collection;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -24,7 +23,6 @@ import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d7Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 /**
  * Those tests should run on Java Dolphin 1.7 .
@@ -32,9 +30,10 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
 public class ChangeTypeRefactoringTests1d7 extends ChangeTypeRefactoringTests {
-	@Rule
-	public RefactoringTestSetup js= new Java1d7Setup();
 
+	public ChangeTypeRefactoringTests1d7() {
+		rts= new Java1d7Setup();
+	}
 	@Override
 	protected String getTestFileName(boolean positive, boolean input) {
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();

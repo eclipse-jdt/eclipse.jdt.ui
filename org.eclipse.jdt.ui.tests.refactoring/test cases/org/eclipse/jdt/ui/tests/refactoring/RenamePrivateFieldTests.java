@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -53,8 +52,10 @@ public class RenamePrivateFieldTests extends GenericRefactoringTest {
 	private static final boolean BUG_81084= true;
 
 	private String fPrefixPref;
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+
+	public RenamePrivateFieldTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

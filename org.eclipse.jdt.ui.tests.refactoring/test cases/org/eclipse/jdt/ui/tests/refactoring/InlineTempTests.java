@@ -20,7 +20,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -43,8 +42,9 @@ public class InlineTempTests extends GenericRefactoringTest {
 		return REFACTORING_PATH;
 	}
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public InlineTempTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	protected String getSimpleTestFileName(boolean canInline, boolean input){
 		String fileName = "A_" + getName();

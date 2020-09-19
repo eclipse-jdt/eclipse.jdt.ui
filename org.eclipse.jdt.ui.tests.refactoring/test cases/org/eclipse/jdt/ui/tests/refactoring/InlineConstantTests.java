@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.Assert;
@@ -44,8 +43,13 @@ public class InlineConstantTests extends GenericRefactoringTest {
 
 	protected boolean toSucceed;
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public InlineConstantTests() {
+		this.rts= new RefactoringTestSetup();
+	}
+
+	InlineConstantTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
 
 	@Override
 	protected String getRefactoringPath() {

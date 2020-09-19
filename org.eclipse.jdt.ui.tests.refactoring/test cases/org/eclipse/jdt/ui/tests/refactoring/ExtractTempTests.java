@@ -23,7 +23,6 @@ import java.util.Hashtable;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -49,8 +48,9 @@ public class ExtractTempTests extends GenericRefactoringTest {
 
 	private String fCompactPref;
 
-	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public ExtractTempTests() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	protected String getRefactoringPath() {

@@ -37,7 +37,15 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	private static final String SLASH_OUT= "/out";
 
 	@Rule
-	public RefactoringTestSetup rts= new RefactoringTestSetup();
+	public RefactoringTestSetup rts;
+
+	public IntroduceParameterTests() {
+		this.rts= new RefactoringTestSetup();
+	}
+
+	protected IntroduceParameterTests(RefactoringTestSetup rts) {
+		this.rts= rts;
+	}
 
 	@Override
 	protected String getResourceLocation() {

@@ -21,7 +21,6 @@ import java.util.Collection;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.team.core.RepositoryProvider;
@@ -59,8 +58,9 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 
 public class ValidateEditTests extends GenericRefactoringTest {
 
-	@Rule
-	public Java1d5Setup fgTestSetup= new Java1d5Setup();
+	public ValidateEditTests() {
+		rts= new Java1d5Setup();
+	}
 
 	@Before
 	public void setUp() throws Exception {

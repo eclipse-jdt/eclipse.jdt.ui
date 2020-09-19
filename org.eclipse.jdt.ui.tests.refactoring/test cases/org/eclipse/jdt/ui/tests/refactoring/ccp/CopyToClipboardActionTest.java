@@ -21,7 +21,6 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.swt.dnd.Clipboard;
@@ -75,8 +74,9 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 	private IFile faTxt;
 	private IFolder fOlder;
 
-	@Rule
-	public RefactoringTestSetup fts= new RefactoringTestSetup();
+	public CopyToClipboardActionTest() {
+		rts= new RefactoringTestSetup();
+	}
 
 	@Override
 	public void genericbefore() throws Exception {
