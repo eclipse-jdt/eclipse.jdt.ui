@@ -183,8 +183,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private String[] getAffectedProjectNatures() throws CoreException {
 		String[] jNatures= JavaProcessors.computeAffectedNaturs(fJavaElements);
 		String[] rNatures= ResourceProcessors.computeAffectedNatures(fResources);
-		Set<String> result= new HashSet<>();
-		result.addAll(Arrays.asList(jNatures));
+		Set<String> result= new HashSet<>(Arrays.asList(jNatures));
 		result.addAll(Arrays.asList(rNatures));
 		return result.toArray(new String[result.size()]);
 	}
@@ -433,8 +432,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		Collections.sort(initialPackagesToDelete, (one, two) -> two.getElementName().compareTo(one.getElementName()));
 
 		// Get resources and java elements which will be deleted as well
-		final Set<IResource> deletedChildren= new HashSet<>();
-		deletedChildren.addAll(Arrays.asList(fResources));
+		final Set<IResource> deletedChildren= new HashSet<>(Arrays.asList(fResources));
 		for (IJavaElement javaElement : fJavaElements) {
 			if (!ReorgUtils.isInsideCompilationUnit(javaElement)) {
 				deletedChildren.add(javaElement.getResource());

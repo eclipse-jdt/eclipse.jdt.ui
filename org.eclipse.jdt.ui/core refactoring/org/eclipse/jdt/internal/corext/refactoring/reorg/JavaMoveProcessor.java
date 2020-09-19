@@ -221,8 +221,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	private String[] getAffectedProjectNatures() throws CoreException {
 		String[] jNatures= JavaProcessors.computeAffectedNaturs(fMovePolicy.getJavaElements());
 		String[] rNatures= ResourceProcessors.computeAffectedNatures(fMovePolicy.getResources());
-		Set<String> result= new HashSet<>();
-		result.addAll(Arrays.asList(jNatures));
+		Set<String> result= new HashSet<>(Arrays.asList(jNatures));
 		result.addAll(Arrays.asList(rNatures));
 		return result.toArray(new String[result.size()]);
 	}

@@ -518,8 +518,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 	private RefactoringStatus checkNonAbstractMembersInDestinationClasses(IMember[] membersToPushDown, IType[] destinationClassesForNonAbstract) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		List<IMember> list= new ArrayList<>(); // Arrays.asList does not support removing
-		list.addAll(Arrays.asList(membersToPushDown));
+		List<IMember> list= new ArrayList<>(Arrays.asList(membersToPushDown)); // Arrays.asList does not support removing
 		list.removeAll(Arrays.asList(getAbstractMembers(membersToPushDown)));
 		IMember[] nonAbstractMembersToPushDown= list.toArray(new IMember[list.size()]);
 		for (IType type : destinationClassesForNonAbstract) {

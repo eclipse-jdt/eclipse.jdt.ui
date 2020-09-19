@@ -720,8 +720,7 @@ public class PasteAction extends SelectionDispatchAction{
 							if (selectedWorkingSets.length == 1) {
 								IWorkingSet ws= selectedWorkingSets[0];
 								if (!IWorkingSetIDs.OTHERS.equals(ws.getId())) {
-									ArrayList<IAdaptable> newElements= new ArrayList<>();
-									newElements.addAll(Arrays.asList(ws.getElements()));
+									ArrayList<IAdaptable> newElements= new ArrayList<>(Arrays.asList(ws.getElements()));
 									newElements.addAll(Arrays.asList(ws.adaptElements(new IAdaptable[] { fDestination.getJavaProject() })));
 									ws.setElements(newElements.toArray(new IAdaptable[newElements.size()]));
 								}

@@ -507,8 +507,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 
 	@Override
 	public Change[] getAllChanges() {
-		ArrayList<Change> changes= new ArrayList<>();
-		changes.addAll(Arrays.asList(super.getAllChanges()));
+		ArrayList<Change> changes= new ArrayList<>(Arrays.asList(super.getAllChanges()));
 		changes.addAll(fOtherChanges);
 		return changes.toArray(new Change[changes.size()]);
 	}

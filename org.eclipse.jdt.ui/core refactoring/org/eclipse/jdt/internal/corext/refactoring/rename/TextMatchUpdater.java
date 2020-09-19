@@ -109,9 +109,7 @@ class TextMatchUpdater {
 
 	private IProject[] getProjectsInScope() {
 		IPath[] enclosingProjects= fScope.enclosingProjectsAndJars();
-		Set<IPath> enclosingProjectSet= new HashSet<>();
-		enclosingProjectSet.addAll(Arrays.asList(enclosingProjects));
-
+		Set<IPath> enclosingProjectSet= new HashSet<>(Arrays.asList(enclosingProjects));
 		ArrayList<IProject> projectsInScope= new ArrayList<>();
 		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
 			if (enclosingProjectSet.contains(project.getFullPath())) {

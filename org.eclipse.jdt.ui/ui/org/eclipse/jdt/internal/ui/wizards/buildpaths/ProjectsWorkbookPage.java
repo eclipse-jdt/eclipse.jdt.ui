@@ -662,8 +662,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 
 	private Object[] getNotYetRequiredProjects() throws JavaModelException {
-		ArrayList<IJavaProject> selectable= new ArrayList<>();
-		selectable.addAll(Arrays.asList(fCurrJProject.getJavaModel().getJavaProjects()));
+		ArrayList<IJavaProject> selectable= new ArrayList<>(Arrays.asList(fCurrJProject.getJavaModel().getJavaProjects()));
 		selectable.remove(fCurrJProject);
 
 		for (CPListElement curr : fProjectsList.getElements()) {

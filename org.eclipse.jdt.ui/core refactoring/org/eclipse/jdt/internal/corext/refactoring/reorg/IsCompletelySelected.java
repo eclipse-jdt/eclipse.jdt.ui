@@ -162,9 +162,7 @@ public class IsCompletelySelected implements Predicate<IPackageFragment> {
 		Set<IPackageFragment> completelySelectedPackages= new HashSet<>(selectedPackages);
 
 		Set<IPackageFragment> visited= new HashSet<>(numberOfPackages);
-		Deque<IPackageFragment> queue= new LinkedList<>();
-
-		queue.addAll(unselectedPackages);
+		Deque<IPackageFragment> queue= new LinkedList<>(unselectedPackages);
 
 		// go over all packages which are not selected, and remove their parents (recursively) from the set of fully selected packages
 		while (!queue.isEmpty()) {

@@ -1173,9 +1173,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 
 		Collection<ITypeBinding> result= new HashSet<>();
 
-		Collection<ITypeBinding> allTypes= new HashSet<>();
-		allTypes.addAll(getAllSuperTypes(originalType));
-
+		Collection<ITypeBinding> allTypes= new HashSet<>(getAllSuperTypes(originalType));
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, allTypes.size());
 
 		for (ITypeBinding type : allTypes) {

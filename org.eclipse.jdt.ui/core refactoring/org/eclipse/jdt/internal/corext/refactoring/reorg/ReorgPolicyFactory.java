@@ -1483,8 +1483,7 @@ public final class ReorgPolicyFactory {
 
 		@Override
 		public IFile[] getAllModifiedFiles() {
-			Set<IFile> result= new HashSet<>();
-			result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
+			Set<IFile> result= new HashSet<>(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 			result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
 			if (!(getJavaElementDestination() instanceof IPackageFragmentRoot) && getDestinationAsPackageFragment() != null && getUpdateReferences())
 				result.addAll(Arrays.asList(ResourceUtil.getFiles(getCus())));
@@ -4435,8 +4434,7 @@ public final class ReorgPolicyFactory {
 
 	public static void storeReorgExecutionLog(String project, Map<String, String> arguments, ReorgExecutionLog log) {
 		if (log != null) {
-			final Set<Object> set= new HashSet<>();
-			set.addAll(Arrays.asList(log.getProcessedElements()));
+			final Set<Object> set= new HashSet<>(Arrays.asList(log.getProcessedElements()));
 			set.addAll(Arrays.asList(log.getRenamedElements()));
 			final StringBuilder buffer= new StringBuilder(64);
 			for (Object object : set) {

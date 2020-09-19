@@ -629,9 +629,7 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 	}
 
 	private List<ITypeBinding> filterSubtypeExceptions(List<ITypeBinding> exceptions) {
-		List<ITypeBinding> filteredExceptions= new ArrayList<>();
-		filteredExceptions.addAll(exceptions);
-
+		List<ITypeBinding> filteredExceptions= new ArrayList<>(exceptions);
 		for (Iterator<ITypeBinding> subtypeIterator= filteredExceptions.iterator(); subtypeIterator.hasNext();) {
 			ITypeBinding iTypeBinding= subtypeIterator.next();
 			for (ITypeBinding superTypeBinding : filteredExceptions) {

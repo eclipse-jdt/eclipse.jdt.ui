@@ -322,8 +322,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
-		List<IFile> result= new ArrayList<>();
-		result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
+		List<IFile> result= new ArrayList<>(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 		if (fQualifiedNameSearchResult != null)
 			result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
 		if (willRenameCU())

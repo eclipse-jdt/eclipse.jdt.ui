@@ -403,8 +403,7 @@ public final class RefactoringExecutionStarter {
 	public static void startMoveStaticMembersRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
 		if (!RefactoringAvailabilityTester.isMoveStaticAvailable(members))
 			return;
-		final Set<IMember> set= new HashSet<>();
-		set.addAll(Arrays.asList(members));
+		final Set<IMember> set= new HashSet<>(Arrays.asList(members));
 		final IMember[] elements= set.toArray(new IMember[set.size()]);
 		IJavaProject project= null;
 		if (elements.length > 0)

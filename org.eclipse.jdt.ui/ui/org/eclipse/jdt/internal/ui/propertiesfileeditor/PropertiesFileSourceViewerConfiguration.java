@@ -357,8 +357,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			if (!PropertiesFileDocumentProvider.isJavaPropertiesFile(fTextEditor.getEditorInput())) {
 				return autoEditStrategies;
 			}
-			List<IAutoEditStrategy> stratergies= new ArrayList<>();
-			stratergies.addAll(Arrays.asList(autoEditStrategies));
+			List<IAutoEditStrategy> stratergies= new ArrayList<>(Arrays.asList(autoEditStrategies));
 			stratergies.add(new PropertiesFileAutoEditStrategy(((IFileEditorInput)fTextEditor.getEditorInput()).getFile(), sourceViewer));
 			return stratergies.toArray(new IAutoEditStrategy[stratergies.size()]);
 		} catch (CoreException e) {

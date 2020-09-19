@@ -1247,9 +1247,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private IFile[] getAllFilesToModify() {
-		List<ICompilationUnit> cus= new ArrayList<>();
-		cus.addAll(Arrays.asList(fTextChangeManager.getAllCompilationUnits()));
-		return ResourceUtil.getFiles(cus.toArray(new ICompilationUnit[cus.size()]));
+		return ResourceUtil.getFiles(fTextChangeManager.getAllCompilationUnits().clone());
 	}
 
 	private boolean isStaticTarget() throws JavaModelException {

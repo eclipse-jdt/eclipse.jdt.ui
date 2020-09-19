@@ -93,8 +93,7 @@ public class InferTypeArgumentsConstraintsSolver {
 		ParametricStructureComputer parametricStructureComputer= new ParametricStructureComputer(allConstraintVariables, fTCModel);
 		Collection<CollectionElementVariable2> newVars= parametricStructureComputer.createElemConstraintVariables();
 
-		ArrayList<ConstraintVariable2> newAllConstraintVariables= new ArrayList<>();
-		newAllConstraintVariables.addAll(Arrays.asList(allConstraintVariables));
+		ArrayList<ConstraintVariable2> newAllConstraintVariables= new ArrayList<>(Arrays.asList(allConstraintVariables));
 		newAllConstraintVariables.addAll(newVars);
 		allConstraintVariables= newAllConstraintVariables.toArray(new ConstraintVariable2[newAllConstraintVariables.size()]);
 

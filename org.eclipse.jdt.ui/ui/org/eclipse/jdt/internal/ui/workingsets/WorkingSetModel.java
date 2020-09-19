@@ -382,8 +382,7 @@ public class WorkingSetModel {
 	 * @since 3.7
 	 */
 	private List<IWorkingSet> getActiveAndAllWorkingSetsFromManagers() {
-		List<IWorkingSet> result= new ArrayList<>();
-		result.addAll(fActiveWorkingSets);
+		List<IWorkingSet> result= new ArrayList<>(fActiveWorkingSets);
 		for (IWorkingSet local : fLocalWorkingSetManager.getWorkingSets()) {
 			if (!result.contains(local) && isSupportedAsTopLevelElement(local)) {
 				result.add(local);

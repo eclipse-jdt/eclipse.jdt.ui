@@ -355,8 +355,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 					ITypeHierarchy th= getSuperTypeHierarchy(type);
 					if (th != null) {
-						List<Object> children= new ArrayList<>();
-						children.addAll(Arrays.asList(super.getChildren(type)));
+						List<Object> children= new ArrayList<>(Arrays.asList(super.getChildren(type)));
 						for (IType superClass : th.getAllSupertypes(type))
 							children.addAll(Arrays.asList(super.getChildren(superClass)));
 						return children.toArray();

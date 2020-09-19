@@ -164,8 +164,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 				nameVariable,
 				fConstraintVariableFactory.makeRawBindingVariable(throwable));
 
-		ArrayList<ITypeConstraint> result= new ArrayList<>();
-		result.addAll(Arrays.asList(defines));
+		ArrayList<ITypeConstraint> result= new ArrayList<>(Arrays.asList(defines));
 		result.addAll(Arrays.asList(catchBound));
 		return result.toArray(new ITypeConstraint[result.size()]);
 	}
@@ -207,8 +206,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 
 	@Override
 	public ITypeConstraint[] create(FieldDeclaration fd){
-		List<ITypeConstraint> result= new ArrayList<>();
-		result.addAll(Arrays.asList(getConstraintsFromFragmentList(fd.fragments(), fd.getType())));
+		List<ITypeConstraint> result= new ArrayList<>(Arrays.asList(getConstraintsFromFragmentList(fd.fragments(), fd.getType())));
 		result.addAll(getConstraintsForHiding(fd));
 		result.addAll(getConstraintsForFieldDeclaringTypes(fd));
 		return result.toArray(new ITypeConstraint[result.size()]);
@@ -362,8 +360,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		} else if (constraints.length == 0){
 			return defines;
 		} else {
-			List<ITypeConstraint> all= new ArrayList<>();
-			all.addAll(Arrays.asList(defines));
+			List<ITypeConstraint> all= new ArrayList<>(Arrays.asList(defines));
 			all.addAll(Arrays.asList(constraints));
 			return all.toArray(new ITypeConstraint[all.size()]);
 		}
@@ -698,8 +695,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 */
 	protected static Set<ITypeBinding> getDeclaringSuperTypes(IMethodBinding methodBinding) {
 		ITypeBinding superClass = methodBinding.getDeclaringClass();
-		Set<ITypeBinding> allSuperTypes= new LinkedHashSet<>();
-		allSuperTypes.addAll(Arrays.asList(Bindings.getAllSuperTypes(superClass)));
+		Set<ITypeBinding> allSuperTypes= new LinkedHashSet<>(Arrays.asList(Bindings.getAllSuperTypes(superClass)));
 		if (allSuperTypes.isEmpty())
 			allSuperTypes.add(methodBinding.getDeclaringClass()); //TODO: Why only iff empty? The declaring class is not a supertype ...
 		Set<ITypeBinding> result= new HashSet<>();

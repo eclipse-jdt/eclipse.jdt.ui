@@ -76,8 +76,7 @@ public class PullUpAction extends SelectionDispatchAction {
 			if (!(name instanceof IMember))
 				return null;
 		}
-		Set<Object> memberSet= new HashSet<>();
-		memberSet.addAll(Arrays.asList(selection.toArray()));
+		Set<Object> memberSet= new HashSet<>(Arrays.asList(selection.toArray()));
 		return memberSet.toArray(new IMember[memberSet.size()]);
 	}
 

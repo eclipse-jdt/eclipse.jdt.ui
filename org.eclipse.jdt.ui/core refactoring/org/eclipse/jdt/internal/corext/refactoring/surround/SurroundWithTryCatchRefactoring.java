@@ -419,9 +419,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 
 	public static List<ITypeBinding> filterSubtypeExceptions(ITypeBinding[] exceptions) {
-		List<ITypeBinding> filteredExceptions= new ArrayList<>();
-		filteredExceptions.addAll(Arrays.asList(exceptions));
-
+		List<ITypeBinding> filteredExceptions= new ArrayList<>(Arrays.asList(exceptions));
 		for (Iterator<ITypeBinding> subtypeIterator= filteredExceptions.iterator(); subtypeIterator.hasNext();) {
 			ITypeBinding iTypeBinding= subtypeIterator.next();
 			for (ITypeBinding superTypeBinding : filteredExceptions) {

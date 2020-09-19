@@ -1358,8 +1358,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 				treeElements.add(((MethodWrapper) data).getMember());
 		}
 
-		List<IMember> newInput= new ArrayList<>();
-		newInput.addAll(inputElements);
+		List<IMember> newInput= new ArrayList<>(inputElements);
 		List<IMember> addedElements= new ArrayList<>();
 
 		for (IMember newElement : newElements) {

@@ -245,9 +245,7 @@ public class EnumeratedTypeSet extends TypeSet {
 	}
 
 	private Set<TType> cloneSet(Set<TType> members) {
-		Set<TType> result= new LinkedHashSet<>();
-		result.addAll(members);
-		return result;
+		return new LinkedHashSet<>(members);
 	}
 
 	public boolean addAll(TypeSet s) {

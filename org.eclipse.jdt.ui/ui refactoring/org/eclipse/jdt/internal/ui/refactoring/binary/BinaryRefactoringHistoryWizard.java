@@ -199,8 +199,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 200);
 			final IClasspathEntry entry= root.getRawClasspathEntry();
 			final IClasspathEntry[] entries= project.getRawClasspath();
-			final List<IClasspathEntry> list= new ArrayList<>();
-			list.addAll(Arrays.asList(entries));
+			final List<IClasspathEntry> list= new ArrayList<>(Arrays.asList(entries));
 			final IFileStore store= EFS.getLocalFileSystem().getStore(JavaPlugin.getDefault().getStateLocation().append(STUB_FOLDER).append(project.getElementName()));
 			if (store.fetchInfo(EFS.NONE, new SubProgressMonitor(monitor, 25, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).exists())
 				store.delete(EFS.NONE, new SubProgressMonitor(monitor, 25, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));

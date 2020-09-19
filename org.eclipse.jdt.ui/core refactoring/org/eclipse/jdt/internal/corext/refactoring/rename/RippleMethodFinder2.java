@@ -329,8 +329,7 @@ public class RippleMethodFinder2 {
 	 * @throws JavaModelException if creating a type hierarchy fails
 	 */
 	private boolean couldHaveMarriedAlienTypes(IProgressMonitor pm, WorkingCopyOwner owner, ITypeHierarchy methodHierarchy, IType[] methodTypeSubtypes) throws JavaModelException {
-		Set<IType> allTypesInMethodHierarchy= new HashSet<>();
-		allTypesInMethodHierarchy.addAll(Arrays.asList(methodHierarchy.getAllClasses()));
+		Set<IType> allTypesInMethodHierarchy= new HashSet<>(Arrays.asList(methodHierarchy.getAllClasses()));
 		allTypesInMethodHierarchy.addAll(Arrays.asList(methodHierarchy.getAllInterfaces()));
 
 

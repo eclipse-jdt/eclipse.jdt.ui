@@ -210,8 +210,7 @@ public abstract class ProfileConfigurationBlock {
 			final IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.xml"); //$NON-NLS-1$
 			if (type != null)
 				encoding= type.getDefaultCharset();
-			final Collection<Profile> profiles= new ArrayList<>();
-			profiles.addAll(fProfileManager.getSortedProfiles());
+			final Collection<Profile> profiles= new ArrayList<>(fProfileManager.getSortedProfiles());
 			try {
 				fProfileStore.writeProfilesToFile(profiles, file, encoding);
 			} catch (CoreException e) {

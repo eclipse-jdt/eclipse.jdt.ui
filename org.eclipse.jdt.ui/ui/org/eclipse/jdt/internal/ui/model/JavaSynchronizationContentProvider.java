@@ -458,8 +458,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return the package fragment children
 	 */
 	private Object[] getPackageFragmentChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
-		final Set<Object> set= new HashSet<>();
-		set.addAll(Arrays.asList(children));
+		final Set<Object> set= new HashSet<>(Arrays.asList(children));
 		IPackageFragment packageFragment= (IPackageFragment) parent;
 		IResource resource= packageFragment.getResource();
 		if (resource != null) {

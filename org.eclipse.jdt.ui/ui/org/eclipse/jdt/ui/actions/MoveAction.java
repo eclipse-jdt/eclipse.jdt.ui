@@ -198,8 +198,7 @@ public class MoveAction extends SelectionDispatchAction{
 	private static IMember[] convertToMemberArray(Object[] obj) {
 		if (obj == null)
 			return null;
-		Set<Object> memberSet= new HashSet<>();
-		memberSet.addAll(Arrays.asList(obj));
+		Set<Object> memberSet= new HashSet<>(Arrays.asList(obj));
 		return memberSet.toArray(new IMember[memberSet.size()]);
 	}
 

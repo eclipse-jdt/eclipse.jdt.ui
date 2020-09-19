@@ -189,8 +189,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 
 	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
-		Set<IFile> combined= new HashSet<>();
-		combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
+		Set<IFile> combined= new HashSet<>(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 		if (fRenameSubpackages) {
 			for (IPackageFragment pack : JavaElementUtil.getPackageAndSubpackages(fPackage)) {
 				combined.addAll(Arrays.asList(ResourceUtil.getFiles(pack.getCompilationUnits())));
