@@ -124,7 +124,7 @@ public class BindingLabelProviderCore {
 
 		// parameters
 		buffer.append('(');
-		if ((flags & JavaElementLabelsCore.M_PARAMETER_TYPES | JavaElementLabelsCore.M_PARAMETER_NAMES) != 0) {
+		if ((flags & (JavaElementLabelsCore.M_PARAMETER_TYPES | JavaElementLabelsCore.M_PARAMETER_NAMES)) != 0) {
 			ITypeBinding[] parameters= ((flags & JavaElementLabelsCore.M_PARAMETER_TYPES) != 0) ? binding.getParameterTypes() : null;
 			if (parameters != null) {
 				for (int index= 0; index < parameters.length; index++) {
