@@ -7146,9 +7146,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_modifiers">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.pattern_matching"
+            runAfter="org.eclipse.jdt.ui.cleanup.embedded_if">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp"
             id="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons"
-            runAfter="org.eclipse.jdt.ui.cleanup.embedded_if">
+            runAfter="org.eclipse.jdt.ui.cleanup.pattern_matching">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp"

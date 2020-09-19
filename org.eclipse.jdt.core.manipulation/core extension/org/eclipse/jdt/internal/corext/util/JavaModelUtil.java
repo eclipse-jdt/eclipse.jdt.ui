@@ -935,7 +935,7 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Checks if the given project or workspace has source compliance 14 or greater.
+	 * Checks if the given project or workspace has source compliance 15 or greater.
 	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
 	 * @return <code>true</code> if the given project or workspace has source compliance 15 or

@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -122,6 +123,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -849,6 +851,60 @@ public class ASTNodes {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Return true if it always ends with a jump statement.
+	 *
+	 * @param statement the statement
+	 * @return true if the statement falls through.
+	 */
+	public static boolean fallsThrough(final Statement statement) {
+		List<Statement> statements= asList(statement);
+
+		if (statements.isEmpty()) {
+			return false;
+		}
+
+		Statement lastStatement= statements.get(statements.size() - 1);
+		switch (lastStatement.getNodeType()) {
+		case ASTNode.RETURN_STATEMENT:
+		case ASTNode.THROW_STATEMENT:
+		case ASTNode.BREAK_STATEMENT:
+		case ASTNode.CONTINUE_STATEMENT:
+			return true;
+
+		case ASTNode.BLOCK:
+			Block block= (Block) lastStatement;
+			return fallsThrough(block);
+
+		case ASTNode.IF_STATEMENT:
+			IfStatement ifStatement= (IfStatement) lastStatement;
+			Statement thenStatement= ifStatement.getThenStatement();
+			Statement elseStatement= ifStatement.getElseStatement();
+			return fallsThrough(thenStatement) && fallsThrough(elseStatement);
+
+		case ASTNode.TRY_STATEMENT:
+			TryStatement tryStatement= (TryStatement) lastStatement;
+
+			if (!fallsThrough(tryStatement.getBody())
+					|| (tryStatement.getFinally() != null && fallsThrough(tryStatement.getFinally()))) {
+				return false;
+			}
+
+			if (tryStatement.catchClauses() != null) {
+				for (Object catchClause : tryStatement.catchClauses()) {
+					if (!fallsThrough(((CatchClause) catchClause).getBody())) {
+						return false;
+					}
+				}
+			}
+
+			return true;
+
+		default:
+			return false;
+		}
 	}
 
 	public static List<BodyDeclaration> getBodyDeclarations(ASTNode node) {

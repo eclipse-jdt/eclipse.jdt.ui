@@ -706,6 +706,18 @@ public class CleanUpConstants {
 	public static final String USE_VAR= "cleanup.use_var"; //$NON-NLS-1$
 
 	/**
+	 * Uses pattern matching for the instanceof operator when possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.17
+	 */
+	public static final String USE_PATTERN_MATCHING_FOR_INSTANCEOF= "cleanup.instanceof"; //$NON-NLS-1$
+
+	/**
 	 * Controls conversion between lambda expressions and anonymous class creations. For detailed
 	 * settings, use {@link #USE_LAMBDA} or {@link #USE_ANONYMOUS_CLASS_CREATION}
 	 * <p>
