@@ -437,8 +437,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private static Set<ICompilationUnit> getMergedSet(Set<ICompilationUnit> s1, Set<ICompilationUnit> s2) {
-		Set<ICompilationUnit> result= new HashSet<>();
-		result.addAll(s1);
+		Set<ICompilationUnit> result= new HashSet<>(s1);
 		result.addAll(s2);
 		return result;
 	}

@@ -161,9 +161,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 					//500 is a guess. Building the type hierarchy on serializable is very expensive
 					//depending on how many subtypes exit in the project.
 
-					HashSet<ICompilationUnit> cus= new HashSet<>();
-					cus.addAll(Arrays.asList(compilationUnits));
-
+					HashSet<ICompilationUnit> cus= new HashSet<>(Arrays.asList(compilationUnits));
 					monitor.subTask(Messages.format(FixMessages.Java50Fix_SerialVersion_CalculateHierarchy_description, SERIALIZABLE_NAME));
 					ITypeHierarchy hierarchy1= serializable.newTypeHierarchy(project, new SubProgressMonitor(monitor, compilationUnits.length));
 					IType[] allSubtypes1= hierarchy1.getAllSubtypes(serializable);

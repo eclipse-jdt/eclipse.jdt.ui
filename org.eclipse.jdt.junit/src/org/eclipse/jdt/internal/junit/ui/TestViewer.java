@@ -696,8 +696,7 @@ public class TestViewer {
 					for (Object element : toUpdate)
 						updateElementInTree((TestElement) element);
 				else {
-					HashSet<Object> toUpdateWithParents= new HashSet<>();
-					toUpdateWithParents.addAll(Arrays.asList(toUpdate));
+					HashSet<Object> toUpdateWithParents= new HashSet<>(Arrays.asList(toUpdate));
 					for (Object element : toUpdate) {
 						TestElement parent= ((TestElement) element).getParent();
 						while (parent != null) {

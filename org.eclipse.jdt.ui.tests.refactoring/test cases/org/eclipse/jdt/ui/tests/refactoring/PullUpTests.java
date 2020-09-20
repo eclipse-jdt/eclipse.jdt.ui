@@ -173,8 +173,7 @@ public class PullUpTests extends GenericRefactoringTest {
 		setSuperclassAsTargetClass(processor);
 
 		List<IMember> additionalRequired= Arrays.asList(processor.getAdditionalRequiredMembersToPullUp(new NullProgressMonitor()));
-		List<IMember> required= new ArrayList<>();
-		required.addAll(additionalRequired);
+		List<IMember> required= new ArrayList<>(additionalRequired);
 		required.addAll(Arrays.asList(members));
 		IField[] expectedFields= getFields(type, expectedFieldNames);
 		IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);

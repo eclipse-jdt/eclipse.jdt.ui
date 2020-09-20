@@ -460,10 +460,7 @@ public class JUnit4TestFinderTest {
 			assertEquals(type.getFullyQualifiedName(), isTest, finder.isTest(type));
 		}
 
-		HashSet<IType> set= new HashSet<>();
-//		finder.findTestsInContainer(container, set, null);
-		set.addAll(Arrays.asList(JUnitCore.findTestTypes(container, null)));
-
+		HashSet<IType> set= new HashSet<>(Arrays.asList(JUnitCore.findTestTypes(container, null)));
 		HashSet<String> namesFound= new HashSet<>();
 		for (IType curr : set) {
 			namesFound.add(curr.getFullyQualifiedName('.'));

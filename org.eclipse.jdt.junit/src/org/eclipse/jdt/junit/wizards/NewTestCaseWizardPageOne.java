@@ -1016,8 +1016,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 		/* find overloaded methods */
 		IMethod[] allMethodsArray= fPage2.getAllMethods();
-		List<IMethod> allMethods= new ArrayList<>();
-		allMethods.addAll(Arrays.asList(allMethodsArray));
+		List<IMethod> allMethods= new ArrayList<>(Arrays.asList(allMethodsArray));
 		List<IMethod> overloadedMethods= getOverloadedMethods(allMethods);
 
 		/* used when for example both sum and Sum methods are present. Then

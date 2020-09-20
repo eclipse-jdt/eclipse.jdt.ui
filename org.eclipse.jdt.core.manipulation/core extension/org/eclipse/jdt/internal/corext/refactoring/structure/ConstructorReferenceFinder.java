@@ -171,8 +171,7 @@ public class ConstructorReferenceFinder {
 
 	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm, WorkingCopyOwner owner, RefactoringStatus status) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		List<SearchMatch> searchMatches= new ArrayList<>();
-		searchMatches.addAll(getImplicitConstructorReferencesFromHierarchy(owner, new SubProgressMonitor(pm, 1)));
+		List<SearchMatch> searchMatches= new ArrayList<>(getImplicitConstructorReferencesFromHierarchy(owner, new SubProgressMonitor(pm, 1)));
 		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(owner, new SubProgressMonitor(pm, 1), status));
 		pm.done();
 		return RefactoringSearchEngine.groupByCu(searchMatches.toArray(new SearchMatch[searchMatches.size()]), status);

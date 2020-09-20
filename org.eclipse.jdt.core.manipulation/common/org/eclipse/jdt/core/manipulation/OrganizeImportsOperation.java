@@ -631,22 +631,22 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}
 
 	private void determineImportDifferences(ImportRewrite importsStructure, Set<String> oldSingleImports, Set<String> oldDemandImports) {
-  		ArrayList<String> importsAdded= new ArrayList<>();
-  		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedImports()));
-  		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedStaticImports()));
+		List<String> importsAdded= new ArrayList<>(importsStructure.getCreatedImports().length + importsStructure.getCreatedStaticImports().length);
+		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedImports()));
+		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedStaticImports()));
 
-  		for (Object element : oldSingleImports.toArray()) {
-	        String importName= (String) element;
-	        if (importsAdded.remove(importName))
-	            oldSingleImports.remove(importName);
-	    }
-	    for (Object element : oldDemandImports.toArray()) {
-	        String importName= (String) element;
-	        if (importsAdded.remove(importName + ".*")) //$NON-NLS-1$
-	            oldDemandImports.remove(importName);
-	    }
-	    fNumberOfImportsAdded= importsAdded.size();
-	    fNumberOfImportsRemoved= oldSingleImports.size() + oldDemandImports.size();
+		for (Object element : oldSingleImports.toArray()) {
+			String importName= (String) element;
+			if (importsAdded.remove(importName))
+				oldSingleImports.remove(importName);
+		}
+		for (Object element : oldDemandImports.toArray()) {
+			String importName= (String) element;
+			if (importsAdded.remove(importName + ".*")) //$NON-NLS-1$
+				oldDemandImports.remove(importName);
+		}
+		fNumberOfImportsAdded= importsAdded.size();
+		fNumberOfImportsRemoved= oldSingleImports.size() + oldDemandImports.size();
 	}
 
 
