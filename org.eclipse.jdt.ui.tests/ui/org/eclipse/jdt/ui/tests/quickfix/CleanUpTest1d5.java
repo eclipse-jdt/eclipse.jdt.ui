@@ -31,13 +31,12 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
-
 /**
  * Tests the cleanup features related to Java 5.
  */
 public class CleanUpTest1d5 extends CleanUpTestCase {
 	@Rule
-    public ProjectTestSetup projectSetup = new Java1d5ProjectTestSetup();
+	public ProjectTestSetup projectSetup = new Java1d5ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -2499,6 +2498,46 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testUnnecessaryEmptyArray() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static void foo(Object... elementsOrTreePaths) {\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar() {\n" //
+				+ "        foo(new Object[] {});\n" //
+				+ "        foo(new Object[0]);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static void foo(Object... elementsOrTreePaths) {\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar() {\n" //
+				+ "        foo();\n" //
+				+ "        foo();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+//		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
@@ -2533,6 +2572,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected= sample;
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 

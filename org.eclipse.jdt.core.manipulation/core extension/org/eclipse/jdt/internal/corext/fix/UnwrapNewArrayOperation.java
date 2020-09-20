@@ -67,7 +67,13 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 				listRewrite.insertLast(ASTNodes.createMoveTarget(rewrite, expressionsInArray.get(i)), group);
 			}
 
-			listRewrite.replace(node, ASTNodes.createMoveTarget(rewrite, expressionsInArray.get(0)), group);
+			if (expressionsInArray.isEmpty()) {
+				listRewrite.remove(node, group);
+			} else {
+				listRewrite.replace(node, ASTNodes.createMoveTarget(rewrite, expressionsInArray.get(0)), group);
+			}
+		} else {
+			listRewrite.remove(node, group);
 		}
 	}
 }

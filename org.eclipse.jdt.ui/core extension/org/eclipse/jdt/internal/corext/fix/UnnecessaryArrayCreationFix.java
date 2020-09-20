@@ -49,60 +49,63 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 
 		@Override
 		public boolean visit(ArrayCreation node) {
+			if (!fRemoveUnnecessaryArrayCreation
+					|| node.getType().getDimensions() != 1) {
+				return true;
+			}
+
 			ArrayInitializer initializer= node.getInitializer();
 
-			if (fRemoveUnnecessaryArrayCreation
-					&& node.getType().getDimensions() == 1
-					&& initializer != null
-					&& initializer.expressions() != null) {
-				if (initializer.expressions().size() == 1) {
-					Expression singleElement= (Expression) initializer.expressions().get(0);
-					NullLiteral nullLiteral= ASTNodes.as(singleElement, NullLiteral.class);
+			if (initializer != null
+					&& initializer.expressions() != null
+					&& initializer.expressions().size() == 1) {
+				Expression singleElement= (Expression) initializer.expressions().get(0);
+				NullLiteral nullLiteral= ASTNodes.as(singleElement, NullLiteral.class);
 
-					if (nullLiteral != null
-							|| (singleElement.resolveTypeBinding() != null && singleElement.resolveTypeBinding().isArray())) {
-						return true;
-					}
+				if (nullLiteral != null
+						|| (singleElement.resolveTypeBinding() != null && singleElement.resolveTypeBinding().isArray())) {
+					return true;
 				}
+			}
 
-				ASTNode parent= node.getParent();
+			ASTNode parent= node.getParent();
 
-				if (parent instanceof ClassInstanceCreation) {
-					ClassInstanceCreation m= (ClassInstanceCreation) parent;
+			if (parent instanceof ClassInstanceCreation) {
+				ClassInstanceCreation cic= (ClassInstanceCreation) parent;
 
-					if (isUselessArrayCreation(node, m.arguments(), m.resolveConstructorBinding()) &&
-							!hasEquivalentMethod(node, m.arguments(), m.resolveConstructorBinding())) {
-						fResult.add(new UnwrapNewArrayOperation(node, m));
-					}
-				} else if (parent instanceof MethodInvocation) {
-					MethodInvocation m= (MethodInvocation) parent;
+				if (isUselessArrayCreation(node, cic.arguments(), cic.resolveConstructorBinding()) &&
+						!hasEquivalentMethod(node, cic.arguments(), cic.resolveConstructorBinding())) {
+					fResult.add(new UnwrapNewArrayOperation(node, cic));
+				}
+			} else if (parent instanceof MethodInvocation) {
+				MethodInvocation m= (MethodInvocation) parent;
 
-					if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding()) &&
-							!hasEquivalentMethod(node, m.arguments(), m.resolveMethodBinding())) {
-						fResult.add(new UnwrapNewArrayOperation(node, m));
-					}
-				} else if (parent instanceof SuperMethodInvocation) {
-					SuperMethodInvocation m= (SuperMethodInvocation) parent;
+				if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding()) &&
+						!hasEquivalentMethod(node, m.arguments(), m.resolveMethodBinding())) {
+					fResult.add(new UnwrapNewArrayOperation(node, m));
+				}
+			} else if (parent instanceof SuperMethodInvocation) {
+				SuperMethodInvocation sm= (SuperMethodInvocation) parent;
 
-					if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding()) &&
-							!hasEquivalentMethod(node, m.arguments(), m.resolveMethodBinding())) {
-						fResult.add(new UnwrapNewArrayOperation(node, m));
-					}
+				if (isUselessArrayCreation(node, sm.arguments(), sm.resolveMethodBinding()) &&
+						!hasEquivalentMethod(node, sm.arguments(), sm.resolveMethodBinding())) {
+					fResult.add(new UnwrapNewArrayOperation(node, sm));
 				}
 			}
 
 			return true;
 		}
 
-		private boolean isUselessArrayCreation(ArrayCreation node, List<?> arguments, IMethodBinding binding) {
-			return arguments.size() > 0
+		private boolean isUselessArrayCreation(ArrayCreation node, List<Expression> arguments, IMethodBinding binding) {
+			return (node.getInitializer() != null || (node.dimensions().size() == 1 && Integer.valueOf(0).equals(((Expression) node.dimensions().get(0)).resolveConstantExpressionValue())))
+					&& arguments.size() > 0
 					&& arguments.get(arguments.size() - 1) == node
 					&& binding != null
 					&& binding.isVarargs()
 					&& binding.getParameterTypes().length == arguments.size();
 		}
 
-		private boolean hasEquivalentMethod(ArrayCreation node, List<?> arguments, IMethodBinding binding) {
+		private boolean hasEquivalentMethod(ArrayCreation node, List<Expression> arguments, IMethodBinding binding) {
 			ITypeBinding type= binding.getDeclaringClass();
 			while (type != null) {
 				if (hasEquivalentMethodForType(node, arguments, binding, type)) {
@@ -113,40 +116,48 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 			return false;
 		}
 
-		private boolean hasEquivalentMethodForType(ArrayCreation node, List<?> arguments, IMethodBinding binding, ITypeBinding type) {
-			IMethodBinding[] methods= type.getDeclaredMethods();
-			for (IMethodBinding method : methods) {
+		private boolean hasEquivalentMethodForType(ArrayCreation node, List<Expression> arguments, IMethodBinding binding, ITypeBinding type) {
+			for (IMethodBinding method : type.getDeclaredMethods()) {
 				if (!binding.isEqualTo(method) && binding.getName().equals(method.getName()) &&
 						(method.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0) {
 					ITypeBinding[] typeArguments= method.getParameterTypes();
-					if (node.getInitializer().expressions().size() + arguments.size() - 1 == typeArguments.length) {
+					ArrayInitializer initializer= node.getInitializer();
+
+					if ((initializer == null ? 0 : initializer.expressions().size()) + arguments.size() - 1 == typeArguments.length) {
 						boolean match= true;
+
 						for (int i= 0; i < arguments.size() - 1; ++i) {
-							ITypeBinding argBinding= ((Expression)arguments.get(i)).resolveTypeBinding();
+							ITypeBinding argBinding= arguments.get(i).resolveTypeBinding();
+
 							if (argBinding == null) {
 								return true;
 							}
+
 							if (!argBinding.isAssignmentCompatible(typeArguments[i])) {
 								match= false;
 								break;
 							}
 						}
+
 						if (match) {
 							for (int i= arguments.size() - 1, j= 0; i < typeArguments.length; ++i, ++j) {
-								Expression exp= (Expression) node.getInitializer().expressions().get(j);
+								Expression exp= (Expression) initializer.expressions().get(j);
 								ITypeBinding expBinding= exp.resolveTypeBinding();
+
 								if (expBinding != null && !expBinding.isAssignmentCompatible(typeArguments[i])) {
 									match= false;
 									break;
 								}
 							}
 						}
+
 						if (match) {
 							return true;
 						}
 					}
 				}
 			}
+
 			return false;
 		}
 	}
