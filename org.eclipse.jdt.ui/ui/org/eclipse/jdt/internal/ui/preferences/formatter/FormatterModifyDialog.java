@@ -126,17 +126,17 @@ public class FormatterModifyDialog extends ModifyDialog {
 
 		private final String fWrapBeforeKey;
 
-		public static LineWrapPreference create(Composite parentComposite, String label, String key, String wrapBeforeKey, Images images) {
+		public static LineWrapPreference create(Composite parentComposite, String label, String key, String wrapBeforeKey, boolean withIndent, Images images) {
 			ToolBar toolBar= new ToolBar(parentComposite, SWT.FLAT);
 			toolBar.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 
-			LineWrapPreference lineWrapPreference= new LineWrapPreference(toolBar, label, key, wrapBeforeKey, images);
+			LineWrapPreference lineWrapPreference= new LineWrapPreference(toolBar, label, key, wrapBeforeKey, withIndent, images);
 			lineWrapPreference.addLabel(label, true, 0);
 
 			return lineWrapPreference;
 		}
 
-		private LineWrapPreference(ToolBar toolBar, String label, String key, String wrapBeforeKey, Images images) {
+		private LineWrapPreference(ToolBar toolBar, String label, String key, String wrapBeforeKey, boolean withIndent, Images images) {
 			super(toolBar, label, key, VALUE_MATCHER);
 			fWrapBeforeKey= wrapBeforeKey;
 			if (wrapBeforeKey != null) {
@@ -155,7 +155,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 			fForceSplitItem.setDisabledImage(images.get(JavaPluginImages.DESC_DLCL_WRAP_FORCE));
 			addSeparator(toolBar);
 
-			fIndentationDropDown= createDropDown(toolBar, INDENT_STYLE, fIndentationItems, images);
+			fIndentationDropDown= withIndent ? createDropDown(toolBar, INDENT_STYLE, fIndentationItems, images) : null;
 		}
 
 		private void addSeparator(ToolBar toolBar) {
@@ -219,11 +219,13 @@ public class FormatterModifyDialog extends ModifyDialog {
 			fForceSplitItem.setSelection(forceWrapping);
 			fForceSplitItem.setEnabled(wrapEnabled);
 
-			MenuItem indentStyleItem= updateMenuItem(fIndentationItems, DefaultCodeFormatterConstants.getIndentStyle(value));
-			fIndentationDropDown.setToolTipText(FormatterMessages.FormatterModifyDialog_lineWrap_indentation_policy_label + indentStyleItem.getText());
-			fIndentationDropDown.setImage(indentStyleItem.getImage());
-			fIndentationDropDown.setDisabledImage((Image) indentStyleItem.getData(DATA_IMAGE_DISABLED));
-			fIndentationDropDown.setEnabled(wrapEnabled);
+			if (fIndentationDropDown != null) {
+				MenuItem indentStyleItem= updateMenuItem(fIndentationItems, DefaultCodeFormatterConstants.getIndentStyle(value));
+				fIndentationDropDown.setToolTipText(FormatterMessages.FormatterModifyDialog_lineWrap_indentation_policy_label + indentStyleItem.getText());
+				fIndentationDropDown.setImage(indentStyleItem.getImage());
+				fIndentationDropDown.setDisabledImage((Image) indentStyleItem.getData(DATA_IMAGE_DISABLED));
+				fIndentationDropDown.setEnabled(wrapEnabled);
+			}
 
 			if (fWrapBeforeKey != null) {
 				int wrapBeforeAfterValue= WRAP_BEFORE_PREF_VALUES.indexOf(getPreferences().get(fWrapBeforeKey));
@@ -252,7 +254,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		protected String getValue() {
 			int wrapStyle= getSelection(fWrapStyleItems);
 			boolean forceSplit= fForceSplitItem.getSelection();
-			int indentStyle= getSelection(fIndentationItems);
+			int indentStyle= fIndentationDropDown == null ? 0 : getSelection(fIndentationItems);
 			return DefaultCodeFormatterConstants.createAlignmentValue(forceSplit, wrapStyle, indentStyle);
 		}
 
@@ -310,7 +312,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 			throw new AssertionError("No item selected"); //$NON-NLS-1$
 		}
 
-		public static ModifyAll<ToolBar> addModifyAll(Section section, final Images images) {
+		public static ModifyAll<ToolBar> addModifyAll(Section section, boolean withIndent, final Images images) {
 			return new ModifyAll<ToolBar>(section, images) {
 				private LineWrapPreference fPreference;
 
@@ -320,7 +322,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 					for (LineWrapPreference pref : findPreferences(LineWrapPreference.class))
 						needWrapBefore= needWrapBefore || pref.fWrapBeforeKey != null;
 
-					fPreference= create(parent, null, "wrapPolicyKey", needWrapBefore ? "wrapBeforeKey" : null, images); //$NON-NLS-1$ //$NON-NLS-2$
+					fPreference= create(parent, null, "wrapPolicyKey", needWrapBefore ? "wrapBeforeKey" : null, withIndent, images); //$NON-NLS-1$ //$NON-NLS-2$
 					fPreference.fControl.setLayoutData(null);
 
 					addSelectionListener(fPreference.fWrapStyleItems, new SelectionAdapter() {
@@ -386,7 +388,9 @@ public class FormatterModifyDialog extends ModifyDialog {
 					for (LineWrapPreference pref : preferences) {
 						increment(STYLE + getSelection(pref.fWrapStyleItems), valueCounts);
 						increment(FORCE + pref.fForceSplitItem.getSelection(), valueCounts);
-						increment(INDENT + getSelection(pref.fIndentationItems), valueCounts);
+						if (!pref.fIndentationItems.isEmpty()) {
+							increment(INDENT + getSelection(pref.fIndentationItems), valueCounts);
+						}
 						if (!pref.fWrapBeforeAfterItems.isEmpty()) {
 							increment(BEFORE + getSelection(pref.fWrapBeforeAfterItems), valueCounts);
 							hasWrapBeforeCount++;
@@ -401,8 +405,10 @@ public class FormatterModifyDialog extends ModifyDialog {
 					fPreference.fForceSplitItem.setToolTipText(FormatterMessages.FormatterModifyDialog_lineWrap_val_force_split
 							+ Messages.format(FormatterMessages.ModifyDialog_modifyAll_summary, new Object[] { forceWrapCount, preferences.size() }));
 
-					prepareDrowpdown(fPreference.fIndentationDropDown, FormatterMessages.FormatterModifyDialog_lineWrap_indentation_policy_label,
-							prepareItems(fPreference.fIndentationItems, INDENT_STYLE, INDENT, valueCounts, preferences.size()));
+					if (!fPreference.fIndentationItems.isEmpty()) {
+						prepareDrowpdown(fPreference.fIndentationDropDown, FormatterMessages.FormatterModifyDialog_lineWrap_indentation_policy_label,
+								prepareItems(fPreference.fIndentationItems, INDENT_STYLE, INDENT, valueCounts, preferences.size()));
+					}
 					if (!fPreference.fWrapBeforeAfterItems.isEmpty()) {
 						prepareDrowpdown(fPreference.fWrapBeforeAfterDropDown, "", //$NON-NLS-1$
 								prepareItems(fPreference.fWrapBeforeAfterItems, WRAP_BEFORE_AFTER, BEFORE, valueCounts, hasWrapBeforeCount));
@@ -1438,10 +1444,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 		fTree.addCheckbox(globalSection,
 				FormatterMessages.FormatterModifyDialog_lineWrap_pref_wrap_outer_expressions_when_nested, DefaultCodeFormatterConstants.FORMATTER_WRAP_OUTER_EXPRESSIONS_WHEN_NESTED, CheckboxPreference.FALSE_TRUE);
 
-		Consumer<Section> modAll= s -> LineWrapPreference.addModifyAll(s, fImages);
+		Consumer<Section> modAll= s -> LineWrapPreference.addModifyAll(s, true, fImages);
 		fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_wrapping_settings, null, modAll)
-				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_annotations, null)
-						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_annotations_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ANNOTATION))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_class_decls, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_extends_clause, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERCLASS_IN_TYPE_DECLARATION)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_implements_clause, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_TYPE_DECLARATION))
@@ -1489,6 +1493,16 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_param_type_ref, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERIZED_TYPE_REFERENCES)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_param_type_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_TYPE_ARGUMENTS)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_param_type_parameters, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_TYPE_PARAMETERS))
+				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_annotations, "-annotations", modAll.andThen(s -> LineWrapPreference.addModifyAll(s, false, fImages))) //$NON-NLS-1$
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_annotations_packages, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_PACKAGE)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_annotations_types, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_TYPE)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_annotations_enum_constants, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_ENUM_CONSTANT)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_annotations_fields, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_FIELD)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_annotations_methods, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_METHOD)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_annotations_local_variables, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_LOCAL_VARIABLE)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_annotations_parameters, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_PARAMETER)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_type_annotations, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_TYPE_ANNOTATIONS)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_annotations_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ANNOTATION))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_module_descriptions, null)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_module_statements, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_MODULE_STATEMENTS))
 				.build(globalSection, (parent, label, key) -> {
@@ -1529,7 +1543,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 							break;
 						default:
 					}
-					LineWrapPreference preference= LineWrapPreference.create(parent.fInnerComposite, label, key, wrapBeforeKey, fImages);
+					boolean withIndent= !"section-linewrap-annotations".equals(parent.getKey()) || DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ANNOTATION.equals(key); //$NON-NLS-1$
+					LineWrapPreference preference= LineWrapPreference.create(parent.fInnerComposite, label, key, wrapBeforeKey, withIndent, fImages);
 					return fTree.addChild(parent, preference);
 				});
 	}

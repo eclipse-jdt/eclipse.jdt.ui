@@ -822,11 +822,6 @@ public class Example {
 }
 //--PREVIEW--END--section-linewrap
 
-//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_arguments_in_annotation
-@MyAnnotation(value1 = "this is an example", value2 = "of an annotation", value3 = "with several arguments", value4 = "which may need to be wrapped")
-class Example {}
-//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_arguments_in_annotation
-
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_superclass_in_type_declaration
 class Example extends OtherClass {}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_superclass_in_type_declaration
@@ -1030,14 +1025,64 @@ class Example {
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_type_parameters
 class Example<S, T extends Element & List, U> {
 }
-
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_type_parameters
+
+//--PREVIEW--START--section-linewrap-annotations
+@PackageAnnotation1 @PackageAnnotation2
+@PackageAnnotation3 @PackageAnnotation4
+package org.example;
+
+@ClassAnnotation1
+@ClassAnnotation2 @ClassAnnotation3  @ClassAnnotation4
+public class Example {
+
+	public enum SomeEnum {
+		@EnumConstantAnnotation1 @EnumConstantAnnotation2 @EnumConstantAnnotation3
+		SOME_VALUE,
+		@EnumConstantAnnotation1 @EnumConstantAnnotation4
+		OTHER_VALUE
+	}
+
+	@FieldAnnotation1 @FieldAnnotation2 @FieldAnnotation3 @FieldAnnotation4
+	private int foo = 0;
+	
+	@MethodAnnotatoin1 @MethodAnnotation2 @MethodAnnotation3 @MethodAnnotation4
+	public void bar() {
+	}
+}
+//--PREVIEW--END--section-linewrap-annotations
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_annotations_on_local_variable
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_annotations_on_parameter
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_type_annotations
+public class Example {
+	@FieldAnnotation
+	private @TypeAnnotation1 @TypeAnnotation2 @TypeAnnotation3 String foo;
+	
+	@MethodAnnotation
+	public @TypeAnnotation1 @TypeAnnotation2 @TypeAnnotation3 String bar() {
+		return "";
+	}
+	public void bar2(@ParamAnnotation1 @ParamAnnotation2 @ParameterAnnotation3 String param) {
+		//
+		@VariableAnnotation1 @VariableAnnotation2 @VariableAnnotation4
+		String localVariable = "";
+		System.out.println(localVariable);
+	}
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_annotations_on_local_variable
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_annotations_on_parameter
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_type_annotations
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_arguments_in_annotation
+@MyAnnotation(value1 = "this is an example", value2 = "of an annotation", value3 = "with several arguments", value4 = "which may need to be wrapped")
+class Example {}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_arguments_in_annotation
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_module_statements:MODULE_INFO
 module example.module0 {
 	provides example.other.module1.SomeService with example.module0.Service1, example.module0.Service2;
 }
-
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_module_statements
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_assertion_message

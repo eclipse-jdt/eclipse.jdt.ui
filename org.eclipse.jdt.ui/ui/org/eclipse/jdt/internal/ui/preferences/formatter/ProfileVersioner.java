@@ -48,8 +48,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_18= 18; // https://bugs.eclipse.org/552919
 	private static final int VERSION_19= 19; // https://bugs.eclipse.org/553155
 	private static final int VERSION_20= 20; // https://bugs.eclipse.org/118641
+	private static final int VERSION_21= 20; // https://bugs.eclipse.org/545078
 
-	private static final int CURRENT_VERSION= VERSION_20;
+	private static final int CURRENT_VERSION= VERSION_21;
 
 	@Override
 	public int getFirstVersion() {
@@ -131,6 +132,9 @@ public class ProfileVersioner implements IProfileVersioner {
 			//$FALL-THROUGH$
 		case VERSION_19:
 			version19to20(oldSettings);
+			//$FALL-THROUGH$
+		case VERSION_20:
+			version20to21(oldSettings);
 			//$FALL-THROUGH$
 		default:
 				for (String key : oldSettings.keySet()) {
@@ -760,6 +764,25 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static void version19to20(Map<String, String> oldSettings) {
 		oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSERTION_MESSAGE,
 				DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+	}
+
+	private static void version20to21(Map<String, String> oldSettings) {
+		String[][] derivations= {
+				{ DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_ENUM_CONSTANT, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_ENUM_CONSTANT },
+				{ DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_FIELD },
+				{ DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_METHOD },
+				{ DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_PACKAGE },
+				{ DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_TYPE },
+				{ DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_TYPE_ANNOTATION, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_TYPE_ANNOTATIONS },
+				{ DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_PARAMETER },
+				{ DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_LOCAL_VARIABLE },
+		};
+		for (String[] derivation : derivations) {
+			boolean splitAnnotations = JavaCore.INSERT.equals(oldSettings.get(derivation[0]));
+			String wrapSetting= DefaultCodeFormatterConstants.createAlignmentValue(splitAnnotations,
+					splitAnnotations ? DefaultCodeFormatterConstants.WRAP_ONE_PER_LINE : DefaultCodeFormatterConstants.WRAP_NO_SPLIT);
+			oldSettings.put(derivation[1], wrapSetting);
+		}
 	}
 
 	/* old format constant values */
