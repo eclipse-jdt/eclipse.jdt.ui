@@ -7325,13 +7325,13 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveParenthesesBug405096_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    int a= 10\n");
-		buf.append("    final Short cache[] = new Short[-(-a) + 1];\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    int a= 10;\n" //
+				+ "    final Short cache[] = new Short[-(-a) + 1];\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
@@ -7342,13 +7342,13 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveParenthesesBug405096_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    int a= 10\n");
-		buf.append("    final Short cache[] = new Short[-(--a) + 1];\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    int a= 10;\n" //
+				+ "    final Short cache[] = new Short[-(--a) + 1];\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
@@ -7359,13 +7359,14 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveParenthesesBug405096_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    int a= 10\n");
-		buf.append("    final Short cache[] = new Short[+(+a) + 1];\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    int a= 10;\n" //
+				+ "    final Short cache[] = new Short[+(+a) + 1];\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
@@ -7828,8 +7829,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public String doNotUsePatternOnSimpleSplit2(String speech1, String speech2) {\n" //
 				+ "       String line= \"\\\\;\";\n" //
 				+ "\n" //
-				+ "       String[] phrases1= speech1.split(line1);\n" //
-				+ "       String[] phrases2= speech2.split(line1, 1);\n" //
+				+ "       String[] phrases1= speech1.split(line);\n" //
+				+ "       String[] phrases2= speech2.split(line, 1);\n" //
 				+ "       return phrases1[0] + phrases2[0];\n" //
 				+ "    }\n" //
 				+ "}\n";
@@ -9020,32 +9021,36 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+		assertRefactoringHasNoChangeEventWithError(new ICompilationUnit[] {cu1});
 	}
 
 	@Test
 	public void testAddFinalBug297566_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int x;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        this(10);\n");
-		buf.append("    }\n");
-		buf.append("    public E1(int a) {\n");
-		buf.append("        this();\n");
-		buf.append("    }\n");
-		buf.append("    public E1(int f, int y) {\n");
-		buf.append("        x = a;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private int x;\n" //
+				+ "\n" //
+				+ "    public E1() {\n" //
+				+ "        this(10);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E1(int a) {\n" //
+				+ "        this();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E1(int f, int y) {\n" //
+				+ "        x = a;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+		assertRefactoringHasNoChangeEventWithError(new ICompilationUnit[] {cu1});
 	}
 
 	@Test
@@ -9638,7 +9643,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.ORGANIZE_IMPORTS);
 
-		RefactoringStatus status= assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+		RefactoringStatus status= assertRefactoringHasNoChangeEventWithError(new ICompilationUnit[] {cu1});
 		RefactoringStatusEntry[] entries= status.getEntries();
 		assertEquals(1, entries.length);
 		String message= entries[0].getMessage();
@@ -9658,7 +9663,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.ORGANIZE_IMPORTS);
 
-		RefactoringStatus status= assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+		RefactoringStatus status= assertRefactoringHasNoChangeEventWithError(new ICompilationUnit[] {cu1});
 		RefactoringStatusEntry[] entries= status.getEntries();
 		assertEquals(1, entries.length);
 		String message= entries[0].getMessage();

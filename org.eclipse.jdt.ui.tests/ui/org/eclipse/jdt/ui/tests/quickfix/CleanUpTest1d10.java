@@ -32,9 +32,8 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
  * Tests the cleanup features related to Java 10.
  */
 public class CleanUpTest1d10 extends CleanUpTestCase {
-
 	@Rule
-    public ProjectTestSetup projectSetup = new Java10ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java10ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -338,7 +337,7 @@ public class CleanUpTest1d10 extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E1 {\n" //
 				+ "    public void foo() {\n" //
-				+ "        ArrayList<Number> doNotRefactorDifferentTypeArguments = new ArrayList<Integer>();\n" //
+				+ "        ArrayList<? extends Integer> doNotRefactorDifferentTypeArguments = new ArrayList<Integer>();\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
@@ -372,9 +371,11 @@ public class CleanUpTest1d10 extends CleanUpTestCase {
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "\n" //
 				+ "public class E1 {\n" //
 				+ "    public void foo() {\n" //
-				+ "        ArrayList<Integer> doNotRefactorParameterizedMethod = newInstance();\n" //
+				+ "        ArrayList<Integer> doNotRefactorParameterizedMethod = null;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public <D> ArrayList<D> newInstance() {\n" //

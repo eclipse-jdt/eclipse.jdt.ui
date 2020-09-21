@@ -15,6 +15,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -56,10 +57,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
@@ -233,11 +238,50 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 	}
 
 	protected RefactoringStatus assertRefactoringHasNoChange(ICompilationUnit[] cus) throws CoreException {
+		for (ICompilationUnit cu : cus) {
+			assertNoCompilationError(cu);
+		}
+
+		return assertRefactoringHasNoChangeEventWithError(cus);
+	}
+
+	protected RefactoringStatus assertRefactoringHasNoChangeEventWithError(ICompilationUnit[] cus) throws CoreException {
 		String[] expected= new String[cus.length];
+
 		for (int i= 0; i < cus.length; i++) {
 			expected[i]= cus[i].getBuffer().getContents();
 		}
+
 		return assertRefactoringResultAsExpected(cus, expected);
+	}
+
+	protected CompilationUnit assertNoCompilationError(ICompilationUnit cu) {
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		parser.setSource(cu);
+		parser.setResolveBindings(true);
+		CompilationUnit root= (CompilationUnit) parser.createAST(null);
+		IProblem[] problems= root.getProblems();
+		boolean hasProblems= false;
+
+		for (IProblem prob : problems) {
+			if (!prob.isWarning() && !prob.isInfo()) {
+				hasProblems= true;
+				break;
+			}
+		}
+
+		if (hasProblems) {
+			StringBuilder builder= new StringBuilder();
+			builder.append(cu.getElementName() + " has compilation problems: \n");
+
+			for (IProblem prob : problems) {
+				builder.append(prob.getMessage()).append('\n');
+			}
+
+			fail(builder.toString());
+		}
+
+		return root;
 	}
 
 	protected final RefactoringStatus performRefactoring(ICompilationUnit[] cus) throws CoreException {

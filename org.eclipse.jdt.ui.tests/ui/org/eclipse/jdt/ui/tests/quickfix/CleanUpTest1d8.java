@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 public class CleanUpTest1d8 extends CleanUpTestCase {
 	@Rule
-    public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	@Override
 	public void setUp() throws Exception {
@@ -980,14 +980,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= ""
 				+ "package test;\n"
+				+ "\n"
 				+ "public class C1 {\n"
 				+ "    final String s;\n"
+				+ "\n"
 				+ "    Runnable run1 = new Runnable() {\n"
 				+ "        @Override\n"
 				+ "        public void run() {\n"
-				+ "            System.out.println(s\n"
+				+ "            System.out.println(s);\n"
 				+ "        }\n"
 				+ "    };\n"
+				+ "\n"
 				+ "    public C1() {\n"
 				+ "        s = \"abc\";\n"
 				+ "    };\n"
@@ -1421,7 +1424,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	public void testConvertToLambdaWithRecursion() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= ""
+				+ "package test;\n" //
+				+ "\n" //
 				+ "import java.util.function.Function;\n" //
+				+ "\n" //
 				+ "public class C1 {\n" //
 				+ "\n" //
 				+ "    public interface I1 {\n" //
@@ -1454,7 +1460,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.USE_LAMBDA);
 
 		String expected= ""
+				+ "package test;\n" //
+				+ "\n" //
 				+ "import java.util.function.Function;\n" //
+				+ "\n" //
 				+ "public class C1 {\n" //
 				+ "\n" //
 				+ "    public interface I1 {\n" //
@@ -1482,6 +1491,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	public void testDoNotConvertLocalRecursiveClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
 				+ "import java.util.function.Function;\n" //
 				+ "\n" //
 				+ "public class C2 {\n" //
@@ -1500,7 +1511,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "                return a + 9;\n" //
 				+ "            }\n" //
 				+ "        };\n" //
-				+ "        return n.add(9);\n" //
+				+ "        return doNotConvert.add(9);\n" //
 				+ "    }\n" //
 				+ "}\n"; //
 		ICompilationUnit cu= pack1.createCompilationUnit("C2.java", sample, false, null);
