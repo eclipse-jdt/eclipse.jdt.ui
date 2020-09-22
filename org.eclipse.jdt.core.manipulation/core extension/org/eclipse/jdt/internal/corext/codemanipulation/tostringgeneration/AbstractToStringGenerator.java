@@ -65,8 +65,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 
 /**
@@ -136,16 +136,12 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
  * @since 3.5
  */
 public abstract class AbstractToStringGenerator {
-
 	protected static final String METHODNAME_TO_STRING= "toString"; //$NON-NLS-1$
-
 	protected static final String TYPENAME_STRING= "String"; //$NON-NLS-1$
 
-	final protected String HELPER_TOSTRING_METHOD_NAME= "toString"; //$NON-NLS-1$
+	private static final String HELPER_ARRAYTOSTRING_METHOD_NAME= "arrayToString"; //$NON-NLS-1$
+	private static final String MAX_LEN_VARIABLE_NAME= "maxLen"; //$NON-NLS-1$
 
-	final private String HELPER_ARRAYTOSTRING_METHOD_NAME= "arrayToString"; //$NON-NLS-1$
-
-	final private String MAX_LEN_VARIABLE_NAME= "maxLen"; //$NON-NLS-1$
 	protected String fMaxLenVariableName= MAX_LEN_VARIABLE_NAME;
 
 	/**
@@ -153,7 +149,7 @@ public abstract class AbstractToStringGenerator {
 	* This property determines whether the method should be overwritten if already exists. The data
 	* of this property is a Boolean.
 	*/
-	protected final static String OVERWRITE_METHOD_PROPERTY= "override_method"; //$NON-NLS-1$
+	protected static final String OVERWRITE_METHOD_PROPERTY= "override_method"; //$NON-NLS-1$
 
 	public ToStringTemplateParser getTemplateParser() {
 		return new ToStringTemplateParser();
@@ -273,7 +269,7 @@ public abstract class AbstractToStringGenerator {
 
 		//private arrayToString() {
 		MethodDeclaration arrayToStringMethod= fAst.newMethodDeclaration();
-		arrayToStringMethod.setName(fAst.newSimpleName(array ? HELPER_ARRAYTOSTRING_METHOD_NAME : HELPER_TOSTRING_METHOD_NAME));
+		arrayToStringMethod.setName(fAst.newSimpleName(array ? HELPER_ARRAYTOSTRING_METHOD_NAME : METHODNAME_TO_STRING));
 		arrayToStringMethod.modifiers().add(fAst.newModifier(Modifier.ModifierKeyword.PRIVATE_KEYWORD));
 		arrayToStringMethod.setReturnType2(fAst.newSimpleType(fAst.newName(TYPENAME_STRING)));
 
@@ -442,7 +438,7 @@ public abstract class AbstractToStringGenerator {
 
 		//return stringBuilder.toString();
 		ReturnStatement returnStatement= fAst.newReturnStatement();
-		returnStatement.setExpression(createMethodInvocation(stringBuilderName, "toString", null)); //$NON-NLS-1$
+		returnStatement.setExpression(createMethodInvocation(stringBuilderName, METHODNAME_TO_STRING, null));
 		body.statements().add(returnStatement);
 
 		arrayToStringMethod.setProperty(OVERWRITE_METHOD_PROPERTY, Boolean.valueOf(array));
@@ -722,7 +718,7 @@ public abstract class AbstractToStringGenerator {
 							MethodInvocation toStringInvocation= fAst.newMethodInvocation();
 							if (fContext.isKeywordThis())
 								toStringInvocation.setExpression(fAst.newThisExpression());
-							toStringInvocation.setName(fAst.newSimpleName(HELPER_TOSTRING_METHOD_NAME));
+							toStringInvocation.setName(fAst.newSimpleName(METHODNAME_TO_STRING));
 							toStringInvocation.arguments().add(memberAccess);
 							toStringInvocation.arguments().add(fAst.newSimpleName(fMaxLenVariableName));
 							needMaxLenVariable= true;
@@ -746,7 +742,7 @@ public abstract class AbstractToStringGenerator {
 									MethodInvocation copyOfInvocation= createMethodInvocation(arraysImport, "copyOf", createMemberAccessExpression(member, true, true)); //$NON-NLS-1$
 									copyOfInvocation.arguments().add(minInvocation);
 									Name arraysImportCopy= (Name)ASTNode.copySubtree(fAst, arraysImport);
-									accessExpression= createMethodInvocation(arraysImportCopy, "toString", copyOfInvocation); //$NON-NLS-1$
+									accessExpression= createMethodInvocation(arraysImportCopy, METHODNAME_TO_STRING, copyOfInvocation);
 								} else {
 									// arrayToString(member, member.length, maxLen)
 									MethodInvocation arrayToStringInvocation= fAst.newMethodInvocation();
@@ -766,7 +762,7 @@ public abstract class AbstractToStringGenerator {
 					if (isArray && fContext.isCustomArray()) {
 						if (fContext.is50orHigher()) {
 							// Arrays.toString(member)
-							return createMethodInvocation(addImport("java.util.Arrays"), "toString", createMemberAccessExpression(member, true, true)); //$NON-NLS-1$ //$NON-NLS-2$
+							return createMethodInvocation(addImport("java.util.Arrays"), METHODNAME_TO_STRING, createMemberAccessExpression(member, true, true)); //$NON-NLS-1$
 						} else {
 							ITypeBinding arrayComponentType= memberType.getComponentType();
 							if (!arrayComponentType.isPrimitive() && typesThatNeedArrayToStringMethod.isEmpty()) {

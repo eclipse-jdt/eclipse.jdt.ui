@@ -22,13 +22,13 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 
 /**
@@ -56,11 +56,11 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
  * @since 3.5
  */
 public class StringBuilderGenerator extends AbstractToStringGenerator {
+	protected static final String APPEND_METHOD_NAME= "append"; //$NON-NLS-1$
+
 	protected StringBuffer fBuffer;
 
 	protected String fBuilderVariableName;
-
-	protected final String APPEND_METHOD_NAME= "append"; //$NON-NLS-1$
 
 	protected void flushBuffer(Block target) {
 		if (fBuffer.length() > 0) {

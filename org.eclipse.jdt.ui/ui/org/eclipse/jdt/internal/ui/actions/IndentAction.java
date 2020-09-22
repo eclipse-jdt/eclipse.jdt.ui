@@ -122,7 +122,7 @@ public class IndentAction extends TextEditorAction {
 	private final boolean fIsTabAction;
 
 	public static final String TEXT_BLOCK_STR= "\"\"\""; //$NON-NLS-1$
-	public static String POTENTIAL_TEXT_BLOCK_STR= "\"\""; //$NON-NLS-1$
+	public static final String POTENTIAL_TEXT_BLOCK_STR= "\"\""; //$NON-NLS-1$
 	public static final String SPACE_STR= " "; //$NON-NLS-1$
 	public static final String EMPTY_STR= ""; //$NON-NLS-1$
 	private static String TAB_STR= "\t"; //$NON-NLS-1$

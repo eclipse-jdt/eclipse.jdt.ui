@@ -56,9 +56,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
  * {@link ImportRewrite#addImport(ITypeBinding)} etc.
  */
 public class ImportRemover {
-
 	private static class StaticImportData {
-
 		private boolean fField;
 
 		private String fMember;
@@ -72,21 +70,17 @@ public class ImportRemover {
 		}
 	}
 
+	private static final String REMOVED= "removed"; //$NON-NLS-1$
+	private static final String RETAINED= "retained"; //$NON-NLS-1$
+
 	private final String PROPERTY_KEY= String.valueOf(System.currentTimeMillis());
-	private final String REMOVED= "removed"; //$NON-NLS-1$
-	private final String RETAINED= "retained"; //$NON-NLS-1$
+	private final IJavaProject fProject;
+	private final CompilationUnit fRoot;
 
 	private Set<String> fAddedImports= new HashSet<>();
-
 	private Set<StaticImportData> fAddedStaticImports= new HashSet<>();
-
-	private final IJavaProject fProject;
-
 	private boolean fHasRemovedNodes;
-
 	private List<ImportDeclaration> fInlinedStaticImports= new ArrayList<>();
-
-	private final CompilationUnit fRoot;
 
 	public ImportRemover(IJavaProject project, CompilationUnit root) {
 		fProject= project;
