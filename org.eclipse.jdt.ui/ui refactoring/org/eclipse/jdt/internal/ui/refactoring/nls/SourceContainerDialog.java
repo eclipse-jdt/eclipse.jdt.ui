@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 
 public class SourceContainerDialog extends ElementTreeSelectionDialog {
 
-	private class PackageAndProjectSelectionValidator extends TypedElementSelectionValidator {
+	private static class PackageAndProjectSelectionValidator extends TypedElementSelectionValidator {
 
 		public PackageAndProjectSelectionValidator() {
 			super(new Class[]{IPackageFragmentRoot.class},false);

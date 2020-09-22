@@ -224,7 +224,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/**
 	 * Color list label provider.
 	 */
-	private class ColorListLabelProvider extends LabelProvider implements IColorProvider {
+	private static class ColorListLabelProvider extends LabelProvider implements IColorProvider {
 
 		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)

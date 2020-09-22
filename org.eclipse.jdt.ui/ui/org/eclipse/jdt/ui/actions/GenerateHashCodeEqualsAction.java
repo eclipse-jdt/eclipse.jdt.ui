@@ -76,7 +76,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 	private static final String METHODNAME_HASH_CODE= "hashCode"; //$NON-NLS-1$
 	private static final String METHODNAME_EQUALS= "equals"; //$NON-NLS-1$
 
-	private class HashCodeEqualsInfo {
+	private static class HashCodeEqualsInfo {
 
 		public boolean foundHashCode= false;
 

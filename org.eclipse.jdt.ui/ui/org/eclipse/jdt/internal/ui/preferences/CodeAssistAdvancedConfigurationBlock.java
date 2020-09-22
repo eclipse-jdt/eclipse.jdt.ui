@@ -140,7 +140,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		}
 	}
 
-	private final class SeparateTableLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private final static class SeparateTableLabelProvider extends LabelProvider implements ITableLabelProvider {
 
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)

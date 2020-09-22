@@ -98,7 +98,7 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 	 * Class for storing information about versions of append method in the builder class that can
 	 * be used for different member types
 	 */
-	private class AppendMethodInformation {
+	private static class AppendMethodInformation {
 		/**
 		 * Type of method with respect to taken parameter types. Possible values:
 		 * <ol>

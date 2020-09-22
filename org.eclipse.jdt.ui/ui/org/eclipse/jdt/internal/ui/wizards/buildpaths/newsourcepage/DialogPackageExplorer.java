@@ -267,7 +267,7 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
      * the default package, and
      * hidden folders.
      */
-    private final class PackageFilter extends LibraryFilter {
+    private final static class PackageFilter extends LibraryFilter {
         private OutputFolderFilter fOutputFolderFilter= new OutputFolderFilter();
         @Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {

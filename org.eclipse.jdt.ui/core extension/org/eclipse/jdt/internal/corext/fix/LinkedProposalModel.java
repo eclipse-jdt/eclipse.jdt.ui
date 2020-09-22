@@ -30,7 +30,7 @@ public class LinkedProposalModel extends LinkedProposalModelCore {
 		return group instanceof LinkedProposalPositionGroup ? (LinkedProposalPositionGroup)group : null;
 	}
 
-	private class LinkedProposalPositionGroupIterator implements Iterator<LinkedProposalPositionGroup> {
+	private static class LinkedProposalPositionGroupIterator implements Iterator<LinkedProposalPositionGroup> {
 		private Iterator<LinkedProposalPositionGroupCore> iterator;
 
 		public LinkedProposalPositionGroupIterator(Iterator<LinkedProposalPositionGroupCore> iterator) {

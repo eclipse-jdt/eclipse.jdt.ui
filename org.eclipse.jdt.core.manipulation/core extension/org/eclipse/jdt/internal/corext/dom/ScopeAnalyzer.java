@@ -670,7 +670,7 @@ public class ScopeAnalyzer {
 	}
 
 
-	private class ScopeAnalyzerVisitor extends HierarchicalASTVisitor {
+	private static class ScopeAnalyzerVisitor extends HierarchicalASTVisitor {
 
 		private final int fPosition;
 		private final int fFlags;
@@ -846,7 +846,7 @@ public class ScopeAnalyzer {
 		}
 	}
 
-	private class DeclarationsAfterVisitor extends HierarchicalASTVisitor {
+	private static class DeclarationsAfterVisitor extends HierarchicalASTVisitor {
 		private final int fPosition;
 		private final int fFlags;
 		private final IBindingRequestor fRequestor;

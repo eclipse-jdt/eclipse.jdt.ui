@@ -357,7 +357,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	}
 
 
-	private class VisibilitySortLabelProvider extends LabelProvider {
+	private static class VisibilitySortLabelProvider extends LabelProvider {
 
 		public VisibilitySortLabelProvider() {
 		}

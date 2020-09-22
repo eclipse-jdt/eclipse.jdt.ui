@@ -1605,7 +1605,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return (addSelectionWarning || addNameWarning);
 	}
 
-	private class Warning {
+	private static class Warning {
 
 		private IMethod[] fRipple;
 		private boolean fSelectionWarning;

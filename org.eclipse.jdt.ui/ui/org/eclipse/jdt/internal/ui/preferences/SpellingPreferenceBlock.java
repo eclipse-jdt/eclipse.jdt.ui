@@ -41,7 +41,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 		}
 	}
 
-	private class StatusChangeListenerAdapter implements IStatusChangeListener {
+	private static class StatusChangeListenerAdapter implements IStatusChangeListener {
 
 		private IPreferenceStatusMonitor fMonitor;
 
