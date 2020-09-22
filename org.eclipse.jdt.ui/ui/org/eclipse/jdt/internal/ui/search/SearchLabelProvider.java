@@ -86,7 +86,6 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		if (fPotentialMatchFgColor == null)
 			return;
 		if (POTENTIAL_MATCH_FG_COLOR.equals(event.getProperty()) || EMPHASIZE_POTENTIAL_MATCHES.equals(event.getProperty())) {
-			fPotentialMatchFgColor.dispose();
 			fPotentialMatchFgColor= null;
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(SearchLabelProvider.this, null); // refresh all
 			fireLabelProviderChanged(lpEvent);
