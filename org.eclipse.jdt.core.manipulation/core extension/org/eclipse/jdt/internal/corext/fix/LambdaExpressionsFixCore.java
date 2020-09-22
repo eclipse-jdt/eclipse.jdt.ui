@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -54,6 +55,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -79,6 +81,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -109,7 +112,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 	}
 
 	public static final class LambdaExpressionsFinder extends ASTVisitor {
-
 		private final ArrayList<LambdaExpression> fNodes= new ArrayList<>();
 
 		public static ArrayList<LambdaExpression> perform(ASTNode node) {
@@ -128,12 +130,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		}
 	}
 
-	public static class AbortSearchException extends RuntimeException {
-		private static final long serialVersionUID= 1L;
-	}
-
 	public static final class SuperThisReferenceFinder extends HierarchicalASTVisitor {
-
 		private ITypeBinding fFunctionalInterface;
 		private MethodDeclaration fMethodDeclaration;
 
@@ -205,7 +202,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 	}
 
 	public static final class FinalFieldAccessInFieldDeclarationFinder extends HierarchicalASTVisitor {
-
 		private MethodDeclaration fMethodDeclaration;
 		private ASTNode fFieldDeclaration;
 		static boolean hasReference(MethodDeclaration node) {
@@ -306,7 +302,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 	}
 
 	public static final class SuperThisQualifier extends HierarchicalASTVisitor {
-
 		private ITypeBinding fQualifierTypeBinding;
 		private ImportRewrite fImportRewrite;
 		private ASTRewrite fASTRewrite;
@@ -443,7 +438,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 	}
 
 	public static class CreateLambdaOperation extends CompilationUnitRewriteOperation {
-
 		private final List<ClassInstanceCreation> fExpressions;
 
 		public CreateLambdaOperation(List<ClassInstanceCreation> expressions) {
@@ -460,16 +454,16 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			HashMap<ClassInstanceCreation, HashSet<String>> cicToNewNames= new HashMap<>();
 			for (int i= 0; i < fExpressions.size(); i++) {
 				ClassInstanceCreation classInstanceCreation= fExpressions.get(i);
-				TextEditGroup group= createTextEditGroup(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression, cuRewrite);
 
 				AnonymousClassDeclaration anonymTypeDecl= classInstanceCreation.getAnonymousClassDeclaration();
 				List<BodyDeclaration> bodyDeclarations= anonymTypeDecl.bodyDeclarations();
 
 				Object object= bodyDeclarations.get(0);
+
 				if (!(object instanceof MethodDeclaration)) {
 					continue;
 				}
-				final MethodDeclaration methodDeclaration= (MethodDeclaration) object;
+
 				HashSet<String> excludedNames= new HashSet<>();
 				if (i != 0) {
 					for (ClassInstanceCreation convertedCic : fExpressions.subList(0, i)) {
@@ -478,6 +472,9 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						}
 					}
 				}
+
+				final MethodDeclaration methodDeclaration= (MethodDeclaration) object;
+				TextEditGroup group= createTextEditGroup(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression, cuRewrite);
 				HashSet<String> newNames= makeNamesUnique(excludedNames, methodDeclaration, rewrite, group);
 				cicToNewNames.put(classInstanceCreation, new HashSet<>(newNames));
 				List<SingleVariableDeclaration> methodParameters= methodDeclaration.parameters();
@@ -490,6 +487,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						break;
 					}
 				}
+
 				LambdaExpression lambdaExpression= ast.newLambdaExpression();
 				List<VariableDeclaration> lambdaParameters= lambdaExpression.parameters();
 				lambdaExpression.setParentheses(createExplicitlyTypedParameters || methodParameters.size() != 1);
@@ -519,6 +517,35 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						}
 					}
 				}
+
+				final Set<ITypeBinding> inheritedTypes= new HashSet<>();
+				collectInheritedTypes(anonymTypeDecl.resolveBinding(), inheritedTypes);
+
+				ASTVisitor inheritedFieldsVisitor= new ASTVisitor() {
+					@Override
+					public boolean visit(final SimpleName node) {
+						if ((!(node.getParent() instanceof QualifiedName) || node.getLocationInParent() != QualifiedName.NAME_PROPERTY)
+								&& (!(node.getParent() instanceof FieldAccess) || node.getLocationInParent() != FieldAccess.NAME_PROPERTY)
+								&& (!(node.getParent() instanceof SuperFieldAccess) || node.getLocationInParent() != SuperFieldAccess.NAME_PROPERTY)
+								&& node.resolveBinding() != null
+								&& node.resolveBinding().getKind() == IBinding.VARIABLE) {
+							IVariableBinding variableBinding= (IVariableBinding) node.resolveBinding();
+
+							if (variableBinding != null
+									&& (variableBinding.getModifiers() & Modifier.STATIC) != 0
+									&& variableBinding.isField()
+									&& inheritedTypes.contains(variableBinding.getDeclaringClass())) {
+								Type copyOfClassName= (Type) rewrite.createCopyTarget(classInstanceCreation.getType());
+								QualifiedType replacement= ast.newQualifiedType(copyOfClassName, ASTNodes.createMoveTarget(rewrite, node));
+								rewrite.replace(node, replacement, group);
+								return false;
+							}
+						}
+
+						return true;
+					}
+				};
+				lambdaBody.accept(inheritedFieldsVisitor);
 
 				@SuppressWarnings("unchecked")
 				ASTNode fragment= ASTNodes.getFirstAncestorOrNull(classInstanceCreation, VariableDeclarationFragment.class, BodyDeclaration.class);
@@ -647,6 +674,27 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 
 				importRemover.registerRemovedNode(classInstanceCreation);
 				importRemover.registerRetainedNode(lambdaBody);
+			}
+		}
+
+		private static void collectInheritedTypes(final ITypeBinding anonymType, final Set<ITypeBinding> inheritedTypes) {
+			if (anonymType != null) {
+				ITypeBinding motherType= anonymType.getSuperclass();
+
+				if (motherType != null) {
+					inheritedTypes.add(motherType);
+					collectInheritedTypes(motherType, inheritedTypes);
+				}
+
+				ITypeBinding[] interfaces= anonymType.getInterfaces();
+
+				if (interfaces != null && interfaces.length > 0) {
+					Collections.addAll(inheritedTypes, interfaces);
+
+					for (ITypeBinding iTypeBinding : interfaces) {
+						collectInheritedTypes(iTypeBinding, inheritedTypes);
+					}
+				}
 			}
 		}
 

@@ -183,6 +183,51 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToLambdaWithConstant() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    @FunctionalInterface\n" //
+				+ "    interface FI1 extends Runnable {\n" //
+				+ "        int CONSTANT_VALUE = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    void foo() {\n" //
+				+ "        Runnable r = new FI1() {\n" //
+				+ "            @Override\n" //
+				+ "            public void run() {\n" //
+				+ "                System.out.println(CONSTANT_VALUE);\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    };\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    @FunctionalInterface\n" //
+				+ "    interface FI1 extends Runnable {\n" //
+				+ "        int CONSTANT_VALUE = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    void foo() {\n" //
+				+ "        Runnable r = () -> System.out.println(FI1.CONSTANT_VALUE);\n" //
+				+ "    };\n" //
+				+ "}\n";
+		String expected= sample;
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { FixMessages.LambdaExpressionsFix_convert_to_lambda_expression });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
 	public void testConvertToLambdaNestedWithImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
