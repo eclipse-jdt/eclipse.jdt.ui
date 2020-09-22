@@ -1031,6 +1031,18 @@ public class CleanUpConstants {
 	public static final String COLLECTION_CLONING= "cleanup.collection_cloning"; //$NON-NLS-1$
 
 	/**
+	 * Replaces creating a new Map, then invoking Map.putAll() on it, by creating the new Map with the other Map as parameter.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String MAP_CLONING= "cleanup.map_cloning"; //$NON-NLS-1$
+
+	/**
 	 * Removes redundant semicolons.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>

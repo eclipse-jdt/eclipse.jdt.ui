@@ -7205,6 +7205,11 @@
             id="org.eclipse.jdt.ui.cleanup.collection_cloning"
             runAfter="org.eclipse.jdt.ui.cleanup.use_directly_map_method">
       </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.map_cloning"
+            runAfter="org.eclipse.jdt.ui.cleanup.collection_cloning">
+      </cleanUp>
    </extension>
 
   <extension

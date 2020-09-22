@@ -2133,7 +2133,26 @@ public class ASTNodes {
 		return current;
 	}
 
-    /**
+	/**
+	 * Returns the unique {@link VariableDeclarationFragment} declared in the
+	 * provided {@link VariableDeclarationStatement}.
+	 *
+	 * @param node the statement from which to extract the unique fragment
+	 * @return the unique fragment declared in the provided variable declaration
+	 *         statement, or {@code null} if more than one exist.
+	 */
+	public static VariableDeclarationFragment getUniqueFragment(final Statement node) {
+		VariableDeclarationStatement statement= as(node, VariableDeclarationStatement.class);
+
+		if (statement == null) {
+			return null;
+		}
+
+		List<VariableDeclarationFragment> fragments= statement.fragments();
+		return fragments.size() == 1 ? fragments.get(0) : null;
+	}
+
+	/**
      * Returns the same node after removing any parentheses around it.
      *
      * @param node the node around which parentheses must be removed

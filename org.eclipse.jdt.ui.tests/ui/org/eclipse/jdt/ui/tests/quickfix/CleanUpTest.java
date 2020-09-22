@@ -6071,6 +6071,158 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testCloneMap() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.HashMap;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void replaceNewNoArgsAssignmentThenPutAll(Map<String, String> map, Map<String, String> output) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = new HashMap<String, String>();\n" //
+				+ "        output.putAll(map);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceNewNoArgsThenPutAll(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>();\n" //
+				+ "        output.putAll(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceNew0ArgThenPutAll(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(0);\n" //
+				+ "        output.putAll(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceNew1ArgThenPutAll(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(0);\n" //
+				+ "        output.putAll(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceNewMapSizeThenPutAll(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(map.size());\n" //
+				+ "        output.putAll(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceWithSizeOfSubMap(List<Map<String, String>> listOfMap) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(listOfMap.get(0).size());\n" //
+				+ "        output.putAll(listOfMap.get(0));\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.MAP_CLONING);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.HashMap;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void replaceNewNoArgsAssignmentThenPutAll(Map<String, String> map, Map<String, String> output) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = new HashMap<String, String>(map);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceNewNoArgsThenPutAll(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceNew0ArgThenPutAll(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceNew1ArgThenPutAll(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceNewMapSizeThenPutAll(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> replaceWithSizeOfSubMap(List<Map<String, String>> listOfMap) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(listOfMap.get(0));\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.MapCloningCleanUp_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testDoNotCloneMap() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.HashMap;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public Map<String, String> doNotReplaceAlreadyInitedMap(Map<String, String> map1, Map<String, String> map2) {\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>(map1);\n" //
+				+ "        output.putAll(map2);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> doNotReplaceWithSpecificSize(Map<String, String> map) {\n" //
+				+ "        Map<String, String> output = new HashMap<String, String>(10);\n" //
+				+ "        output.putAll(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<Object, Object> doNotReplaceNewThenAddAllIncompatibleTypes(Map<String, String> map) {\n" //
+				+ "        final Map<Object, Object> output = new HashMap<Object, Object>();\n" //
+				+ "        output.putAll(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, String> doNotReplaceAnonymousMap(Map<String, String> map) {\n" //
+				+ "        final Map<String, String> output = new HashMap<String, String>() {\n" //
+				+ "            private static final long serialVersionUID= 1L;\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public void putAll(Map<? extends String, ? extends String> map) {\n" //
+				+ "                // Drop the map\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "        output.putAll(map);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.MAP_CLONING);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testSerialVersionBug139381() throws Exception {
 
 		JavaProjectHelper.set14CompilerOptions(getProject());

@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
+import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
@@ -55,6 +56,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new MergeConditionalBlocksCleanUp(values),
 				new MapMethodCleanUp(values),
 				new CollectionCloningCleanUp(values),
+				new MapCloningCleanUp(values),
 				new RedundantModifiersCleanUp(values),
 				new RedundantSemicolonsCleanUp(values),
 				new UnnecessaryArrayCreationCleanUp(values),
@@ -113,6 +115,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference collectionCloning= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_CollectionCloning, CleanUpConstants.COLLECTION_CLONING, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(collectionCloning);
+
+		CheckboxPreference mapCloning= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_MapCloning, CleanUpConstants.MAP_CLONING, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(mapCloning);
 
 		CheckboxPreference modifiers= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantModifiers, CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(modifiers);
