@@ -188,7 +188,7 @@ public class CCPActionGroup extends ActionGroup {
 			actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
 		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, fCopyQualifiedNameAction);
-		if (fCopyAction != null)
+		if (fCutAction != null)
 			actionBars.setGlobalActionHandler(ActionFactory.CUT.getId(), fCutAction);
 		if (fPasteAction != null)
 			actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), fPasteAction);
