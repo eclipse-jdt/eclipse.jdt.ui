@@ -7091,9 +7091,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.number_suffix">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup"
+            id="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression"
+            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PatternCleanUp"
             id="org.eclipse.jdt.ui.cleanup.precompile_regex"
-            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+            runAfter="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp"

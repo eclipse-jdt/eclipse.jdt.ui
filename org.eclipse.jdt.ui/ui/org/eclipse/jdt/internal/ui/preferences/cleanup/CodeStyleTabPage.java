@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
@@ -40,6 +41,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new ConvertLoopCleanUp(values),
 				new ExpressionsCleanUp(values),
 				new NumberSuffixCleanUp(values),
+				new BitwiseConditionalExpressionCleanup(values),
 				new VariableDeclarationCleanUp(values),
 				new VarCleanUp(values),
 				new LambdaExpressionsCleanUp(values),
@@ -73,6 +75,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		final RadioPreference useParenthesesAlwaysPref= createRadioPref(expressionsGroup, 1, CleanUpMessages.CodeStyleTabPage_RadioName_AlwaysUseParantheses, CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
 		final RadioPreference useParenthesesNeverPref= createRadioPref(expressionsGroup, 1, CleanUpMessages.CodeStyleTabPage_RadioName_NeverUseParantheses, CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useParenthesesPref, new RadioPreference[] {useParenthesesAlwaysPref, useParenthesesNeverPref});
+
+		final CheckboxPreference bitwiseComparison= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_CheckSignOfBitwiseOperation, CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(bitwiseComparison);
 
 		Group numberSuffixGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_NumberLiteral);
 

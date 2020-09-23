@@ -39,17 +39,18 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 
 	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
-		Group tabPageGroup= createGroup(numColumns, composite, CleanUpMessages.OptimizationTabPage_GroupName_Optimization);
+		Group optimizationGroup= createGroup(numColumns, composite, CleanUpMessages.OptimizationTabPage_GroupName_Optimization);
 
-		final CheckboxPreference useLazyLogicalPref= createCheckboxPref(tabPageGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_UseLazyLogicalOperator,
+		final CheckboxPreference useLazyLogicalPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_UseLazyLogicalOperator,
 				CleanUpConstants.USE_LAZY_LOGICAL_OPERATOR, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(useLazyLogicalPref);
 
-		final CheckboxPreference precompileRegExPref= createCheckboxPref(tabPageGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_PrecompileRegEx, CleanUpConstants.PRECOMPILE_REGEX,
+		final CheckboxPreference precompileRegExPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_PrecompileRegEx, CleanUpConstants.PRECOMPILE_REGEX,
 				CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(precompileRegExPref);
 
-		final CheckboxPreference collectionCloning= createCheckboxPref(tabPageGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_NoStringCreation, CleanUpConstants.NO_STRING_CREATION, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(collectionCloning);
+		final CheckboxPreference noStringCreation= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_NoStringCreation, CleanUpConstants.NO_STRING_CREATION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(noStringCreation);
+
 	}
 }

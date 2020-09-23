@@ -750,6 +750,18 @@ public class CleanUpConstants {
 	public static final String PRECOMPILE_REGEX= "cleanup.precompile_regex"; //$NON-NLS-1$
 
 	/**
+	 * Check for sign of bitwise operation.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String CHECK_SIGN_OF_BITWISE_OPERATION= "cleanup.bitwise_conditional_expression"; //$NON-NLS-1$
+
+	/**
 	 * Removes a String instance from a String literal.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

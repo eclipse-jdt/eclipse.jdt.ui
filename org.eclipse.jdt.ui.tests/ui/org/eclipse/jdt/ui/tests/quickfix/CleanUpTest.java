@@ -9729,6 +9729,67 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testCheckSignOfBitwiseOperation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public class Foo {\n" //
+				+ "  private static final int CONSTANT = -1;\n" //
+				+ "\n" //
+				+ "  public int foo () {\n" //
+				+ "    int i = 0;\n" //
+				+ "    if (i & (CONSTANT | C2) > 0) {}\n" //
+				+ "    if (0 < (i & (CONSTANT | C2))) {}\n" //
+				+ "    return (1>>4 & CONSTANT) > 0;\n" //
+				+ "  };\n" //
+				+ "};\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Foo.java", sample, false, null);
+		sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public class Foo {\n" //
+				+ "  private static final int CONSTANT = -1;\n" //
+				+ "\n" //
+				+ "  public int foo () {\n" //
+				+ "    int i = 0;\n" //
+				+ "    if (i & (CONSTANT | C2) != 0) {}\n" //
+				+ "    if (0 != (i & (CONSTANT | C2))) {}\n" //
+				+ "    return (1>>4 & CONSTANT) != 0;\n" //
+				+ "  };\n" //
+				+ "};\n";
+		String expected = sample;
+
+		enable(CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION);
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.CheckSignOfBitwiseOperation_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testKeepCheckSignOfBitwiseOperation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public class Foo {\n" //
+				+ "  private static final int CONSTANT = -1;\n" //
+				+ "\n" //
+				+ "  public void bar() {\n" //
+				+ "    int i = 0;\n" //
+				+ "    if (i > 0) {}\n" //
+				+ "    if (i > 0 && (CONSTANT +1) > 0) {}\n" //
+				+ "  };\n" //
+				+ "};\n";
+		String original= sample;
+		ICompilationUnit cu= pack1.createCompilationUnit("Foo.java", original, false, null);
+
+		enable(CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRemoveBlockReturnThrows01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

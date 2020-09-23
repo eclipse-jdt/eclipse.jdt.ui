@@ -133,6 +133,8 @@ public class MultiFixMessages extends NLS {
 	public static String UnnecessaryArrayCreationCleanup_description;
 	public static String ObjectsEqualsCleanup_description;
 
+	public static String CheckSignOfBitwiseOperation_description;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, MultiFixMessages.class);
