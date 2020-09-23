@@ -7171,9 +7171,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.strings">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.arrays_fill"
+            runAfter="org.eclipse.jdt.ui.cleanup.type_parameters">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp"
             id="org.eclipse.jdt.ui.cleanup.autoboxing"
-            runAfter="org.eclipse.jdt.ui.cleanup.type_parameters">
+            runAfter="org.eclipse.jdt.ui.cleanup.arrays_fill">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp"

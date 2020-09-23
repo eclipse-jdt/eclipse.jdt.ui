@@ -283,10 +283,24 @@ public class ASTNodes {
 		}
 
 		private boolean mayCallActiveToString(Expression expression) {
-			return !hasType(expression, String.class.getCanonicalName(), boolean.class.getSimpleName(), short.class.getSimpleName(), int.class.getSimpleName(), long.class.getSimpleName(),
-					float.class.getSimpleName(), double.class.getSimpleName(),
-					Short.class.getCanonicalName(), Boolean.class.getCanonicalName(), Integer.class.getCanonicalName(), Long.class.getCanonicalName(), Float.class.getCanonicalName(),
-					Double.class.getCanonicalName()) && !(expression instanceof PrefixExpression) && !(expression instanceof InfixExpression)
+			return !hasType(expression,
+					String.class.getCanonicalName(),
+					boolean.class.getSimpleName(),
+					int.class.getSimpleName(),
+					long.class.getSimpleName(),
+					double.class.getSimpleName(),
+					float.class.getSimpleName(),
+					short.class.getSimpleName(),
+					char.class.getSimpleName(),
+					Boolean.class.getCanonicalName(),
+					Integer.class.getCanonicalName(),
+					Long.class.getCanonicalName(),
+					Double.class.getCanonicalName(),
+					Float.class.getCanonicalName(),
+					Short.class.getCanonicalName(),
+					Character.class.getCanonicalName())
+					&& !(expression instanceof PrefixExpression)
+					&& !(expression instanceof InfixExpression)
 					&& !(expression instanceof PostfixExpression);
 		}
 
@@ -1236,6 +1250,18 @@ public class ASTNodes {
 	 * @return true if the provided node has the provided operator, false otherwise.
 	 */
 	public static boolean hasOperator(PrefixExpression node, PrefixExpression.Operator expectedOperator, PrefixExpression.Operator... additionalExpectedOperators) {
+		return node != null && isOperatorInList(node.getOperator(), expectedOperator, additionalExpectedOperators);
+	}
+
+	/**
+	 * Returns whether the provided operator is the same as the one of provided node.
+	 *
+	 * @param node the node for which to test the operator
+	 * @param expectedOperator the first operator to test
+	 * @param additionalExpectedOperators the other operators to test too
+	 * @return true if the provided node has the provided operator, false otherwise.
+	 */
+	public static boolean hasOperator(PostfixExpression node, PostfixExpression.Operator expectedOperator, PostfixExpression.Operator... additionalExpectedOperators) {
 		return node != null && isOperatorInList(node.getOperator(), expectedOperator, additionalExpectedOperators);
 	}
 

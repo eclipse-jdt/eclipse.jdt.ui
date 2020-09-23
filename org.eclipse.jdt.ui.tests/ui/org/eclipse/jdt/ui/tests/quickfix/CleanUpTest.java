@@ -4424,6 +4424,255 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUseArraysFill() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private boolean[] booleanArray = new boolean[10];\n" //
+				+ "\n" //
+				+ "    public boolean[] refactorBooleanArray() {\n" //
+				+ "        boolean[] array = new boolean[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = true;\n" //
+				+ "        }\n" //
+				+ "        for (int i = 0; i < array.length; ++i) {\n" //
+				+ "            array[i] = false;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] refactorNumberArray() {\n" //
+				+ "        int[] array = new int[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = 123;\n" //
+				+ "        }\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = Integer.MAX_VALUE;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] refactorCharacterArray() {\n" //
+				+ "        char[] array = new char[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = '!';\n" //
+				+ "        }\n" //
+				+ "        for (int j = 0; array.length > j; j++) {\n" //
+				+ "            array[j] = 'z';\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[] refactorStringArray() {\n" //
+				+ "        String[] array = new String[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = \"foo\";\n" //
+				+ "        }\n" //
+				+ "        for (int j = 0; array.length > j; j++) {\n" //
+				+ "            array[j] = null;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[] refactorBackwardLoopOnArrary() {\n" //
+				+ "        String[] array = new String[10];\n" //
+				+ "\n" //
+				+ "        for (int i = array.length - 1; i >= 0; i--) {\n" //
+				+ "            array[i] = \"foo\";\n" //
+				+ "        }\n" //
+				+ "        for (int i = array.length - 1; 0 <= i; --i) {\n" //
+				+ "            array[i] = \"foo\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorExternalArray() {\n" //
+				+ "        for (int i = 0; i < booleanArray.length; i++) {\n" //
+				+ "            booleanArray[i] = true;\n" //
+				+ "        }\n" //
+				+ "        for (int i = 0; i < this.booleanArray.length; i++) {\n" //
+				+ "            this.booleanArray[i] = false;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.ARRAYS_FILL);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private boolean[] booleanArray = new boolean[10];\n" //
+				+ "\n" //
+				+ "    public boolean[] refactorBooleanArray() {\n" //
+				+ "        boolean[] array = new boolean[10];\n" //
+				+ "\n" //
+				+ "        Arrays.fill(array, true);\n" //
+				+ "        Arrays.fill(array, false);\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] refactorNumberArray() {\n" //
+				+ "        int[] array = new int[10];\n" //
+				+ "\n" //
+				+ "        Arrays.fill(array, 123);\n" //
+				+ "        Arrays.fill(array, Integer.MAX_VALUE);\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] refactorCharacterArray() {\n" //
+				+ "        char[] array = new char[10];\n" //
+				+ "\n" //
+				+ "        Arrays.fill(array, '!');\n" //
+				+ "        Arrays.fill(array, 'z');\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[] refactorStringArray() {\n" //
+				+ "        String[] array = new String[10];\n" //
+				+ "\n" //
+				+ "        Arrays.fill(array, \"foo\");\n" //
+				+ "        Arrays.fill(array, null);\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[] refactorBackwardLoopOnArrary() {\n" //
+				+ "        String[] array = new String[10];\n" //
+				+ "\n" //
+				+ "        Arrays.fill(array, \"foo\");\n" //
+				+ "        Arrays.fill(array, \"foo\");\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorExternalArray() {\n" //
+				+ "        Arrays.fill(booleanArray, true);\n" //
+				+ "        Arrays.fill(this.booleanArray, false);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testDoNotUseArraysFill() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean[] doNotReplaceNonForEachLoop() {\n" //
+				+ "        boolean[] array = new boolean[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 1; i < array.length; i++) {\n" //
+				+ "            array[i] = true;\n" //
+				+ "        }\n" //
+				+ "        for (int i = 0; i < array.length - 1; i++) {\n" //
+				+ "            array[i] = false;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean[] doNotReplaceWierdLoop(int j) {\n" //
+				+ "        boolean[] array = new boolean[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; j++ < array.length; i++) {\n" //
+				+ "            array[i] = true;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] doNotRefactorInitWithoutConstant(int j) {\n" //
+				+ "        int[] array = new int[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = i*i;\n" //
+				+ "        }\n" //
+				+ "        for (int i = array.length - 1; i >= 0; i--) {\n" //
+				+ "            array[i] = j++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] doNotRefactorWithAnotherStatement() {\n" //
+				+ "        int[] array = new int[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = 123;\n" //
+				+ "            System.out.println(\"Do not forget me!\");\n" //
+				+ "        }\n" //
+				+ "        for (int i = array.length - 1; i >= 0; i--) {\n" //
+				+ "            System.out.println(\"Do not forget me!\");\n" //
+				+ "            array[i] = 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] doNotRefactorWithSpecificIndex() {\n" //
+				+ "        int[] array = new int[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[0] = 123;\n" //
+				+ "        }\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[array.length - i] = 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] doNotRefactorAnotherArray(int[] array3) {\n" //
+				+ "        int[] array = new int[10];\n" //
+				+ "        int[] array2 = new int[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array2[i] = 123;\n" //
+				+ "        }\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array3[i] = 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] doNotRefactorSpecialAssignment(int[] array) {\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] += 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.ARRAYS_FILL);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testUseLazyLogicalOperator() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

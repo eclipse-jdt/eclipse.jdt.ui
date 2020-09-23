@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
@@ -47,6 +48,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new UnnecessaryCodeCleanUp(values),
 				new StringCleanUp(values),
 				new TypeParametersCleanUp(values),
+				new ArraysFillCleanUp(values),
 				new AutoboxingCleanUp(values),
 				new UnboxingCleanUp(values),
 				new PushDownNegationCleanUp(values),
@@ -88,6 +90,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference typeArgs= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantTypeArguments, CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(typeArgs);
+
+		CheckboxPreference arraysFill= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ArraysFill, CleanUpConstants.ARRAYS_FILL, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(arraysFill);
 
 		CheckboxPreference autoboxing= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_Autoboxing, CleanUpConstants.USE_AUTOBOXING, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(autoboxing);
