@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 import org.eclipse.osgi.util.NLS;
 
 public class CleanUpMessages extends NLS {
-
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages"; //$NON-NLS-1$
 
 	public static String CleanUpConfigurationBlock_SelectedCleanUps_label;
@@ -137,6 +136,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons_description;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantArrayCreation_description;
+	public static String UnnecessaryCodeTabPage_CheckboxName_UselessReturn;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ObjectsEquals;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryVarargsArrayCreation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedConstructors;

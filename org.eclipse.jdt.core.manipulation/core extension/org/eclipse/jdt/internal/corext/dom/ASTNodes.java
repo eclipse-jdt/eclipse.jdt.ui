@@ -1938,7 +1938,7 @@ public class ASTNodes {
 	 * @param node the start node
 	 * @return true if a sibling may exist
 	 */
-	private static boolean canHaveSiblings(final Statement node) {
+	public static boolean canHaveSiblings(final Statement node) {
 		ASTNode statementAtLevel= statementAtLevel(node);
 		ASTNode parent= statementAtLevel.getParent();
 
@@ -1986,6 +1986,43 @@ public class ASTNodes {
 		}
 
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Returns the next statement in the source file if it exists.
+	 *
+	 * @param startNode the start node
+	 * @return the next statement in the source file if it exists, null otherwise
+	 */
+	public static Statement getNextStatement(final Statement startNode) {
+		Statement nextSibling= getNextSibling(startNode);
+
+		if (nextSibling != null) {
+			return nextSibling;
+		}
+
+		ASTNode parent= startNode.getParent();
+		if (parent instanceof Statement) {
+			return getNextStatement((Statement) parent);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the next statement in the same block if it exists.
+	 *
+	 * @param startNode the start node
+	 * @return the next statement in the same block if it exists, null otherwise
+	 */
+	public static Statement getNextSibling(final Statement startNode) {
+		List<Statement> siblings= getSiblings(startNode, true);
+
+		if (siblings.isEmpty()) {
+			return null;
+		}
+
+		return siblings.get(0);
 	}
 
 	/**

@@ -7141,9 +7141,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UselessReturnCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.useless_return"
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp"
             id="org.eclipse.jdt.ui.cleanup.objects_equals"
-            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation">
+            runAfter="org.eclipse.jdt.ui.cleanup.no_string_creation">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StringCleanUp"

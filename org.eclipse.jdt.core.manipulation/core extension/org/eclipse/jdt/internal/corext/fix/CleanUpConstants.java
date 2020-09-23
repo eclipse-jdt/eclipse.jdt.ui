@@ -1091,6 +1091,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_UNNECESSARY_ARRAY_CREATION= "cleanup.remove_unnecessary_array_creation"; //$NON-NLS-1$
 
 	/**
+	 * Removes useless lone return at the end of a method.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String REMOVE_USELESS_RETURN= "cleanup.useless_return"; //$NON-NLS-1$
+
+	/**
 	 * Reduces the code of the equals method implementation by using Objects.equals().
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

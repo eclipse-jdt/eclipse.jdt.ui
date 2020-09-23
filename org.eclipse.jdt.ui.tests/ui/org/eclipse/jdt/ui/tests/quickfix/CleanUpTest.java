@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 public class CleanUpTest extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup = new ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -5823,6 +5823,206 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testRemoveUselessReturn() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void removeUselessReturn() {\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnWithPreviousCode() {\n" //
+				+ "        System.out.println(\"Keep this line\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnWithIf(boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceByBlock(boolean isEnabled) {\n" //
+				+ "        System.out.println(\"Keep this line\");\n" //
+				+ "        if (isEnabled)\n" //
+				+ "            return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeElseStatement(boolean isValid) {\n" //
+				+ "        System.out.println(\"Keep this line\");\n" //
+				+ "        if (isValid)\n" //
+				+ "            System.out.println(\"isValid is true\");\n" //
+				+ "        else\n" //
+				+ "            return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeElseBlock(boolean isValid) {\n" //
+				+ "        System.out.println(\"Keep this line\");\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(\"isValid is true\");\n" //
+				+ "        } else {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnWithSwitch(int myNumber) {\n" //
+				+ "        switch (myNumber) {\n" //
+				+ "        case 0:\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnWithIfElse(boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            return;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Remove anyway\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnInLambda() {\n" //
+				+ "        Runnable r = () -> {return;};\n" //
+				+ "        r.run();\n" //
+				+ "        System.out.println(\"Remove anyway\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_USELESS_RETURN);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void removeUselessReturn() {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnWithPreviousCode() {\n" //
+				+ "        System.out.println(\"Keep this line\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnWithIf(boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceByBlock(boolean isEnabled) {\n" //
+				+ "        System.out.println(\"Keep this line\");\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeElseStatement(boolean isValid) {\n" //
+				+ "        System.out.println(\"Keep this line\");\n" //
+				+ "        if (isValid)\n" //
+				+ "            System.out.println(\"isValid is true\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeElseBlock(boolean isValid) {\n" //
+				+ "        System.out.println(\"Keep this line\");\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(\"isValid is true\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnWithSwitch(int myNumber) {\n" //
+				+ "        switch (myNumber) {\n" //
+				+ "        case 0:\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnWithIfElse(boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Remove anyway\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessReturnInLambda() {\n" //
+				+ "        Runnable r = () -> {};\n" //
+				+ "        r.run();\n" //
+				+ "        System.out.println(\"Remove anyway\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.UselessReturnCleanUp_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testDoNotRemoveReturn() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public int doNotRemoveReturnWithValue() {\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveUselessReturnInMiddleOfSwitch(int myNumber) {\n" //
+				+ "        switch (myNumber) {\n" //
+				+ "        case 0:\n" //
+				+ "            System.out.println(\"I'm not the last statement\");\n" //
+				+ "            return;\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"Do some stuff\");\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveReturnWithFollowingCode(boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Do not forget me\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveReturnInWhile(int myNumber) {\n" //
+				+ "        while (myNumber-- > 0) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveReturnInDoWhile(int myNumber) {\n" //
+				+ "        do {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            return;\n" //
+				+ "        } while (myNumber-- > 0);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveReturnInFor() {\n" //
+				+ "        for (int myNumber = 0; myNumber < 10; myNumber++) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveReturnInForEach(int[] integers) {\n" //
+				+ "        for (int myNumber : integers) {\n" //
+				+ "            System.out.println(\"Only the first value: \" + myNumber);\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_USELESS_RETURN);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}

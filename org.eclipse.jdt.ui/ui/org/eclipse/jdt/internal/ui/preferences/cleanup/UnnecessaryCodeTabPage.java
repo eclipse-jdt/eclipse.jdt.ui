@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UselessReturnCleanUp;
 
 public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.unnecessary_code"; //$NON-NLS-1$
@@ -62,6 +63,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new RedundantModifiersCleanUp(values),
 				new RedundantSemicolonsCleanUp(values),
 				new UnnecessaryArrayCreationCleanUp(values),
+				new UselessReturnCleanUp(values),
 				new ObjectsEqualsCleanUp(values)
 		};
 	}
@@ -132,6 +134,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference arrayCreation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnnecessaryVarargsArrayCreation, CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(arrayCreation);
+
+		CheckboxPreference uselessReturn= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UselessReturn, CleanUpConstants.REMOVE_USELESS_RETURN, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(uselessReturn);
 
 		CheckboxPreference objectsEquals= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ObjectsEquals, CleanUpConstants.USE_OBJECTS_EQUALS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(objectsEquals);
