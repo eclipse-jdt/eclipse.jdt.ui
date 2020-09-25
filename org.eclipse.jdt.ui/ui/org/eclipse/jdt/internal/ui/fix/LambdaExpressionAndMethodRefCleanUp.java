@@ -354,7 +354,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 			copyOfLambdaExpression.parameters().add(copyOfParameter);
 			copyOfLambdaExpression.setBody(rewrite.createCopyTarget(node.getBody()));
 			copyOfLambdaExpression.setParentheses(false);
-			rewrite.replace(node, copyOfLambdaExpression, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, copyOfLambdaExpression, group);
 		}
 	}
 
@@ -376,7 +376,9 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 			Expression copyOfExpression= (Expression) rewrite.createCopyTarget(returnStatement.getExpression());
-			rewrite.replace(node.getBody(), ASTNodeFactory.parenthesizeIfNeeded(ast, copyOfExpression), group);
+			ASTNode node1= node.getBody();
+			ASTNode replacement= ASTNodeFactory.parenthesizeIfNeeded(ast, copyOfExpression);
+			ASTNodes.replaceButKeepComment(rewrite, node1, replacement, group);
 		}
 	}
 
@@ -398,7 +400,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 			CreationReference creationRef= ast.newCreationReference();
 			creationRef.setType(copyType(cuRewrite, ast, classInstanceCreation, classInstanceCreation.resolveTypeBinding()));
-			rewrite.replace(node, creationRef, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, creationRef, group);
 		}
 	}
 
@@ -420,7 +422,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 			SuperMethodReference creationRef= ast.newSuperMethodReference();
 			creationRef.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
-			rewrite.replace(node, creationRef, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, creationRef, group);
 		}
 	}
 
@@ -446,7 +448,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 			typeMethodRef.setType(copyType(cuRewrite, ast, methodInvocation, type));
 			typeMethodRef.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
-			rewrite.replace(node, typeMethodRef, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, typeMethodRef, group);
 		}
 	}
 
@@ -474,7 +476,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 			}
 
 			typeMethodRef.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
-			rewrite.replace(node, typeMethodRef, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, typeMethodRef, group);
 		}
 	}
 

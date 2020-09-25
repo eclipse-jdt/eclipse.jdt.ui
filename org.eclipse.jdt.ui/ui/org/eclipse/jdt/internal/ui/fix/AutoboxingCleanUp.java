@@ -186,9 +186,9 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 				newCastExpression.setType(ast.newPrimitiveType(PrimitiveType.toCode(primitiveType.getName())));
 				newCastExpression.setExpression(arg0);
 
-				rewrite.replace(node, newCastExpression, group);
+				ASTNodes.replaceButKeepComment(rewrite, node, newCastExpression, group);
 			} else {
-				rewrite.replace(node, arg0, group);
+				ASTNodes.replaceButKeepComment(rewrite, node, arg0, group);
 			}
 		}
 	}

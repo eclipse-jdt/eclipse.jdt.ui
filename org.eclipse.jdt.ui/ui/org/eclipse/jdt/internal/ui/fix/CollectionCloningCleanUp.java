@@ -261,7 +261,7 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 			newClassInstanceCreation.setType(ASTNodes.createMoveTarget(rewrite, cic.getType()));
 			newClassInstanceCreation.arguments().add(ASTNodes.createMoveTarget(rewrite, arg0));
 
-			rewrite.replace(nodeToReplace, newClassInstanceCreation, group);
+			ASTNodes.replaceButKeepComment(rewrite, nodeToReplace, newClassInstanceCreation, group);
 			rewrite.remove(nodeToRemove, group);
 		}
 	}

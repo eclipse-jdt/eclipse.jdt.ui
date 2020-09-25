@@ -174,7 +174,7 @@ public class BitwiseConditionalExpressionCleanup extends AbstractMultiFix {
 			newInfixExpression.setRightOperand(ASTNodes.createMoveTarget(rewrite, fExpression.getRightOperand()));
 			newInfixExpression.setFlags(fExpression.getFlags());
 
-			rewrite.replace(fExpression, newInfixExpression, group);
+			ASTNodes.replaceButKeepComment(rewrite, fExpression, newInfixExpression, group);
 		}
 	}
 }

@@ -58,6 +58,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "package test;\n" //
 				+ "public class E {\n" //
 				+ "    void foo(){\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Runnable r = new Runnable() {\n" //
 				+ "            @Override\n" //
 				+ "            public void run() {\n" //
@@ -76,6 +77,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "package test;\n" //
 				+ "public class E {\n" //
 				+ "    void foo(){\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Runnable r = () -> System.out.println(\"do something\");\n" //
 				+ "    };\n" //
 				+ "}\n";

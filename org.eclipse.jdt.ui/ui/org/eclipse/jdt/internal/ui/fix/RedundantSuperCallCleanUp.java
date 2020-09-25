@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
@@ -137,7 +138,7 @@ public class RedundantSuperCallCleanUp extends AbstractMultiFix implements IClea
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.RedundantSuperCallCleanup_description, cuRewrite);
 
-			rewrite.remove(node, group);
+			ASTNodes.removeButKeepComment(rewrite, node, group);
 		}
 	}
 }

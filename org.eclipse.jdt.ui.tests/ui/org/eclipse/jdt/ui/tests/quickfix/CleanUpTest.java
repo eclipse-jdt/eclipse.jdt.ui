@@ -4424,6 +4424,84 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testKeepCommentOnReplacement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean[] refactorBooleanArray() {\n" //
+				+ "        boolean[] array = new boolean[10];\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = true;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.ARRAYS_FILL);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean[] refactorBooleanArray() {\n" //
+				+ "        boolean[] array = new boolean[10];\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Arrays.fill(array, true);\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testKeepCommentOnRemoval() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    class A {\n" //
+				+ "        A(int a) {}\n" //
+				+ "\n" //
+				+ "        A() {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            super();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_SUPER_CALL);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    class A {\n" //
+				+ "        A(int a) {}\n" //
+				+ "\n" //
+				+ "        A() {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            \n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.RedundantSuperCallCleanup_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
 	public void testUseArraysFill() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -5414,7 +5492,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        A() {\n" //
 				+ "            super();\n" //
 				+ "        }\n" //
-				+ "\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    class B extends A {\n" //
@@ -5440,7 +5517,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "        A() {\n" //
 				+ "        }\n" //
-				+ "\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    class B extends A {\n" //

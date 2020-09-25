@@ -17,11 +17,14 @@ package org.eclipse.jdt.internal.corext.fix;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteOperationsFixCore implements ILinkedFix {
+	public static final String UNTOUCH_COMMENT= "untouchComment"; //$NON-NLS-1$
 
 	public abstract static class CompilationUnitRewriteOperation extends CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation {
 
@@ -29,6 +32,16 @@ public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteO
 
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
+			cuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
+				@Override
+				public SourceRange computeSourceRange(final ASTNode node) {
+					if (Boolean.TRUE.equals(node.getProperty(UNTOUCH_COMMENT))) {
+						return new SourceRange(node.getStartPosition(), node.getLength());
+					}
+
+					return super.computeSourceRange(node);
+				}
+			});
 			rewriteAST(cuRewrite, (LinkedProposalModel)linkedModel);
 		}
 	}

@@ -295,7 +295,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 				private boolean replace(final Expression expression) {
 					SimpleName node= ast.newSimpleName(text);
-					astRewrite.replace(expression, node, group);
+					ASTNodes.replaceButKeepComment(astRewrite, expression, node, group);
 					remover.registerRemovedNode(expression);
 					checkChildOperations(expression, node);
 					pg.addPosition(astRewrite.track(node), false);

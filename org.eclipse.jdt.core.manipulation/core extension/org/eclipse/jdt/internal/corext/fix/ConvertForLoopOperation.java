@@ -772,12 +772,12 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 
 					} else {
 						SimpleName name= ast.newSimpleName(parameterName);
-						rewrite.replace(node, name, editGroup);
+						ASTNodes.replaceButKeepComment(rewrite, node, name, editGroup);
 						pg.addPosition(rewrite.track(name), true);
 					}
 				} else {
 					SimpleName name= ast.newSimpleName(parameterName);
-					rewrite.replace(node, name, editGroup);
+					ASTNodes.replaceButKeepComment(rewrite, node, name, editGroup);
 					pg.addPosition(rewrite.track(name), true);
 				}
 			}
@@ -881,12 +881,12 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 
 					} else {
 						SimpleName name= ast.newSimpleName(parameterName);
-						rewrite.replace(node, name, editGroup);
+						ASTNodes.replaceButKeepComment(rewrite, node, name, editGroup);
 						pg.addPosition(rewrite.track(name), true);
 					}
 				} else {
 					SimpleName name= ast.newSimpleName(parameterName);
-					rewrite.replace(node, name, editGroup);
+					ASTNodes.replaceButKeepComment(rewrite, node, name, editGroup);
 					pg.addPosition(rewrite.track(name), true);
 				}
 			}

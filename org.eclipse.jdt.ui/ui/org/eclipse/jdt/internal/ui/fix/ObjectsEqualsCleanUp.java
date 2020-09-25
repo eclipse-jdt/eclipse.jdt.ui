@@ -266,13 +266,16 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 			notExpression.setOperand(newEqualsMethod);
 
 			ReturnStatement copyOfReturnStatement= ASTNodes.createMoveTarget(rewrite, returnStatement);
+			ASTNode node1= node.getExpression();
 
-			rewrite.replace(node.getExpression(), notExpression, group);
+			ASTNodes.replaceButKeepComment(rewrite, node1, notExpression, group);
 
 			if (node.getThenStatement() instanceof Block) {
-				rewrite.replace((ASTNode) ((Block) node.getThenStatement()).statements().get(0), copyOfReturnStatement, group);
+				ASTNode node2= (ASTNode) ((Block) node.getThenStatement()).statements().get(0);
+				ASTNodes.replaceButKeepComment(rewrite, node2, copyOfReturnStatement, group);
 			} else {
-				rewrite.replace(node.getThenStatement(), copyOfReturnStatement, group);
+				ASTNode node2= node.getThenStatement();
+				ASTNodes.replaceButKeepComment(rewrite, node2, copyOfReturnStatement, group);
 			}
 
 			if (node.getElseStatement() != null) {

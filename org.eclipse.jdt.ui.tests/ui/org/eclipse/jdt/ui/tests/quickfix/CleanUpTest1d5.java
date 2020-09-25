@@ -519,6 +519,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "public class E1 {\n" //
 				+ "    public void foo() {\n" //
 				+ "        List<E1> list= new ArrayList<E1>();\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (Iterator<E1> iter = list.iterator(); iter.hasNext();) {\n" //
 				+ "            E1 e = iter.next();\n" //
 				+ "            System.out.println(e);\n" //
@@ -536,6 +537,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "public class E1 {\n" //
 				+ "    public void foo() {\n" //
 				+ "        List<E1> list= new ArrayList<E1>();\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (E1 e : list) {\n" //
 				+ "            System.out.println(e);\n" //
 				+ "        }\n" //
@@ -1894,6 +1896,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "public class E {\n" //
 				+ "    public static void bar() {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Character c = Character.valueOf('*');\n" //
 				+ "        Byte by = Byte.valueOf((byte) 0);\n" //
 				+ "        Boolean bo = Boolean.valueOf(true);\n" //
@@ -1913,6 +1916,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "public class E {\n" //
 				+ "    public static void bar() {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Character c = '*';\n" //
 				+ "        Byte by = (byte) 0;\n" //
 				+ "        Boolean bo = true;\n" //

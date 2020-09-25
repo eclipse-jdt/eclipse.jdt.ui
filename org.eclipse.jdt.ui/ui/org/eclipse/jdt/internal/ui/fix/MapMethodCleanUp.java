@@ -209,7 +209,7 @@ public class MapMethodCleanUp extends AbstractMultiFix {
 				newMethodInvocation.arguments().add(rewrite.createMoveTarget((Expression) expression));
 			}
 
-			rewrite.replace(this.globalMi, newMethodInvocation, group);
+			ASTNodes.replaceButKeepComment(rewrite, this.globalMi, newMethodInvocation, group);
 		}
 	}
 }

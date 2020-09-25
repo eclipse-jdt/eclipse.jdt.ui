@@ -213,8 +213,9 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 			if (nextOperation != null) {
 				nextOperation.setNode(copyOfReplacement);
 			}
+			ASTNode node= this.getNode();
 
-			rewrite.replace(this.getNode(), copyOfReplacement, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, copyOfReplacement, group);
 		}
 
 		public void setNextOperation(ReplacementOperation nextOperation) {
@@ -240,8 +241,9 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.PushDownNegationCleanup_description, cuRewrite);
 			Expression copyOfReplacement= ast.newBooleanLiteral(this.replacement);
+			ASTNode node= this.getNode();
 
-			rewrite.replace(this.getNode(), copyOfReplacement, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, copyOfReplacement, group);
 		}
 	}
 
@@ -262,8 +264,9 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.PushDownNegationCleanup_description, cuRewrite);
 			ParenthesizedExpression parenthesizedExpression= doRewriteAST(rewrite, ast, infixExpression, reverseOp);
+			ASTNode node= this.getNode();
 
-			rewrite.replace(this.getNode(), parenthesizedExpression, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, parenthesizedExpression, group);
 		}
 
 		private ParenthesizedExpression doRewriteAST(ASTRewrite rewrite, AST ast, InfixExpression pInfixExpression, Operator pReverseOp) {

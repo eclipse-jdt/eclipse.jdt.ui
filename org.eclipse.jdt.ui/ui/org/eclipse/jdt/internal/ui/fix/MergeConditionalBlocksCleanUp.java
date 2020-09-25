@@ -25,6 +25,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -204,11 +205,14 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 			newCondition.setLeftOperand(newConditions.remove(0));
 			newCondition.setRightOperand(newConditions.remove(0));
 			newCondition.extendedOperands().addAll(newConditions);
+			ASTNode node= duplicateIfBlocks.get(0).getExpression();
 
-			rewrite.replace(duplicateIfBlocks.get(0).getExpression(), newCondition, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, newCondition, group);
 
 			if (remainingStatement != null) {
-				rewrite.replace(duplicateIfBlocks.get(0).getElseStatement(), ASTNodes.createMoveTarget(rewrite, remainingStatement), group);
+				ASTNode node1= duplicateIfBlocks.get(0).getElseStatement();
+				ASTNode replacement= ASTNodes.createMoveTarget(rewrite, remainingStatement);
+				ASTNodes.replaceButKeepComment(rewrite, node1, replacement, group);
 			} else if (duplicateIfBlocks.get(0).getElseStatement() != null) {
 				rewrite.remove(duplicateIfBlocks.get(0).getElseStatement(), group);
 			}

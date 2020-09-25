@@ -178,7 +178,7 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 
 			ExpressionStatement expressionStatement= ast.newExpressionStatement(methodInvocation);
 
-			rewrite.replace(node, expressionStatement, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, expressionStatement, group);
 		}
 
 		private Name newTypeName(AST ast, String patternNameText) {

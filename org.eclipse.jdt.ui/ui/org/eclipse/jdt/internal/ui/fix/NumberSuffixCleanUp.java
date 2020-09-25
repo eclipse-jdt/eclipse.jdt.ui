@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
@@ -142,7 +143,7 @@ public class NumberSuffixCleanUp extends AbstractMultiFix {
 			final String newToken= token.substring(0, token.length() - 1) + token.substring(token.length() - 1).toUpperCase();
 			final NumberLiteral replacement= ast.newNumberLiteral(newToken);
 
-			rewrite.replace(node, replacement, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, replacement, group);
 		}
 	}
 }

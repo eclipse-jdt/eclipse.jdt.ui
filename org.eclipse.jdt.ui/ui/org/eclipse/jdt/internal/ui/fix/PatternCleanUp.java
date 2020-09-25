@@ -311,7 +311,8 @@ public class PatternCleanUp extends AbstractMultiFix {
 			TextEditGroup group= createTextEditGroup(FixMessages.PatternFix_convert_string_to_pattern_object, cuRewrite);
 
 			String patternNameText= importRewrite.addImport(Pattern.class.getCanonicalName());
-			rewrite.replace(type, ast.newSimpleType(newTypeName(ast, patternNameText)), group);
+			ASTNode replacement= ast.newSimpleType(newTypeName(ast, patternNameText));
+			ASTNodes.replaceButKeepComment(rewrite, type, replacement, group);
 
 			Expression unparanthesedInitializer= ASTNodes.getUnparenthesedExpression(initializer);
 			MethodInvocation newCompileMethod= ast.newMethodInvocation();
@@ -347,9 +348,9 @@ public class PatternCleanUp extends AbstractMultiFix {
 				rewrite.getListRewrite(typeDecl,
 						ASTNodes.getBodyDeclarationsProperty(typeDecl)).insertAt(newFieldDeclaration, insertionIndex + addedFieldCount, group);
 				addedFields.add(newFieldName);
-				rewrite.replace(initializer, ast.newSimpleName(newFieldName), group);
+				ASTNodes.replaceButKeepComment(rewrite, initializer, ast.newSimpleName(newFieldName), group);
 			} else {
-				rewrite.replace(initializer, newCompileMethod, group);
+			    ASTNodes.replaceButKeepComment(rewrite, initializer, newCompileMethod, group);
 			}
 
 			for (SimpleName oldRegExUse : regExUses) {
@@ -384,7 +385,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 					newMethod.setExpression(newMatcherExpression);
 				}
 
-				rewrite.replace(oldMethodInvocation, newMethod, group);
+				ASTNodes.replaceButKeepComment(rewrite, oldMethodInvocation, newMethod, group);
 			}
 		}
 

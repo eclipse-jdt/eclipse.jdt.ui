@@ -26,6 +26,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -272,12 +273,16 @@ public class VarCleanUp extends AbstractMultiFix {
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.VarCleanUp_description, cuRewrite);
 
 			if (classInstanceCreation != null) {
-				rewrite.replace(classInstanceCreation.getType(), rewrite.createCopyTarget(node), group);
+				ASTNode node1= classInstanceCreation.getType();
+				ASTNode replacement= rewrite.createCopyTarget(node);
+				ASTNodes.replaceButKeepComment(rewrite, node1, replacement, group);
 			} else if (literal != null) {
-				rewrite.replace(literal, ast.newNumberLiteral(literal.getToken() + postfix), group);
+				ASTNode replacement= ast.newNumberLiteral(literal.getToken() + postfix);
+				ASTNodes.replaceButKeepComment(rewrite, literal, replacement, group);
 			}
+			ASTNode replacement= ast.newSimpleType(ast.newSimpleName("var"));
 
-			rewrite.replace(node, ast.newSimpleType(ast.newSimpleName("var")), group); //$NON-NLS-1$
+			ASTNodes.replaceButKeepComment(rewrite, node, replacement, group); //$NON-NLS-1$
 		}
 	}
 }

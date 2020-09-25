@@ -150,6 +150,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 // @see JDTUIHelperClasses
 public class ASTNodes {
+	public static final String UNTOUCH_COMMENT= "untouchComment"; //$NON-NLS-1$
+
 	public static final int NODE_ONLY=				0;
 	public static final int INCLUDE_FIRST_PARENT= 	1;
 	public static final int INCLUDE_ALL_PARENTS= 	2;
@@ -3265,6 +3267,34 @@ public class ASTNodes {
 	@SuppressWarnings("unchecked")
 	public static <T extends ASTNode> T copySubtree(AST target, T node) {
 		return (T) ASTNode.copySubtree(target, node);
+	}
+
+	/**
+	 * Removes the provided node from the AST leaving the leading comment.
+	 *
+	 * @param rewrite     The AST Rewriter
+	 * @param node        The node to remove
+	 * @param editGroup   The edit group
+	 * @see ASTRewrite#remove(ASTNode, org.eclipse.text.edits.TextEditGroup)
+	 */
+	public static void removeButKeepComment(final ASTRewrite rewrite, final ASTNode node, final TextEditGroup editGroup) {
+		node.setProperty(UNTOUCH_COMMENT, Boolean.TRUE);
+		rewrite.remove(node, editGroup);
+	}
+
+	/**
+	 * Replaces the provided node from the AST with the provided replacement node.
+	 *
+	 * @param rewrite     The AST Rewriter
+	 * @param node        The node to remove
+	 * @param replacement The replacement node
+	 * @param editGroup   The edit group
+	 * @see ASTRewrite#replace(ASTNode, ASTNode,
+	 *      org.eclipse.text.edits.TextEditGroup)
+	 */
+	public static void replaceButKeepComment(final ASTRewrite rewrite, final ASTNode node, final ASTNode replacement, final TextEditGroup editGroup) {
+		node.setProperty(UNTOUCH_COMMENT, Boolean.TRUE);
+		rewrite.replace(node, replacement, editGroup);
 	}
 
 	/**

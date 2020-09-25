@@ -164,7 +164,7 @@ public class LazyLogicalCleanUp extends AbstractMultiFix {
 			newIe.setRightOperand(copyOfOperands.remove(0));
 			newIe.extendedOperands().addAll(copyOfOperands);
 
-			rewrite.replace(this.node, newIe, group);
+			ASTNodes.replaceButKeepComment(rewrite, this.node, newIe, group);
 		}
 	}
 }

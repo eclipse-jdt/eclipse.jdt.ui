@@ -163,7 +163,7 @@ public class UnboxingCleanUp extends AbstractMultiFix {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.UnboxingCleanup_description, cuRewrite);
 			Expression copyOfWrapper= (Expression) rewrite.createCopyTarget(node.getExpression());
-			rewrite.replace(node, copyOfWrapper, group);
+			ASTNodes.replaceButKeepComment(rewrite, node, copyOfWrapper, group);
 		}
 	}
 }
