@@ -1590,8 +1590,7 @@ public final class ReorgPolicyFactory {
 
 		@Override
 		protected Map<String, String> getRefactoringArguments(String project) {
-			final Map<String, String> arguments= new HashMap<>();
-			arguments.putAll(super.getRefactoringArguments(project));
+			final Map<String, String> arguments= new HashMap<>(super.getRefactoringArguments(project));
 			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES, Boolean.toString(fUpdateReferences));

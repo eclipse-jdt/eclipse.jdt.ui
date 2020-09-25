@@ -16,6 +16,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -386,9 +387,7 @@ public abstract class FlowInfo {
 
 	protected void createAccessModeArray(FlowContext context) {
 		fAccessModes= new int[context.getArrayLength()];
-		for (int i= 0; i < fAccessModes.length; i++) {
-			fAccessModes[i]= UNUSED;
-		}
+		Arrays.fill(fAccessModes, UNUSED);
 	}
 
 	protected void mergeAccessModeConditional(FlowInfo otherInfo, FlowContext context) {

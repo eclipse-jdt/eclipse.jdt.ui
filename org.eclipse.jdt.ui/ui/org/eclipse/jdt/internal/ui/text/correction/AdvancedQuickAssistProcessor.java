@@ -2771,9 +2771,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				thenStatement= currentIf.getThenStatement();
 			}
 
-			for (SwitchCase switchCaseStatement : createSwitchCaseStatements(ast, rewrite, caseExpressions)) {
-				switchStatement.statements().add(switchCaseStatement);
-			}
+			switchStatement.statements().addAll(Arrays.asList(createSwitchCaseStatements(ast, rewrite, caseExpressions)));
 			boolean isBreakRequired= true;
 			if (thenStatement instanceof Block) {
 				Statement statement= null;

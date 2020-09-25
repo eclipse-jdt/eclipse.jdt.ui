@@ -475,9 +475,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 					j7Invoc.arguments().add(fAst.newSimpleName(field.getName()));
 				} else if (field.getType().isPrimitive()) {
 					Statement[] sts= createAddSimpleHashCode(field.getType(), this::getThisAccessForHashCode, field.getName(), false);
-					for (Statement st : sts) {
-						body.statements().add(st);
-					}
+					body.statements().addAll(Arrays.asList(sts));
 				} else {
 					body.statements().add(createAddQualifiedHashCode(field));
 				}
@@ -730,9 +728,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			a.setIndex(fAst.newSimpleName(name));
 			return a;
 		}, VARIABLE_NAME_INDEX, true);
-		for (Statement statement : statements) {
-			forBody.statements().add(statement);
-		}
+		forBody.statements().addAll(Arrays.asList(statements));
 		forStatement.setBody(forBody);
 
 		// END RETURN

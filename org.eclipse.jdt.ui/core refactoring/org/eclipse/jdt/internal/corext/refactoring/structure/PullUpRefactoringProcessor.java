@@ -1610,8 +1610,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private Map<IMember, Set<IMember>> getMatchingMembers(final ITypeHierarchy hierarchy, final IType type, final boolean includeAbstract) throws JavaModelException {
-		final Map<IMember, Set<IMember>> result= new HashMap<>();
-		result.putAll(getMatchingMembersMapping(type));
+		final Map<IMember, Set<IMember>> result= new HashMap<>(getMatchingMembersMapping(type));
 		for (IType subType : hierarchy.getAllSubtypes(type)) {
 			final Map<IMember, Set<IMember>> map= getMatchingMembersMapping(subType);
 			mergeMaps(result, map);
