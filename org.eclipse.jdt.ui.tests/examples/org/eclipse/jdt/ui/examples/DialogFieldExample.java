@@ -49,7 +49,7 @@ public class DialogFieldExample {
 		return this;
 	}
 
-	private class MylabelProvider extends LabelProvider implements ITableLabelProvider {
+	private static class MylabelProvider extends LabelProvider implements ITableLabelProvider {
 		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;

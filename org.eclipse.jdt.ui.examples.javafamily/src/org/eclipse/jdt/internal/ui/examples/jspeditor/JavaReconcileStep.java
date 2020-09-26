@@ -219,7 +219,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 	/**
 	 * Adapts an <code>ICompilationUnit</code> to the <code>ITextModel</code> interface.
 	 */
-	class CompilationUnitAdapter implements IReconcilableModel {
+	static class CompilationUnitAdapter implements IReconcilableModel {
 
 		private ICompilationUnit fCompilationUnit;
 

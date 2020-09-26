@@ -44,7 +44,7 @@ public class WordRulePerformanceTest extends TextPerformanceTestCase2 {
 		return new PerfTestSuite(WordRulePerformanceTest.class);
 	}
 
-	private final class MyWordDetector implements IWordDetector {
+	private final static class MyWordDetector implements IWordDetector {
 		@Override
 		public boolean isWordPart(char c) {
 			return Character.isLetterOrDigit(c);

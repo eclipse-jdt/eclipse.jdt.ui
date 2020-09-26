@@ -220,7 +220,7 @@ public class JUnit5TestListener implements TestExecutionListener {
 		return new JUnit5Identifier(testIdentifier);
 	}
 
-	private class IgnoredTestIdentifier extends JUnit5Identifier {
+	private static class IgnoredTestIdentifier extends JUnit5Identifier {
 		public IgnoredTestIdentifier(TestIdentifier description) {
 			super(description);
 		}
@@ -234,7 +234,7 @@ public class JUnit5TestListener implements TestExecutionListener {
 		}
 	}
 
-	private class AssumptionFailedTestIdentifier extends JUnit5Identifier {
+	private static class AssumptionFailedTestIdentifier extends JUnit5Identifier {
 		public AssumptionFailedTestIdentifier(TestIdentifier description) {
 			super(description);
 		}

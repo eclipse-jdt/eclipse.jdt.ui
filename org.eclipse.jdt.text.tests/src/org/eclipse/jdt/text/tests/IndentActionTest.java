@@ -53,7 +53,7 @@ public class IndentActionTest {
 
 	private static final String PROJECT= "IndentTests";
 
-	private final class IndentTestSetup extends ExternalResource {
+	private final static class IndentTestSetup extends ExternalResource {
 		private IJavaProject fJavaProject;
 
 		@Override

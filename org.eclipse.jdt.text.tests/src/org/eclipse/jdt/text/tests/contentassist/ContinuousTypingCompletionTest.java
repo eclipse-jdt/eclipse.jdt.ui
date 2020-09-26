@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
 
 public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
-	private final class CompletionSelectionTracker implements ICompletionListener {
+	private final static class CompletionSelectionTracker implements ICompletionListener {
 		private ICompletionProposal fSelectedProposal;
 
 		@Override
