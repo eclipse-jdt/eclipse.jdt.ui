@@ -22,7 +22,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -72,11 +71,10 @@ public abstract class StructureSelectionAction extends Action {
 	 */
 	@Override
 	public final  void run() {
-		IJavaElement inputElement= EditorUtility.getEditorInputJavaElement(fEditor, false);
-		if (!(inputElement instanceof ITypeRoot) || !inputElement.exists())
+		ITypeRoot typeRoot= EditorUtility.getEditorInputJavaElement(fEditor, false);
+		if (typeRoot == null || !typeRoot.exists())
 			return;
 
-		ITypeRoot typeRoot= (ITypeRoot) inputElement;
 		ISourceRange sourceRange;
 		try {
 			sourceRange= typeRoot.getSourceRange();

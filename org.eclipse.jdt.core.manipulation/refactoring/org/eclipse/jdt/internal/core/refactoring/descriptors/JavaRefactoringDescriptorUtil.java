@@ -178,17 +178,13 @@ public class JavaRefactoringDescriptorUtil {
 	 * @throws IllegalArgumentException if the value of the attribute is not a {@link String} or allowNull is <code>false</code> and the attribute does not exist
 	 */
 	public static String getString(Map<String, String> map, String attribute, boolean allowNull) throws IllegalArgumentException {
-		Object object= map.get(attribute);
-		if (object == null) {
+		String value= map.get(attribute);
+		if (value == null) {
 			if (allowNull)
 				return null;
 			throw new IllegalArgumentException("The map does not contain the attribute '" + attribute + "'"); //$NON-NLS-1$//$NON-NLS-2$
 		}
-		if (object instanceof String) {
-			String value= (String) object;
-			return value;
-		}
-		throw new IllegalArgumentException("The provided map does not contain a string for attribute '" + attribute + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		return value;
 	}
 
 	/**

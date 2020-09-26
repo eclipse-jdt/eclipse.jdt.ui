@@ -896,7 +896,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		if (!(input instanceof IJavaElement)) {
 			// Use the input of the page
 			input= getSite().getPage().getInput();
-			if (!(input instanceof IJavaElement) && input instanceof IAdaptable)
+			if (input != null && !(input instanceof IJavaElement))
 				input= ((IAdaptable)input).getAdapter(IJavaElement.class);
 		}
 		setInput(findInputForJavaElement((IJavaElement)input));
@@ -904,7 +904,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 
 	protected void setInitialSelection() {
 		// Use the selection, if any
-		Object input;
 		IWorkbenchPage page= getSite().getPage();
 		ISelection selection= null;
 		if (page != null)
@@ -924,13 +923,16 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 
 		if (selection == null || selection.isEmpty()) {
 			// Use the input of the page
-			input= getSite().getPage().getInput();
-			if (!(input instanceof IJavaElement)) {
-				if (input instanceof IAdaptable)
-					input= ((IAdaptable)input).getAdapter(IJavaElement.class);
-				else
-					return;
+			IAdaptable input= getSite().getPage().getInput();
+
+			if (input == null) {
+				return;
 			}
+
+			if (!(input instanceof IJavaElement)) {
+				input= input.getAdapter(IJavaElement.class);
+			}
+
 			selection= new StructuredSelection(input);
 		}
 		selectionChanged(null, selection);

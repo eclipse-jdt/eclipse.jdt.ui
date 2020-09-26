@@ -1030,9 +1030,9 @@ public final class JavaModelUtil {
 	public static String getExecutionEnvironmentCompliance(IExecutionEnvironment executionEnvironment) {
 		Map<String, String> complianceOptions= executionEnvironment.getComplianceOptions();
 		if (complianceOptions != null) {
-			Object compliance= complianceOptions.get(JavaCore.COMPILER_COMPLIANCE);
-			if (compliance instanceof String)
-				return (String)compliance;
+			String compliance= complianceOptions.get(JavaCore.COMPILER_COMPLIANCE);
+			if (compliance != null)
+				return compliance;
 		}
 
 		// fallback:

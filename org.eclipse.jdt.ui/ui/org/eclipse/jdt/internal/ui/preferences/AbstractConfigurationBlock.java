@@ -266,7 +266,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		while (!(parent instanceof ScrolledPageContent) && parent != null) {
 			parent= parent.getParent();
 		}
-		if (parent instanceof ScrolledPageContent) {
+		if (parent != null) {
 			return (ScrolledPageContent) parent;
 		}
 		return null;
@@ -277,7 +277,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		while (!(parent instanceof ExpandableComposite) && parent != null) {
 			parent= parent.getParent();
 		}
-		if (parent instanceof ExpandableComposite) {
+		if (parent != null) {
 			return (ExpandableComposite) parent;
 		}
 		return null;

@@ -321,13 +321,11 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      */
     private ScrolledPageContent getParentScrolledComposite(Control control) {
        Control parent= control.getParent();
-       while (!(parent instanceof ScrolledPageContent)) {
+       while (!(parent instanceof ScrolledPageContent) && parent != null) {
            parent= parent.getParent();
        }
-       if (parent instanceof ScrolledPageContent) {
-           return (ScrolledPageContent) parent;
-       }
-       return null;
+
+       return (ScrolledPageContent) parent;
    }
 
     @Override

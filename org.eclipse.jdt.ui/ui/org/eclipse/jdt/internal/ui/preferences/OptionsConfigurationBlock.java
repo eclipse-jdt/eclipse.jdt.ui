@@ -760,7 +760,7 @@ public abstract class OptionsConfigurationBlock {
 		while (!(parent instanceof ScrolledPageContent) && parent != null) {
 			parent= parent.getParent();
 		}
-		if (parent instanceof ScrolledPageContent) {
+		if (parent != null) {
 			return (ScrolledPageContent) parent;
 		}
 		return null;
@@ -771,7 +771,7 @@ public abstract class OptionsConfigurationBlock {
 		while (!(parent instanceof ExpandableComposite) && parent != null) {
 			parent= parent.getParent();
 		}
-		if (parent instanceof ExpandableComposite) {
+		if (parent != null) {
 			return (ExpandableComposite) parent;
 		}
 		return null;

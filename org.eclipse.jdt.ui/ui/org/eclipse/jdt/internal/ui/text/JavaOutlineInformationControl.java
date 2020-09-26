@@ -717,7 +717,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			while (p != null && !(p instanceof IType)) {
 				p= p.getParent();
 			}
-			if (!(p instanceof IType))
+			if (p == null)
 				return new IJavaElement[] {fInput};
 
 			ITypeHierarchy hierarchy= getSuperTypeHierarchy((IType)p);

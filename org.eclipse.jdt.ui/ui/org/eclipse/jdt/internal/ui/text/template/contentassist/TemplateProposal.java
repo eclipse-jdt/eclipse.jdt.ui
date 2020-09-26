@@ -67,7 +67,6 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.part.IWorkbenchPartOrientation;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
@@ -575,9 +574,9 @@ public class TemplateProposal
 	@Override
 	public IInformationControlCreator getInformationControlCreator() {
 		int orientation;
-		IEditorPart editor= getJavaEditor();
-		if (editor instanceof IWorkbenchPartOrientation)
-			orientation= ((IWorkbenchPartOrientation)editor).getOrientation();
+		JavaEditor editor= getJavaEditor();
+		if (editor != null)
+			orientation= editor.getOrientation();
 		else
 			orientation= SWT.LEFT_TO_RIGHT;
 		return new TemplateInformationControlCreator(orientation);
