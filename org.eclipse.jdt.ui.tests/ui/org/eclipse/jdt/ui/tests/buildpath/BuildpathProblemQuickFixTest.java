@@ -94,7 +94,7 @@ public class BuildpathProblemQuickFixTest {
 					? ((IMarkerResolutionRelevance) e2).getRelevanceForResolution()
 					: 0;
 			if (relevanceMarker1 != relevanceMarker2) {
-				return Integer.valueOf(relevanceMarker2).compareTo(relevanceMarker1);
+				return Integer.compare(relevanceMarker2,relevanceMarker1);
 			}
 			return e1.getLabel().compareTo(
 					e2.getLabel());
