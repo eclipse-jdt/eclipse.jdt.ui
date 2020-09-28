@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.AddOrRemoveAllCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
@@ -40,6 +41,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		return new AbstractCleanUp[] {
 				new ControlStatementsCleanUp(values),
 				new ConvertLoopCleanUp(values),
+				new AddOrRemoveAllCleanUp(values),
 				new ExpressionsCleanUp(values),
 				new NumberSuffixCleanUp(values),
 				new BitwiseConditionalExpressionCleanup(values),
@@ -72,6 +74,10 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		intent(controlGroup);
 		final CheckboxPreference convertLoopOnlyIfLoopVariableUsed= createCheckboxPref(controlGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed, CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(convertLoop, new CheckboxPreference[] {convertLoopOnlyIfLoopVariableUsed});
+
+		final CheckboxPreference addOrRemoveAllPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseAddAllRemoveAll, CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL,
+				CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(addOrRemoveAllPref);
 
 		Group expressionsGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_Expressions);
 

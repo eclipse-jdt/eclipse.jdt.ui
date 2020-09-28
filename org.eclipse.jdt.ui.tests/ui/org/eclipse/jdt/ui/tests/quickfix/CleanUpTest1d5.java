@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
  */
 public class CleanUpTest1d5 extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup = new Java1d5ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d5ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -46,6 +46,466 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		return projectSetup.getDefaultClasspath();
+	}
+
+	@Test
+	public void testAddOrRemoveAll() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Set;\n" //
+				+ "\n" //
+				+ "public class E1 extends ArrayList<java.util.Date> {\n" //
+				+ "    private java.util.Date[] innerArray = new java.util.Date[10];\n" //
+				+ "\n" //
+				+ "    private List<java.util.Date> innerList = new ArrayList<java.util.Date>();\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceAddWithForLoopByCollectionsAddAll(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        for (int i = 0; i < elems1.length; i++) {\n" //
+				+ "            output.add(elems1[i]);\n" //
+				+ "        }\n" //
+				+ "        for (int i = 0; i < elems2.length; i++) {\n" //
+				+ "            output.add(elems2[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceBackwardLoopOnSet(\n" //
+				+ "            Set<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        for (int i = elems1.length - 1; i >= 0; i--) {\n" //
+				+ "            output.add(elems1[i]);\n" //
+				+ "        }\n" //
+				+ "        for (int i = elems2.length - 1; 0 <= i; i--) {\n" //
+				+ "            output.add(elems2[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAddWithNotEqualOperator(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        for (int i = 0; i != dates.length; i++) {\n" //
+				+ "            output.add(dates[i]);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAddWithForLoopByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        for (int i = 0; i < dates.length; i++) {\n" //
+				+ "            output.add(dates[i]);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceLoopWithFieldArray(Collection<? super java.util.Date> output) {\n" //
+				+ "        for (int i = 0; i < innerArray.length; i++) {\n" //
+				+ "            output.add(innerArray[i]);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceForeachWithFieldArray(Collection<? super java.util.Date> output) {\n" //
+				+ "        for (java.util.Date d : this.innerArray) {\n" //
+				+ "            output.add(d);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceLoopWithFieldList(Collection<? super java.util.Date> output) {\n" //
+				+ "        for (int i = 0; i < this.innerList.size(); i++) {\n" //
+				+ "            output.add(this.innerList.get(i));\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceForeachWithFieldList(Collection<? super java.util.Date> output) {\n" //
+				+ "        for (java.util.Date d : innerList) {\n" //
+				+ "            output.add(d);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection replaceAddWithForEachByCollectionsAddAll(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        for (java.util.Date d : elems1) {\n" //
+				+ "            output.add(d);\n" //
+				+ "        }\n" //
+				+ "        for (java.sql.Date d : elems2) {\n" //
+				+ "            output.add(d);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAddWithForEachByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        for (java.util.Date date : dates) {\n" //
+				+ "            output.add(date);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithArray(\n" //
+				+ "            Map<String, List<String>> mapToFill, String[] inputList) {\n" //
+				+ "        for (String input : inputList) {\n" //
+				+ "            mapToFill.get(\"foo\").add(input);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return mapToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection replaceLoopOnRawCollectionWithArray(\n" //
+				+ "            List colToFill, String[] inputList) {\n" //
+				+ "        for (String input : inputList) {\n" //
+				+ "            colToFill.add(input);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return colToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithList(\n" //
+				+ "            Map<String, List<String>> mapToFill, List<String> inputList) {\n" //
+				+ "        for (String input : inputList) {\n" //
+				+ "            mapToFill.get(\"foo\").add(input);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return mapToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection replaceLoopOnRawCollectionWithList(\n" //
+				+ "            List colToFill, List<String> inputList) {\n" //
+				+ "        for (String input : inputList) {\n" //
+				+ "            colToFill.add(input);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return colToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> replaceAddWithForLoopByAddAll(List<String> col, List<String> output) {\n" //
+				+ "        for (int i = 0; i < col.size(); i++) {\n" //
+				+ "            output.add(col.get(i));\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> replaceAddWithForEachByAddAll(Collection<String> col, List<String> output) {\n" //
+				+ "        for (String s : col) {\n" //
+				+ "            output.add(s);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> replaceRemoveWithForLoopByRemoveAll(List<String> col, Set<String> output) {\n" //
+				+ "        for (int i = 0; i < col.size(); i++) {\n" //
+				+ "            output.remove(col.get(i));\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> replaceRemoveWithForEachByRemoveAll(Collection<String> col, Set<String> output) {\n" //
+				+ "        for (String s : col) {\n" //
+				+ "            output.remove(s);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private String doSomething(String s) {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", input, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Set;\n" //
+				+ "\n" //
+				+ "public class E1 extends ArrayList<java.util.Date> {\n" //
+				+ "    private java.util.Date[] innerArray = new java.util.Date[10];\n" //
+				+ "\n" //
+				+ "    private List<java.util.Date> innerList = new ArrayList<java.util.Date>();\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceAddWithForLoopByCollectionsAddAll(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        Collections.addAll(output, elems1);\n" //
+				+ "        Collections.addAll(output, elems2);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceBackwardLoopOnSet(\n" //
+				+ "            Set<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        Collections.addAll(output, elems1);\n" //
+				+ "        Collections.addAll(output, elems2);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAddWithNotEqualOperator(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        Collections.addAll(output, dates);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAddWithForLoopByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        Collections.addAll(output, dates);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceLoopWithFieldArray(Collection<? super java.util.Date> output) {\n" //
+				+ "        Collections.addAll(output, innerArray);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceForeachWithFieldArray(Collection<? super java.util.Date> output) {\n" //
+				+ "        Collections.addAll(output, this.innerArray);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceLoopWithFieldList(Collection<? super java.util.Date> output) {\n" //
+				+ "        output.addAll(this.innerList);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceForeachWithFieldList(Collection<? super java.util.Date> output) {\n" //
+				+ "        output.addAll(innerList);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection replaceAddWithForEachByCollectionsAddAll(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        Collections.addAll(output, elems1);\n" //
+				+ "        Collections.addAll(output, elems2);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAddWithForEachByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        Collections.addAll(output, dates);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithArray(\n" //
+				+ "            Map<String, List<String>> mapToFill, String[] inputList) {\n" //
+				+ "        Collections.addAll(mapToFill.get(\"foo\"), inputList);\n" //
+				+ "\n" //
+				+ "        return mapToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection replaceLoopOnRawCollectionWithArray(\n" //
+				+ "            List colToFill, String[] inputList) {\n" //
+				+ "        colToFill.addAll(Arrays.asList(inputList));\n" //
+				+ "\n" //
+				+ "        return colToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithList(\n" //
+				+ "            Map<String, List<String>> mapToFill, List<String> inputList) {\n" //
+				+ "        mapToFill.get(\"foo\").addAll(inputList);\n" //
+				+ "\n" //
+				+ "        return mapToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection replaceLoopOnRawCollectionWithList(\n" //
+				+ "            List colToFill, List<String> inputList) {\n" //
+				+ "        colToFill.addAll(inputList);\n" //
+				+ "\n" //
+				+ "        return colToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> replaceAddWithForLoopByAddAll(List<String> col, List<String> output) {\n" //
+				+ "        output.addAll(col);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> replaceAddWithForEachByAddAll(Collection<String> col, List<String> output) {\n" //
+				+ "        output.addAll(col);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> replaceRemoveWithForLoopByRemoveAll(List<String> col, Set<String> output) {\n" //
+				+ "        output.removeAll(col);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> replaceRemoveWithForEachByRemoveAll(Collection<String> col, Set<String> output) {\n" //
+				+ "        output.removeAll(col);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private String doSomething(String s) {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.AddOrRemoveAllCleanup_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotAddOrRemoveAll() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Set;\n" //
+				+ "\n" //
+				+ "public class E1 extends ArrayList<java.util.Date> {\n" //
+				+ "    private List<java.util.Date> innerList = new ArrayList<java.util.Date>();\n" //
+				+ "\n" //
+				+ "    @Override\n" //
+				+ "    public boolean addAll(Collection<? extends java.util.Date> doNotRefactorWithCyclicCalls) {\n" //
+				+ "        for (java.util.Date doNotRefactorWithCyclicCall : doNotRefactorWithCyclicCalls) {\n" //
+				+ "            add(doNotRefactorWithCyclicCall);\n" //
+				+ "        }\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> doNotReplaceBackwardLoopOnCollection(\n" //
+				+ "            Collection<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        for (int i = elems1.length - 1; i >= 0; i--) {\n" //
+				+ "            output.add(elems1[i]);\n" //
+				+ "        }\n" //
+				+ "        for (int i = elems2.length - 1; 0 <= i; i--) {\n" //
+				+ "            output.add(elems2[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRefactorInsideImplementation(Collection<? extends java.util.Date> dates) {\n" //
+				+ "        for (java.util.Date date : dates) {\n" //
+				+ "            this.add(date);\n" //
+				+ "        }\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceLoopWithFieldList(Collection<? super java.util.Date> output, List<java.util.Date> input) {\n" //
+				+ "        for (int i = 0; i < input.size(); i++) {\n" //
+				+ "            output.add(innerList.get(i));\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, List<String>> doNotRefactorForEachWithListUsingLoopVariable(\n" //
+				+ "            Map<String, List<String>> mapToFill, List<String> inputList) {\n" //
+				+ "        for (String input : inputList) {\n" //
+				+ "            mapToFill.get(input).add(input);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return mapToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, List<String>> doNotRefactorForLoopWithListUsingLoopIndex(\n" //
+				+ "            Map<String, List<String>> mapToFill, List<String> inputList) {\n" //
+				+ "        for (int i = 0; i < inputList.size(); i++) {\n" //
+				+ "            mapToFill.get(inputList.get(i)).add(inputList.get(i));\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return mapToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, List<String>> doNotRefactorForLoopWithListUsingLoopIterator(\n" //
+				+ "            Map<String, List<String>> mapToFill, List<String> inputList) {\n" //
+				+ "        String input = null;\n" //
+				+ "        for (Iterator<String> it = inputList.iterator(); it.hasNext(); input = it.next()) {\n" //
+				+ "            mapToFill.get(input).add(input);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return mapToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorForLoopWithListUsingLoopIterator(List<String> col) {\n" //
+				+ "        for (Iterator<String> it = col.iterator(); it.hasNext();) {\n" //
+				+ "            System.out.println(it.next());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, List<String>> doNotRefactorForEachWithArrayUsingLoopVariable(\n" //
+				+ "            Map<String, List<String>> mapToFill, String[] inputArray) {\n" //
+				+ "        for (String input : inputArray) {\n" //
+				+ "            mapToFill.get(input).add(input);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return mapToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Map<String, List<String>> doNotRefactorForLoopWithArrayUsingLoopIndex(\n" //
+				+ "            Map<String, List<String>> mapToFill, String[] inputArray) {\n" //
+				+ "        for (int i = 0; i < inputArray.length; i++) {\n" //
+				+ "            mapToFill.get(inputArray[i]).add(inputArray[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return mapToFill;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> doNotRefactorForLoopAddMethodResult(List<String> output, String[] elems) {\n" //
+				+ "        for (int i = 0; i < elems.length; i++) {\n" //
+				+ "            output.add(doSomething(elems[i]));\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> doNotRefactorForEachAddMethodResult(List<String> output, String[] elems) {\n" //
+				+ "        for (String s : elems) {\n" //
+				+ "            output.add(doSomething(s));\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> doNotRefactorRemoveWithPossibleDoubles() {\n" //
+				+ "        List<String> col = new ArrayList<String>();\n" //
+				+ "        col.add(\"redundant\");\n" //
+				+ "        List<String> output = new ArrayList<String>();\n" //
+				+ "        output.add(\"redundant\");\n" //
+				+ "        output.add(\"redundant\");\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < col.size(); i++) {\n" //
+				+ "            output.remove(col.get(i));\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> doNotRefactorForLoopAddMethodResult(List<String> output, List<String> col) {\n" //
+				+ "        for (int i = 0; i < col.size(); i++) {\n" //
+				+ "            output.add(doSomething(col.get(i)));\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<String> doNotRefactorForEachAddMethodResult(List<String> output, List<String> col) {\n" //
+				+ "        for (String s : col) {\n" //
+				+ "            output.add(doSomething(s));\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private String doSomething(String s) {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
 	@Test

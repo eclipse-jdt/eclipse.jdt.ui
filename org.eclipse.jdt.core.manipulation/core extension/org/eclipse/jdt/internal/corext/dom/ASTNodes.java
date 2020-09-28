@@ -150,7 +150,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 // @see JDTUIHelperClasses
 public class ASTNodes {
-
 	public static final int NODE_ONLY=				0;
 	public static final int INCLUDE_FIRST_PARENT= 	1;
 	public static final int INCLUDE_ALL_PARENTS= 	2;
@@ -582,6 +581,32 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns whether the provided expression is an instance of the qualified type
+	 * name.
+	 *
+	 * @param expression        the expression to analyze
+	 * @param qualifiedTypeName the qualified type name
+	 * @return {@code true} if the provided expression is an instance of the
+	 *         qualified type name, {@code false} otherwise
+	 */
+	public static boolean instanceOf(final Expression expression, final String qualifiedTypeName) {
+		return expression != null && instanceOf(expression.resolveTypeBinding(), qualifiedTypeName);
+	}
+
+	/**
+	 * Returns whether the provided type binding is an instance of the qualified
+	 * type name.
+	 *
+	 * @param typeBinding       the type binding to analyze
+	 * @param qualifiedTypeName the qualified type name
+	 * @return true if the provided type binding is an instance of the qualified
+	 *         type name, false otherwise
+	 */
+	public static boolean instanceOf(final ITypeBinding typeBinding, final String qualifiedTypeName) {
+		return findImplementedType(typeBinding, qualifiedTypeName) != null;
+	}
+
+	/**
 	 * Returns whether the provided expression represents an array.
 	 *
 	 * @param expression the expression to analyze
@@ -966,6 +991,18 @@ public class ASTNodes {
 			return getBooleanObject(qn);
 		}
 		return null;
+	}
+
+	/**
+	 * Returns whether the provided expression has the provided type.
+	 *
+	 * @param expression the expression to test
+	 * @param exprClass  the type to test the expression against
+	 * @return {@code true} if the provided expression has the provided type,
+	 *         {@code false} otherwise
+	 */
+	public static boolean is(final Expression expression, final Class<? extends Expression> exprClass) {
+		return as(expression, exprClass) != null;
 	}
 
 	/**
@@ -2984,7 +3021,7 @@ public class ASTNodes {
 	 * @return the type binding for the provided qualified type name if it can be found in the type
 	 *         hierarchy of the provided type binding, or {@code null} otherwise
 	 */
-	private static ITypeBinding findImplementedType(final ITypeBinding typeBinding, final String qualifiedTypeName) {
+	public static ITypeBinding findImplementedType(final ITypeBinding typeBinding, final String qualifiedTypeName) {
 		if (typeBinding == null) {
 			return null;
 		}

@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     Fabrice TIERCELIN - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.ArrayList;
@@ -17,7 +30,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 /** Visitor collecting all definitions and uses of a local variable. */
 public final class VarDefinitionsUsesVisitor extends ASTVisitor {
-	private final ASTNode variableDeclaration;
+	private final IVariableBinding variableBinding;
 	private final ASTNode scopeNode;
 	private final boolean includeInnerScopes;
 	private final List<SimpleName> writes= new ArrayList<>();
@@ -32,32 +45,9 @@ public final class VarDefinitionsUsesVisitor extends ASTVisitor {
 	 * @param includeInnerScopes True if the sub blocks should be analyzed
 	 */
 	public VarDefinitionsUsesVisitor(final IVariableBinding variableBinding, final ASTNode scopeNode, final boolean includeInnerScopes) {
-		this.variableDeclaration= ASTNodes.findDeclaration(variableBinding, scopeNode);
-		this.scopeNode= getDeclaringScope(variableDeclaration);
+		this.variableBinding= variableBinding;
+		this.scopeNode= scopeNode;
 		this.includeInnerScopes= includeInnerScopes;
-	}
-
-	private static ASTNode getDeclaringScope(final ASTNode variableDeclaration) {
-		ASTNode node= variableDeclaration.getParent();
-
-		while (isVariableDeclaration(node)) {
-			node= node.getParent();
-		}
-
-		return node;
-	}
-
-	private static boolean isVariableDeclaration(final ASTNode node) {
-		switch (node.getNodeType()) {
-		case ASTNode.SINGLE_VARIABLE_DECLARATION:
-		case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
-		case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
-		case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-			return true;
-
-		default:
-			return false;
-		}
 	}
 
 	/**
@@ -66,7 +56,7 @@ public final class VarDefinitionsUsesVisitor extends ASTVisitor {
 	 * @return this visitor
 	 */
 	public VarDefinitionsUsesVisitor find() {
-		if (variableDeclaration != null && scopeNode != null) {
+		if (variableBinding != null && scopeNode != null) {
 			scopeNode.accept(this);
 		}
 
@@ -75,9 +65,7 @@ public final class VarDefinitionsUsesVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(final SimpleName node) {
-		ASTNode occurrence= ASTNodes.findDeclaration(node.resolveBinding(), node);
-
-		if (variableDeclaration != null && variableDeclaration.equals(occurrence)) {
+		if (ASTNodes.isSameLocalVariable(variableBinding, node)) {
 			switch (node.getParent().getNodeType()) {
 			case ASTNode.ASSIGNMENT:
 				addWriteOrRead(node, Assignment.LEFT_HAND_SIDE_PROPERTY);
