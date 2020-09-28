@@ -6705,6 +6705,231 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testRemoveUselessContinue() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void removeUselessContinue(List<String> texts) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessContinueWithPreviousCode(List<String> texts) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessContinueWithIf(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                System.out.println(\"Keep this line\");\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceByBlock(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            if (isValid)\n" //
+				+ "                continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeElseStatement(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            if (isValid)\n" //
+				+ "                System.out.println(\"isValid is true\");\n" //
+				+ "            else\n" //
+				+ "                continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeElseBlock(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            if (isValid) {\n" //
+				+ "                System.out.println(\"isValid is true\");\n" //
+				+ "            } else {\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessContinueWithSwitch(List<String> texts, int myNumber) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            switch (myNumber) {\n" //
+				+ "            case 0:\n" //
+				+ "                System.out.println(\"Keep this line\");\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessContinueWithIfElse(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                System.out.println(\"Keep this line\");\n" //
+				+ "                continue;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Remove anyway\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", input, false, null);
+
+		enable(CleanUpConstants.REMOVE_USELESS_CONTINUE);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void removeUselessContinue(List<String> texts) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessContinueWithPreviousCode(List<String> texts) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessContinueWithIf(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                System.out.println(\"Keep this line\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceByBlock(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            if (isValid) {\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeElseStatement(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            if (isValid)\n" //
+				+ "                System.out.println(\"isValid is true\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeElseBlock(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "            if (isValid) {\n" //
+				+ "                System.out.println(\"isValid is true\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessContinueWithSwitch(List<String> texts, int myNumber) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            switch (myNumber) {\n" //
+				+ "            case 0:\n" //
+				+ "                System.out.println(\"Keep this line\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeUselessContinueWithIfElse(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                System.out.println(\"Keep this line\");\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Remove anyway\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.UselessContinueCleanUp_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotRemoveContinue() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void doNotRemoveBreak(List<String> texts) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveReturn(List<String> texts) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveThrow(List<String> texts) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            throw new NullPointerException();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveContinueWithLabel(List<String> texts, List<String> otherTexts) {\n" //
+				+ "        begin: for (String text : texts) {\n" //
+				+ "            for (String otherText : otherTexts) {\n" //
+				+ "                System.out.println(\"Keep this line\");\n" //
+				+ "                continue begin;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveUselessContinueInMiddleOfSwitch(List<String> texts, int myNumber) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            switch (myNumber) {\n" //
+				+ "            case 0:\n" //
+				+ "                System.out.println(\"I'm not the last statement\");\n" //
+				+ "                continue;\n" //
+				+ "            case 1:\n" //
+				+ "                System.out.println(\"Do some stuff\");\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveContinueWithFollowingCode(List<String> texts, boolean isValid) {\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                System.out.println(\"Keep this line\");\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Keep this line\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_USELESS_CONTINUE);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testMapMethodRatherThanKeySetMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

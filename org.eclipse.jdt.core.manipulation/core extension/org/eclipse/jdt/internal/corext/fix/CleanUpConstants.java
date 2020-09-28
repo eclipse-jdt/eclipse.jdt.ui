@@ -1170,6 +1170,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_USELESS_RETURN= "cleanup.useless_return"; //$NON-NLS-1$
 
 	/**
+	 * Removes useless lone continue at the end of a loop.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String REMOVE_USELESS_CONTINUE= "cleanup.useless_continue"; //$NON-NLS-1$
+
+	/**
 	 * Replaces a loop on elements by Collection.addAll(), Collection.addAll(Arrays.asList()), Collection.removeAll(), Collections.addAll() or Collections.removeAll().
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
