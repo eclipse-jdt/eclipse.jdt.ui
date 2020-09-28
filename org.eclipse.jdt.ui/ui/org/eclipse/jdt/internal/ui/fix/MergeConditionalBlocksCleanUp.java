@@ -25,7 +25,6 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -134,7 +133,7 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 
 					if (nextElse != null
 							&& operandCount.get() + ASTNodes.getNbOperands(nextElse.getExpression()) < ASTNodes.EXCESSIVE_OPERAND_NUMBER) {
-						if (match(previousStatement, nextElse.getThenStatement())) {
+						if (ASTNodes.match(previousStatement, nextElse.getThenStatement())) {
 							operandCount.addAndGet(ASTNodes.getNbOperands(nextElse.getExpression()));
 							duplicateIfBlocks.add(nextElse);
 							isThenStatement.add(Boolean.TRUE);
@@ -142,7 +141,7 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 						}
 
 						if (nextElse.getElseStatement() != null
-								&& match(previousStatement, nextElse.getElseStatement())) {
+								&& ASTNodes.match(previousStatement, nextElse.getElseStatement())) {
 							operandCount.addAndGet(ASTNodes.getNbOperands(nextElse.getExpression()));
 							duplicateIfBlocks.add(nextElse);
 							isThenStatement.add(Boolean.FALSE);
@@ -152,24 +151,6 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 				}
 
 				return false;
-			}
-
-			private boolean match(final Statement expectedStatement, final Statement actualStatement) {
-				ASTMatcher matcher= new ASTMatcher();
-				List<Statement> expectedStatements= ASTNodes.asList(expectedStatement);
-				List<Statement> actualStatements= ASTNodes.asList(actualStatement);
-
-				if (expectedStatements.size() != actualStatements.size()) {
-					return false;
-				}
-
-				for (int codeLine= 0; codeLine < expectedStatements.size(); codeLine++) {
-					if (!matcher.safeSubtreeMatch(expectedStatements.get(codeLine), actualStatements.get(codeLine))) {
-						return false;
-					}
-				}
-
-				return true;
 			}
 		});
 

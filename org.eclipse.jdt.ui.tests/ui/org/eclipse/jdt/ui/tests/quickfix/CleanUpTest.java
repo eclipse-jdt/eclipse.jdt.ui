@@ -5495,7 +5495,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (i == 0) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            System.out.println(\"Duplicate\");\n" //
-				+ "        } else if (i == 1) {\n" //
+				+ "        } else if (i == 123) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            System.out.println(\"Duplicate\");\n" //
 				+ "        } else {\n" //
@@ -5509,10 +5509,10 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if (a == 0) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (a + 1));\n" //
 				+ "        } else if (a == 1) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (1 + a));\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5521,10 +5521,10 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if (b == 0) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (a + 123 + 0));\n" //
 				+ "        } else if (b == 1) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (a + 123));\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5536,13 +5536,21 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if (j == 0) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            if (j > 0) {\n" //
+				+ "                System.out.println(\"Duplicate\");\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate too\");\n" //
+				+ "            }\n" //
 				+ "        } else if (j == 1) {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            if (j <= 0) {\n" //
+				+ "                System.out.println(\"Duplicate too\");\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate\");\n" //
+				+ "            }\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -5551,10 +5559,10 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if (k == 0) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + !(k == 0));\n" //
 				+ "        } else if (k == 1) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (k != 0));\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -5566,10 +5574,10 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            System.out.println(\"A given code\");\n" //
 				+ "        } if (m == 1) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (m > 0));\n" //
 				+ "        } else if (m == 2) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (0 < m));\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5581,10 +5589,17 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if (n == 0)\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            if (n > 0) {\n" //
+				+ "                System.out.println(\"Duplicate\");\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate too\");\n" //
+				+ "            }\n" //
 				+ "        else if (n == 1)\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            if (n > 0)\n" //
+				+ "                System.out.println(\"Duplicate\");\n" //
+				+ "            else\n" //
+				+ "                System.out.println(\"Duplicate too\");\n" //
 				+ "        else\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5635,11 +5650,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (q == 0) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            System.out.println(\"Duplicate\");\n" //
-				+ "            System.out.println(\"code\");\n" //
+				+ "            q = q + 1;\n" //
 				+ "        } else if (q == 1) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            System.out.println(\"Duplicate\");\n" //
-				+ "            System.out.println(\"code\");\n" //
+				+ "            q++;\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5658,7 +5673,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    /** Duplicate if and else if code, merge it */\n" //
 				+ "    public void duplicateIfAndElseIf(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        if ((i == 0) || (i == 1)) {\n" //
+				+ "        if ((i == 0) || (i == 123)) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            System.out.println(\"Duplicate\");\n" //
 				+ "        } else {\n" //
@@ -5672,7 +5687,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if ((a == 0) || (a == 1)) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (a + 1));\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5681,7 +5696,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if ((b == 0) || (b == 1)) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (a + 123 + 0));\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5693,7 +5708,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if ((j == 0) || !(j == 1)) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            if (j > 0) {\n" //
+				+ "                System.out.println(\"Duplicate\");\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate too\");\n" //
+				+ "            }\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5705,7 +5724,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if ((k == 0) || (k == 1)) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + !(k == 0));\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -5717,7 +5736,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            System.out.println(\"A given code\");\n" //
 				+ "        } if ((m == 1) || (m == 2)) {\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"Duplicate\" + (m > 0));\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5729,7 +5748,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        if ((n == 0) || (n == 1))\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            if (n > 0) {\n" //
+				+ "                System.out.println(\"Duplicate\");\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate too\");\n" //
+				+ "            }\n" //
 				+ "        else\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //
@@ -5766,7 +5789,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if ((q == 0) || (q == 1)) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            System.out.println(\"Duplicate\");\n" //
-				+ "            System.out.println(\"code\");\n" //
+				+ "            q = q + 1;\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            System.out.println(\"Different\");\n" //

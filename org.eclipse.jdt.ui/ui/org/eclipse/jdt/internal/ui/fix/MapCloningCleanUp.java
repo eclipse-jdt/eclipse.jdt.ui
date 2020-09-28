@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -201,9 +200,8 @@ public class MapCloningCleanUp extends AbstractMultiFix {
 						}
 
 						MethodInvocation methodInvocation= ASTNodes.as(args.get(0), MethodInvocation.class);
-						ASTMatcher matcher= new ASTMatcher();
 
-						return ASTNodes.usesGivenSignature(methodInvocation, Map.class.getCanonicalName(), "size") && matcher.safeSubtreeMatch(methodInvocation.getExpression(), sourceMap); //$NON-NLS-1$
+						return ASTNodes.usesGivenSignature(methodInvocation, Map.class.getCanonicalName(), "size") && ASTNodes.match(methodInvocation.getExpression(), sourceMap); //$NON-NLS-1$
 					}
 
 					return false;

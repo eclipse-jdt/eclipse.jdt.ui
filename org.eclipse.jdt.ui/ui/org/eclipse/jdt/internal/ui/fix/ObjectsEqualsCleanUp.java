@@ -26,7 +26,6 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -205,8 +204,7 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 
 			private boolean match(final Expression firstField, final Expression secondField, final Expression thisObject,
 					final ASTNode otherObject) {
-				ASTMatcher astMatcher= new ASTMatcher();
-				return astMatcher.safeSubtreeMatch(thisObject, firstField) && astMatcher.safeSubtreeMatch(otherObject, secondField);
+				return ASTNodes.match(thisObject, firstField) && ASTNodes.match(otherObject, secondField);
 			}
 		});
 

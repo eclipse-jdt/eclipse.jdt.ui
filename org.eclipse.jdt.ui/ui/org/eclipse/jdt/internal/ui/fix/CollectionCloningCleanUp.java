@@ -42,7 +42,6 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -211,10 +210,9 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 						}
 
 						MethodInvocation methodInvocation= ASTNodes.as(args.get(0), MethodInvocation.class);
-						ASTMatcher matcher= new ASTMatcher();
 
 						return ASTNodes.usesGivenSignature(methodInvocation, Collection.class.getCanonicalName(), "size") //$NON-NLS-1$
-								&& matcher.safeSubtreeMatch(methodInvocation.getExpression(), sourceCollection);
+								&& ASTNodes.match(methodInvocation.getExpression(), sourceCollection);
 					}
 
 					return false;

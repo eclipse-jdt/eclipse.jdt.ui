@@ -975,21 +975,31 @@ public class ASTNodes {
 	}
 
 	/**
-	 * Returns the {@link Boolean} object value represented by the provided expression.
+	 * Returns the {@link Boolean} object value represented by the provided
+	 * expression.
 	 *
-	 * @param expression the expression to analyze
-	 * @return the {@link Boolean} object value if the provided expression represents one, null
-	 *         otherwise
+	 * @param node the expression to analyze
+	 * @return the {@link Boolean} object value if the provided expression
+	 *         represents one, null otherwise
 	 */
-	public static Boolean getBooleanLiteral(Expression expression) {
+	public static Boolean getBooleanLiteral(final ASTNode node) {
+		if (!(node instanceof Expression)) {
+			return null;
+		}
+
+		Expression expression= (Expression) node;
 		final BooleanLiteral bl= as(expression, BooleanLiteral.class);
+
 		if (bl != null) {
 			return bl.booleanValue();
 		}
+
 		final QualifiedName qn= as(expression, QualifiedName.class);
+
 		if (hasType(qn, Boolean.class.getCanonicalName())) {
 			return getBooleanObject(qn);
 		}
+
 		return null;
 	}
 
@@ -3077,6 +3087,62 @@ public class ASTNodes {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns whether the two provided codes structurally match.
+	 *
+	 * @param referenceStatements the first code to compare
+	 * @param comparedStatements  the second code to compare
+	 * @return true if the two provided codes structurally match, false otherwise
+	 */
+	public static boolean match(final List<Statement> referenceStatements, final List<Statement> comparedStatements) {
+		return match(ASTSemanticMatcher.INSTANCE, referenceStatements, comparedStatements);
+	}
+
+	/**
+	 * Returns whether the two provided codes structurally match.
+	 *
+	 * @param matcher the AST matcher
+	 * @param referenceStatements the first code to compare
+	 * @param comparedStatements  the second code to compare
+	 * @return true if the two provided codes structurally match, false otherwise
+	 */
+	public static boolean match(final ASTSemanticMatcher matcher, final List<Statement> referenceStatements, final List<Statement> comparedStatements) {
+		if (referenceStatements.size() != comparedStatements.size()) {
+			return false;
+		}
+
+		for (int codeLine= 0; codeLine < referenceStatements.size(); codeLine++) {
+			if (!match(matcher, referenceStatements.get(codeLine), comparedStatements.get(codeLine))) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns whether the two provided nodes structurally match.
+	 *
+	 * @param node1 the first node to compare
+	 * @param node2 the second node to compare
+	 * @return true if the two provided nodes structurally match, false otherwise
+	 */
+	public static boolean match(final ASTNode node1, final ASTNode node2) {
+		return match(ASTSemanticMatcher.INSTANCE, node1, node2);
+	}
+
+	/**
+	 * Returns whether the two provided nodes structurally match.
+	 *
+	 * @param matcher the AST matcher
+	 * @param node1   the first node to compare
+	 * @param node2   the second node to compare
+	 * @return true if the two provided nodes structurally match, false otherwise
+	 */
+	public static boolean match(final ASTSemanticMatcher matcher, final ASTNode node1, final ASTNode node2) {
+		return matcher.safeSubtreeMatch(node1, node2);
 	}
 
 	public static ITypeBinding getTypeBinding(CompilationUnit root, IType type) throws JavaModelException {
