@@ -298,7 +298,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 								tree.setSelection(new TreeItem[] { fLastItem });
 							}
 						}
-					} else if (o == null) {
+					} else {
 						fLastItem= null;
 					}
 				}
