@@ -41,7 +41,7 @@ public class ActualTypeResolver extends TypeResolver {
 	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 		List<String> params= variable.getVariableType().getParams();
-		if (params.size() > 0 && context instanceof JavaContext) {
+		if (params.size() > 0 && context instanceof JavaPostfixContext) {
 			String param= params.get(0);
 			JavaPostfixContext jc= (JavaPostfixContext) context;
 			TemplateVariable ref= jc.getTemplateVariable(param);
