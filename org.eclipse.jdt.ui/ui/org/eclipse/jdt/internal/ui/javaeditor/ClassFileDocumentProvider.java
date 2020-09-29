@@ -350,7 +350,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 */
 	protected void handleDeleted(IClassFileEditorInput input) {
 		if (input == null) {
-			fireElementDeleted(input);
+			fireElementDeleted(null);
 			return;
 		}
 
