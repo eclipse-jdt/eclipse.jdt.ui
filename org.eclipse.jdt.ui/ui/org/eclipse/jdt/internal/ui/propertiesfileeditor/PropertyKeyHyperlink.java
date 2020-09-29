@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
@@ -85,7 +86,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PatternConstructor;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
@@ -96,7 +96,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  */
 public class PropertyKeyHyperlink implements IHyperlink {
 
-
+/**
+ * Note: this class KeyReference has a natural ordering that is inconsistent with equals
+ *
+ */
 	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter, Comparable<KeyReference> {
 
 		private static final Collator fgCollator= Collator.getInstance();

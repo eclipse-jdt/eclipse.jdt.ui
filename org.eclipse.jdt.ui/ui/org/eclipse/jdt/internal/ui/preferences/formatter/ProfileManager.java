@@ -112,6 +112,8 @@ public abstract class ProfileManager extends Observable {
 	/**
 	 * Represents a built-in profile. The state of a built-in profile
 	 * cannot be changed after instantiation.
+	 *
+	 * Note: this class has a natural ordering that is inconsistent with equals.
 	 */
 	public static final class BuiltInProfile extends Profile {
 		private final String fName;
@@ -184,6 +186,8 @@ public abstract class ProfileManager extends Observable {
 
 	/**
 	 * Represents a user-defined profile. A custom profile can be modified after instantiation.
+	 *
+	 * Note: this class has a natural ordering that is inconsistent with equals.
 	 */
 	public static class CustomProfile extends Profile {
 		private String fName;

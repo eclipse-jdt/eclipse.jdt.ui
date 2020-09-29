@@ -41,6 +41,8 @@ import org.eclipse.jdt.ui.JavaUI;
  * Represents a custom filter which is provided by the
  * "org.eclipse.jdt.ui.javaElementFilters" extension point.
  *
+ * Note: this class has a natural ordering that is inconsistent with equals.
+ *
  * since 2.0
  */
 public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginContribution {
