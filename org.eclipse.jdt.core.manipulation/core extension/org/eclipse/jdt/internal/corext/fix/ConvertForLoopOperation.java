@@ -238,6 +238,10 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	 * <li>[result].length > [indexBinding];</li>
 	 * <li>[indexBinding] < [lengthBinding];</li>
 	 * <li>[lengthBinding] > [indexBinding];</li>
+	 * <li>[indexBinding] != [result].length;</li>
+	 * <li>[result].length != [indexBinding];</li>
+	 * <li>[indexBinding] != [lengthBinding];</li>
+	 * <li>[lengthBinding] != [indexBinding];</li>
 	 * </ul>
 	 */
 	private boolean validateExpression(ForStatement statement) {
@@ -268,7 +272,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			if (!fIndexBinding.equals(((SimpleName)left).resolveBinding()))
 				return false;
 
-			if (!Operator.LESS.equals(infix.getOperator()))
+			if (!Operator.LESS.equals(infix.getOperator()) && !Operator.NOT_EQUALS.equals(infix.getOperator()))
 				return false;
 
 			return validateLengthQuery(right);
@@ -276,7 +280,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			if (!fIndexBinding.equals(((SimpleName)right).resolveBinding()))
 				return false;
 
-			if (!Operator.GREATER.equals(infix.getOperator()))
+			if (!Operator.GREATER.equals(infix.getOperator()) && !Operator.NOT_EQUALS.equals(infix.getOperator()))
 				return false;
 
 			return validateLengthQuery(left);

@@ -126,6 +126,38 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testNotEqualsComparison() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("public class B {\n");
+		bld.append("    public void foo() {\n");
+		bld.append("        int[] array = {5, 6, 7, 8};\n");
+		bld.append("        for (int i = 0; i != array.length; i++) {\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", bld.toString(), false, null);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(bld, cu);
+		assertNotNull(fConvertLoopProposal);
+		assertCorrectLabels(proposals);
+		String preview1= getPreviewContent(fConvertLoopProposal);
+		bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("public class B {\n");
+		bld.append("    public void foo() {\n");
+		bld.append("        int[] array = {5, 6, 7, 8};\n");
+		bld.append("        for (int element : array) {\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+		String expected= bld.toString();
+		assertEqualString(preview1, expected);
+	}
+
+	@Test
 	public void testNameDetectionChildren() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
