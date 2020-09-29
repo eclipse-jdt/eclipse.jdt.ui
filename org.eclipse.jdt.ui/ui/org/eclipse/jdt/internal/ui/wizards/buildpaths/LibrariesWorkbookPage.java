@@ -1140,7 +1140,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private CPListElement[] openClassFolderDialog(CPListElement existing) {
 		if (existing == null) {
-			IPath[] selected= BuildPathDialogAccess.chooseClassFolderEntries(getShell(), fCurrJProject.getPath(), getUsedContainers(existing));
+			IPath[] selected= BuildPathDialogAccess.chooseClassFolderEntries(getShell(), fCurrJProject.getPath(), getUsedContainers(null));
 			if (selected != null) {
 				IWorkspaceRoot root= fCurrJProject.getProject().getWorkspace().getRoot();
 				ArrayList<CPListElement> res= new ArrayList<>();
@@ -1164,7 +1164,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		IWorkspaceRoot root= fCurrJProject.getProject().getWorkspace().getRoot();
 
 		if (existing == null) {
-			IPath[] selected= BuildPathDialogAccess.chooseJAREntries(getShell(), fCurrJProject.getPath(), getUsedJARFiles(existing));
+			IPath[] selected= BuildPathDialogAccess.chooseJAREntries(getShell(), fCurrJProject.getPath(), getUsedJARFiles(null));
 			if (selected != null) {
 				ArrayList<CPListElement> res= new ArrayList<>();
 
