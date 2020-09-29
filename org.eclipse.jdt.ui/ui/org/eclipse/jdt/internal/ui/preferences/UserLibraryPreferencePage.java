@@ -1405,7 +1405,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 	private CPListElement[] openJarFileDialog(CPListElement existing, Object parent) {
 		if (existing == null) {
-			return doOpenExternalJarFileDialog(existing, parent);
+			return doOpenExternalJarFileDialog(null, parent);
 		}
 
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
