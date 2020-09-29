@@ -438,7 +438,7 @@ class BreadcrumbItemDropDown {
 								}
 							}
 						}
-					} else if (o == null) {
+					} else {
 						fLastItem= null;
 					}
 				}
