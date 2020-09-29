@@ -186,6 +186,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  */
 public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
+	private static final Pattern NUM_PATTERN= Pattern.compile("[0-9]+$"); //$NON-NLS-1$
+
 	/**
 	 * Class used in stub creation routines to add needed imports to a
 	 * compilation unit.
@@ -665,8 +667,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			boolean initial= true;
 			while (resource == null || resource.exists()) {
 				typeName= Signature.getSimpleName(typeName);
-				Pattern p= Pattern.compile("[0-9]+$"); //$NON-NLS-1$
-				Matcher m= p.matcher(typeName);
+				Matcher m= NUM_PATTERN.matcher(typeName);
 				if (m.find()) {
 					// String ends with a number: increment it by 1
 					BigDecimal newNumber= null;
