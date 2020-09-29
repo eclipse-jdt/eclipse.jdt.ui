@@ -1376,16 +1376,14 @@ public class ChangeTypeRefactoring extends Refactoring {
 		if (fMethodBinding != null && fCuToSearchResultGroup.containsKey(unit)){
 			SearchResultGroup group= fCuToSearchResultGroup.get(unit);
 			for (ASTNode node : ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cu)) {
-				if (fMethodBinding != null){
-					// find MethodDeclaration above it in the tree
-					ASTNode n= node;
-					while (n != null && !(n instanceof MethodDeclaration)) {
-						n = n.getParent();
-					}
-					MethodDeclaration md= (MethodDeclaration) n;
-					if (md != null)
-						md.accept(fCollector);
+				// find MethodDeclaration above it in the tree
+				ASTNode n= node;
+				while (n != null && !(n instanceof MethodDeclaration)) {
+					n = n.getParent();
 				}
+				MethodDeclaration md= (MethodDeclaration) n;
+				if (md != null)
+					md.accept(fCollector);
 			}
 		} else {
 			cu.accept(fCollector);
@@ -1526,39 +1524,37 @@ public class ChangeTypeRefactoring extends Refactoring {
 			return fAffectedUnits;
 		}
 		if (fMethodBinding != null) {
-			if (fMethodBinding != null) {
 
+			IMethod selectedMethod= (IMethod) fMethodBinding.getJavaElement();
+			if (selectedMethod == null) {
+				// can't happen since we checked it up front in check initial conditions
+				Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_method);
+			}
 
-				IMethod selectedMethod= (IMethod) fMethodBinding.getJavaElement();
-				if (selectedMethod == null) {
-					// can't happen since we checked it up front in check initial conditions
-					Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_method);
-				}
+			// the following code fragment appears to be the source of a memory leak, when
+			// GT is repeatedly applied
 
-				// the following code fragment appears to be the source of a memory leak, when
-				// GT is repeatedly applied
+			IMethod root= selectedMethod;
+			if (! root.getDeclaringType().isInterface() && MethodChecks.isVirtual(root)) {
+				final SubProgressMonitor subMonitor= new SubProgressMonitor(pm, 5);
+				IMethod inInterface= MethodChecks.isDeclaredInInterface(root, root.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(subMonitor, 1)), subMonitor);
+				if (inInterface != null && !inInterface.equals(root))
+					root= inInterface;
+			}
 
-				IMethod root= selectedMethod;
-				if (! root.getDeclaringType().isInterface() && MethodChecks.isVirtual(root)) {
-					final SubProgressMonitor subMonitor= new SubProgressMonitor(pm, 5);
-					IMethod inInterface= MethodChecks.isDeclaredInInterface(root, root.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(subMonitor, 1)), subMonitor);
-					if (inInterface != null && !inInterface.equals(root))
-						root= inInterface;
-				}
+			// end code fragment
 
-				// end code fragment
+			IMethod[] rippleMethods= RippleMethodFinder2.getRelatedMethods(
+					root, new SubProgressMonitor(pm, 15), null);
+			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(
+					rippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
 
-				IMethod[] rippleMethods= RippleMethodFinder2.getRelatedMethods(
-						root, new SubProgressMonitor(pm, 15), null);
-				SearchPattern pattern= RefactoringSearchEngine.createOrPattern(
-						rippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
+			// To compute the scope we have to use the selected method. Otherwise we
+			// might start from the wrong project.
+			IJavaSearchScope scope= RefactoringScopeFactory.create(selectedMethod);
+			CollectingSearchRequestor csr= new CollectingSearchRequestor();
 
-				// To compute the scope we have to use the selected method. Otherwise we
-				// might start from the wrong project.
-				IJavaSearchScope scope= RefactoringScopeFactory.create(selectedMethod);
-				CollectingSearchRequestor csr= new CollectingSearchRequestor();
-
-				SearchResultGroup[] groups= RefactoringSearchEngine.search(
+			SearchResultGroup[] groups= RefactoringSearchEngine.search(
 					pattern,
 					null,
 					scope,
@@ -1566,8 +1562,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 					new SubProgressMonitor(pm, 80),
 					new RefactoringStatus()); //TODO: deal with errors from non-CU matches
 
-				fAffectedUnits= getCus(groups);
-			}
+			fAffectedUnits= getCus(groups);
 		} else if (fFieldBinding != null) {
 			IField iField= (IField) fFieldBinding.getJavaElement();
 			if (iField == null) {
