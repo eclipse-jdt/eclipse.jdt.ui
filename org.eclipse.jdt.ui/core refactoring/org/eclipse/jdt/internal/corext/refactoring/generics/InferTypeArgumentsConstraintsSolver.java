@@ -334,10 +334,10 @@ public class InferTypeArgumentsConstraintsSolver {
 
 		for (int i= 0; i < interfaceCandidates.size(); i++) {
 			TType interf= interfaceCandidates.get(i);
-			Object isTagging= fInterfaceTaggingCache.get(interf);
+			Boolean isTagging= fInterfaceTaggingCache.get(interf);
 			if (isTagging == null)
 				unresolvedTypes.add(interf);
-			else if (isTagging == Boolean.FALSE)
+			else if (Boolean.FALSE.equals(isTagging))
 				nonTagging.add(interf);
 		}
 
