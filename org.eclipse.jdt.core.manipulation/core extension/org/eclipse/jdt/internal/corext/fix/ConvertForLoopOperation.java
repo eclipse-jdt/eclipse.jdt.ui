@@ -262,12 +262,14 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			IBinding righBinding= ((SimpleName)right).resolveBinding();
 
 			if (fIndexBinding.equals(leftBinding)) {
-				return lengthBinding.equals(righBinding);
-			} else if (fIndexBinding.equals(righBinding)) {
-				return lengthBinding.equals(leftBinding);
+				return lengthBinding.equals(righBinding)
+						&& ASTNodes.hasOperator(infix, Operator.LESS, Operator.NOT_EQUALS);
 			}
 
-			return false;
+			if (fIndexBinding.equals(righBinding)) {
+				return lengthBinding.equals(leftBinding)
+						&& ASTNodes.hasOperator(infix, Operator.GREATER, Operator.NOT_EQUALS);
+			}
 		} else if (left instanceof SimpleName) {
 			if (!fIndexBinding.equals(((SimpleName)left).resolveBinding()))
 				return false;
