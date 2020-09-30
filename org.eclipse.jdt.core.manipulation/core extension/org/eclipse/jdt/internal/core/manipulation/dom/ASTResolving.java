@@ -619,7 +619,7 @@ public class ASTResolving {
 			lastLocation= node.getLocationInParent();
 			node= node.getParent();
 		}
-		return (BodyDeclaration) node;
+		return null;
 	}
 
 
