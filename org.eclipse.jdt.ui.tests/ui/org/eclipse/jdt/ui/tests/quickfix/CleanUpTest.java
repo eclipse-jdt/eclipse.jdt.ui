@@ -5721,19 +5721,19 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /** Duplicate if and else if code, merge it */\n" //
-				+ "    public void longIfAndElseIf(int q) {\n" //
+				+ "    public void longIfAndElseIf(int q, boolean isValid) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (q == 0) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            System.out.println(\"Duplicate\");\n" //
 				+ "            q = q + 1;\n" //
-				+ "        } else if (q == 1) {\n" //
+				+ "        } else if (isValid ? (q == 1) : (q > 1)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        } else {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            System.out.println(\"Duplicate\");\n" //
 				+ "            q++;\n" //
-				+ "        } else {\n" //
-				+ "            // Keep this comment also\n" //
-				+ "            System.out.println(\"Different\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
@@ -5782,7 +5782,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    /** Duplicate if and else code, merge it */\n" //
 				+ "    public void duplicateIfAndElse(int j) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        if ((j == 0) || !(j == 1)) {\n" //
+				+ "        if ((j == 0) || (j != 1)) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            if (j > 0) {\n" //
 				+ "                System.out.println(\"Duplicate\");\n" //
@@ -5860,9 +5860,9 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /** Duplicate if and else if code, merge it */\n" //
-				+ "    public void longIfAndElseIf(int q) {\n" //
+				+ "    public void longIfAndElseIf(int q, boolean isValid) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        if ((q == 0) || (q == 1)) {\n" //
+				+ "        if ((q == 0) || (isValid ? (q != 1) : (q <= 1))) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            System.out.println(\"Duplicate\");\n" //
 				+ "            q = q + 1;\n" //
