@@ -65,7 +65,7 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleMultiFix_AddThisQualifier_description;
 	public static String CodeStyleMultiFix_QualifyAccessToStaticField;
 	public static String CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect;
-	public static String CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description;
+	public static String CodeStyleMultiFix_ConvertSingleStatementInControlBodyToBlock_description;
 	public static String CodeStyleCleanUp_addDefaultSerialVersionId_description;
 
 	public static String CodeStyleCleanUp_numberSuffix_description;
