@@ -25,8 +25,7 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -206,12 +205,8 @@ public class JavaTextSelection extends TextSelection {
 					|| nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
 				fInVariableInitializer= false;
 				break;
-			} else if (nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT &&
-					((VariableDeclarationFragment)node).getInitializer() == last) {
-				fInVariableInitializer= true;
-				break;
-			} else if (nodeType == ASTNode.SINGLE_VARIABLE_DECLARATION &&
-					((SingleVariableDeclaration)node).getInitializer() == last) {
+			} else if ((nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT || nodeType == ASTNode.SINGLE_VARIABLE_DECLARATION)
+					&& ((VariableDeclaration) node).getInitializer() == last) {
 				fInVariableInitializer= true;
 				break;
 			} else if (nodeType == ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION &&

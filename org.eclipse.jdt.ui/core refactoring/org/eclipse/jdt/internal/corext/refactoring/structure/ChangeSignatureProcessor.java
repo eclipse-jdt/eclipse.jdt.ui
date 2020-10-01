@@ -2466,7 +2466,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 							if (nameBinding != null) {
 								boolean process= false;
 								final ITypeBinding infoBinding= info.getTypeBinding();
-								if ((infoBinding != null && Bindings.equals(infoBinding, nameBinding)) || info.getElement().getElementName().equals(nameBinding.getName())) {
+								if ((infoBinding != null && Bindings.equals(infoBinding, nameBinding))
+										|| info.getElement().getElementName().equals(nameBinding.getName())) {
 									process= true;
 								}
 								if (process) {

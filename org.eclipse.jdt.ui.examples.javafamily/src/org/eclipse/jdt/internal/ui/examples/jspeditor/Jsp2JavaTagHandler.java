@@ -117,12 +117,12 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 		int typeStart= jspLineStr.indexOf("class=\"") + 7; //$NON-NLS-1$
 		int typeLength= Math.max(0, jspLineStr.indexOf('"', typeStart) - typeStart);
 
-		if (relativeLineOffsetInJava < typeLength)  {
-			javaPartitionStart= typeStart;
-		} else if (relativeLineOffsetInJava < typeLength + variableNameLength)
+		if ((typeLength <= relativeLineOffsetInJava)
+				&& (relativeLineOffsetInJava < typeLength + variableNameLength)) {
 			javaPartitionStart= variableNameStart;
-		else
+		} else {
 			javaPartitionStart= typeStart;
+		}
 
 		// start relative to Jsp line start
 		return javaPartitionStart - relativeLineOffsetInJava;

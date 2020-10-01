@@ -107,10 +107,8 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 				|| je.getElementType() == IJavaElement.CLASS_FILE
 				|| je.getElementType() == IJavaElement.JAVA_PROJECT) {
 			selectedElements.add(je);
-		} else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			if (!isInArchiveOrExternal(je))
-				selectedElements.add(je);
-		} else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+		} else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT
+				|| je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 			if (!isInArchiveOrExternal(je))
 				selectedElements.add(je);
 		} else {

@@ -261,13 +261,8 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 			if (fDirection == direction)
 				return;
 
-			if (direction == FORWARD) {
+			if ((direction == FORWARD) || (direction == BACKWARD)) {
 				if (fStart <= fEnd)
-					fState= fAnchorState;
-				else
-					fState= UNKNOWN;
-			} else if (direction == BACKWARD) {
-				if (fEnd >= fStart)
 					fState= fAnchorState;
 				else
 					fState= UNKNOWN;

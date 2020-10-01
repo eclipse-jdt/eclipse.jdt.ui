@@ -93,8 +93,8 @@ public class ASTNodeSearchUtil {
 		cuNode.accept(analyzer);
 		//XXX workaround for jdt core feature 23527
 		ASTNode node= analyzer.getFirstSelectedNode();
-		if ((node == null && analyzer.getLastCoveringNode() instanceof SuperConstructorInvocation)
-				|| (node == null && analyzer.getLastCoveringNode() instanceof ConstructorInvocation)) {
+		if (node == null
+				&& (analyzer.getLastCoveringNode() instanceof ConstructorInvocation || analyzer.getLastCoveringNode() instanceof SuperConstructorInvocation)) {
 			node= analyzer.getLastCoveringNode().getParent();
 		}
 

@@ -13,9 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
-import org.eclipse.core.resources.IMarker;
+import org.eclipse.jdt.jeview.JEPluginImages;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
@@ -23,8 +25,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.jeview.JEPluginImages;
 
 
 
@@ -63,10 +63,8 @@ public class JEViewLabelProvider extends LabelProvider /*implements IColorProvid
 				|| (element instanceof JEMemberValuePair)) {
 			return fInfoImg;
 
-		} else if (element instanceof JavaElementChildrenProperty) {
-			return fChildrenImg;
-
-		} else if (element instanceof JEClasspathEntry) {
+		} else if (element instanceof JavaElementChildrenProperty
+				|| element instanceof JEClasspathEntry) {
 			return fChildrenImg;
 
 		} else if (element instanceof Error) {

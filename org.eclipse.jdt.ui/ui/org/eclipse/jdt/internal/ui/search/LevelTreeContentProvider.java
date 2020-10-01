@@ -175,26 +175,20 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	protected void remove(Set<Object> toRemove, Set<Object> toUpdate, Object element) {
 		// precondition here:  fResult.getMatchCount(child) <= 0
 
-		if (hasChildren(element)) {
+		if (hasChildren(element) || getPage().getDisplayedMatchCount(element) != 0) {
 			if (toUpdate != null)
 				toUpdate.add(element);
 		} else {
-			if (getPage().getDisplayedMatchCount(element) == 0) {
-				fChildrenMap.remove(element);
-				Object parent= getParent(element);
-				if (parent != null) {
-					if (removeFromSiblings(element, parent)) {
-						remove(toRemove, toUpdate, parent);
-					}
-				} else {
-					if (removeFromSiblings(element, getSearchResult())) {
-						if (toRemove != null)
-							toRemove.add(element);
-					}
+			fChildrenMap.remove(element);
+			Object parent= getParent(element);
+			if (parent != null) {
+				if (removeFromSiblings(element, parent)) {
+					remove(toRemove, toUpdate, parent);
 				}
 			} else {
-				if (toUpdate != null) {
-					toUpdate.add(element);
+				if (removeFromSiblings(element, getSearchResult())) {
+					if (toRemove != null)
+						toRemove.add(element);
 				}
 			}
 		}
