@@ -331,7 +331,7 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //

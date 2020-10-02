@@ -62,7 +62,7 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_CheckboxName_UseVar;
 
 	public static String CodeStyleTabPage_CheckboxName_UseParentheses;
-	public static String CodeStyleTabPage_GroupName_ControlStatments;
+	public static String CodeStyleTabPage_GroupName_ControlStatements;
 	public static String CodeStyleTabPage_GroupName_Expressions;
 
 	public static String CodeStyleTabPage_GroupName_NumberLiteral;

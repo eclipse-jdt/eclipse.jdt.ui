@@ -1045,7 +1045,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		buf.append("}");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		buf= new StringBuffer();
 		buf.append("package test;\r\n");

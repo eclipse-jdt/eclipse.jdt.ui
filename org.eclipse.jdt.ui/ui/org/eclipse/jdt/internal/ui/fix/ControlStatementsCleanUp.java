@@ -49,9 +49,9 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		if (!useBlocks)
 			return false;
 
-		return isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS) ||
-		       isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER) ||
-		       isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
+		return isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS) ||
+		       isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER) ||
+		       isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 	}
 
 	@Override
@@ -65,19 +65,19 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			return null;
 
 		return ControlStatementsFix.createCleanUp(compilationUnit,
-				isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS),
-				isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER),
-				isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW));
+				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS),
+				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER),
+				isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW));
 	}
 
 	@Override
 	public String[] getStepDescriptions() {
 		List<String> result= new ArrayList<>();
-		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS))
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS))
 			result.add(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodyToBlock_description);
-		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER))
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description);
-		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW))
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description);
 
 		return result.toArray(new String[result.size()]);
@@ -87,7 +87,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	public String getPreview() {
 		StringBuilder buf= new StringBuilder();
 
-		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS)) {
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS)) {
 			buf.append("if (obj == null) {\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("}\n"); //$NON-NLS-1$
@@ -97,7 +97,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			buf.append("} else {\n"); //$NON-NLS-1$
 			buf.append("    return;\n"); //$NON-NLS-1$
 			buf.append("}\n"); //$NON-NLS-1$
-		} else if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER)){
+		} else if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER)){
 			buf.append("if (obj == null)\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
@@ -107,7 +107,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			buf.append("else\n"); //$NON-NLS-1$
 			buf.append("    return;\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
-		} else if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW)) {
+		} else if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW)) {
 			buf.append("if (obj == null)\n"); //$NON-NLS-1$
 			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$

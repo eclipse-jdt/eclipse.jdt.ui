@@ -2517,7 +2517,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2575,7 +2575,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2624,7 +2624,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2679,7 +2679,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2737,7 +2737,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2815,7 +2815,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 
 		buf= new StringBuffer();
@@ -2850,7 +2850,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 
@@ -3530,7 +3530,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3937,7 +3937,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 
 		buf= new StringBuffer();
@@ -3980,7 +3980,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		buf= new StringBuffer();
 		buf.append("package test1;  \n");
@@ -4012,7 +4012,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4043,8 +4043,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 
@@ -4082,7 +4082,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 
 		buf= new StringBuffer();
@@ -4161,7 +4161,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 
@@ -4196,7 +4196,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 
@@ -7724,7 +7724,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -7762,7 +7762,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -7808,9 +7808,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -7857,9 +7857,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -7898,9 +7898,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -7939,9 +7939,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -7976,9 +7976,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -8022,7 +8022,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -8069,7 +8069,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -8106,8 +8106,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -8141,8 +8141,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -8236,7 +8236,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
 
@@ -8279,7 +8279,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
 
@@ -8323,7 +8323,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
@@ -8366,7 +8366,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
@@ -11246,7 +11246,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -11278,7 +11278,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -11311,7 +11311,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -11346,7 +11346,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -11708,7 +11708,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 
 		buf= new StringBuffer();
 		buf.append("package test;\n");

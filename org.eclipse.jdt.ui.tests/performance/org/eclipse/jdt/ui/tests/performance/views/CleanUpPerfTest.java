@@ -178,7 +178,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		node.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpOptions.TRUE);
 
 		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.TRUE);
-		node.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS, CleanUpOptions.TRUE);
 
 		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.TRUE);
@@ -256,7 +256,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.TRUE);
-		node.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS, CleanUpOptions.TRUE);
 
 		storeSettings(node);
 
@@ -273,7 +273,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		Map<String, String> node= getNullSettings();
 
-		node.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 
 		storeSettings(node);
 

@@ -528,7 +528,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -572,7 +572,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -614,7 +614,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -656,7 +656,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -693,7 +693,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
@@ -711,7 +711,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
@@ -729,7 +729,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
@@ -748,7 +748,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
@@ -768,7 +768,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -799,7 +799,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
@@ -822,7 +822,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -857,7 +857,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -889,7 +889,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
@@ -932,7 +932,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		pack2.createCompilationUnit("E3.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -969,7 +969,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -999,7 +999,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1030,7 +1030,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1066,7 +1066,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1105,8 +1105,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
@@ -1129,8 +1129,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
@@ -1153,7 +1153,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1189,7 +1189,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
@@ -1211,9 +1211,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1253,9 +1253,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1302,9 +1302,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1343,9 +1343,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1381,9 +1381,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1428,7 +1428,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1472,8 +1472,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1505,7 +1505,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1536,8 +1536,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1569,7 +1569,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1600,8 +1600,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1641,7 +1641,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1678,7 +1678,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
@@ -1716,7 +1716,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1765,7 +1765,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1811,7 +1811,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1844,7 +1844,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		sample= "" //
 				+ "package test1;\n" //
@@ -1884,7 +1884,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}

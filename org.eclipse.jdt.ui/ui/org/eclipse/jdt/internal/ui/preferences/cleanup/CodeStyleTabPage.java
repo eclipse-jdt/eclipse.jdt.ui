@@ -55,24 +55,24 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
-		Group controlGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_ControlStatments);
+		Group controlGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_ControlStatements);
 
 		final CheckboxPreference useBlockPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseBlocks, CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpModifyDialog.FALSE_TRUE);
 		intent(controlGroup);
-		final RadioPreference useBlockAlwaysPref= createRadioPref(controlGroup, numColumns - 1, CleanUpMessages.CodeStyleTabPage_RadioName_AlwaysUseBlocks, CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
+		final RadioPreference useBlockAlwaysPref= createRadioPref(controlGroup, numColumns - 1, CleanUpMessages.CodeStyleTabPage_RadioName_AlwaysUseBlocks, CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
 		intent(controlGroup);
-		final RadioPreference useBlockJDTStylePref= createRadioPref(controlGroup, numColumns - 1, CleanUpMessages.CodeStyleTabPage_RadioName_UseBlocksSpecial, CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW, CleanUpModifyDialog.FALSE_TRUE);
+		final RadioPreference useBlockJDTStylePref= createRadioPref(controlGroup, numColumns - 1, CleanUpMessages.CodeStyleTabPage_RadioName_UseBlocksSpecial, CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW, CleanUpModifyDialog.FALSE_TRUE);
 		intent(controlGroup);
-		final RadioPreference useBlockNeverPref= createRadioPref(controlGroup, numColumns - 1, CleanUpMessages.CodeStyleTabPage_RadioName_NeverUseBlocks, CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER, CleanUpModifyDialog.FALSE_TRUE);
+		final RadioPreference useBlockNeverPref= createRadioPref(controlGroup, numColumns - 1, CleanUpMessages.CodeStyleTabPage_RadioName_NeverUseBlocks, CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useBlockPref, new RadioPreference[] {useBlockAlwaysPref, useBlockJDTStylePref, useBlockNeverPref});
 
 		CheckboxPreference convertToSwitchExpressions= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertToSwitchExpressions, CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(convertToSwitchExpressions);
 
-		CheckboxPreference convertLoop= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced, CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpModifyDialog.FALSE_TRUE);
+		CheckboxPreference convertLoop= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced, CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(convertLoop);
 		intent(controlGroup);
-		final CheckboxPreference convertLoopOnlyIfLoopVariableUsed= createCheckboxPref(controlGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed, CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpModifyDialog.FALSE_TRUE);
+		final CheckboxPreference convertLoopOnlyIfLoopVariableUsed= createCheckboxPref(controlGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed, CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(convertLoop, new CheckboxPreference[] {convertLoopOnlyIfLoopVariableUsed});
 
 		final CheckboxPreference addOrRemoveAllPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseAddAllRemoveAll, CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL,

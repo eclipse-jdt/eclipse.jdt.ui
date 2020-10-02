@@ -403,8 +403,8 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 
 	boolean useBlocks(IJavaProject project) {
 		if (CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, project))) {
-			return CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, project))
-					|| CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW, project));
+			return CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS, project))
+					|| CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW, project));
 		}
 		return false;
 	}

@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 public class CleanUpConstants {
-
 	/**
 	 * Constant for default options kind for clean up.
 	 */
@@ -410,8 +409,8 @@ public class CleanUpConstants {
 
 	/**
 	 * Controls the usage of blocks around single control statement bodies. For detailed settings
-	 * use<br> {@link #CONTROL_STATMENTS_USE_BLOCKS_ALWAYS}<br> {@link #CONTROL_STATMENTS_USE_BLOCKS_NEVER}<br>
-	 * {@link #CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW} <br>
+	 * use<br> {@link #CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS}<br> {@link #CONTROL_STATEMENTS_USE_BLOCKS_NEVER}<br>
+	 * {@link #CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW} <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
 	 *
@@ -440,9 +439,55 @@ public class CleanUpConstants {
 	 *
 	 * @see CleanUpOptionsCore#TRUE
 	 * @see CleanUpOptionsCore#FALSE
-	 * @since 3.3
+	 * @since 4.18
 	 */
-	public static final String CONTROL_STATMENTS_USE_BLOCKS_ALWAYS= "cleanup.always_use_blocks"; //$NON-NLS-1$
+	public static final String CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS= "cleanup.always_use_blocks"; //$NON-NLS-1$
+
+	/**
+	 * Adds block to control statement body if the body is not a block.
+	 * <p>
+	 * Example:
+	 *
+	 * <pre>
+	 *                   	 if (b) foo(); -&gt; if (b) {foo();}
+	 * </pre>
+	 *
+	 * Only has an effect if {@link #CONTROL_STATEMENTS_USE_BLOCKS} is TRUE <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 *
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 3.3
+	 * @deprecated Use {@link #CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS} instead
+	 */
+	@Deprecated
+	public static final String CONTROL_STATMENTS_USE_BLOCKS_ALWAYS= CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS;
+
+	/**
+	 * Remove unnecessary blocks in control statement bodies if they contain a single return or
+	 * throw statement.
+	 * <p>
+	 * Example:
+	 *
+	 * <pre>
+	 *                     if (b) {return;} -&gt; if (b) return;
+	 * </pre>
+	 *
+	 * Only has an effect if {@link #CONTROL_STATEMENTS_USE_BLOCKS} is TRUE <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 *
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW= "cleanup.use_blocks_only_for_return_and_throw"; //$NON-NLS-1$
+
 
 	/**
 	 * Remove unnecessary blocks in control statement bodies if they contain a single return or
@@ -463,8 +508,31 @@ public class CleanUpConstants {
 	 * @see CleanUpOptionsCore#TRUE
 	 * @see CleanUpOptionsCore#FALSE
 	 * @since 3.3
+	 * @deprecated Use {@link #CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW} instead
 	 */
-	public static final String CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW= "cleanup.use_blocks_only_for_return_and_throw"; //$NON-NLS-1$
+	@Deprecated
+	public static final String CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW= CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW;
+
+	/**
+	 * Remove unnecessary blocks in control statement bodies.
+	 * <p>
+	 * Example:
+	 *
+	 * <pre>
+	 *                     if (b) {foo();} -&gt; if (b) foo();
+	 * </pre>
+	 *
+	 * Only has an effect if {@link #CONTROL_STATEMENTS_USE_BLOCKS} is TRUE <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 *
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String CONTROL_STATEMENTS_USE_BLOCKS_NEVER= "cleanup.never_use_blocks"; //$NON-NLS-1$
 
 	/**
 	 * Remove unnecessary blocks in control statement bodies.
@@ -484,12 +552,34 @@ public class CleanUpConstants {
 	 * @see CleanUpOptionsCore#TRUE
 	 * @see CleanUpOptionsCore#FALSE
 	 * @since 3.3
+	 * @deprecated Use {@link #CONTROL_STATEMENTS_USE_BLOCKS_NEVER} instead
 	 */
-	public static final String CONTROL_STATMENTS_USE_BLOCKS_NEVER= "cleanup.never_use_blocks"; //$NON-NLS-1$
+	@Deprecated
+	public static final String CONTROL_STATMENTS_USE_BLOCKS_NEVER= CONTROL_STATEMENTS_USE_BLOCKS_NEVER;
 
 	/**
 	 * Convert for loops to enhanced for loops.  For detailed setting use<br>
-	 * {@link #CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED}<br>
+	 * {@link #CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED}<br>
+	 * <p>
+	 * Example:
+	 *
+	 * <pre>
+	 *                   for (int i = 0; i &lt; array.length; i++) {} -&gt; for (int element : array) {}
+	 * </pre>
+	 *
+	 * Possible values: {TRUE, FALSE}<br>
+	 *
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED= "cleanup.convert_to_enhanced_for_loop"; //$NON-NLS-1$
+
+	/**
+	 * Convert for loops to enhanced for loops.  For detailed setting use<br>
+	 * {@link #CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED}<br>
 	 * <p>
 	 * Example:
 	 *
@@ -504,8 +594,10 @@ public class CleanUpConstants {
 	 * @see CleanUpOptionsCore#TRUE
 	 * @see CleanUpOptionsCore#FALSE
 	 * @since 3.3
+	 * @deprecated Use {@link #CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED} instead
 	 */
-	public static final String CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED= "cleanup.convert_to_enhanced_for_loop"; //$NON-NLS-1$
+	@Deprecated
+	public static final String CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED= CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED;
 
 	/**
 	 * Convert a for loop to enhanced for loop only if the loop variable will be used.
@@ -516,7 +608,28 @@ public class CleanUpConstants {
 	 *                   for (int i = 0; i &lt; array.length; i++) {}; -&gt; will not be converted
 	 * </pre>
 	 * <br>
-	 * Only has an effect if {@link #CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED} is TRUE <br>
+	 * Only has an effect if {@link #CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED} is TRUE <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 *
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static String CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= "cleanup.convert_to_enhanced_for_loop_if_loop_var_used"; //$NON-NLS-1$
+
+	/**
+	 * Convert a for loop to enhanced for loop only if the loop variable will be used.
+	 * <p>
+	 * Example:
+	 *
+	 * <pre>
+	 *                   for (int i = 0; i &lt; array.length; i++) {}; -&gt; will not be converted
+	 * </pre>
+	 * <br>
+	 * Only has an effect if {@link #CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED} is TRUE <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
 	 *
@@ -525,8 +638,10 @@ public class CleanUpConstants {
 	 * @see CleanUpOptionsCore#TRUE
 	 * @see CleanUpOptionsCore#FALSE
 	 * @since 4.16
+	 * @deprecated Use {@link #CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED}
 	 */
-	public static String CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= "cleanup.convert_to_enhanced_for_loop_if_loop_var_used"; //$NON-NLS-1$
+	@Deprecated
+	public static String CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED;
 
 	/**
 	 * Convert switch statements to switch expressions.IF_LOOP_VAR_USED}<br>
@@ -1108,7 +1223,6 @@ public class CleanUpConstants {
 	 */
 	public static final String REDUNDANT_IF_CONDITION= "cleanup.if_condition"; //$NON-NLS-1$
 
-
 	/**
 	 * Use directly map method.<br>
 	 * <br>
@@ -1536,6 +1650,4 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public final static String DEFAULT_SAVE_PARTICIPANT_PROFILE= SAVE_PARTICIPANT_PROFILE;
-
-
 }
