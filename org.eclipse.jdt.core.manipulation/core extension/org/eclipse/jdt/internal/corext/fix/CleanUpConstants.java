@@ -1072,6 +1072,18 @@ public class CleanUpConstants {
 	 */
 	public static final String MERGE_CONDITIONAL_BLOCKS= "cleanup.merge_conditional_blocks"; //$NON-NLS-1$
 
+	/**
+	 * Merges blocks that end with a jump statement into the following same code.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String REDUNDANT_FALLING_THROUGH_BLOCK_END= "cleanup.redundant_falling_through_block_end"; //$NON-NLS-1$
+
 
 	/**
 	 * Use directly map method.<br>

@@ -75,6 +75,8 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Rule
 	public ProjectTestSetup projectSetup= new ProjectTestSetup();
 
+	IJavaProject fJProject1= getProject();
+
 	@Override
 	protected IJavaProject getProject() {
 		return projectSetup.getProject();
@@ -84,8 +86,6 @@ public class CleanUpTest extends CleanUpTestCase {
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		return projectSetup.getDefaultClasspath();
 	}
-
-	IJavaProject fJProject1= getProject();
 
 	private static class NoChangeRedundantModifiersCleanUp extends RedundantModifiersCleanUp {
 		private NoChangeRedundantModifiersCleanUp(Map<String, String> options) {
@@ -5924,6 +5924,584 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testRedundantFallingThroughBlockEnd() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private boolean b= true;\n" //
+				+ "\n" //
+				+ "    public void mergeIfBlocksIntoFollowingCode(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (i == 10) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (i == 20) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int mergeUselessElse(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "        } else return i + 123;\n" //
+				+ "        return i + 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char mergeIfStatementIntoFollowingCode(int j) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (j <= 0) return 'a';\n" //
+				+ "        else if (j == 10) return 'b';\n" //
+				+ "        else if (j == 20) return 'a';\n" //
+				+ "        return 'a';\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeEndOfIfIntoFollowingCode(int k) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (k <= 0) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (k == 10) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (k == 20) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeWithoutContinue(int i, int j) {\n" //
+				+ "        while (j-- > 0) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i <= 0) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                continue;\n" //
+				+ "            } else if (i == 10) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                continue;\n" //
+				+ "            } else if (i == 20) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeWithoutReturn(int n) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (n <= 0) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (n == 10) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (n == 20) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeIfThrowingException(int i) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            i += 42;\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            throw new Exception();\n" //
+				+ "        } else if (i == 10) {\n" //
+				+ "            i += 42;\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            throw new Exception();\n" //
+				+ "        } else if (i == 20) {\n" //
+				+ "            i += 42;\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            throw new Exception();\n" //
+				+ "        }\n" //
+				+ "        i = i + 42;\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        throw new Exception();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeDeepStatements(String number, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            if (i <= 0) {\n" //
+				+ "                i += 42;\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                return;\n" //
+				+ "            } else if (i == 10) {\n" //
+				+ "                i += 42;\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                return;\n" //
+				+ "            } else if (i == 20) {\n" //
+				+ "                i += 42;\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeIfWithContinue(int[] numbers) {\n" //
+				+ "        for (int i : numbers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i <= 0) {\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                continue;\n" //
+				+ "            } else if (i == 10) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                continue;\n" //
+				+ "            } else if (i == 20) {\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeIfWithBreak(int[] numbers) {\n" //
+				+ "        for (int i : numbers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i <= 0) {\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                break;\n" //
+				+ "            } else if (i == 10) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                break;\n" //
+				+ "            } else if (i == 20) {\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeIfThatAlwaysFallThrough(int i, boolean interruptCode) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            i++;\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            } else {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        } else if (i == 10) {\n" //
+				+ "            i += 1;\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            } else {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        } else if (i == 20) {\n" //
+				+ "            i = 1 + i;\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            } else {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        i = i + 1;\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        if (interruptCode) {\n" //
+				+ "            throw new Exception(\"Stop!\");\n" //
+				+ "        } else {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_FALLING_THROUGH_BLOCK_END);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private boolean b= true;\n" //
+				+ "\n" //
+				+ "    public void mergeIfBlocksIntoFollowingCode(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "        } else if (i == 10) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (i == 20) {\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int mergeUselessElse(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "        }\n" //
+				+ "        return i + 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char mergeIfStatementIntoFollowingCode(int j) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (j <= 0) {\n" //
+				+ "        } else if (j == 10) return 'b';\n" //
+				+ "        else if (j == 20) {\n" //
+				+ "        }\n" //
+				+ "        return 'a';\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeEndOfIfIntoFollowingCode(int k) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (k <= 0) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "        } else if (k == 10) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (k == 20) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeWithoutContinue(int i, int j) {\n" //
+				+ "        while (j-- > 0) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i <= 0) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "            } else if (i == 10) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                continue;\n" //
+				+ "            } else if (i == 20) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeWithoutReturn(int n) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (n <= 0) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "        } else if (n == 10) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (n == 20) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeIfThrowingException(int i) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "        } else if (i == 10) {\n" //
+				+ "            i += 42;\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            throw new Exception();\n" //
+				+ "        } else if (i == 20) {\n" //
+				+ "        }\n" //
+				+ "        i = i + 42;\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        throw new Exception();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeDeepStatements(String number, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            if (i <= 0) {\n" //
+				+ "                i += 42;\n" //
+				+ "            } else if (i == 10) {\n" //
+				+ "                i += 42;\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                return;\n" //
+				+ "            } else if (i == 20) {\n" //
+				+ "                i += 42;\n" //
+				+ "            }\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeIfWithContinue(int[] numbers) {\n" //
+				+ "        for (int i : numbers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i <= 0) {\n" //
+				+ "            } else if (i == 10) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                continue;\n" //
+				+ "            } else if (i == 20) {\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeIfWithBreak(int[] numbers) {\n" //
+				+ "        for (int i : numbers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i <= 0) {\n" //
+				+ "            } else if (i == 10) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                break;\n" //
+				+ "            } else if (i == 20) {\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeIfThatAlwaysFallThrough(int i, boolean interruptCode) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "        } else if (i == 10) {\n" //
+				+ "            i += 1;\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            } else {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        } else if (i == 20) {\n" //
+				+ "        }\n" //
+				+ "        i = i + 1;\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        if (interruptCode) {\n" //
+				+ "            throw new Exception(\"Stop!\");\n" //
+				+ "        } else {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.RedundantFallingThroughBlockEndCleanup_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotMergeRedundantFallingThroughBlockEnd() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private boolean b= true;\n" //
+				+ "\n" //
+				+ "    public void doNotMergeDifferentVariable(int i) {\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            boolean b= false;\n" //
+				+ "            System.out.println(\"Display a varaible: \" + b);\n" //
+				+ "            return;\n" //
+				+ "        } else if (i == 10) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (i == 20) {\n" //
+				+ "            int b= 123;\n" //
+				+ "            System.out.println(\"Display a varaible: \" + b);\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Display a varaible: \" + b);\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeWithoutLabeledContinue(int i, int j, int k) {\n" //
+				+ "        loop: while (k-- > 0) {\n" //
+				+ "            while (j-- > 0) {\n" //
+				+ "                if (i <= 0) {\n" //
+				+ "                    System.out.println(\"Doing another thing\");\n" //
+				+ "                    System.out.println(\"Doing something\");\n" //
+				+ "                    continue loop;\n" //
+				+ "                } else if (i == 10) {\n" //
+				+ "                    System.out.println(\"Doing another thing\");\n" //
+				+ "                    continue loop;\n" //
+				+ "                } else if (i == 20) {\n" //
+				+ "                    System.out.println(\"Doing another thing\");\n" //
+				+ "                    System.out.println(\"Doing something\");\n" //
+				+ "                    continue loop;\n" //
+				+ "                }\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeWithoutBreak(int i, int j) {\n" //
+				+ "        while (j-- > 0) {\n" //
+				+ "            if (i <= 0) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                break;\n" //
+				+ "            } else if (i == 10) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                break;\n" //
+				+ "            } else if (i == 20) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorCodeThatDoesntFallThrough(int i) {\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "        } else if (i == 20) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorNotLastStatements(String number, int i) {\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            try {\n" //
+				+ "                Integer.valueOf(number);\n" //
+				+ "            } catch (NumberFormatException nfe) {\n" //
+				+ "                if (i == 5) {\n" //
+				+ "                    i += 42;\n" //
+				+ "                    System.out.println(\"Doing something\");\n" //
+				+ "                    return;\n" //
+				+ "                } else if (i == 10) {\n" //
+				+ "                    i += 42;\n" //
+				+ "                    System.out.println(\"Doing another thing\");\n" //
+				+ "                    return;\n" //
+				+ "                } else if (i == 20) {\n" //
+				+ "                    i += 42;\n" //
+				+ "                    System.out.println(\"Doing something\");\n" //
+				+ "                    return;\n" //
+				+ "                }\n" //
+				+ "            } catch (IllegalArgumentException iae) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                return;\n" //
+				+ "            } catch (NullPointerException npe) {\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Insidious code...\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeIfThatNotAlwaysFallThrough(int i, boolean interruptCode) throws Exception {\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            }\n" //
+				+ "        } else if (i == 10) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            }\n" //
+				+ "        } else if (i == 20) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        if (interruptCode) {\n" //
+				+ "            throw new Exception(\"Stop!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorWithFinally(String number) {\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"Beware of finally!\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorCodeThatDoesntFallThrough(String number) {\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeCatchThatNotAlwaysFallThrough(String number, boolean interruptCode) throws Exception {\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            }\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            }\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        if (interruptCode) {\n" //
+				+ "            throw new Exception(\"Stop!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_FALLING_THROUGH_BLOCK_END);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test

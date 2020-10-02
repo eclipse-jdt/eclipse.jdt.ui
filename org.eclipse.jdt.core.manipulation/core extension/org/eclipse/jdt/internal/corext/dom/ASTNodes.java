@@ -152,6 +152,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 // @see JDTUIHelperClasses
 public class ASTNodes {
+	/**
+	 * This constant should be merged with org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.UNTOUCH_COMMENT
+	 */
 	public static final String UNTOUCH_COMMENT= "untouchComment"; //$NON-NLS-1$
 
 	public static final int NODE_ONLY=				0;
@@ -2129,6 +2132,17 @@ public class ASTNodes {
 		}
 
 		return siblings.get(0);
+	}
+
+	/**
+	 * Returns the next statements in the same block if it exists.
+	 *
+	 * @param startNode the start node
+	 * @return the next statements in the same block if it exists, empty list
+	 *         otherwise
+	 */
+	public static List<Statement> getNextSiblings(final Statement startNode) {
+		return getSiblings(startNode, true);
 	}
 
 	/**
