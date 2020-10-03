@@ -85,8 +85,8 @@ public class ModifierCorrectionSubProcessorCore {
 						k++;
 					}
 					// first remove space then replace range (remove space can destroy empty position)
-					edit.addChild(new ReplaceEdit(end, k - end, new String())); // remove extra spaces
-					edit.addChild(new ReplaceEdit(currentPosition.offset, currentPosition.length, new String()));
+					edit.addChild(new ReplaceEdit(end, k - end, "")); // remove extra spaces //$NON-NLS-1$
+					edit.addChild(new ReplaceEdit(currentPosition.offset, currentPosition.length, "")); //$NON-NLS-1$
 				} else {
 					// first then replace range the insert space (insert space can destroy empty position)
 					edit.addChild(new ReplaceEdit(currentPosition.offset, currentPosition.length, ModifierKeyword.fromFlagValue(fModifier).toString()));

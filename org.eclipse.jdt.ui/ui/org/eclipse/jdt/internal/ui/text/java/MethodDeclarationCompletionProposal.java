@@ -190,7 +190,7 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 
 	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		return new String(); // don't let method stub proposals complete incrementally
+		return ""; // don't let method stub proposals complete incrementally //$NON-NLS-1$
 	}
 
 	/*

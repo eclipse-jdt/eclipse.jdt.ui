@@ -47,7 +47,7 @@ public abstract class PackageFragmentRootContainer implements IAdaptable {
 		public String getLabel(Object o) {
 			if (o instanceof PackageFragmentRootContainer)
 				return ((PackageFragmentRootContainer) o).getLabel();
-			return new String();
+			return ""; //$NON-NLS-1$
 		}
 
 		@Override

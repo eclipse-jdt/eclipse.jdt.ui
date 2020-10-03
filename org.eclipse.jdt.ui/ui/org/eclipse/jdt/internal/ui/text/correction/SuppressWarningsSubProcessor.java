@@ -134,7 +134,7 @@ public class SuppressWarningsSubProcessor {
 		if (fragments.size() > 0) {
 			return fragments.get(0).getName().getIdentifier();
 		}
-		return new String();
+		return ""; //$NON-NLS-1$
 	}
 
 

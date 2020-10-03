@@ -1440,7 +1440,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 * @since 3.6
 	 */
 	private static boolean equals(String key, Preferences preferences, Map<String, String> map) {
-		String dummy= new String();
+		String dummy= ""; //$NON-NLS-1$
 		String defaultValue= preferences.get(key, dummy);
 		return defaultValue != null && defaultValue != dummy
 				? map.containsKey(key) && equals(defaultValue, map.get(key))

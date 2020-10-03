@@ -337,7 +337,7 @@ public class TypingRunDetector {
 		int end= e.getOffset() + e.getLength();
 		String newText= e.getText();
 		if (newText == null)
-			newText= new String();
+			newText= ""; //$NON-NLS-1$
 
 		if (start == end) {
 			// no replace / delete / overwrite

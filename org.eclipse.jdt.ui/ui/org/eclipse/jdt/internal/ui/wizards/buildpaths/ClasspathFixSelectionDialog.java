@@ -58,6 +58,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -67,7 +68,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.correction.ClasspathFixProcessorDescriptor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
@@ -171,7 +171,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			Link link= createLink(composite, listener);
 			String[] args= {  BasicElementLabels.getJavaElementName(fMissingType), BasicElementLabels.getJavaElementName(fProject.getElementName()) };
 			link.setText(Messages.format(NewWizardMessages.ClasspathFixSelectionDialog_no_proposals_message, args));
-			updateStatus(new StatusInfo(IStatus.ERROR, new String()));
+			updateStatus(new StatusInfo(IStatus.ERROR, "")); //$NON-NLS-1$
 		} else {
 			Label label= new Label(composite, SWT.WRAP);
 			GridData layoutData= new GridData(SWT.FILL, SWT.CENTER, false, false);

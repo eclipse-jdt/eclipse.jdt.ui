@@ -157,7 +157,7 @@ public class CUCorrectionProposalCore extends ChangeCorrectionProposalCore imple
 				source= cu.getSource();
 			} catch (JavaModelException e) {
 				JavaManipulationPlugin.log(e);
-				source= new String(); // empty
+				source= ""; // empty //$NON-NLS-1$
 			}
 			Document document= new Document(source);
 			document.setInitialLineDelimiter(StubUtility.getLineDelimiterUsed(cu));

@@ -276,7 +276,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						// no change necessary
 						return null;
 					}
-					return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, new String());
+					return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
 				} else if (JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject()) && (binding instanceof IVariableBinding || binding instanceof IMethodBinding)) {
 					boolean isField= binding instanceof IVariableBinding;
 					ITypeBinding declaringClass= isField ? ((IVariableBinding) binding).getDeclaringClass() : ((IMethodBinding) binding).getDeclaringClass();

@@ -49,7 +49,7 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 	private int fSelectedStrategy;
 
 	public RenameTypeWizardSimilarElementsOptionsDialog(Shell parentShell, int defaultStrategy) {
-		super(parentShell, RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_title, null, new String(), INFORMATION, new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
+		super(parentShell, RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_title, null, "", INFORMATION, new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0); //$NON-NLS-1$
 		fSelectedStrategy= defaultStrategy;
 	}
 

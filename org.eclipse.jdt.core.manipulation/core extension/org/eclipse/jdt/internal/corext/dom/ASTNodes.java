@@ -385,7 +385,7 @@ public class ASTNodes {
 					if (removeIndent) {
 						IJavaProject project= typeRoot.getJavaProject();
 						int indent= getIndentUsed(buffer, node.getStartPosition(), project);
-						str= Strings.changeIndent(str, indent, project, new String(), typeRoot.findRecommendedLineSeparator());
+						str= Strings.changeIndent(str, indent, project, "", typeRoot.findRecommendedLineSeparator()); //$NON-NLS-1$
 					}
 					return str;
 				}

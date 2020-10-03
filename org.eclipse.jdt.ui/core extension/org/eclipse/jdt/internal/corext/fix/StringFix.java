@@ -150,7 +150,7 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 
 	private static ReplaceEdit getReplace(int offset, int length, IBuffer buffer, boolean removeLeadingIndents) {
 
-		String replaceString= new String();
+		String replaceString= ""; //$NON-NLS-1$
 		boolean hasMoreInComment= false;
 
 		// look after the tag

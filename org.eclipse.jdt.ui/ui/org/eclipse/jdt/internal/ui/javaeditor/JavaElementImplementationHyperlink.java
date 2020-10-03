@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.IRegion;
@@ -66,7 +67,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -161,7 +161,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 */
 	public static void openImplementations(IEditorPart editor, IRegion region, final IJavaElement javaElement, SelectionDispatchAction openAction) {
 		final boolean isMethodAbstract[]= new boolean[1];
-		final String dummyString= new String();
+		final String dummyString= ""; //$NON-NLS-1$
 		final ArrayList<IJavaElement> links= new ArrayList<>();
 		IRunnableWithProgress runnable;
 

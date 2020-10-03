@@ -51,7 +51,7 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	private final IDialogSettings fDialogSettings;
 
 	public SortMembersMessageDialog(Shell parentShell) {
-		super(OPTIONAL_ID, parentShell, DialogsMessages.SortMembersMessageDialog_dialog_title, null, new String(), INFORMATION, new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
+		super(OPTIONAL_ID, parentShell, DialogsMessages.SortMembersMessageDialog_dialog_title, null, "", INFORMATION, new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0); //$NON-NLS-1$
 
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 

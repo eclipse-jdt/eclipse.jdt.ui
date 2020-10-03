@@ -90,7 +90,7 @@ public class SortingLabelProvider extends SearchLabelProvider {
 		if (indexOf != -1) {
 			return textLabel.substring(indexOf);
 		}
-		return new String();
+		return ""; //$NON-NLS-1$
 	}
 
 	public void setOrder(int orderFlag) {

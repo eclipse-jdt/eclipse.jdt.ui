@@ -79,7 +79,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 * @see #findKey(Position, IJavaElement)
 	 * @since 3.6
 	 */
-	private static final String NO_KEY= new String();
+	private static final String NO_KEY= ""; //$NON-NLS-1$
 
 	private NLSSearchResult fResult;
 	private IFile fPropertiesFile;

@@ -123,7 +123,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 
 				@Override
 				public String getAdditionalProposalInfo() {
-					return new String();
+					return ""; //$NON-NLS-1$
 				}
 
 				@Override
