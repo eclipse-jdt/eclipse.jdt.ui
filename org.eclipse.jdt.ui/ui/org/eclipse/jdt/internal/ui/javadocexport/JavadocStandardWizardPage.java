@@ -155,14 +155,14 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fBasicOptionsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 2, 0));
 		fBasicOptionsGroup.setText(JavadocExportMessages.JavadocStandardWizardPage_basicgroup_label);
 
-		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_usebutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.USE, true);
-		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_hierarchybutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NOTREE, false);
-		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_navigartorbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NONAVBAR, false);
+		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_usebutton_label, new GridData(GridData.FILL_HORIZONTAL), JavadocOptionsManager.USE, true);
+		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_hierarchybutton_label, new GridData(GridData.FILL_HORIZONTAL), JavadocOptionsManager.NOTREE, false);
+		new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_navigartorbutton_label, new GridData(GridData.FILL_HORIZONTAL), JavadocOptionsManager.NONAVBAR, false);
 
-		fIndexCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_indexbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NOINDEX, false);
+		fIndexCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_indexbutton_label, new GridData(GridData.FILL_HORIZONTAL), JavadocOptionsManager.NOINDEX, false);
 
 		fSeperatedIndexCheck= new FlaggedButton(fBasicOptionsGroup, JavadocExportMessages.JavadocStandardWizardPage_seperateindexbutton_label, createGridData(GridData.GRAB_HORIZONTAL, 1,
-				LayoutUtil.getIndent()), fStore.SPLITINDEX, true);
+				LayoutUtil.getIndent()), JavadocOptionsManager.SPLITINDEX, true);
 		fSeperatedIndexCheck.getButton().setEnabled(fIndexCheck.getButton().getSelection());
 
 		fIndexCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fSeperatedIndexCheck.getButton()}));
@@ -176,11 +176,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fTagsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 2, 0));
 		fTagsGroup.setText(JavadocExportMessages.JavadocStandardWizardPage_tagsgroup_label);
 
-		new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_authorbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.AUTHOR, true);
-		new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_versionbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.VERSION, true);
-		fDeprecatedCheck= new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_deprecatedbutton_label, new GridData(GridData.FILL_HORIZONTAL), fStore.NODEPRECATED, false);
+		new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_authorbutton_label, new GridData(GridData.FILL_HORIZONTAL), JavadocOptionsManager.AUTHOR, true);
+		new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_versionbutton_label, new GridData(GridData.FILL_HORIZONTAL), JavadocOptionsManager.VERSION, true);
+		fDeprecatedCheck= new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_deprecatedbutton_label, new GridData(GridData.FILL_HORIZONTAL), JavadocOptionsManager.NODEPRECATED, false);
 		fDeprecatedList= new FlaggedButton(fTagsGroup, JavadocExportMessages.JavadocStandardWizardPage_deprecatedlistbutton_label, createGridData(GridData.FILL_HORIZONTAL, 1,
-				LayoutUtil.getIndent()), fStore.NODEPRECATEDLIST, false);
+				LayoutUtil.getIndent()), JavadocOptionsManager.NODEPRECATEDLIST, false);
 		fDeprecatedList.getButton().setEnabled(fDeprecatedCheck.getButton().getSelection());
 
 		fDeprecatedCheck.getButton().addSelectionListener(new ToggleSelectionAdapter(new Control[] { fDeprecatedList.getButton()}));

@@ -73,6 +73,11 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 public class JavadocTreeWizardPage extends JavadocWizardPage {
+	private static final int PREFERENCESTATUS= 0;
+	private static final int CUSTOMSTATUS= 1;
+	private static final int STANDARDSTATUS= 2;
+	private static final int TREESTATUS= 3;
+	private static final int JAVADOCSTATUS= 4;
 
 	private CheckboxTreeAndListGroup fInputGroup;
 
@@ -102,12 +107,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private StatusInfo fTreeStatus;
 	private StatusInfo fPreferenceStatus;
 	private StatusInfo fWizardStatus;
-
-	private final int PREFERENCESTATUS= 0;
-	private final int CUSTOMSTATUS= 1;
-	private final int STANDARDSTATUS= 2;
-	private final int TREESTATUS= 3;
-	private final int JAVADOCSTATUS= 4;
 
 	/**
 	 * Constructor for JavadocTreeWizardPage.
@@ -235,7 +234,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					fVisibilitySelection= fStore.PRIVATE;
+					fVisibilitySelection= JavadocOptionsManager.PRIVATE;
 					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_privatevisibilitydescription_label);
 				}
 			}
@@ -244,7 +243,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					fVisibilitySelection= fStore.PACKAGE;
+					fVisibilitySelection= JavadocOptionsManager.PACKAGE;
 					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_packagevisibledescription_label);
 				}
 			}
@@ -253,7 +252,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					fVisibilitySelection= fStore.PROTECTED;
+					fVisibilitySelection= JavadocOptionsManager.PROTECTED;
 					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_protectedvisibilitydescription_label);
 				}
 			}
@@ -263,7 +262,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					fVisibilitySelection= fStore.PUBLIC;
+					fVisibilitySelection= JavadocOptionsManager.PUBLIC;
 					fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_publicvisibilitydescription_label);
 				}
 			}
@@ -275,19 +274,19 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	protected void setVisibilitySettings() {
 		fVisibilitySelection= fStore.getAccess();
-		fPrivateVisibility.setSelection(fVisibilitySelection.equals(fStore.PRIVATE));
+		fPrivateVisibility.setSelection(fVisibilitySelection.equals(JavadocOptionsManager.PRIVATE));
 		if (fPrivateVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_privatevisibilitydescription_label);
 
-		fProtectedVisibility.setSelection(fVisibilitySelection.equals(fStore.PROTECTED));
+		fProtectedVisibility.setSelection(fVisibilitySelection.equals(JavadocOptionsManager.PROTECTED));
 		if (fProtectedVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_protectedvisibilitydescription_label);
 
-		fPackageVisibility.setSelection(fVisibilitySelection.equals(fStore.PACKAGE));
+		fPackageVisibility.setSelection(fVisibilitySelection.equals(JavadocOptionsManager.PACKAGE));
 		if (fPackageVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_packagevisibledescription_label);
 
-		fPublicVisibility.setSelection(fVisibilitySelection.equals(fStore.PUBLIC));
+		fPublicVisibility.setSelection(fVisibilitySelection.equals(JavadocOptionsManager.PUBLIC));
 		if (fPublicVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_publicvisibilitydescription_label);
 	}

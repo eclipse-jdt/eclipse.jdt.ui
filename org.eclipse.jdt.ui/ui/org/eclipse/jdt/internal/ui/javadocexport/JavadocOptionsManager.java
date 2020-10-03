@@ -77,6 +77,47 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 
 public class JavadocOptionsManager {
+	public static final String PRIVATE= "private"; //$NON-NLS-1$
+	public static final String PROTECTED= "protected"; //$NON-NLS-1$
+	public static final String PACKAGE= "package"; //$NON-NLS-1$
+	public static final String PUBLIC= "public"; //$NON-NLS-1$
+
+	public static final String USE= "use"; //$NON-NLS-1$
+	public static final String NOTREE= "notree"; //$NON-NLS-1$
+	public static final String NOINDEX= "noindex"; //$NON-NLS-1$
+	public static final String NONAVBAR= "nonavbar"; //$NON-NLS-1$
+	public static final String NODEPRECATED= "nodeprecated"; //$NON-NLS-1$
+	public static final String NODEPRECATEDLIST= "nodeprecatedlist"; //$NON-NLS-1$
+	public static final String VERSION= "version"; //$NON-NLS-1$
+	public static final String AUTHOR= "author"; //$NON-NLS-1$
+	public static final String SPLITINDEX= "splitindex"; //$NON-NLS-1$
+	public static final String STYLESHEETFILE= "stylesheetfile"; //$NON-NLS-1$
+	public static final String OVERVIEW= "overview"; //$NON-NLS-1$
+	public static final String DOCLETNAME= "docletname"; //$NON-NLS-1$
+	public static final String DOCLETPATH= "docletpath"; //$NON-NLS-1$
+	public static final String SOURCEPATH= "sourcepath"; //$NON-NLS-1$
+	public static final String CLASSPATH= "classpath"; //$NON-NLS-1$
+	public static final String DESTINATION= "destdir"; //$NON-NLS-1$
+	public static final String OPENINBROWSER= "openinbrowser"; //$NON-NLS-1$
+
+	public static final String VISIBILITY= "access"; //$NON-NLS-1$
+	public static final String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
+	public static final String SOURCEFILES= "sourcefiles"; //$NON-NLS-1$
+	public static final String EXTRAOPTIONS= "additionalparam"; //$NON-NLS-1$
+	public static final String VMOPTIONS= "vmparam"; //$NON-NLS-1$
+	//public final String JAVADOCCOMMAND= "javadoccommand"; //$NON-NLS-1$
+	public static final String TITLE= "doctitle"; //$NON-NLS-1$
+	public static final String HREF= "href"; //$NON-NLS-1$
+
+	public static final String NAME= "name"; //$NON-NLS-1$
+	public static final String PATH= "path"; //$NON-NLS-1$
+	public static final String FROMSTANDARD= "fromStandard"; //$NON-NLS-1$
+	public static final String ANTPATH= "antpath"; //$NON-NLS-1$
+	public static final String SOURCE= "source"; //$NON-NLS-1$
+
+	private static final String SECTION_JAVADOC= "javadoc"; //$NON-NLS-1$
+
+	private static final String JAVADOC_COMMAND_HISTORY= "javadoc_command_history"; //$NON-NLS-1$
 
 	private IFile fXmlfile;
 
@@ -122,48 +163,6 @@ public class JavadocOptionsManager {
 	//add-on for multi-project version
 	private String fDestination;
 	private String fAntpath;
-
-	public final String PRIVATE= "private"; //$NON-NLS-1$
-	public final String PROTECTED= "protected"; //$NON-NLS-1$
-	public final String PACKAGE= "package"; //$NON-NLS-1$
-	public final String PUBLIC= "public"; //$NON-NLS-1$
-
-	public final String USE= "use"; //$NON-NLS-1$
-	public final String NOTREE= "notree"; //$NON-NLS-1$
-	public final String NOINDEX= "noindex"; //$NON-NLS-1$
-	public final String NONAVBAR= "nonavbar"; //$NON-NLS-1$
-	public final String NODEPRECATED= "nodeprecated"; //$NON-NLS-1$
-	public final String NODEPRECATEDLIST= "nodeprecatedlist"; //$NON-NLS-1$
-	public final String VERSION= "version"; //$NON-NLS-1$
-	public final String AUTHOR= "author"; //$NON-NLS-1$
-	public final String SPLITINDEX= "splitindex"; //$NON-NLS-1$
-	public final String STYLESHEETFILE= "stylesheetfile"; //$NON-NLS-1$
-	public final String OVERVIEW= "overview"; //$NON-NLS-1$
-	public final String DOCLETNAME= "docletname"; //$NON-NLS-1$
-	public final String DOCLETPATH= "docletpath"; //$NON-NLS-1$
-	public final String SOURCEPATH= "sourcepath"; //$NON-NLS-1$
-	public final String CLASSPATH= "classpath"; //$NON-NLS-1$
-	public final String DESTINATION= "destdir"; //$NON-NLS-1$
-	public final String OPENINBROWSER= "openinbrowser"; //$NON-NLS-1$
-
-	public final String VISIBILITY= "access"; //$NON-NLS-1$
-	public final String PACKAGENAMES= "packagenames"; //$NON-NLS-1$
-	public final String SOURCEFILES= "sourcefiles"; //$NON-NLS-1$
-	public final String EXTRAOPTIONS= "additionalparam"; //$NON-NLS-1$
-	public final String VMOPTIONS= "vmparam"; //$NON-NLS-1$
-	//public final String JAVADOCCOMMAND= "javadoccommand"; //$NON-NLS-1$
-	public final String TITLE= "doctitle"; //$NON-NLS-1$
-	public final String HREF= "href"; //$NON-NLS-1$
-
-	public final String NAME= "name"; //$NON-NLS-1$
-	public final String PATH= "path"; //$NON-NLS-1$
-	public final String FROMSTANDARD= "fromStandard"; //$NON-NLS-1$
-	public final String ANTPATH= "antpath"; //$NON-NLS-1$
-	public final String SOURCE= "source"; //$NON-NLS-1$
-
-	private final String SECTION_JAVADOC= "javadoc"; //$NON-NLS-1$
-
-	private static final String JAVADOC_COMMAND_HISTORY= "javadoc_command_history"; //$NON-NLS-1$
 
 	public JavadocOptionsManager(IFile xmlJavadocFile, IDialogSettings dialogSettings, List<?> currSelection) {
 		fXmlfile= xmlJavadocFile;

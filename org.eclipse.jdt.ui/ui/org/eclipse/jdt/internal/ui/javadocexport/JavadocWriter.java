@@ -119,21 +119,21 @@ public class JavadocWriter {
 
 		String destination= getPathString(Path.fromOSString(store.getDestination()));
 
-		xmlJavadocDesc.setAttribute(store.DESTINATION, destination);
-		xmlJavadocDesc.setAttribute(store.VISIBILITY, store.getAccess());
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.DESTINATION, destination);
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.VISIBILITY, store.getAccess());
 		String source= store.getSource();
 		if (source.length() > 0 && !source.equals("-")) { //$NON-NLS-1$
-			xmlJavadocDesc.setAttribute(store.SOURCE, store.getSource());
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.SOURCE, store.getSource());
 		}
-		xmlJavadocDesc.setAttribute(store.USE, booleanToString(store.getBoolean("use"))); //$NON-NLS-1$
-		xmlJavadocDesc.setAttribute(store.NOTREE, booleanToString(store.getBoolean("notree"))); //$NON-NLS-1$
-		xmlJavadocDesc.setAttribute(store.NONAVBAR, booleanToString(store.getBoolean("nonavbar"))); //$NON-NLS-1$
-		xmlJavadocDesc.setAttribute(store.NOINDEX, booleanToString(store.getBoolean("noindex"))); //$NON-NLS-1$
-		xmlJavadocDesc.setAttribute(store.SPLITINDEX, booleanToString(store.getBoolean("splitindex"))); //$NON-NLS-1$
-		xmlJavadocDesc.setAttribute(store.AUTHOR, booleanToString(store.getBoolean("author"))); //$NON-NLS-1$
-		xmlJavadocDesc.setAttribute(store.VERSION, booleanToString(store.getBoolean("version"))); //$NON-NLS-1$
-		xmlJavadocDesc.setAttribute(store.NODEPRECATEDLIST, booleanToString(store.getBoolean("nodeprecatedlist"))); //$NON-NLS-1$
-		xmlJavadocDesc.setAttribute(store.NODEPRECATED, booleanToString(store.getBoolean("nodeprecated"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.USE, booleanToString(store.getBoolean("use"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.NOTREE, booleanToString(store.getBoolean("notree"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.NONAVBAR, booleanToString(store.getBoolean("nonavbar"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.NOINDEX, booleanToString(store.getBoolean("noindex"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.SPLITINDEX, booleanToString(store.getBoolean("splitindex"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.AUTHOR, booleanToString(store.getBoolean("author"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.VERSION, booleanToString(store.getBoolean("version"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.NODEPRECATEDLIST, booleanToString(store.getBoolean("nodeprecatedlist"))); //$NON-NLS-1$
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.NODEPRECATED, booleanToString(store.getBoolean("nodeprecated"))); //$NON-NLS-1$
 
 
 		//set the packages and source files
@@ -141,38 +141,38 @@ public class JavadocWriter {
 		List<String> sourcefiles= new ArrayList<>();
 		sortSourceElement(store.getSourceElements(), sourcefiles, packages);
 		if (!packages.isEmpty())
-			xmlJavadocDesc.setAttribute(store.PACKAGENAMES, toSeparatedList(packages));
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.PACKAGENAMES, toSeparatedList(packages));
 
 		if (!sourcefiles.isEmpty())
-			xmlJavadocDesc.setAttribute(store.SOURCEFILES, toSeparatedList(sourcefiles));
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.SOURCEFILES, toSeparatedList(sourcefiles));
 
-		xmlJavadocDesc.setAttribute(store.SOURCEPATH, getPathString(store.getSourcepath()));
-		xmlJavadocDesc.setAttribute(store.CLASSPATH, getPathString(store.getClasspath()));
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.SOURCEPATH, getPathString(store.getSourcepath()));
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.CLASSPATH, getPathString(store.getClasspath()));
 
 		String overview= store.getOverview();
 		if (overview.length() > 0)
-			xmlJavadocDesc.setAttribute(store.OVERVIEW, overview);
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.OVERVIEW, overview);
 
 		String styleSheet= store.getStyleSheet();
 		if (styleSheet.length() > 0)
-			xmlJavadocDesc.setAttribute(store.STYLESHEETFILE, styleSheet);
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.STYLESHEETFILE, styleSheet);
 
 		String title= store.getTitle();
 		if (title.length() > 0)
-			xmlJavadocDesc.setAttribute(store.TITLE, title);
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.TITLE, title);
 
 
 		String vmArgs= store.getVMParams();
 		String additionalArgs= store.getAdditionalParams();
 		if (vmArgs.length() + additionalArgs.length() > 0) {
 			String str= vmArgs + ' ' + additionalArgs;
-			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.EXTRAOPTIONS, str);
 		}
 
 		for (String href : store.getHRefs()) {
 			Element links= document.createElement("link"); //$NON-NLS-1$
 			xmlJavadocDesc.appendChild(links);
-			links.setAttribute(store.HREF, href);
+			links.setAttribute(JavadocOptionsManager.HREF, href);
 		}
 	}
 
@@ -263,27 +263,27 @@ public class JavadocWriter {
 		List<String> sourcefiles= new ArrayList<>();
 		sortSourceElement(store.getSourceElements(), sourcefiles, packages);
 		if (!packages.isEmpty())
-			xmlJavadocDesc.setAttribute(store.PACKAGENAMES, toSeparatedList(packages));
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.PACKAGENAMES, toSeparatedList(packages));
 
 		if (!sourcefiles.isEmpty())
-			xmlJavadocDesc.setAttribute(store.SOURCEFILES, toSeparatedList(sourcefiles));
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.SOURCEFILES, toSeparatedList(sourcefiles));
 
-		xmlJavadocDesc.setAttribute(store.SOURCEPATH, getPathString(store.getSourcepath()));
-		xmlJavadocDesc.setAttribute(store.CLASSPATH, getPathString(store.getClasspath()));
-		xmlJavadocDesc.setAttribute(store.VISIBILITY, store.getAccess());
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.SOURCEPATH, getPathString(store.getSourcepath()));
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.CLASSPATH, getPathString(store.getClasspath()));
+		xmlJavadocDesc.setAttribute(JavadocOptionsManager.VISIBILITY, store.getAccess());
 
 		Element doclet= document.createElement("doclet"); //$NON-NLS-1$
 		xmlJavadocDesc.appendChild(doclet);
-		doclet.setAttribute(store.NAME, store.getDocletName());
-		doclet.setAttribute(store.PATH, store.getDocletPath());
+		doclet.setAttribute(JavadocOptionsManager.NAME, store.getDocletName());
+		doclet.setAttribute(JavadocOptionsManager.PATH, store.getDocletPath());
 
 		String str= store.getOverview();
 		if (str.length() > 0)
-			xmlJavadocDesc.setAttribute(store.OVERVIEW, str);
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.OVERVIEW, str);
 
 		str= store.getAdditionalParams();
 		if (str.length() > 0)
-			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
+			xmlJavadocDesc.setAttribute(JavadocOptionsManager.EXTRAOPTIONS, str);
 
 	}
 
