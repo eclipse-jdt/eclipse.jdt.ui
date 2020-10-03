@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternCleanUp;
@@ -33,7 +34,8 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 		return new AbstractCleanUp[] {
 				new LazyLogicalCleanUp(values),
 				new PatternCleanUp(values),
-				new NoStringCreationCleanUp(values)
+				new NoStringCreationCleanUp(values),
+				new BooleanLiteralCleanUp(values)
 		};
 	}
 
@@ -52,5 +54,7 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 		final CheckboxPreference noStringCreation= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_NoStringCreation, CleanUpConstants.NO_STRING_CREATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(noStringCreation);
 
+		final CheckboxPreference booleanLiteral= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_BooleanLiteral, CleanUpConstants.PREFER_BOOLEAN_LITERAL, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(booleanLiteral);
 	}
 }

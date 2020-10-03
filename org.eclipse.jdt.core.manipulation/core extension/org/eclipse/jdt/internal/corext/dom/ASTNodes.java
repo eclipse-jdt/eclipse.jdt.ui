@@ -2857,20 +2857,35 @@ public class ASTNodes {
 		}
 	}
 
-    /**
-     * Returns whether the provided method invocation invokes a method with the
-     * provided method signature. The method signature is compared against the
-     * erasure of the invoked method.
-     *
-     * @param node                         the method invocation to compare
-     * @param typeQualifiedName            the qualified name of the type declaring
-     *                                     the method
-     * @param methodName                   the method name
-     * @param parameterTypesQualifiedNames the qualified names of the parameter
-     *                                     types
-     * @return true if the provided method invocation matches the provided method
-     *         signature, false otherwise
-     */
+	/**
+	 * Returns whether the provided qualified name accesses a field with the
+	 * provided signature.
+	 *
+	 * @param node              the qualified name to compare
+	 * @param qualifiedTypeName the qualified name of the type declaring the field
+	 * @param fieldNames        the field names
+	 * @return true if the provided qualified name matches the provided field
+	 *         signature, false otherwise
+	 */
+	public static boolean isField(final QualifiedName node, final String qualifiedTypeName, final String... fieldNames) {
+		return instanceOf(node, qualifiedTypeName)
+				&& Arrays.asList(fieldNames).contains(node.getName().getIdentifier());
+	}
+
+	/**
+	 * Returns whether the provided method invocation invokes a method with the
+	 * provided method signature. The method signature is compared against the
+	 * erasure of the invoked method.
+	 *
+	 * @param node                         the method invocation to compare
+	 * @param typeQualifiedName            the qualified name of the type declaring
+	 *                                     the method
+	 * @param methodName                   the method name
+	 * @param parameterTypesQualifiedNames the qualified names of the parameter
+	 *                                     types
+	 * @return true if the provided method invocation matches the provided method
+	 *         signature, false otherwise
+	 */
 	public static boolean usesGivenSignature(final MethodInvocation node, final String typeQualifiedName, final String methodName,
 			final String... parameterTypesQualifiedNames) {
 		return node != null

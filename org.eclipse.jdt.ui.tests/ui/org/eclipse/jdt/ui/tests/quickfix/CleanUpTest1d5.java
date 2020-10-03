@@ -2806,6 +2806,67 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testBooleanLiteral() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static boolean replaceUselessUnboxing() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean bo1 = Boolean.TRUE;\n" //
+				+ "        boolean bo2 = Boolean.FALSE;\n" //
+				+ "        bo1 = Boolean.TRUE;\n" //
+				+ "        if (Boolean.TRUE) {\n" //
+				+ "            bo2 = Boolean.FALSE;\n" //
+				+ "        }\n" //
+				+ "        return bo1 && bo2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.PREFER_BOOLEAN_LITERAL);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static boolean replaceUselessUnboxing() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean bo1 = true;\n" //
+				+ "        boolean bo2 = false;\n" //
+				+ "        bo1 = true;\n" //
+				+ "        if (true) {\n" //
+				+ "            bo2 = false;\n" //
+				+ "        }\n" //
+				+ "        return bo1 && bo2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.BooleanLiteralCleanup_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotUseBooleanLiteral() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static boolean doNotCreateUselessAutoboxing() {\n" //
+				+ "        Boolean bo = Boolean.TRUE;\n" //
+				+ "        bo = Boolean.FALSE;\n" //
+				+ "        return bo;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PREFER_BOOLEAN_LITERAL);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testUnnecessaryArrayBug550129() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //

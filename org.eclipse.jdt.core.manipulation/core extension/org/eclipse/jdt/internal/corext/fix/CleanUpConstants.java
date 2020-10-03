@@ -805,6 +805,18 @@ public class CleanUpConstants {
 	public static final String NO_STRING_CREATION= "cleanup.no_string_creation"; //$NON-NLS-1$
 
 	/**
+	 * Replaces Boolean.TRUE/Boolean.FALSE by true/false when used as primitive.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String PREFER_BOOLEAN_LITERAL= "cleanup.boolean_literal"; //$NON-NLS-1$
+
+	/**
 	 * Adds type parameters to raw type references.
 	 * <p>
 	 * Example:
