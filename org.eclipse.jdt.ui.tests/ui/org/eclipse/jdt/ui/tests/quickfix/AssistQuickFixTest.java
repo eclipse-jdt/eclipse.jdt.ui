@@ -2137,7 +2137,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String ex2= buf.toString();
 
-		buf= new StringBuffer();
 		String ex3= null; // Wrap in buf.append() (to clipboard)
 
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3 });
@@ -2192,7 +2191,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String ex2= buf.toString();
 
-		buf= new StringBuffer();
 		String ex3= null; // Wrap in buf.append() (to clipboard)
 
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3 });
@@ -6401,7 +6399,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
 
-		buf= new StringBuffer();
 		String expected1= null; // Wrap in buf.append() (to clipboard)
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}

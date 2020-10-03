@@ -119,9 +119,8 @@ public class UnresolvedMethodsQuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testCreateMethodQuickFix1() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("interface Snippet {\n");
 		buf.append("    public abstract String name();\n");
@@ -157,7 +156,7 @@ public class UnresolvedMethodsQuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testCreateMethodQuickFix2() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuffer buf;
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -246,9 +245,8 @@ public class UnresolvedMethodsQuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testCreateMethodQuickFix4() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Arrays;\n");
 		buf.append("public interface NestedInterfaceInInterface {\n");
@@ -283,9 +281,8 @@ public class UnresolvedMethodsQuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testCreateMethodQuickFix5() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public interface NestedInterfaceInInterface {\n");
 		buf.append("    interface Interface {\n");
@@ -373,9 +370,8 @@ public class UnresolvedMethodsQuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testCreateMethodQuickFix7() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class NestedInterfaceInClass {\n");
 		buf.append("    int total= 10;\n");

@@ -1885,10 +1885,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testSimilarVariableNamesMultipleOcc() throws Exception {
-		StringBuffer buf= new StringBuffer();
-
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test3;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int cout;\n");

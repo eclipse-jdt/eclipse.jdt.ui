@@ -5487,9 +5487,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testStaticMethodInInterface1() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("interface Snippet {\n");
 		buf.append("    public abstract String name();\n");
@@ -5508,9 +5507,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testStaticMethodInInterface2() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("interface Snippet {\n");
 		buf.append("    public abstract String name();\n");
@@ -5527,9 +5525,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testStaticMethodInInterface3() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class XX {\n");
 		buf.append("    interface I {\n");
@@ -5561,7 +5558,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testStaticMethodInInterface4() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuffer buf;
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5577,7 +5574,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testAbstractMehodInInterface() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuffer buf;
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");

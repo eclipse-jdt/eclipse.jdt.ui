@@ -702,9 +702,8 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testLambdaReturnType1() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("@FunctionalInterface\n");
 		buf.append("interface I {\n");
@@ -751,9 +750,8 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testLambdaReturnType2() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("@FunctionalInterface\n");
 		buf.append("interface I {\n");
@@ -798,9 +796,8 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testLambdaReturnType3() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("@FunctionalInterface\n");
 		buf.append("interface I {\n");
@@ -848,9 +845,8 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testLambdaReturnType4() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("@FunctionalInterface\n");
 		buf.append("interface I {\n");
@@ -950,9 +946,8 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testLambdaReturnType5() throws Exception {
-		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.math.BigInteger;\n");
 		buf.append("\n");

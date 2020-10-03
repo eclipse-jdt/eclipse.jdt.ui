@@ -9678,7 +9678,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 6);
 
-		String expected= new String();
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -9689,8 +9688,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("            throw new IllegalArgumentException();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected= buf.toString();
-
+		String expected= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}

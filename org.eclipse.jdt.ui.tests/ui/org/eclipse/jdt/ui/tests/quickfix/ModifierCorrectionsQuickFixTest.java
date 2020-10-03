@@ -626,7 +626,6 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testNonStaticMethodRequestedInConstructor() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int xoo() { return 1; };\n");
@@ -663,7 +662,6 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testNonStaticFieldRequestedInConstructor() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int fXoo= 1;\n");
