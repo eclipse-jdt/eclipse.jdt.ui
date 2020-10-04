@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
+import java.util.function.Supplier;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.ACC;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
@@ -25,6 +27,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
@@ -37,6 +40,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.resource.JFaceResources;
+
+import org.eclipse.ui.PlatformUI;
 
 
 /**
@@ -166,6 +171,32 @@ public class SWTUtil {
 	 */
 	public static void fixReadonlyTextBackground(Text textField) {
 		textField.setBackground(textField.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+	}
+
+	/**
+	 * Executes a given runnable directly if this thread is the UI thread or submits the runnable
+	 * to {@link Display#asyncExec(Runnable)} of the provided control otherwise.
+	 * <p>
+	 * The control will be checked for {@link Control#isDisposed()} before executing the runnable.
+	 *
+	 * @param supplier supplier for a {@link Control} to use
+	 * @param r the runnable
+	 */
+	public static void execDirectOrAsyncIfNecessary(Supplier<Control> supplier, Runnable r) {
+		if(Display.getCurrent() != null) {
+			Control ctrl = supplier.get();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				r.run();
+			}
+		} else {
+			PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+				Control ctrl = supplier.get();
+				if (ctrl != null && !ctrl.isDisposed()) {
+					r.run();
+				}
+			});
+		}
+
 	}
 
 	private SWTUtil() {
