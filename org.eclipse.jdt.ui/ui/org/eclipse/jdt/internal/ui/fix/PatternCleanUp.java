@@ -320,9 +320,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 			newCompileMethod.setName(ast.newSimpleName(COMPILE_METHOD));
 			newCompileMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, unparanthesedInitializer));
 
-			@SuppressWarnings("unchecked")
 			boolean isInStaticInitializer= ASTNodes.getFirstAncestorOrNull(initializer, Initializer.class) != null;
-			@SuppressWarnings("unchecked")
 			ASTNode typeDecl= ASTNodes.getFirstAncestorOrNull(initializer, TypeDeclaration.class, RecordDeclaration.class);
 			boolean isInInterface= typeDecl instanceof TypeDeclaration && ((TypeDeclaration)typeDecl).isInterface();
 			boolean isInLocalType= typeDecl instanceof AbstractTypeDeclaration && ((AbstractTypeDeclaration)typeDecl).isLocalTypeDeclaration();
@@ -440,7 +438,6 @@ public class PatternCleanUp extends AbstractMultiFix {
 			return variableNames;
 		}
 
-		@SuppressWarnings("unchecked")
 		private int findInsertionIndex(AbstractTypeDeclaration typeDecl) {
 			List<BodyDeclaration> decls= typeDecl.bodyDeclarations();
 			boolean finished= false;

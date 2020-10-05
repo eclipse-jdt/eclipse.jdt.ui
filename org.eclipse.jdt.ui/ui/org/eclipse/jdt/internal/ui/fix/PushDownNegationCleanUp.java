@@ -128,7 +128,7 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 					}
 				} else if (operand instanceof InfixExpression) {
 					final InfixExpression infixExpression= (InfixExpression) operand;
-					final InfixExpression.Operator negatedOperator= ASTNodes.oppositeInfixOperator(infixExpression.getOperator());
+					final InfixExpression.Operator negatedOperator= ASTNodes.negatedInfixOperator(infixExpression.getOperator());
 
 					if (negatedOperator != null) {
 						rewriteOperations.add(new PushDownNegationInExpressionOperation(node, infixExpression));

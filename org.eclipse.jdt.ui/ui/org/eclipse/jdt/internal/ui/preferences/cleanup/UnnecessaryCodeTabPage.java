@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
@@ -62,6 +63,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new RedundantSuperCallCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
+				new RedundantIfConditionCleanUp(values),
 				new MapMethodCleanUp(values),
 				new CollectionCloningCleanUp(values),
 				new MapCloningCleanUp(values),
@@ -129,6 +131,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference redundantFallingThroughBlockEnd= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd, CleanUpConstants.REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(redundantFallingThroughBlockEnd);
+
+		CheckboxPreference redundantIfCondition= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantIfCondition, CleanUpConstants.REDUNDANT_IF_CONDITION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(redundantIfCondition);
 
 		CheckboxPreference mapMethod= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UseDirectlyMapMethod,
 				CleanUpConstants.USE_DIRECTLY_MAP_METHOD, CleanUpModifyDialog.FALSE_TRUE);

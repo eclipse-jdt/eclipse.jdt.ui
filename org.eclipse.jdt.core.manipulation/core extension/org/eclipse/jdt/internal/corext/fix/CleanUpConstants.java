@@ -1096,6 +1096,18 @@ public class CleanUpConstants {
 	 */
 	public static final String REDUNDANT_FALLING_THROUGH_BLOCK_END= "cleanup.redundant_falling_through_block_end"; //$NON-NLS-1$
 
+	/**
+	 * Remove a condition on an else that is negative to the condition of the previous if.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String REDUNDANT_IF_CONDITION= "cleanup.if_condition"; //$NON-NLS-1$
+
 
 	/**
 	 * Use directly map method.<br>

@@ -7246,9 +7246,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.if_condition"
+            runAfter="org.eclipse.jdt.ui.cleanup.redundant_falling_through_block_end">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp"
             id="org.eclipse.jdt.ui.cleanup.use_directly_map_method"
-            runAfter="org.eclipse.jdt.ui.cleanup.redundant_falling_through_block_end">
+            runAfter="org.eclipse.jdt.ui.cleanup.if_condition">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp"

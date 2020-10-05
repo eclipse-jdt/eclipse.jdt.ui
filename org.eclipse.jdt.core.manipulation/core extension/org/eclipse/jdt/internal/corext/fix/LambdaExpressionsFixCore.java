@@ -547,7 +547,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				};
 				lambdaBody.accept(inheritedFieldsVisitor);
 
-				@SuppressWarnings("unchecked")
 				ASTNode fragment= ASTNodes.getFirstAncestorOrNull(classInstanceCreation, VariableDeclarationFragment.class, BodyDeclaration.class);
 
 				if (fragment instanceof VariableDeclarationFragment) {
@@ -556,7 +555,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					if (actualFragment.getParent() instanceof FieldDeclaration) {
 						FieldDeclaration fieldDeclaration= (FieldDeclaration) actualFragment.getParent();
 
-						@SuppressWarnings("unchecked")
 						ASTNode declarationClass= ASTNodes.getFirstAncestorOrNull(fieldDeclaration, TypeDeclaration.class);
 
 						if (declarationClass instanceof TypeDeclaration) {

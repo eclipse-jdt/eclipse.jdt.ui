@@ -387,7 +387,6 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 				if (!node.getIdentifier().equals(variableName)) {
 					return true;
 				}
-				@SuppressWarnings("unchecked")
 				ASTNode assignNode= ASTNodes.getFirstAncestorOrNull(node, Assignment.class);
 				if (assignNode != null) {
 					Expression lhs= ((Assignment) assignNode).getLeftHandSide();
@@ -453,7 +452,6 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 
 				@Override
 				public boolean visit(SimpleName node) {
-					@SuppressWarnings("unchecked")
 					ASTNode assignNode= ASTNodes.getFirstAncestorOrNull(node, Assignment.class);
 					if (assignNode != null) {
 						IBinding resolveBinding= node.resolveBinding();

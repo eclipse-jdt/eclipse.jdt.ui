@@ -1419,7 +1419,7 @@ public class ASTNodes {
 	 * @param operator the infix operator
 	 * @return the opposite infix operator
 	 */
-	public static InfixExpression.Operator oppositeInfixOperator(InfixExpression.Operator operator) {
+	public static InfixExpression.Operator negatedInfixOperator(InfixExpression.Operator operator) {
 		if (InfixExpression.Operator.LESS.equals(operator))
 			return InfixExpression.Operator.GREATER_EQUALS;
 
@@ -2191,7 +2191,7 @@ public class ASTNodes {
 	 * @return the first ancestor of the provided node which has any of the required type, or
 	 *         {@code null}
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static ASTNode getFirstAncestorOrNull(final ASTNode node, final Class<? extends ASTNode> ancestorClass, final Class<? extends ASTNode>... ancestorClasses) {
 		if (node == null || node.getParent() == null) {
 			return null;
@@ -2870,6 +2870,33 @@ public class ASTNodes {
 	public static boolean isField(final QualifiedName node, final String qualifiedTypeName, final String... fieldNames) {
 		return instanceOf(node, qualifiedTypeName)
 				&& Arrays.asList(fieldNames).contains(node.getName().getIdentifier());
+	}
+
+	/**
+	 * Returns whether a checked exception is supposed to be caught.
+	 *
+	 * @param node the node
+	 * @return true if a checked exception is supposed to be caught.
+	 */
+	public static boolean isExceptionExpected(final ASTNode node) {
+		ASTNode parentNode= getFirstAncestorOrNull(node, TryStatement.class, BodyDeclaration.class);
+
+		while (parentNode instanceof TryStatement) {
+			TryStatement tryStatement= (TryStatement) parentNode;
+			List<CatchClause> catchClauses= tryStatement.catchClauses();
+
+			for (CatchClause catchClause : catchClauses) {
+				if (catchClause.getException().getType() != null
+						&& !instanceOf(catchClause.getException().getType().resolveBinding(),
+								RuntimeException.class.getCanonicalName())) {
+					return true;
+				}
+			}
+
+			parentNode= getFirstAncestorOrNull(parentNode, TryStatement.class, BodyDeclaration.class);
+		}
+
+		return false;
 	}
 
 	/**

@@ -6505,6 +6505,252 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testRedundantIfCondition() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int removeOppositeCondition(boolean b1, boolean b2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b1 && b2) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else if (!b2 || !b1) {\n" //
+				+ "            i = 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeOppositeConditionWithElse(int i1, int i2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else if (i2 <= i1) {\n" //
+				+ "            i = 1;\n" //
+				+ "        } else {\n" //
+				+ "            i = 2;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeOppositeConditionAmongOthers(int i1, int i2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            i = -1;\n" //
+				+ "        } else if (i1 < i2 + 1) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else if (1 + i2 <= i1) {\n" //
+				+ "            i = 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorCaughtCode(boolean b1, boolean b2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        try {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (b1 && b2) {\n" //
+				+ "                i = 0;\n" //
+				+ "            } else if (!b2 || !b1) {\n" //
+				+ "                throw new IOException();\n" //
+				+ "            }\n" //
+				+ "        } catch (IOException e) {\n" //
+				+ "            System.out.println(\"I should be reachable\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeUncaughtCode(boolean b1, boolean b2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        try {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (b1 && b2) {\n" //
+				+ "                i = 0;\n" //
+				+ "            } else if (!b2 || !b1) {\n" //
+				+ "                i = 1;\n" //
+				+ "            } else {\n" //
+				+ "                throw new NullPointerException();\n" //
+				+ "            }\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"I should be reachable\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_IF_CONDITION);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int removeOppositeCondition(boolean b1, boolean b2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b1 && b2) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            i = 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeOppositeConditionWithElse(int i1, int i2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            i = 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeOppositeConditionAmongOthers(int i1, int i2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            i = -1;\n" //
+				+ "        } else if (i1 < i2 + 1) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            i = 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorCaughtCode(boolean b1, boolean b2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        try {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (b1 && b2) {\n" //
+				+ "                i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                throw new IOException();\n" //
+				+ "            }\n" //
+				+ "        } catch (IOException e) {\n" //
+				+ "            System.out.println(\"I should be reachable\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeUncaughtCode(boolean b1, boolean b2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        try {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (b1 && b2) {\n" //
+				+ "                i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                i = 1;\n" //
+				+ "            }\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"I should be reachable\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.RedundantIfConditionCleanup_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testKeepIfCondition() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int doNotRemoveDifferentCondition(boolean b1, boolean b2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        if (b1 && b2) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else if (b2 || b1) {\n" //
+				+ "            i = 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRemoveMovedOperands(int number1, int number2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        if (number1 < number2) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else if (number2 < number1) {\n" //
+				+ "            i = 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRemoveActiveCondition(List<String> myList) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        if (myList.remove(\"I will be removed\")) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else if (myList.remove(\"I will be removed\")) {\n" //
+				+ "            i = 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRemoveCaughtCode(boolean b1, boolean b2) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        try {\n" //
+				+ "            if (b1 && b2) {\n" //
+				+ "                i = 0;\n" //
+				+ "            } else if (!b2 || !b1) {\n" //
+				+ "                i = 1;\n" //
+				+ "            } else {\n" //
+				+ "                throw new IOException();\n" //
+				+ "            }\n" //
+				+ "        } catch (IOException e) {\n" //
+				+ "            System.out.println(\"I should be reachable\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorFallThroughBlocks(boolean b1, boolean b2) {\n" //
+				+ "        if (b1 && b2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (!b2 || !b1) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_IF_CONDITION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testRemoveUselessReturn() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

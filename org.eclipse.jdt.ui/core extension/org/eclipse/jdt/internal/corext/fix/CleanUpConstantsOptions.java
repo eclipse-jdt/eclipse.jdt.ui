@@ -101,6 +101,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpOptions.FALSE);
+		options.setOption(REDUNDANT_IF_CONDITION, CleanUpOptions.FALSE);
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);
 		options.setOption(COLLECTION_CLONING, CleanUpOptions.FALSE);
 		options.setOption(MAP_CLONING, CleanUpOptions.FALSE);
@@ -219,6 +220,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpOptions.FALSE);
+		options.setOption(REDUNDANT_IF_CONDITION, CleanUpOptions.FALSE);
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);
 		options.setOption(COLLECTION_CLONING, CleanUpOptions.FALSE);
 		options.setOption(MAP_CLONING, CleanUpOptions.FALSE);
