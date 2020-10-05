@@ -748,6 +748,8 @@ public final class RefactoringAvailabilityTester {
 						&& (JdtFlags.isEnum((IMember) element)
 								|| ((IField) element).isRecordComponent()))
 					return false;
+				if ((element instanceof IMethod) && ((IMethod)element).isConstructor())
+					return false;
 			}
 		}
 		return ReorgPolicyFactory.createMovePolicy(resources, elements).canEnable();
