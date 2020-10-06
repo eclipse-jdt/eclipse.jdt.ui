@@ -137,35 +137,55 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 	public String getPreview() {
 		StringBuilder buf= new StringBuilder();
 
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS)) {
-		} else {
+		if (!isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS)) {
 			buf.append("import pack.Bar;\n"); //$NON-NLS-1$
 		}
 		buf.append("class Example {\n"); //$NON-NLS-1$
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES)) {
-		} else {
+		if (!isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) || !isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES)) {
 			buf.append("    private class Sub {}\n"); //$NON-NLS-1$
 		}
 		buf.append("    public Example(boolean b) {}\n"); //$NON-NLS-1$
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS)) {
-		} else {
+		if (!isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) || !isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS)) {
 			buf.append("    private Example() {}\n"); //$NON-NLS-1$
 		}
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS)) {
-		} else {
+		if (!isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) || !isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS)) {
 			buf.append("    private int fField;\n"); //$NON-NLS-1$
 		}
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS)) {
-		} else {
+		if (!isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) || !isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS)) {
 			buf.append("    private void foo() {}\n"); //$NON-NLS-1$
 		}
 		buf.append("    public void bar() {\n"); //$NON-NLS-1$
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES)) {
-		} else {
+		if (!isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES)) {
 			buf.append("        int i= 10;\n"); //$NON-NLS-1$
 		}
 		buf.append("    }\n"); //$NON-NLS-1$
 		buf.append("}\n"); //$NON-NLS-1$
+
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS)) {
+			buf.append("\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS)) {
+			if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES)) {
+				buf.append("\n"); //$NON-NLS-1$
+			}
+
+			if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS)) {
+				buf.append("\n"); //$NON-NLS-1$
+			}
+
+			if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS)) {
+				buf.append("\n"); //$NON-NLS-1$
+			}
+
+			if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS)) {
+				buf.append("\n"); //$NON-NLS-1$
+			}
+		}
+
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES)) {
+			buf.append("\n"); //$NON-NLS-1$
+		}
 
 		return buf.toString();
 	}

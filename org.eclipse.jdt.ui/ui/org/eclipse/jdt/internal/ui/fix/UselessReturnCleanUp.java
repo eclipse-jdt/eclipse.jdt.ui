@@ -80,7 +80,7 @@ public class UselessReturnCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("public void foo() {"); //$NON-NLS-1$
+		bld.append("public void foo() {\n"); //$NON-NLS-1$
 
 		if (isEnabled(CleanUpConstants.REMOVE_USELESS_RETURN)) {
 			bld.append("}\n\n"); //$NON-NLS-1$

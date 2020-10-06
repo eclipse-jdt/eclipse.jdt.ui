@@ -84,7 +84,7 @@ public class UselessContinueCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("for (String text : texts) {"); //$NON-NLS-1$
+		bld.append("for (String text : texts) {\n"); //$NON-NLS-1$
 
 		if (isEnabled(CleanUpConstants.REMOVE_USELESS_CONTINUE)) {
 			bld.append("}\n\n"); //$NON-NLS-1$

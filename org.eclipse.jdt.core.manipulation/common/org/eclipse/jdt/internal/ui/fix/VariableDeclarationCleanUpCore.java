@@ -84,29 +84,30 @@ public class VariableDeclarationCleanUpCore extends AbstractCleanUpCore {
 
 	@Override
 	public String getPreview() {
-		StringBuilder buf= new StringBuilder();
+		StringBuilder bld= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS)) {
-			buf.append("private final int i= 0;\n"); //$NON-NLS-1$
+			bld.append("private final int i= 0;\n"); //$NON-NLS-1$
 		} else {
-			buf.append("private int i= 0;\n"); //$NON-NLS-1$
+			bld.append("private int i= 0;\n"); //$NON-NLS-1$
 		}
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS)) {
-			buf.append("public void foo(final int j) {\n"); //$NON-NLS-1$
+			bld.append("public void foo(final int j) {\n"); //$NON-NLS-1$
 		} else {
-			buf.append("public void foo(int j) {\n"); //$NON-NLS-1$
+			bld.append("public void foo(int j) {\n"); //$NON-NLS-1$
 		}
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES)) {
-			buf.append("    final int k;\n"); //$NON-NLS-1$
-			buf.append("    int h;\n"); //$NON-NLS-1$
-			buf.append("    h= 0;\n"); //$NON-NLS-1$
+			bld.append("    final int k;\n"); //$NON-NLS-1$
+			bld.append("    int h;\n"); //$NON-NLS-1$
+			bld.append("    h= 0;\n"); //$NON-NLS-1$
+			bld.append("}\n"); //$NON-NLS-1$
 		} else {
-			buf.append("    int k, h;\n"); //$NON-NLS-1$
-			buf.append("    h= 0;\n"); //$NON-NLS-1$
+			bld.append("    int k, h;\n"); //$NON-NLS-1$
+			bld.append("    h= 0;\n"); //$NON-NLS-1$
+			bld.append("}\n\n"); //$NON-NLS-1$
 		}
-		buf.append("}\n"); //$NON-NLS-1$
 
-		return buf.toString();
+		return bld.toString();
 	}
 
 }

@@ -75,22 +75,23 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuilder bld= new StringBuilder();
-
 		if (isEnabled(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS)) {
-			bld.append("if ((i == 0) || (i == 1)) {\n"); //$NON-NLS-1$
-		} else {
-			bld.append("if (i == 0) {\n"); //$NON-NLS-1$
-			bld.append("    System.out.println(\"Duplicate\");\n"); //$NON-NLS-1$
-			bld.append("} else if (i == 1) {\n"); //$NON-NLS-1$
+			return "" //$NON-NLS-1$
+					+ "if (isValid || (i != 1)) {\n" //$NON-NLS-1$
+					+ "    System.out.println(\"Duplicate\");\n" //$NON-NLS-1$
+					+ "} else {\n" //$NON-NLS-1$
+					+ "    System.out.println(\"Different\");\n" //$NON-NLS-1$
+					+ "}\n\n\n"; //$NON-NLS-1$
 		}
 
-		bld.append("    System.out.println(\"Duplicate\");\n"); //$NON-NLS-1$
-		bld.append("} else {\n"); //$NON-NLS-1$
-		bld.append("    System.out.println(\"Different\");\n"); //$NON-NLS-1$
-		bld.append("}\n"); //$NON-NLS-1$
-
-		return bld.toString();
+		return "" //$NON-NLS-1$
+				+ "if (isValid) {\n" //$NON-NLS-1$
+				+ "    System.out.println(\"Duplicate\");\n" //$NON-NLS-1$
+				+ "} else if (i == 1) {\n" //$NON-NLS-1$
+				+ "    System.out.println(\"Different\");\n" //$NON-NLS-1$
+				+ "} else {\n" //$NON-NLS-1$
+				+ "    System.out.println(\"Duplicate\");\n" //$NON-NLS-1$
+				+ "}\n"; //$NON-NLS-1$
 	}
 
 	@Override

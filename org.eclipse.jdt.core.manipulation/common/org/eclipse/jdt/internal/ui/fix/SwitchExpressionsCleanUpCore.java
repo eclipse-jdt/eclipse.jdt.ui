@@ -29,13 +29,11 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
 
 public class SwitchExpressionsCleanUpCore extends AbstractCleanUpCore {
-
 	public SwitchExpressionsCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
 	public SwitchExpressionsCleanUpCore() {
-		super();
 	}
 
 	@Override
@@ -66,38 +64,33 @@ public class SwitchExpressionsCleanUpCore extends AbstractCleanUpCore {
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS))
 			result.add(MultiFixMessages.SwitchExpressionsCleanUp_ConvertToSwitchExpressions_description);
 
-		return result.toArray(new String[result.size()]);
+		return result.toArray(new String[0]);
 	}
 
 	@Override
 	public String getPreview() {
-		StringBuilder buf= new StringBuilder();
-
-		boolean convert= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
-
-		if (convert) {
-			buf.append("int i = switch(j) {\n"); //$NON-NLS-1$
-			buf.append("    case 1 -> 3;\n"); //$NON-NLS-1$
-			buf.append("    case 2 -> 4;\n"); //$NON-NLS-1$
-			buf.append("    default -> 0;\n"); //$NON-NLS-1$
-			buf.append("};\n"); //$NON-NLS-1$
-			buf.append("\n"); //$NON-NLS-1$
-		} else {
-			buf.append("int i;\n"); //$NON-NLS-1$
-			buf.append("switch(j) {\n"); //$NON-NLS-1$
-			buf.append("    case 1:\n"); //$NON-NLS-1$
-			buf.append("        i = 3;\n"); //$NON-NLS-1$
-			buf.append("        break;\n"); //$NON-NLS-1$
-			buf.append("    case 2:\n"); //$NON-NLS-1$
-			buf.append("        i = 4;\n"); //$NON-NLS-1$
-			buf.append("        break;\n"); //$NON-NLS-1$
-			buf.append("    default:\n"); //$NON-NLS-1$
-			buf.append("        i = 0;\n"); //$NON-NLS-1$
-			buf.append("        break;\n"); //$NON-NLS-1$
-			buf.append("}\n"); //$NON-NLS-1$
-			buf.append("\n"); //$NON-NLS-1$
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS)) {
+			return "" //$NON-NLS-1$
+					+ "int i = switch(j) {\n" //$NON-NLS-1$
+					+ "    case 1 -> 3;\n" //$NON-NLS-1$
+					+ "    case 2 -> 4;\n" //$NON-NLS-1$
+					+ "    default -> 0;\n" //$NON-NLS-1$
+					+ "};\n\n\n\n\n\n\n\n\n"; //$NON-NLS-1$
 		}
-		return buf.toString();
-	}
 
+		return "" //$NON-NLS-1$
+				+ "int i;\n" //$NON-NLS-1$
+				+ "switch(j) {\n" //$NON-NLS-1$
+				+ "    case 1:\n" //$NON-NLS-1$
+				+ "        i = 3;\n" //$NON-NLS-1$
+				+ "        break;\n" //$NON-NLS-1$
+				+ "    case 2:\n" //$NON-NLS-1$
+				+ "        i = 4;\n" //$NON-NLS-1$
+				+ "        break;\n" //$NON-NLS-1$
+				+ "    default:\n" //$NON-NLS-1$
+				+ "        i = 0;\n" //$NON-NLS-1$
+				+ "        break;\n" //$NON-NLS-1$
+				+ "}\n" //$NON-NLS-1$
+				+ "\n"; //$NON-NLS-1$
+	}
 }

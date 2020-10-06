@@ -132,9 +132,12 @@ public class Java50CleanUp extends AbstractMultiFix {
 		buf.append("     */\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED)) {
 			buf.append("    @Deprecated\n"); //$NON-NLS-1$
+			buf.append("    public void foo() {}\n"); //$NON-NLS-1$
+			buf.append("}\n"); //$NON-NLS-1$
+		} else {
+			buf.append("    public void foo() {}\n"); //$NON-NLS-1$
+			buf.append("}\n\n"); //$NON-NLS-1$
 		}
-		buf.append("    public void foo() {}\n"); //$NON-NLS-1$
-		buf.append("}\n"); //$NON-NLS-1$
 		buf.append("class ESub extends E implements Runnable {\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)) {
 			buf.append("    @Override\n"); //$NON-NLS-1$
@@ -144,9 +147,15 @@ public class Java50CleanUp extends AbstractMultiFix {
 				&& isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)
 				&& isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION)) {
 			buf.append("    @Override\n"); //$NON-NLS-1$
+			buf.append("    public void run() {}\n"); //$NON-NLS-1$
+			buf.append("}\n"); //$NON-NLS-1$
+		} else {
+			buf.append("    public void run() {}\n"); //$NON-NLS-1$
+			buf.append("}\n\n"); //$NON-NLS-1$
 		}
-		buf.append("    public void run() {}\n"); //$NON-NLS-1$
-		buf.append("}\n"); //$NON-NLS-1$
+		if (!isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) || !isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)) {
+			buf.append("\n"); //$NON-NLS-1$
+		}
 
 		return buf.toString();
 	}

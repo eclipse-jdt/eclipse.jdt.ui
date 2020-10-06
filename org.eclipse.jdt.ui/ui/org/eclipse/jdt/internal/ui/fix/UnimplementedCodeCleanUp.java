@@ -65,26 +65,28 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuilder buf= new StringBuilder();
+		StringBuilder bld= new StringBuilder();
 
 		if (isEnabled(MAKE_TYPE_ABSTRACT)) {
-			buf.append("public abstract class Face implements IFace {\n"); //$NON-NLS-1$
+			bld.append("public abstract class Face implements IFace {\n"); //$NON-NLS-1$
 		} else {
-			buf.append("public class Face implements IFace {\n"); //$NON-NLS-1$
+			bld.append("public class Face implements IFace {\n"); //$NON-NLS-1$
 		}
 		if (isEnabled(CleanUpConstants.ADD_MISSING_METHODES)) {
 			boolean createComments= Boolean.parseBoolean(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, null));
 			if (createComments)
-				buf.append(indent(getOverridingMethodComment(), "    ")); //$NON-NLS-1$
+				bld.append(indent(getOverridingMethodComment(), "    ")); //$NON-NLS-1$
 
-			buf.append("    @Override\n"); //$NON-NLS-1$
-			buf.append("    public void method() {\n"); //$NON-NLS-1$
-			buf.append(indent(getMethodBody(), "        ")); //$NON-NLS-1$
-			buf.append("    }\n"); //$NON-NLS-1$
+			bld.append("    @Override\n"); //$NON-NLS-1$
+			bld.append("    public void method() {\n"); //$NON-NLS-1$
+			bld.append(indent(getMethodBody(), "        ")); //$NON-NLS-1$
+			bld.append("    }\n"); //$NON-NLS-1$
+			bld.append("}\n"); //$NON-NLS-1$
+		} else {
+			bld.append("}\n\n\n\n\n\n"); //$NON-NLS-1$
 		}
-		buf.append("}\n"); //$NON-NLS-1$
 
-		return buf.toString();
+		return bld.toString();
 	}
 
 	@Override
