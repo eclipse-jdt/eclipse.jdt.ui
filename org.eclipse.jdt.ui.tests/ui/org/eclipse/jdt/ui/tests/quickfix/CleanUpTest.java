@@ -4508,6 +4508,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E1 {\n" //
+				+ "    private static final boolean CONSTANT = true;\n" //
 				+ "    private boolean[] booleanArray = new boolean[10];\n" //
 				+ "\n" //
 				+ "    public boolean[] refactorBooleanArray() {\n" //
@@ -4562,6 +4563,31 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return array;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public String[] refactorStringArrayWithLocalVar(String s) {\n" //
+				+ "        String[] array = new String[10];\n" //
+				+ "\n" //
+				+ "        String var = \"foo\";\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = var;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = s;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[] refactorArrayWithFinalField() {\n" //
+				+ "        Boolean[] array = new Boolean[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = CONSTANT;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public String[] refactorBackwardLoopOnArrary() {\n" //
 				+ "        String[] array = new String[10];\n" //
 				+ "\n" //
@@ -4594,6 +4620,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.Arrays;\n" //
 				+ "\n" //
 				+ "public class E1 {\n" //
+				+ "    private static final boolean CONSTANT = true;\n" //
 				+ "    private boolean[] booleanArray = new boolean[10];\n" //
 				+ "\n" //
 				+ "    public boolean[] refactorBooleanArray() {\n" //
@@ -4632,6 +4659,25 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return array;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public String[] refactorStringArrayWithLocalVar(String s) {\n" //
+				+ "        String[] array = new String[10];\n" //
+				+ "\n" //
+				+ "        String var = \"foo\";\n" //
+				+ "        Arrays.fill(array, var);\n" //
+				+ "\n" //
+				+ "        Arrays.fill(array, s);\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[] refactorArrayWithFinalField() {\n" //
+				+ "        Boolean[] array = new Boolean[10];\n" //
+				+ "\n" //
+				+ "        Arrays.fill(array, CONSTANT);\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public String[] refactorBackwardLoopOnArrary() {\n" //
 				+ "        String[] array = new String[10];\n" //
 				+ "\n" //
@@ -4657,6 +4703,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E1 {\n" //
+				+ "    public int field = 4;\n" //
+				+ "    private static int changingValue = 0;\n" //
+				+ "    private final int CONSTANT = changingValue++;\n" //
+				+ "    private E1[] arrayOfE1 = null;\n" //
+				+ "\n" //
 				+ "    public boolean[] doNotReplaceNonForEachLoop() {\n" //
 				+ "        boolean[] array = new boolean[10];\n" //
 				+ "\n" //
@@ -4670,24 +4721,47 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return array;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public boolean[] doNotReplaceWierdLoop(int j) {\n" //
+				+ "    public boolean[] doNotReplaceWierdLoop(int k) {\n" //
 				+ "        boolean[] array = new boolean[10];\n" //
 				+ "\n" //
-				+ "        for (int i = 0; j++ < array.length; i++) {\n" //
-				+ "            array[i] = true;\n" //
+				+ "        for (int m = 0; k++ < array.length; m++) {\n" //
+				+ "            array[m] = true;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        return array;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public int[] doNotRefactorInitWithoutConstant(int j) {\n" //
+				+ "    public int[] doNotRefactorInitWithoutConstant(int n) {\n" //
 				+ "        int[] array = new int[10];\n" //
 				+ "\n" //
-				+ "        for (int i = 0; i < array.length; i++) {\n" //
-				+ "            array[i] = i*i;\n" //
+				+ "        for (int p = 0; p < array.length; p++) {\n" //
+				+ "            array[p] = p*p;\n" //
 				+ "        }\n" //
-				+ "        for (int i = array.length - 1; i >= 0; i--) {\n" //
-				+ "            array[i] = j++;\n" //
+				+ "        for (int p = array.length - 1; p >= 0; p--) {\n" //
+				+ "            array[p] = n++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] doNotRefactorInitWithIndexVarOrNonFinalField(int q) {\n" //
+				+ "        int[] array = new int[10];\n" //
+				+ "\n" //
+				+ "        for (int r = 0; r < array.length; r++) {\n" //
+				+ "            array[r] = r;\n" //
+				+ "        }\n" //
+				+ "        for (int r = 0; r < array.length; r++) {\n" //
+				+ "            array[r] = field;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] doNotRefactorCodeThatUsesIndex() {\n" //
+				+ "        int[] array = new int[10];\n" //
+				+ "\n" //
+				+ "        for (int s = 0; s < array.length; s++) {\n" //
+				+ "            array[s] = arrayOfE1[s].CONSTANT;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        return array;\n" //

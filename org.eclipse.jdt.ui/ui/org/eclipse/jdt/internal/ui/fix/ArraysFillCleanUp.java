@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,15 +26,21 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
@@ -111,7 +118,7 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 					Assignment assignment= ASTNodes.asExpression(statements.get(0), Assignment.class);
 
 					if (ASTNodes.hasOperator(assignment, Assignment.Operator.ASSIGN)
-							&& ASTNodes.isHardCoded(assignment.getRightHandSide())
+							&& isUnchangedValue(node, assignment.getRightHandSide())
 							&& ASTNodes.isPassive(assignment.getRightHandSide())) {
 						ArrayAccess arrayAccess= ASTNodes.as(assignment.getLeftHandSide(), ArrayAccess.class);
 
@@ -123,6 +130,36 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 				}
 
 				return true;
+			}
+
+			private boolean isUnchangedValue(final ForStatement node, final Expression expression) {
+				if (ASTNodes.isHardCoded(expression)) {
+					return true;
+				}
+
+				if (!ASTNodes.isPassive(expression)) {
+					return false;
+				}
+
+				if (expression instanceof SimpleName) {
+					SimpleName name= (SimpleName) expression;
+					IBinding binding= name.resolveBinding();
+
+					if (binding instanceof IVariableBinding) {
+						IVariableBinding varBinding= (IVariableBinding) binding;
+						ASTNode declaration= ASTNodes.findDeclaration(binding, expression.getRoot());
+
+						if (varBinding.isField()
+								&& declaration instanceof VariableDeclaration
+								&& ((VariableDeclaration) declaration).getInitializer() != null) {
+							return Modifier.isFinal(varBinding.getModifiers());
+						}
+
+						return declaration != null && !ASTNodes.isParent(declaration, node);
+					}
+				}
+
+				return false;
 			}
 
 			private boolean isSameVariable(final ForLoopContent loopContent, final ArrayAccess arrayAccess) {
