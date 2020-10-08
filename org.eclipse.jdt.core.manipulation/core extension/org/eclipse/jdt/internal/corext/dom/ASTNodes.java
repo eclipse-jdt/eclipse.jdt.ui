@@ -2195,6 +2195,30 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns the first ancestor of the provided node which has the required type.
+	 *
+	 * @param <T>           the required ancestor's type
+	 * @param node          the start node
+	 * @param ancestorClass the required ancestor's type
+	 * @return the first ancestor of the provided node which has the required type,
+	 *         {@code null} if no suitable ancestor can be found
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends ASTNode> T getTypedAncestor(final ASTNode node, final Class<T> ancestorClass) {
+		if (node == null || node.getParent() == null) {
+			return null;
+		}
+
+		ASTNode parent= node.getParent();
+
+		if (ancestorClass.isAssignableFrom(parent.getClass())) {
+			return (T) parent;
+		}
+
+		return getTypedAncestor(parent, ancestorClass);
+	}
+
+	/**
 	 * Returns the first ancestor of the provided node which has any of the required types.
 	 *
 	 * @param node the start node
@@ -2929,6 +2953,26 @@ public class ASTNodes {
 			final String... parameterTypesQualifiedNames) {
 		return node != null
 				&& usesGivenSignature(node.resolveMethodBinding(), typeQualifiedName, methodName, parameterTypesQualifiedNames);
+	}
+
+	/**
+	 * Returns whether the provided method declaration declares a method with the
+	 * provided method signature. The method signature is compared against the
+	 * erasure of the declared method.
+	 *
+	 * @param actualMethod                 the actual method declaration
+	 * @param typeQualifiedName            the expected qualified name of the type declaring
+	 *                                     the expected method
+	 * @param methodName                   the expected method name
+	 * @param parameterTypesQualifiedNames the expected qualified names of the parameter
+	 *                                     types
+	 * @return true if the provided method declaration matches the provided method
+	 *         signature, false otherwise
+	 */
+	public static boolean usesGivenSignature(final MethodDeclaration actualMethod, final String typeQualifiedName, final String methodName,
+			final String... parameterTypesQualifiedNames) {
+		return actualMethod != null
+				&& usesGivenSignature(actualMethod.resolveBinding(), typeQualifiedName, methodName, parameterTypesQualifiedNames);
 	}
 
 	/**

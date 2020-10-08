@@ -29,6 +29,8 @@ import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+
 public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Rule
     public ProjectTestSetup projectSetup= new Java1d7ProjectTestSetup();
@@ -79,6 +81,227 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testHash() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public class RefactoredClass {\n" //
+				+ "        private Map<Integer, String> innerTextById;\n" //
+				+ "        private Observable innerObservable;\n" //
+				+ "        private String innerText;\n" //
+				+ "        private String[] innerTexts;\n" //
+				+ "        private int[] innerIntegers;\n" //
+				+ "        private char innerChar;\n" //
+				+ "        private byte innerByte;\n" //
+				+ "        private boolean innerBoolean;\n" //
+				+ "        private int innerInt;\n" //
+				+ "        private long innerLong;\n" //
+				+ "        private double innerDouble;\n" //
+				+ "        private short innerShort;\n" //
+				+ "        private float innerFloat;\n" //
+				+ "        private double innerOtherDouble;\n" //
+				+ "        private Boolean innerBooleanWrapper;\n" //
+				+ "\n" //
+				+ "        @Override\n" //
+				+ "        public int hashCode() {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            final int prime = 31;\n" //
+				+ "            int result = 1;\n" //
+				+ "            result = prime * result + getEnclosingInstance().hashCode();\n" //
+				+ "            result = prime * result + (RefactoredClass.this.innerBoolean ? 1231 : 1237);\n" //
+				+ "            result = prime * result + this.innerByte;\n" //
+				+ "            result = prime * result + innerChar;\n" //
+				+ "            long temp = Double.doubleToLongBits(innerDouble);\n" //
+				+ "            result = prime * result + (int) ((temp >>> 32) ^ temp);\n" //
+				+ "            result = prime * result + Float.floatToIntBits(innerFloat);\n" //
+				+ "            result = result * prime + innerInt;\n" //
+				+ "            result = prime * result + Arrays.hashCode(innerIntegers);\n" //
+				+ "            result = prime * result + (int) (innerLong ^ (this.innerLong >>> 32));\n" //
+				+ "            result = prime * result + ((innerObservable == null) ? 0 : innerObservable.hashCode());\n" //
+				+ "            temp = Double.doubleToLongBits(innerOtherDouble);\n" //
+				+ "            result = prime * result + (int) (temp ^ (temp >>> 32));\n" //
+				+ "            result = prime * result + innerShort;\n" //
+				+ "            result = prime * result + ((innerText == null) ? 0 : innerText.hashCode());\n" //
+				+ "            result = prime * result + ((innerTextById != null) ? this.innerTextById.hashCode() : 0);\n" //
+				+ "            result = prime * result + ((this.innerBooleanWrapper != null) ? innerBooleanWrapper.hashCode() : 0);\n" //
+				+ "            return prime * result + Arrays.hashCode(innerTexts);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        private E getEnclosingInstance() {\n" //
+				+ "            return E.this;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private Map<Integer, String> textById;\n" //
+				+ "    private Observable anObservable;\n" //
+				+ "    private String aText;\n" //
+				+ "    private String[] texts;\n" //
+				+ "    private int[] integers;\n" //
+				+ "    private char aChar;\n" //
+				+ "    private byte aByte;\n" //
+				+ "    private boolean aBoolean;\n" //
+				+ "    private int anInt;\n" //
+				+ "    private long aLong;\n" //
+				+ "    private double aDouble;\n" //
+				+ "    private short aShort;\n" //
+				+ "    private float aFloat;\n" //
+				+ "    private double anotherDouble;\n" //
+				+ "\n" //
+				+ "    @Override\n" //
+				+ "    public int hashCode() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final int prime = 31;\n" //
+				+ "        int result = 1;\n" //
+				+ "        result = prime * result + (E.this.aBoolean ? 1231 : 1237);\n" //
+				+ "        result = prime * result + aByte;\n" //
+				+ "        result = prime * result + aChar;\n" //
+				+ "        result = prime * result + Float.floatToIntBits(aFloat);\n" //
+				+ "        result = prime * result + (int) (aLong ^ (aLong >>> 32));\n" //
+				+ "        long temp;\n" //
+				+ "        temp = Double.doubleToLongBits(aDouble);\n" //
+				+ "        result = prime * result + (int) (temp ^ (temp >>> 32));\n" //
+				+ "        result = prime * result + aShort;\n" //
+				+ "        result = prime * result + ((null == aText) ? 0 : aText.hashCode());\n" //
+				+ "        result = prime * result + anInt;\n" //
+				+ "        result = prime * result + ((anObservable == null) ? 0 : anObservable.hashCode());\n" //
+				+ "        result = prime * result + Arrays.hashCode(integers);\n" //
+				+ "        result = prime * result + ((textById == null) ? 0 : textById.hashCode());\n" //
+				+ "        result = prime * result + Arrays.hashCode(texts);\n" //
+				+ "        temp = Double.doubleToLongBits(anotherDouble);\n" //
+				+ "        result = prime * result + (int) (temp ^ (temp >>> 32));\n" //
+				+ "        return result;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.MODERNIZE_HASH);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Objects;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public class RefactoredClass {\n" //
+				+ "        private Map<Integer, String> innerTextById;\n" //
+				+ "        private Observable innerObservable;\n" //
+				+ "        private String innerText;\n" //
+				+ "        private String[] innerTexts;\n" //
+				+ "        private int[] innerIntegers;\n" //
+				+ "        private char innerChar;\n" //
+				+ "        private byte innerByte;\n" //
+				+ "        private boolean innerBoolean;\n" //
+				+ "        private int innerInt;\n" //
+				+ "        private long innerLong;\n" //
+				+ "        private double innerDouble;\n" //
+				+ "        private short innerShort;\n" //
+				+ "        private float innerFloat;\n" //
+				+ "        private double innerOtherDouble;\n" //
+				+ "        private Boolean innerBooleanWrapper;\n" //
+				+ "\n" //
+				+ "        @Override\n" //
+				+ "        public int hashCode() {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            return Objects.hash(getEnclosingInstance().hashCode(), innerBoolean, innerByte, innerChar, innerDouble,\n" //
+				+ "                    innerFloat, innerInt, Arrays.hashCode(innerIntegers), innerLong, innerObservable, innerOtherDouble,\n" //
+				+ "                    innerShort, innerText, innerTextById, innerBooleanWrapper, Arrays.hashCode(innerTexts));\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        private E getEnclosingInstance() {\n" //
+				+ "            return E.this;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private Map<Integer, String> textById;\n" //
+				+ "    private Observable anObservable;\n" //
+				+ "    private String aText;\n" //
+				+ "    private String[] texts;\n" //
+				+ "    private int[] integers;\n" //
+				+ "    private char aChar;\n" //
+				+ "    private byte aByte;\n" //
+				+ "    private boolean aBoolean;\n" //
+				+ "    private int anInt;\n" //
+				+ "    private long aLong;\n" //
+				+ "    private double aDouble;\n" //
+				+ "    private short aShort;\n" //
+				+ "    private float aFloat;\n" //
+				+ "    private double anotherDouble;\n" //
+				+ "\n" //
+				+ "    @Override\n" //
+				+ "    public int hashCode() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Objects.hash(aBoolean, aByte, aChar, aFloat, aLong,\n" //
+				+ "                aDouble, aShort, aText, anInt, anObservable, Arrays.hashCode(integers), textById,\n" //
+				+ "                Arrays.hashCode(texts), anotherDouble);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.HashCleanup_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testKeepHash() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public class DoNotRefactorNewClass {\n" //
+				+ "        private boolean innerBoolean;\n" //
+				+ "\n" //
+				+ "        @Override\n" //
+				+ "        public int hashCode() {\n" //
+				+ "            final int prime = 31;\n" //
+				+ "            int result = 1;\n" //
+				+ "            result = prime * result + getEnclosingInstance().hashCode();\n" //
+				+ "            result = prime * result + (innerBoolean ? 1231 : 1237);\n" //
+				+ "            return result;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        private E getEnclosingInstance() {\n" //
+				+ "            return new E();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorCustomHash {\n" //
+				+ "        private boolean innerBoolean;\n" //
+				+ "\n" //
+				+ "        @Override\n" //
+				+ "        public int hashCode() {\n" //
+				+ "            final int prime = 63;\n" //
+				+ "            int result = 1;\n" //
+				+ "            result = prime * result + (innerBoolean ? 1231 : 1237);\n" //
+				+ "            return result;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private boolean innerBoolean;\n" //
+				+ "\n" //
+				+ "    @Override\n" //
+				+ "    public int hashCode() {\n" //
+				+ "        final int prime = 31;\n" //
+				+ "        int result = 1;\n" //
+				+ "        result += prime * result + (innerBoolean ? 1231 : 1237);\n" //
+				+ "        return result;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.MODERNIZE_HASH);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
