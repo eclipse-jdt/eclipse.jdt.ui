@@ -367,7 +367,6 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		codeComplete(cu, offset, collector);
 
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-		assertEquals(2, proposals.length);
 		IEditorPart part= JavaUI.openInEditor(cu);
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
