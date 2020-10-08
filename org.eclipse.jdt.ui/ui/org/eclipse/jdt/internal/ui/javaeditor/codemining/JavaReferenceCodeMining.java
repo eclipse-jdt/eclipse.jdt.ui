@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2019 Angelo Zerr and others.
+ * Copyright (c) 2018, 2020 Angelo Zerr and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  * - Angelo Zerr: initial API and implementation
+ * - IBM Corporation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
@@ -86,7 +87,7 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 				long refCount= countReferences(element, monitor);
 				monitor.isCanceled();
 				action= refCount > 0 ? e -> {
-					if (refCount == 1 && (e.stateMask & SWT.CTRL) == SWT.CTRL) {
+					if (refCount == 1 && ((e.stateMask & SWT.CTRL) == SWT.CTRL || (e.stateMask & SWT.COMMAND) == SWT.COMMAND)) {
 						// Ctrl + Click is done, open the referenced element in the Java Editor
 						try {
 							SearchMatch match= getReferenceMatch(element, monitor);
