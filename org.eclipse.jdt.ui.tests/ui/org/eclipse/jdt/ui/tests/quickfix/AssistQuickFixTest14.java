@@ -97,8 +97,8 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
 
-		int index= buf.indexOf("switch");
-		IInvocationContext ctx= getCorrectionContext(cu, index, 0);
+		int index= buf.indexOf("\t\tswitch (day) {");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 16);
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 

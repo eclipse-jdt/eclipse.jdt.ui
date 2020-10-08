@@ -720,9 +720,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getConvertToSwitchExpressionProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		while (covering instanceof SwitchCase
-				|| covering instanceof SwitchExpression) {
-			covering= covering.getParent();
+		if (covering instanceof Block) {
+			List<Statement> statements= ((Block) covering).statements();
+			int startIndex= getIndex(context.getSelectionOffset(), statements);
+			if (startIndex == -1 || startIndex >= statements.size()) {
+				return false;
+			}
+			covering= statements.get(startIndex);
+		} else {
+			while (covering instanceof SwitchCase
+					|| covering instanceof SwitchExpression) {
+				covering= covering.getParent();
+			}
 		}
 
 		SwitchStatement switchStatement;
