@@ -157,6 +157,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/actions/GenerateConstructorUsingFieldsSelectionDialog.java" type="org.eclipse.jdt.internal.ui.actions.GenerateConstructorUsingFieldsSelectionDialog">
+        <filter comment="Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="GenerateConstructorUsingFieldsSelectionDialog"/>
+                <message_argument value="isRecord()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/callhierarchy/CallHierarchyViewer.java" type="org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyViewer">
         <filter id="571473929">
             <message_arguments>

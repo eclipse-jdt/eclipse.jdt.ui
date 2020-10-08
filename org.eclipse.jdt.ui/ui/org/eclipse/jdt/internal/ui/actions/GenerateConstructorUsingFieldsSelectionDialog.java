@@ -124,7 +124,8 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		}
 
 		final boolean isEnum= type.isEnum();
-		fOmitSuper= fGenConstructorSettings.getBoolean(OMIT_SUPER) || isEnum;
+		final boolean isRecord= type.isRecord();
+		fOmitSuper= fGenConstructorSettings.getBoolean(OMIT_SUPER) || isEnum || isRecord;
 		if (isEnum)
 			setVisibility(Modifier.PRIVATE);
 	}
@@ -313,7 +314,8 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		try {
 			// Disable omit super checkbox unless default constructor and enum
 			final boolean hasContructor= getSuperConstructorChoice().getParameterTypes().length == 0;
-			fOmitSuperButton.setEnabled(hasContructor && !getType().isEnum());
+			IType type= getType();
+			fOmitSuperButton.setEnabled(hasContructor && !type.isEnum() && !type.isRecord());
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
