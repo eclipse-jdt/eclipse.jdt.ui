@@ -218,4 +218,30 @@ public class UtilitiesTest extends QuickFixTest {
 			}
 		}
 	}
+
+	@Test
+	public void testGetPossibleTypeKindsForTypes() throws Exception {
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public sealed interface E permits X {}\n");
+		buf.append("public sealed class F permits X {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int[] expected= {
+				TypeKinds.CLASSES | TypeKinds.INTERFACES,
+				TypeKinds.CLASSES
+		};
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		for (int i = 0; i < astRoot.types().size(); i++) {
+			TypeDeclaration typeDecl = (TypeDeclaration) astRoot.types().get(i);
+			ASTNode node= NodeFinder.perform(astRoot, buf.indexOf("X", typeDecl.getStartPosition()), 1);
+			int kinds= ASTResolving.getPossibleTypeKinds(node, true);
+			assertEquals("Guessing failed for " + node.toString(), expected[i], kinds);
+		}
+	}
 }

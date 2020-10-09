@@ -1090,6 +1090,13 @@ public class ASTResolving {
 						kind= TypeKinds.INTERFACES;
 					} else if (node.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
 						kind= TypeKinds.CLASSES;
+					} else if (node.getLocationInParent() == TypeDeclaration.PERMITS_TYPES_PROPERTY) {
+						if (ASTHelper.isSealedTypeSupportedInAST(node.getAST())) {
+							kind = TypeKinds.CLASSES;
+							if (((TypeDeclaration) parent).isInterface()) {
+								kind |= TypeKinds.INTERFACES;
+							}
+						}
 					}
 					break;
 				case ASTNode.ENUM_DECLARATION:
