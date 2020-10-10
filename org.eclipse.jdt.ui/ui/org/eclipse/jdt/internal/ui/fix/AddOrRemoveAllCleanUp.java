@@ -115,29 +115,22 @@ public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpF
 		unit.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(final EnhancedForStatement node) {
-				Expression iterable= node.getExpression();
-				List<Statement> statements= ASTNodes.asList(node.getBody());
-
-				if (statements.size() != 1) {
-					return true;
-				}
-
-				MethodInvocation methodInvocation= ASTNodes.asExpression(statements.get(0), MethodInvocation.class);
+				MethodInvocation methodInvocation= ASTNodes.asExpression(node.getBody(), MethodInvocation.class);
 				IVariableBinding foreachVariable= node.getParameter().resolveBinding();
-				if (methodInvocation == null || methodInvocation.arguments().size() != 1) {
-					return true;
-				}
-
-				Expression arg0= (Expression) methodInvocation.arguments().get(0);
 
 				// We should remove all the loop variable occurrences
 				// As we replace only one, there should be no more than one occurrence
-				if (getVariableUseCount(foreachVariable, node.getBody()) == 1) {
+				if (methodInvocation != null
+						&& methodInvocation.arguments().size() == 1
+						&& getVariableUseCount(foreachVariable, node.getBody()) == 1) {
+					Expression iterable= node.getExpression();
+					Expression argument= (Expression) methodInvocation.arguments().get(0);
+
 					if (ASTNodes.instanceOf(iterable, Collection.class.getCanonicalName())) {
-						if (ASTNodes.isSameLocalVariable(node.getParameter(), arg0)) {
+						if (ASTNodes.isSameLocalVariable(node.getParameter(), argument)) {
 							return maybeReplaceForCollection(node, methodInvocation, iterable);
 						}
-					} else if (ASTNodes.isArray(iterable) && ASTNodes.isSameLocalVariable(foreachVariable, arg0)) {
+					} else if (ASTNodes.isArray(iterable) && ASTNodes.isSameLocalVariable(foreachVariable, argument)) {
 						return maybeReplaceForArray(node, iterable, methodInvocation);
 					}
 				}
@@ -148,16 +141,18 @@ public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpF
 			@Override
 			public boolean visit(final ForStatement node) {
 				ForLoopContent loopContent= ForLoops.iterateOverContainer(node);
-				List<Statement> statements= ASTNodes.asList(node.getBody());
+				MethodInvocation methodInvocation= ASTNodes.asExpression(node.getBody(), MethodInvocation.class);
 
-				if (loopContent != null && loopContent.getLoopVariable() != null && statements.size() == 1) {
+				if (loopContent != null
+						&& loopContent.getLoopVariable() != null
+						&& methodInvocation != null
+						&& methodInvocation.arguments().size() == 1) {
 					Name loopVariable= loopContent.getLoopVariable();
 					IVariableBinding loopVariableName= (IVariableBinding) loopVariable.resolveBinding();
-					MethodInvocation methodInvocation= ASTNodes.asExpression(statements.get(0), MethodInvocation.class);
 
 					// We should remove all the loop variable occurrences
 					// As we replace only one, there should be no more than one occurrence
-					if (methodInvocation != null && methodInvocation.arguments().size() == 1 && getVariableUseCount(loopVariableName, node.getBody()) == 1
+					if (getVariableUseCount(loopVariableName, node.getBody()) == 1
 							&& (loopContent.isLoopingForward()
 									|| (methodInvocation.resolveMethodBinding() != null
 									&& ASTNodes.hasType(methodInvocation.resolveMethodBinding().getDeclaringClass(), Set.class.getCanonicalName())))) {

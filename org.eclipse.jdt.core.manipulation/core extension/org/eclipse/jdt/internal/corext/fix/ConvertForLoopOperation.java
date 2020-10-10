@@ -39,11 +39,9 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -69,15 +67,12 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-
 public class ConvertForLoopOperation extends ConvertLoopOperation {
-
 	private static final String LENGTH_QUERY= "length"; //$NON-NLS-1$
 	private static final String SIZE_QUERY= "size"; //$NON-NLS-1$
 	private static final String GET_QUERY= "get"; //$NON-NLS-1$
 	private static final String ISEMPTY_QUERY= "isEmpty"; //$NON-NLS-1$
-	private static final String LITERAL_0= "0"; //$NON-NLS-1$
-	private static final String LITERAL_1= "1"; //$NON-NLS-1$
+
 	private static final class InvalidBodyError extends Error {
 		private static final long serialVersionUID= 1L;
 	}
@@ -94,6 +89,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private MethodInvocation fSizeMethodAccess;
 	private boolean fCheckLoopVarUsed;
 	private boolean fLoopVarReferenced;
+
 	public ConvertForLoopOperation(ForStatement forStatement) {
 		this(forStatement, new String[0], false, false);
 	}
@@ -219,12 +215,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	 * </ul>
 	 */
 	private IVariableBinding getIndexBindingFromFragment(VariableDeclarationFragment fragment) {
-		Expression initializer= fragment.getInitializer();
-		if (!(initializer instanceof NumberLiteral))
-			return null;
-
-		NumberLiteral number= (NumberLiteral)initializer;
-		if (!LITERAL_0.equals(number.getToken()))
+		if (!Long.valueOf(0).equals(ASTNodes.getIntegerLiteral(fragment.getInitializer())))
 			return null;
 
 		return (IVariableBinding)fragment.getName().resolveBinding();
@@ -263,18 +254,18 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 
 			if (fIndexBinding.equals(leftBinding)) {
 				return lengthBinding.equals(righBinding)
-						&& ASTNodes.hasOperator(infix, Operator.LESS, Operator.NOT_EQUALS);
+						&& ASTNodes.hasOperator(infix, InfixExpression.Operator.LESS, InfixExpression.Operator.NOT_EQUALS);
 			}
 
 			if (fIndexBinding.equals(righBinding)) {
 				return lengthBinding.equals(leftBinding)
-						&& ASTNodes.hasOperator(infix, Operator.GREATER, Operator.NOT_EQUALS);
+						&& ASTNodes.hasOperator(infix, InfixExpression.Operator.GREATER, InfixExpression.Operator.NOT_EQUALS);
 			}
 		} else if (left instanceof SimpleName) {
 			if (!fIndexBinding.equals(((SimpleName)left).resolveBinding()))
 				return false;
 
-			if (!Operator.LESS.equals(infix.getOperator()) && !Operator.NOT_EQUALS.equals(infix.getOperator()))
+			if (!ASTNodes.hasOperator(infix, InfixExpression.Operator.LESS, InfixExpression.Operator.NOT_EQUALS))
 				return false;
 
 			return validateLengthQuery(right);
@@ -282,7 +273,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			if (!fIndexBinding.equals(((SimpleName)right).resolveBinding()))
 				return false;
 
-			if (!Operator.GREATER.equals(infix.getOperator()) && !Operator.NOT_EQUALS.equals(infix.getOperator()))
+			if (!ASTNodes.hasOperator(infix, InfixExpression.Operator.GREATER, InfixExpression.Operator.NOT_EQUALS))
 				return false;
 
 			return validateLengthQuery(left);
@@ -431,7 +422,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 				return false;
 
 			if (Assignment.Operator.PLUS_ASSIGN.equals(assignment.getOperator())) {
-				return isOneLiteral(assignment.getRightHandSide());
+				return Long.valueOf(1).equals(ASTNodes.getIntegerLiteral(assignment.getRightHandSide()));
 			} else if (Assignment.Operator.ASSIGN.equals(assignment.getOperator())) {
 				Expression right= assignment.getRightHandSide();
 				if (!(right instanceof InfixExpression))
@@ -444,23 +435,14 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 				IBinding rightBinding= getBinding(rightOperand);
 
 				if (fIndexBinding.equals(leftBinding)) {
-					return isOneLiteral(rightOperand);
+					return Long.valueOf(1).equals(ASTNodes.getIntegerLiteral(rightOperand));
 				} else if (fIndexBinding.equals(rightBinding)) {
-					return isOneLiteral(leftOperand);
+					return Long.valueOf(1).equals(ASTNodes.getIntegerLiteral(leftOperand));
 				}
 			}
 		}
 		return false;
 	}
-
-	private boolean isOneLiteral(Expression expression) {
-		if (!(expression instanceof NumberLiteral))
-			return false;
-
-		NumberLiteral literal= (NumberLiteral)expression;
-		return LITERAL_1.equals(literal.getToken());
-	}
-
 
 	/*
 	 * returns false iff
@@ -893,7 +875,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		});
 	}
 
-	private SingleVariableDeclaration createParameterDeclarationCollection(String parameterName, VariableDeclarationFragment fragement, Expression sizeAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroupCore pg, boolean makeFinal) {
+	private SingleVariableDeclaration createParameterDeclarationCollection(String parameterName, VariableDeclarationFragment fragment, Expression sizeAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroupCore pg, boolean makeFinal) {
 		CompilationUnit compilationUnit= (CompilationUnit)sizeAccess.getRoot();
 		AST ast= compilationUnit.getAST();
 
@@ -912,16 +894,14 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			TypeLocation.LOCAL_VARIABLE);
 		result.setType(type);
 
-		if (fragement != null) {
-			VariableDeclarationStatement declaration= (VariableDeclarationStatement)fragement.getParent();
+		if (fragment != null) {
+			VariableDeclarationStatement declaration= (VariableDeclarationStatement)fragment.getParent();
 			ModifierRewrite.create(rewrite, result).copyAllModifiers(declaration, group);
 		}
-		if (makeFinal && (fragement == null || ASTNodes.findModifierNode(Modifier.FINAL, ASTNodes.getModifiers(fragement)) == null)) {
+		if (makeFinal && (fragment == null || ASTNodes.findModifierNode(Modifier.FINAL, ASTNodes.getModifiers(fragment)) == null)) {
 			ModifierRewrite.create(rewrite, result).setModifiers(Modifier.FINAL, 0, group);
 		}
 
 		return result;
 	}
-
-
 }

@@ -41,7 +41,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -53,8 +53,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -142,7 +142,7 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 						Expression arg0= (Expression) methodInvocation.arguments().get(0);
 						Statement previousStatement= ASTNodes.getPreviousSibling(node);
 						Assignment as= ASTNodes.asExpression(previousStatement, Assignment.class);
-						VariableDeclarationStatement variableDeclarationStatement= ASTNodes.as(previousStatement, VariableDeclarationStatement.class);
+						VariableDeclarationFragment fragment= ASTNodes.getUniqueFragment(previousStatement);
 
 						if (ASTNodes.hasOperator(as, Assignment.Operator.ASSIGN)) {
 							SimpleName lhs= ASTNodes.as(as.getLeftHandSide(), SimpleName.class);
@@ -150,12 +150,8 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 							if (lhs != null && ASTNodes.isSameLocalVariable(lhs, methodInvocation.getExpression())) {
 								return maybeReplaceInitializer(as.getRightHandSide(), arg0, node);
 							}
-						} else if (variableDeclarationStatement != null && variableDeclarationStatement.fragments().size() == 1) {
-							VariableDeclarationFragment fragment= (VariableDeclarationFragment) variableDeclarationStatement.fragments().get(0);
-
-							if (fragment != null && ASTNodes.isSameLocalVariable(fragment, methodInvocation.getExpression())) {
-								return maybeReplaceInitializer(fragment.getInitializer(), arg0, node);
-							}
+						} else if (fragment != null && ASTNodes.isSameLocalVariable(fragment, methodInvocation.getExpression())) {
+							return maybeReplaceInitializer(fragment.getInitializer(), arg0, node);
 						}
 					}
 
@@ -167,7 +163,7 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 					ClassInstanceCreation cic= ASTNodes.as(nodeToReplace, ClassInstanceCreation.class);
 
 					if (canReplaceInitializer(cic, arg0) && ASTNodes.isCastCompatible(nodeToReplace, arg0)) {
-						rewriteOperations.add(new CollectionCloningOperation(nodeToReplace, nodeToRemove, cic, arg0));
+						rewriteOperations.add(new CollectionCloningOperation(nodeToRemove, cic, arg0));
 
 						result= false;
 						return false;
@@ -181,24 +177,39 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 						return false;
 					}
 
-					List<Expression> args= cic.arguments();
-					boolean noArgsCtor= args.isEmpty();
-
-					if (noArgsCtor && ASTNodes.hasType(cic, ConcurrentLinkedDeque.class.getCanonicalName(), ArrayList.class.getCanonicalName(),
-							HashSet.class.getCanonicalName(), LinkedHashSet.class.getCanonicalName(), LinkedList.class.getCanonicalName(),
-							TreeSet.class.getCanonicalName(), Vector.class.getCanonicalName(), ConcurrentLinkedQueue.class.getCanonicalName(),
-							ConcurrentSkipListSet.class.getCanonicalName(), CopyOnWriteArrayList.class.getCanonicalName(),
-							CopyOnWriteArraySet.class.getCanonicalName(), DelayQueue.class.getCanonicalName(), LinkedBlockingDeque.class.getCanonicalName(),
-							LinkedBlockingQueue.class.getCanonicalName(), LinkedTransferQueue.class.getCanonicalName(), PriorityBlockingQueue.class.getCanonicalName(),
-							ArrayDeque.class.getCanonicalName(), PriorityQueue.class.getCanonicalName())) {
-						return true;
+					if (cic.arguments().isEmpty()) {
+						return ASTNodes.hasType(cic,
+								ConcurrentLinkedDeque.class.getCanonicalName(),
+								ArrayList.class.getCanonicalName(),
+								HashSet.class.getCanonicalName(),
+								LinkedHashSet.class.getCanonicalName(),
+								LinkedList.class.getCanonicalName(),
+								TreeSet.class.getCanonicalName(),
+								Vector.class.getCanonicalName(),
+								ConcurrentLinkedQueue.class.getCanonicalName(),
+								ConcurrentSkipListSet.class.getCanonicalName(),
+								CopyOnWriteArrayList.class.getCanonicalName(),
+								CopyOnWriteArraySet.class.getCanonicalName(),
+								DelayQueue.class.getCanonicalName(),
+								LinkedBlockingDeque.class.getCanonicalName(),
+								LinkedBlockingQueue.class.getCanonicalName(),
+								LinkedTransferQueue.class.getCanonicalName(),
+								PriorityBlockingQueue.class.getCanonicalName(),
+								ArrayDeque.class.getCanonicalName(),
+								PriorityQueue.class.getCanonicalName());
 					}
 
-					boolean colCapacityCtor= isValidCapacityParameter(sourceCollection, args);
-
-					return colCapacityCtor && ASTNodes.hasType(cic, ArrayList.class.getCanonicalName(), HashSet.class.getCanonicalName(), LinkedHashSet.class.getCanonicalName(),
-							LinkedBlockingDeque.class.getCanonicalName(), LinkedBlockingQueue.class.getCanonicalName(), PriorityBlockingQueue.class.getCanonicalName(),
-							ArrayDeque.class.getCanonicalName(), PriorityQueue.class.getCanonicalName(), Vector.class.getCanonicalName());
+					return isValidCapacityParameter(sourceCollection, cic.arguments())
+							&& ASTNodes.hasType(cic,
+									ArrayList.class.getCanonicalName(),
+									HashSet.class.getCanonicalName(),
+									LinkedHashSet.class.getCanonicalName(),
+									LinkedBlockingDeque.class.getCanonicalName(),
+									LinkedBlockingQueue.class.getCanonicalName(),
+									PriorityBlockingQueue.class.getCanonicalName(),
+									ArrayDeque.class.getCanonicalName(),
+									PriorityQueue.class.getCanonicalName(),
+									Vector.class.getCanonicalName());
 				}
 
 				private boolean isValidCapacityParameter(final Expression sourceCollection, final List<Expression> args) {
@@ -239,29 +250,28 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 	}
 
 	private static class CollectionCloningOperation extends CompilationUnitRewriteOperation {
-		private final Expression nodeToReplace;
 		private final ExpressionStatement nodeToRemove;
-		private final ClassInstanceCreation cic;
+		private final ClassInstanceCreation classInstanceCreation;
 		private final Expression arg0;
 
-		public CollectionCloningOperation(final Expression nodeToReplace, final ExpressionStatement nodeToRemove, final ClassInstanceCreation cic, final Expression arg0) {
-			this.nodeToReplace= nodeToReplace;
+		public CollectionCloningOperation(final ExpressionStatement nodeToRemove, final ClassInstanceCreation classInstanceCreation, final Expression arg0) {
 			this.nodeToRemove= nodeToRemove;
-			this.cic= cic;
+			this.classInstanceCreation= classInstanceCreation;
 			this.arg0= arg0;
 		}
 
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			AST ast= cuRewrite.getRoot().getAST();
+			ListRewrite listRewrite= rewrite.getListRewrite(classInstanceCreation, ClassInstanceCreation.ARGUMENTS_PROPERTY);
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.CollectionCloningCleanUp_description, cuRewrite);
 
-			ClassInstanceCreation newClassInstanceCreation= ast.newClassInstanceCreation();
-			newClassInstanceCreation.setType(ASTNodes.createMoveTarget(rewrite, cic.getType()));
-			newClassInstanceCreation.arguments().add(ASTNodes.createMoveTarget(rewrite, arg0));
+			if (classInstanceCreation.arguments() == null || classInstanceCreation.arguments().isEmpty()) {
+				listRewrite.insertFirst(ASTNodes.createMoveTarget(rewrite, arg0), group);
+			} else {
+				listRewrite.replace((ASTNode) classInstanceCreation.arguments().get(0), ASTNodes.createMoveTarget(rewrite, arg0), group);
+			}
 
-			ASTNodes.replaceButKeepComment(rewrite, nodeToReplace, newClassInstanceCreation, group);
 			rewrite.remove(nodeToRemove, group);
 		}
 	}

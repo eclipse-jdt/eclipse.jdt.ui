@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -131,20 +130,17 @@ public class MapCloningCleanUp extends AbstractMultiFix {
 					if (result && ASTNodes.usesGivenSignature(methodInvocation, Map.class.getCanonicalName(), "putAll", Map.class.getCanonicalName())) { //$NON-NLS-1$
 						Expression arg0= (Expression) methodInvocation.arguments().get(0);
 						Statement previousStatement= ASTNodes.getPreviousSibling(node);
+						VariableDeclarationFragment fragment= ASTNodes.getUniqueFragment(previousStatement);
 
-						Assignment as= ASTNodes.asExpression(previousStatement, Assignment.class);
-						if (ASTNodes.hasOperator(as, Assignment.Operator.ASSIGN)) {
-							SimpleName lhs= ASTNodes.as(as.getLeftHandSide(), SimpleName.class);
+						Assignment assignment= ASTNodes.asExpression(previousStatement, Assignment.class);
+						if (ASTNodes.hasOperator(assignment, Assignment.Operator.ASSIGN)) {
+							SimpleName leftHandSide= ASTNodes.as(assignment.getLeftHandSide(), SimpleName.class);
 
-							if (lhs != null && ASTNodes.isSameLocalVariable(lhs, methodInvocation.getExpression())) {
-								return maybeReplaceInitializer(as.getRightHandSide(), arg0, node);
+							if (leftHandSide != null && ASTNodes.isSameLocalVariable(leftHandSide, methodInvocation.getExpression())) {
+								return maybeReplaceInitializer(assignment.getRightHandSide(), arg0, node);
 							}
-						} else if (previousStatement instanceof VariableDeclarationStatement) {
-							VariableDeclarationFragment fragment= ASTNodes.getUniqueFragment(previousStatement);
-
-							if (fragment != null && ASTNodes.isSameLocalVariable(fragment, methodInvocation.getExpression())) {
-								return maybeReplaceInitializer(fragment.getInitializer(), arg0, node);
-							}
+						} else if (fragment != null && ASTNodes.isSameLocalVariable(fragment, methodInvocation.getExpression())) {
+							return maybeReplaceInitializer(fragment.getInitializer(), arg0, node);
 						}
 					}
 
@@ -229,25 +225,25 @@ public class MapCloningCleanUp extends AbstractMultiFix {
 
 	private static class MapCloningOperation extends CompilationUnitRewriteOperation {
 		private final ExpressionStatement nodeToRemove;
-		private final ClassInstanceCreation cic;
+		private final ClassInstanceCreation classInstanceCreation;
 		private final Expression arg0;
 
-		public MapCloningOperation(final ExpressionStatement nodeToRemove, final ClassInstanceCreation cic, final Expression arg0) {
+		public MapCloningOperation(final ExpressionStatement nodeToRemove, final ClassInstanceCreation classInstanceCreation, final Expression arg0) {
 			this.nodeToRemove= nodeToRemove;
-			this.cic= cic;
+			this.classInstanceCreation= classInstanceCreation;
 			this.arg0= arg0;
 		}
 
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			ListRewrite listRewrite= rewrite.getListRewrite(cic, ClassInstanceCreation.ARGUMENTS_PROPERTY);
+			ListRewrite listRewrite= rewrite.getListRewrite(classInstanceCreation, ClassInstanceCreation.ARGUMENTS_PROPERTY);
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.MapCloningCleanUp_description, cuRewrite);
 
-			if (cic.arguments() == null || cic.arguments().isEmpty()) {
+			if (classInstanceCreation.arguments() == null || classInstanceCreation.arguments().isEmpty()) {
 				listRewrite.insertFirst(ASTNodes.createMoveTarget(rewrite, arg0), group);
 			} else {
-				listRewrite.replace((ASTNode) cic.arguments().get(0), ASTNodes.createMoveTarget(rewrite, arg0), group);
+				listRewrite.replace((ASTNode) classInstanceCreation.arguments().get(0), ASTNodes.createMoveTarget(rewrite, arg0), group);
 			}
 
 			rewrite.remove(nodeToRemove, group);

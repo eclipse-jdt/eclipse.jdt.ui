@@ -311,12 +311,12 @@ public class PatternCleanUp extends AbstractMultiFix {
 			TextEditGroup group= createTextEditGroup(FixMessages.PatternFix_convert_string_to_pattern_object, cuRewrite);
 
 			String patternNameText= importRewrite.addImport(Pattern.class.getCanonicalName());
-			ASTNode replacement= ast.newSimpleType(newTypeName(ast, patternNameText));
+			ASTNode replacement= ast.newSimpleType(ASTNodeFactory.newName(ast, patternNameText));
 			ASTNodes.replaceButKeepComment(rewrite, type, replacement, group);
 
 			Expression unparanthesedInitializer= ASTNodes.getUnparenthesedExpression(initializer);
 			MethodInvocation newCompileMethod= ast.newMethodInvocation();
-			newCompileMethod.setExpression(newTypeName(ast, patternNameText));
+			newCompileMethod.setExpression(ASTNodeFactory.newName(ast, patternNameText));
 			newCompileMethod.setName(ast.newSimpleName(COMPILE_METHOD));
 			newCompileMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, unparanthesedInitializer));
 
@@ -339,7 +339,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 				newFragment.setName(ast.newSimpleName(newFieldName));
 				newFragment.setInitializer(newCompileMethod);
 				FieldDeclaration newFieldDeclaration= ast.newFieldDeclaration(newFragment);
-				newFieldDeclaration.setType(ast.newSimpleType(newTypeName(ast, patternNameText)));
+				newFieldDeclaration.setType(ast.newSimpleType(ASTNodeFactory.newName(ast, patternNameText)));
 				newFieldDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.STATIC | Modifier.PRIVATE | Modifier.FINAL));
 				int insertionIndex= findInsertionIndex((AbstractTypeDeclaration)typeDecl);
 				int addedFieldCount= addedFields.size();
@@ -411,20 +411,6 @@ public class PatternCleanUp extends AbstractMultiFix {
 				}
 			}
 			return newName;
-		}
-
-		private Name newTypeName(AST ast, String patternNameText) {
-			Name qualifiedName= null;
-
-			for (String packageName : patternNameText.split("\\.")) { //$NON-NLS-1$
-				if (qualifiedName == null) {
-					qualifiedName= ast.newSimpleName(packageName);
-				} else {
-					qualifiedName= ast.newQualifiedName(qualifiedName, ast.newSimpleName(packageName));
-				}
-			}
-
-			return qualifiedName;
 		}
 
 		private List<String> getVisibleVariablesInScope(ASTNode node) {

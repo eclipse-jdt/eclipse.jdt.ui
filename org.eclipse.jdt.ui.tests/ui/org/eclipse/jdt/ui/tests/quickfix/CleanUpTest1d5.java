@@ -605,8 +605,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    public void foo() {\n" //
 				+ "        int[] array={1,2,3,4};\n" //
 				+ "        for (int i=0;i<array.length;i++) {\n" //
-				+ "            String[] strs={\"1\",\"2\"};\n" //
-				+ "            for (int j = 0; j < strs.length; j++) {\n" //
+				+ "            String[] strs={\"1\", \"2\"};\n" //
+				+ "            for (int j = 1 - 1; j < strs.length; j++) {\n" //
 				+ "                System.out.println(array[i]+strs[j]);\n" //
 				+ "            }\n" //
 				+ "        }\n" //
@@ -622,7 +622,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    public void foo() {\n" //
 				+ "        int[] array={1,2,3,4};\n" //
 				+ "        for (int element : array) {\n" //
-				+ "            String[] strs={\"1\",\"2\"};\n" //
+				+ "            String[] strs={\"1\", \"2\"};\n" //
 				+ "            for (String str : strs) {\n" //
 				+ "                System.out.println(element+str);\n" //
 				+ "            }\n" //
@@ -3041,6 +3041,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    public static void bar() {\n" //
 				+ "        foo(new Object[] {});\n" //
 				+ "        foo(new Object[0]);\n" //
+				+ "        foo(new Object[0 + 0]);\n" //
+				+ "        foo(new Object[1 - 1]);\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
@@ -3056,6 +3058,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static void bar() {\n" //
+				+ "        foo();\n" //
+				+ "        foo();\n" //
 				+ "        foo();\n" //
 				+ "        foo();\n" //
 				+ "    }\n" //

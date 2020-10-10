@@ -65,9 +65,9 @@ public class UnnecessaryArrayCreationCleanUp extends AbstractMultiFix {
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION)) {
 			return "List k= Arrays.asList(\"a\", \"b\", \"c\");\n"; //$NON-NLS-1$
-		} else {
-			return "List k= Arrays.asList(new String[] {\"a\", \"b\", \"c\"});\n"; //$NON-NLS-1$
 		}
+
+		return "List k= Arrays.asList(new String[] {\"a\", \"b\", \"c\"});\n"; //$NON-NLS-1$
 	}
 
 	@Override

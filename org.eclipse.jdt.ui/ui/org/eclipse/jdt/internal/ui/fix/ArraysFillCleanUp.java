@@ -37,13 +37,12 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ForLoops;
 import org.eclipse.jdt.internal.corext.dom.ForLoops.ContainerType;
@@ -109,23 +108,20 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 			@Override
 			public boolean visit(final ForStatement node) {
 				ForLoopContent loopContent= ForLoops.iterateOverContainer(node);
-				List<Statement> statements= ASTNodes.asList(node.getBody());
+				Assignment assignment= ASTNodes.asExpression(node.getBody(), Assignment.class);
 
-				if (loopContent != null
+				if (assignment != null
+						&& loopContent != null
 						&& loopContent.getLoopVariable() != null
 						&& loopContent.getContainerType() == ContainerType.ARRAY
-						&& statements.size() == 1) {
-					Assignment assignment= ASTNodes.asExpression(statements.get(0), Assignment.class);
+						&& ASTNodes.hasOperator(assignment, Assignment.Operator.ASSIGN)
+						&& isUnchangedValue(node, assignment.getRightHandSide())
+						&& ASTNodes.isPassive(assignment.getRightHandSide())) {
+					ArrayAccess arrayAccess= ASTNodes.as(assignment.getLeftHandSide(), ArrayAccess.class);
 
-					if (ASTNodes.hasOperator(assignment, Assignment.Operator.ASSIGN)
-							&& isUnchangedValue(node, assignment.getRightHandSide())
-							&& ASTNodes.isPassive(assignment.getRightHandSide())) {
-						ArrayAccess arrayAccess= ASTNodes.as(assignment.getLeftHandSide(), ArrayAccess.class);
-
-						if (arrayAccess != null && isSameVariable(loopContent, arrayAccess)) {
-							rewriteOperations.add(new ArraysFillOperation(node, assignment, arrayAccess));
-							return false;
-						}
+					if (arrayAccess != null && isSameVariable(loopContent, arrayAccess)) {
+						rewriteOperations.add(new ArraysFillOperation(node, assignment, arrayAccess));
+						return false;
 					}
 				}
 
@@ -208,7 +204,7 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 			String arraysNameText= importRewrite.addImport(Arrays.class.getCanonicalName());
 
 			MethodInvocation methodInvocation= ast.newMethodInvocation();
-			methodInvocation.setExpression(newTypeName(ast, arraysNameText));
+			methodInvocation.setExpression(ASTNodeFactory.newName(ast, arraysNameText));
 			methodInvocation.setName(ast.newSimpleName("fill")); //$NON-NLS-1$
 			methodInvocation.arguments().add(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(arrayAccess.getArray())));
 			methodInvocation.arguments().add(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(assignment.getRightHandSide())));
@@ -216,20 +212,6 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 			ExpressionStatement expressionStatement= ast.newExpressionStatement(methodInvocation);
 
 			ASTNodes.replaceButKeepComment(rewrite, node, expressionStatement, group);
-		}
-
-		private Name newTypeName(AST ast, String patternNameText) {
-			Name qualifiedName= null;
-
-			for (String packageName : patternNameText.split("\\.")) { //$NON-NLS-1$
-				if (qualifiedName == null) {
-					qualifiedName= ast.newSimpleName(packageName);
-				} else {
-					qualifiedName= ast.newQualifiedName(qualifiedName, ast.newSimpleName(packageName));
-				}
-			}
-
-			return qualifiedName;
 		}
 	}
 }

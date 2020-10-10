@@ -97,7 +97,7 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 		}
 
 		private boolean isUselessArrayCreation(ArrayCreation node, List<Expression> arguments, IMethodBinding binding) {
-			return (node.getInitializer() != null || (node.dimensions().size() == 1 && Integer.valueOf(0).equals(((Expression) node.dimensions().get(0)).resolveConstantExpressionValue())))
+			return (node.getInitializer() != null || (node.dimensions().size() == 1 && Long.valueOf(0).equals(ASTNodes.getIntegerLiteral((Expression) node.dimensions().get(0)))))
 					&& arguments.size() > 0
 					&& arguments.get(arguments.size() - 1) == node
 					&& binding != null
