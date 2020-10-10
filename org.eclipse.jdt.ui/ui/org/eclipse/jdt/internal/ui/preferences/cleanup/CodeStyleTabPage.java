@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.ui.fix.AtomicObjectCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
@@ -45,6 +46,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new ControlStatementsCleanUp(values),
 				new ConvertLoopCleanUp(values),
 				new AddAllCleanUp(values),
+				new ElseIfCleanUp(values),
 				new ExpressionsCleanUp(values),
 				new BitwiseConditionalExpressionCleanup(values),
 				new AtomicObjectCleanUp(values),
@@ -72,6 +74,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		intent(controlGroup);
 		final RadioPreference useBlockNeverPref= createRadioPref(controlGroup, numColumns - 1, CleanUpMessages.CodeStyleTabPage_RadioName_NeverUseBlocks, CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useBlockPref, new RadioPreference[] {useBlockAlwaysPref, useBlockJDTStylePref, useBlockNeverPref});
+
+		CheckboxPreference elseIf= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ElseIf, CleanUpConstants.ELSE_IF, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(elseIf);
 
 		CheckboxPreference convertLoop= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced, CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(convertLoop);

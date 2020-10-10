@@ -72,6 +72,7 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleCleanUp_AtomicObject_declaration;
 	public static String CodeStyleCleanUp_AtomicObject_usage;
 	public static String CodeStyleCleanUp_PullUpAssignment_description;
+	public static String CodeStyleCleanUp_ElseIf_description;
 	public static String CodeStyleCleanUp_numberSuffix_description;
 	public static String CodeStyleCleanUp_QualifyNonStaticMethod_description;
 	public static String CodeStyleCleanUp_QualifyStaticMethod_description;

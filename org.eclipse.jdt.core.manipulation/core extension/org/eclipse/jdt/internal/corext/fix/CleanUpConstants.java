@@ -1604,6 +1604,18 @@ public class CleanUpConstants {
 	public static final String PULL_UP_ASSIGNMENT= "cleanup.pull_up_assignment"; //$NON-NLS-1$
 
 	/**
+	 * Uses the <code>else if</code> pseudo keyword.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String ELSE_IF= "cleanup.else_if"; //$NON-NLS-1$
+
+	/**
 	 * Controls whether long literal suffix should be rewritten in uppercase.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>

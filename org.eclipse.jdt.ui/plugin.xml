@@ -7081,9 +7081,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.var">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.else_if"
+            runAfter="org.eclipse.jdt.ui.cleanup.lambda">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp"
             id="org.eclipse.jdt.ui.cleanup.switch_expressions"
-            runAfter="org.eclipse.jdt.ui.cleanup.lambda">
+            runAfter="org.eclipse.jdt.ui.cleanup.else_if">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp"

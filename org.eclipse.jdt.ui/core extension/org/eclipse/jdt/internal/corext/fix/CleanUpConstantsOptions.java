@@ -63,6 +63,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(ATOMIC_OBJECT, CleanUpOptions.FALSE);
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
+		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations
@@ -195,6 +196,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(ATOMIC_OBJECT, CleanUpOptions.FALSE);
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
+		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations

@@ -68,6 +68,7 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_CheckboxName_CheckSignOfBitwiseOperation;
 	public static String CodeStyleTabPage_CheckboxName_AtomicObject;
 	public static String CodeStyleTabPage_CheckboxName_PullUpAssignment;
+	public static String CodeStyleTabPage_CheckboxName_ElseIf;
 
 	public static String CodeStyleTabPage_GroupName_NumberLiteral;
 	public static String CodeStyleTabPage_CheckboxName_NumberSuffix;

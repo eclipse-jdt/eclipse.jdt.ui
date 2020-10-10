@@ -9519,6 +9519,83 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testElseIf() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactor(boolean isValid, boolean isEnabled) throws Exception {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            System.out.println(isValid);\n" //
+				+ "        } else {\n" //
+				+ "            if (isEnabled) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                System.out.println(isEnabled);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.ELSE_IF);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactor(boolean isValid, boolean isEnabled) throws Exception {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            System.out.println(isValid);\n" //
+				+ "        } else if (isEnabled) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            System.out.println(isEnabled);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", input, output);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ElseIf_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotUseElseIf() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotRefactor(boolean isValid, boolean isEnabled) throws Exception {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(isValid);\n" //
+				+ "        } else if (isEnabled) {\n" //
+				+ "            System.out.println(isEnabled);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotLoseRemainingStatements(boolean isValid, boolean isEnabled) throws Exception {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(isValid);\n" //
+				+ "        } else {\n" //
+				+ "            if (isEnabled) {\n" //
+				+ "                System.out.println(isEnabled);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            System.out.println(\"Don't forget me!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.ELSE_IF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testUnnecessaryCodeBug127704_1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
