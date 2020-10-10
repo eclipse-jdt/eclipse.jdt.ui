@@ -6850,6 +6850,136 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            return;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchIntoFollowingCode(String number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeEndOfCatchIntoFollowingCode(String number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchThrowingException(String number) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            throw new Exception();\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            throw new Exception();\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            throw new Exception();\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        throw new Exception();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchWithContinue(List<String> numbers) {\n" //
+				+ "        for (String number : numbers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            try {\n" //
+				+ "                Integer.valueOf(number);\n" //
+				+ "            } catch (NumberFormatException nfe) {\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                continue;\n" //
+				+ "            } catch (IllegalArgumentException iae) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                continue;\n" //
+				+ "            } catch (NullPointerException npe) {\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchWithBreak(List<String> numbers) {\n" //
+				+ "        for (String number : numbers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            try {\n" //
+				+ "                Integer.valueOf(number);\n" //
+				+ "            } catch (NumberFormatException nfe) {\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                break;\n" //
+				+ "            } catch (IllegalArgumentException iae) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                break;\n" //
+				+ "            } catch (NullPointerException npe) {\n" //
+				+ "                System.out.println(\"Doing something\");\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchThatAlwaysFallThrough(String number, boolean interruptCode) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            } else {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            } else {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            if (!interruptCode) {\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        if (interruptCode) {\n" //
+				+ "            throw new Exception(\"Stop!\");\n" //
+				+ "        } else {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
 
@@ -7020,6 +7150,104 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            return;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchIntoFollowingCode(String number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeEndOfCatchIntoFollowingCode(String number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            return;\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchThrowingException(String number) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            throw new Exception();\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        throw new Exception();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchWithContinue(List<String> numbers) {\n" //
+				+ "        for (String number : numbers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            try {\n" //
+				+ "                Integer.valueOf(number);\n" //
+				+ "            } catch (NumberFormatException nfe) {\n" //
+				+ "            } catch (IllegalArgumentException iae) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                continue;\n" //
+				+ "            } catch (NullPointerException npe) {\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchWithBreak(List<String> numbers) {\n" //
+				+ "        for (String number : numbers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            try {\n" //
+				+ "                Integer.valueOf(number);\n" //
+				+ "            } catch (NumberFormatException nfe) {\n" //
+				+ "            } catch (IllegalArgumentException iae) {\n" //
+				+ "                System.out.println(\"Doing another thing\");\n" //
+				+ "                break;\n" //
+				+ "            } catch (NullPointerException npe) {\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Doing something\");\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeCatchThatAlwaysFallThrough(String number, boolean interruptCode) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            Integer.valueOf(number);\n" //
+				+ "        } catch (NumberFormatException nfe) {\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            System.out.println(\"Doing another thing\");\n" //
+				+ "            if (interruptCode) {\n" //
+				+ "                throw new Exception(\"Stop!\");\n" //
+				+ "            } else {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        } catch (NullPointerException npe) {\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Doing something\");\n" //
+				+ "        if (interruptCode) {\n" //
+				+ "            throw new Exception(\"Stop!\");\n" //
+				+ "        } else {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.RedundantFallingThroughBlockEndCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
@@ -7089,30 +7317,30 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void doNotRefactorCodeThatDoesntFallThrough(int i) {\n" //
-				+ "        if (i <= 0) {\n" //
+				+ "    public void doNotRefactorCodeThatDoesntFallThrough(int m) {\n" //
+				+ "        if (m <= 0) {\n" //
 				+ "            System.out.println(\"Doing something\");\n" //
-				+ "        } else if (i == 20) {\n" //
+				+ "        } else if (m == 20) {\n" //
 				+ "            System.out.println(\"Doing something\");\n" //
 				+ "        }\n" //
 				+ "        System.out.println(\"Doing something\");\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void doNotRefactorNotLastStatements(String number, int i) {\n" //
-				+ "        if (i > 0) {\n" //
+				+ "    public void doNotRefactorNotLastStatements(String number, int n) {\n" //
+				+ "        if (n > 0) {\n" //
 				+ "            try {\n" //
 				+ "                Integer.valueOf(number);\n" //
 				+ "            } catch (NumberFormatException nfe) {\n" //
-				+ "                if (i == 5) {\n" //
-				+ "                    i += 42;\n" //
+				+ "                if (n == 5) {\n" //
+				+ "                    n += 42;\n" //
 				+ "                    System.out.println(\"Doing something\");\n" //
 				+ "                    return;\n" //
-				+ "                } else if (i == 10) {\n" //
-				+ "                    i += 42;\n" //
+				+ "                } else if (n == 10) {\n" //
+				+ "                    n += 42;\n" //
 				+ "                    System.out.println(\"Doing another thing\");\n" //
 				+ "                    return;\n" //
-				+ "                } else if (i == 20) {\n" //
-				+ "                    i += 42;\n" //
+				+ "                } else if (n == 20) {\n" //
+				+ "                    n += 42;\n" //
 				+ "                    System.out.println(\"Doing something\");\n" //
 				+ "                    return;\n" //
 				+ "                }\n" //
