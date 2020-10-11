@@ -130,6 +130,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_Unboxing;
 	public static String UnnecessaryCodeTabPage_CheckboxName_PatternMatchingForInstanceof;
 	public static String UnnecessaryCodeTabPage_CheckboxName_PushDownNegation;
+	public static String UnnecessaryCodeTabPage_CheckboxName_ComparisonStatement;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSuperCall;
 	public static String UnnecessaryCodeTabPage_CheckboxName_MergeConditionalBlocks;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd;

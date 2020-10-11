@@ -1065,6 +1065,18 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns whether the provided statement has the provided type.
+	 *
+	 * @param statement the statement to test
+	 * @param stmtClass the type to test the statement against
+	 * @return {@code true} if the provided statement has the provided type,
+	 *         {@code false} otherwise
+	 */
+	public static boolean is(final Statement statement, final Class<? extends Statement> stmtClass) {
+		return as(statement, stmtClass) != null;
+	}
+
+	/**
 	 * Returns whether the provided expression has the provided type.
 	 *
 	 * @param expression the expression to test

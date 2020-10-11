@@ -1176,6 +1176,18 @@ public class CleanUpConstants {
 	public static final String PUSH_DOWN_NEGATION= "cleanup.push_down_negation"; //$NON-NLS-1$
 
 	/**
+	 * Removes useless bad value checks before assignments or return statements.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String REMOVE_REDUNDANT_COMPARISON_STATEMENT= "cleanup.comparison_statement"; //$NON-NLS-1$
+
+	/**
 	 * Remove super() call in constructor.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

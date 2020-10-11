@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
@@ -60,6 +61,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new AutoboxingCleanUp(values),
 				new UnboxingCleanUp(values),
 				new PushDownNegationCleanUp(values),
+				new RedundantComparisonStatementCleanUp(values),
 				new RedundantSuperCallCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
@@ -119,6 +121,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		CheckboxPreference pushDownNegation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PushDownNegation, CleanUpConstants.PUSH_DOWN_NEGATION,
 				CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(pushDownNegation);
+
+		CheckboxPreference comparisonStatement= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ComparisonStatement, CleanUpConstants.REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(comparisonStatement);
 
 		CheckboxPreference redundantSuperCall= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantSuperCall, CleanUpConstants.REDUNDANT_SUPER_CALL, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(redundantSuperCall);

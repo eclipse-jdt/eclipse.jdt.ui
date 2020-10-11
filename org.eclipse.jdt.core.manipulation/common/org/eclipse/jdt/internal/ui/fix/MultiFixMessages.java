@@ -129,6 +129,7 @@ public class MultiFixMessages extends NLS {
 	public static String AutoboxingCleanup_description;
 	public static String UnboxingCleanup_description;
 	public static String PushDownNegationCleanup_description;
+	public static String RedundantComparisonStatementCleanup_description;
 	public static String RedundantSuperCallCleanup_description;
 	public static String MergeConditionalBlocksCleanup_description;
 	public static String RedundantFallingThroughBlockEndCleanup_description;

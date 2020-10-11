@@ -5480,6 +5480,639 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testRedundantComparisonStatement() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final String DEFAULT = \"\";\n" //
+				+ "    private String input;\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable1(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input == null) {\n" //
+				+ "            output = null;\n" //
+				+ "        } else {\n" //
+				+ "            output = /* Keep this comment too */ input;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable2(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null == input) {\n" //
+				+ "            output = null;\n" //
+				+ "        } else {\n" //
+				+ "            output = input;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable3(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input != null) {\n" //
+				+ "            output = input;\n" //
+				+ "        } else {\n" //
+				+ "            output = null;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable4(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null != input) {\n" //
+				+ "            output = input;\n" //
+				+ "        } else {\n" //
+				+ "            output = null;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeHardCodedNumber(int input) {\n" //
+				+ "        int output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (123 != input) {\n" //
+				+ "            output = input;\n" //
+				+ "        } else {\n" //
+				+ "            output = 123;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char removeHardCodedCharacter(char input) {\n" //
+				+ "        char output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input == 'a') {\n" //
+				+ "            output = 'a';\n" //
+				+ "        } else {\n" //
+				+ "            output = input;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeHardCodedExpression(int input) {\n" //
+				+ "        int output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input != 1 + 2 + 3) {\n" //
+				+ "            output = input;\n" //
+				+ "        } else {\n" //
+				+ "            output = 3 + 2 + 1;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable5(String input, boolean isValid) {\n" //
+				+ "        String output = null;\n" //
+				+ "        if (isValid)\n" //
+				+ "            if (input != null) {\n" //
+				+ "                output = input;\n" //
+				+ "            } else {\n" //
+				+ "                output = null;\n" //
+				+ "            }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorFieldAssign1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input == null) {\n" //
+				+ "            this.input = null;\n" //
+				+ "        } else {\n" //
+				+ "            this.input = input;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorFieldAssign2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null == input) {\n" //
+				+ "            this.input = null;\n" //
+				+ "        } else {\n" //
+				+ "            this.input = input;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorFieldAssign3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input != null) {\n" //
+				+ "            this.input = input;\n" //
+				+ "        } else {\n" //
+				+ "            this.input = null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorFieldAssign4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null != input) {\n" //
+				+ "            this.input = input;\n" //
+				+ "        } else {\n" //
+				+ "            this.input = null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturn1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input == null) {\n" //
+				+ "            return null;\n" //
+				+ "        } else {\n" //
+				+ "            return /* Keep this comment too */ input;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturn2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null == input) {\n" //
+				+ "            return null;\n" //
+				+ "        } else {\n" //
+				+ "            return input;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturn3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input != null) {\n" //
+				+ "            return input;\n" //
+				+ "        } else {\n" //
+				+ "            return null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturn4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null != input) {\n" //
+				+ "            return input;\n" //
+				+ "        } else {\n" //
+				+ "            return null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturnNoElse1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input == null) {\n" //
+				+ "            return null;\n" //
+				+ "        }\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturnNoElse2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null == input) {\n" //
+				+ "            return null;\n" //
+				+ "        }\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturnNoElse3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input != null) {\n" //
+				+ "            return input;\n" //
+				+ "        }\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturnNoElse4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null != input) {\n" //
+				+ "            return input;\n" //
+				+ "        }\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstant1(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input != null) {\n" //
+				+ "            output = /* Keep this comment too */ null;\n" //
+				+ "        } else {\n" //
+				+ "            output = input;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstant2(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null != input) {\n" //
+				+ "            output = null;\n" //
+				+ "        } else {\n" //
+				+ "            output = input;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstant3(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input == null) {\n" //
+				+ "            output = input;\n" //
+				+ "        } else {\n" //
+				+ "            output = null;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstant4(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null == input) {\n" //
+				+ "            output = input;\n" //
+				+ "        } else {\n" //
+				+ "            output = null;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturn1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input != null) {\n" //
+				+ "            return /* Keep this comment too */ null;\n" //
+				+ "        } else {\n" //
+				+ "            return input;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturn2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null != input) {\n" //
+				+ "            return null;\n" //
+				+ "        } else {\n" //
+				+ "            return input;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturn3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input == null) {\n" //
+				+ "            return input;\n" //
+				+ "        } else {\n" //
+				+ "            return null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturn4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null == input) {\n" //
+				+ "            return input;\n" //
+				+ "        } else {\n" //
+				+ "            return null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturnNoElse1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input != null) {\n" //
+				+ "            return null;\n" //
+				+ "        }\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturnNoElse2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null != input) {\n" //
+				+ "            return null;\n" //
+				+ "        }\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturnNoElse3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (input == null) {\n" //
+				+ "            return input;\n" //
+				+ "        }\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturnNoElse4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null == input) {\n" //
+				+ "            return input;\n" //
+				+ "        }\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.REMOVE_REDUNDANT_COMPARISON_STATEMENT);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final String DEFAULT = \"\";\n" //
+				+ "    private String input;\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable1(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = /* Keep this comment too */ input;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable2(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = input;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable3(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = input;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable4(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = input;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeHardCodedNumber(int input) {\n" //
+				+ "        int output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = input;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char removeHardCodedCharacter(char input) {\n" //
+				+ "        char output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = input;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeHardCodedExpression(int input) {\n" //
+				+ "        int output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = input;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorLocalVariable5(String input, boolean isValid) {\n" //
+				+ "        String output = null;\n" //
+				+ "        if (isValid)\n" //
+				+ "            output = input;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorFieldAssign1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        this.input = input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorFieldAssign2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        this.input = input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorFieldAssign3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        this.input = input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorFieldAssign4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        this.input = input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturn1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return /* Keep this comment too */ input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturn2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturn3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturn4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturnNoElse1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturnNoElse2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturnNoElse3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReturnNoElse4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return input;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstant1(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = /* Keep this comment too */ null;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstant2(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = null;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstant3(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = null;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstant4(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = null;\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturn1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return /* Keep this comment too */ null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturn2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturn3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturn4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturnNoElse1(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturnNoElse2(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturnNoElse3(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantReturnNoElse4(String input) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.RedundantComparisonStatementCleanup_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testKeepComparisonStatement() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final String DEFAULT = \"\";\n" //
+				+ "    private String input;\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorLocalVariable(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        if (input == null) {\n" //
+				+ "            output = DEFAULT;\n" //
+				+ "        } else {\n" //
+				+ "            output = input;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorConstant(String input) {\n" //
+				+ "        String output;\n" //
+				+ "        if (input != null) {\n" //
+				+ "            output = DEFAULT;\n" //
+				+ "        } else {\n" //
+				+ "            output = input;\n" //
+				+ "        }\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorActiveExpression(List<String> input) {\n" //
+				+ "        String result;\n" //
+				+ "        if (input.remove(0) == null) {\n" //
+				+ "            result = null;\n" //
+				+ "        } else {\n" //
+				+ "            result = input.remove(0);\n" //
+				+ "        }\n" //
+				+ "        return result;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotUseConstantWithoutActiveExpression(List<String> input) {\n" //
+				+ "        String result;\n" //
+				+ "        if (input.remove(0) == null) {\n" //
+				+ "            result = null;\n" //
+				+ "        } else {\n" //
+				+ "            result = input.remove(0);\n" //
+				+ "        }\n" //
+				+ "        return result;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldAssignXXX(String input, E other) {\n" //
+				+ "        if (input == null) {\n" //
+				+ "            this.input = null;\n" //
+				+ "        } else {\n" //
+				+ "            other.input = input;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldAssign(String input) {\n" //
+				+ "        if (input == null) {\n" //
+				+ "            this.input = DEFAULT;\n" //
+				+ "        } else {\n" //
+				+ "            this.input = input;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorConstantReturn(String input) {\n" //
+				+ "        if (null != input) {\n" //
+				+ "            return input;\n" //
+				+ "        } else {\n" //
+				+ "            return DEFAULT;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<?> doNotRefactorDifferentReturn(Collection<?> c) {\n" //
+				+ "        if (c == null) {\n" //
+				+ "            return Collections.emptySet();\n" //
+				+ "        } else {\n" //
+				+ "            return c;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date doNotRefactorActiveAssignment(List<Date> input) {\n" //
+				+ "        Date date;\n" //
+				+ "        if (input.remove(0) != null) {\n" //
+				+ "            date = input.remove(0);\n" //
+				+ "        } else {\n" //
+				+ "            date = null;\n" //
+				+ "        }\n" //
+				+ "        return date;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date doNotRefactorActiveReturn(List<Date> input) {\n" //
+				+ "        if (input.remove(0) != null) {\n" //
+				+ "            return input.remove(0);\n" //
+				+ "        }\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_REDUNDANT_COMPARISON_STATEMENT);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testUselessSuperCall() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
