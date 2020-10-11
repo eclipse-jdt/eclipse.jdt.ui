@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,9 +46,8 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ReturnTypeQuickFixTest extends QuickFixTest {
-
 	@Rule
-    public ProjectTestSetup projectSetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -805,6 +805,62 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testCorrectReturnStatementInConditional() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    <K1, K2, V> V foo(K1 key1, Map<K1, Map<K2, V>> map) {\n" //
+				+ "        Map<K2, V> map2 = map.get(key1);\n" //
+				+ "        return map2 == null ? null : map2.entrySet();\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", input, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    <K1, K2, V> V foo(K1 key1, Map<K1, Map<K2, V>> map) {\n" //
+				+ "        Map<K2, V> map2 = map.get(key1);\n" //
+				+ "        return (V) (map2 == null ? null : map2.entrySet());\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		String expected2= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Map.Entry;\n" //
+				+ "import java.util.Set;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    <K1, K2, V> Set<Entry<K2, V>> foo(K1 key1, Map<K1, Map<K2, V>> map) {\n" //
+				+ "        Map<K2, V> map2 = map.get(key1);\n" //
+				+ "        return map2 == null ? null : map2.entrySet();\n" //
+				+ "    }\n" //
+				+ "}\n"; //
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}

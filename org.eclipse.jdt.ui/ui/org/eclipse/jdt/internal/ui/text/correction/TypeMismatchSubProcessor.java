@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -55,6 +56,9 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -76,12 +80,8 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ImplementInterfaceProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.OptionalCorrectionProposal;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
@@ -198,7 +198,7 @@ public class TypeMismatchSubProcessor {
 		boolean nullOrVoid= currBinding == null || "void".equals(currBinding.getName()); //$NON-NLS-1$
 
 		// change method return statement to actual type
-		if (!nullOrVoid && parentNodeType == ASTNode.RETURN_STATEMENT) {
+		if (!nullOrVoid && isTypeReturned(nodeToCast)) {
 			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 			if (decl instanceof MethodDeclaration) {
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
@@ -260,6 +260,21 @@ public class TypeMismatchSubProcessor {
 			proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INSERT_NULL_CHECK, image));
 		}
 
+	}
+
+	private static boolean isTypeReturned(final Expression nodeToCast) {
+		int parentNodeType= nodeToCast.getParent().getNodeType();
+
+		if (parentNodeType == ASTNode.RETURN_STATEMENT) {
+			return true;
+		}
+
+		if (parentNodeType == ASTNode.PARENTHESIZED_EXPRESSION
+				|| parentNodeType == ASTNode.CONDITIONAL_EXPRESSION && (nodeToCast.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY || nodeToCast.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY)) {
+			return isTypeReturned((Expression) nodeToCast.getParent());
+		}
+
+		return false;
 	}
 
 	public static ITypeBinding boxUnboxPrimitives(ITypeBinding castType, ITypeBinding toCast, AST ast) {

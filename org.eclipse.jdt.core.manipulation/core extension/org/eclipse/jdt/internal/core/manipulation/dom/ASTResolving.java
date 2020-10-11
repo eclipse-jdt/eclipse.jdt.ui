@@ -244,13 +244,27 @@ public class ASTResolving {
 			break;
 		case ASTNode.CONDITIONAL_EXPRESSION:
 			ConditionalExpression expression= (ConditionalExpression) parent;
-			if (node.equals(expression.getExpression())) {
+
+			if (node.getLocationInParent() == ConditionalExpression.EXPRESSION_PROPERTY) {
 				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 			}
-			if (node.equals(expression.getElseExpression())) {
+
+			if (node.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY
+					&& expression.getElseExpression().resolveTypeBinding() != null) {
+				return expression.getElseExpression().resolveTypeBinding();
+			}
+
+			if (node.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY
+					&& expression.getThenExpression().resolveTypeBinding() != null) {
 				return expression.getThenExpression().resolveTypeBinding();
 			}
-			return expression.getElseExpression().resolveTypeBinding();
+
+			if (node.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY
+					|| node.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
+				return getPossibleReferenceBinding(expression);
+			}
+
+			break;
 		case ASTNode.POSTFIX_EXPRESSION:
 			return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 		case ASTNode.PREFIX_EXPRESSION:
