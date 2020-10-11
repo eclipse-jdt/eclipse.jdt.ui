@@ -1128,6 +1128,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_REDUNDANT_MODIFIERS= "cleanup.remove_redundant_modifiers"; //$NON-NLS-1$
 
 	/**
+	 * Replaces for loops to use String.join() where possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String JOIN= "cleanup.join"; //$NON-NLS-1$
+
+	/**
 	 * Replaces a for loop on an array that assigns the same value by a call to Arrays.fill().
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

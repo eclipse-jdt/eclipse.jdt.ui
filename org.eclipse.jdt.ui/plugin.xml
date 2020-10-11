@@ -7216,9 +7216,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.type_parameters">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.JoinCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.join"
+            runAfter="org.eclipse.jdt.ui.cleanup.hash">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp"
             id="org.eclipse.jdt.ui.cleanup.arrays_fill"
-            runAfter="org.eclipse.jdt.ui.cleanup.hash">
+            runAfter="org.eclipse.jdt.ui.cleanup.join">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp"

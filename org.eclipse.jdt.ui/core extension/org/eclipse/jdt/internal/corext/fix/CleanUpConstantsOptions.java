@@ -95,6 +95,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(MODERNIZE_HASH, CleanUpOptions.FALSE);
+		options.setOption(JOIN, CleanUpOptions.FALSE);
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);
@@ -216,6 +217,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(MODERNIZE_HASH, CleanUpOptions.FALSE);
+		options.setOption(JOIN, CleanUpOptions.FALSE);
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);

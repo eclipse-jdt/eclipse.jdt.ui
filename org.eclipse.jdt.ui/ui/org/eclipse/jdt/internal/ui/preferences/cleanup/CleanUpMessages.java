@@ -126,6 +126,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryNLSTags;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantTypeArguments;
 	public static String UnnecessaryCodeTabPage_CheckboxName_Hash;
+	public static String UnnecessaryCodeTabPage_CheckboxName_Join;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ArraysFill;
 	public static String UnnecessaryCodeTabPage_CheckboxName_Autoboxing;
 	public static String UnnecessaryCodeTabPage_CheckboxName_Unboxing;

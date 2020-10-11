@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
+import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
@@ -59,6 +60,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new StringCleanUp(values),
 				new TypeParametersCleanUp(values),
 				new HashCleanUp(values),
+				new JoinCleanUp(values),
 				new ArraysFillCleanUp(values),
 				new AutoboxingCleanUp(values),
 				new UnboxingCleanUp(values),
@@ -113,6 +115,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference hash= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_Hash, CleanUpConstants.MODERNIZE_HASH, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(hash);
+
+		CheckboxPreference join= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_Join, CleanUpConstants.JOIN, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(join);
 
 		CheckboxPreference arraysFill= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ArraysFill, CleanUpConstants.ARRAYS_FILL, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(arraysFill);
