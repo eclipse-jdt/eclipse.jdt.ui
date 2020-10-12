@@ -1,7 +1,7 @@
 package p;
 record A(int f, int g){	
-	A{
-		System.out.println(f);
+	A (int f, int g){
+		this.f= f;
 	}
 	
 	public void val(int f) {

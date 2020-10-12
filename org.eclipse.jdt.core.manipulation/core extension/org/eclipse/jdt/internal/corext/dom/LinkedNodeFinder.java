@@ -72,7 +72,8 @@ public class LinkedNodeFinder  {
 				if (bBinding.isParameter()) {
 					IMethodBinding mBinding= bBinding.getDeclaringMethod();
 					if (mBinding != null
-							&& mBinding.isCompactConstructor()) {
+							&& (mBinding.isCompactConstructor()
+									|| mBinding.isCanonicalConstructor())) {
 						ITypeBinding typeBinding= mBinding.getDeclaringClass();
 						if (typeBinding != null
 								&& typeBinding.isRecord()) {

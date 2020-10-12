@@ -24,18 +24,26 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -210,19 +218,9 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 		if (elements == null || elements.length != 1)
 			return null;
-		if (elements[0].getElementType() == IJavaElement.LOCAL_VARIABLE) {
-			IJavaElement element= elements[0];
-			IJavaElement parent= element.getParent();
-			if(parent != null && parent.getElementType() == IJavaElement.FIELD) {
-				IField parentField= (IField) parent;
-				IJavaElement topParent= parent.getParent();
-				if(topParent != null && topParent.getElementType() == IJavaElement.TYPE) {
-					if (((IType)topParent).isRecord()) {
-						return parentField;
-					}
-				}
-			}
-		}
+		IField field= getRecordComponentToRename(elements[0]);
+		if (field != null)
+			return field;
 		return elements[0];
 	}
 
@@ -260,5 +258,100 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			}
 		}
 		return false;
+	}
+
+	private IField getField(ILocalVariable localVar) {
+		IField field= null;
+		if (localVar != null) {
+			IJavaElement parent= localVar.getParent();
+			if (parent != null && parent.getElementType() == IJavaElement.METHOD) {
+				IMethod parentMethod= (IMethod) parent;
+				try {
+					if (parentMethod.isConstructor()) {
+						IJavaElement topParent= parent.getParent();
+						if (topParent != null && topParent.getElementType() == IJavaElement.TYPE) {
+							IType type= (IType) topParent;
+							if (type.isRecord()) {
+								CompilationUnit astRoot= SharedASTProviderCore.getAST(type.getCompilationUnit(), SharedASTProviderCore.WAIT_YES, null);
+								MethodDeclaration mDecl= ASTNodeSearchUtil.getMethodDeclarationNode(parentMethod, astRoot);
+								if (mDecl != null) {
+									IMethodBinding mBinding= mDecl.resolveBinding();
+									if (mBinding != null && mBinding.isCanonicalConstructor()) {
+										field= type.getRecordComponent(localVar.getElementName());
+										return field;
+									}
+								}
+							}
+						}
+					}
+				} catch (JavaModelException e) {
+					//do nothing
+				}
+			}
+
+		}
+		return field;
+	}
+
+	private IField getRecordComponentToRename(IJavaElement element) {
+		IField recCompField= null;
+		if (element != null) {
+			if (element.getElementType() == IJavaElement.LOCAL_VARIABLE) {
+				IJavaElement parent= element.getParent();
+				if (parent != null && parent.getElementType() == IJavaElement.FIELD) {
+					IField parentField= (IField) parent;
+					IJavaElement topParent= parent.getParent();
+					if (topParent != null && topParent.getElementType() == IJavaElement.TYPE) {
+						try {
+							if (((IType) topParent).isRecord()) {
+								recCompField= parentField;
+							}
+						} catch (JavaModelException e) {
+							//do nothing
+						}
+					}
+				} else if (parent != null && parent.getElementType() == IJavaElement.METHOD) {
+					IMethod parentMethod= (IMethod) parent;
+					try {
+						if (parentMethod.isConstructor()) {
+							IJavaElement topParent= parent.getParent();
+							if (topParent != null && topParent.getElementType() == IJavaElement.TYPE) {
+								if (((IType) topParent).isRecord()) {
+									IField fieldElem= getField((ILocalVariable) element);
+									if (fieldElem != null) {
+										recCompField= fieldElem;
+									}
+								}
+							}
+						}
+					} catch (JavaModelException e) {
+						//do nothing
+					}
+				}
+			} else if (element.getElementType() == IJavaElement.METHOD) {
+				IMethod mElem= (IMethod) element;
+				IJavaElement parent= mElem.getParent();
+				if (parent != null && parent.getElementType() == IJavaElement.TYPE) {
+					try {
+						IType pType= (IType) parent;
+						if (mElem.getParameters().length == 0
+								&& pType.isRecord()
+								&& !Flags.isStatic(mElem.getFlags())) {
+							IField[] fields= pType.getRecordComponents();
+							for (IField field : fields) {
+								if (!Flags.isStatic(field.getFlags()) && mElem.getElementName().equals(field.getElementName())) {
+									recCompField= field;
+									break;
+								}
+							}
+						}
+					} catch (JavaModelException e) {
+						//do nothing
+					}
+				}
+			}
+		}
+
+		return recCompField;
 	}
 }

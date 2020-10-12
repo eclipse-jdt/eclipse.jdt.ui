@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,9 +37,11 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
@@ -89,6 +91,31 @@ public class RefactoringAnalyzeUtil {
 	public static Block getBlock(TextEdit edit, TextChange change, CompilationUnit cuNode){
 		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
 		return (ASTNodes.getParent(decl, Block.class));
+	}
+
+	public static RecordDeclaration getRecordDeclaration(TextEdit edit, TextChange change, CompilationUnit cuNode){
+		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
+		return (ASTNodes.getParent(decl, RecordDeclaration.class));
+	}
+
+	/**
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	@SuppressWarnings("javadoc")
+	public static MethodDeclaration getRecordDeclarationCompactConstructor(TextEdit edit, TextChange change, CompilationUnit cuNode){
+		RecordDeclaration recDecl = getRecordDeclaration(edit, change, cuNode);
+		MethodDeclaration compConst= null;
+		if (recDecl != null) {
+			MethodDeclaration[] decls= recDecl.getMethods();
+			for (MethodDeclaration mDecl : decls) {
+				IMethodBinding mBinding= mDecl.resolveBinding();
+				if (mBinding != null && mBinding.isCompactConstructor()) {
+					compConst= mDecl;
+					break;
+				}
+			}
+		}
+		return compConst;
 	}
 
 	public static IProblem[] getIntroducedCompileProblems(CompilationUnit newCUNode, CompilationUnit oldCuNode) {

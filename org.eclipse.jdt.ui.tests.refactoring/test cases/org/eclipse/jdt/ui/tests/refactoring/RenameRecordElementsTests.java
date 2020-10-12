@@ -35,6 +35,7 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -90,6 +91,29 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 		IType recordA= getType(cu, "A");
 		IField field= recordA.getField(fieldName);
 		IMethod method= recordA.getMethod(fieldName, new String[] {});
+		if (isGetterPresent) {
+			assertTrue(method.exists());
+		}
+		ILocalVariable localVar= null;
+		IMethod[] methods= recordA.getMethods();
+		if (methods != null && methods.length > 0) {
+			for (IMethod meth : methods) {
+				if (meth.getElementName().equals(recordA.getElementName())) {
+					ILocalVariable[] lVars= meth.getParameters();
+					if (lVars != null && lVars.length > 0) {
+						for (ILocalVariable lVar : lVars) {
+							if (lVar != null && lVar.getElementName().equals(fieldName)) {
+								localVar= lVar;
+								break;
+							}
+						}
+					}
+				}
+				if (localVar != null) {
+					break;
+				}
+			}
+		}
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
 		descriptor.setJavaElement(field);
 		descriptor.setNewName(newFieldName);
@@ -114,7 +138,10 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 			elements.add(method);
 			args.add(new RenameArguments(newFieldName, updateReferences));
 		}
-
+		if (localVar != null && localVar.exists()) {
+			elements.add(localVar);
+			args.add(new RenameArguments(newFieldName, updateReferences));
+		}
 
 		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
 
@@ -155,6 +182,29 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 		IType recordA= getType(cu, "A");
 		IField field= recordA.getField(fieldName);
 		IMethod method= recordA.getMethod(fieldName, new String[] {});
+		if (isGetterPresent) {
+			assertTrue(method.exists());
+		}
+		ILocalVariable localVar= null;
+		IMethod[] methods= recordA.getMethods();
+		if (methods != null && methods.length > 0) {
+			for (IMethod meth : methods) {
+				if (meth.getElementName().equals(recordA.getElementName())) {
+					ILocalVariable[] lVars= meth.getParameters();
+					if (lVars != null && lVars.length > 0) {
+						for (ILocalVariable lVar : lVars) {
+							if (lVar != null && lVar.getElementName().equals(fieldName)) {
+								localVar= lVar;
+								break;
+							}
+						}
+					}
+				}
+				if (localVar != null) {
+					break;
+				}
+			}
+		}
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
 		descriptor.setJavaElement(field);
 		descriptor.setNewName(newFieldName);
@@ -179,7 +229,10 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 			elements.add(method);
 			args.add(new RenameArguments(newFieldName, updateReferences));
 		}
-
+		if (localVar != null && localVar.exists()) {
+			elements.add(localVar);
+			args.add(new RenameArguments(newFieldName, updateReferences));
+		}
 
 		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
 
@@ -218,60 +271,7 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 	}
 
 	private void renameRecordExplicitAccessor(String methodName, String newMethodName, boolean updateReferences, boolean fail) throws Exception{
-		ParticipantTesting.reset();
-		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		ICompilationUnit cu2= createCUfromTestFile(getPackageP(), "B");
-		IType recordA= getType(cu, "A");
-		IMethod method= recordA.getMethod(methodName,new String[] {});
-		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
-		descriptor.setJavaElement(method);
-		descriptor.setNewName(newMethodName);
-		descriptor.setUpdateReferences(updateReferences);
-		descriptor.setKeepOriginal(false);
-		descriptor.setDeprecateDelegate(false);
-
-		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
-
-		List<IAnnotatable> elements= new ArrayList<>();
-		elements.add(method);
-		List<RenameArguments> args= new ArrayList<>();
-		args.add(new RenameArguments(newMethodName, updateReferences));
-		IField field= recordA.getField(methodName);
-		if (field != null && field.exists()) {
-			elements.add(field);
-			args.add(new RenameArguments(newMethodName, updateReferences));
-		}
-
-
-
-		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
-
-		RefactoringStatus result= performRefactoring(refactoring);
-		if (fail) {
-			assertNotNull("was supposed to fail", result);
-		} else {
-			assertNull("was supposed to pass", result);
-			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
-			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cu2.getSource());
-
-			ParticipantTesting.testRename(
-				renameHandles,
-				args.toArray(new RenameArguments[args.size()]));
-
-			assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-			assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
-
-			RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
-			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
-			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("B")), cu2.getSource());
-
-			assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-			assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
-
-			RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
-			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
-			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("B")), cu2.getSource());
-		}
+		renameRecordCompactConstructor(methodName, newMethodName, updateReferences, fail, true);
 	}
 
 	private void renameRecord(String recordName, String newRecordName, boolean updateReferences) throws Exception{
@@ -354,6 +354,41 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 
 	@Test
 	public void testRenameRecordCompactConstructorFailMethodConflict() throws Exception{
+		renameRecordCompactConstructor("f", "g", true, true, true);
+	}
+
+	@Test
+	public void testRenameRecordCanonicalConstructorImplicitAccessor() throws Exception{
+		renameRecordCompactConstructor("f", "g", true, false, false);
+	}
+
+	@Test
+	public void testRenameRecordCanonicalConstructorImplicitAccessor2() throws Exception{
+		renameRecordCompactConstructor2("f", "g", true, false, false);
+	}
+
+	@Test
+	public void testRenameRecordCanonicalConstructorExplicitAccessor() throws Exception{
+		renameRecordCompactConstructor("f", "g", true, false, true);
+	}
+
+	@Test
+	public void testRenameRecordCanonicalConstructorFailFieldConflict() throws Exception{
+		renameRecordCompactConstructor("f", "g", true, true, true);
+	}
+
+	@Test
+	public void testRenameRecordCanonicalConstructorFailMethodConflict() throws Exception{
+		renameRecordCompactConstructor("f", "g", true, true, true);
+	}
+
+	@Test
+	public void testRenameRecordCanonicalConstructorFailLocalVariableConflict() throws Exception{
+		renameRecordCompactConstructor("f", "g", true, true, true);
+	}
+
+	@Test
+	public void testRenameRecordCompactConstructorFailLocalVariableConflict() throws Exception{
 		renameRecordCompactConstructor("f", "g", true, true, true);
 	}
 }

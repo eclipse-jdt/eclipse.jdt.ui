@@ -29,6 +29,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -41,15 +42,19 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -108,9 +113,15 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private static final String ATTRIBUTE_RENAME_SETTER= "setter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATE= "delegate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
+	private static final GroupCategorySet CATEGORY_LOCAL_RENAME= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.rename.renameType.local", RefactoringCoreMessages.RenameTypeProcessor_changeCategory_local_variables, RefactoringCoreMessages.RenameTypeProcessor_changeCategory_local_variables_description)); //$NON-NLS-1$
 
 	protected IField fField;
+	/* Record Related Fields */
 	private boolean fIsRecordComponent= false;
+	private RenameLocalVariableProcessor fRenameLocalVariableProcessor;
+	private ILocalVariable fLocalVariable;
+	private boolean fIsCompactConstructor;
+	/* Record Related Fields End*/
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
 	protected boolean fUpdateReferences;
@@ -121,6 +132,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private GroupCategorySet fCategorySet;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
+	private CompilationUnit fCompUnit;
 
 	/**
 	 * Creates a new rename field processor.
@@ -178,6 +190,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 
 	@Override
+	public void setNewElementName(String newName) {
+		super.setNewElementName(newName);
+		setLocalVariableProcessor();
+	}
+
+	@Override
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_FIELD_PROCESSOR;
 	}
@@ -226,6 +244,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			IMethod accessor= getAccessor();
 			if (accessor != null) {
 				result.rename(accessor, new RenameArguments(getNewElementName(), getUpdateReferences()));
+			}
+			if (fLocalVariable != null) {
+				result.rename(fLocalVariable, new RenameArguments(getNewElementName(), getUpdateReferences()));
 			}
 		}
 		return result;
@@ -380,6 +401,39 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return JavaModelUtil.findMethod(fField.getElementName(), new String[0], false, fField.getDeclaringType());
 	}
 
+	private void setLocalVariableProcessor() {
+		if (fIsRecordComponent && fField != null) {
+			IType parent= fField.getDeclaringType();
+			try {
+				if (parent != null && parent.isRecord()) {
+					fCompUnit= SharedASTProviderCore.getAST(fField.getCompilationUnit(), SharedASTProviderCore.WAIT_YES, null);
+					for (IJavaElement elem : parent.getChildren()) {
+						if (elem instanceof IMethod
+								&& ((IMethod) elem).isConstructor()) {
+							IMethod method= (IMethod) elem;
+							MethodDeclaration mDecl= ASTNodeSearchUtil.getMethodDeclarationNode(method, fCompUnit);
+							if (mDecl != null) {
+								IMethodBinding mBinding= mDecl.resolveBinding();
+								if (mBinding != null && mBinding.isCanonicalConstructor()) {
+									ILocalVariable[] localVars= method.getParameters();
+									for (ILocalVariable lVar : localVars) {
+										if (lVar.getElementName().equals(fField.getElementName())) {
+											fLocalVariable= lVar;
+											fIsCompactConstructor= mBinding.isCompactConstructor();
+											fRenameLocalVariableProcessor= createLocalRenameProcessor(lVar, getNewElementName(), fCompUnit);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			} catch (JavaModelException e) {
+				//do nothing
+			}
+		}
+	}
+
 	public String getNewGetterName() throws CoreException {
 		IMethod primaryGetterCandidate= JavaModelUtil.findMethod(GetterSetterUtil.getGetterName(fField, new String[0]), new String[0], false, fField.getDeclaringType());
 		if (! JavaModelUtil.isBoolean(fField) || (primaryGetterCandidate != null && primaryGetterCandidate.exists()))
@@ -508,6 +562,15 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				result.merge(Checks.checkIfConstructorName(getAccessor(), getNewElementName(), fField.getDeclaringType().getElementName()));
 			} else {
 				pm.worked(1);
+			}
+
+			if (fRenameLocalVariableProcessor != null && fIsRecordComponent) {
+				result.merge(fRenameLocalVariableProcessor.checkInitialConditions(new SubProgressMonitor(pm, 1)));
+				if (result.hasFatalError())
+					return result;
+				result.merge(fRenameLocalVariableProcessor.checkFinalConditions(new SubProgressMonitor(pm, 1), context));
+				if (result.hasFatalError())
+					return result;
 			}
 
 			result.merge(createChanges(new SubProgressMonitor(pm, 10)));
@@ -729,6 +792,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 		if (fIsRecordComponent) {
 			addAccessorOccurrences(new SubProgressMonitor(pm, 1), result);
+			if (fRenameLocalVariableProcessor != null) {
+				addLocalVariableOccurrences(new SubProgressMonitor(pm, 1), getNewElementName(), result);
+			}
 		} else {
 			pm.worked(1);
 		}
@@ -866,6 +932,25 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			}
 		}
 	}
+
+	private void addLocalVariableOccurrences(IProgressMonitor pm, String newName, RefactoringStatus status) throws CoreException {
+		Assert.isTrue(this.fRenameLocalVariableProcessor != null);
+
+		int current= 0;
+		ICompilationUnit cu= fField.getCompilationUnit();
+		RenameAnalyzeUtil.LocalAnalyzePackage[] analyzePackages= new RenameAnalyzeUtil.LocalAnalyzePackage[1];
+		RenameAnalyzeUtil.LocalAnalyzePackage analyzePackage= fRenameLocalVariableProcessor.getLocalAnalyzePackage();
+		analyzePackages[current]= analyzePackage;
+		for (TextEdit occurenceEdit : analyzePackage.fOccurenceEdits) {
+			addTextEdit(fChangeManager.get(cu), newName, occurenceEdit);
+		}
+		if (!fIsCompactConstructor) {
+			status.merge(RenameAnalyzeUtil.analyzeLocalRenames(analyzePackages, fChangeManager.get(cu), fCompUnit, false));
+		} else {
+			status.merge(RenameAnalyzeUtil.analyzeCompactConstructorLocalRenames(analyzePackages, fChangeManager.get(cu), fCompUnit, false));
+		}
+	}
+
 
 	private void addFieldAccessorOccurrences(IProgressMonitor pm, String editName, String newAccessorName, RefactoringStatus status) throws CoreException {
 		Assert.isTrue(fField.exists());
@@ -1037,5 +1122,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return RefactoringCoreMessages.DelegateFieldCreator_keep_original_renamed_plural;
 		else
 			return RefactoringCoreMessages.DelegateFieldCreator_keep_original_renamed_singular;
+	}
+
+	private RenameLocalVariableProcessor createLocalRenameProcessor(final ILocalVariable local, final String newName, final CompilationUnit compilationUnit) {
+		final RenameLocalVariableProcessor processor= new RenameLocalVariableProcessor(local, fChangeManager, compilationUnit, CATEGORY_LOCAL_RENAME);
+		processor.setNewElementName(newName);
+		processor.setUpdateReferences(getUpdateReferences());
+		return processor;
 	}
 }

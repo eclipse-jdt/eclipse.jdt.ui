@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -230,7 +231,8 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 
 		if (!Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class)
 				&& !Checks.isDeclaredIn(fTempDeclarationNode, Initializer.class)
-				&& !Checks.isDeclaredIn(fTempDeclarationNode, LambdaExpression.class)) {
+				&& !Checks.isDeclaredIn(fTempDeclarationNode, LambdaExpression.class)
+				&& !Checks.isDeclaredIn(fTempDeclarationNode, RecordDeclaration.class)) {
 			if (JavaModelUtil.is18OrHigher(fCu.getJavaProject()))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_only_in_methods_initializers_and_lambda);
 

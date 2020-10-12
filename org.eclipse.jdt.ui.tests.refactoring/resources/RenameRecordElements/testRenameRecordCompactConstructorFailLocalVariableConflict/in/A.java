@@ -1,6 +1,7 @@
 package p;
-record A(int f, int g){	
+record A(int f){
 	A{
+		int g=0;
 		System.out.println(f);
 	}
 	
@@ -13,6 +14,10 @@ record A(int f, int g){
 	}
 	
 	public int f() {
+		return f;
+	}
+	
+	public int g() {
 		return f;
 	}
 }
