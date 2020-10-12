@@ -135,9 +135,6 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_PushDownNegation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ComparisonStatement;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSuperCall;
-	public static String UnnecessaryCodeTabPage_CheckboxName_MergeConditionalBlocks;
-	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd;
-	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantIfCondition;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UseDirectlyMapMethod;
 	public static String UnnecessaryCodeTabPage_CheckboxName_CollectionCloning;
 	public static String UnnecessaryCodeTabPage_CheckboxName_MapCloning;
@@ -160,6 +157,12 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedTypes;
 	public static String UnnecessaryCodeTabPage_GroupName_UnnecessaryCode;
 	public static String UnnecessaryCodeTabPage_GroupName_UnusedCode;
+
+	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
+
+	public static String DuplicateCodeTabPage_CheckboxName_MergeConditionalBlocks;
+	public static String DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd;
+	public static String DuplicateCodeTabPage_CheckboxName_RedundantIfCondition;
 
 	static {
 		// initialize resource bundle

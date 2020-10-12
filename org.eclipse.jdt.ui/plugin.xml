@@ -7022,6 +7022,11 @@
             cleanUpKind="saveAction">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.DuplicateCodeTabPage"
+            name="%CleanUpTabPage.DuplicateCode.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage"
             name="%CleanUpTabPage.MissingCode.name"
             cleanUpKind="saveAction">
@@ -7256,24 +7261,9 @@
             runAfter="org.eclipse.jdt.ui.cleanup.comparison_statement">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks"
-            runAfter="org.eclipse.jdt.ui.cleanup.no_super">
-      </cleanUp>
-      <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.redundant_falling_through_block_end"
-            runAfter="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks">
-      </cleanUp>
-      <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.if_condition"
-            runAfter="org.eclipse.jdt.ui.cleanup.redundant_falling_through_block_end">
-      </cleanUp>
-      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp"
             id="org.eclipse.jdt.ui.cleanup.use_directly_map_method"
-            runAfter="org.eclipse.jdt.ui.cleanup.if_condition">
+            runAfter="org.eclipse.jdt.ui.cleanup.no_super">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp"
@@ -7284,6 +7274,21 @@
             class="org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp"
             id="org.eclipse.jdt.ui.cleanup.map_cloning"
             runAfter="org.eclipse.jdt.ui.cleanup.collection_cloning">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks"
+            runAfter="org.eclipse.jdt.ui.cleanup.map_cloning">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.redundant_falling_through_block_end"
+            runAfter="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.if_condition"
+            runAfter="org.eclipse.jdt.ui.cleanup.redundant_falling_through_block_end">
       </cleanUp>
    </extension>
 
