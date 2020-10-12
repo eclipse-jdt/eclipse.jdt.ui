@@ -168,6 +168,14 @@ public class CleanUpTest1d15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return 0;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public int matchPatternOnLoneElse(Object object) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (!(object instanceof Date)) object.toString();\n" //
+				+ "        else final Date date = (Date) object;\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
 
@@ -240,6 +248,13 @@ public class CleanUpTest1d15 extends CleanUpTestCase {
 				+ "    public long matchPatternOnLoneStatement(Object object) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (object instanceof Date date) {}\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int matchPatternOnLoneElse(Object object) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (!(object instanceof Date date)) object.toString();\n" //
 				+ "\n" //
 				+ "        return 0;\n" //
 				+ "    }\n" //

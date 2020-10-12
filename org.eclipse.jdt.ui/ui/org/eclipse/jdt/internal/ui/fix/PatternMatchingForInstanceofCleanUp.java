@@ -105,7 +105,7 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
 		if (!isEnabled(CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF)
 				|| !PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(unit.getJavaElement().getJavaProject())
-				|| !JavaModelUtil.is14OrHigher(unit.getJavaElement().getJavaProject())) {
+				|| !JavaModelUtil.is15OrHigher(unit.getJavaElement().getJavaProject())) {
 			return null;
 		}
 
@@ -278,7 +278,7 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 
 			ASTNodes.replaceButKeepComment(rewrite, nodeToComplete, newInstanceof, group);
 
-			if (ASTNodes.canHaveSiblings(statementToRemove)) {
+			if (ASTNodes.canHaveSiblings(statementToRemove) || statementToRemove.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
 				rewrite.remove(statementToRemove, group);
 			} else {
 				ASTNodes.replaceButKeepComment(rewrite, statementToRemove, ast.newBlock(), group);
