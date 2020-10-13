@@ -1344,7 +1344,7 @@ public class CleanUpConstants {
 	public static final String REMOVE_USELESS_CONTINUE= "cleanup.useless_continue"; //$NON-NLS-1$
 
 	/**
-	 * Replaces a loop on elements by Collection.addAll(), Collection.addAll(Arrays.asList()), Collection.removeAll(), Collections.addAll() or Collections.removeAll().
+	 * Replaces a loop on elements by Collection.addAll(), Collection.addAll(Arrays.asList()) or Collections.addAll().
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
 	 * <p>
@@ -1353,7 +1353,7 @@ public class CleanUpConstants {
 	 * @see CleanUpOptionsCore#FALSE
 	 * @since 4.18
 	 */
-	public static final String CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL= "cleanup.add_remove_all"; //$NON-NLS-1$
+	public static final String CONTROL_STATEMENTS_USE_ADD_ALL= "cleanup.add_all"; //$NON-NLS-1$
 
 	/**
 	 * Reduces the code of the equals method implementation by using Objects.equals().

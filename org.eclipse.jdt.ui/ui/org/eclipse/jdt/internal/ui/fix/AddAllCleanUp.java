@@ -64,29 +64,29 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * A fix that replaces a loop on elements by Collection.addAll(), Collection.addAll(Arrays.asList()), Collection.removeAll(), Collections.addAll() or Collections.removeAll().
+ * A fix that replaces a loop on elements by Collection.addAll(), Collection.addAll(Arrays.asList()) or Collections.addAll().
  * If the source is an array, the list is raw and the JVM is Java 1.5 or higher, we use Arrays.asList() to handle the erasure type.
  * It doesn't decrease the performance.
  */
-public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
-	public AddOrRemoveAllCleanUp() {
+public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
+	public AddAllCleanUp() {
 		this(Collections.emptyMap());
 	}
 
-	public AddOrRemoveAllCleanUp(Map<String, String> options) {
+	public AddAllCleanUp(Map<String, String> options) {
 		super(options);
 	}
 
 	@Override
 	public CleanUpRequirements getRequirements() {
-		boolean requireAST= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL);
+		boolean requireAST= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_ALL);
 		return new CleanUpRequirements(requireAST, false, false, null);
 	}
 
 	@Override
 	public String[] getStepDescriptions() {
-		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL)) {
-			return new String[] { MultiFixMessages.AddOrRemoveAllCleanup_description };
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_ALL)) {
+			return new String[] { MultiFixMessages.AddAllCleanup_description };
 		}
 
 		return new String[0];
@@ -94,7 +94,7 @@ public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpF
 
 	@Override
 	public String getPreview() {
-		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL)) {
+		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_ALL)) {
 			return "outputList.addAll(inputList);\n\n\n"; //$NON-NLS-1$
 		}
 
@@ -106,7 +106,7 @@ public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpF
 
 	@Override
 	protected ICleanUpFix createFix(final CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL)) {
+		if (!isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_ALL)) {
 			return null;
 		}
 
@@ -238,12 +238,7 @@ public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpF
 				}
 
 				if (ASTNodes.usesGivenSignature(addOrRemoveMethod, Collection.class.getCanonicalName(), "add", Object.class.getCanonicalName())) { //$NON-NLS-1$
-					rewriteOperations.add(new AddOrRemoveAllForCollectionOperation(node, "addAll", addOrRemoveMethod.getExpression(), data)); //$NON-NLS-1$
-					return false;
-				}
-
-				if (ASTNodes.usesGivenSignature(addOrRemoveMethod, Set.class.getCanonicalName(), "remove", Object.class.getCanonicalName())) { //$NON-NLS-1$
-					rewriteOperations.add(new AddOrRemoveAllForCollectionOperation(node, "removeAll", addOrRemoveMethod.getExpression(), data)); //$NON-NLS-1$
+					rewriteOperations.add(new AddAllForCollectionOperation(node, addOrRemoveMethod.getExpression(), data));
 					return false;
 				}
 
@@ -263,7 +258,7 @@ public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpF
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.AddOrRemoveAllCleanup_description, unit,
+		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.AddAllCleanup_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
 	}
 
@@ -297,7 +292,7 @@ public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpF
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.AddOrRemoveAllCleanup_description, cuRewrite);
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.AddAllCleanup_description, cuRewrite);
 			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 
 			if (JavaModelUtil.is50OrHigher(((CompilationUnit) toReplace.getRoot()).getJavaElement().getJavaProject())
@@ -332,15 +327,13 @@ public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpF
 		}
 	}
 
-	private static class AddOrRemoveAllForCollectionOperation extends CompilationUnitRewriteOperation {
+	private static class AddAllForCollectionOperation extends CompilationUnitRewriteOperation {
 		private final Statement toReplace;
-		private final String methodName;
 		private final Expression affectedCollection;
 		private final Expression addedData;
 
-		public AddOrRemoveAllForCollectionOperation(final Statement toReplace, final String methodName, final Expression affectedCollection, final Expression addedData) {
+		public AddAllForCollectionOperation(final Statement toReplace, final Expression affectedCollection, final Expression addedData) {
 			this.toReplace= toReplace;
-			this.methodName= methodName;
 			this.affectedCollection= affectedCollection;
 			this.addedData= addedData;
 		}
@@ -349,11 +342,11 @@ public class AddOrRemoveAllCleanUp extends AbstractMultiFix implements ICleanUpF
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.AddOrRemoveAllCleanup_description, cuRewrite);
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.AddAllCleanup_description, cuRewrite);
 
 			MethodInvocation newMethod= ast.newMethodInvocation();
 			newMethod.setExpression(ASTNodes.createMoveTarget(rewrite, affectedCollection));
-			newMethod.setName(ast.newSimpleName(methodName));
+			newMethod.setName(ast.newSimpleName("addAll")); //$NON-NLS-1$
 			newMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(addedData)));
 
 			rewrite.replace(toReplace, ast.newExpressionStatement(newMethod), group);

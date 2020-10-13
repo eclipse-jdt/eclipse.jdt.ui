@@ -49,7 +49,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testAddOrRemoveAll() throws Exception {
+	public void testAddAll() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //
 				+ "package test1;\n" //
@@ -196,29 +196,13 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Collection<String> replaceRemoveWithForLoopByRemoveAll(List<String> col, Set<String> output) {\n" //
-				+ "        for (int i = 0; i < col.size(); i++) {\n" //
-				+ "            output.remove(col.get(i));\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Collection<String> replaceRemoveWithForEachByRemoveAll(Collection<String> col, Set<String> output) {\n" //
-				+ "        for (String s : col) {\n" //
-				+ "            output.remove(s);\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    private String doSomething(String s) {\n" //
 				+ "        return null;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", input, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_ALL);
 
 		String output= "" //
 				+ "package test1;\n" //
@@ -329,29 +313,17 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Collection<String> replaceRemoveWithForLoopByRemoveAll(List<String> col, Set<String> output) {\n" //
-				+ "        output.removeAll(col);\n" //
-				+ "\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Collection<String> replaceRemoveWithForEachByRemoveAll(Collection<String> col, Set<String> output) {\n" //
-				+ "        output.removeAll(col);\n" //
-				+ "\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    private String doSomething(String s) {\n" //
 				+ "        return null;\n" //
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.AddOrRemoveAllCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.AddAllCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { output });
 	}
 
 	@Test
-	public void testDoNotAddOrRemoveAll() throws Exception {
+	public void testDoNotAddAll() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
 				+ "package test1;\n" //
@@ -467,20 +439,6 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Collection<String> doNotRefactorRemoveWithPossibleDoubles() {\n" //
-				+ "        List<String> col = new ArrayList<String>();\n" //
-				+ "        col.add(\"redundant\");\n" //
-				+ "        List<String> output = new ArrayList<String>();\n" //
-				+ "        output.add(\"redundant\");\n" //
-				+ "        output.add(\"redundant\");\n" //
-				+ "\n" //
-				+ "        for (int i = 0; i < col.size(); i++) {\n" //
-				+ "            output.remove(col.get(i));\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public Collection<String> doNotRefactorForLoopAddMethodResult(List<String> output, List<String> col) {\n" //
 				+ "        for (int i = 0; i < col.size(); i++) {\n" //
 				+ "            output.add(doSomething(col.get(i)));\n" //
@@ -503,7 +461,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_REMOVE_ALL);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_ALL);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}

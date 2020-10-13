@@ -7061,14 +7061,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.control_statements">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.AddOrRemoveAllCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.add_remove_all"
+            class="org.eclipse.jdt.internal.ui.fix.AddAllCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.add_all"
             runAfter="org.eclipse.jdt.ui.cleanup.loop">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp"
             id="org.eclipse.jdt.ui.cleanup.variables"
-            runAfter="org.eclipse.jdt.ui.cleanup.add_remove_all">
+            runAfter="org.eclipse.jdt.ui.cleanup.add_all">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.VarCleanUp"
