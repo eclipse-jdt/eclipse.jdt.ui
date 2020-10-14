@@ -101,72 +101,72 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddNLSTag01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s= \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s= \"\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public String s1 = \"\";\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s2 = \"\";\n");
-		buf.append("        String s3 = s2 + \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public String s1 = \"\";\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s2 = \"\";\n" //
+				+ "        String s3 = s2 + \"\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public static final String s= \"\";\n");
-		buf.append("    public static String bar(String s1, String s2) {\n");
-		buf.append("        bar(\"\", \"\");\n");
-		buf.append("        return \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static final String s= \"\";\n" //
+				+ "    public static String bar(String s1, String s2) {\n" //
+				+ "        bar(\"\", \"\");\n" //
+				+ "        return \"\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s= \"\"; //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s= \"\"; //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public String s1 = \"\"; //$NON-NLS-1$\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s2 = \"\"; //$NON-NLS-1$\n");
-		buf.append("        String s3 = s2 + \"\"; //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public String s1 = \"\"; //$NON-NLS-1$\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s2 = \"\"; //$NON-NLS-1$\n" //
+				+ "        String s3 = s2 + \"\"; //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public static final String s= \"\"; //$NON-NLS-1$\n");
-		buf.append("    public static String bar(String s1, String s2) {\n");
-		buf.append("        bar(\"\", \"\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
-		buf.append("        return \"\"; //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static final String s= \"\"; //$NON-NLS-1$\n" //
+				+ "    public static String bar(String s1, String s2) {\n" //
+				+ "        bar(\"\", \"\"); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        return \"\"; //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -174,72 +174,72 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveNLSTag01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s= null; //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s= null; //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public String s1 = null; //$NON-NLS-1$\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s2 = null; //$NON-NLS-1$\n");
-		buf.append("        String s3 = s2 + s2; //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public String s1 = null; //$NON-NLS-1$\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s2 = null; //$NON-NLS-1$\n" //
+				+ "        String s3 = s2 + s2; //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public static final String s= null; //$NON-NLS-1$\n");
-		buf.append("    public static String bar(String s1, String s2) {\n");
-		buf.append("        bar(s2, s1); //$NON-NLS-1$ //$NON-NLS-2$\n");
-		buf.append("        return s1; //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static final String s= null; //$NON-NLS-1$\n" //
+				+ "    public static String bar(String s1, String s2) {\n" //
+				+ "        bar(s2, s1); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        return s1; //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s= null; \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s= null; \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public String s1 = null; \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s2 = null; \n");
-		buf.append("        String s3 = s2 + s2; \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public String s1 = null; \n" //
+				+ "    public void foo() {\n" //
+				+ "        String s2 = null; \n" //
+				+ "        String s3 = s2 + s2; \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public static final String s= null; \n");
-		buf.append("    public static String bar(String s1, String s2) {\n");
-		buf.append("        bar(s2, s1); \n");
-		buf.append("        return s1; \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static final String s= null; \n" //
+				+ "    public static String bar(String s1, String s2) {\n" //
+				+ "        bar(s2, s1); \n" //
+				+ "        return s1; \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -247,56 +247,56 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.*;\n");
-		buf.append("public class E2 {\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.*;\n" //
+				+ "public class E2 {\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("import java.io.StringReader;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import java.util.HashMap;\n" //
+				+ "import test1.E2;\n" //
+				+ "import java.io.StringReader;\n" //
+				+ "import java.util.HashMap;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -304,64 +304,64 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private void foo() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private void foo() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private void foo() {}\n");
-		buf.append("    private void bar() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    private void foo() {}\n" //
+				+ "    private void bar() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    private class E3Inner {\n");
-		buf.append("        private void foo() {}\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {}\n");
-		buf.append("            private void foo() {};\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    private class E3Inner {\n" //
+				+ "        private void foo() {}\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        Runnable r= new Runnable() {\n" //
+				+ "            public void run() {}\n" //
+				+ "            private void foo() {};\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    private class E3Inner {\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {};\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    private class E3Inner {\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        Runnable r= new Runnable() {\n" //
+				+ "            public void run() {};\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -369,61 +369,61 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private E1(int i) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private E1(int i) {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public E2() {}\n");
-		buf.append("    private E2(int i) {}\n");
-		buf.append("    private E2(String s) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public E2() {}\n" //
+				+ "    private E2(int i) {}\n" //
+				+ "    private E2(String s) {}\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    public class E3Inner {\n");
-		buf.append("        private E3Inner(int i) {}\n");
-		buf.append("    }\n");
-		buf.append("    private void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    public class E3Inner {\n" //
+				+ "        private E3Inner(int i) {}\n" //
+				+ "    }\n" //
+				+ "    private void foo() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private E1(int i) {}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private E1(int i) {}\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public E2() {}\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public E2() {}\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    public class E3Inner {\n");
-		buf.append("        private E3Inner(int i) {}\n");
-		buf.append("    }\n");
-		buf.append("    private void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    public class E3Inner {\n" //
+				+ "        private E3Inner(int i) {}\n" //
+				+ "    }\n" //
+				+ "    private void foo() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -431,58 +431,58 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private int i= 10;\n");
-		buf.append("    private int j= 10;\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    private int i= 10;\n" //
+				+ "    private int j= 10;\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    private int i;\n");
-		buf.append("    private int j;\n");
-		buf.append("    private void foo() {\n");
-		buf.append("        i= 10;\n");
-		buf.append("        i= 20;\n");
-		buf.append("        i= j;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    private int i;\n" //
+				+ "    private int j;\n" //
+				+ "    private void foo() {\n" //
+				+ "        i= 10;\n" //
+				+ "        i= 20;\n" //
+				+ "        i= j;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    private int j;\n");
-		buf.append("    private void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    private int j;\n" //
+				+ "    private void foo() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -490,55 +490,55 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private class E1Inner{}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private class E1Inner{}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private class E2Inner1 {}\n");
-		buf.append("    private class E2Inner2 {}\n");
-		buf.append("    public class E2Inner3 {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    private class E2Inner1 {}\n" //
+				+ "    private class E2Inner2 {}\n" //
+				+ "    public class E2Inner3 {}\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    public class E3Inner {\n");
-		buf.append("        private class E3InnerInner {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    public class E3Inner {\n" //
+				+ "        private class E3InnerInner {}\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public class E2Inner3 {}\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public class E2Inner3 {}\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    public class E3Inner {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    public class E3Inner {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -546,78 +546,78 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 10;\n");
-		buf.append("        int j= 10;\n");
-		buf.append("    }\n");
-		buf.append("    private void bar() {\n");
-		buf.append("        int i= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= 10;\n" //
+				+ "        int j= 10;\n" //
+				+ "    }\n" //
+				+ "    private void bar() {\n" //
+				+ "        int i= 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    public class E3Inner {\n");
-		buf.append("        public void foo() {\n");
-		buf.append("            int i= 10;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 10;\n");
-		buf.append("        int j= i;\n");
-		buf.append("        j= 10;\n");
-		buf.append("        j= 20;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    public class E3Inner {\n" //
+				+ "        public void foo() {\n" //
+				+ "            int i= 10;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= 10;\n" //
+				+ "        int j= i;\n" //
+				+ "        j= 10;\n" //
+				+ "        j= 20;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("    private void bar() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public void foo() {\n" //
+				+ "    }\n" //
+				+ "    private void bar() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    public class E3Inner {\n");
-		buf.append("        public void foo() {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class E3 {\n" //
+				+ "    public class E3Inner {\n" //
+				+ "        public void foo() {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -625,28 +625,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= bar();\n");
-		buf.append("        int j= 1;\n");
-		buf.append("    }\n");
-		buf.append("    public int bar() {return 1;}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= bar();\n" //
+				+ "        int j= 1;\n" //
+				+ "    }\n" //
+				+ "    public int bar() {return 1;}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        bar();\n");
-		buf.append("    }\n");
-		buf.append("    public int bar() {return 1;}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        bar();\n" //
+				+ "    }\n" //
+				+ "    public int bar() {return 1;}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -654,25 +654,25 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i= bar();\n");
-		buf.append("    private int j= 1;\n");
-		buf.append("    public int bar() {return 1;}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i= bar();\n" //
+				+ "    private int j= 1;\n" //
+				+ "    public int bar() {return 1;}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i= bar();\n");
-		buf.append("    public int bar() {return 1;}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i= bar();\n" //
+				+ "    public int bar() {return 1;}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -680,30 +680,30 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 1;\n");
-		buf.append("        i= bar();\n");
-		buf.append("        int j= 1;\n");
-		buf.append("        j= 1;\n");
-		buf.append("    }\n");
-		buf.append("    public int bar() {return 1;}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= 1;\n" //
+				+ "        i= bar();\n" //
+				+ "        int j= 1;\n" //
+				+ "        j= 1;\n" //
+				+ "    }\n" //
+				+ "    public int bar() {return 1;}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        bar();\n");
-		buf.append("    }\n");
-		buf.append("    public int bar() {return 1;}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        bar();\n" //
+				+ "    }\n" //
+				+ "    public int bar() {return 1;}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -711,32 +711,32 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i= 1;\n");
-		buf.append("    private int j= 1;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        i= bar();\n");
-		buf.append("        j= 1;\n");
-		buf.append("    }\n");
-		buf.append("    public int bar() {return 1;}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i= 1;\n" //
+				+ "    private int j= 1;\n" //
+				+ "    public void foo() {\n" //
+				+ "        i= bar();\n" //
+				+ "        j= 1;\n" //
+				+ "    }\n" //
+				+ "    public int bar() {return 1;}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i= 1;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        i= bar();\n");
-		buf.append("    }\n");
-		buf.append("    public int bar() {return 1;}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i= 1;\n" //
+				+ "    public void foo() {\n" //
+				+ "        i= bar();\n" //
+				+ "    }\n" //
+				+ "    public int bar() {return 1;}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -744,49 +744,49 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCode11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1  {\n");
-		buf.append("    private void foo(String s) {\n");
-		buf.append("        String s1= (String)s;\n");
-		buf.append("        Object o= (Object)new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1  {\n" //
+				+ "    private void foo(String s) {\n" //
+				+ "        String s1= (String)s;\n" //
+				+ "        Object o= (Object)new Object();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    String s1;\n");
-		buf.append("    String s2= (String)s1;\n");
-		buf.append("    public void foo(Integer i) {\n");
-		buf.append("        Number n= (Number)i;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    String s1;\n" //
+				+ "    String s2= (String)s1;\n" //
+				+ "    public void foo(Integer i) {\n" //
+				+ "        Number n= (Number)i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1  {\n");
-		buf.append("    private void foo(String s) {\n");
-		buf.append("        String s1= s;\n");
-		buf.append("        Object o= new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1  {\n" //
+				+ "    private void foo(String s) {\n" //
+				+ "        String s1= s;\n" //
+				+ "        Object o= new Object();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    String s1;\n");
-		buf.append("    String s2= s1;\n");
-		buf.append("    public void foo(Integer i) {\n");
-		buf.append("        Number n= i;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    String s1;\n" //
+				+ "    String s2= s1;\n" //
+				+ "    public void foo(Integer i) {\n" //
+				+ "        Number n= i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
@@ -794,27 +794,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug123766() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1  {\n");
-		buf.append("    private int i,j;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s1,s2;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1  {\n" //
+				+ "    private int i,j;\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s1,s2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1  {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1  {\n" //
+				+ "    public void foo() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -822,18 +822,18 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug150853() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import foo.Bar;\n");
-		buf.append("public class E1 {}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import foo.Bar;\n" //
+				+ "public class E1 {}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -841,25 +841,25 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug173014_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("        void foo() {\n");
-		buf.append("                class Local {}\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "        void foo() {\n" //
+				+ "                class Local {}\n" //
+				+ "        }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("        void foo() {\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "        void foo() {\n" //
+				+ "        }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -867,30 +867,30 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug173014_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        class Local {}\n");
-		buf.append("        class Local2 {\n");
-		buf.append("            class LMember {}\n");
-		buf.append("            class LMember2 extends Local2 {}\n");
-		buf.append("            LMember m;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "        class Local {}\n" //
+				+ "        class Local2 {\n" //
+				+ "            class LMember {}\n" //
+				+ "            class LMember2 extends Local2 {}\n" //
+				+ "            LMember m;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -898,27 +898,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug189394() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Random;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Random ran = new Random();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Random;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        Random ran = new Random();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Random;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        new Random();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Random;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        new Random();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -926,31 +926,31 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug335173_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		String sample= "" //
 
-		buf.append("package test1;\n");
-		buf.append("import java.util.Comparator;\n");
-		buf.append("\n");
-		buf.append("class IntComp implements Comparator<Integer> {\n");
-		buf.append("    public int compare(Integer o1, Integer o2) {\n");
-		buf.append("        return ((Integer) o1).intValue() - ((Integer) o2).intValue();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+				+ "package test1;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "\n" //
+				+ "class IntComp implements Comparator<Integer> {\n" //
+				+ "    public int compare(Integer o1, Integer o2) {\n" //
+				+ "        return ((Integer) o1).intValue() - ((Integer) o2).intValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		ICompilationUnit cu1= pack1.createCompilationUnit("IntComp.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("IntComp.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Comparator;\n");
-		buf.append("\n");
-		buf.append("class IntComp implements Comparator<Integer> {\n");
-		buf.append("    public int compare(Integer o1, Integer o2) {\n");
-		buf.append("        return o1.intValue() - o2.intValue();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "\n" //
+				+ "class IntComp implements Comparator<Integer> {\n" //
+				+ "    public int compare(Integer o1, Integer o2) {\n" //
+				+ "        return o1.intValue() - o2.intValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -958,29 +958,29 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug335173_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(Integer n) {\n");
-		buf.append("        int i = (((Integer) n)).intValue();\n");
-		buf.append("        foo(((Integer) n));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(Integer n) {\n" //
+				+ "        int i = (((Integer) n)).intValue();\n" //
+				+ "        foo(((Integer) n));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(Integer n) {\n");
-		buf.append("        int i = ((n)).intValue();\n");
-		buf.append("        foo((n));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(Integer n) {\n" //
+				+ "        int i = ((n)).intValue();\n" //
+				+ "        foo((n));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -988,27 +988,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug335173_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(Integer n) {\n");
-		buf.append("        int i = ((Integer) (n)).intValue();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(Integer n) {\n" //
+				+ "        int i = ((Integer) (n)).intValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(Integer n) {\n");
-		buf.append("        int i = (n).intValue();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(Integer n) {\n" //
+				+ "        int i = (n).intValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -1016,27 +1016,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug371078_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		String sample= "" //
 
-		buf.append("package test1;\n");
-		buf.append("class E1 {\n");
-		buf.append("    public static Object create(final int a, final int b) {\n");
-		buf.append("        return (Double) ((double) (a * Math.pow(10, -b)));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+				+ "package test1;\n" //
+				+ "class E1 {\n" //
+				+ "    public static Object create(final int a, final int b) {\n" //
+				+ "        return (Double) ((double) (a * Math.pow(10, -b)));\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		ICompilationUnit cu1= pack1.createCompilationUnit("IntComp.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("IntComp.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("class E1 {\n");
-		buf.append("    public static Object create(final int a, final int b) {\n");
-		buf.append("        return (a * Math.pow(10, -b));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "class E1 {\n" //
+				+ "    public static Object create(final int a, final int b) {\n" //
+				+ "        return (a * Math.pow(10, -b));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -1044,26 +1044,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnusedCodeBug371078_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		String sample= "" //
 
-		buf.append("package test1;\n");
-		buf.append("public class NestedCasts {\n");
-		buf.append("	void foo(Integer i) {\n");
-		buf.append("		Object o= ((((Number) (((Integer) i)))));\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("NestedCasts.java", buf.toString(), false, null);
+				+ "package test1;\n" //
+				+ "public class NestedCasts {\n" //
+				+ "	void foo(Integer i) {\n" //
+				+ "		Object o= ((((Number) (((Integer) i)))));\n" //
+				+ "	}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("NestedCasts.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class NestedCasts {\n");
-		buf.append("	void foo(Integer i) {\n");
-		buf.append("		Object o= (((((i)))));\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class NestedCasts {\n" //
+				+ "	void foo(Integer i) {\n" //
+				+ "		Object o= (((((i)))));\n" //
+				+ "	}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -1071,59 +1071,59 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testJava5001() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    private int field= 1;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    private int field= 1;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    private int field1= 1;\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    private int field2= 2;\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1{\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    private int field1= 1;\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    private int field2= 2;\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private int field= 1;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    private int field= 1;\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private int field1= 1;\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private int field2= 2;\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1{\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    private int field1= 1;\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    private int field2= 2;\n" //
+				+ "}\n";
+		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
@@ -1131,59 +1131,59 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testJava5002() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    private int f() {return 1;}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    private int f() {return 1;}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    private int f1() {return 1;}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    private int f2() {return 2;}\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1{\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    private int f1() {return 1;}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    private int f2() {return 2;}\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private int f() {return 1;}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    private int f() {return 1;}\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private int f1() {return 1;}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private int f2() {return 2;}\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1{\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    private int f1() {return 1;}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    private int f2() {return 2;}\n" //
+				+ "}\n";
+		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
@@ -1191,57 +1191,57 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testJava5003() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("/**\n");
-		buf.append(" * @deprecated\n");
-		buf.append(" */\n");
-		buf.append("public class E1 {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "/**\n" //
+				+ " * @deprecated\n" //
+				+ " */\n" //
+				+ "public class E1 {\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    private class E2Sub1 {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    private class E2Sub2 {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1{\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    private class E2Sub1 {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    private class E2Sub2 {}\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("/**\n");
-		buf.append(" * @deprecated\n");
-		buf.append(" */\n");
-		buf.append("@Deprecated\n");
-		buf.append("public class E1 {\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "/**\n" //
+				+ " * @deprecated\n" //
+				+ " */\n" //
+				+ "@Deprecated\n" //
+				+ "public class E1 {\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private class E2Sub1 {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private class E2Sub2 {}\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1{\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    private class E2Sub1 {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    private class E2Sub2 {}\n" //
+				+ "}\n";
+		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
@@ -1249,62 +1249,62 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testJava5004() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    private void foo3() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    private void foo3() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    protected void foo3() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    protected void foo3() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    public void foo3() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    public void foo3() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    @Override\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    protected void foo3() {}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    @Override\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    @Override\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    protected void foo3() {}\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    @Override\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo3() {}\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    @Override\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    @Override\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    @Override\n" //
+				+ "    public void foo3() {}\n" //
+				+ "}\n";
+		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2});
 	}
@@ -1312,137 +1312,137 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testJava5005() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    private void foo3() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    public int i;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    private void foo3() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    public int i;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    protected void foo3() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    protected void foo3() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    public void foo3() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    public void foo3() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    private void foo3() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public int i;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    private void foo3() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    public int i;\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    @Override\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    protected void foo3() {}\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    @Override\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    @Override\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    protected void foo3() {}\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo1() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    @Override\n");
-		buf.append("    protected void foo2() {}\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo3() {}\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    @Override\n" //
+				+ "    public void foo1() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    @Override\n" //
+				+ "    protected void foo2() {}\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    @Override\n" //
+				+ "    public void foo3() {}\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -1450,19 +1450,19 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testJava50Bug222257() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        ArrayList list= new ArrayList<String>();\n");
-		buf.append("        ArrayList list2= new ArrayList<String>();\n");
-		buf.append("        \n");
-		buf.append("        System.out.println(list);\n");
-		buf.append("        System.out.println(list2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        ArrayList list= new ArrayList<String>();\n" //
+				+ "        ArrayList list2= new ArrayList<String>();\n" //
+				+ "        \n" //
+				+ "        System.out.println(list);\n" //
+				+ "        System.out.println(list2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		HashMap<String, String> map= new HashMap<>();
 		map.put(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES, CleanUpOptions.TRUE);
@@ -1495,40 +1495,40 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddOverride15() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("interface I {\n");
-		buf.append("    void m();\n");
-		buf.append("    boolean equals(Object obj);\n");
-		buf.append("}\n");
-		buf.append("interface J extends I {\n");
-		buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
-		buf.append("}\n");
-		buf.append("class X implements J {\n");
-		buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
-		buf.append("    public int hashCode() { return 0; }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "interface I {\n" //
+				+ "    void m();\n" //
+				+ "    boolean equals(Object obj);\n" //
+				+ "}\n" //
+				+ "interface J extends I {\n" //
+				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
+				+ "}\n" //
+				+ "class X implements J {\n" //
+				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
+				+ "    public int hashCode() { return 0; }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("I.java", sample, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("interface I {\n");
-		buf.append("    void m();\n");
-		buf.append("    boolean equals(Object obj);\n");
-		buf.append("}\n");
-		buf.append("interface J extends I {\n");
-		buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
-		buf.append("}\n");
-		buf.append("class X implements J {\n");
-		buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
-		buf.append("    @Override\n");
-		buf.append("    public int hashCode() { return 0; }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "interface I {\n" //
+				+ "    void m();\n" //
+				+ "    boolean equals(Object obj);\n" //
+				+ "}\n" //
+				+ "interface J extends I {\n" //
+				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
+				+ "}\n" //
+				+ "class X implements J {\n" //
+				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
+				+ "    @Override\n" //
+				+ "    public int hashCode() { return 0; }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -1541,43 +1541,43 @@ public class CleanUpTest extends CleanUpTestCase {
 			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
 
 			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("interface I {\n");
-			buf.append("    void m();\n");
-			buf.append("    boolean equals(Object obj);\n");
-			buf.append("}\n");
-			buf.append("interface J extends I {\n");
-			buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
-			buf.append("}\n");
-			buf.append("class X implements J {\n");
-			buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
-			buf.append("    public int hashCode() { return 0; }\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "interface I {\n" //
+					+ "    void m();\n" //
+					+ "    boolean equals(Object obj);\n" //
+					+ "}\n" //
+					+ "interface J extends I {\n" //
+					+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
+					+ "}\n" //
+					+ "class X implements J {\n" //
+					+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
+					+ "    public int hashCode() { return 0; }\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", sample, false, null);
 
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("interface I {\n");
-			buf.append("    void m();\n");
-			buf.append("    @Override\n");
-			buf.append("    boolean equals(Object obj);\n");
-			buf.append("}\n");
-			buf.append("interface J extends I {\n");
-			buf.append("    @Override\n");
-			buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
-			buf.append("}\n");
-			buf.append("class X implements J {\n");
-			buf.append("    @Override\n");
-			buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
-			buf.append("    @Override\n");
-			buf.append("    public int hashCode() { return 0; }\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "interface I {\n" //
+					+ "    void m();\n" //
+					+ "    @Override\n" //
+					+ "    boolean equals(Object obj);\n" //
+					+ "}\n" //
+					+ "interface J extends I {\n" //
+					+ "    @Override\n" //
+					+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
+					+ "}\n" //
+					+ "class X implements J {\n" //
+					+ "    @Override\n" //
+					+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
+					+ "    @Override\n" //
+					+ "    public int hashCode() { return 0; }\n" //
+					+ "}\n";
+			String expected1= sample;
 
 			assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
@@ -1593,39 +1593,39 @@ public class CleanUpTest extends CleanUpTestCase {
 			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
 
 			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("interface I {\n");
-			buf.append("    void m();\n");
-			buf.append("    boolean equals(Object obj);\n");
-			buf.append("}\n");
-			buf.append("interface J extends I {\n");
-			buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
-			buf.append("}\n");
-			buf.append("class X implements J {\n");
-			buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
-			buf.append("    public int hashCode() { return 0; }\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "interface I {\n" //
+					+ "    void m();\n" //
+					+ "    boolean equals(Object obj);\n" //
+					+ "}\n" //
+					+ "interface J extends I {\n" //
+					+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
+					+ "}\n" //
+					+ "class X implements J {\n" //
+					+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
+					+ "    public int hashCode() { return 0; }\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", sample, false, null);
 
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("interface I {\n");
-			buf.append("    void m();\n");
-			buf.append("    boolean equals(Object obj);\n");
-			buf.append("}\n");
-			buf.append("interface J extends I {\n");
-			buf.append("    void m(); // @Override error in 1.5, not in 1.6\n");
-			buf.append("}\n");
-			buf.append("class X implements J {\n");
-			buf.append("    public void m() {} // @Override error in 1.5, not in 1.6\n");
-			buf.append("    @Override\n");
-			buf.append("    public int hashCode() { return 0; }\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "interface I {\n" //
+					+ "    void m();\n" //
+					+ "    boolean equals(Object obj);\n" //
+					+ "}\n" //
+					+ "interface J extends I {\n" //
+					+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
+					+ "}\n" //
+					+ "class X implements J {\n" //
+					+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
+					+ "    @Override\n" //
+					+ "    public int hashCode() { return 0; }\n" //
+					+ "}\n";
+			String expected1= sample;
 
 			assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
@@ -1650,35 +1650,35 @@ public class CleanUpTest extends CleanUpTestCase {
 			JavaProjectHelper.addRTJar16(project);
 			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
 			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("interface I {\n");
+			StringBuilder bld= new StringBuilder();
+			bld.append("package test1;\n");
+			bld.append("interface I {\n");
 			for (count= 0; count < PROBLEMS_COUNT; count++)
-				buf.append("    void m" + count + "();\n");
-			buf.append("}\n");
-			buf.append("class X implements I {\n");
+				bld.append("    void m" + count + "();\n");
+			bld.append("}\n");
+			bld.append("class X implements I {\n");
 			for (count= 0; count < PROBLEMS_COUNT; count++)
-				buf.append("    public void m" + count + "() {} // @Override error in 1.5, not in 1.6\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+				bld.append("    public void m" + count + "() {} // @Override error in 1.5, not in 1.6\n");
+			bld.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", bld.toString(), false, null);
 
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("interface I {\n");
+			bld= new StringBuilder();
+			bld.append("package test1;\n");
+			bld.append("interface I {\n");
 			for (count= 0; count < PROBLEMS_COUNT; count++)
-				buf.append("    void m" + count + "();\n");
-			buf.append("}\n");
-			buf.append("class X implements I {\n");
+				bld.append("    void m" + count + "();\n");
+			bld.append("}\n");
+			bld.append("class X implements I {\n");
 			for (count= 0; count < PROBLEMS_COUNT; count++) {
-				buf.append("    @Override\n");
-				buf.append("    public void m" + count + "() {} // @Override error in 1.5, not in 1.6\n");
+				bld.append("    @Override\n");
+				bld.append("    public void m" + count + "() {} // @Override error in 1.5, not in 1.6\n");
 			}
-			buf.append("}\n");
-			String expected1= buf.toString();
+			bld.append("}\n");
+			String expected1= bld.toString();
 
 			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 		} finally {
@@ -1689,74 +1689,74 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    String s = \"\"; //$NON-NLS-1$\n");
-		buf.append("    String t = \"\";  //$NON-NLS-1$\n");
-		buf.append("    \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        s = \"\"; //$NON-NLS-1$\n");
-		buf.append("        s = s + s;\n");
-		buf.append("        s = t + s;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    String s = \"\"; //$NON-NLS-1$\n" //
+				+ "    String t = \"\";  //$NON-NLS-1$\n" //
+				+ "    \n" //
+				+ "    public void foo() {\n" //
+				+ "        s = \"\"; //$NON-NLS-1$\n" //
+				+ "        s = s + s;\n" //
+				+ "        s = t + s;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    int i = 10;\n");
-		buf.append("    \n");
-		buf.append("    public class E2Inner {\n");
-		buf.append("        public void bar() {\n");
-		buf.append("            int j = i;\n");
-		buf.append("            String k = s + t;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("    public void fooBar() {\n");
-		buf.append("        String k = s;\n");
-		buf.append("        int j = i;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1{\n" //
+				+ "    int i = 10;\n" //
+				+ "    \n" //
+				+ "    public class E2Inner {\n" //
+				+ "        public void bar() {\n" //
+				+ "            int j = i;\n" //
+				+ "            String k = s + t;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public void fooBar() {\n" //
+				+ "        String k = s;\n" //
+				+ "        int j = i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    String s = \"\"; //$NON-NLS-1$\n");
-		buf.append("    String t = \"\";  //$NON-NLS-1$\n");
-		buf.append("    \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        this.s = \"\"; //$NON-NLS-1$\n");
-		buf.append("        this.s = this.s + this.s;\n");
-		buf.append("        this.s = this.t + this.s;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    String s = \"\"; //$NON-NLS-1$\n" //
+				+ "    String t = \"\";  //$NON-NLS-1$\n" //
+				+ "    \n" //
+				+ "    public void foo() {\n" //
+				+ "        this.s = \"\"; //$NON-NLS-1$\n" //
+				+ "        this.s = this.s + this.s;\n" //
+				+ "        this.s = this.t + this.s;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    int i = 10;\n");
-		buf.append("    \n");
-		buf.append("    public class E2Inner {\n");
-		buf.append("        public void bar() {\n");
-		buf.append("            int j = E2.this.i;\n");
-		buf.append("            String k = E2.this.s + E2.this.t;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("    public void fooBar() {\n");
-		buf.append("        String k = this.s;\n");
-		buf.append("        int j = this.i;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1{\n" //
+				+ "    int i = 10;\n" //
+				+ "    \n" //
+				+ "    public class E2Inner {\n" //
+				+ "        public void bar() {\n" //
+				+ "            int j = E2.this.i;\n" //
+				+ "            String k = E2.this.s + E2.this.t;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public void fooBar() {\n" //
+				+ "        String k = this.s;\n" //
+				+ "        int j = this.i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
@@ -1764,41 +1764,41 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int i= 0;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static int i= 0;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private E1 e1;\n");
-		buf.append("    \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        e1= new E1();\n");
-		buf.append("        int j= e1.i;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    private E1 e1;\n" //
+				+ "    \n" //
+				+ "    public void foo() {\n" //
+				+ "        e1= new E1();\n" //
+				+ "        int j= e1.i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private E1 e1;\n");
-		buf.append("    \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        this.e1= new E1();\n");
-		buf.append("        int j= E1.i;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    private E1 e1;\n" //
+				+ "    \n" //
+				+ "    public void foo() {\n" //
+				+ "        this.e1= new E1();\n" //
+				+ "        int j= E1.i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {cu1.getBuffer().getContents(), expected1});
 	}
@@ -1806,79 +1806,79 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= this.f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static int f;\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= this.f;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public static String s = \"\";\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(this.s);\n");
-		buf.append("        E1 e1= new E1();\n");
-		buf.append("        int i= e1.f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public static String s = \"\";\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(this.s);\n" //
+				+ "        E1 e1= new E1();\n" //
+				+ "        int i= e1.f;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public static int g;\n");
-		buf.append("    {\n");
-		buf.append("        this.g= (new E1()).f;\n");
-		buf.append("    }\n");
-		buf.append("    public static int f= E1.f;\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E1;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static int g;\n" //
+				+ "    {\n" //
+				+ "        this.g= (new E1()).f;\n" //
+				+ "    }\n" //
+				+ "    public static int f= E1.f;\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= E1.f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static int f;\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= E1.f;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public static String s = \"\";\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E2.s);\n");
-		buf.append("        E1 e1= new E1();\n");
-		buf.append("        int i= E1.f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public static String s = \"\";\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E2.s);\n" //
+				+ "        E1 e1= new E1();\n" //
+				+ "        int i= E1.f;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public static int g;\n");
-		buf.append("    {\n");
-		buf.append("        E3.g= E1.f;\n");
-		buf.append("    }\n");
-		buf.append("    public static int f= E1.f;\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E1;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static int g;\n" //
+				+ "    {\n" //
+				+ "        E3.g= E1.f;\n" //
+				+ "    }\n" //
+				+ "    public static int f= E1.f;\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 	}
@@ -1886,79 +1886,79 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int f() {return 1;}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= this.f();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static int f() {return 1;}\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= this.f();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public static String s() {return \"\";}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(this.s());\n");
-		buf.append("        E1 e1= new E1();\n");
-		buf.append("        int i= e1.f();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public static String s() {return \"\";}\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(this.s());\n" //
+				+ "        E1 e1= new E1();\n" //
+				+ "        int i= e1.f();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public static int g;\n");
-		buf.append("    {\n");
-		buf.append("        this.g= (new E1()).f();\n");
-		buf.append("    }\n");
-		buf.append("    public static int f= E1.f();\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E1;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static int g;\n" //
+				+ "    {\n" //
+				+ "        this.g= (new E1()).f();\n" //
+				+ "    }\n" //
+				+ "    public static int f= E1.f();\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int f() {return 1;}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= E1.f();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static int f() {return 1;}\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= E1.f();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public static String s() {return \"\";}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E2.s());\n");
-		buf.append("        E1 e1= new E1();\n");
-		buf.append("        int i= E1.f();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    public static String s() {return \"\";}\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E2.s());\n" //
+				+ "        E1 e1= new E1();\n" //
+				+ "        int i= E1.f();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public static int g;\n");
-		buf.append("    {\n");
-		buf.append("        E3.g= E1.f();\n");
-		buf.append("    }\n");
-		buf.append("    public static int f= E1.f();\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E1;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static int g;\n" //
+				+ "    {\n" //
+				+ "        E3.g= E1.f();\n" //
+				+ "    }\n" //
+				+ "    public static int f= E1.f();\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 
@@ -1967,66 +1967,66 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public String s= \"\";\n");
-		buf.append("    public E2 e2;\n");
-		buf.append("    public static int i= 10;\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public String s= \"\";\n" //
+				+ "    public E2 e2;\n" //
+				+ "    public static int i= 10;\n" //
+				+ "    public void foo() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    public int i = 10;\n");
-		buf.append("    public E1 e1;\n");
-		buf.append("    public void fooBar() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    public int i = 10;\n" //
+				+ "    public E1 e1;\n" //
+				+ "    public void fooBar() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    private E1 e1;    \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        e1= new E1();\n");
-		buf.append("        int j= e1.i;\n");
-		buf.append("        String s= e1.s;\n");
-		buf.append("        e1.foo();\n");
-		buf.append("        e1.e2.fooBar();\n");
-		buf.append("        int k= e1.e2.e2.e2.i;\n");
-		buf.append("        int h= e1.e2.e2.e1.e2.e1.i;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E1;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 {\n" //
+				+ "    private E1 e1;    \n" //
+				+ "    public void foo() {\n" //
+				+ "        e1= new E1();\n" //
+				+ "        int j= e1.i;\n" //
+				+ "        String s= e1.s;\n" //
+				+ "        e1.foo();\n" //
+				+ "        e1.e2.fooBar();\n" //
+				+ "        int k= e1.e2.e2.e2.i;\n" //
+				+ "        int h= e1.e2.e2.e1.e2.e1.i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    private E1 e1;    \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        this.e1= new E1();\n");
-		buf.append("        int j= E1.i;\n");
-		buf.append("        String s= this.e1.s;\n");
-		buf.append("        this.e1.foo();\n");
-		buf.append("        this.e1.e2.fooBar();\n");
-		buf.append("        int k= this.e1.e2.e2.e2.i;\n");
-		buf.append("        int h= E1.i;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E1;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 {\n" //
+				+ "    private E1 e1;    \n" //
+				+ "    public void foo() {\n" //
+				+ "        this.e1= new E1();\n" //
+				+ "        int j= E1.i;\n" //
+				+ "        String s= this.e1.s;\n" //
+				+ "        this.e1.foo();\n" //
+				+ "        this.e1.e2.fooBar();\n" //
+				+ "        int k= this.e1.e2.e2.e2.i;\n" //
+				+ "        int h= E1.i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), cu2.getBuffer().getContents(), expected1});
 	}
@@ -2034,18 +2034,18 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public String s= \"\";\n");
-		buf.append("    public E1 create() {\n");
-		buf.append("        return new E1();\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        create().s= \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public String s= \"\";\n" //
+				+ "    public E1 create() {\n" //
+				+ "        return new E1();\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        create().s= \"\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2058,16 +2058,16 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int i = 10;\n");
-		buf.append("    private static int j = i + 10 * i;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s= i + \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static int i = 10;\n" //
+				+ "    private static int j = i + 10 * i;\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s= i + \"\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2080,22 +2080,22 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public final static int i = 1;\n");
-		buf.append("    public final int j = 2;\n");
-		buf.append("    private final int k = 3;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        switch (3) {\n");
-		buf.append("        case i: break;\n");
-		buf.append("        case j: break;\n");
-		buf.append("        case k: break;\n");
-		buf.append("        default: break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public final static int i = 1;\n" //
+				+ "    public final int j = 2;\n" //
+				+ "    private final int k = 3;\n" //
+				+ "    public void foo() {\n" //
+				+ "        switch (3) {\n" //
+				+ "        case i: break;\n" //
+				+ "        case j: break;\n" //
+				+ "        case k: break;\n" //
+				+ "        default: break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2108,29 +2108,29 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public abstract class E1Inner1 {\n");
-		buf.append("        protected int n;\n");
-		buf.append("        public abstract void foo();\n");
-		buf.append("    }\n");
-		buf.append("    public abstract class E1Inner2 {\n");
-		buf.append("        public abstract void run();\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        E1Inner1 inner= new E1Inner1() {\n");
-		buf.append("            public void foo() {\n");
-		buf.append("                E1Inner2 inner2= new E1Inner2() {\n");
-		buf.append("                    public void run() {\n");
-		buf.append("                        System.out.println(n);\n");
-		buf.append("                    }\n");
-		buf.append("                };\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public abstract class E1Inner1 {\n" //
+				+ "        protected int n;\n" //
+				+ "        public abstract void foo();\n" //
+				+ "    }\n" //
+				+ "    public abstract class E1Inner2 {\n" //
+				+ "        public abstract void run();\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        E1Inner1 inner= new E1Inner1() {\n" //
+				+ "            public void foo() {\n" //
+				+ "                E1Inner2 inner2= new E1Inner2() {\n" //
+				+ "                    public void run() {\n" //
+				+ "                        System.out.println(n);\n" //
+				+ "                    }\n" //
+				+ "                };\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2143,13 +2143,13 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static final int N;\n");
-		buf.append("    static {N= 10;}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private static final int N;\n" //
+				+ "    static {N= 10;}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2163,46 +2163,46 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {    \n");
-		buf.append("    public static int E1N = 10;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1N);\n");
-		buf.append("        E1N = 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {    \n" //
+				+ "    public static int E1N = 10;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1N);\n" //
+				+ "        E1N = 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    public static int E2N = 10;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1N);\n");
-		buf.append("        E1N = 10;\n");
-		buf.append("        System.out.println(E2N);\n");
-		buf.append("        E2N = 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    public static int E2N = 10;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1N);\n" //
+				+ "        E1N = 10;\n" //
+				+ "        System.out.println(E2N);\n" //
+				+ "        E2N = 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    private static int E3N = 10;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1N);\n");
-		buf.append("        E1N = 10;\n");
-		buf.append("        System.out.println(E2N);\n");
-		buf.append("        E2N = 10;\n");
-		buf.append("        System.out.println(E3N);\n");
-		buf.append("        E3N = 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    private static int E3N = 10;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1N);\n" //
+				+ "        E1N = 10;\n" //
+				+ "        System.out.println(E2N);\n" //
+				+ "        E2N = 10;\n" //
+				+ "        System.out.println(E3N);\n" //
+				+ "        E3N = 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2210,46 +2210,46 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {    \n");
-		buf.append("    public static int E1N = 10;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("        E1.E1N = 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {    \n" //
+				+ "    public static int E1N = 10;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "        E1.E1N = 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    public static int E2N = 10;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("        E1.E1N = 10;\n");
-		buf.append("        System.out.println(E2.E2N);\n");
-		buf.append("        E2.E2N = 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    public static int E2N = 10;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "        E1.E1N = 10;\n" //
+				+ "        System.out.println(E2.E2N);\n" //
+				+ "        E2.E2N = 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    private static int E3N = 10;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("        E1.E1N = 10;\n");
-		buf.append("        System.out.println(E2.E2N);\n");
-		buf.append("        E2.E2N = 10;\n");
-		buf.append("        System.out.println(E3.E3N);\n");
-		buf.append("        E3.E3N = 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E1;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    private static int E3N = 10;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "        E1.E1N = 10;\n" //
+				+ "        System.out.println(E2.E2N);\n" //
+				+ "        E2.E2N = 10;\n" //
+				+ "        System.out.println(E3.E3N);\n" //
+				+ "        E3.E3N = 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
 
@@ -2258,18 +2258,18 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public final static int N1 = 10;\n");
-		buf.append("    public static int N2 = N1;\n");
-		buf.append("    {\n");
-		buf.append("        System.out.println(N1);\n");
-		buf.append("        N2 = 10;\n");
-		buf.append("        System.out.println(N2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public final static int N1 = 10;\n" //
+				+ "    public static int N2 = N1;\n" //
+				+ "    {\n" //
+				+ "        System.out.println(N1);\n" //
+				+ "        N2 = 10;\n" //
+				+ "        System.out.println(N2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2277,18 +2277,18 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public final static int N1 = 10;\n");
-		buf.append("    public static int N2 = E1.N1;\n");
-		buf.append("    {\n");
-		buf.append("        System.out.println(E1.N1);\n");
-		buf.append("        E1.N2 = 10;\n");
-		buf.append("        System.out.println(E1.N2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public final static int N1 = 10;\n" //
+				+ "    public static int N2 = E1.N1;\n" //
+				+ "    {\n" //
+				+ "        System.out.println(E1.N1);\n" //
+				+ "        E1.N2 = 10;\n" //
+				+ "        System.out.println(E1.N2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2296,19 +2296,19 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle13() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static class E1Inner {\n");
-		buf.append("        private static class E1InnerInner {\n");
-		buf.append("            public static int N = 10;\n");
-		buf.append("            static {\n");
-		buf.append("                System.out.println(N);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private static class E1Inner {\n" //
+				+ "        private static class E1InnerInner {\n" //
+				+ "            public static int N = 10;\n" //
+				+ "            static {\n" //
+				+ "                System.out.println(N);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2316,19 +2316,19 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static class E1Inner {\n");
-		buf.append("        private static class E1InnerInner {\n");
-		buf.append("            public static int N = 10;\n");
-		buf.append("            static {\n");
-		buf.append("                System.out.println(E1InnerInner.N);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private static class E1Inner {\n" //
+				+ "        private static class E1InnerInner {\n" //
+				+ "            public static int N = 10;\n" //
+				+ "            static {\n" //
+				+ "                System.out.println(E1InnerInner.N);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2336,19 +2336,19 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle14() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    static class E1Inner {\n");
-		buf.append("        public static class E1InnerInner {\n");
-		buf.append("            public static int N = 10;\n");
-		buf.append("            public void foo() {\n");
-		buf.append("                System.out.println(N);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static class E1Inner {\n" //
+				+ "        public static class E1InnerInner {\n" //
+				+ "            public static int N = 10;\n" //
+				+ "            public void foo() {\n" //
+				+ "                System.out.println(N);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2356,19 +2356,19 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    static class E1Inner {\n");
-		buf.append("        public static class E1InnerInner {\n");
-		buf.append("            public static int N = 10;\n");
-		buf.append("            public void foo() {\n");
-		buf.append("                System.out.println(E1InnerInner.N);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static class E1Inner {\n" //
+				+ "        public static class E1InnerInner {\n" //
+				+ "            public static int N = 10;\n" //
+				+ "            public void foo() {\n" //
+				+ "                System.out.println(E1InnerInner.N);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2376,19 +2376,19 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle15() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    static class E1Inner {\n");
-		buf.append("        public static class E1InnerInner {\n");
-		buf.append("            public static int N = 10;\n");
-		buf.append("            public void foo() {\n");
-		buf.append("                System.out.println((new E1InnerInner()).N);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static class E1Inner {\n" //
+				+ "        public static class E1InnerInner {\n" //
+				+ "            public static int N = 10;\n" //
+				+ "            public void foo() {\n" //
+				+ "                System.out.println((new E1InnerInner()).N);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2396,19 +2396,19 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    static class E1Inner {\n");
-		buf.append("        public static class E1InnerInner {\n");
-		buf.append("            public static int N = 10;\n");
-		buf.append("            public void foo() {\n");
-		buf.append("                System.out.println(E1InnerInner.N);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static class E1Inner {\n" //
+				+ "        public static class E1InnerInner {\n" //
+				+ "            public static int N = 10;\n" //
+				+ "            public void foo() {\n" //
+				+ "                System.out.println(E1InnerInner.N);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2416,39 +2416,39 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle16() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int E1N;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static int E1N;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    public static int E2N = 10;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("        System.out.println(E2.E1N);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    public static int E2N = 10;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "        System.out.println(E2.E1N);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("        System.out.println(E2.E1N);\n");
-		buf.append("        System.out.println(E3.E1N);\n");
-		buf.append("        System.out.println(E2.E2N);\n");
-		buf.append("        System.out.println(E3.E2N);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E1;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "        System.out.println(E2.E1N);\n" //
+				+ "        System.out.println(E3.E1N);\n" //
+				+ "        System.out.println(E2.E2N);\n" //
+				+ "        System.out.println(E3.E2N);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2457,31 +2457,31 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    public static int E2N = 10;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    public static int E2N = 10;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("        System.out.println(E1.E1N);\n");
-		buf.append("        System.out.println(E2.E2N);\n");
-		buf.append("        System.out.println(E2.E2N);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E1;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "        System.out.println(E1.E1N);\n" //
+				+ "        System.out.println(E2.E2N);\n" //
+				+ "        System.out.println(E2.E2N);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2});
 
@@ -2490,65 +2490,65 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle17() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b= true;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (b)\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        if (b) {\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        } else\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        if (b)\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        else\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        while (b)\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        do\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        while (b);\n");
-		buf.append("        for(;;)\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b= true;\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (b)\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        } else\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        if (b)\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        else\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        while (b)\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        do\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        while (b);\n" //
+				+ "        for(;;)\n" //
+				+ "            System.out.println(10);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b= true;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (b) {\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        }\n");
-		buf.append("        if (b) {\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        }\n");
-		buf.append("        if (b) {\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        }\n");
-		buf.append("        while (b) {\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        }\n");
-		buf.append("        do {\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        } while (b);\n");
-		buf.append("        for(;;) {\n");
-		buf.append("            System.out.println(10);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b= true;\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        }\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        }\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        }\n" //
+				+ "        while (b) {\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        }\n" //
+				+ "        do {\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        } while (b);\n" //
+				+ "        for(;;) {\n" //
+				+ "            System.out.println(10);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2556,45 +2556,45 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle18() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b, q;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (b)\n");
-		buf.append("            System.out.println(1);\n");
-		buf.append("        else if (q)\n");
-		buf.append("            System.out.println(1);\n");
-		buf.append("        else\n");
-		buf.append("            if (b && q)\n");
-		buf.append("                System.out.println(1);\n");
-		buf.append("            else\n");
-		buf.append("                System.out.println(2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b, q;\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (b)\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        else if (q)\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        else\n" //
+				+ "            if (b && q)\n" //
+				+ "                System.out.println(1);\n" //
+				+ "            else\n" //
+				+ "                System.out.println(2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b, q;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (b) {\n");
-		buf.append("            System.out.println(1);\n");
-		buf.append("        } else if (q) {\n");
-		buf.append("            System.out.println(1);\n");
-		buf.append("        } else\n");
-		buf.append("            if (b && q) {\n");
-		buf.append("                System.out.println(1);\n");
-		buf.append("            } else {\n");
-		buf.append("                System.out.println(2);\n");
-		buf.append("            }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b, q;\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        } else if (q) {\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        } else\n" //
+				+ "            if (b && q) {\n" //
+				+ "                System.out.println(1);\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(2);\n" //
+				+ "            }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2602,54 +2602,54 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle19() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b, q;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (;b;)\n");
-		buf.append("            for (;q;)\n");
-		buf.append("                if (b)\n");
-		buf.append("                    System.out.println(1);\n");
-		buf.append("                else if (q)\n");
-		buf.append("                    System.out.println(2);\n");
-		buf.append("                else\n");
-		buf.append("                    System.out.println(3);\n");
-		buf.append("        for (;b;)\n");
-		buf.append("            for (;q;) {\n");
-		buf.append("                \n");
-		buf.append("            }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b, q;\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (;b;)\n" //
+				+ "            for (;q;)\n" //
+				+ "                if (b)\n" //
+				+ "                    System.out.println(1);\n" //
+				+ "                else if (q)\n" //
+				+ "                    System.out.println(2);\n" //
+				+ "                else\n" //
+				+ "                    System.out.println(3);\n" //
+				+ "        for (;b;)\n" //
+				+ "            for (;q;) {\n" //
+				+ "                \n" //
+				+ "            }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b, q;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (;b;) {\n");
-		buf.append("            for (;q;) {\n");
-		buf.append("                if (b) {\n");
-		buf.append("                    System.out.println(1);\n");
-		buf.append("                } else if (q) {\n");
-		buf.append("                    System.out.println(2);\n");
-		buf.append("                } else {\n");
-		buf.append("                    System.out.println(3);\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        for (;b;) {\n");
-		buf.append("            for (;q;) {\n");
-		buf.append("                \n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b, q;\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (;b;) {\n" //
+				+ "            for (;q;) {\n" //
+				+ "                if (b) {\n" //
+				+ "                    System.out.println(1);\n" //
+				+ "                } else if (q) {\n" //
+				+ "                    System.out.println(2);\n" //
+				+ "                } else {\n" //
+				+ "                    System.out.println(3);\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        for (;b;) {\n" //
+				+ "            for (;q;) {\n" //
+				+ "                \n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2657,54 +2657,54 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle20() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b, q;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        while (b)\n");
-		buf.append("            while (q)\n");
-		buf.append("                if (b)\n");
-		buf.append("                    System.out.println(1);\n");
-		buf.append("                else if (q)\n");
-		buf.append("                    System.out.println(2);\n");
-		buf.append("                else\n");
-		buf.append("                    System.out.println(3);\n");
-		buf.append("        while (b)\n");
-		buf.append("            while (q) {\n");
-		buf.append("                \n");
-		buf.append("            }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b, q;\n" //
+				+ "    public void foo() {\n" //
+				+ "        while (b)\n" //
+				+ "            while (q)\n" //
+				+ "                if (b)\n" //
+				+ "                    System.out.println(1);\n" //
+				+ "                else if (q)\n" //
+				+ "                    System.out.println(2);\n" //
+				+ "                else\n" //
+				+ "                    System.out.println(3);\n" //
+				+ "        while (b)\n" //
+				+ "            while (q) {\n" //
+				+ "                \n" //
+				+ "            }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b, q;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        while (b) {\n");
-		buf.append("            while (q) {\n");
-		buf.append("                if (b) {\n");
-		buf.append("                    System.out.println(1);\n");
-		buf.append("                } else if (q) {\n");
-		buf.append("                    System.out.println(2);\n");
-		buf.append("                } else {\n");
-		buf.append("                    System.out.println(3);\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        while (b) {\n");
-		buf.append("            while (q) {\n");
-		buf.append("                \n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b, q;\n" //
+				+ "    public void foo() {\n" //
+				+ "        while (b) {\n" //
+				+ "            while (q) {\n" //
+				+ "                if (b) {\n" //
+				+ "                    System.out.println(1);\n" //
+				+ "                } else if (q) {\n" //
+				+ "                    System.out.println(2);\n" //
+				+ "                } else {\n" //
+				+ "                    System.out.println(3);\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        while (b) {\n" //
+				+ "            while (q) {\n" //
+				+ "                \n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2712,57 +2712,57 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle21() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b, q;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        do\n");
-		buf.append("            do\n");
-		buf.append("                if (b)\n");
-		buf.append("                    System.out.println(1);\n");
-		buf.append("                else if (q)\n");
-		buf.append("                    System.out.println(2);\n");
-		buf.append("                else\n");
-		buf.append("                    System.out.println(3);\n");
-		buf.append("            while (q);\n");
-		buf.append("        while (b);\n");
-		buf.append("        do\n");
-		buf.append("            do {\n");
-		buf.append("                \n");
-		buf.append("            } while (q);\n");
-		buf.append("        while (b);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b, q;\n" //
+				+ "    public void foo() {\n" //
+				+ "        do\n" //
+				+ "            do\n" //
+				+ "                if (b)\n" //
+				+ "                    System.out.println(1);\n" //
+				+ "                else if (q)\n" //
+				+ "                    System.out.println(2);\n" //
+				+ "                else\n" //
+				+ "                    System.out.println(3);\n" //
+				+ "            while (q);\n" //
+				+ "        while (b);\n" //
+				+ "        do\n" //
+				+ "            do {\n" //
+				+ "                \n" //
+				+ "            } while (q);\n" //
+				+ "        while (b);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public boolean b, q;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        do {\n");
-		buf.append("            do {\n");
-		buf.append("                if (b) {\n");
-		buf.append("                    System.out.println(1);\n");
-		buf.append("                } else if (q) {\n");
-		buf.append("                    System.out.println(2);\n");
-		buf.append("                } else {\n");
-		buf.append("                    System.out.println(3);\n");
-		buf.append("                }\n");
-		buf.append("            } while (q);\n");
-		buf.append("        } while (b);\n");
-		buf.append("        do {\n");
-		buf.append("            do {\n");
-		buf.append("                \n");
-		buf.append("            } while (q);\n");
-		buf.append("        } while (b);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean b, q;\n" //
+				+ "    public void foo() {\n" //
+				+ "        do {\n" //
+				+ "            do {\n" //
+				+ "                if (b) {\n" //
+				+ "                    System.out.println(1);\n" //
+				+ "                } else if (q) {\n" //
+				+ "                    System.out.println(2);\n" //
+				+ "                } else {\n" //
+				+ "                    System.out.println(3);\n" //
+				+ "                }\n" //
+				+ "            } while (q);\n" //
+				+ "        } while (b);\n" //
+				+ "        do {\n" //
+				+ "            do {\n" //
+				+ "                \n" //
+				+ "            } while (q);\n" //
+				+ "        } while (b);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2770,26 +2770,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle22() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import test2.I1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        I1 i1= new I1() {\n");
-		buf.append("            private static final int N= 10;\n");
-		buf.append("            public void foo() {\n");
-		buf.append("                System.out.println(N);\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import test2.I1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        I1 i1= new I1() {\n" //
+				+ "            private static final int N= 10;\n" //
+				+ "            public void foo() {\n" //
+				+ "                System.out.println(N);\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public interface I1 {}\n");
-		pack2.createCompilationUnit("I1.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public interface I1 {}\n";
+		pack2.createCompilationUnit("I1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
@@ -2800,17 +2800,17 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle23() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int fNb= 0;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            fNb++;\n");
-		buf.append("        String s; //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int fNb= 0;\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true)\n" //
+				+ "            fNb++;\n" //
+				+ "        String s; //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2818,18 +2818,18 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int fNb= 0;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("            this.fNb++;\n");
-		buf.append("        }\n");
-		buf.append("        String s; \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int fNb= 0;\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true) {\n" //
+				+ "            this.fNb++;\n" //
+				+ "        }\n" //
+				+ "        String s; \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2837,15 +2837,15 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle24() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            System.out.println(\"\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true)\n" //
+				+ "            System.out.println(\"\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -2854,16 +2854,16 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("            System.out.println(\"\"); //$NON-NLS-1$\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true) {\n" //
+				+ "            System.out.println(\"\"); //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2871,47 +2871,47 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle25() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(I1Impl.N);\n");
-		buf.append("        I1 i1= new I1();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(I1Impl.N);\n" //
+				+ "        I1 i1= new I1();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import test2.I1;\n");
-		buf.append("public class I1Impl implements I1 {}\n");
-		pack1.createCompilationUnit("I1Impl.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import test2.I1;\n" //
+				+ "public class I1Impl implements I1 {}\n";
+		pack1.createCompilationUnit("I1Impl.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class I1 {}\n");
-		pack1.createCompilationUnit("I1.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class I1 {}\n";
+		pack1.createCompilationUnit("I1.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public interface I1 {\n");
-		buf.append("    public static int N= 10;\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("I1.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public interface I1 {\n" //
+				+ "    public static int N= 10;\n" //
+				+ "}\n";
+		pack2.createCompilationUnit("I1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(test2.I1.N);\n");
-		buf.append("        I1 i1= new I1();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(test2.I1.N);\n" //
+				+ "        I1 i1= new I1();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2919,28 +2919,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle26() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("    private void bar() {\n");
-		buf.append("        foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {}\n" //
+				+ "    private void bar() {\n" //
+				+ "        foo();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("    private void bar() {\n");
-		buf.append("        this.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {}\n" //
+				+ "    private void bar() {\n" //
+				+ "        this.foo();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2948,28 +2948,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle27() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static void foo() {}\n");
-		buf.append("    private void bar() {\n");
-		buf.append("        foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void foo() {}\n" //
+				+ "    private void bar() {\n" //
+				+ "        foo();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static void foo() {}\n");
-		buf.append("    private void bar() {\n");
-		buf.append("        E1.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void foo() {}\n" //
+				+ "    private void bar() {\n" //
+				+ "        E1.foo();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -2977,30 +2977,30 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug118204() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    static String s;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(s);\n");
-		buf.append("    }\n");
-		buf.append("    E1(){}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static String s;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(s);\n" //
+				+ "    }\n" //
+				+ "    E1(){}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    static String s;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(E1.s);\n");
-		buf.append("    }\n");
-		buf.append("    E1(){}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static String s;\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(E1.s);\n" //
+				+ "    }\n" //
+				+ "    E1(){}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3008,29 +3008,29 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug114544() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(new E1().i);\n");
-		buf.append("    }\n");
-		buf.append("    public static int i= 10;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(new E1().i);\n" //
+				+ "    }\n" //
+				+ "    public static int i= 10;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        new E1();\n");
-		buf.append("        System.out.println(E1.i);\n");
-		buf.append("    }\n");
-		buf.append("    public static int i= 10;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        new E1();\n" //
+				+ "        System.out.println(E1.i);\n" //
+				+ "    }\n" //
+				+ "    public static int i= 10;\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3038,37 +3038,37 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug119170_01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static void foo() {}\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void foo() {}\n" //
+				+ "}\n";
+		pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static class E1 {}\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        test1.E1 e1= new test1.E1();\n");
-		buf.append("        e1.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    private static class E1 {}\n" //
+				+ "    public void bar() {\n" //
+				+ "        test1.E1 e1= new test1.E1();\n" //
+				+ "        e1.foo();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static class E1 {}\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        test1.E1 e1= new test1.E1();\n");
-		buf.append("        test1.E1.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    private static class E1 {}\n" //
+				+ "    public void bar() {\n" //
+				+ "        test1.E1 e1= new test1.E1();\n" //
+				+ "        test1.E1.foo();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3076,37 +3076,37 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug119170_02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static void foo() {}\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void foo() {}\n" //
+				+ "}\n";
+		pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static String E1= \"\";\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        test1.E1 e1= new test1.E1();\n");
-		buf.append("        e1.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    private static String E1= \"\";\n" //
+				+ "    public void foo() {\n" //
+				+ "        test1.E1 e1= new test1.E1();\n" //
+				+ "        e1.foo();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static String E1= \"\";\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        test1.E1 e1= new test1.E1();\n");
-		buf.append("        test1.E1.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 {\n" //
+				+ "    private static String E1= \"\";\n" //
+				+ "    public void foo() {\n" //
+				+ "        test1.E1 e1= new test1.E1();\n" //
+				+ "        test1.E1.foo();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3114,37 +3114,37 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug123468() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    protected int field;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    protected int field;\n" //
+				+ "}\n";
+		pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        super.field= 10;\n");
-		buf.append("        field= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    private int field;\n" //
+				+ "    public void foo() {\n" //
+				+ "        super.field= 10;\n" //
+				+ "        field= 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        super.field= 10;\n");
-		buf.append("        this.field= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    private int field;\n" //
+				+ "    public void foo() {\n" //
+				+ "        super.field= 10;\n" //
+				+ "        this.field= 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3152,34 +3152,34 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug129115() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static int NUMBER;\n");
-		buf.append("    public void reset() {\n");
-		buf.append("        NUMBER= 0;\n");
-		buf.append("    }\n");
-		buf.append("    enum MyEnum {\n");
-		buf.append("        STATE_1, STATE_2, STATE_3\n");
-		buf.append("      };\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private static int NUMBER;\n" //
+				+ "    public void reset() {\n" //
+				+ "        NUMBER= 0;\n" //
+				+ "    }\n" //
+				+ "    enum MyEnum {\n" //
+				+ "        STATE_1, STATE_2, STATE_3\n" //
+				+ "      };\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static int NUMBER;\n");
-		buf.append("    public void reset() {\n");
-		buf.append("        E1.NUMBER= 0;\n");
-		buf.append("    }\n");
-		buf.append("    enum MyEnum {\n");
-		buf.append("        STATE_1, STATE_2, STATE_3\n");
-		buf.append("      };\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private static int NUMBER;\n" //
+				+ "    public void reset() {\n" //
+				+ "        E1.NUMBER= 0;\n" //
+				+ "    }\n" //
+				+ "    enum MyEnum {\n" //
+				+ "        STATE_1, STATE_2, STATE_3\n" //
+				+ "      };\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3187,32 +3187,32 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug135219() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E { \n");
-		buf.append("    public int i;\n");
-		buf.append("    public void print(int j) {}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        print(i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E { \n" //
+				+ "    public int i;\n" //
+				+ "    public void print(int j) {}\n" //
+				+ "    public void foo() {\n" //
+				+ "        print(i);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E { \n");
-		buf.append("    public int i;\n");
-		buf.append("    public void print(int j) {}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        this.print(this.i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E { \n" //
+				+ "    public int i;\n" //
+				+ "    public void print(int j) {}\n" //
+				+ "    public void foo() {\n" //
+				+ "        this.print(this.i);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3220,41 +3220,41 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug_138318() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E<I> {\n");
-		buf.append("    private static int I;\n");
-		buf.append("    private static String STR() {return \"\";}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable runnable = new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                System.out.println(I);\n");
-		buf.append("                System.out.println(STR());\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E<I> {\n" //
+				+ "    private static int I;\n" //
+				+ "    private static String STR() {return \"\";}\n" //
+				+ "    public void foo() {\n" //
+				+ "        Runnable runnable = new Runnable() {\n" //
+				+ "            public void run() {\n" //
+				+ "                System.out.println(I);\n" //
+				+ "                System.out.println(STR());\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E<I> {\n");
-		buf.append("    private static int I;\n");
-		buf.append("    private static String STR() {return \"\";}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable runnable = new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                System.out.println(E.I);\n");
-		buf.append("                System.out.println(E.STR());\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E<I> {\n" //
+				+ "    private static int I;\n" //
+				+ "    private static String STR() {return \"\";}\n" //
+				+ "    public void foo() {\n" //
+				+ "        Runnable runnable = new Runnable() {\n" //
+				+ "            public void run() {\n" //
+				+ "                System.out.println(E.I);\n" //
+				+ "                System.out.println(E.STR());\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3262,34 +3262,34 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug138325_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E<I> {\n");
-		buf.append("    private int i;\n");
-		buf.append("    private String str() {return \"\";}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(str());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E<I> {\n" //
+				+ "    private int i;\n" //
+				+ "    private String str() {return \"\";}\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(i);\n" //
+				+ "        System.out.println(str());\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E<I> {\n");
-		buf.append("    private int i;\n");
-		buf.append("    private String str() {return \"\";}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(this.i);\n");
-		buf.append("        System.out.println(this.str());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E<I> {\n" //
+				+ "    private int i;\n" //
+				+ "    private String str() {return \"\";}\n" //
+				+ "    public void foo() {\n" //
+				+ "        System.out.println(this.i);\n" //
+				+ "        System.out.println(this.str());\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3297,42 +3297,42 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug138325_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E<I> {\n");
-		buf.append("    private int i;\n");
-		buf.append("    private String str() {return \"\";}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable runnable = new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                System.out.println(i);\n");
-		buf.append("                System.out.println(str());\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E<I> {\n" //
+				+ "    private int i;\n" //
+				+ "    private String str() {return \"\";}\n" //
+				+ "    public void foo() {\n" //
+				+ "        Runnable runnable = new Runnable() {\n" //
+				+ "            public void run() {\n" //
+				+ "                System.out.println(i);\n" //
+				+ "                System.out.println(str());\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E<I> {\n");
-		buf.append("    private int i;\n");
-		buf.append("    private String str() {return \"\";}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable runnable = new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                System.out.println(E.this.i);\n");
-		buf.append("                System.out.println(E.this.str());\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E<I> {\n" //
+				+ "    private int i;\n" //
+				+ "    private String str() {return \"\";}\n" //
+				+ "    public void foo() {\n" //
+				+ "        Runnable runnable = new Runnable() {\n" //
+				+ "            public void run() {\n" //
+				+ "                System.out.println(E.this.i);\n" //
+				+ "                System.out.println(E.this.str());\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3414,38 +3414,38 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle_Bug140565() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.*;\n");
-		buf.append("public class E1 {\n");
-		buf.append("        static class ClassA {static ClassB B;}\n");
-		buf.append("        static class ClassB {static ClassC C;}\n");
-		buf.append("        static class ClassC {static ClassD D;}\n");
-		buf.append("        static class ClassD {}\n");
-		buf.append("\n");
-		buf.append("        public void foo() {\n");
-		buf.append("                ClassA.B.C.D.toString();\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.io.*;\n" //
+				+ "public class E1 {\n" //
+				+ "        static class ClassA {static ClassB B;}\n" //
+				+ "        static class ClassB {static ClassC C;}\n" //
+				+ "        static class ClassC {static ClassD D;}\n" //
+				+ "        static class ClassD {}\n" //
+				+ "\n" //
+				+ "        public void foo() {\n" //
+				+ "                ClassA.B.C.D.toString();\n" //
+				+ "        }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("        static class ClassA {static ClassB B;}\n");
-		buf.append("        static class ClassB {static ClassC C;}\n");
-		buf.append("        static class ClassC {static ClassD D;}\n");
-		buf.append("        static class ClassD {}\n");
-		buf.append("\n");
-		buf.append("        public void foo() {\n");
-		buf.append("                ClassC.D.toString();\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "        static class ClassA {static ClassB B;}\n" //
+				+ "        static class ClassB {static ClassC C;}\n" //
+				+ "        static class ClassC {static ClassD D;}\n" //
+				+ "        static class ClassD {}\n" //
+				+ "\n" //
+				+ "        public void foo() {\n" //
+				+ "                ClassC.D.toString();\n" //
+				+ "        }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3453,35 +3453,35 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug157480() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 extends ETop {\n");
-		buf.append("    public void bar(boolean b) {\n");
-		buf.append("        if (b == true && b || b) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class ETop {\n");
-		buf.append("    public void bar(boolean b) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 extends ETop {\n" //
+				+ "    public void bar(boolean b) {\n" //
+				+ "        if (b == true && b || b) {}\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "class ETop {\n" //
+				+ "    public void bar(boolean b) {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 extends ETop {\n");
-		buf.append("    @Override\n");
-		buf.append("    public void bar(boolean b) {\n");
-		buf.append("        if (((b == true) && b) || b) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class ETop {\n");
-		buf.append("    public void bar(boolean b) {}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 extends ETop {\n" //
+				+ "    @Override\n" //
+				+ "    public void bar(boolean b) {\n" //
+				+ "        if (((b == true) && b) || b) {}\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "class ETop {\n" //
+				+ "    public void bar(boolean b) {}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3489,26 +3489,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug154787() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("interface E1 {String FOO = \"FOO\";}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "interface E1 {String FOO = \"FOO\";}\n";
+		pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 implements E1 {}\n");
-		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 implements E1 {}\n";
+		pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 {\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        return E2.FOO;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 {\n" //
+				+ "    public String foo() {\n" //
+				+ "        return E2.FOO;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E3.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
@@ -3519,29 +3519,29 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug189398() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(Object o) {\n");
-		buf.append("        if (o != null)\n");
-		buf.append("            System.out.println(o);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(Object o) {\n" //
+				+ "        if (o != null)\n" //
+				+ "            System.out.println(o);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(Object o) {\n");
-		buf.append("        if (o != null) {\n");
-		buf.append("            System.out.println(o);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(Object o) {\n" //
+				+ "        if (o != null) {\n" //
+				+ "            System.out.println(o);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -3549,32 +3549,32 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug238828_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        return \"Foo\" + field //MyComment\n");
-		buf.append("                    + field;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int field;\n" //
+				+ "\n" //
+				+ "    public String foo() {\n" //
+				+ "        return \"Foo\" + field //MyComment\n" //
+				+ "                    + field;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        return \"Foo\" + this.field //MyComment\n");
-		buf.append("                    + this.field;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int field;\n" //
+				+ "\n" //
+				+ "    public String foo() {\n" //
+				+ "        return \"Foo\" + this.field //MyComment\n" //
+				+ "                    + this.field;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -3582,32 +3582,32 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyleBug238828_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static int FIELD;\n");
-		buf.append("\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        return \"Foo\" + FIELD //MyComment\n");
-		buf.append("                    + FIELD;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private static int FIELD;\n" //
+				+ "\n" //
+				+ "    public String foo() {\n" //
+				+ "        return \"Foo\" + FIELD //MyComment\n" //
+				+ "                    + FIELD;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_FIELD);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static int FIELD;\n");
-		buf.append("\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        return \"Foo\" + E1.FIELD //MyComment\n");
-		buf.append("                    + E1.FIELD;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private static int FIELD;\n" //
+				+ "\n" //
+				+ "    public String foo() {\n" //
+				+ "        return \"Foo\" + E1.FIELD //MyComment\n" //
+				+ "                    + E1.FIELD;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -3620,41 +3620,41 @@ public class CleanUpTest extends CleanUpTestCase {
 			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
 			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
 
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("interface CinematicEvent {\n");
-			buf.append("    public void stop();\n");
-			buf.append("    public boolean internalUpdate();\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("CinematicEvent.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "interface CinematicEvent {\n" //
+					+ "    public void stop();\n" //
+					+ "    public boolean internalUpdate();\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("CinematicEvent.java", sample, false, null);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("abstract class E1 implements CinematicEvent {\n");
-			buf.append("\n");
-			buf.append("    protected PlayState playState = PlayState.Stopped;\n");
-			buf.append("    protected LoopMode loopMode = LoopMode.DontLoop;\n");
-			buf.append("\n");
-			buf.append("    public boolean internalUpdate() {\n");
-			buf.append("        return loopMode == loopMode.DontLoop;\n");
-			buf.append("    }\n");
-			buf.append("\n");
-			buf.append("    public void stop() {\n");
-			buf.append("    }\n");
-			buf.append("\n");
-			buf.append("    public void read() {\n");
-			buf.append("        Object ic= new Object();\n");
-			buf.append("        playState.toString();\n");
-			buf.append("    }\n");
-			buf.append("\n");
-			buf.append("    enum PlayState {\n");
-			buf.append("        Stopped\n");
-			buf.append("    }\n");
-			buf.append("    enum LoopMode {\n");
-			buf.append("        DontLoop\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu2= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			sample= "" //
+					+ "package test1;\n" //
+					+ "abstract class E1 implements CinematicEvent {\n" //
+					+ "\n" //
+					+ "    protected PlayState playState = PlayState.Stopped;\n" //
+					+ "    protected LoopMode loopMode = LoopMode.DontLoop;\n" //
+					+ "\n" //
+					+ "    public boolean internalUpdate() {\n" //
+					+ "        return loopMode == loopMode.DontLoop;\n" //
+					+ "    }\n" //
+					+ "\n" //
+					+ "    public void stop() {\n" //
+					+ "    }\n" //
+					+ "\n" //
+					+ "    public void read() {\n" //
+					+ "        Object ic= new Object();\n" //
+					+ "        playState.toString();\n" //
+					+ "    }\n" //
+					+ "\n" //
+					+ "    enum PlayState {\n" //
+					+ "        Stopped\n" //
+					+ "    }\n" //
+					+ "    enum LoopMode {\n" //
+					+ "        DontLoop\n" //
+					+ "    }\n" //
+					+ "}\n";
+			ICompilationUnit cu2= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 			enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 			enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -3666,35 +3666,35 @@ public class CleanUpTest extends CleanUpTestCase {
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("abstract class E1 implements CinematicEvent {\n");
-			buf.append("\n");
-			buf.append("    protected PlayState playState = PlayState.Stopped;\n");
-			buf.append("    protected LoopMode loopMode = LoopMode.DontLoop;\n");
-			buf.append("\n");
-			buf.append("    @Override\n");
-			buf.append("    public boolean internalUpdate() {\n");
-			buf.append("        return this.loopMode == LoopMode.DontLoop;\n");
-			buf.append("    }\n");
-			buf.append("\n");
-			buf.append("    @Override\n");
-			buf.append("    public void stop() {\n");
-			buf.append("    }\n");
-			buf.append("\n");
-			buf.append("    public void read() {\n");
-			buf.append("        final Object ic= new Object();\n");
-			buf.append("        this.playState.toString();\n");
-			buf.append("    }\n");
-			buf.append("\n");
-			buf.append("    enum PlayState {\n");
-			buf.append("        Stopped\n");
-			buf.append("    }\n");
-			buf.append("    enum LoopMode {\n");
-			buf.append("        DontLoop\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "abstract class E1 implements CinematicEvent {\n" //
+					+ "\n" //
+					+ "    protected PlayState playState = PlayState.Stopped;\n" //
+					+ "    protected LoopMode loopMode = LoopMode.DontLoop;\n" //
+					+ "\n" //
+					+ "    @Override\n" //
+					+ "    public boolean internalUpdate() {\n" //
+					+ "        return this.loopMode == LoopMode.DontLoop;\n" //
+					+ "    }\n" //
+					+ "\n" //
+					+ "    @Override\n" //
+					+ "    public void stop() {\n" //
+					+ "    }\n" //
+					+ "\n" //
+					+ "    public void read() {\n" //
+					+ "        final Object ic= new Object();\n" //
+					+ "        this.playState.toString();\n" //
+					+ "    }\n" //
+					+ "\n" //
+					+ "    enum PlayState {\n" //
+					+ "        Stopped\n" //
+					+ "    }\n" //
+					+ "    enum LoopMode {\n" //
+					+ "        DontLoop\n" //
+					+ "    }\n" //
+					+ "}\n";
+			String expected1= sample;
 
 			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { cu1.getBuffer().getContents(), expected1 });
 		} finally {
@@ -3706,17 +3706,17 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCodeStyle_StaticAccessThroughInstance_Bug307407() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private final String localString = new MyClass().getMyString();\n");
-		buf.append("    public static class MyClass {\n");
-		buf.append("        public static String getMyString() {\n");
-		buf.append("            return \"a\";\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private final String localString = new MyClass().getMyString();\n" //
+				+ "    public static class MyClass {\n" //
+				+ "        public static String getMyString() {\n" //
+				+ "            return \"a\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
@@ -3727,53 +3727,53 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveNonStaticQualifier_Bug219204_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void test() {\n");
-		buf.append("        E1 t = E1.bar().g().g().foo(E1.foo(null).bar()).bar();\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private static E1 foo(E1 t) {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private static E1 bar() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private E1 g() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void test() {\n" //
+				+ "        E1 t = E1.bar().g().g().foo(E1.foo(null).bar()).bar();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static E1 foo(E1 t) {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static E1 bar() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private E1 g() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void test() {\n");
-		buf.append("        E1.bar().g().g();\n");
-		buf.append("        E1.foo(null);\n");
-		buf.append("        E1.foo(E1.bar());\n");
-		buf.append("        E1 t = E1.bar();\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private static E1 foo(E1 t) {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private static E1 bar() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private E1 g() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void test() {\n" //
+				+ "        E1.bar().g().g();\n" //
+				+ "        E1.foo(null);\n" //
+				+ "        E1.foo(E1.bar());\n" //
+				+ "        E1 t = E1.bar();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static E1 foo(E1 t) {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static E1 bar() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private E1 g() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -3781,50 +3781,50 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveNonStaticQualifier_Bug219204_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void test() {\n");
-		buf.append("        while (true)\n");
-		buf.append("            new E1().bar1().bar2().bar3();\n");
-		buf.append("    }\n");
-		buf.append("    private static E1 bar1() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    private static E1 bar2() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    private static E1 bar3() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void test() {\n" //
+				+ "        while (true)\n" //
+				+ "            new E1().bar1().bar2().bar3();\n" //
+				+ "    }\n" //
+				+ "    private static E1 bar1() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "    private static E1 bar2() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "    private static E1 bar3() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void test() {\n");
-		buf.append("        while (true) {\n");
-		buf.append("            new E1();\n");
-		buf.append("            E1.bar1();\n");
-		buf.append("            E1.bar2();\n");
-		buf.append("            E1.bar3();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private static E1 bar1() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    private static E1 bar2() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    private static E1 bar3() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void test() {\n" //
+				+ "        while (true) {\n" //
+				+ "            new E1();\n" //
+				+ "            E1.bar1();\n" //
+				+ "            E1.bar2();\n" //
+				+ "            E1.bar3();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    private static E1 bar1() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "    private static E1 bar2() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "    private static E1 bar3() {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -3832,52 +3832,52 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testChangeNonstaticAccessToStatic_Bug439733() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("class Singleton {\n");
-		buf.append("    public static String name = \"The Singleton\";\n");
-		buf.append("    public static Singleton instance = new Singleton();\n");
-		buf.append("    public static Singleton getInstance() {\n");
-		buf.append("        return instance;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        System.out.println(Singleton.instance.name);\n");
-		buf.append("        System.out.println(Singleton.getInstance().name);\n");
-		buf.append("        System.out.println(Singleton.getInstance().getInstance().name);\n");
-		buf.append("        System.out.println(new Singleton().name);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "class Singleton {\n" //
+				+ "    public static String name = \"The Singleton\";\n" //
+				+ "    public static Singleton instance = new Singleton();\n" //
+				+ "    public static Singleton getInstance() {\n" //
+				+ "        return instance;\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "        System.out.println(Singleton.instance.name);\n" //
+				+ "        System.out.println(Singleton.getInstance().name);\n" //
+				+ "        System.out.println(Singleton.getInstance().getInstance().name);\n" //
+				+ "        System.out.println(new Singleton().name);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("class Singleton {\n");
-		buf.append("    public static String name = \"The Singleton\";\n");
-		buf.append("    public static Singleton instance = new Singleton();\n");
-		buf.append("    public static Singleton getInstance() {\n");
-		buf.append("        return instance;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        System.out.println(Singleton.name);\n");
-		buf.append("        Singleton.getInstance();\n");
-		buf.append("        System.out.println(Singleton.name);\n");
-		buf.append("        Singleton.getInstance();\n");
-		buf.append("        Singleton.getInstance();\n");
-		buf.append("        System.out.println(Singleton.name);\n");
-		buf.append("        new Singleton();\n");
-		buf.append("        System.out.println(Singleton.name);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "class Singleton {\n" //
+				+ "    public static String name = \"The Singleton\";\n" //
+				+ "    public static Singleton instance = new Singleton();\n" //
+				+ "    public static Singleton getInstance() {\n" //
+				+ "        return instance;\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "        System.out.println(Singleton.name);\n" //
+				+ "        Singleton.getInstance();\n" //
+				+ "        System.out.println(Singleton.name);\n" //
+				+ "        Singleton.getInstance();\n" //
+				+ "        Singleton.getInstance();\n" //
+				+ "        System.out.println(Singleton.name);\n" //
+				+ "        new Singleton();\n" //
+				+ "        System.out.println(Singleton.name);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -3885,35 +3885,35 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCombination01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i= 10;\n");
-		buf.append("    private int j= 20;\n");
-		buf.append("    \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        i= j;\n");
-		buf.append("        i= 20;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i= 10;\n" //
+				+ "    private int j= 20;\n" //
+				+ "    \n" //
+				+ "    public void foo() {\n" //
+				+ "        i= j;\n" //
+				+ "        i= 20;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int j= 20;\n");
-		buf.append("    \n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private int j= 20;\n" //
+				+ "    \n" //
+				+ "    public void foo() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3921,42 +3921,42 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCombination02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            System.out.println(\"\");\n");
-		buf.append("        if (true)\n");
-		buf.append("            System.out.println(\"\");\n");
-		buf.append("        if (true)\n");
-		buf.append("            System.out.println(\"\");\n");
-		buf.append("        System.out.println(\"\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true)\n" //
+				+ "            System.out.println(\"\");\n" //
+				+ "        if (true)\n" //
+				+ "            System.out.println(\"\");\n" //
+				+ "        if (true)\n" //
+				+ "            System.out.println(\"\");\n" //
+				+ "        System.out.println(\"\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("            System.out.println(\"\"); //$NON-NLS-1$\n");
-		buf.append("        }\n");
-		buf.append("        if (true) {\n");
-		buf.append("            System.out.println(\"\"); //$NON-NLS-1$\n");
-		buf.append("        }\n");
-		buf.append("        if (true) {\n");
-		buf.append("            System.out.println(\"\"); //$NON-NLS-1$\n");
-		buf.append("        }\n");
-		buf.append("        System.out.println(\"\"); //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true) {\n" //
+				+ "            System.out.println(\"\"); //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "        if (true) {\n" //
+				+ "            System.out.println(\"\"); //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "        if (true) {\n" //
+				+ "            System.out.println(\"\"); //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"\"); //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -3964,36 +3964,36 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCombination03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;  \n");
-		buf.append("import java.util.Iterator;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1  {\n");
-		buf.append("    private List<String> fList;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (Iterator<String> iter = fList.iterator(); iter.hasNext();) {\n");
-		buf.append("            String element = (String) iter.next();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;  \n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1  {\n" //
+				+ "    private List<String> fList;\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (Iterator<String> iter = fList.iterator(); iter.hasNext();) {\n" //
+				+ "            String element = (String) iter.next();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;  \n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1  {\n");
-		buf.append("    private List<String> fList;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (String string : this.fList) {\n");
-		buf.append("            String element = (String) string;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;  \n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1  {\n" //
+				+ "    private List<String> fList;\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (String string : this.fList) {\n" //
+				+ "            String element = (String) string;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -4001,46 +4001,46 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testBug245254() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i= 0;\n");
-		buf.append("    void method() {\n");
-		buf.append("        if (true\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i= 0;\n" //
+				+ "    void method() {\n" //
+				+ "        if (true\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i= 0;\n");
-		buf.append("    void method() {\n");
-		buf.append("        if (true\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i= 0;\n" //
+				+ "    void method() {\n" //
+				+ "        if (true\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected= sample;
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
 	public void testCombinationBug120585() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i= 0;\n");
-		buf.append("    void method() {\n");
-		buf.append("        int[] array= null;\n");
-		buf.append("        for (int i= 0; i < array.length; i++)\n");
-		buf.append("            System.out.println(array[i]);\n");
-		buf.append("        i= 12;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i= 0;\n" //
+				+ "    void method() {\n" //
+				+ "        int[] array= null;\n" //
+				+ "        for (int i= 0; i < array.length; i++)\n" //
+				+ "            System.out.println(array[i]);\n" //
+				+ "        i= 12;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
@@ -4048,17 +4048,17 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    void method() {\n");
-		buf.append("        int[] array= null;\n");
-		buf.append("        for (int element : array) {\n");
-		buf.append("            System.out.println(element);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void method() {\n" //
+				+ "        int[] array= null;\n" //
+				+ "        for (int element : array) {\n" //
+				+ "            System.out.println(element);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -4066,41 +4066,41 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCombinationBug125455() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1  {\n");
-		buf.append("    private void bar(boolean wait) {\n");
-		buf.append("        if (!wait) \n");
-		buf.append("            return;\n");
-		buf.append("    }\n");
-		buf.append("    private void foo(String s) {\n");
-		buf.append("        String s1= \"\";\n");
-		buf.append("        if (s.equals(\"\"))\n");
-		buf.append("            System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1  {\n" //
+				+ "    private void bar(boolean wait) {\n" //
+				+ "        if (!wait) \n" //
+				+ "            return;\n" //
+				+ "    }\n" //
+				+ "    private void foo(String s) {\n" //
+				+ "        String s1= \"\";\n" //
+				+ "        if (s.equals(\"\"))\n" //
+				+ "            System.out.println();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1  {\n");
-		buf.append("    private void bar(boolean wait) {\n");
-		buf.append("        if (!wait) {\n");
-		buf.append("            return;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private void foo(String s) {\n");
-		buf.append("        String s1= \"\"; //$NON-NLS-1$\n");
-		buf.append("        if (s.equals(\"\")) { //$NON-NLS-1$\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1  {\n" //
+				+ "    private void bar(boolean wait) {\n" //
+				+ "        if (!wait) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    private void foo(String s) {\n" //
+				+ "        String s1= \"\"; //$NON-NLS-1$\n" //
+				+ "        if (s.equals(\"\")) { //$NON-NLS-1$\n" //
+				+ "            System.out.println();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -4108,16 +4108,16 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCombinationBug157468() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private void bar(boolean bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {\n");
-		buf.append("        if (bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) { // a b c d e f g h i j k\n");
-		buf.append("            final String s = \"\";\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private void bar(boolean bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {\n" //
+				+ "        if (bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) { // a b c d e f g h i j k\n" //
+				+ "            final String s = \"\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 
@@ -4130,18 +4130,18 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		JavaCore.setOptions(options);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("	private void bar(boolean bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {\n");
-		buf.append("		if (bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) { // a b c d e f g\n");
-		buf.append("																// h i j k\n");
-		buf.append("			final String s = \"\";\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "	private void bar(boolean bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {\n" //
+				+ "		if (bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) { // a b c d e f g\n" //
+				+ "																// h i j k\n" //
+				+ "			final String s = \"\";\n" //
+				+ "		}\n" //
+				+ "	}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -4149,32 +4149,32 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCombinationBug234984_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void method(String[] arr) {\n");
-		buf.append("        for (int i = 0; i < arr.length; i++) {\n");
-		buf.append("            String item = arr[i];\n");
-		buf.append("            String item2 = item + \"a\";\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void method(String[] arr) {\n" //
+				+ "        for (int i = 0; i < arr.length; i++) {\n" //
+				+ "            String item = arr[i];\n" //
+				+ "            String item2 = item + \"a\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void method(String[] arr) {\n");
-		buf.append("        for (final String item : arr) {\n");
-		buf.append("            final String item2 = item + \"a\";\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void method(String[] arr) {\n" //
+				+ "        for (final String item : arr) {\n" //
+				+ "            final String item2 = item + \"a\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -4182,35 +4182,35 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCombinationBug234984_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Iterator;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void method(List<E1> es) {\n");
-		buf.append("        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n");
-		buf.append("            E1 next = iterator.next();\n");
-		buf.append("            next= new E1();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void method(List<E1> es) {\n" //
+				+ "        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n" //
+				+ "            E1 next = iterator.next();\n" //
+				+ "            next= new E1();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void method(List<E1> es) {\n");
-		buf.append("        for (E1 next : es) {\n");
-		buf.append("            next= new E1();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void method(List<E1> es) {\n" //
+				+ "        for (E1 next : es) {\n" //
+				+ "            next= new E1();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -4222,26 +4222,26 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 			getProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("\n");
-			buf.append("    " + FIELD_COMMENT + "\n");
-			buf.append("    private static final long serialVersionUID = 1L;\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "\n" //
+					+ "    " + FIELD_COMMENT + "\n" //
+					+ "    private static final long serialVersionUID = 1L;\n" //
+					+ "}\n";
+			String expected1= sample;
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
 			JavaProjectHelper.set15CompilerOptions(fJProject1);
@@ -4255,38 +4255,38 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("    public class B1 implements Serializable {\n");
-			buf.append("    }\n");
-			buf.append("    public class B2 extends B1 {\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "    public class B1 implements Serializable {\n" //
+					+ "    }\n" //
+					+ "    public class B2 extends B1 {\n" //
+					+ "    }\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("    " + FIELD_COMMENT + "\n");
-			buf.append("    private static final long serialVersionUID = 1L;\n");
-			buf.append("    public class B1 implements Serializable {\n");
-			buf.append("\n");
-			buf.append("        " + FIELD_COMMENT + "\n");
-			buf.append("        private static final long serialVersionUID = 1L;\n");
-			buf.append("    }\n");
-			buf.append("    public class B2 extends B1 {\n");
-			buf.append("\n");
-			buf.append("        " + FIELD_COMMENT + "\n");
-			buf.append("        private static final long serialVersionUID = 1L;\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "    " + FIELD_COMMENT + "\n" //
+					+ "    private static final long serialVersionUID = 1L;\n" //
+					+ "    public class B1 implements Serializable {\n" //
+					+ "\n" //
+					+ "        " + FIELD_COMMENT + "\n" //
+					+ "        private static final long serialVersionUID = 1L;\n" //
+					+ "    }\n" //
+					+ "    public class B2 extends B1 {\n" //
+					+ "\n" //
+					+ "        " + FIELD_COMMENT + "\n" //
+					+ "        private static final long serialVersionUID = 1L;\n" //
+					+ "    }\n" //
+					+ "}\n";
+			String expected1= sample;
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
 			JavaProjectHelper.set15CompilerOptions(getProject());
@@ -4300,37 +4300,37 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Externalizable;\n");
-			buf.append("public class E2 implements Externalizable {\n");
-			buf.append("}\n");
-			ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+			sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Externalizable;\n" //
+					+ "public class E2 implements Externalizable {\n" //
+					+ "}\n";
+			ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
 
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("\n");
-			buf.append("    " + FIELD_COMMENT + "\n");
-			buf.append("    private static final long serialVersionUID = 1L;\n");
-			buf.append("}\n");
-			String expected2= buf.toString();
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Externalizable;\n");
-			buf.append("public class E2 implements Externalizable {\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "\n" //
+					+ "    " + FIELD_COMMENT + "\n" //
+					+ "    private static final long serialVersionUID = 1L;\n" //
+					+ "}\n";
+			String expected2= sample;
+			sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Externalizable;\n" //
+					+ "public class E2 implements Externalizable {\n" //
+					+ "}\n";
+			String expected1= sample;
 
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 		} finally {
@@ -4345,36 +4345,36 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        Serializable s= new Serializable() {\n");
-			buf.append("        };\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "    public void foo() {\n" //
+					+ "        Serializable s= new Serializable() {\n" //
+					+ "        };\n" //
+					+ "    }\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("    " + FIELD_COMMENT + "\n");
-			buf.append("    private static final long serialVersionUID = 1L;\n");
-			buf.append("\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        Serializable s= new Serializable() {\n");
-			buf.append("\n");
-			buf.append("            " + FIELD_COMMENT + "\n");
-			buf.append("            private static final long serialVersionUID = 1L;\n");
-			buf.append("        };\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "    " + FIELD_COMMENT + "\n" //
+					+ "    private static final long serialVersionUID = 1L;\n" //
+					+ "\n" //
+					+ "    public void foo() {\n" //
+					+ "        Serializable s= new Serializable() {\n" //
+					+ "\n" //
+					+ "            " + FIELD_COMMENT + "\n" //
+					+ "            private static final long serialVersionUID = 1L;\n" //
+					+ "        };\n" //
+					+ "    }\n" //
+					+ "}\n";
+			String expected1= sample;
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
 			JavaProjectHelper.set15CompilerOptions(getProject());
@@ -4388,35 +4388,35 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("\n");
-			buf.append("    private Serializable s= new Serializable() {\n");
-			buf.append("        \n");
-			buf.append("    };\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "\n" //
+					+ "    private Serializable s= new Serializable() {\n" //
+					+ "        \n" //
+					+ "    };\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 implements Serializable {\n");
-			buf.append("\n");
-			buf.append("    " + FIELD_COMMENT + "\n");
-			buf.append("    private static final long serialVersionUID = 1L;\n");
-			buf.append("    private Serializable s= new Serializable() {\n");
-			buf.append("\n");
-			buf.append("        " + FIELD_COMMENT + "\n");
-			buf.append("        private static final long serialVersionUID = 1L;\n");
-			buf.append("        \n");
-			buf.append("    };\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 implements Serializable {\n" //
+					+ "\n" //
+					+ "    " + FIELD_COMMENT + "\n" //
+					+ "    private static final long serialVersionUID = 1L;\n" //
+					+ "    private Serializable s= new Serializable() {\n" //
+					+ "\n" //
+					+ "        " + FIELD_COMMENT + "\n" //
+					+ "        private static final long serialVersionUID = 1L;\n" //
+					+ "        \n" //
+					+ "    };\n" //
+					+ "}\n";
+			String expected1= sample;
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
 			JavaProjectHelper.set15CompilerOptions(getProject());
@@ -8290,48 +8290,48 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    void foo1() {\n");
-			buf.append("        new Serializable() {\n");
-			buf.append("        };\n");
-			buf.append("    }\n");
-			buf.append("    void foo2() {\n");
-			buf.append("        new Object() {\n");
-			buf.append("        };\n");
-			buf.append("        new Serializable() {\n");
-			buf.append("        };\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 {\n" //
+					+ "    void foo1() {\n" //
+					+ "        new Serializable() {\n" //
+					+ "        };\n" //
+					+ "    }\n" //
+					+ "    void foo2() {\n" //
+					+ "        new Object() {\n" //
+					+ "        };\n" //
+					+ "        new Serializable() {\n" //
+					+ "        };\n" //
+					+ "    }\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("import java.io.Serializable;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    void foo1() {\n");
-			buf.append("        new Serializable() {\n");
-			buf.append("\n");
-			buf.append("            " + FIELD_COMMENT + "\n");
-			buf.append("            private static final long serialVersionUID = 1L;\n");
-			buf.append("        };\n");
-			buf.append("    }\n");
-			buf.append("    void foo2() {\n");
-			buf.append("        new Object() {\n");
-			buf.append("        };\n");
-			buf.append("        new Serializable() {\n");
-			buf.append("\n");
-			buf.append("            " + FIELD_COMMENT + "\n");
-			buf.append("            private static final long serialVersionUID = 1L;\n");
-			buf.append("        };\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "import java.io.Serializable;\n" //
+					+ "public class E1 {\n" //
+					+ "    void foo1() {\n" //
+					+ "        new Serializable() {\n" //
+					+ "\n" //
+					+ "            " + FIELD_COMMENT + "\n" //
+					+ "            private static final long serialVersionUID = 1L;\n" //
+					+ "        };\n" //
+					+ "    }\n" //
+					+ "    void foo2() {\n" //
+					+ "        new Object() {\n" //
+					+ "        };\n" //
+					+ "        new Serializable() {\n" //
+					+ "\n" //
+					+ "            " + FIELD_COMMENT + "\n" //
+					+ "            private static final long serialVersionUID = 1L;\n" //
+					+ "        };\n" //
+					+ "    }\n" //
+					+ "}\n";
+			String expected1= sample;
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
 			JavaProjectHelper.set15CompilerOptions(fJProject1);
@@ -8341,131 +8341,131 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddBlockBug149110_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            throw new IllegalAccessError();\n");
-		buf.append("        if (true) {\n");
-		buf.append("            throw new IllegalAccessError();\n");
-		buf.append("        }\n");
-		buf.append("        if (false)\n");
-		buf.append("            System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true)\n" //
+				+ "            throw new IllegalAccessError();\n" //
+				+ "        if (true) {\n" //
+				+ "            throw new IllegalAccessError();\n" //
+				+ "        }\n" //
+				+ "        if (false)\n" //
+				+ "            System.out.println();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            throw new IllegalAccessError();\n");
-		buf.append("        if (true)\n");
-		buf.append("            throw new IllegalAccessError();\n");
-		buf.append("        if (false) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true)\n" //
+				+ "            throw new IllegalAccessError();\n" //
+				+ "        if (true)\n" //
+				+ "            throw new IllegalAccessError();\n" //
+				+ "        if (false) {\n" //
+				+ "            System.out.println();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	@Test
 	public void testAddBlockBug149110_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            return;\n");
-		buf.append("        if (true) {\n");
-		buf.append("            return;\n");
-		buf.append("        }\n");
-		buf.append("        if (false)\n");
-		buf.append("            System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true)\n" //
+				+ "            return;\n" //
+				+ "        if (true) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (false)\n" //
+				+ "            System.out.println();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            return;\n");
-		buf.append("        if (true)\n");
-		buf.append("            return;\n");
-		buf.append("        if (false) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true)\n" //
+				+ "            return;\n" //
+				+ "        if (true)\n" //
+				+ "            return;\n" //
+				+ "        if (false) {\n" //
+				+ "            System.out.println();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	@Test
 	public void testRemoveBlock01() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void if_() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("            ;\n");
-		buf.append("        } else if (false) {\n");
-		buf.append("            ;\n");
-		buf.append("        } else {\n");
-		buf.append("            ;\n");
-		buf.append("        }\n");
-		buf.append("        \n");
-		buf.append("        if (true) {\n");
-		buf.append("            ;;\n");
-		buf.append("        } else if (false) {\n");
-		buf.append("            ;;\n");
-		buf.append("        } else {\n");
-		buf.append("            ;;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void if_() {\n" //
+				+ "        if (true) {\n" //
+				+ "            ;\n" //
+				+ "        } else if (false) {\n" //
+				+ "            ;\n" //
+				+ "        } else {\n" //
+				+ "            ;\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        if (true) {\n" //
+				+ "            ;;\n" //
+				+ "        } else if (false) {\n" //
+				+ "            ;;\n" //
+				+ "        } else {\n" //
+				+ "            ;;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void if_() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            ;\n");
-		buf.append("        else if (false)\n");
-		buf.append("            ;\n");
-		buf.append("        else\n");
-		buf.append("            ;\n");
-		buf.append("        \n");
-		buf.append("        if (true) {\n");
-		buf.append("            ;;\n");
-		buf.append("        } else if (false) {\n");
-		buf.append("            ;;\n");
-		buf.append("        } else {\n");
-		buf.append("            ;;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void if_() {\n" //
+				+ "        if (true)\n" //
+				+ "            ;\n" //
+				+ "        else if (false)\n" //
+				+ "            ;\n" //
+				+ "        else\n" //
+				+ "            ;\n" //
+				+ "        \n" //
+				+ "        if (true) {\n" //
+				+ "            ;;\n" //
+				+ "        } else if (false) {\n" //
+				+ "            ;;\n" //
+				+ "        } else {\n" //
+				+ "            ;;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8474,39 +8474,39 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveBlock02() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (;;) {\n");
-		buf.append("            ; \n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        for (;;) {\n");
-		buf.append("            ;; \n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (;;) {\n" //
+				+ "            ; \n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void bar() {\n" //
+				+ "        for (;;) {\n" //
+				+ "            ;; \n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (;;);\n");
-		buf.append("    }\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        for (;;) {\n");
-		buf.append("            ;; \n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (;;);\n" //
+				+ "    }\n" //
+				+ "    public void bar() {\n" //
+				+ "        for (;;) {\n" //
+				+ "            ;; \n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8515,39 +8515,39 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveBlock03() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        while (true) {\n");
-		buf.append("            ;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        while (true) {\n");
-		buf.append("            ;;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        while (true) {\n" //
+				+ "            ;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void bar() {\n" //
+				+ "        while (true) {\n" //
+				+ "            ;;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        while (true);\n");
-		buf.append("    }\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        while (true) {\n");
-		buf.append("            ;;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        while (true);\n" //
+				+ "    }\n" //
+				+ "    public void bar() {\n" //
+				+ "        while (true) {\n" //
+				+ "            ;;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8556,39 +8556,39 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveBlock04() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        do {\n");
-		buf.append("            ;\n");
-		buf.append("        } while (true);\n");
-		buf.append("    }\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        do {\n");
-		buf.append("            ;;\n");
-		buf.append("        } while (true);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        do {\n" //
+				+ "            ;\n" //
+				+ "        } while (true);\n" //
+				+ "    }\n" //
+				+ "    public void bar() {\n" //
+				+ "        do {\n" //
+				+ "            ;;\n" //
+				+ "        } while (true);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        do; while (true);\n");
-		buf.append("    }\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        do {\n");
-		buf.append("            ;;\n");
-		buf.append("        } while (true);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        do; while (true);\n" //
+				+ "    }\n" //
+				+ "    public void bar() {\n" //
+				+ "        do {\n" //
+				+ "            ;;\n" //
+				+ "        } while (true);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8597,31 +8597,31 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveBlock05() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int[] is= null;\n");
-		buf.append("        for (int i= 0;i < is.length;i++) {\n");
-		buf.append("            ;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int[] is= null;\n" //
+				+ "        for (int i= 0;i < is.length;i++) {\n" //
+				+ "            ;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int[] is= null;\n");
-		buf.append("        for (int element : is);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int[] is= null;\n" //
+				+ "        for (int element : is);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8630,53 +8630,53 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveBlockBug138628() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("            if (true)\n");
-		buf.append("                ;\n");
-		buf.append("        } else if (true) {\n");
-		buf.append("            if (false) {\n");
-		buf.append("                ;\n");
-		buf.append("            } else\n");
-		buf.append("                ;\n");
-		buf.append("        } else if (false) {\n");
-		buf.append("            if (true) {\n");
-		buf.append("                ;\n");
-		buf.append("            }\n");
-		buf.append("        } else {\n");
-		buf.append("            if (true)\n");
-		buf.append("                ;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true) {\n" //
+				+ "            if (true)\n" //
+				+ "                ;\n" //
+				+ "        } else if (true) {\n" //
+				+ "            if (false) {\n" //
+				+ "                ;\n" //
+				+ "            } else\n" //
+				+ "                ;\n" //
+				+ "        } else if (false) {\n" //
+				+ "            if (true) {\n" //
+				+ "                ;\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            if (true)\n" //
+				+ "                ;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("            if (true)\n");
-		buf.append("                ;\n");
-		buf.append("        } else if (true) {\n");
-		buf.append("            if (false)\n");
-		buf.append("                ;\n");
-		buf.append("            else\n");
-		buf.append("                ;\n");
-		buf.append("        } else if (false) {\n");
-		buf.append("            if (true)\n");
-		buf.append("                ;\n");
-		buf.append("        } else if (true)\n");
-		buf.append("            ;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (true) {\n" //
+				+ "            if (true)\n" //
+				+ "                ;\n" //
+				+ "        } else if (true) {\n" //
+				+ "            if (false)\n" //
+				+ "                ;\n" //
+				+ "            else\n" //
+				+ "                ;\n" //
+				+ "        } else if (false) {\n" //
+				+ "            if (true)\n" //
+				+ "                ;\n" //
+				+ "        } else if (true)\n" //
+				+ "            ;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8685,38 +8685,38 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveBlockBug149990() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (false) {\n");
-		buf.append("            while (true) {\n");
-		buf.append("                if (false) {\n");
-		buf.append("                    ;\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        } else\n");
-		buf.append("            ;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (false) {\n" //
+				+ "            while (true) {\n" //
+				+ "                if (false) {\n" //
+				+ "                    ;\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "        } else\n" //
+				+ "            ;\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (false) {\n");
-		buf.append("            while (true)\n");
-		buf.append("                if (false)\n");
-		buf.append("                    ;\n");
-		buf.append("        } else\n");
-		buf.append("            ;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        if (false) {\n" //
+				+ "            while (true)\n" //
+				+ "                if (false)\n" //
+				+ "                    ;\n" //
+				+ "        } else\n" //
+				+ "            ;\n" //
+				+ "    }\n" //
+				+ "}";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8725,33 +8725,33 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveBlockBug156513_1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(boolean b, int[] ints) {\n");
-		buf.append("        if (b) {\n");
-		buf.append("            for (int i = 0; i < ints.length; i++) {\n");
-		buf.append("                System.out.println(ints[i]);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(boolean b, int[] ints) {\n" //
+				+ "        if (b) {\n" //
+				+ "            for (int i = 0; i < ints.length; i++) {\n" //
+				+ "                System.out.println(ints[i]);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(boolean b, int[] ints) {\n");
-		buf.append("        if (b)\n");
-		buf.append("            for (int j : ints)\n");
-		buf.append("                System.out.println(j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(boolean b, int[] ints) {\n" //
+				+ "        if (b)\n" //
+				+ "            for (int j : ints)\n" //
+				+ "                System.out.println(j);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8760,33 +8760,33 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveBlockBug156513_2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(boolean b, int[] ints) {\n");
-		buf.append("        for (int i = 0; i < ints.length; i++) {\n");
-		buf.append("            for (int j = 0; j < ints.length; j++) {\n");
-		buf.append("                System.out.println(ints[j]);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(boolean b, int[] ints) {\n" //
+				+ "        for (int i = 0; i < ints.length; i++) {\n" //
+				+ "            for (int j = 0; j < ints.length; j++) {\n" //
+				+ "                System.out.println(ints[j]);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(boolean b, int[] ints) {\n");
-		buf.append("        for (int k : ints)\n");
-		buf.append("            for (int l : ints)\n");
-		buf.append("                System.out.println(l);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(boolean b, int[] ints) {\n" //
+				+ "        for (int k : ints)\n" //
+				+ "            for (int l : ints)\n" //
+				+ "                System.out.println(l);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8795,25 +8795,25 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testUnnecessaryCodeBug127704_1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private boolean foo() {\n");
-		buf.append("        return (boolean) (Boolean) Boolean.TRUE;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    private boolean foo() {\n" //
+				+ "        return (boolean) (Boolean) Boolean.TRUE;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private boolean foo() {\n");
-		buf.append("        return Boolean.TRUE;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    private boolean foo() {\n" //
+				+ "        return Boolean.TRUE;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8822,27 +8822,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testUnnecessaryCodeBug127704_2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private Integer foo() {\n");
-		buf.append("        return (Integer) (Number) getNumber();\n");
-		buf.append("    }\n");
-		buf.append("    private Number getNumber() {return null;}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    private Integer foo() {\n" //
+				+ "        return (Integer) (Number) getNumber();\n" //
+				+ "    }\n" //
+				+ "    private Number getNumber() {return null;}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private Integer foo() {\n");
-		buf.append("        return (Integer) getNumber();\n");
-		buf.append("    }\n");
-		buf.append("    private Number getNumber() {return null;}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    private Integer foo() {\n" //
+				+ "        return (Integer) getNumber();\n" //
+				+ "    }\n" //
+				+ "    private Number getNumber() {return null;}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8851,48 +8851,48 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testAddParentheses01() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int i) {\n");
-		buf.append("        if (i == 0 || i == 1)\n");
-		buf.append("            System.out.println(i);\n");
-		buf.append("        \n");
-		buf.append("        while (i > 0 && i < 10)\n");
-		buf.append("            System.out.println(1);\n");
-		buf.append("        \n");
-		buf.append("        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n");
-		buf.append("        \n");
-		buf.append("        do ; while (i > 5 && b || i < 100 && i > 90);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i) {\n" //
+				+ "        if (i == 0 || i == 1)\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        \n" //
+				+ "        while (i > 0 && i < 10)\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        \n" //
+				+ "        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n" //
+				+ "        \n" //
+				+ "        do ; while (i > 5 && b || i < 100 && i > 90);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int i) {\n");
-		buf.append("        if ((i == 0) || (i == 1)) {\n");
-		buf.append("            System.out.println(i);\n");
-		buf.append("        }\n");
-		buf.append("        \n");
-		buf.append("        while ((i > 0) && (i < 10)) {\n");
-		buf.append("            System.out.println(1);\n");
-		buf.append("        }\n");
-		buf.append("        \n");
-		buf.append("        boolean b= ((i != -1) && (i > 10) && (i < 100)) || (i > 20);\n");
-		buf.append("        \n");
-		buf.append("        do {\n");
-		buf.append("            ;\n");
-		buf.append("        } while (((i > 5) && b) || ((i < 100) && (i > 90)));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i) {\n" //
+				+ "        if ((i == 0) || (i == 1)) {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        while ((i > 0) && (i < 10)) {\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        boolean b= ((i != -1) && (i > 10) && (i < 100)) || (i > 20);\n" //
+				+ "        \n" //
+				+ "        do {\n" //
+				+ "            ;\n" //
+				+ "        } while (((i > 5) && b) || ((i < 100) && (i > 90)));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8901,31 +8901,31 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testAddParentheses02() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=331845
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int i, int j) {\n");
-		buf.append("        if (i + 10 != j - 5)\n");
-		buf.append("            System.out.println(i - j + 10 - i * j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i, int j) {\n" //
+				+ "        if (i + 10 != j - 5)\n" //
+				+ "            System.out.println(i - j + 10 - i * j);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int i, int j) {\n");
-		buf.append("        if ((i + 10) != (j - 5)) {\n");
-		buf.append("            System.out.println(((i - j) + 10) - (i * j));\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i, int j) {\n" //
+				+ "        if ((i + 10) != (j - 5)) {\n" //
+				+ "            System.out.println(((i - j) + 10) - (i * j));\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -8934,48 +8934,48 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParentheses01() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int i) {\n");
-		buf.append("        if ((i == 0) || (i == 1)) {\n");
-		buf.append("            System.out.println(i);\n");
-		buf.append("        }\n");
-		buf.append("        \n");
-		buf.append("        while ((i > 0) && (i < 10)) {\n");
-		buf.append("            System.out.println(1);\n");
-		buf.append("        }\n");
-		buf.append("        \n");
-		buf.append("        boolean b= ((i != -1) && (i > 10) && (i < 100)) || (i > 20);\n");
-		buf.append("        \n");
-		buf.append("        do {\n");
-		buf.append("            ;\n");
-		buf.append("        } while (((i > 5) && b) || ((i < 100) && (i > 90)));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i) {\n" //
+				+ "        if ((i == 0) || (i == 1)) {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        while ((i > 0) && (i < 10)) {\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        boolean b= ((i != -1) && (i > 10) && (i < 100)) || (i > 20);\n" //
+				+ "        \n" //
+				+ "        do {\n" //
+				+ "            ;\n" //
+				+ "        } while (((i > 5) && b) || ((i < 100) && (i > 90)));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int i) {\n");
-		buf.append("        if (i == 0 || i == 1)\n");
-		buf.append("            System.out.println(i);\n");
-		buf.append("        \n");
-		buf.append("        while (i > 0 && i < 10)\n");
-		buf.append("            System.out.println(1);\n");
-		buf.append("        \n");
-		buf.append("        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n");
-		buf.append("        \n");
-		buf.append("        do; while (i > 5 && b || i < 100 && i > 90);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i) {\n" //
+				+ "        if (i == 0 || i == 1)\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        \n" //
+				+ "        while (i > 0 && i < 10)\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        \n" //
+				+ "        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n" //
+				+ "        \n" //
+				+ "        do; while (i > 5 && b || i < 100 && i > 90);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -8984,38 +8984,38 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug134739() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(boolean a) {\n");
-		buf.append("        if (((a)))\n");
-		buf.append("            return;\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(boolean a, boolean b) {\n");
-		buf.append("        if (((a)) || ((b)))\n");
-		buf.append("            return;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(boolean a) {\n" //
+				+ "        if (((a)))\n" //
+				+ "            return;\n" //
+				+ "    }\n" //
+				+ "    public void bar(boolean a, boolean b) {\n" //
+				+ "        if (((a)) || ((b)))\n" //
+				+ "            return;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(boolean a) {\n");
-		buf.append("        if (a)\n");
-		buf.append("            return;\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(boolean a, boolean b) {\n");
-		buf.append("        if (a || b)\n");
-		buf.append("            return;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(boolean a) {\n" //
+				+ "        if (a)\n" //
+				+ "            return;\n" //
+				+ "    }\n" //
+				+ "    public void bar(boolean a, boolean b) {\n" //
+				+ "        if (a || b)\n" //
+				+ "            return;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -9024,30 +9024,30 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug134741_1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public boolean foo(Object o) {\n");
-		buf.append("        if ((((String)o)).equals(\"\"))\n");
-		buf.append("            return true;\n");
-		buf.append("        return false;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public boolean foo(Object o) {\n" //
+				+ "        if ((((String)o)).equals(\"\"))\n" //
+				+ "            return true;\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public boolean foo(Object o) {\n");
-		buf.append("        if (((String)o).equals(\"\"))\n");
-		buf.append("            return true;\n");
-		buf.append("        return false;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public boolean foo(Object o) {\n" //
+				+ "        if (((String)o).equals(\"\"))\n" //
+				+ "            return true;\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -9056,15 +9056,15 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug134741_2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(boolean a) {\n");
-		buf.append("        if ((\"\" + \"b\").equals(\"a\"))\n");
-		buf.append("            return;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(boolean a) {\n" //
+				+ "        if ((\"\" + \"b\").equals(\"a\"))\n" //
+				+ "            return;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
@@ -9076,14 +9076,14 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug134741_3() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public String foo2(String s) {\n");
-		buf.append("        return (s != null ? s : \"\").toString();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public String foo2(String s) {\n" //
+				+ "        return (s != null ? s : \"\").toString();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
@@ -9095,212 +9095,212 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug134985_1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public boolean foo(String s1, String s2, boolean a, boolean b) {\n");
-		buf.append("        return (a == b) == (s1 == s2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public boolean foo(String s1, String s2, boolean a, boolean b) {\n" //
+				+ "        return (a == b) == (s1 == s2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public boolean foo(String s1, String s2, boolean a, boolean b) {\n");
-		buf.append("        return a == b == (s1 == s2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public boolean foo(String s1, String s2, boolean a, boolean b) {\n" //
+				+ "        return a == b == (s1 == s2);\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	@Test
 	public void testRemoveParenthesesBug134985_2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        return (\"\" + 3) + (3 + 3);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public String foo() {\n" //
+				+ "        return (\"\" + 3) + (3 + 3);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        return \"\" + 3 + (3 + 3);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public String foo() {\n" //
+				+ "        return \"\" + 3 + (3 + 3);\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	@Test
 	public void testRemoveParenthesesBug188207() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int foo() {\n");
-		buf.append("        boolean b= (true ? true : (true ? false : true));\n");
-		buf.append("        return ((b ? true : true) ? 0 : 1);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public int foo() {\n" //
+				+ "        boolean b= (true ? true : (true ? false : true));\n" //
+				+ "        return ((b ? true : true) ? 0 : 1);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int foo() {\n");
-		buf.append("        boolean b= true ? true : true ? false : true;\n");
-		buf.append("        return (b ? true : true) ? 0 : 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public int foo() {\n" //
+				+ "        boolean b= true ? true : true ? false : true;\n" //
+				+ "        return (b ? true : true) ? 0 : 1;\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	@Test
 	public void testRemoveParenthesesBug208752() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        double d = 2.0 * (0.5 / 4.0);\n");
-		buf.append("        int spaceCount = (3);\n");
-		buf.append("        spaceCount = 2 * (spaceCount / 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        double d = 2.0 * (0.5 / 4.0);\n" //
+				+ "        int spaceCount = (3);\n" //
+				+ "        spaceCount = 2 * (spaceCount / 2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        double d = 2.0 * (0.5 / 4.0);\n");
-		buf.append("        int spaceCount = 3;\n");
-		buf.append("        spaceCount = 2 * (spaceCount / 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        double d = 2.0 * (0.5 / 4.0);\n" //
+				+ "        int spaceCount = 3;\n" //
+				+ "        spaceCount = 2 * (spaceCount / 2);\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	@Test
 	public void testRemoveParenthesesBug190188() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        (new Object()).toString();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        (new Object()).toString();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        new Object().toString();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        new Object().toString();\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	@Test
 	public void testRemoveParenthesesBug212856() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo() {\n");
-		buf.append("        int n= 1 + (2 - 3);\n");
-		buf.append("        n= 1 - (2 + 3);\n");
-		buf.append("        n= 1 - (2 - 3);\n");
-		buf.append("        n= 1 * (2 * 3);\n");
-		buf.append("        return 2 * (n % 10);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo() {\n" //
+				+ "        int n= 1 + (2 - 3);\n" //
+				+ "        n= 1 - (2 + 3);\n" //
+				+ "        n= 1 - (2 - 3);\n" //
+				+ "        n= 1 * (2 * 3);\n" //
+				+ "        return 2 * (n % 10);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo() {\n");
-		buf.append("        int n= 1 + 2 - 3;\n");
-		buf.append("        n= 1 - (2 + 3);\n");
-		buf.append("        n= 1 - (2 - 3);\n");
-		buf.append("        n= 1 * 2 * 3;\n");
-		buf.append("        return 2 * (n % 10);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo() {\n" //
+				+ "        int n= 1 + 2 - 3;\n" //
+				+ "        n= 1 - (2 + 3);\n" //
+				+ "        n= 1 - (2 - 3);\n" //
+				+ "        n= 1 * 2 * 3;\n" //
+				+ "        return 2 * (n % 10);\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	@Test
 	public void testRemoveParenthesesBug335173_1() throws Exception {
 		//while loop's expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(boolean a) {\n");
-		buf.append("        while (((a))) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(int x) {\n");
-		buf.append("        while ((x > 2)) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(boolean a) {\n" //
+				+ "        while (((a))) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void bar(int x) {\n" //
+				+ "        while ((x > 2)) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(boolean a) {\n");
-		buf.append("        while (a) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(int x) {\n");
-		buf.append("        while (x > 2) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(boolean a) {\n" //
+				+ "        while (a) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void bar(int x) {\n" //
+				+ "        while (x > 2) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9309,28 +9309,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_2() throws Exception {
 		//do while loop's expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        do {\n");
-		buf.append("        } while ((x > 2));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        do {\n" //
+				+ "        } while ((x > 2));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        do {\n");
-		buf.append("        } while (x > 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        do {\n" //
+				+ "        } while (x > 2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9339,28 +9339,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_3() throws Exception {
 		//for loop's expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        for (int x = 0; (x > 2); x++) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        for (int x = 0; (x > 2); x++) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        for (int x = 0; x > 2; x++) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        for (int x = 0; x > 2; x++) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9369,28 +9369,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_4() throws Exception {
 		//switch statement expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        switch ((x - 2)) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        switch ((x - 2)) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        switch (x - 2) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        switch (x - 2) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9399,32 +9399,32 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_5() throws Exception {
 		//switch case expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        switch (x) {\n");
-		buf.append("        case (1 + 2):\n");
-		buf.append("            break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        switch (x) {\n" //
+				+ "        case (1 + 2):\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        switch (x) {\n");
-		buf.append("        case 1 + 2:\n");
-		buf.append("            break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        switch (x) {\n" //
+				+ "        case 1 + 2:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9433,26 +9433,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_6() throws Exception {
 		//throw statement expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int type) throws Exception {\n");
-		buf.append("        throw (type == 1 ? new IllegalArgumentException() : new Exception());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int type) throws Exception {\n" //
+				+ "        throw (type == 1 ? new IllegalArgumentException() : new Exception());\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int type) throws Exception {\n");
-		buf.append("        throw type == 1 ? new IllegalArgumentException() : new Exception();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int type) throws Exception {\n" //
+				+ "        throw type == 1 ? new IllegalArgumentException() : new Exception();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9461,34 +9461,34 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_7() throws Exception {
 		//synchronized statement expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private static final Object OBJECT = new Object();\n");
-		buf.append("    private static final String STRING = new String();\n");
-		buf.append("    \n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        synchronized ((x == 1 ? STRING : OBJECT)) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private static final Object OBJECT = new Object();\n" //
+				+ "    private static final String STRING = new String();\n" //
+				+ "    \n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        synchronized ((x == 1 ? STRING : OBJECT)) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private static final Object OBJECT = new Object();\n");
-		buf.append("    private static final String STRING = new String();\n");
-		buf.append("    \n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        synchronized (x == 1 ? STRING : OBJECT) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private static final Object OBJECT = new Object();\n" //
+				+ "    private static final String STRING = new String();\n" //
+				+ "    \n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        synchronized (x == 1 ? STRING : OBJECT) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9497,26 +9497,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_8() throws Exception {
 		//assert statement expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        assert (x > 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        assert (x > 2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        assert x > 2;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        assert x > 2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9525,26 +9525,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_9() throws Exception {
 		//assert statement message expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        assert x > 2 : (x - 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        assert x > 2 : (x - 2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        assert x > 2 : x - 2;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        assert x > 2 : x - 2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9553,26 +9553,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_10() throws Exception {
 		//array access index expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int a[], int x) {\n");
-		buf.append("        int i = a[(x + 2)];\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a[], int x) {\n" //
+				+ "        int i = a[(x + 2)];\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int a[], int x) {\n");
-		buf.append("        int i = a[x + 2];\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a[], int x) {\n" //
+				+ "        int i = a[x + 2];\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9581,26 +9581,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_11() throws Exception {
 		//conditional expression's then expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int i = x > 10 ? (x > 5 ? x - 1 : x - 2): x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int i = x > 10 ? (x > 5 ? x - 1 : x - 2): x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int i = x > 10 ? x > 5 ? x - 1 : x - 2: x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int i = x > 10 ? x > 5 ? x - 1 : x - 2: x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9609,26 +9609,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_12() throws Exception {
 		//conditional expression's else expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int i = x > 10 ? x: (x > 5 ? x - 1 : x - 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int i = x > 10 ? x: (x > 5 ? x - 1 : x - 2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int i = x > 10 ? x: x > 5 ? x - 1 : x - 2;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int i = x > 10 ? x: x > 5 ? x - 1 : x - 2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9637,26 +9637,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_13() throws Exception {
 		//conditional expression's then expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int i = x > 10 ? (x = x - 2): x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int i = x > 10 ? (x = x - 2): x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int i = x > 10 ? (x = x - 2): x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int i = x > 10 ? (x = x - 2): x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9665,26 +9665,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_14() throws Exception {
 		//conditional expression's else expression
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int i = x > 10 ? x: (x = x - 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int i = x > 10 ? x: (x = x - 2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int i = x > 10 ? x: (x = x - 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int i = x > 10 ? x: (x = x - 2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9693,32 +9693,32 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_15() throws Exception {
 		//shift operators
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int m= (x >> 2) >> 1;\n");
-		buf.append("        m= x >> (2 >> 1);\n");
-		buf.append("        int n= (x << 2) << 1;\n");
-		buf.append("        n= x << (2 << 1);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int m= (x >> 2) >> 1;\n" //
+				+ "        m= x >> (2 >> 1);\n" //
+				+ "        int n= (x << 2) << 1;\n" //
+				+ "        n= x << (2 << 1);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x) {\n");
-		buf.append("        int m= x >> 2 >> 1;\n");
-		buf.append("        m= x >> (2 >> 1);\n");
-		buf.append("        int n= x << 2 << 1;\n");
-		buf.append("        n= x << (2 << 1);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x) {\n" //
+				+ "        int m= x >> 2 >> 1;\n" //
+				+ "        m= x >> (2 >> 1);\n" //
+				+ "        int n= x << 2 << 1;\n" //
+				+ "        n= x << (2 << 1);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9727,34 +9727,34 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_16() throws Exception {
 		//integer multiplication
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x, long y) {\n");
-		buf.append("        int m= (4 * x) * 2;\n");
-		buf.append("        int n= 4 * (x * 2);\n");
-		buf.append("        int p= 4 * (x % 3);\n");
-		buf.append("        int q= 4 * (x / 3);\n");
-		buf.append("        int r= 4 * (x * y);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x, long y) {\n" //
+				+ "        int m= (4 * x) * 2;\n" //
+				+ "        int n= 4 * (x * 2);\n" //
+				+ "        int p= 4 * (x % 3);\n" //
+				+ "        int q= 4 * (x / 3);\n" //
+				+ "        int r= 4 * (x * y);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x, long y) {\n");
-		buf.append("        int m= 4 * x * 2;\n");
-		buf.append("        int n= 4 * x * 2;\n");
-		buf.append("        int p= 4 * (x % 3);\n");
-		buf.append("        int q= 4 * (x / 3);\n");
-		buf.append("        int r= 4 * (x * y);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x, long y) {\n" //
+				+ "        int m= 4 * x * 2;\n" //
+				+ "        int n= 4 * x * 2;\n" //
+				+ "        int p= 4 * (x % 3);\n" //
+				+ "        int q= 4 * (x / 3);\n" //
+				+ "        int r= 4 * (x * y);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9763,32 +9763,32 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_17() throws Exception {
 		//floating point multiplication
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(double x) {\n");
-		buf.append("        int m= (4.0 * x) * 0.5;\n");
-		buf.append("        int n= 4.0 * (x * 0.5);\n");
-		buf.append("        int p= 4.0 * (x / 100);\n");
-		buf.append("        int q= 4.0 * (x % 3);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(double x) {\n" //
+				+ "        int m= (4.0 * x) * 0.5;\n" //
+				+ "        int n= 4.0 * (x * 0.5);\n" //
+				+ "        int p= 4.0 * (x / 100);\n" //
+				+ "        int q= 4.0 * (x % 3);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(double x) {\n");
-		buf.append("        int m= 4.0 * x * 0.5;\n");
-		buf.append("        int n= 4.0 * (x * 0.5);\n");
-		buf.append("        int p= 4.0 * (x / 100);\n");
-		buf.append("        int q= 4.0 * (x % 3);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(double x) {\n" //
+				+ "        int m= 4.0 * x * 0.5;\n" //
+				+ "        int n= 4.0 * (x * 0.5);\n" //
+				+ "        int p= 4.0 * (x / 100);\n" //
+				+ "        int q= 4.0 * (x % 3);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9797,30 +9797,30 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_18() throws Exception {
 		//integer addition
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x, long y) {\n");
-		buf.append("        int m= (4 + x) + 2;\n");
-		buf.append("        int n= 4 + (x + 2);\n");
-		buf.append("        int p= 4 + (x + y);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x, long y) {\n" //
+				+ "        int m= (4 + x) + 2;\n" //
+				+ "        int n= 4 + (x + 2);\n" //
+				+ "        int p= 4 + (x + y);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int x, long y) {\n");
-		buf.append("        int m= 4 + x + 2;\n");
-		buf.append("        int n= 4 + x + 2;\n");
-		buf.append("        int p= 4 + (x + y);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int x, long y) {\n" //
+				+ "        int m= 4 + x + 2;\n" //
+				+ "        int n= 4 + x + 2;\n" //
+				+ "        int p= 4 + (x + y);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9829,28 +9829,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_19() throws Exception {
 		//floating point addition
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(double x) {\n");
-		buf.append("        int m= (4.0 + x) + 100.0;\n");
-		buf.append("        int n= 4.0 + (x + 100.0);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(double x) {\n" //
+				+ "        int m= (4.0 + x) + 100.0;\n" //
+				+ "        int n= 4.0 + (x + 100.0);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(double x) {\n");
-		buf.append("        int m= 4.0 + x + 100.0;\n");
-		buf.append("        int n= 4.0 + (x + 100.0);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(double x) {\n" //
+				+ "        int m= 4.0 + x + 100.0;\n" //
+				+ "        int n= 4.0 + (x + 100.0);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9859,48 +9859,48 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug335173_20() throws Exception {
 		//string concatenation
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s, String t, String u) {\n");
-		buf.append("        String a= (s + t) + u;\n");
-		buf.append("        String b= s + (t + u);\n");
-		buf.append("        String c= (1 + 2) + s;\n");
-		buf.append("        String d= 1 + (2 + s);\n");
-		buf.append("        String e= s + (1 + 2);\n");
-		buf.append("        String f= (s + 1) + 2;\n");
-		buf.append("        String g= (1 + s) + 2;\n");
-		buf.append("        String h= 1 + (s + 2);\n");
-		buf.append("        String i= s + (1 + t);\n");
-		buf.append("        String j= s + (t + 1);\n");
-		buf.append("        String k= s + (1 - 2);\n");
-		buf.append("        String l= s + (1 * 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(String s, String t, String u) {\n" //
+				+ "        String a= (s + t) + u;\n" //
+				+ "        String b= s + (t + u);\n" //
+				+ "        String c= (1 + 2) + s;\n" //
+				+ "        String d= 1 + (2 + s);\n" //
+				+ "        String e= s + (1 + 2);\n" //
+				+ "        String f= (s + 1) + 2;\n" //
+				+ "        String g= (1 + s) + 2;\n" //
+				+ "        String h= 1 + (s + 2);\n" //
+				+ "        String i= s + (1 + t);\n" //
+				+ "        String j= s + (t + 1);\n" //
+				+ "        String k= s + (1 - 2);\n" //
+				+ "        String l= s + (1 * 2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s, String t, String u) {\n");
-		buf.append("        String a= s + t + u;\n");
-		buf.append("        String b= s + t + u;\n");
-		buf.append("        String c= 1 + 2 + s;\n");
-		buf.append("        String d= 1 + (2 + s);\n");
-		buf.append("        String e= s + (1 + 2);\n");
-		buf.append("        String f= s + 1 + 2;\n");
-		buf.append("        String g= 1 + s + 2;\n");
-		buf.append("        String h= 1 + s + 2;\n");
-		buf.append("        String i= s + 1 + t;\n");
-		buf.append("        String j= s + t + 1;\n");
-		buf.append("        String k= s + (1 - 2);\n");
-		buf.append("        String l= s + 1 * 2;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(String s, String t, String u) {\n" //
+				+ "        String a= s + t + u;\n" //
+				+ "        String b= s + t + u;\n" //
+				+ "        String c= 1 + 2 + s;\n" //
+				+ "        String d= 1 + (2 + s);\n" //
+				+ "        String e= s + (1 + 2);\n" //
+				+ "        String f= s + 1 + 2;\n" //
+				+ "        String g= 1 + s + 2;\n" //
+				+ "        String h= 1 + s + 2;\n" //
+				+ "        String i= s + 1 + t;\n" //
+				+ "        String j= s + t + 1;\n" //
+				+ "        String k= s + (1 - 2);\n" //
+				+ "        String l= s + 1 * 2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -9908,12 +9908,12 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveParenthesesBug405096_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    final Short cache[] = new Short[-(-128) + 1];\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    final Short cache[] = new Short[-(-128) + 1];\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
@@ -9976,24 +9976,24 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveParenthesesBug405096_5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    int a= 10\n");
-		buf.append("    final Short cache[] = new Short[+(++a) + +(-127)];\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    int a= 10\n" //
+				+ "    final Short cache[] = new Short[+(++a) + +(-127)];\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    int a= 10\n");
-		buf.append("    final Short cache[] = new Short[+(++a) + +-127];\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    int a= 10\n" //
+				+ "    final Short cache[] = new Short[+(++a) + +-127];\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -10001,22 +10001,22 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveParenthesesBug405096_6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    final Short cache[] = new Short[+(+128) + ~(-127)];\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    final Short cache[] = new Short[+(+128) + ~(-127)];\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    final Short cache[] = new Short[+(+128) + ~-127];\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    final Short cache[] = new Short[+(+128) + ~-127];\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -10024,46 +10024,46 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveParenthesesBug405096_7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    String a= \"\";\n");
-		buf.append("    int n= 0;\n");
-		buf.append("    \n");
-		buf.append("    int i1 = 1+(1+(+128));\n");
-		buf.append("    int j1 = 1+(1+(+n));\n");
-		buf.append("    int i2 = 1-(-128);\n");
-		buf.append("    int j2 = 1-(-n);\n");
-		buf.append("    int i3 = 1+(++n);\n");
-		buf.append("    int j3 = 1-(--n);\n");
-		buf.append("    String s1 = a+(++n);\n");
-		buf.append("    String s2 = a+(+128);\n");
-		buf.append("    int i5 = 1+(--n);\n");
-		buf.append("    int j5 = 1-(++n);\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    String a= \"\";\n" //
+				+ "    int n= 0;\n" //
+				+ "    \n" //
+				+ "    int i1 = 1+(1+(+128));\n" //
+				+ "    int j1 = 1+(1+(+n));\n" //
+				+ "    int i2 = 1-(-128);\n" //
+				+ "    int j2 = 1-(-n);\n" //
+				+ "    int i3 = 1+(++n);\n" //
+				+ "    int j3 = 1-(--n);\n" //
+				+ "    String s1 = a+(++n);\n" //
+				+ "    String s2 = a+(+128);\n" //
+				+ "    int i5 = 1+(--n);\n" //
+				+ "    int j5 = 1-(++n);\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    String a= \"\";\n");
-		buf.append("    int n= 0;\n");
-		buf.append("    \n");
-		buf.append("    int i1 = 1+1+(+128);\n");
-		buf.append("    int j1 = 1+1+(+n);\n");
-		buf.append("    int i2 = 1-(-128);\n");
-		buf.append("    int j2 = 1-(-n);\n");
-		buf.append("    int i3 = 1+(++n);\n");
-		buf.append("    int j3 = 1-(--n);\n");
-		buf.append("    String s1 = a+(++n);\n");
-		buf.append("    String s2 = a+(+128);\n");
-		buf.append("    int i5 = 1+--n;\n");
-		buf.append("    int j5 = 1-++n;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    String a= \"\";\n" //
+				+ "    int n= 0;\n" //
+				+ "    \n" //
+				+ "    int i1 = 1+1+(+128);\n" //
+				+ "    int j1 = 1+1+(+n);\n" //
+				+ "    int i2 = 1-(-128);\n" //
+				+ "    int j2 = 1-(-n);\n" //
+				+ "    int i3 = 1+(++n);\n" //
+				+ "    int j3 = 1-(--n);\n" //
+				+ "    String s1 = a+(++n);\n" //
+				+ "    String s2 = a+(+128);\n" //
+				+ "    int i5 = 1+--n;\n" //
+				+ "    int j5 = 1-++n;\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -10071,34 +10071,34 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifier01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo;\n");
-		buf.append("    public void setFoo(int foo) {\n");
-		buf.append("        this.foo= foo;\n");
-		buf.append("    }\n");
-		buf.append("    public int getFoo() {\n");
-		buf.append("        return this.foo;\n");
-		buf.append("    }   \n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo;\n" //
+				+ "    public void setFoo(int foo) {\n" //
+				+ "        this.foo= foo;\n" //
+				+ "    }\n" //
+				+ "    public int getFoo() {\n" //
+				+ "        return this.foo;\n" //
+				+ "    }   \n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo;\n");
-		buf.append("    public void setFoo(int foo) {\n");
-		buf.append("        this.foo= foo;\n");
-		buf.append("    }\n");
-		buf.append("    public int getFoo() {\n");
-		buf.append("        return foo;\n");
-		buf.append("    }   \n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo;\n" //
+				+ "    public void setFoo(int foo) {\n" //
+				+ "        this.foo= foo;\n" //
+				+ "    }\n" //
+				+ "    public int getFoo() {\n" //
+				+ "        return foo;\n" //
+				+ "    }   \n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11050,28 +11050,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifier02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo() {return 0;}\n");
-		buf.append("    public int getFoo() {\n");
-		buf.append("        return this.foo();\n");
-		buf.append("    }   \n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo() {return 0;}\n" //
+				+ "    public int getFoo() {\n" //
+				+ "        return this.foo();\n" //
+				+ "    }   \n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo() {return 0;}\n");
-		buf.append("    public int getFoo() {\n");
-		buf.append("        return foo();\n");
-		buf.append("    }   \n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo() {return 0;}\n" //
+				+ "    public int getFoo() {\n" //
+				+ "        return foo();\n" //
+				+ "    }   \n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.CodeStyleFix_removeThis_groupDescription });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
@@ -11080,38 +11080,38 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifier03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo;\n");
-		buf.append("    public int bar;\n");
-		buf.append("    public class E1Inner {\n");
-		buf.append("        private int bar;\n");
-		buf.append("        public int getFoo() {\n");
-		buf.append("            E1.this.bar= this.bar;\n");
-		buf.append("            return E1.this.foo;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo;\n" //
+				+ "    public int bar;\n" //
+				+ "    public class E1Inner {\n" //
+				+ "        private int bar;\n" //
+				+ "        public int getFoo() {\n" //
+				+ "            E1.this.bar= this.bar;\n" //
+				+ "            return E1.this.foo;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo;\n");
-		buf.append("    public int bar;\n");
-		buf.append("    public class E1Inner {\n");
-		buf.append("        private int bar;\n");
-		buf.append("        public int getFoo() {\n");
-		buf.append("            E1.this.bar= bar;\n");
-		buf.append("            return foo;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo;\n" //
+				+ "    public int bar;\n" //
+				+ "    public class E1Inner {\n" //
+				+ "        private int bar;\n" //
+				+ "        public int getFoo() {\n" //
+				+ "            E1.this.bar= bar;\n" //
+				+ "            return foo;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11119,40 +11119,40 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifier04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo() {return 0;}\n");
-		buf.append("    public int bar() {return 0;}\n");
-		buf.append("    public class E1Inner {\n");
-		buf.append("        private int bar() {return 1;}\n");
-		buf.append("        public int getFoo() {\n");
-		buf.append("            E1.this.bar(); \n");
-		buf.append("            this.bar();\n");
-		buf.append("            return E1.this.foo();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo() {return 0;}\n" //
+				+ "    public int bar() {return 0;}\n" //
+				+ "    public class E1Inner {\n" //
+				+ "        private int bar() {return 1;}\n" //
+				+ "        public int getFoo() {\n" //
+				+ "            E1.this.bar(); \n" //
+				+ "            this.bar();\n" //
+				+ "            return E1.this.foo();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int foo() {return 0;}\n");
-		buf.append("    public int bar() {return 0;}\n");
-		buf.append("    public class E1Inner {\n");
-		buf.append("        private int bar() {return 1;}\n");
-		buf.append("        public int getFoo() {\n");
-		buf.append("            E1.this.bar(); \n");
-		buf.append("            bar();\n");
-		buf.append("            return foo();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int foo() {return 0;}\n" //
+				+ "    public int bar() {return 0;}\n" //
+				+ "    public class E1Inner {\n" //
+				+ "        private int bar() {return 1;}\n" //
+				+ "        public int getFoo() {\n" //
+				+ "            E1.this.bar(); \n" //
+				+ "            bar();\n" //
+				+ "            return foo();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11160,28 +11160,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifierBug134720() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        this.setEnabled(true);\n");
-		buf.append("    }\n");
-		buf.append("    private void setEnabled(boolean b) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        this.setEnabled(true);\n" //
+				+ "    }\n" //
+				+ "    private void setEnabled(boolean b) {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        setEnabled(true);\n");
-		buf.append("    }\n");
-		buf.append("    private void setEnabled(boolean b) {}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        setEnabled(true);\n" //
+				+ "    }\n" //
+				+ "    private void setEnabled(boolean b) {}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11189,36 +11189,36 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifierBug150481_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public class Inner extends E {\n");
-		buf.append("        public void test() {\n");
-		buf.append("            E.this.foo();\n");
-		buf.append("            this.foo();\n");
-		buf.append("            foo();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public class Inner extends E {\n" //
+				+ "        public void test() {\n" //
+				+ "            E.this.foo();\n" //
+				+ "            this.foo();\n" //
+				+ "            foo();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void foo() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public class Inner extends E {\n");
-		buf.append("        public void test() {\n");
-		buf.append("            E.this.foo();\n");
-		buf.append("            foo();\n");
-		buf.append("            foo();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public class Inner extends E {\n" //
+				+ "        public void test() {\n" //
+				+ "            E.this.foo();\n" //
+				+ "            foo();\n" //
+				+ "            foo();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void foo() {}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11226,34 +11226,34 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifierBug150481_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public class Inner {\n");
-		buf.append("        public void test() {\n");
-		buf.append("            E.this.foo();\n");
-		buf.append("            foo();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public class Inner {\n" //
+				+ "        public void test() {\n" //
+				+ "            E.this.foo();\n" //
+				+ "            foo();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void foo() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public class Inner {\n");
-		buf.append("        public void test() {\n");
-		buf.append("            foo();\n");
-		buf.append("            foo();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public class Inner {\n" //
+				+ "        public void test() {\n" //
+				+ "            foo();\n" //
+				+ "            foo();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void foo() {}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11261,38 +11261,38 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifierBug219478() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 extends E2 {\n");
-		buf.append("    private class E1Inner extends E2 {\n");
-		buf.append("        public E1Inner() {\n");
-		buf.append("            i = 2;\n");
-		buf.append("            System.out.println(i + E1.this.i);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class E2 {\n");
-		buf.append("    protected int i = 1;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 extends E2 {\n" //
+				+ "    private class E1Inner extends E2 {\n" //
+				+ "        public E1Inner() {\n" //
+				+ "            i = 2;\n" //
+				+ "            System.out.println(i + E1.this.i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "class E2 {\n" //
+				+ "    protected int i = 1;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 extends E2 {\n");
-		buf.append("    private class E1Inner extends E2 {\n");
-		buf.append("        public E1Inner() {\n");
-		buf.append("            i = 2;\n");
-		buf.append("            System.out.println(i + E1.this.i);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class E2 {\n");
-		buf.append("    protected int i = 1;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 extends E2 {\n" //
+				+ "    private class E1Inner extends E2 {\n" //
+				+ "        public E1Inner() {\n" //
+				+ "            i = 2;\n" //
+				+ "            System.out.println(i + E1.this.i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "class E2 {\n" //
+				+ "    protected int i = 1;\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -11300,38 +11300,38 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifierBug219608() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 extends E2 {\n");
-		buf.append("    private int i = 1;\n");
-		buf.append("    private class E1Inner extends E2 {\n");
-		buf.append("        public E1Inner() {\n");
-		buf.append("            System.out.println(i + E1.this.i);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class E2 {\n");
-		buf.append("    private int i = 1;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 extends E2 {\n" //
+				+ "    private int i = 1;\n" //
+				+ "    private class E1Inner extends E2 {\n" //
+				+ "        public E1Inner() {\n" //
+				+ "            System.out.println(i + E1.this.i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "class E2 {\n" //
+				+ "    private int i = 1;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 extends E2 {\n");
-		buf.append("    private int i = 1;\n");
-		buf.append("    private class E1Inner extends E2 {\n");
-		buf.append("        public E1Inner() {\n");
-		buf.append("            System.out.println(i + i);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class E2 {\n");
-		buf.append("    private int i = 1;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 extends E2 {\n" //
+				+ "    private int i = 1;\n" //
+				+ "    private class E1Inner extends E2 {\n" //
+				+ "        public E1Inner() {\n" //
+				+ "            System.out.println(i + i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "class E2 {\n" //
+				+ "    private int i = 1;\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -11339,26 +11339,26 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveQualifierBug330754() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String label = \"works\";\n");
-		buf.append("    class Nested extends Test {\n");
-		buf.append("        Nested() {\n");
-		buf.append("            label = \"broken\";\n");
-		buf.append("        }\n");
-		buf.append("        @Override\n");
-		buf.append("        public String toString() {\n");
-		buf.append("            return Test.this.label;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class Test {\n" //
+				+ "    String label = \"works\";\n" //
+				+ "    class Nested extends Test {\n" //
+				+ "        Nested() {\n" //
+				+ "            label = \"broken\";\n" //
+				+ "        }\n" //
+				+ "        @Override\n" //
+				+ "        public String toString() {\n" //
+				+ "            return Test.this.label;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
 
-		String expected1= buf.toString();
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -11366,33 +11366,33 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinal01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int i= 0;\n");
-		buf.append("    public void foo(int j, int k) {\n");
-		buf.append("        int h, v;\n");
-		buf.append("        v= 0;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private int i= 0;\n" //
+				+ "    public void foo(int j, int k) {\n" //
+				+ "        int h, v;\n" //
+				+ "        v= 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private final int i= 0;\n");
-		buf.append("    public void foo(final int j, final int k) {\n");
-		buf.append("        final int h;\n");
-		buf.append("        int v;\n");
-		buf.append("        v= 0;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private final int i= 0;\n" //
+				+ "    public void foo(final int j, final int k) {\n" //
+				+ "        final int h;\n" //
+				+ "        int v;\n" //
+				+ "        v= 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] {
 				FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description
@@ -11403,28 +11403,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinal02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private Object obj1= new Object();\n");
-		buf.append("    protected Object obj2;\n");
-		buf.append("    Object obj3;\n");
-		buf.append("    public Object obj4;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private Object obj1= new Object();\n" //
+				+ "    protected Object obj2;\n" //
+				+ "    Object obj3;\n" //
+				+ "    public Object obj4;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private final Object obj1= new Object();\n");
-		buf.append("    protected Object obj2;\n");
-		buf.append("    Object obj3;\n");
-		buf.append("    public Object obj4;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private final Object obj1= new Object();\n" //
+				+ "    protected Object obj2;\n" //
+				+ "    Object obj3;\n" //
+				+ "    public Object obj4;\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11432,40 +11432,40 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinal03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int i = 0;\n");
-		buf.append("    public void foo() throws Exception {\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(int j) {\n");
-		buf.append("        int k;\n");
-		buf.append("        try {\n");
-		buf.append("            foo();\n");
-		buf.append("        } catch (Exception e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private int i = 0;\n" //
+				+ "    public void foo() throws Exception {\n" //
+				+ "    }\n" //
+				+ "    public void bar(int j) {\n" //
+				+ "        int k;\n" //
+				+ "        try {\n" //
+				+ "            foo();\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int i = 0;\n");
-		buf.append("    public void foo() throws Exception {\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(int j) {\n");
-		buf.append("        final int k;\n");
-		buf.append("        try {\n");
-		buf.append("            foo();\n");
-		buf.append("        } catch (final Exception e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private int i = 0;\n" //
+				+ "    public void foo() throws Exception {\n" //
+				+ "    }\n" //
+				+ "    public void bar(int j) {\n" //
+				+ "        final int k;\n" //
+				+ "        try {\n" //
+				+ "            foo();\n" //
+				+ "        } catch (final Exception e) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11473,40 +11473,40 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinal04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int i = 0;\n");
-		buf.append("    public void foo() throws Exception {\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(int j) {\n");
-		buf.append("        int k;\n");
-		buf.append("        try {\n");
-		buf.append("            foo();\n");
-		buf.append("        } catch (Exception e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private int i = 0;\n" //
+				+ "    public void foo() throws Exception {\n" //
+				+ "    }\n" //
+				+ "    public void bar(int j) {\n" //
+				+ "        int k;\n" //
+				+ "        try {\n" //
+				+ "            foo();\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int i = 0;\n");
-		buf.append("    public void foo() throws Exception {\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(final int j) {\n");
-		buf.append("        int k;\n");
-		buf.append("        try {\n");
-		buf.append("            foo();\n");
-		buf.append("        } catch (Exception e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    private int i = 0;\n" //
+				+ "    public void foo() throws Exception {\n" //
+				+ "    }\n" //
+				+ "    public void bar(final int j) {\n" //
+				+ "        int k;\n" //
+				+ "        try {\n" //
+				+ "            foo();\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11514,32 +11514,32 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinal05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 0;\n");
-		buf.append("        if (i > 1 || i == 1 && i > 1)\n");
-		buf.append("            ;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int i= 0;\n" //
+				+ "        if (i > 1 || i == 1 && i > 1)\n" //
+				+ "            ;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        final int i= 0;\n");
-		buf.append("        if ((i > 1) || ((i == 1) && (i > 1)))\n");
-		buf.append("            ;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        final int i= 0;\n" //
+				+ "        if ((i > 1) || ((i == 1) && (i > 1)))\n" //
+				+ "            ;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11547,36 +11547,36 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug129807() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public interface I {\n");
-		buf.append("        void foo(int i);\n");
-		buf.append("    }\n");
-		buf.append("    public class IImpl implements I {\n");
-		buf.append("        public void foo(int i) {}\n");
-		buf.append("    }\n");
-		buf.append("    public abstract void bar(int i, String s);\n");
-		buf.append("    public void foobar(int i, int j) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public abstract class E {\n" //
+				+ "    public interface I {\n" //
+				+ "        void foo(int i);\n" //
+				+ "    }\n" //
+				+ "    public class IImpl implements I {\n" //
+				+ "        public void foo(int i) {}\n" //
+				+ "    }\n" //
+				+ "    public abstract void bar(int i, String s);\n" //
+				+ "    public void foobar(int i, int j) {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public interface I {\n");
-		buf.append("        void foo(int i);\n");
-		buf.append("    }\n");
-		buf.append("    public class IImpl implements I {\n");
-		buf.append("        public void foo(final int i) {}\n");
-		buf.append("    }\n");
-		buf.append("    public abstract void bar(int i, String s);\n");
-		buf.append("    public void foobar(final int i, final int j) {}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public abstract class E {\n" //
+				+ "    public interface I {\n" //
+				+ "        void foo(int i);\n" //
+				+ "    }\n" //
+				+ "    public class IImpl implements I {\n" //
+				+ "        public void foo(final int i) {}\n" //
+				+ "    }\n" //
+				+ "    public abstract void bar(int i, String s);\n" //
+				+ "    public void foobar(final int i, final int j) {}\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -11584,15 +11584,15 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug134676_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E<T> { \n");
-		buf.append("    private String s;\n");
-		buf.append("    void setS(String s) {\n");
-		buf.append("        this.s = s;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E<T> { \n" //
+				+ "    private String s;\n" //
+				+ "    void setS(String s) {\n" //
+				+ "        this.s = s;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -11603,47 +11603,47 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug134676_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E<T> { \n");
-		buf.append("    private String s= \"\";\n");
-		buf.append("    private T t;\n");
-		buf.append("    private T t2;\n");
-		buf.append("    public E(T t) {t2= t;}\n");
-		buf.append("    void setT(T t) {\n");
-		buf.append("        this.t = t;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E<T> { \n" //
+				+ "    private String s= \"\";\n" //
+				+ "    private T t;\n" //
+				+ "    private T t2;\n" //
+				+ "    public E(T t) {t2= t;}\n" //
+				+ "    void setT(T t) {\n" //
+				+ "        this.t = t;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E<T> { \n");
-		buf.append("    private final String s= \"\";\n");
-		buf.append("    private T t;\n");
-		buf.append("    private final T t2;\n");
-		buf.append("    public E(T t) {t2= t;}\n");
-		buf.append("    void setT(T t) {\n");
-		buf.append("        this.t = t;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E<T> { \n" //
+				+ "    private final String s= \"\";\n" //
+				+ "    private T t;\n" //
+				+ "    private final T t2;\n" //
+				+ "    public E(T t) {t2= t;}\n" //
+				+ "    void setT(T t) {\n" //
+				+ "        this.t = t;\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	//Changed test due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=220124
 	@Test
 	public void testAddFinalBug145028() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private volatile int field= 0;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private volatile int field= 0;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -11655,12 +11655,12 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug294768() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private transient int field= 0;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private transient int field= 0;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -11671,81 +11671,81 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug157276_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        field= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int field;\n" //
+				+ "    public E1() {\n" //
+				+ "        field= 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private final int field;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        field= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private final int field;\n" //
+				+ "    public E1() {\n" //
+				+ "        field= 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	@Test
 	public void testAddFinalBug157276_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        field= 10;\n");
-		buf.append("    }\n");
-		buf.append("    public E1(int f) {\n");
-		buf.append("        field= f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int field;\n" //
+				+ "    public E1() {\n" //
+				+ "        field= 10;\n" //
+				+ "    }\n" //
+				+ "    public E1(int f) {\n" //
+				+ "        field= f;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private final int field;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        field= 10;\n");
-		buf.append("    }\n");
-		buf.append("    public E1(int f) {\n");
-		buf.append("        field= f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private final int field;\n" //
+				+ "    public E1() {\n" //
+				+ "        field= 10;\n" //
+				+ "    }\n" //
+				+ "    public E1(int f) {\n" //
+				+ "        field= f;\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	@Test
 	public void testAddFinalBug157276_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        field= 10;\n");
-		buf.append("    }\n");
-		buf.append("    public E1(final int f) {\n");
-		buf.append("        field= f;\n");
-		buf.append("        field= 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int field;\n" //
+				+ "    public E1() {\n" //
+				+ "        field= 10;\n" //
+				+ "    }\n" //
+				+ "    public E1(final int f) {\n" //
+				+ "        field= f;\n" //
+				+ "        field= 5;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -11756,17 +11756,17 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug157276_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("    public E1() {\n");
-		buf.append("    }\n");
-		buf.append("    public E1(final int f) {\n");
-		buf.append("        field= f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int field;\n" //
+				+ "    public E1() {\n" //
+				+ "    }\n" //
+				+ "    public E1(final int f) {\n" //
+				+ "        field= f;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -11777,15 +11777,15 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug157276_5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int field= 0;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        field= 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int field= 0;\n" //
+				+ "    public E1() {\n" //
+				+ "        field= 5;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -11796,15 +11796,15 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug157276_6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        if (false) field= 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int field;\n" //
+				+ "    public E1() {\n" //
+				+ "        if (false) field= 5;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -11815,15 +11815,15 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug157276_7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static int field;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        field= 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private static int field;\n" //
+				+ "    public E1() {\n" //
+				+ "        field= 5;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -11834,307 +11834,307 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug156842() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int f0;\n");
-		buf.append("    private int f1= 0;\n");
-		buf.append("    private int f3;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        f3= 0;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int f0;\n" //
+				+ "    private int f1= 0;\n" //
+				+ "    private int f3;\n" //
+				+ "    public E1() {\n" //
+				+ "        f3= 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int f0;\n");
-		buf.append("    private final int f1= 0;\n");
-		buf.append("    private final int f3;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        f3= 0;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int f0;\n" //
+				+ "    private final int f1= 0;\n" //
+				+ "    private final int f3;\n" //
+				+ "    public E1() {\n" //
+				+ "        f3= 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	@Test
 	public void testAddFinalBug158041_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(int[] ints) {\n");
-		buf.append("        for (int j = 0; j < ints.length; j++) {\n");
-		buf.append("            System.out.println(ints[j]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(int[] ints) {\n" //
+				+ "        for (int j = 0; j < ints.length; j++) {\n" //
+				+ "            System.out.println(ints[j]);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(int[] ints) {\n");
-		buf.append("        for (final int i : ints) {\n");
-		buf.append("            System.out.println(i);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(int[] ints) {\n" //
+				+ "        for (final int i : ints) {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	@Test
 	public void testAddFinalBug158041_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(int[] ints) {\n");
-		buf.append("        for (int j = 0; j < ints.length; j++) {\n");
-		buf.append("            int i = ints[j];\n");
-		buf.append("            System.out.println(i);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(int[] ints) {\n" //
+				+ "        for (int j = 0; j < ints.length; j++) {\n" //
+				+ "            int i = ints[j];\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(int[] ints) {\n");
-		buf.append("        for (final int i : ints) {\n");
-		buf.append("            System.out.println(i);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(int[] ints) {\n" //
+				+ "        for (final int i : ints) {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	@Test
 	public void testAddFinalBug158041_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Iterator;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(List<E1> es) {\n");
-		buf.append("        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n");
-		buf.append("            System.out.println(iterator.next());\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<E1> es) {\n" //
+				+ "        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n" //
+				+ "            System.out.println(iterator.next());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(List<E1> es) {\n");
-		buf.append("        for (final E1 e1 : es) {\n");
-		buf.append("            System.out.println(e1);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<E1> es) {\n" //
+				+ "        for (final E1 e1 : es) {\n" //
+				+ "            System.out.println(e1);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	@Test
 	public void testAddFinalBug158041_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Iterator;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(List<E1> es) {\n");
-		buf.append("        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n");
-		buf.append("            E1 e1 = iterator.next();\n");
-		buf.append("            System.out.println(e1);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<E1> es) {\n" //
+				+ "        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n" //
+				+ "            E1 e1 = iterator.next();\n" //
+				+ "            System.out.println(e1);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(List<E1> es) {\n");
-		buf.append("        for (final E1 e1 : es) {\n");
-		buf.append("            System.out.println(e1);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<E1> es) {\n" //
+				+ "        for (final E1 e1 : es) {\n" //
+				+ "            System.out.println(e1);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	@Test
 	public void testAddFinalBug163789() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        this(10);\n");
-		buf.append("        i = 10;\n");
-		buf.append("    }\n");
-		buf.append("    public E1(int j) {\n");
-		buf.append("        i = j;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i;\n" //
+				+ "    public E1() {\n" //
+				+ "        this(10);\n" //
+				+ "        i = 10;\n" //
+				+ "    }\n" //
+				+ "    public E1(int j) {\n" //
+				+ "        i = j;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int i;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        this(10);\n");
-		buf.append("        i = 10;\n");
-		buf.append("    }\n");
-		buf.append("    public E1(final int j) {\n");
-		buf.append("        i = j;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int i;\n" //
+				+ "    public E1() {\n" //
+				+ "        this(10);\n" //
+				+ "        i = 10;\n" //
+				+ "    }\n" //
+				+ "    public E1(final int j) {\n" //
+				+ "        i = j;\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	@Test
 	public void testAddFinalBug191862() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E01 {\n");
-		buf.append("    @SuppressWarnings(\"unused\")\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private int x = 5, y= 10;\n");
-		buf.append("    \n");
-		buf.append("    private void foo() {\n");
-		buf.append("        @SuppressWarnings(\"unused\")\n");
-		buf.append("        @Deprecated\n");
-		buf.append("        int i= 10, j;\n");
-		buf.append("        j= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E01 {\n" //
+				+ "    @SuppressWarnings(\"unused\")\n" //
+				+ "    @Deprecated\n" //
+				+ "    private int x = 5, y= 10;\n" //
+				+ "    \n" //
+				+ "    private void foo() {\n" //
+				+ "        @SuppressWarnings(\"unused\")\n" //
+				+ "        @Deprecated\n" //
+				+ "        int i= 10, j;\n" //
+				+ "        j= 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E01 {\n");
-		buf.append("    @SuppressWarnings(\"unused\")\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    private final int x = 5, y= 10;\n");
-		buf.append("    \n");
-		buf.append("    private void foo() {\n");
-		buf.append("        @SuppressWarnings(\"unused\")\n");
-		buf.append("        @Deprecated\n");
-		buf.append("        final\n");
-		buf.append("        int i= 10;\n");
-		buf.append("        @SuppressWarnings(\"unused\")\n");
-		buf.append("        @Deprecated\n");
-		buf.append("        int j;\n");
-		buf.append("        j= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E01 {\n" //
+				+ "    @SuppressWarnings(\"unused\")\n" //
+				+ "    @Deprecated\n" //
+				+ "    private final int x = 5, y= 10;\n" //
+				+ "    \n" //
+				+ "    private void foo() {\n" //
+				+ "        @SuppressWarnings(\"unused\")\n" //
+				+ "        @Deprecated\n" //
+				+ "        final\n" //
+				+ "        int i= 10;\n" //
+				+ "        @SuppressWarnings(\"unused\")\n" //
+				+ "        @Deprecated\n" //
+				+ "        int j;\n" //
+				+ "        j= 10;\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
 	}
 
 	@Test
 	public void testAddFinalBug213995() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private Object foo = new Object() {\n");
-		buf.append("        public boolean equals(Object obj) {\n");
-		buf.append("            return super.equals(obj);\n");
-		buf.append("        }\n");
-		buf.append("    }; \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Object foo = new Object() {\n");
-		buf.append("            public boolean equals(Object obj) {\n");
-		buf.append("                return super.equals(obj);\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private Object foo = new Object() {\n" //
+				+ "        public boolean equals(Object obj) {\n" //
+				+ "            return super.equals(obj);\n" //
+				+ "        }\n" //
+				+ "    }; \n" //
+				+ "    public void foo() {\n" //
+				+ "        Object foo = new Object() {\n" //
+				+ "            public boolean equals(Object obj) {\n" //
+				+ "                return super.equals(obj);\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private Object foo = new Object() {\n");
-		buf.append("        public boolean equals(final Object obj) {\n");
-		buf.append("            return super.equals(obj);\n");
-		buf.append("        }\n");
-		buf.append("    }; \n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Object foo = new Object() {\n");
-		buf.append("            public boolean equals(final Object obj) {\n");
-		buf.append("                return super.equals(obj);\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private Object foo = new Object() {\n" //
+				+ "        public boolean equals(final Object obj) {\n" //
+				+ "            return super.equals(obj);\n" //
+				+ "        }\n" //
+				+ "    }; \n" //
+				+ "    public void foo() {\n" //
+				+ "        Object foo = new Object() {\n" //
+				+ "            public boolean equals(final Object obj) {\n" //
+				+ "                return super.equals(obj);\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	@Test
 	public void testAddFinalBug272532() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int field;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        if (true)\n");
-		buf.append("            return;\n");
-		buf.append("        field= 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int field;\n" //
+				+ "    public E1() {\n" //
+				+ "        if (true)\n" //
+				+ "            return;\n" //
+				+ "        field= 5;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -12145,18 +12145,18 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testAddFinalBug297566() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int x;\n");
-		buf.append("    public E1() {\n");
-		buf.append("        this();\n");
-		buf.append("    }\n");
-		buf.append("    public E1(int a) {\n");
-		buf.append("        x = a;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    private int x;\n" //
+				+ "    public E1() {\n" //
+				+ "        this();\n" //
+				+ "    }\n" //
+				+ "    public E1(int a) {\n" //
+				+ "        x = a;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
@@ -12314,58 +12314,58 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveBlockReturnThrows01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public void foo(Object obj) {\n");
-		buf.append("        if (obj == null) {\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        }\n");
-		buf.append("        \n");
-		buf.append("        if (obj.hashCode() > 0) {\n");
-		buf.append("            return;\n");
-		buf.append("        }\n");
-		buf.append("        \n");
-		buf.append("        if (obj.hashCode() < 0) {\n");
-		buf.append("            System.out.println(\"\");\n");
-		buf.append("            return;\n");
-		buf.append("        }\n");
-		buf.append("        \n");
-		buf.append("        if (obj.toString() != null) {\n");
-		buf.append("            System.out.println(obj.toString());\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println(\"\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public abstract class E {\n" //
+				+ "    public void foo(Object obj) {\n" //
+				+ "        if (obj == null) {\n" //
+				+ "            throw new IllegalArgumentException();\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        if (obj.hashCode() > 0) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        if (obj.hashCode() < 0) {\n" //
+				+ "            System.out.println(\"\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        if (obj.toString() != null) {\n" //
+				+ "            System.out.println(obj.toString());\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public void foo(Object obj) {\n");
-		buf.append("        if (obj == null)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        \n");
-		buf.append("        if (obj.hashCode() > 0)\n");
-		buf.append("            return;\n");
-		buf.append("        \n");
-		buf.append("        if (obj.hashCode() < 0) {\n");
-		buf.append("            System.out.println(\"\");\n");
-		buf.append("            return;\n");
-		buf.append("        }\n");
-		buf.append("        \n");
-		buf.append("        if (obj.toString() != null) {\n");
-		buf.append("            System.out.println(obj.toString());\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println(\"\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public abstract class E {\n" //
+				+ "    public void foo(Object obj) {\n" //
+				+ "        if (obj == null)\n" //
+				+ "            throw new IllegalArgumentException();\n" //
+				+ "        \n" //
+				+ "        if (obj.hashCode() > 0)\n" //
+				+ "            return;\n" //
+				+ "        \n" //
+				+ "        if (obj.hashCode() < 0) {\n" //
+				+ "            System.out.println(\"\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        if (obj.toString() != null) {\n" //
+				+ "            System.out.println(obj.toString());\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -12373,23 +12373,23 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveTrailingWhitespace01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package    test1;     \n");
-		buf.append("   public class E1 {  \n");
-		buf.append("                   \n");
-		buf.append("}                  \n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package    test1;     \n" //
+				+ "   public class E1 {  \n" //
+				+ "                   \n" //
+				+ "}                  \n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
 		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 
-		buf= new StringBuffer();
-		buf.append("package    test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package    test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -12397,22 +12397,22 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveTrailingWhitespace02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package    test1;     \n");
-		buf.append("   public class E1 {  \n");
-		buf.append("                   \n");
-		buf.append("}                  \n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package    test1;     \n" //
+				+ "   public class E1 {  \n" //
+				+ "                   \n" //
+				+ "}                  \n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY);
 
-		buf= new StringBuffer();
-		buf.append("package    test1;\n");
-		buf.append("   public class E1 {\n");
-		buf.append("                   \n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package    test1;\n" //
+				+ "   public class E1 {\n" //
+				+ "                   \n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -12420,37 +12420,37 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveTrailingWhitespaceBug173081() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("/**\n");
-		buf.append(" * \n");
-		buf.append(" *     \n");
-		buf.append(" */\n");
-		buf.append("public class E1 { \n");
-		buf.append("    /**\n");
-		buf.append("     * \n");
-		buf.append("	 *     \n");
-		buf.append("     */\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "/**\n" //
+				+ " * \n" //
+				+ " *     \n" //
+				+ " */\n" //
+				+ "public class E1 { \n" //
+				+ "    /**\n" //
+				+ "     * \n" //
+				+ "	 *     \n" //
+				+ "     */\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY);
 		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("/**\n");
-		buf.append(" * \n");
-		buf.append(" * \n");
-		buf.append(" */\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * \n");
-		buf.append("     * \n");
-		buf.append("     */\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "/**\n" //
+				+ " * \n" //
+				+ " * \n" //
+				+ " */\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * \n" //
+				+ "     * \n" //
+				+ "     */\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -12458,28 +12458,28 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembers01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("   public class SM01 {\n");
-		buf.append("   int b;\n");
-		buf.append("   int a;\n");
-		buf.append("   void d() {};\n");
-		buf.append("   void c() {};\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("SM01.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "   public class SM01 {\n" //
+				+ "   int b;\n" //
+				+ "   int a;\n" //
+				+ "   void d() {};\n" //
+				+ "   void c() {};\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("SM01.java", sample, false, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("   public class SM01 {\n");
-		buf.append("   int a;\n");
-		buf.append("   int b;\n");
-		buf.append("   void c() {};\n");
-		buf.append("   void d() {};\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "   public class SM01 {\n" //
+				+ "   int a;\n" //
+				+ "   int b;\n" //
+				+ "   void c() {};\n" //
+				+ "   void d() {};\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -12487,27 +12487,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembers02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("   public class SM02 {\n");
-		buf.append("   int b;\n");
-		buf.append("   int a;\n");
-		buf.append("   void d() {};\n");
-		buf.append("   void c() {};\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("SM02.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "   public class SM02 {\n" //
+				+ "   int b;\n" //
+				+ "   int a;\n" //
+				+ "   void d() {};\n" //
+				+ "   void c() {};\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("SM02.java", sample, false, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("   public class SM02 {\n");
-		buf.append("   int b;\n");
-		buf.append("   int a;\n");
-		buf.append("   void c() {};\n");
-		buf.append("   void d() {};\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "   public class SM02 {\n" //
+				+ "   int b;\n" //
+				+ "   int a;\n" //
+				+ "   void c() {};\n" //
+				+ "   void d() {};\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -12519,27 +12519,27 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test;\n");
-			buf.append("   public class SM02 {\n");
-			buf.append("   private int b;\n");
-			buf.append("   public int a;\n");
-			buf.append("   void d() {};\n");
-			buf.append("   void c() {};\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("SM02.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test;\n" //
+					+ "   public class SM02 {\n" //
+					+ "   private int b;\n" //
+					+ "   public int a;\n" //
+					+ "   void d() {};\n" //
+					+ "   void c() {};\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("SM02.java", sample, false, null);
 
 			enable(CleanUpConstants.SORT_MEMBERS);
 
-			buf= new StringBuffer();
-			buf.append("package test;\n");
-			buf.append("   public class SM02 {\n");
-			buf.append("   private int b;\n");
-			buf.append("   public int a;\n");
-			buf.append("   void c() {};\n");
-			buf.append("   void d() {};\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test;\n" //
+					+ "   public class SM02 {\n" //
+					+ "   private int b;\n" //
+					+ "   public int a;\n" //
+					+ "   void c() {};\n" //
+					+ "   void d() {};\n" //
+					+ "}\n";
+			String expected1= sample;
 
 			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 		} finally {
@@ -12550,27 +12550,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersBug223997() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class SM02 {\n");
-		buf.append("    public String s2;\n");
-		buf.append("    public static String s1;\n");
-		buf.append("   void d() {};\n");
-		buf.append("   void c() {};\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("SM02.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class SM02 {\n" //
+				+ "    public String s2;\n" //
+				+ "    public static String s1;\n" //
+				+ "   void d() {};\n" //
+				+ "   void c() {};\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("SM02.java", sample, false, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class SM02 {\n");
-		buf.append("    public static String s1;\n");
-		buf.append("    public String s2;\n");
-		buf.append("   void c() {};\n");
-		buf.append("   void d() {};\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class SM02 {\n" //
+				+ "    public static String s1;\n" //
+				+ "    public String s2;\n" //
+				+ "   void c() {};\n" //
+				+ "   void d() {};\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -12578,29 +12578,29 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersBug263173() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class SM263173 {\n");
-		buf.append("    static int someInt;\n");
-		buf.append("    static {\n");
-		buf.append("        someInt = 1;\n");
-		buf.append("    };\n");
-		buf.append("    static int anotherInt = someInt;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("SM263173.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class SM263173 {\n" //
+				+ "    static int someInt;\n" //
+				+ "    static {\n" //
+				+ "        someInt = 1;\n" //
+				+ "    };\n" //
+				+ "    static int anotherInt = someInt;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("SM263173.java", sample, false, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class SM263173 {\n");
-		buf.append("    static int someInt;\n");
-		buf.append("    static {\n");
-		buf.append("        someInt = 1;\n");
-		buf.append("    };\n");
-		buf.append("    static int anotherInt = someInt;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class SM263173 {\n" //
+				+ "    static int someInt;\n" //
+				+ "    static {\n" //
+				+ "        someInt = 1;\n" //
+				+ "    };\n" //
+				+ "    static int anotherInt = someInt;\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -12608,13 +12608,13 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersBug434941() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class A {\n");
-		buf.append("    public static final int CONSTANT = 5;\n");
-		buf.append("    public static void main(final String[] args) { }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class A {\n" //
+				+ "    public static final int CONSTANT = 5;\n" //
+				+ "    public static void main(final String[] args) { }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
@@ -12630,29 +12630,29 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersMixedFields() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class A {\n");
-		buf.append("    public static final int B = 1;\n");
-		buf.append("    public final int A = 2;\n");
-		buf.append("    public static final int C = 3;\n");
-		buf.append("    public final int D = 4;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class A {\n" //
+				+ "    public static final int B = 1;\n" //
+				+ "    public final int A = 2;\n" //
+				+ "    public static final int C = 3;\n" //
+				+ "    public final int D = 4;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		disable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class A {\n");
-		buf.append("    public static final int B = 1;\n");
-		buf.append("    public static final int C = 3;\n");
-		buf.append("    public final int A = 2;\n");
-		buf.append("    public final int D = 4;\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class A {\n" //
+				+ "    public static final int B = 1;\n" //
+				+ "    public static final int C = 3;\n" //
+				+ "    public final int A = 2;\n" //
+				+ "    public final int D = 4;\n" //
+				+ "}\n";
 
-		String expected1= buf.toString();
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -12660,15 +12660,15 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersMixedFieldsInterface() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public interface A {\n");
-		buf.append("    public static final int B = 1;\n");
-		buf.append("    public final int A = 2;\n");
-		buf.append("    public static final int C = 3;\n");
-		buf.append("    public final int D = 4;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public interface A {\n" //
+				+ "    public static final int B = 1;\n" //
+				+ "    public final int A = 2;\n" //
+				+ "    public static final int C = 3;\n" //
+				+ "    public final int D = 4;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		disable(CleanUpConstants.SORT_MEMBERS_ALL);
@@ -12677,16 +12677,16 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public interface A {\n");
-		buf.append("    public final int A = 2;\n");
-		buf.append("    public static final int B = 1;\n");
-		buf.append("    public static final int C = 3;\n");
-		buf.append("    public final int D = 4;\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test;\n" //
+				+ "public interface A {\n" //
+				+ "    public final int A = 2;\n" //
+				+ "    public static final int B = 1;\n" //
+				+ "    public static final int C = 3;\n" //
+				+ "    public final int D = 4;\n" //
+				+ "}\n";
 
-		String expected1= buf.toString();
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -12694,63 +12694,63 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersBug407759() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class A {\n");
-		buf.append("    void foo2() {}\n");
-		buf.append("    void foo1() {}\n");
-		buf.append("    static int someInt;\n");
-		buf.append("    static void fooStatic() {}\n");
-		buf.append("    static {\n");
-		buf.append("    	someInt = 1;\n");
-		buf.append("    }\n");
-		buf.append("    void foo3() {}\n");
-		buf.append("    static int anotherInt = someInt;\n");
-		buf.append("    void foo() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class A {\n" //
+				+ "    void foo2() {}\n" //
+				+ "    void foo1() {}\n" //
+				+ "    static int someInt;\n" //
+				+ "    static void fooStatic() {}\n" //
+				+ "    static {\n" //
+				+ "    	someInt = 1;\n" //
+				+ "    }\n" //
+				+ "    void foo3() {}\n" //
+				+ "    static int anotherInt = someInt;\n" //
+				+ "    void foo() {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		disable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class A {\n");
-		buf.append("    static int someInt;\n");
-		buf.append("    static {\n");
-		buf.append("    	someInt = 1;\n");
-		buf.append("    }\n");
-		buf.append("    static int anotherInt = someInt;\n");
-		buf.append("    static void fooStatic() {}\n");
-		buf.append("    void foo() {}\n");
-		buf.append("    void foo1() {}\n");
-		buf.append("    void foo2() {}\n");
-		buf.append("    void foo3() {}\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class A {\n" //
+				+ "    static int someInt;\n" //
+				+ "    static {\n" //
+				+ "    	someInt = 1;\n" //
+				+ "    }\n" //
+				+ "    static int anotherInt = someInt;\n" //
+				+ "    static void fooStatic() {}\n" //
+				+ "    void foo() {}\n" //
+				+ "    void foo1() {}\n" //
+				+ "    void foo2() {}\n" //
+				+ "    void foo3() {}\n" //
+				+ "}\n";
 
-		String expected1= buf.toString();
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class A {\n");
-		buf.append("    static int anotherInt = someInt;\n");
-		buf.append("    static int someInt;\n");
-		buf.append("    static {\n");
-		buf.append("    	someInt = 1;\n");
-		buf.append("    }\n");
-		buf.append("    static void fooStatic() {}\n");
-		buf.append("    void foo() {}\n");
-		buf.append("    void foo1() {}\n");
-		buf.append("    void foo2() {}\n");
-		buf.append("    void foo3() {}\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class A {\n" //
+				+ "    static int anotherInt = someInt;\n" //
+				+ "    static int someInt;\n" //
+				+ "    static {\n" //
+				+ "    	someInt = 1;\n" //
+				+ "    }\n" //
+				+ "    static void fooStatic() {}\n" //
+				+ "    void foo() {}\n" //
+				+ "    void foo1() {}\n" //
+				+ "    void foo2() {}\n" //
+				+ "    void foo3() {}\n" //
+				+ "}\n";
 
-		expected1= buf.toString();
+		expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -12762,57 +12762,57 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test;\n");
-			buf.append("public class A {\n");
-			buf.append("    public final int B = 1;\n");
-			buf.append("    private static final int AA = 1;\n");
-			buf.append("    public static final int BB = 2;\n");
-			buf.append("    private final int A = 2;\n");
-			buf.append("    final int C = 3;\n");
-			buf.append("    protected static final int DD = 3;\n");
-			buf.append("    final static int CC = 4;\n");
-			buf.append("    protected final int D = 4;\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test;\n" //
+					+ "public class A {\n" //
+					+ "    public final int B = 1;\n" //
+					+ "    private static final int AA = 1;\n" //
+					+ "    public static final int BB = 2;\n" //
+					+ "    private final int A = 2;\n" //
+					+ "    final int C = 3;\n" //
+					+ "    protected static final int DD = 3;\n" //
+					+ "    final static int CC = 4;\n" //
+					+ "    protected final int D = 4;\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
 
 			enable(CleanUpConstants.SORT_MEMBERS);
 			disable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-			buf= new StringBuffer();
-			buf.append("package test;\n");
-			buf.append("public class A {\n");
-			buf.append("    private static final int AA = 1;\n");
-			buf.append("    public static final int BB = 2;\n");
-			buf.append("    protected static final int DD = 3;\n");
-			buf.append("    final static int CC = 4;\n");
-			buf.append("    public final int B = 1;\n");
-			buf.append("    private final int A = 2;\n");
-			buf.append("    final int C = 3;\n");
-			buf.append("    protected final int D = 4;\n");
-			buf.append("}\n");
+			sample= "" //
+					+ "package test;\n" //
+					+ "public class A {\n" //
+					+ "    private static final int AA = 1;\n" //
+					+ "    public static final int BB = 2;\n" //
+					+ "    protected static final int DD = 3;\n" //
+					+ "    final static int CC = 4;\n" //
+					+ "    public final int B = 1;\n" //
+					+ "    private final int A = 2;\n" //
+					+ "    final int C = 3;\n" //
+					+ "    protected final int D = 4;\n" //
+					+ "}\n";
 
-			String expected1= buf.toString();
+			String expected1= sample;
 
 			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 
 			enable(CleanUpConstants.SORT_MEMBERS);
 			enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-			buf= new StringBuffer();
-			buf.append("package test;\n");
-			buf.append("public class A {\n");
-			buf.append("    public static final int BB = 2;\n");
-			buf.append("    private static final int AA = 1;\n");
-			buf.append("    protected static final int DD = 3;\n");
-			buf.append("    final static int CC = 4;\n");
-			buf.append("    public final int B = 1;\n");
-			buf.append("    private final int A = 2;\n");
-			buf.append("    protected final int D = 4;\n");
-			buf.append("    final int C = 3;\n");
-			buf.append("}\n");
+			sample= "" //
+					+ "package test;\n" //
+					+ "public class A {\n" //
+					+ "    public static final int BB = 2;\n" //
+					+ "    private static final int AA = 1;\n" //
+					+ "    protected static final int DD = 3;\n" //
+					+ "    final static int CC = 4;\n" //
+					+ "    public final int B = 1;\n" //
+					+ "    private final int A = 2;\n" //
+					+ "    protected final int D = 4;\n" //
+					+ "    final int C = 3;\n" //
+					+ "}\n";
 
-			expected1= buf.toString();
+			expected1= sample;
 
 			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 		} finally {
@@ -12823,24 +12823,24 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testOrganizeImports01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    A a;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    A a;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {}\n");
-		pack2.createCompilationUnit("A.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class A {}\n";
+		pack2.createCompilationUnit("A.java", sample, false, null);
 
 		IPackageFragment pack3= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class A {}\n");
-		pack3.createCompilationUnit("A.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "public class A {}\n";
+		pack3.createCompilationUnit("A.java", sample, false, null);
 
 		enable(CleanUpConstants.ORGANIZE_IMPORTS);
 
@@ -12855,12 +12855,12 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testOrganizeImports02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Vect or v;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    Vect or v;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.ORGANIZE_IMPORTS);
 
@@ -12875,40 +12875,40 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testOrganizeImportsBug202266() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test2", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("public class E2 {\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test2;\n" //
+				+ "public class E2 {\n" //
+				+ "}\n";
+		pack1.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test3", false, null);
-		buf= new StringBuffer();
-		buf.append("package test3;\n");
-		buf.append("public class E2 {\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("E2.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test3;\n" //
+				+ "public class E2 {\n" //
+				+ "}\n";
+		pack2.createCompilationUnit("E2.java", sample, false, null);
 
 		IPackageFragment pack3= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    ArrayList foo;\n");
-		buf.append("    E2 foo2;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack3.createCompilationUnit("E.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    ArrayList foo;\n" //
+				+ "    E2 foo2;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack3.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.ORGANIZE_IMPORTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    ArrayList foo;\n");
-		buf.append("    E2 foo2;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    ArrayList foo;\n" //
+				+ "    E2 foo2;\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -12916,27 +12916,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testOrganizeImportsBug229570() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public interface E1 {\n");
-		buf.append("  List<IEntity> getChildEntities();\n");
-		buf.append("  ArrayList<String> test;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public interface E1 {\n" //
+				+ "  List<IEntity> getChildEntities();\n" //
+				+ "  ArrayList<String> test;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.ORGANIZE_IMPORTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("\n");
-		buf.append("public interface E1 {\n");
-		buf.append("  List<IEntity> getChildEntities();\n");
-		buf.append("  ArrayList<String> test;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public interface E1 {\n" //
+				+ "  List<IEntity> getChildEntities();\n" //
+				+ "  ArrayList<String> test;\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -12944,59 +12944,59 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCorrectIndetation01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("/**\n");
-		buf.append("* \n");
-		buf.append("*/\n");
-		buf.append("package test1;\n");
-		buf.append("/**\n");
-		buf.append(" * \n");
-		buf.append("* \n");
-		buf.append(" */\n");
-		buf.append("        public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("         * \n");
-		buf.append(" * \n");
-		buf.append("     */\n");
-		buf.append("            public void foo() {\n");
-		buf.append("            //a\n");
-		buf.append("        //b\n");
-		buf.append("            }\n");
-		buf.append("    /*\n");
-		buf.append("     *\n");
-		buf.append("           *\n");
-		buf.append("* \n");
-		buf.append("     */\n");
-		buf.append("        }\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "/**\n" //
+				+ "* \n" //
+				+ "*/\n" //
+				+ "package test1;\n" //
+				+ "/**\n" //
+				+ " * \n" //
+				+ "* \n" //
+				+ " */\n" //
+				+ "        public class E1 {\n" //
+				+ "    /**\n" //
+				+ "         * \n" //
+				+ " * \n" //
+				+ "     */\n" //
+				+ "            public void foo() {\n" //
+				+ "            //a\n" //
+				+ "        //b\n" //
+				+ "            }\n" //
+				+ "    /*\n" //
+				+ "     *\n" //
+				+ "           *\n" //
+				+ "* \n" //
+				+ "     */\n" //
+				+ "        }\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 
-		buf= new StringBuffer();
-		buf.append("/**\n");
-		buf.append(" * \n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("/**\n");
-		buf.append(" * \n");
-		buf.append(" * \n");
-		buf.append(" */\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * \n");
-		buf.append("     * \n");
-		buf.append("     */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        //a\n");
-		buf.append("        //b\n");
-		buf.append("    }\n");
-		buf.append("    /*\n");
-		buf.append("     *\n");
-		buf.append("     *\n");
-		buf.append("     * \n");
-		buf.append("     */\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "/**\n" //
+				+ " * \n" //
+				+ " */\n" //
+				+ "package test1;\n" //
+				+ "/**\n" //
+				+ " * \n" //
+				+ " * \n" //
+				+ " */\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * \n" //
+				+ "     * \n" //
+				+ "     */\n" //
+				+ "    public void foo() {\n" //
+				+ "        //a\n" //
+				+ "        //b\n" //
+				+ "    }\n" //
+				+ "    /*\n" //
+				+ "     *\n" //
+				+ "     *\n" //
+				+ "     * \n" //
+				+ "     */\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
@@ -13004,27 +13004,27 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testCorrectIndetationBug202145_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("//  \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "//  \n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        //\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        //\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
@@ -13035,27 +13035,27 @@ public class CleanUpTest extends CleanUpTestCase {
 		project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("//  \n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String sample= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    public void foo() {\n" //
+					+ "//  \n" //
+					+ "    }\n" //
+					+ "}\n";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 			enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("//\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected1= buf.toString();
+			sample= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    public void foo() {\n" //
+					+ "//\n" //
+					+ "    }\n" //
+					+ "}\n";
+			String expected1= sample;
 
 			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 		} finally {
@@ -13066,79 +13066,79 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnimplementedCode01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public interface IFace {\n");
-		buf.append("    void foo();\n");
-		buf.append("    void bar();\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("IFace.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public interface IFace {\n" //
+				+ "    void foo();\n" //
+				+ "    void bar();\n" //
+				+ "}\n";
+		pack1.createCompilationUnit("IFace.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E01 implements IFace {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E01.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E01 implements IFace {\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E01.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E02 implements IFace {\n");
-		buf.append("    public class Inner implements IFace {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E02.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E02 implements IFace {\n" //
+				+ "    public class Inner implements IFace {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E02.java", sample, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_METHODES);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E01 implements IFace {\n");
-		buf.append("\n");
-		buf.append("    /* comment */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        //TODO\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    /* comment */\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        //TODO\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E01 implements IFace {\n" //
+				+ "\n" //
+				+ "    /* comment */\n" //
+				+ "    public void foo() {\n" //
+				+ "        //TODO\n" //
+				+ "        \n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /* comment */\n" //
+				+ "    public void bar() {\n" //
+				+ "        //TODO\n" //
+				+ "        \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E02 implements IFace {\n");
-		buf.append("    public class Inner implements IFace {\n");
-		buf.append("\n");
-		buf.append("        /* comment */\n");
-		buf.append("        public void foo() {\n");
-		buf.append("            //TODO\n");
-		buf.append("            \n");
-		buf.append("        }\n");
-		buf.append("\n");
-		buf.append("        /* comment */\n");
-		buf.append("        public void bar() {\n");
-		buf.append("            //TODO\n");
-		buf.append("            \n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    /* comment */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        //TODO\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    /* comment */\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        //TODO\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E02 implements IFace {\n" //
+				+ "    public class Inner implements IFace {\n" //
+				+ "\n" //
+				+ "        /* comment */\n" //
+				+ "        public void foo() {\n" //
+				+ "            //TODO\n" //
+				+ "            \n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        /* comment */\n" //
+				+ "        public void bar() {\n" //
+				+ "            //TODO\n" //
+				+ "            \n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /* comment */\n" //
+				+ "    public void foo() {\n" //
+				+ "        //TODO\n" //
+				+ "        \n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /* comment */\n" //
+				+ "    public void bar() {\n" //
+				+ "        //TODO\n" //
+				+ "        \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
 	}
@@ -13146,46 +13146,46 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testUnimplementedCode02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public interface IFace {\n");
-		buf.append("    void foo();\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("IFace.java", buf.toString(), false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public interface IFace {\n" //
+				+ "    void foo();\n" //
+				+ "}\n";
+		pack1.createCompilationUnit("IFace.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E01 implements IFace {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E01.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E01 implements IFace {\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E01.java", sample, false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class E02 implements IFace {\n");
-		buf.append("    \n");
-		buf.append("    public class Inner implements IFace {\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= pack1.createCompilationUnit("E02.java", buf.toString(), false, null);
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E02 implements IFace {\n" //
+				+ "    \n" //
+				+ "    public class Inner implements IFace {\n" //
+				+ "        \n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E02.java", sample, false, null);
 
 		enable(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public abstract class E01 implements IFace {\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public abstract class E01 implements IFace {\n" //
+				+ "}\n";
+		String expected1= sample;
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public abstract class E02 implements IFace {\n");
-		buf.append("    \n");
-		buf.append("    public abstract class Inner implements IFace {\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "public abstract class E02 implements IFace {\n" //
+				+ "    \n" //
+				+ "    public abstract class Inner implements IFace {\n" //
+				+ "        \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
 	}
@@ -13333,51 +13333,51 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRemoveRedundantSemicolons () throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		String sample= "" //
 
 		// Ensure various extra semi-colons are removed and required ones are left intact.
 		// This includes a lambda expression.
-		buf.append("package test; ;\n");
-		buf.append("enum cars { sedan, coupe };\n");
-		buf.append("public class Foo {\n");
-		buf.append("  int add(int a, int b) {return a+b;};\n");
-		buf.append("  int a= 3;; ;\n");
-		buf.append("  int b= 7; // leave this ; alone\n");
-		buf.append("  int c= 10; /* and this ; too */\n");
-		buf.append("  public int foo () {\n");
-		buf.append("    ;\n");
-		buf.append("    Runnable r = () -> {\n");
-		buf.append("      System.out.println(\"running\");\n");
-		buf.append("    };;\n");
-		buf.append("    for (;;)\n");
-		buf.append("      ;;\n");
-		buf.append("      ;\n");
-		buf.append("    while (a++ < 1000) ;\n");
-		buf.append("  };\n");
-		buf.append("};\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("Foo.java", buf.toString(), false, null);
+				+ "package test; ;\n" //
+				+ "enum cars { sedan, coupe };\n" //
+				+ "public class Foo {\n" //
+				+ "  int add(int a, int b) {return a+b;};\n" //
+				+ "  int a= 3;; ;\n" //
+				+ "  int b= 7; // leave this ; alone\n" //
+				+ "  int c= 10; /* and this ; too */\n" //
+				+ "  public int foo () {\n" //
+				+ "    ;\n" //
+				+ "    Runnable r = () -> {\n" //
+				+ "      System.out.println(\"running\");\n" //
+				+ "    };;\n" //
+				+ "    for (;;)\n" //
+				+ "      ;;\n" //
+				+ "      ;\n" //
+				+ "    while (a++ < 1000) ;\n" //
+				+ "  };\n" //
+				+ "};\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("Foo.java", sample, false, null);
 
 		// Ensure semi-colon after lambda expression remains intact.
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("enum cars { sedan, coupe }\n");
-		buf.append("public class Foo {\n");
-		buf.append("  int add(int a, int b) {return a+b;}\n");
-		buf.append("  int a= 3;\n");
-		buf.append("  int b= 7; // leave this ; alone\n");
-		buf.append("  int c= 10; /* and this ; too */\n");
-		buf.append("  public int foo () {\n");
-		buf.append("    \n");
-		buf.append("    Runnable r = () -> {\n");
-		buf.append("      System.out.println(\"running\");\n");
-		buf.append("    };\n");
-		buf.append("    for (;;)\n");
-		buf.append("      ;\n");
-		buf.append("      \n");
-		buf.append("    while (a++ < 1000) ;\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		String expected1 = buf.toString();
+		sample= "" //
+				+ "package test;\n" //
+				+ "enum cars { sedan, coupe }\n" //
+				+ "public class Foo {\n" //
+				+ "  int add(int a, int b) {return a+b;}\n" //
+				+ "  int a= 3;\n" //
+				+ "  int b= 7; // leave this ; alone\n" //
+				+ "  int c= 10; /* and this ; too */\n" //
+				+ "  public int foo () {\n" //
+				+ "    \n" //
+				+ "    Runnable r = () -> {\n" //
+				+ "      System.out.println(\"running\");\n" //
+				+ "    };\n" //
+				+ "    for (;;)\n" //
+				+ "      ;\n" //
+				+ "      \n" //
+				+ "    while (a++ < 1000) ;\n" //
+				+ "  }\n" //
+				+ "}\n";
+		String expected1 = sample;
 
 		enable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
@@ -13387,42 +13387,42 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testBug491087() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("interface A {\n");
-		buf.append("    class B {\n");
-		buf.append("        String field;\n");
-		buf.append("       B() { field = \"foo\"; }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class C {\n");
-		buf.append("    class D {\n");
-		buf.append("       String field;\n");
-		buf.append("       D() { field = \"bar\"; }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "interface A {\n" //
+				+ "    class B {\n" //
+				+ "        String field;\n" //
+				+ "       B() { field = \"foo\"; }\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "class C {\n" //
+				+ "    class D {\n" //
+				+ "       String field;\n" //
+				+ "       D() { field = \"bar\"; }\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		ICompilationUnit cu1= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("C.java", sample, false, null);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("interface A {\n");
-		buf.append("    class B {\n");
-		buf.append("        String field;\n");
-		buf.append("       B() { this.field = \"foo\"; }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class C {\n");
-		buf.append("    class D {\n");
-		buf.append("       String field;\n");
-		buf.append("       D() { this.field = \"bar\"; }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		sample= "" //
+				+ "package test1;\n" //
+				+ "interface A {\n" //
+				+ "    class B {\n" //
+				+ "        String field;\n" //
+				+ "       B() { this.field = \"foo\"; }\n" //
+				+ "    }\n" //
+				+ "}\n" //
+				+ "class C {\n" //
+				+ "    class D {\n" //
+				+ "       String field;\n" //
+				+ "       D() { this.field = \"bar\"; }\n" //
+				+ "    }\n" //
+				+ "}\n";
 
-		String expected1= buf.toString();
+		String expected1= sample;
 
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] {
 				Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
