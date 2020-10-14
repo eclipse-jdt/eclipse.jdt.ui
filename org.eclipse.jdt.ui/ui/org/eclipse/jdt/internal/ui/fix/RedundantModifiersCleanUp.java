@@ -112,6 +112,16 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 			buf.append("  }\n"); //$NON-NLS-1$
 		}
 		buf.append("}\n"); //$NON-NLS-1$
+		buf.append("\n"); //$NON-NLS-1$
+		buf.append("public enum SampleEnum {\n"); //$NON-NLS-1$
+		buf.append("  VALUE1(\"1\"), VALUE2(\"2\");\n"); //$NON-NLS-1$
+		buf.append("\n"); //$NON-NLS-1$
+		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS)) {
+			buf.append("  SampleEnum(String string) {}\n"); //$NON-NLS-1$
+		} else {
+			buf.append("  private SampleEnum(String string) {}\n"); //$NON-NLS-1$
+		}
+		buf.append("}\n"); //$NON-NLS-1$
 
 
 		return buf.toString();
@@ -139,20 +149,24 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 
 			@Override
 			public boolean visit(MethodDeclaration node) {
-				TypeDeclaration typeDecl= node.getParent() instanceof TypeDeclaration ? (TypeDeclaration) node.getParent() : null;
+				if (node.getParent() instanceof TypeDeclaration) {
+					TypeDeclaration typeDecl= (TypeDeclaration) node.getParent();
 
-				if (typeDecl != null) {
 					if (typeDecl.isInterface()) {
 						if (Modifier.isAbstract(node.getModifiers())) {
 							rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.ABSTRACT));
 						}
 
-						if (Modifier.isPublic(node.getModifiers()) && !AnonymousClassDeclaration.class.isInstance(node.getParent()) && !EnumDeclaration.class.isInstance(node.getParent())) {
+						if (Modifier.isPublic(node.getModifiers()) && !AnonymousClassDeclaration.class.isInstance(node.getParent())) {
 							rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.PUBLIC));
 						}
 					} else if (Modifier.isFinal(typeDecl.getModifiers()) && Modifier.isFinal(node.getModifiers()) && !node.isVarargs()) {
 						rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.FINAL));
 					}
+				} else if (node.getParent() instanceof EnumDeclaration
+						&& node.isConstructor()
+						&& Modifier.isPrivate(node.getModifiers())) {
+						rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.PRIVATE));
 				}
 
 				return true;

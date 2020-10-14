@@ -13252,6 +13252,25 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected3 = buf.toString();
 		ICompilationUnit cu3= pack1.createCompilationUnit("AnonymousNestedInInterface.java", buf.toString(), false, null);
 
+		String input4= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public enum SampleEnum {\n" //
+				+ "  VALUE1(\"1\"), VALUE2(\"2\");\n" //
+				+ "\n" //
+				+ "  private SampleEnum(String string) {}\n" //
+				+ "}\n";
+		ICompilationUnit cu4= pack1.createCompilationUnit("SampleEnum.java", input4, false, null);
+
+		String expected4= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public enum SampleEnum {\n" //
+				+ "  VALUE1(\"1\"), VALUE2(\"2\");\n" //
+				+ "\n" //
+				+ "  SampleEnum(String string) {}\n" //
+				+ "}\n";
+
 		// public modifier must not be removed from enum methods
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -13260,11 +13279,11 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("    public static void method () { }\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		ICompilationUnit cu4= pack1.createCompilationUnit("NestedEnum.java", buf.toString(), false, null);
+		ICompilationUnit cu5= pack1.createCompilationUnit("NestedEnum.java", buf.toString(), false, null);
 		// https://docs.oracle.com/javase/specs/jls/se8/html/jls-8.html#jls-8.9
 		// nested enum type is implicitly static
 		// Bug#538459 'public' modified must not be removed from static method in nested enum
-		String expected4 = buf.toString().replace("static enum", "enum");
+		String expected5 = buf.toString().replace("static enum", "enum");
 
 		// Bug#551038: final keyword must not be removed from method with varargs
 		buf= new StringBuffer();
@@ -13274,8 +13293,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("  public final void errorRemoveRedundantModifiers(final String... input) {\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		String expected5 = buf.toString();
-		ICompilationUnit cu5= pack1.createCompilationUnit("SafeVarargsExample.java", buf.toString(), false, null);
+		String expected6 = buf.toString();
+		ICompilationUnit cu6= pack1.createCompilationUnit("SafeVarargsExample.java", buf.toString(), false, null);
 
 		// Bug#553608: modifiers public static final must not be removed from inner enum within interface
 		buf= new StringBuffer();
@@ -13286,12 +13305,33 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("    public static final int B = 0;\n");
 		buf.append("  }\n");
 		buf.append("}\n");
-		String expected6 = buf.toString();
-		ICompilationUnit cu6= pack1.createCompilationUnit("NestedEnumExample.java", buf.toString(), false, null);
+		String expected7 = buf.toString();
+		ICompilationUnit cu7= pack1.createCompilationUnit("NestedEnumExample.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5, cu6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5, cu6, cu7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
 
+	}
+
+	@Test
+	public void testDoNotRemoveModifiers() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public enum SampleEnum {\n" //$NON-NLS-1$
+				+ "  VALUE1, VALUE2;\n" //$NON-NLS-1$
+				+ "\n" //
+				+ "  private void notAConstructor(String string) {}\n" //$NON-NLS-1$
+				+ "}\n"; //$NON-NLS-1$
+		ICompilationUnit cu= pack.createCompilationUnit("SampleEnum.java", sample, false, null);
+
+		// When
+		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
+
+		// Then
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
