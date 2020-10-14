@@ -144,4 +144,20 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 		addLocalVariables("String s;");
 		assertMethodBodyIncrementalCompletion("s.Su|", "s.sub|");
 	}
+
+	@Test
+	public void testBug567743_1() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
+		addLocalVariables("String unique_abc;");
+		assertMethodBodyIncrementalCompletion("unique_|", "unique_abc|");
+	}
+
+	@Test
+	public void testBug567743_2() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
+		addMembers("static String unique_abc;");
+		assertMethodBodyIncrementalCompletion("unique_|", "unique_abc|");
+	}
 }

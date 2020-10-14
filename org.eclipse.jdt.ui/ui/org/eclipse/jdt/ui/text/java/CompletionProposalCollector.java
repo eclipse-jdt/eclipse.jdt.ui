@@ -817,7 +817,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		Image image= getImage(fLabelProvider.createLocalImageDescriptor(proposal));
 		StyledString label= fLabelProvider.createSimpleLabelWithType(proposal);
 		int relevance= computeRelevance(proposal);
-		final JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance);
+		final JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance, false, getInvocationContext());
 		javaProposal.setTriggerCharacters(VAR_TRIGGER);
 		return javaProposal;
 	}
