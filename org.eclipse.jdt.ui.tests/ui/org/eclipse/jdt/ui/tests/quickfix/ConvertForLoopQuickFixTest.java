@@ -244,6 +244,111 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testCaptureList() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("import java.util.List;\n");
+		bld.append("\n");
+		bld.append("public class F {\n");
+		bld.append("    public void foo(List<?> wildcardList) {\n");
+		bld.append("        for (int j = 0; j < wildcardList.size(); j++) {\n");
+		bld.append("            Object element = wildcardList.get(j);\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("F.java", bld.toString(), false, null);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(bld, cu);
+		assertNotNull(fConvertLoopProposal);
+		assertCorrectLabels(proposals);
+		String preview1= getPreviewContent(fConvertLoopProposal);
+		bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("import java.util.List;\n");
+		bld.append("\n");
+		bld.append("public class F {\n");
+		bld.append("    public void foo(List<?> wildcardList) {\n");
+		bld.append("        for (Object element : wildcardList) {\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+		String expected= bld.toString();
+		assertEqualString(preview1, expected);
+	}
+
+	@Test
+	public void testWildcardList() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("import java.util.List;\n");
+		bld.append("\n");
+		bld.append("public class G {\n");
+		bld.append("    public void foo(List<? extends String> wildcardList) {\n");
+		bld.append("        for (int j = 0; j < wildcardList.size(); j++) {\n");
+		bld.append("            String element = wildcardList.get(j);\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("G.java", bld.toString(), false, null);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(bld, cu);
+		assertNotNull(fConvertLoopProposal);
+		assertCorrectLabels(proposals);
+		String preview1= getPreviewContent(fConvertLoopProposal);
+		bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("import java.util.List;\n");
+		bld.append("\n");
+		bld.append("public class G {\n");
+		bld.append("    public void foo(List<? extends String> wildcardList) {\n");
+		bld.append("        for (String element : wildcardList) {\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+		String expected= bld.toString();
+		assertEqualString(preview1, expected);
+	}
+
+	@Test
+	public void testUpperBoundList() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("import java.util.List;\n");
+		bld.append("\n");
+		bld.append("public class H {\n");
+		bld.append("    public void foo(List<? super String> wildcardList) {\n");
+		bld.append("        for (int j = 0; j < wildcardList.size(); j++) {\n");
+		bld.append("            Object element = wildcardList.get(j);\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("H.java", bld.toString(), false, null);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(bld, cu);
+		assertNotNull(fConvertLoopProposal);
+		assertCorrectLabels(proposals);
+		String preview1= getPreviewContent(fConvertLoopProposal);
+		bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("import java.util.List;\n");
+		bld.append("\n");
+		bld.append("public class H {\n");
+		bld.append("    public void foo(List<? super String> wildcardList) {\n");
+		bld.append("        for (Object element : wildcardList) {\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+		String expected= bld.toString();
+		assertEqualString(preview1, expected);
+	}
+
+	@Test
 	public void testNameDetectionChildren() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
