@@ -1128,7 +1128,7 @@ public class CleanUpConstants {
 	public static final String INSERT_INFERRED_TYPE_ARGUMENTS= "cleanup.insert_inferred_type_arguments"; //$NON-NLS-1$
 
 	/**
-	 * Removes redundant type arguments from class instance creations and creates a diamond.<br>
+	 * Removes redundant type arguments from class instance creations and creates a diamond operator.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
 	 * <br>
