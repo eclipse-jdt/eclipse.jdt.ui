@@ -61,6 +61,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
+		options.setOption(ATOMIC_OBJECT, CleanUpOptions.FALSE);
 
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
@@ -183,6 +184,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
+		options.setOption(ATOMIC_OBJECT, CleanUpOptions.FALSE);
 
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 

@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AddOrRemoveAllCleanUp;
+import org.eclipse.jdt.internal.ui.fix.AtomicObjectCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
@@ -44,8 +45,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new ConvertLoopCleanUp(values),
 				new AddOrRemoveAllCleanUp(values),
 				new ExpressionsCleanUp(values),
-				new NumberSuffixCleanUp(values),
 				new BitwiseConditionalExpressionCleanup(values),
+				new AtomicObjectCleanUp(values),
+				new NumberSuffixCleanUp(values),
 				new VariableDeclarationCleanUp(values),
 				new VarCleanUp(values),
 				new LambdaExpressionsCleanUp(values),
@@ -89,6 +91,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference bitwiseComparison= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_CheckSignOfBitwiseOperation, CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(bitwiseComparison);
+
+		final CheckboxPreference atomicObject= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_AtomicObject, CleanUpConstants.ATOMIC_OBJECT, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(atomicObject);
 
 		Group numberSuffixGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_NumberLiteral);
 

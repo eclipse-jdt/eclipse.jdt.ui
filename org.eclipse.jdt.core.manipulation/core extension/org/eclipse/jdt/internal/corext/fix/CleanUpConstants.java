@@ -1508,6 +1508,18 @@ public class CleanUpConstants {
 	public static final String ADD_MISSING_SERIAL_VERSION_ID_DEFAULT= "cleanup.add_default_serial_version_id"; //$NON-NLS-1$
 
 	/**
+	 * Replace an array with one index by an atomic object.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String ATOMIC_OBJECT= "cleanup.atomic_object"; //$NON-NLS-1$
+
+	/**
 	 * Controls whether long literal suffix should be rewritten in uppercase.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
