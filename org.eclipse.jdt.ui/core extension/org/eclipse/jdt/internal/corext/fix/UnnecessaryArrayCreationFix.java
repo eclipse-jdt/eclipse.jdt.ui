@@ -102,7 +102,8 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 					&& arguments.get(arguments.size() - 1) == node
 					&& binding != null
 					&& binding.isVarargs()
-					&& binding.getParameterTypes().length == arguments.size();
+					&& binding.getParameterTypes().length == arguments.size()
+					&& binding.getParameterTypes()[arguments.size() - 1].getDimensions() == 1;
 		}
 
 		private boolean hasEquivalentMethod(ArrayCreation node, List<Expression> arguments, IMethodBinding binding) {
