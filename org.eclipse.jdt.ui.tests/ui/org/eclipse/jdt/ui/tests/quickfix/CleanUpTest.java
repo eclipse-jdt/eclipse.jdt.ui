@@ -11365,6 +11365,456 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testBreakLoop() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int[] innerArray = new int[10];\n" //
+				+ "\n" //
+				+ "    public String addBreak(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakInForeachLoop(int[] array) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i : array) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakWithField() {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < this.innerArray.length; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakWithoutBlock(int[] array) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i : array) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i == 42)\n" //
+				+ "                isFound = true;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakAfterSeveralAssignments(String[] array, boolean isFound, int count) {\n" //
+				+ "        for (String text : array) {\n" //
+				+ "            if (text == null) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "                count = 1;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isFound) {\n" //
+				+ "            return \"We have found \" + count + \" result(s)\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"The result has not been found\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakAfterComplexAssignment(int[] array) {\n" //
+				+ "        int hourNumber = 0;\n" //
+				+ "\n" //
+				+ "        for (int dayNumber : array) {\n" //
+				+ "            if (dayNumber == 7) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                hourNumber = 7 * 24;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return \"Hour number: \" + hourNumber;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakWithTemporaryVariable(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            int temporaryInteger = i * 3;\n" //
+				+ "\n" //
+				+ "            if (temporaryInteger == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean[] addBreakWithFixedAssignment(int number, int index) {\n" //
+				+ "        boolean[] isFound = new boolean[number];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound[index] = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakWithUpdatedIterator(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i++ == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.BREAK_LOOP);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int[] innerArray = new int[10];\n" //
+				+ "\n" //
+				+ "    public String addBreak(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakInForeachLoop(int[] array) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i : array) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakWithField() {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < this.innerArray.length; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakWithoutBlock(int[] array) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i : array) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                isFound = true;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakAfterSeveralAssignments(String[] array, boolean isFound, int count) {\n" //
+				+ "        for (String text : array) {\n" //
+				+ "            if (text == null) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "                count = 1;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isFound) {\n" //
+				+ "            return \"We have found \" + count + \" result(s)\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"The result has not been found\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakAfterComplexAssignment(int[] array) {\n" //
+				+ "        int hourNumber = 0;\n" //
+				+ "\n" //
+				+ "        for (int dayNumber : array) {\n" //
+				+ "            if (dayNumber == 7) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                hourNumber = 7 * 24;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return \"Hour number: \" + hourNumber;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakWithTemporaryVariable(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            int temporaryInteger = i * 3;\n" //
+				+ "\n" //
+				+ "            if (temporaryInteger == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean[] addBreakWithFixedAssignment(int number, int index) {\n" //
+				+ "        boolean[] isFound = new boolean[number];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound[index] = true;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String addBreakWithUpdatedIterator(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i++ == 42) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                isFound = true;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : \"The result has not been found\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", input, output);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.BreakLoopCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotBreakLoop() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int crazyInteger = 0;\n" //
+				+ "\n" //
+				+ "    public String doNotBreakWithoutAssignment(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        return isFound ? \"The result has been found\" : (\"The result has not been found\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotBreakWithExternalIterator(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "        int i;\n" //
+				+ "        for (i = 0; i < number; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        return isFound ? \"The result has been found\" : (\"The result has not been found on \" + i + \" iteration(s)\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotBreakWithActiveConditions(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "        for (int i = 0; i < number--; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : (\"The result has not been found on \" + number + \" iteration(s)\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean[] doNotBreakWithChangingAssignment(int number) {\n" //
+				+ "        boolean[] hasNumber42 = new boolean[number];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                hasNumber42[i] = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return hasNumber42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] doNotBreakForeachLoopWithChangingAssignment(int[] input, int[] output) {\n" //
+				+ "        for (int i : input) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                output[i] = 123456;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean[] doNotBreakWithActiveAssignment(int number, int index) {\n" //
+				+ "        boolean[] isFound = new boolean[number];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                isFound[index++] = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotBreakWithActiveUpdater(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < number; i++, number--) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? \"The result has been found\" : (\"The result has not been found on \" + number + \" iteration(s)\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotBreakWithSeveralConditions(int[] array) {\n" //
+				+ "        int tenFactor = 0;\n" //
+				+ "\n" //
+				+ "        for (int i : array) {\n" //
+				+ "            if (i == 10) {\n" //
+				+ "                tenFactor = 1;\n" //
+				+ "            }\n" //
+				+ "            if (i == 100) {\n" //
+				+ "                tenFactor = 2;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return \"The result: \" + tenFactor;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotBreakWithActiveCondition(int[] array, int modifiedInteger) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "\n" //
+				+ "        for (int i : array) {\n" //
+				+ "            if (i == modifiedInteger++) {\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return isFound ? 0 : modifiedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotBreakWithActiveAssignment(int[] array, int modifiedInteger) {\n" //
+				+ "        int result = 0;\n" //
+				+ "\n" //
+				+ "        for (int i : array) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                result = modifiedInteger++;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return result;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotBreakWithVariableAssignment(int[] array) {\n" //
+				+ "        int result = 0;\n" //
+				+ "\n" //
+				+ "        new Thread() {\n" //
+				+ "            @Override\n" //
+				+ "            public void run() {\n" //
+				+ "                while (crazyInteger++ < 10000) {}\n" //
+				+ "            }\n" //
+				+ "        }.start();\n" //
+				+ "\n" //
+				+ "        for (int i : array) {\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                result = crazyInteger;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return result;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithSpecialAssignment(int[] array) {\n" //
+				+ "        int tenFactor = 0;\n" //
+				+ "\n" //
+				+ "        for (int i : array) {\n" //
+				+ "            if (i == 10) {\n" //
+				+ "                tenFactor += 1;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return \"The result: \" + tenFactor;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakInfiniteLoop(int[] array) {\n" //
+				+ "        int tenFactor = 0;\n" //
+				+ "\n" //
+				+ "        for (;;) {\n" //
+				+ "            if (crazyInteger == 10) {\n" //
+				+ "                tenFactor = 1;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.BREAK_LOOP);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRegExPrecompilationInLambda() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

@@ -121,6 +121,7 @@ public class MultiFixMessages extends NLS {
 	public static String NullAnnotationsCleanUp_add_nonnullbydefault_annotation;
 	public static String NullAnnotationsCleanUp_remove_redundant_nullness_annotation;
 
+	public static String BreakLoopCleanUp_description;
 	public static String CodeStyleCleanUp_LazyLogical_description;
 	public static String PrimitiveSerializationCleanUp_description;
 

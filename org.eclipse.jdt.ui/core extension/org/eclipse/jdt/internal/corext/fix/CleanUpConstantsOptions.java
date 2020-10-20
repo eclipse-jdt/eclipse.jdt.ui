@@ -82,6 +82,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
 
 		// Optimization
+		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
 
@@ -210,6 +211,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
 
 		// Optimization
+		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
 

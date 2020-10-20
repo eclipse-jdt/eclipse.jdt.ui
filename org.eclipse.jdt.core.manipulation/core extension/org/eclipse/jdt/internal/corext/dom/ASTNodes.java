@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -801,6 +802,24 @@ public class ASTNodes {
 		return parentType == ASTNode.LABELED_STATEMENT ||
 				(parentType == ASTNode.BREAK_STATEMENT && name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) ||
 				parentType != ASTNode.CONTINUE_STATEMENT;
+	}
+
+	/**
+	 * Return the identifiers of variables declared inside the given statement.
+	 *
+	 * @param node               The node to visit
+	 * @param includeInnerScopes True if blocks are visited too.
+	 *
+	 * @return The ids of the declared variables.
+	 */
+	public static Set<SimpleName> getLocalVariableIdentifiers(final ASTNode node, final boolean includeInnerScopes) {
+		if (node == null) {
+			return Collections.emptySet();
+		}
+
+		VarDeclarationIdentifierVisitor visitor= new VarDeclarationIdentifierVisitor(node, includeInnerScopes);
+		node.accept(visitor);
+		return visitor.getVariableNames();
 	}
 
 	/**
