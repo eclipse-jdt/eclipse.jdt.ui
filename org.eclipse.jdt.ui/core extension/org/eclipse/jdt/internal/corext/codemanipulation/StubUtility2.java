@@ -115,7 +115,7 @@ public final class StubUtility2 {
 		int modifiers= binding.getModifiers();
 		ITypeBinding declaringType= binding.getDeclaringClass();
 		ITypeBinding typeObject= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is18OrHigher(javaProject))) {
+		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is1d8OrHigher(javaProject))) {
 			// generate a method body
 
 			Map<String, String> options= FormatterProfileManager.getProjectSettings(javaProject);

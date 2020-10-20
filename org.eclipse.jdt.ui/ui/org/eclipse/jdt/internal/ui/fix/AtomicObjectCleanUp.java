@@ -320,7 +320,7 @@ public class AtomicObjectCleanUp extends AbstractMultiFix {
 			if (objectClass != null) {
 				ParameterizedType newParameterizedType= ast.newParameterizedType(atomicInstance);
 
-				if (!JavaModelUtil.is17OrHigher(((CompilationUnit) type.getRoot()).getJavaElement().getJavaProject())) {
+				if (!JavaModelUtil.is1d7OrHigher(((CompilationUnit) type.getRoot()).getJavaElement().getJavaProject())) {
 					newParameterizedType.typeArguments().add(rewrite.createCopyTarget(objectClass));
 				}
 

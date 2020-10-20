@@ -107,7 +107,7 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.USE_OBJECTS_EQUALS) || !JavaModelUtil.is17OrHigher(unit.getJavaElement().getJavaProject())) {
+		if (!isEnabled(CleanUpConstants.USE_OBJECTS_EQUALS) || !JavaModelUtil.is1d7OrHigher(unit.getJavaElement().getJavaProject())) {
 			return null;
 		}
 

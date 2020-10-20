@@ -35,7 +35,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	public static LambdaExpressionsFix createConvertToLambdaFix(ClassInstanceCreation cic) {
 		CompilationUnit root= (CompilationUnit) cic.getRoot();
-		if (!JavaModelUtil.is18OrHigher(root.getJavaElement().getJavaProject()))
+		if (!JavaModelUtil.is1d8OrHigher(root.getJavaElement().getJavaProject()))
 			return null;
 
 		if (!LambdaExpressionsFixCore.isFunctionalAnonymous(cic))
@@ -63,7 +63,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean useLambda, boolean useAnonymous) {
-		if (!JavaModelUtil.is18OrHigher(compilationUnit.getJavaElement().getJavaProject()))
+		if (!JavaModelUtil.is1d8OrHigher(compilationUnit.getJavaElement().getJavaProject()))
 			return null;
 
 		if (useLambda) {

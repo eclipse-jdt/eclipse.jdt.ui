@@ -127,7 +127,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.MODERNIZE_HASH) || !JavaModelUtil.is17OrHigher(unit.getJavaElement().getJavaProject())) {
+		if (!isEnabled(CleanUpConstants.MODERNIZE_HASH) || !JavaModelUtil.is1d7OrHigher(unit.getJavaElement().getJavaProject())) {
 			return null;
 		}
 

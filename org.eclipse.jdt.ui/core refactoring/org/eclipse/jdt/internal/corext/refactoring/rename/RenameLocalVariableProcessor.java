@@ -233,7 +233,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				&& !Checks.isDeclaredIn(fTempDeclarationNode, Initializer.class)
 				&& !Checks.isDeclaredIn(fTempDeclarationNode, LambdaExpression.class)
 				&& !Checks.isDeclaredIn(fTempDeclarationNode, RecordDeclaration.class)) {
-			if (JavaModelUtil.is18OrHigher(fCu.getJavaProject()))
+			if (JavaModelUtil.is1d8OrHigher(fCu.getJavaProject()))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_only_in_methods_initializers_and_lambda);
 
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_only_in_methods_and_initializers);

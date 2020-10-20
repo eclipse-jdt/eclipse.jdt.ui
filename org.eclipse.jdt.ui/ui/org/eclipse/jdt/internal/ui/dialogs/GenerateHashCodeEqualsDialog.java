@@ -203,7 +203,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 
 		button= new Button(composite, SWT.CHECK);
 		button.setText(JavaUIMessages.GenerateHashCodeEqualsDialog_j7hashequals_button);
-		if (JavaModelUtil.is17OrHigher(this.fProject)) {
+		if (JavaModelUtil.is1d7OrHigher(this.fProject)) {
 			button.addSelectionListener(new SelectionAdapter() {
 
 				@Override

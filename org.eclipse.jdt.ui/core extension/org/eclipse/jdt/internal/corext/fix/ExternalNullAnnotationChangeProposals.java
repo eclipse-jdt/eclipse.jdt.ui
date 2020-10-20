@@ -470,7 +470,7 @@ public class ExternalNullAnnotationChangeProposals {
 			rendererNullable.addDimension(i == outerExtraDims);
 			rendererRemove.addDimension(i == outerExtraDims);
 		}
-		boolean useJava8= JavaModelUtil.is18OrHigher(javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
+		boolean useJava8= JavaModelUtil.is1d8OrHigher(javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
 		if (!useJava8 && (outer != inner || outerExtraDims > 0)) { // below 1.8 we can only annotate the top type (not type parameter)
 			// still need to handle ParameterizedType (outer) with SimpleType (inner)
 			if ((outer.getNodeType() != ASTNode.PARAMETERIZED_TYPE)

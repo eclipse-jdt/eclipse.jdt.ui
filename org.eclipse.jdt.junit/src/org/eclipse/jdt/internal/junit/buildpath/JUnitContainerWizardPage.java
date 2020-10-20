@@ -198,7 +198,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 				status.setWarning(JUnitMessages.JUnitContainerWizardPage_warning_java5_required);
 			}
 		} else if (JUnitCore.JUNIT5_CONTAINER_PATH.equals(containerPath)) {
-			if (fProject != null && !JavaModelUtil.is18OrHigher(fProject)) {
+			if (fProject != null && !JavaModelUtil.is1d8OrHigher(fProject)) {
 				status.setWarning(JUnitMessages.JUnitContainerWizardPage_warning_java8_required);
 			}
 		}

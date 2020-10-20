@@ -12144,7 +12144,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testConvertLambdaToAnonymous() throws Exception {
-		assertFalse("error should not appear in 1.8 or higher", JavaModelUtil.is18OrHigher(fJProject1));
+		assertFalse("error should not appear in 1.8 or higher", JavaModelUtil.is1d8OrHigher(fJProject1));
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();

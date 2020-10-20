@@ -89,7 +89,7 @@ public class SurroundWithTryWithResourcesAction extends SelectionDispatchAction 
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
 			return;
 
-		if (!JavaModelUtil.is18OrHigher(cu.getJavaProject())) {
+		if (!JavaModelUtil.is1d8OrHigher(cu.getJavaProject())) {
 			String message= Messages.format(RefactoringMessages.SurroundWithTryResourcesAction_not18, BasicElementLabels.getJavaElementName(cu.getJavaProject().getElementName()));
 			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), getDialogTitle(), message);
 			return;

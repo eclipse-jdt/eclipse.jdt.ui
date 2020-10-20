@@ -352,7 +352,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			if (target.isAnnotation())
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_create_in_annotation);
 			if (target.isInterface()
-					&& (!JavaModelUtil.is18OrHigher(target.getJavaProject()) || !JavaModelUtil.is18OrHigher(getProject())))
+					&& (!JavaModelUtil.is1d8OrHigher(target.getJavaProject()) || !JavaModelUtil.is1d8OrHigher(getProject())))
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_create_on_interface);
 		} catch (JavaModelException e) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_unable_determine_declaring_type);

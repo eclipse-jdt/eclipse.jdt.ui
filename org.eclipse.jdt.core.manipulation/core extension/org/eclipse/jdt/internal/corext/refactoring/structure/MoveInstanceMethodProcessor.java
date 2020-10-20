@@ -1647,7 +1647,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		if (!binding.isInterface() || binding.isAnnotation())
 			return false;
 		IJavaElement javaElement= binding.getJavaElement();
-		return javaElement != null && JavaModelUtil.is18OrHigher(javaElement.getJavaProject());
+		return javaElement != null && JavaModelUtil.is1d8OrHigher(javaElement.getJavaProject());
 	}
 
 	/**

@@ -213,7 +213,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	boolean isValidDestination(ASTNode node) {
 		boolean isInterface= node instanceof TypeDeclaration && ((TypeDeclaration) node).isInterface();
 		return !(node instanceof AnnotationTypeDeclaration) &&
-				(!isInterface || JavaModelUtil.is18OrHigher(fCUnit.getJavaProject()));
+				(!isInterface || JavaModelUtil.is1d8OrHigher(fCUnit.getJavaProject()));
 	}
 
 	public RefactoringStatus checkInitialConditions(ImportRewrite rewriter) {

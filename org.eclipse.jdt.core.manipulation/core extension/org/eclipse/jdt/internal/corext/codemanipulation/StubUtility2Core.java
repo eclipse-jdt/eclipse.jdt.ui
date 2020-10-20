@@ -348,7 +348,7 @@ public final class StubUtility2Core {
 		int modifiers= binding.getModifiers();
 		ITypeBinding declaringType= binding.getDeclaringClass();
 		ITypeBinding typeObject= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is18OrHigher(javaProject))) {
+		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is1d8OrHigher(javaProject))) {
 			// generate a method body
 
 			Map<String, String> options= javaProject.getOptions(true);
@@ -614,7 +614,7 @@ public final class StubUtility2Core {
 		int modifiers= method.getModifiers();
 		if (inInterface) {
 			modifiers= modifiers & ~Modifier.PROTECTED & ~Modifier.PUBLIC;
-			if (Modifier.isAbstract(modifiers) && JavaModelUtil.is18OrHigher(javaProject)) {
+			if (Modifier.isAbstract(modifiers) && JavaModelUtil.is1d8OrHigher(javaProject)) {
 				modifiers= modifiers | Modifier.DEFAULT;
 			}
 		} else {

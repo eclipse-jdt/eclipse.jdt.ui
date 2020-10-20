@@ -125,7 +125,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF) || !JavaModelUtil.is18OrHigher(unit.getJavaElement().getJavaProject())) {
+		if (!isEnabled(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF) || !JavaModelUtil.is1d8OrHigher(unit.getJavaElement().getJavaProject())) {
 			return null;
 		}
 

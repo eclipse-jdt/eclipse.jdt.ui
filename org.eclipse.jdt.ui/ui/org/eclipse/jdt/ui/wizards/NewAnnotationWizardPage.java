@@ -451,7 +451,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 
 		@Override
 		protected void updateAvailableButtons() {
-			boolean isJava8orHigher= JavaModelUtil.is18OrHigher(fJavaProject);
+			boolean isJava8orHigher= JavaModelUtil.is1d8OrHigher(fJavaProject);
 			for (int index : fEnumValuesSinceJava8) {
 				fEnumButtons.enableSelectionButton(index, isJava8orHigher);
 			}

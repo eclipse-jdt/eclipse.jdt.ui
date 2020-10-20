@@ -190,7 +190,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		IJavaElement[] elements= new IJavaElement[] { proj };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
-		int elementKinds= JavaModelUtil.is18OrHigher(proj) ? IJavaSearchConstants.CLASS_AND_INTERFACE : IJavaSearchConstants.CLASS;
+		int elementKinds= JavaModelUtil.is1d8OrHigher(proj) ? IJavaSearchConstants.CLASS_AND_INTERFACE : IJavaSearchConstants.CLASS;
 		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false, getWizard().getContainer(), scope, elementKinds);
 
 		dialog.setTitle(RefactoringMessages.IntroduceIndirectionInputPage_dialog_choose_declaring_class);

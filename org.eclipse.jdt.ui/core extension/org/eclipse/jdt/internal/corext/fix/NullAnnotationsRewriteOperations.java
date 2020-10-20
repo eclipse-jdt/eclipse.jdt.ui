@@ -415,7 +415,7 @@ public class NullAnnotationsRewriteOperations {
 
 		private boolean usesNullTypeAnnotations(IJavaElement cu, String annotationName) {
 			IJavaProject project= (IJavaProject) cu.getAncestor(IJavaElement.JAVA_PROJECT);
-			if (!JavaModelUtil.is18OrHigher(project)) {
+			if (!JavaModelUtil.is1d8OrHigher(project)) {
 				return false;
 			}
 			try {

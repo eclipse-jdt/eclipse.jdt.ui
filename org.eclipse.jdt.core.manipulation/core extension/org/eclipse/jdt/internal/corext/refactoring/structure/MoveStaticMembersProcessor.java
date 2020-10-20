@@ -482,7 +482,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	private RefactoringStatus checkMoveToInterface() throws JavaModelException {
 		//could be more clever and make field final if it is only written once...
-		boolean is18OrHigher= JavaModelUtil.is18OrHigher(fDestinationType.getJavaProject());
+		boolean is18OrHigher= JavaModelUtil.is1d8OrHigher(fDestinationType.getJavaProject());
 		RefactoringStatus result= new RefactoringStatus();
 		boolean declaringIsInterface= getDeclaringType().isInterface();
 		if (declaringIsInterface && is18OrHigher)

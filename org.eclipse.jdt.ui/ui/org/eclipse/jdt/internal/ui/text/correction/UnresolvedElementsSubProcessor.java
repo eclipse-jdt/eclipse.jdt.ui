@@ -204,7 +204,7 @@ public class UnresolvedElementsSubProcessor {
 				if (locationInParent == ExpressionMethodReference.EXPRESSION_PROPERTY) {
 					typeKind= TypeKinds.REF_TYPES;
 				} else if (locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {
-					if (JavaModelUtil.is18OrHigher(cu.getJavaProject())) {
+					if (JavaModelUtil.is1d8OrHigher(cu.getJavaProject())) {
 						typeKind= TypeKinds.CLASSES | TypeKinds.INTERFACES | TypeKinds.ENUMS;
 					} else {
 						typeKind= TypeKinds.CLASSES;
@@ -755,7 +755,7 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		if (javaProject.findType(defaultOptions.get(annotationNameOptions[0])) != null)
 			return;
-		String version= JavaModelUtil.is18OrHigher(javaProject) ? "2" : "[1.1.0,2.0.0)"; //$NON-NLS-1$ //$NON-NLS-2$
+		String version= JavaModelUtil.is1d8OrHigher(javaProject) ? "2" : "[1.1.0,2.0.0)"; //$NON-NLS-1$ //$NON-NLS-2$
 		Bundle[] annotationsBundles= JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", version); //$NON-NLS-1$
 		if (annotationsBundles == null)
 			return;
@@ -1338,7 +1338,7 @@ public class UnresolvedElementsSubProcessor {
 				ITypeBinding[] parameterTypes= getParameterTypes(arguments);
 				if (parameterTypes != null) {
 					String sig= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature(methodName, parameterTypes, false);
-					boolean is18OrHigher= JavaModelUtil.is18OrHigher(targetCU.getJavaProject());
+					boolean is18OrHigher= JavaModelUtil.is1d8OrHigher(targetCU.getJavaProject());
 					boolean isSenderTypeAbstractClass = (senderDeclBinding.getModifiers() &  Modifier.ABSTRACT) > 0;
 					boolean isSenderBindingInterface= senderDeclBinding.isInterface();
 					if (nodeParentType == senderDeclBinding) {

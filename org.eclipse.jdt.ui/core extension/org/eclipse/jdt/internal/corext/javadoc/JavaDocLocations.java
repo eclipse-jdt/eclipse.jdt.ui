@@ -410,7 +410,7 @@ public class JavaDocLocations {
 		 * This breaks all clients that directly create such URLs.
 		 * We can't know what format is required, so we just guess by the project's compiler compliance.
 		 */
-		boolean is18OrHigher= JavaModelUtil.is18OrHigher(meth.getJavaProject());
+		boolean is18OrHigher= JavaModelUtil.is1d8OrHigher(meth.getJavaProject());
 		buf.append(is18OrHigher ? '-' : '(');
 		String[] params= meth.getParameterTypes();
 		IType declaringType= meth.getDeclaringType();

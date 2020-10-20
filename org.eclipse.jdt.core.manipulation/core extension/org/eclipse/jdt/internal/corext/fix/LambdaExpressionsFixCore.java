@@ -897,7 +897,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 
 	public static LambdaExpressionsFixCore createConvertToLambdaFix(ClassInstanceCreation cic) {
 		CompilationUnit root= (CompilationUnit) cic.getRoot();
-		if (!JavaModelUtil.is18OrHigher(root.getJavaElement().getJavaProject())) {
+		if (!JavaModelUtil.is1d8OrHigher(root.getJavaElement().getJavaProject())) {
 			return null;
 		}
 
@@ -928,7 +928,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 	}
 
 	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean useLambda, boolean useAnonymous) {
-		if (!JavaModelUtil.is18OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+		if (!JavaModelUtil.is1d8OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
 			return null;
 		}
 

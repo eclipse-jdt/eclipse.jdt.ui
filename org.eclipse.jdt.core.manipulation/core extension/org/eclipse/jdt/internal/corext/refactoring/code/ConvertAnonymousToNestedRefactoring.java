@@ -851,7 +851,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private boolean isBindingToTemp(IVariableBinding variable) {
 		if (variable.isField())
 			return false;
-		if (!Modifier.isFinal(variable.getModifiers()) && !JavaModelUtil.is18OrHigher(fCu.getJavaProject()))
+		if (!Modifier.isFinal(variable.getModifiers()) && !JavaModelUtil.is1d8OrHigher(fCu.getJavaProject()))
 			return false;
 		ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(variable);
 		if (declaringNode == null)

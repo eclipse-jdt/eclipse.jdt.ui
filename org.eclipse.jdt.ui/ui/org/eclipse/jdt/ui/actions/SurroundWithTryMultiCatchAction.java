@@ -58,7 +58,7 @@ public class SurroundWithTryMultiCatchAction extends SurroundWithTryCatchAction 
 	public void run(ITextSelection selection) {
 		ICompilationUnit compilationUnit= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		IJavaProject javaProject= compilationUnit.getJavaProject();
-		if (!JavaModelUtil.is17OrHigher(javaProject)) {
+		if (!JavaModelUtil.is1d7OrHigher(javaProject)) {
 			String message= Messages.format(RefactoringMessages.SurroundWithTryMultiCatchAction_not17, BasicElementLabels.getJavaElementName(javaProject.getElementName()));
 			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), getDialogTitle(), message);
 			return;
@@ -83,7 +83,7 @@ public class SurroundWithTryMultiCatchAction extends SurroundWithTryCatchAction 
 
 		ICompilationUnit compilationUnit= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		IJavaProject javaProject= compilationUnit.getJavaProject();
-		return JavaModelUtil.is17OrHigher(javaProject);
+		return JavaModelUtil.is1d7OrHigher(javaProject);
 	}
 
 }

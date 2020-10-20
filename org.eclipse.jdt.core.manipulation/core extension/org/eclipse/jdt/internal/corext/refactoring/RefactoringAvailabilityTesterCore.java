@@ -84,7 +84,7 @@ public final class RefactoringAvailabilityTesterCore  {
 		if (!Checks.isAvailable(member))
 			return false;
 		if (type == IJavaElement.METHOD && declaring.isInterface()) {
-			boolean is18OrHigher= JavaModelUtil.is18OrHigher(member.getJavaProject());
+			boolean is18OrHigher= JavaModelUtil.is1d8OrHigher(member.getJavaProject());
 			if (!is18OrHigher || !Flags.isStatic(member.getFlags()))
 				return false;
 		}

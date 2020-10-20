@@ -272,7 +272,7 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 		}
 
-		if (JavaModelUtil.is17OrHigher(cu.getJavaProject())) {
+		if (JavaModelUtil.is1d7OrHigher(cu.getJavaProject())) {
 			refactoring= SurroundWithTryCatchRefactoring.create(cu, offset, length, true);
 			if (refactoring == null)
 				return;
@@ -313,7 +313,7 @@ public class LocalCorrectionsSubProcessor {
 		if (surroundingTry != null && (ASTNodes.isParent(selectedNode, surroundingTry.getBody()) || selectedNode.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY)) {
 			addAdditionalCatchProposal(context, proposals, cu, selectedNode, offset, length, decl, uncaughtExceptions, surroundingTry, ast);
 
-			if (JavaModelUtil.is17OrHigher(cu.getJavaProject())) {
+			if (JavaModelUtil.is1d7OrHigher(cu.getJavaProject())) {
 				List<CatchClause> catchClauses= surroundingTry.catchClauses();
 				List<ITypeBinding> filteredExceptions= SurroundWithTryCatchRefactoring.filterSubtypeExceptions(uncaughtExceptions);
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
@@ -1714,7 +1714,7 @@ public class LocalCorrectionsSubProcessor {
 						ASTNode parent= selectedNode.getParent();
 						ICompilationUnit cu= context.getCompilationUnit();
 						// add explicit type arguments if necessary (for 1.8 and later, we're optimistic that inference just works):
-						if (Invocations.isInvocationWithArguments(parent) && !JavaModelUtil.is18OrHigher(cu.getJavaProject())) {
+						if (Invocations.isInvocationWithArguments(parent) && !JavaModelUtil.is1d8OrHigher(cu.getJavaProject())) {
 							IMethodBinding methodBinding= Invocations.resolveBinding(parent);
 							if (methodBinding != null) {
 								ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();

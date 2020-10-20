@@ -126,7 +126,7 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.JOIN) || !JavaModelUtil.is18OrHigher(unit.getJavaElement().getJavaProject())) {
+		if (!isEnabled(CleanUpConstants.JOIN) || !JavaModelUtil.is1d8OrHigher(unit.getJavaElement().getJavaProject())) {
 			return null;
 		}
 

@@ -1871,7 +1871,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				castException.setExpression(elseCopy);
 				elseCopy= castException;
 			}
-		} else if (JavaModelUtil.is17OrHigher(project)) {
+		} else if (JavaModelUtil.is1d7OrHigher(project)) {
 			addExplicitTypeArgumentsIfNecessary(rewrite, proposal, thenExpression);
 			addExplicitTypeArgumentsIfNecessary(rewrite, proposal, elseExpression);
 		}
@@ -2671,7 +2671,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						ITypeBinding leftBinding= leftOperand.resolveTypeBinding();
 						if (leftBinding != null) {
 							if (leftBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
-								if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
+								if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
 									return false;
 							} else if (!leftBinding.isEnum()) {
 								return false;
@@ -2685,7 +2685,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						ITypeBinding rightBinding= leftOperand.resolveTypeBinding();
 						if (rightBinding != null) {
 							if (rightBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
-								if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
+								if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
 									return false;
 							} else if (!rightBinding.isEnum()) {
 								return false;

@@ -2244,7 +2244,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					castException.setExpression(elseCopy);
 					elseCopy= castException;
 				}
-			} else if (JavaModelUtil.is17OrHigher(project)) {
+			} else if (JavaModelUtil.is1d7OrHigher(project)) {
 				addExplicitTypeArgumentsIfNecessary(rewrite, proposal, thenExpression);
 				addExplicitTypeArgumentsIfNecessary(rewrite, proposal, elseExpression);
 			}
@@ -2880,7 +2880,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getConvertToMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
+		if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
 			return false;
 
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(covering, ASTNode.CATCH_CLAUSE);
@@ -2969,7 +2969,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getUnrollMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is17OrHigher(context.getCompilationUnit().getJavaProject()))
+		if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
 			return false;
 
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(covering, ASTNode.CATCH_CLAUSE);
