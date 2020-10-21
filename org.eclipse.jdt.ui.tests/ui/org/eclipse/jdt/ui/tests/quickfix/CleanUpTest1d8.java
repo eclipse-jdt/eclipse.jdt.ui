@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertNotEquals;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -1951,6 +1953,451 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return concatenation.toString();\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReassignment(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation = concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation = concatenation.append(text);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Runnable refactorFinalConcatenation(String[] names) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        final StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < names.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(names[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        Runnable supplier= new Runnable() {\n" //
+				+ "            @Override\n" //
+				+ "            public void run() {\n" //
+				+ "                System.out.println(concatenation.toString());\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "        return supplier;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithChar(String[] titles) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String title : titles) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(',');\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(title);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithHardCodedDelimiter(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation = concatenation.append(\" \" + 1);\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithBuilderFirst(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithStringBuffer(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuffer concatenation = new StringBuffer();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithBooleanObject(String[] texts) {\n" //
+				+ "        Boolean isFirst = Boolean.TRUE;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = Boolean.FALSE;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation = concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithNegatedBoolean(String[] texts) {\n" //
+				+ "        Boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (!isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            } else {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithReversedBoolean(String[] texts) {\n" //
+				+ "        boolean isVisited = Boolean.FALSE;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isVisited) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            } else {\n" //
+				+ "                isVisited = Boolean.TRUE;\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithLotsOfMethods(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        System.out.println(concatenation.charAt(0));\n" //
+				+ "        System.out.println(concatenation.chars());\n" //
+				+ "        System.out.println(concatenation.codePoints());\n" //
+				+ "        System.out.println(concatenation.indexOf(\"foo\", 0));\n" //
+				+ "        System.out.println(concatenation.lastIndexOf(\"foo\"));\n" //
+				+ "        System.out.println(concatenation.lastIndexOf(\"foo\", 0));\n" //
+				+ "        System.out.println(concatenation.length());\n" //
+				+ "        System.out.println(concatenation.subSequence(0, 0));\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationOnForeach(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithConditionOnIndex(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (i > 0) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithInequalityOnIndex(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (i != 0) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithReversedConditionOnIndex(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (0 < i) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithGreaterOrEqualsOnIndex(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (i >= 1) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithDelimiterAtTheEnd(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "            if (i < texts.length - 1) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithMirroredCondition(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "            if (texts.length - 1 > i) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithNotEqualsCondition(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "            if (i < texts.length - 1) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithLessOrEqualsCondition(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "            if (i <= texts.length - 2) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingLength(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (concatenation.length() > 0) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingNotEmpty(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (concatenation.length() != 0) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingGreaterOrEqualsOne(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (concatenation.length() >= 1) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingLengthMirrored(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (0 < concatenation.length()) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingNotEmptyMirrored(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (0 != concatenation.length()) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingGreaterOrEqualsOneMirrored(String[] texts) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (1 <= concatenation.length()) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantBooleanShift(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (!isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            isFirst = false;\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorWithBooleanShiftAtTheEnd(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (!isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "            isFirst = false;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorWithReversedBooleanShift(String[] texts) {\n" //
+				+ "        boolean isNotFirst = false;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isNotFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "            isNotFirst = true;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
 
@@ -1971,7 +2418,275 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return concatenation;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorReassignment(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Runnable refactorFinalConcatenation(String[] names) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final String concatenation = String.join(\", \", names);\n" //
+				+ "\n" //
+				+ "        Runnable supplier= new Runnable() {\n" //
+				+ "            @Override\n" //
+				+ "            public void run() {\n" //
+				+ "                System.out.println(concatenation);\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "        return supplier;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithChar(String[] titles) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(String.valueOf(','), titles);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithHardCodedDelimiter(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\" \" + 1, texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithBuilderFirst(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithStringBuffer(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithBooleanObject(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithNegatedBoolean(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithReversedBoolean(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithLotsOfMethods(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        System.out.println(concatenation.charAt(0));\n" //
+				+ "        System.out.println(concatenation.chars());\n" //
+				+ "        System.out.println(concatenation.codePoints());\n" //
+				+ "        System.out.println(concatenation.indexOf(\"foo\", 0));\n" //
+				+ "        System.out.println(concatenation.lastIndexOf(\"foo\"));\n" //
+				+ "        System.out.println(concatenation.lastIndexOf(\"foo\", 0));\n" //
+				+ "        System.out.println(concatenation.length());\n" //
+				+ "        System.out.println(concatenation.subSequence(0, 0));\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationOnForeach(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithConditionOnIndex(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithInequalityOnIndex(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithReversedConditionOnIndex(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithGreaterOrEqualsOnIndex(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithDelimiterAtTheEnd(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithMirroredCondition(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithNotEqualsCondition(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithLessOrEqualsCondition(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingLength(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingNotEmpty(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingGreaterOrEqualsOne(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingLengthMirrored(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingNotEmptyMirrored(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationTestingGreaterOrEqualsOneMirrored(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConstantBooleanShift(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorWithBooleanShiftAtTheEnd(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorWithReversedBooleanShift(String[] texts) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\", \", texts);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
 				+ "}\n";
+
+		assertNotEquals("The class must be changed", input, output);
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.JoinCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
@@ -2119,6 +2834,273 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "\n" //
 				+ "        concatenation.append(\"foo\");\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithInitialization(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder(\"foo\");\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithWrongIndex(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[0]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithWrongBoolean(String[] texts, boolean isSecond) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isSecond) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithWrongBoolean(String[] texts) {\n" //
+				+ "        boolean isSecond = false;\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isSecond = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithWrongArray(String[] texts, String[] names) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(names[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithWrongBuilder(String[] texts, StringBuilder otherBuilder) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            otherBuilder.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithAnotherBuilder(String[] texts, StringBuilder otherBuilder) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                otherBuilder.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithAdditionalStatement(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i]);\n" //
+				+ "            System.out.println(\"Hi!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithWrongMethod(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < texts.length; i++) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(texts[i], 0, 2);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWrongVariable(String[] texts, String test) {\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(test);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithBooleanShiftFirst(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            isFirst = false;\n" //
+				+ "            if (!isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithAppendingFirst(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "            if (!isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            isFirst = false;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithConditionAtTheEnd(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "            isFirst = false;\n" //
+				+ "            if (!isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithNonsense(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            isFirst = false;\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "            if (!isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorUnshiftedBoolean(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (!isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            isFirst = true;\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWrongCondition(String[] texts) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            isFirst = false;\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWrongInit(String[] texts) {\n" //
+				+ "        boolean isFirst = false;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            if (!isFirst) {\n" //
+				+ "                concatenation.append(\", \");\n" //
+				+ "            }\n" //
+				+ "            isFirst = false;\n" //
+				+ "            concatenation.append(text);\n" //
+				+ "        }\n" //
 				+ "\n" //
 				+ "        return concatenation.toString();\n" //
 				+ "    }\n" //
