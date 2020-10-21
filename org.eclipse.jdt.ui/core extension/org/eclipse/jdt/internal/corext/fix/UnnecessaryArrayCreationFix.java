@@ -14,7 +14,10 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 
@@ -41,6 +44,7 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 	public final static class UnnecessaryArrayCreationFinder extends GenericVisitor {
 		private final List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> fResult;
 		private final boolean fRemoveUnnecessaryArrayCreation;
+		private final Set<String> fInvalidTypes= new HashSet<>(Arrays.asList("byte", "char", "short")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		public UnnecessaryArrayCreationFinder(boolean removeUnnecessaryArrayCreation, List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> resultingCollection) {
 			fRemoveUnnecessaryArrayCreation= removeUnnecessaryArrayCreation;
@@ -103,7 +107,8 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 					&& binding != null
 					&& binding.isVarargs()
 					&& binding.getParameterTypes().length == arguments.size()
-					&& binding.getParameterTypes()[arguments.size() - 1].getDimensions() == 1;
+					&& binding.getParameterTypes()[arguments.size() - 1].getDimensions() == 1
+					&& !fInvalidTypes.contains(binding.getParameterTypes()[arguments.size() - 1].getElementType().getName());
 		}
 
 		private boolean hasEquivalentMethod(ArrayCreation node, List<Expression> arguments, IMethodBinding binding) {

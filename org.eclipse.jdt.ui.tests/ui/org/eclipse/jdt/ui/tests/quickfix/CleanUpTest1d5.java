@@ -3114,6 +3114,29 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUnnecessaryArrayBug568082() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "        someMethod(new byte[]{42});\n" //
+				+ "        someMethod2(new char[]{42});\n" //
+				+ "        someMethod3(new short[]{42});\n" //
+	    		+ "    }\n" //
+	    		+ "    private static void someMethod(byte... bytes) {}\n" //
+	    		+ "    private static void someMethod2(char... chars) {}\n" //
+	    		+ "    private static void someMethod3(short... shorts) {}\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testKeepArrayWithSingleArrayElement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
