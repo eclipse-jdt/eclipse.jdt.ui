@@ -7527,9 +7527,9 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        int i = -1;\n" //
 				+ "        try {\n" //
 				+ "            // Keep this comment\n" //
-				+ "            if (b1 && b2) {\n" //
+				+ "            if (!b1 == b2) {\n" //
 				+ "                i = 0;\n" //
-				+ "            } else if (!b2 || !b1) {\n" //
+				+ "            } else if (!b2 != b1) {\n" //
 				+ "                i = 1;\n" //
 				+ "            } else {\n" //
 				+ "                throw new NullPointerException();\n" //
@@ -7610,7 +7610,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        int i = -1;\n" //
 				+ "        try {\n" //
 				+ "            // Keep this comment\n" //
-				+ "            if (b1 && b2) {\n" //
+				+ "            if (!b1 == b2) {\n" //
 				+ "                i = 0;\n" //
 				+ "            } else {\n" //
 				+ "                i = 1;\n" //
@@ -7652,6 +7652,17 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (number1 < number2) {\n" //
 				+ "            i = 0;\n" //
 				+ "        } else if (number2 < number1) {\n" //
+				+ "            i = 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotHandleObjectsThatCanBeNull(Boolean isValid) {\n" //
+				+ "        int i = -1;\n" //
+				+ "        if (isValid == Boolean.TRUE) {\n" //
+				+ "            i = 0;\n" //
+				+ "        } else if (isValid == Boolean.FALSE) {\n" //
 				+ "            i = 1;\n" //
 				+ "        }\n" //
 				+ "\n" //

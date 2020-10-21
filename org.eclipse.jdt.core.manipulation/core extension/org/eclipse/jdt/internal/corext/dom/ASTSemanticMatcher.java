@@ -357,7 +357,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 	}
 
 	private boolean isOneLiteral(final Expression operand) {
-		return Long.valueOf(1).equals(ASTNodes.getIntegerLiteral(operand));
+		return Long.valueOf(1L).equals(ASTNodes.getIntegerLiteral(operand));
 	}
 
 	@Override
@@ -646,11 +646,11 @@ public class ASTSemanticMatcher extends ASTMatcher {
 	}
 
 	/**
-	 * Match the negative boolean.
+	 * Match the negative boolean expressions.
 	 *
 	 * @param node        Node to check
 	 * @param otherObject Node to compare
-	 * @return True if it is the negative boolean.
+	 * @return True if one boolean expression is the negative of the other boolean expression.
 	 */
 	public boolean matchNegative(final ASTNode node, final Object otherObject) {
 		Object other= unbracket(otherObject);
@@ -660,15 +660,15 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		}
 
 		if (node instanceof PrefixExpression) {
-			PrefixExpression pe= (PrefixExpression) node;
+			PrefixExpression prefixExpression= (PrefixExpression) node;
 
-			if (ASTNodes.hasOperator(pe, PrefixExpression.Operator.NOT)) {
+			if (ASTNodes.hasOperator(prefixExpression, PrefixExpression.Operator.NOT)) {
 				if (other instanceof PrefixExpression
 						&& ASTNodes.hasOperator((PrefixExpression) other, PrefixExpression.Operator.NOT)) {
-					return matchNegative(pe.getOperand(), ((PrefixExpression) other).getOperand());
+					return matchNegative(prefixExpression.getOperand(), ((PrefixExpression) other).getOperand());
 				}
 
-				return safeSubtreeMatch(pe.getOperand(), other);
+				return safeSubtreeMatch(prefixExpression.getOperand(), other);
 			}
 		} else if (other instanceof PrefixExpression
 				&& ASTNodes.hasOperator((PrefixExpression) other, PrefixExpression.Operator.NOT)) {
@@ -676,6 +676,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		}
 
 		if (other instanceof ASTNode) {
+			// Matches two negative boolean values
 			Boolean value= ASTNodes.getBooleanLiteral(node);
 			Boolean otherValue= ASTNodes.getBooleanLiteral((ASTNode) other);
 
@@ -684,6 +685,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 			}
 		}
 
+		// Now, only arithmetic and logical operations are handled
 		if (!(node instanceof InfixExpression) || !(other instanceof InfixExpression)) {
 			return false;
 		}
@@ -696,16 +698,41 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		Expression leftOperand2= infixExpression2.getLeftOperand();
 		Expression rightOperand2= infixExpression2.getRightOperand();
 
-		if (infixExpression1.getOperator().equals(infixExpression2.getOperator())
-				&& !infixExpression1.hasExtendedOperands() && !infixExpression2.hasExtendedOperands()
-				&& ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS,
-						InfixExpression.Operator.XOR)) {
-			return matchOneNegativeOther(leftOperand1, leftOperand2, rightOperand2, rightOperand1)
-					|| matchOneNegativeOther(rightOperand2, rightOperand1, leftOperand1, leftOperand2) || ASTNodes.isPassiveWithoutFallingThrough(leftOperand1) && ASTNodes.isPassiveWithoutFallingThrough(rightOperand1) && ASTNodes.isPassiveWithoutFallingThrough(leftOperand2)
-					&& ASTNodes.isPassiveWithoutFallingThrough(rightOperand2)
-					&& (matchOneNegativeOther(leftOperand1, leftOperand2, rightOperand2, rightOperand1)
-							|| matchOneNegativeOther(rightOperand2, rightOperand1, leftOperand1,
-									leftOperand2));
+		if (infixExpression1.getOperator().equals(infixExpression2.getOperator())) {
+			// Matches two comparisons with same operator and exactly one negative operand:
+			//   isValid == true
+			//   isValid == false
+			//
+			//   isValid == true
+			//   false == isValid
+			//
+			//   isValid != true
+			//   isValid != false
+			//
+			//   isValid == (i > 0)
+			//   isValid == (i <= 0)
+			if (infixExpression1.hasExtendedOperands()
+					|| infixExpression2.hasExtendedOperands()) {
+				return false;
+			}
+
+			if (ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS)
+					&& ((!ASTNodes.hasType(leftOperand1, boolean.class.getCanonicalName()) && !ASTNodes.hasType(rightOperand1, boolean.class.getCanonicalName()))
+							|| (!ASTNodes.hasType(leftOperand2, boolean.class.getCanonicalName()) && !ASTNodes.hasType(rightOperand2, boolean.class.getCanonicalName())))) {
+				return false;
+			}
+
+			if (ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS, InfixExpression.Operator.XOR)) {
+				return matchOneNegativeOther(leftOperand1, leftOperand2, rightOperand2, rightOperand1)
+						|| matchOneNegativeOther(rightOperand2, rightOperand1, leftOperand1, leftOperand2)
+						|| ASTNodes.isPassiveWithoutFallingThrough(leftOperand1) && ASTNodes.isPassiveWithoutFallingThrough(rightOperand1) && ASTNodes.isPassiveWithoutFallingThrough(leftOperand2)
+						&& ASTNodes.isPassiveWithoutFallingThrough(rightOperand2)
+						&& (matchOneNegativeOther(leftOperand1, leftOperand2, rightOperand2, rightOperand1)
+								|| matchOneNegativeOther(rightOperand2, rightOperand1, leftOperand1,
+										leftOperand2));
+			}
+
+			return false;
 		}
 
 		InfixExpression.Operator negatedOperator= ASTNodes.negatedInfixOperator(infixExpression1.getOperator());
@@ -713,32 +740,74 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		if (infixExpression2.getOperator().equals(negatedOperator)) {
 			if (ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.CONDITIONAL_AND, InfixExpression.Operator.CONDITIONAL_OR,
 					InfixExpression.Operator.AND, InfixExpression.Operator.OR)) {
+				// De Morgan's laws (matches negative logical operator with negative operands):
+				//   a && b && c
+				//   !a || !b || !c
+				//
+				//   !a || b || !c
+				//   c && !b && a
 				return isOperandsMatching(infixExpression1, infixExpression2, false);
 			}
-			if (ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS)) {
-				return isOperandsMatching(infixExpression1, infixExpression2, true);
+
+			// Now, only operations with two operands are handled
+			if (infixExpression1.hasExtendedOperands() || infixExpression2.hasExtendedOperands()) {
+				return false;
 			}
+
+			if (ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS)) {
+				// Matches two comparisons with negative operator and two equal operands:
+				//   isValid == true
+				//   isValid != true
+				//
+				//   isValid == true
+				//   true != isValid
+				//
+				// ...or matches two comparisons with negative operator and two negative operands:
+				//   isValid == true
+				//   !isValid != false
+				//
+				//   isValid == false
+				//   true != !isValid
+				return isOperandsMatching(infixExpression1, infixExpression2, true)
+						|| isOperandsMatching(infixExpression1, infixExpression2, false);
+			}
+
 			if (ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.GREATER, InfixExpression.Operator.GREATER_EQUALS,
 					InfixExpression.Operator.LESS, InfixExpression.Operator.LESS_EQUALS)
 					&& ASTNodes.isPassiveWithoutFallingThrough(leftOperand1)
 					&& ASTNodes.isPassiveWithoutFallingThrough(rightOperand1)
 					&& ASTNodes.isPassiveWithoutFallingThrough(leftOperand2)
 					&& ASTNodes.isPassiveWithoutFallingThrough(rightOperand2)) {
+				// Matches two inequalities with negative operator and unmoved operands:
+				//   i < j
+				//   i => j
+				//
+				//   k <= 123
+				//   k > 123
 				return safeSubtreeMatch(leftOperand1, leftOperand2) && safeSubtreeMatch(rightOperand1, rightOperand2);
 			}
 
 			return false;
 		}
 
-		return (ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.GREATER) && ASTNodes.hasOperator(infixExpression2, InfixExpression.Operator.GREATER_EQUALS) || ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.GREATER_EQUALS) && ASTNodes.hasOperator(infixExpression2, InfixExpression.Operator.GREATER) || ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.LESS) && ASTNodes.hasOperator(infixExpression2, InfixExpression.Operator.LESS_EQUALS) || ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.LESS_EQUALS) && ASTNodes.hasOperator(infixExpression2, InfixExpression.Operator.LESS))
-				&& !infixExpression1.hasExtendedOperands()
-				&& !infixExpression2.hasExtendedOperands()
-				&& ASTNodes.isPassiveWithoutFallingThrough(leftOperand1)
-				&& ASTNodes.isPassiveWithoutFallingThrough(rightOperand1)
-				&& ASTNodes.isPassiveWithoutFallingThrough(leftOperand2)
-				&& ASTNodes.isPassiveWithoutFallingThrough(rightOperand2)
-				&& safeSubtreeMatch(leftOperand1, rightOperand2)
-				&& safeSubtreeMatch(rightOperand1, leftOperand2);
+		if ((ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.GREATER) && ASTNodes.hasOperator(infixExpression2, InfixExpression.Operator.GREATER_EQUALS) || ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.GREATER_EQUALS) && ASTNodes.hasOperator(infixExpression2, InfixExpression.Operator.GREATER) || ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.LESS) && ASTNodes.hasOperator(infixExpression2, InfixExpression.Operator.LESS_EQUALS) || ASTNodes.hasOperator(infixExpression1, InfixExpression.Operator.LESS_EQUALS) && ASTNodes.hasOperator(infixExpression2, InfixExpression.Operator.LESS))) {
+			// Matches two inequalities with negative and mirrored operator and exchanged operands:
+			//   j > i
+			//   i => j
+			//
+			//   k <= 123
+			//   123 < k
+			return !infixExpression1.hasExtendedOperands()
+					&& !infixExpression2.hasExtendedOperands()
+					&& ASTNodes.isPassiveWithoutFallingThrough(leftOperand1)
+					&& ASTNodes.isPassiveWithoutFallingThrough(rightOperand1)
+					&& ASTNodes.isPassiveWithoutFallingThrough(leftOperand2)
+					&& ASTNodes.isPassiveWithoutFallingThrough(rightOperand2)
+					&& safeSubtreeMatch(leftOperand1, rightOperand2)
+					&& safeSubtreeMatch(rightOperand1, leftOperand2);
+		}
+
+		return false;
 	}
 
 	private boolean matchOneNegativeOther(final Expression equalOperand1, final Expression equalOperand2,
@@ -819,10 +888,10 @@ public class ASTSemanticMatcher extends ASTMatcher {
 					iterator.remove();
 				}
 			} else if (ASTNodes.hasOperator(infixExpression, InfixExpression.Operator.PLUS)) {
-				if (Long.valueOf(0).equals(numberLiteral)) {
+				if (Long.valueOf(0L).equals(numberLiteral)) {
 					iterator.remove();
 				}
-			} else if (ASTNodes.hasOperator(infixExpression, InfixExpression.Operator.TIMES) && Long.valueOf(1).equals(numberLiteral)) {
+			} else if (ASTNodes.hasOperator(infixExpression, InfixExpression.Operator.TIMES) && Long.valueOf(1L).equals(numberLiteral)) {
 				iterator.remove();
 			}
 		}
