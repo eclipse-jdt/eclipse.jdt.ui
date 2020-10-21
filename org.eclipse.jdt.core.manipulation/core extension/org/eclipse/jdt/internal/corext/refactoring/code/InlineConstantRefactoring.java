@@ -620,6 +620,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private IField fField;
 	private CompilationUnitRewrite fDeclarationCuRewrite;
 	private VariableDeclarationFragment fDeclaration;
+	private SearchResultGroup[] fReferences;
 	private boolean fDeclarationSelected;
 	private boolean fDeclarationSelectedChecked= false;
 	private boolean fInitializerAllStaticFinal;
@@ -822,7 +823,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList<SimpleName>(), staticImportsInInitializer);
 
 			if (getReplaceAllReferences()) {
-				for (SearchResultGroup group : findReferences(pm, result)) {
+				for (SearchResultGroup group : getReferences(pm, result)) {
 					if (pm.isCanceled())
 						throw new OperationCanceledException();
 					ICompilationUnit cu= group.getCompilationUnit();
@@ -978,6 +979,24 @@ public class InlineConstantRefactoring extends Refactoring {
 	public void setReplaceAllReferences(boolean replaceAllReferences) {
 		fReplaceAllReferences= replaceAllReferences;
 		checkInvariant();
+	}
+
+	/**
+	 * Returns the references, or empty list if the references could not be found.
+	 * @param monitor progress monitor
+	 * @param status the status to report errors
+	 *
+	 * @return the references
+	 */
+	public SearchResultGroup[] getReferences(IProgressMonitor monitor, RefactoringStatus status) {
+		if (this.fReferences == null) {
+			try {
+				this.fReferences= findReferences(monitor, status);
+			} catch (JavaModelException e) {
+				this.fReferences= new SearchResultGroup[0];
+			}
+		}
+		return this.fReferences;
 	}
 
 	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
