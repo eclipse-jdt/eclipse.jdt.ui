@@ -37,8 +37,8 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
@@ -58,7 +58,11 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * A fix that uses Arrays.fill() when possible.
+ * A fix that uses Arrays.fill() when possible:
+ * <ul>
+ * <li>Check that we iterate on the whole array.</li>
+ * <li>Check that we always set the same value.</li>
+ * </ul>
  */
 public class ArraysFillCleanUp extends AbstractMultiFix {
 	public ArraysFillCleanUp() {
@@ -129,28 +133,42 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 			}
 
 			private boolean isUnchangedValue(final ForStatement node, final Expression expression) {
-				if (ASTNodes.isHardCoded(expression)) {
-					return true;
-				}
-
 				if (!ASTNodes.isPassive(expression)) {
 					return false;
 				}
 
-				if (expression instanceof SimpleName) {
-					SimpleName name= (SimpleName) expression;
-					IBinding binding= name.resolveBinding();
+				if (ASTNodes.isHardCoded(expression)) {
+					return true;
+				}
+
+				SimpleName simpleName= null;
+
+				if (expression instanceof QualifiedName) {
+					QualifiedName name= (QualifiedName) expression;
+					IBinding binding= name.getQualifier().resolveBinding();
+
+					if (binding.getKind() == IBinding.TYPE) {
+						simpleName= name.getName();
+					}
+				} else if (expression instanceof SimpleName) {
+					simpleName= (SimpleName) expression;
+				}
+
+				if (simpleName != null) {
+					IBinding binding= simpleName.resolveBinding();
 
 					if (binding instanceof IVariableBinding) {
 						IVariableBinding varBinding= (IVariableBinding) binding;
-						ASTNode declaration= ASTNodes.findDeclaration(binding, expression.getRoot());
 
-						if (varBinding.isField()
-								&& declaration instanceof VariableDeclaration
-								&& ((VariableDeclaration) declaration).getInitializer() != null) {
+						if (varBinding.isField()) {
 							return Modifier.isFinal(varBinding.getModifiers());
 						}
 
+						if (varBinding.isEffectivelyFinal()) {
+							return true;
+						}
+
+						ASTNode declaration= ASTNodes.findDeclaration(binding, expression.getRoot());
 						return declaration != null && !ASTNodes.isParent(declaration, node);
 					}
 				}

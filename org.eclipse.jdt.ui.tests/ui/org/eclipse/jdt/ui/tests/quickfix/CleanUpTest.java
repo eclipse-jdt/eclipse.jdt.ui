@@ -4503,11 +4503,11 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testUseArraysFill() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
+				+ "public class E {\n" //
 				+ "    private static final boolean CONSTANT = true;\n" //
 				+ "    private boolean[] booleanArray = new boolean[10];\n" //
 				+ "\n" //
@@ -4519,6 +4519,16 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "        for (int i = 0; i < array.length; ++i) {\n" //
 				+ "            array[i] = false;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean[] refactorWithConstant() {\n" //
+				+ "        boolean[] array = new boolean[10];\n" //
+				+ "\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = Boolean.TRUE;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        return array;\n" //
@@ -4610,16 +4620,16 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("E.java", input, false, null);
 
 		enable(CleanUpConstants.ARRAYS_FILL);
 
-		sample= "" //
+		String output= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.Arrays;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
+				+ "public class E {\n" //
 				+ "    private static final boolean CONSTANT = true;\n" //
 				+ "    private boolean[] booleanArray = new boolean[10];\n" //
 				+ "\n" //
@@ -4628,6 +4638,14 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "        Arrays.fill(array, true);\n" //
 				+ "        Arrays.fill(array, false);\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean[] refactorWithConstant() {\n" //
+				+ "        boolean[] array = new boolean[10];\n" //
+				+ "\n" //
+				+ "        Arrays.fill(array, Boolean.TRUE);\n" //
 				+ "\n" //
 				+ "        return array;\n" //
 				+ "    }\n" //
@@ -4693,7 +4711,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { output });
 	}
 
 	@Test
