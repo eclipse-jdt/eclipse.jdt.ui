@@ -109,6 +109,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);
 		options.setOption(COLLECTION_CLONING, CleanUpOptions.FALSE);
 		options.setOption(MAP_CLONING, CleanUpOptions.FALSE);
+		options.setOption(OVERRIDDEN_ASSIGNMENT, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(RAISE_EMBEDDED_IF, CleanUpOptions.FALSE);
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
@@ -232,6 +233,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);
 		options.setOption(COLLECTION_CLONING, CleanUpOptions.FALSE);
 		options.setOption(MAP_CLONING, CleanUpOptions.FALSE);
+		options.setOption(OVERRIDDEN_ASSIGNMENT, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(RAISE_EMBEDDED_IF, CleanUpOptions.FALSE);
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);

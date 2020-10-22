@@ -8615,8 +8615,201 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testSerialVersionBug139381() throws Exception {
+	public void testOverriddenAssignment() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean removeUselessInitialization() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedVar = true;\n" //
+				+ "        reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long removeInitForLong() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long reassignedVar = 0;\n" //
+				+ "        reassignedVar = System.currentTimeMillis();\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String removeInitForString() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String reassignedVar = \"\";\n" //
+				+ "        reassignedVar = File.pathSeparator;\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removePassiveInitialization(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedPassiveVar = i > 0;\n" //
+				+ "        reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedPassiveVar;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
 
+		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean removeUselessInitialization() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedVar;\n" //
+				+ "        reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long removeInitForLong() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long reassignedVar;\n" //
+				+ "        reassignedVar = System.currentTimeMillis();\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String removeInitForString() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String reassignedVar;\n" //
+				+ "        reassignedVar = File.pathSeparator;\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removePassiveInitialization(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedPassiveVar;\n" //
+				+ "        reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedPassiveVar;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.OverriddenAssignmentCleanUp_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotRemoveAssignment() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean doNotRemoveWithOrAssignment() {\n" //
+				+ "        boolean isValid = true;\n" //
+				+ "        isValid |= false;\n" //
+				+ "        isValid = false;\n" //
+				+ "        return isValid;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long doNotRemoveWithMinusAssignment() {\n" //
+				+ "        long decrementedVar = 123;\n" //
+				+ "        decrementedVar -= 456;\n" //
+				+ "        decrementedVar = 789;\n" //
+				+ "        return decrementedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long doNotRemoveWithEmbeddedPlusAssignment() {\n" //
+				+ "        long incrementedVar = 123;\n" //
+				+ "        long dummy = incrementedVar += 456;\n" //
+				+ "        incrementedVar = 789;\n" //
+				+ "        return incrementedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> doNotRemoveActiveInit() {\n" //
+				+ "        List<String> aList = Arrays.asList(\"lorem\", \"ipsum\");\n" //
+				+ "\n" //
+				+ "        boolean reassignedVar = aList.remove(\"lorem\");\n" //
+				+ "        reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return aList;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRemoveInitWithoutOverriding() {\n" //
+				+ "        String usedVar = \"\";\n" //
+				+ "        return usedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRemoveInitWithUse() {\n" //
+				+ "        String usedVar = \"\";\n" //
+				+ "        System.out.println(usedVar);\n" //
+				+ "        usedVar = File.pathSeparator;\n" //
+				+ "        return usedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRemoveInitWithUseInIf() {\n" //
+				+ "        String usedVar = \"\";\n" //
+				+ "        if (\"\\n\".equals(File.pathSeparator)) {\n" //
+				+ "            System.out.println(usedVar);\n" //
+				+ "        }\n" //
+				+ "        usedVar = File.pathSeparator;\n" //
+				+ "        return usedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRemoveInitWithCall() {\n" //
+				+ "        String usedVar = \"\";\n" //
+				+ "        usedVar.length();\n" //
+				+ "        usedVar = File.pathSeparator;\n" //
+				+ "        return usedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] doNotRemoveInitWithIndex() {\n" //
+				+ "        char[] usedVar = new char[] {'a', 'b', 'c'};\n" //
+				+ "        char oneChar = usedVar[1];\n" //
+				+ "        usedVar = new char[] {'d', 'e', 'f'};\n" //
+				+ "        return usedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte doNotRemoveInitWhenUsed() {\n" //
+				+ "        byte usedVar = 0;\n" //
+				+ "        usedVar = usedVar++;\n" //
+				+ "        return usedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRemoveInitWhenOverriddenInIf() {\n" //
+				+ "        String usedVar = \"\";\n" //
+				+ "        if (\"\\n\".equals(File.pathSeparator)) {\n" //
+				+ "            usedVar = File.pathSeparator;\n" //
+				+ "        }\n" //
+				+ "        return usedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRemoveActiveInitialization(List<String> aList) {\n" //
+				+ "        boolean reassignedActiveVar = aList.remove(\"foo\");\n" //
+				+ "        reassignedActiveVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedActiveVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRemoveInitializationWithIncrement(int i) {\n" //
+				+ "        int reassignedActiveVar = i++;\n" //
+				+ "        reassignedActiveVar = 123;\n" //
+				+ "        return reassignedActiveVar + i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long doNotRemoveInitializationWithAssignment(long i, long j) {\n" //
+				+ "        long reassignedActiveVar = i = j;\n" //
+				+ "        reassignedActiveVar = 123;\n" //
+				+ "        return reassignedActiveVar + i + j;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testSerialVersionBug139381() throws Exception {
 		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {

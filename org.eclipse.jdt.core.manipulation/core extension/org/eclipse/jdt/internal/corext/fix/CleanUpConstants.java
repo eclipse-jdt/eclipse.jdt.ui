@@ -1296,6 +1296,18 @@ public class CleanUpConstants {
 	public static final String MAP_CLONING= "cleanup.map_cloning"; //$NON-NLS-1$
 
 	/**
+	 * Remove passive assignment when the variable is reassigned before being read.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String OVERRIDDEN_ASSIGNMENT= "cleanup.overridden_assignment"; //$NON-NLS-1$
+
+	/**
 	 * Removes redundant semicolons.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>

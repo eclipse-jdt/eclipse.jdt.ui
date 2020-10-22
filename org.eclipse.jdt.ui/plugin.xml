@@ -7251,9 +7251,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unboxing">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.overridden_assignment"
+            runAfter="org.eclipse.jdt.ui.cleanup.push_down_negation">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp"
             id="org.eclipse.jdt.ui.cleanup.comparison_statement"
-            runAfter="org.eclipse.jdt.ui.cleanup.push_down_negation">
+            runAfter="org.eclipse.jdt.ui.cleanup.overridden_assignment">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp"
