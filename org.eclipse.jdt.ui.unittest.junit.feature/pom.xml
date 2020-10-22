@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2017, 2020 Red Hat Inc. and others.
+ 
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+  SPDX-License-Identifier: EPL-2.0
+ 
+  Contributors:
+    Red Hat Incorporated - initial implementation
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>eclipse.jdt.ui</artifactId>
+    <groupId>eclipse.jdt.ui</groupId>
+    <version>4.18.0-SNAPSHOT</version>
+  </parent>
+  <groupId>org.eclipse.jdt.feature</groupId>
+  <artifactId>org.eclipse.jdt.ui.unittest.junit.feature</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>eclipse-feature</packaging>
+</project>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            icon="$nl$/icons/full/obj16/julaunch.png"
+            configTypeID="org.eclipse.jdt.ui.unittest.junit.launchConfiguration"
+            id="org.eclipse.unittest.launchimage">
+      </launchConfigurationTypeImage>
+   </extension>
+   
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            type="org.eclipse.jdt.ui.unittest.junit.launchConfiguration"
+            helpContextId="org.eclipse.jdt.ui.unittest.junit_tab_group"
+            class="org.eclipse.jdt.ui.unittest.junit.internal.launcher.JUnitTabGroup"
+            id="org.eclipse.jdt.junit.launchConfigurationTabGroup.junit">
+         <launchMode
+               perspective="org.eclipse.debug.ui.DebugPerspective"
+               description="%JUnitTabGroupDescription.debug"
+               mode="debug">
+         </launchMode>
+         <launchMode
+               description="%JUnitTabGroupDescription.run"
+               mode="run">
+         </launchMode>
+      </launchConfigurationTabGroup>
+   </extension>
+
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            name="%Launch.label"
+            delegateDescription="%JUnitLaunchDelegate.description"
+            delegateName="%JUnitLaunchDelegate.name"
+            allowCommandLine="true"
+            delegate="org.eclipse.jdt.ui.unittest.junit.launcher.AdvancedJUnitLaunchConfigurationDelegate"
+            modes="run, debug"
+            id="org.eclipse.jdt.ui.unittest.junit.launchConfiguration"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"
+            migrationDelegate="org.eclipse.jdt.internal.junit.launcher.JUnitMigrationDelegate">
+      </launchConfigurationType>
+   </extension>
+
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            label="%UnitTestShortcut.label"
+            icon="$nl$/icons/full/obj16/julaunch.png"
+            helpContextId="org.eclipse.jdt.junit.launch_shortcut"
+            class="org.eclipse.jdt.ui.unittest.junit.launcher.JUnitLaunchShortcut"
+            modes="run, debug"
+            id="org.eclipse.jdt.ui.unittest.junit.junitShortcut">
+         <contextualLaunch>
+            <enablement>
+               <with variable="selection">
+                  <count value="1"/>
+               	  <iterate>
+                     <adapt type="org.eclipse.jdt.core.IJavaElement">
+                     	<and>
+		                	<test property="org.eclipse.jdt.core.isInJavaProject"/>
+		                	<or>
+		                	<test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+		                	<test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="org.junit.platform.commons.annotation.Testable"/>
+		                	</or>
+		                	<test property="org.eclipse.jdt.junit.canLaunchAsJUnit" forcePluginActivation="true"/>
+                  		</and>
+		             </adapt>
+		          </iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+         <configurationType
+               id="org.eclipse.jdt.ui.unittest.junit.launchConfiguration">
+         </configurationType>
+         <description
+               description="%DebugJUnitLaunchShortcut.description"
+               mode="debug">
+         </description>
+         <description
+               description="%RunJUnitLaunchShortcut.description"
+               mode="run">
+         </description>
+      </shortcut>
+   </extension>
+
+   <extension
+         point="org.eclipse.unittest.ui.unittestViewSupport">
+      <viewSupport
+            class="org.eclipse.jdt.ui.unittest.junit.ui.JUnitTestViewSupport"
+            id="org.eclipse.jdt.ui.unittest.junit">
+      </viewSupport>
+   </extension>
+</plugin>
