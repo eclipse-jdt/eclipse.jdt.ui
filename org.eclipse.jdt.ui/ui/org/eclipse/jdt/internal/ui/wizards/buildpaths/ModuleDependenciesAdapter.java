@@ -448,6 +448,17 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			irrelevantModules.add(fFocusModule.getElementName());
 
 			IClasspathEntry jreEntry= fDependenciesPage.findSystemLibraryElement().getClasspathEntry();
+			//Get addread from fElem and add to irrelevantModules, dont want to re-add it
+			Object moduleAttributes= fElem.getAttribute(CPListElement.MODULE);
+			if (moduleAttributes instanceof ModuleEncapsulationDetail[]) {
+				ModuleEncapsulationDetail encapDetails[]= (ModuleEncapsulationDetail[]) moduleAttributes;
+				for (ModuleEncapsulationDetail moduleEncapsulationDetail : encapDetails) {
+					if (moduleEncapsulationDetail instanceof ModuleAddReads) {
+						String fTargetModule= ((ModuleAddReads) moduleEncapsulationDetail).fTargetModule;
+						irrelevantModules.add(fTargetModule);
+					}
+				}
+			}
 			ModuleSelectionDialog dialog= ModuleSelectionDialog.forReads(shell, fElem.getJavaProject(), jreEntry, irrelevantModules);
 			if (dialog.open() != 0) {
 				return false;
