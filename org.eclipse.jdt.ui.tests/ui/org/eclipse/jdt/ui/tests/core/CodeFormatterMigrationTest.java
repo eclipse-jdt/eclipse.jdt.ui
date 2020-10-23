@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Manumitting Technologies Inc - initial API and implementation
+ *     Microsoft Corporation - add testUpdateFrom13_javaFormatter to test ProfileVersionerCore.updateAndComplete
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
@@ -23,6 +24,7 @@ import org.junit.Test;
 
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileVersioner;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileVersionerCore;
 
 /**
  * Tests for migrating formatter profiles.
@@ -42,5 +44,17 @@ public class CodeFormatterMigrationTest {
 		assertEquals(0, ProfileVersioner.getVersionStatus(profile));
 		assertTrue(profile.getSettings().containsKey("org.eclipse.jdt.core.javaFormatter"));
 		assertEquals("foo", profile.getSettings().get("org.eclipse.jdt.core.javaFormatter"));
+	}
+
+	@Test
+	public void testUpdateFrom13_javaFormatter() {
+		Map<String, String> options= new HashMap<>();
+		options.put("org.eclipse.jdt.core.formatter.insert_new_line_in_empty_anonymous_type_declaration", "do not insert");
+		int profileVersion= 13; // ProfileVersioner.VERSION_13
+
+		Map<String, String> newSettings = ProfileVersionerCore.updateAndComplete(options, profileVersion);
+
+		assertTrue(newSettings.containsKey("org.eclipse.jdt.core.formatter.keep_anonymous_type_declaration_on_one_line"));
+		assertEquals("one_line_if_empty", newSettings.get("org.eclipse.jdt.core.formatter.keep_anonymous_type_declaration_on_one_line"));
 	}
 }

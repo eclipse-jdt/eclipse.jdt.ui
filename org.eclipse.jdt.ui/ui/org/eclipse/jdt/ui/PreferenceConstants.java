@@ -13,6 +13,7 @@
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *     Red Hat Inc - modify to use CodeGenerationSettingsConstants
  *     Angelo Zerr <angelo.zerr@gmail.com> - [CodeMining] Provide Java References/Implementation CodeMinings - Bug 529127
+ *     Microsoft Corporation - moved some fields to PreferenceConstantsCore
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
@@ -54,6 +55,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer;
+import org.eclipse.jdt.internal.ui.PreferenceConstantsCore;
 import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.callhierarchy.ExpandWithConstructorsConfigurationBlock;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
@@ -2840,7 +2842,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_SOURCE}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_FORMATSOURCE= "comment_format_source_code"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_FORMATSOURCE= PreferenceConstantsCore.FORMATTER_COMMENT_FORMATSOURCE;
 
 	/**
 	 * A named preference that controls whether description of Javadoc
@@ -2853,7 +2855,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= "comment_indent_parameter_description"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= PreferenceConstantsCore.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION;
 
 	/**
 	 * A named preference that controls whether the header comment of
@@ -2866,7 +2868,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HEADER}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_FORMATHEADER= "comment_format_header"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_FORMATHEADER= PreferenceConstantsCore.FORMATTER_COMMENT_FORMATHEADER;
 
 	/**
 	 * A named preference that controls whether Javadoc root tags
@@ -2879,7 +2881,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_ROOT_TAGS}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_INDENTROOTTAGS= "comment_indent_root_tags"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_INDENTROOTTAGS= PreferenceConstantsCore.FORMATTER_COMMENT_INDENTROOTTAGS;
 
 	/**
 	 * A named preference that controls whether Javadoc comments
@@ -2892,7 +2894,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_FORMAT= "comment_format_comments"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_FORMAT= PreferenceConstantsCore.FORMATTER_COMMENT_FORMAT;
 
 	/**
 	 * A named preference that controls whether a new line is inserted
@@ -2905,7 +2907,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_NEWLINEFORPARAMETER= "comment_new_line_for_parameter"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_NEWLINEFORPARAMETER= PreferenceConstantsCore.FORMATTER_COMMENT_NEWLINEFORPARAMETER;
 
 	/**
 	 * A named preference that controls whether an empty line is inserted before
@@ -2918,7 +2920,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "comment_separate_root_tags"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_SEPARATEROOTTAGS= PreferenceConstantsCore.FORMATTER_COMMENT_SEPARATEROOTTAGS;
 
 	/**
 	 * A named preference that controls whether blank lines are cleared during formatting.
@@ -2930,7 +2932,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_CLEARBLANKLINES= "comment_clear_blank_lines"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_CLEARBLANKLINES= PreferenceConstantsCore.FORMATTER_COMMENT_CLEARBLANKLINES;
 
 	/**
 	 * A named preference that controls the line length of comments.
@@ -2942,7 +2944,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_LINE_LENGTH}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_LINELENGTH= "comment_line_length"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_LINELENGTH= PreferenceConstantsCore.FORMATTER_COMMENT_LINELENGTH;
 
 	/**
 	 * A named preference that controls whether HTML tags are formatted.
@@ -2954,7 +2956,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HTML}
 	 */
 	@Deprecated
-	public final static String FORMATTER_COMMENT_FORMATHTML= "comment_format_html"; //$NON-NLS-1$
+	public final static String FORMATTER_COMMENT_FORMATHTML= PreferenceConstantsCore.FORMATTER_COMMENT_FORMATHTML;
 
 	/**
 	 * A named preference that controls whether completion processors should be called from the non-UI thread,
