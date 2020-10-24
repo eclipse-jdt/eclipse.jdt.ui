@@ -31,7 +31,7 @@ public class TwoPaneElementSelectorExample {
 		java.util.Random random= new java.util.Random();
 		Object[] elements= new Object[8000];
 		for (int i= 0; i < elements.length; i++)
-			elements[i]= Integer.valueOf(random.nextInt()).toString();
+			elements[i]= Integer.toString(random.nextInt());
 		ILabelProvider elementRenderer= new org.eclipse.jface.viewers.LabelProvider() {
 			@Override
 			public String getText(Object element) {

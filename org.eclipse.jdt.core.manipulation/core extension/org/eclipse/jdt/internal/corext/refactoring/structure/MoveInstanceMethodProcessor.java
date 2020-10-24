@@ -1776,12 +1776,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fMethod));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fMethodName);
 			arguments.put(ATTRIBUTE_TARGET_NAME, fTargetName);
-			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
-			arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemove).toString());
-			arguments.put(ATTRIBUTE_INLINE, Boolean.valueOf(fInline).toString());
-			arguments.put(ATTRIBUTE_USE_GETTER, Boolean.valueOf(fUseGetters).toString());
-			arguments.put(ATTRIBUTE_USE_SETTER, Boolean.valueOf(fUseSetters).toString());
-			arguments.put(ATTRIBUTE_TARGET_INDEX, Integer.valueOf(getTargetIndex()).toString());
+			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.toString(fDelegateDeprecation));
+			arguments.put(ATTRIBUTE_REMOVE, Boolean.toString(fRemove));
+			arguments.put(ATTRIBUTE_INLINE, Boolean.toString(fInline));
+			arguments.put(ATTRIBUTE_USE_GETTER, Boolean.toString(fUseGetters));
+			arguments.put(ATTRIBUTE_USE_SETTER, Boolean.toString(fUseSetters));
+			arguments.put(ATTRIBUTE_TARGET_INDEX, Integer.toString(getTargetIndex()));
 			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.MoveInstanceMethodRefactoring_name, list.toArray(new Change[list.size()]));
 		} finally {
 			monitor.done();
