@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VarCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
@@ -47,6 +48,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new ExpressionsCleanUp(values),
 				new BitwiseConditionalExpressionCleanup(values),
 				new AtomicObjectCleanUp(values),
+				new PullUpAssignmentCleanUp(values),
 				new NumberSuffixCleanUp(values),
 				new VariableDeclarationCleanUp(values),
 				new VarCleanUp(values),
@@ -94,6 +96,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference atomicObject= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_AtomicObject, CleanUpConstants.ATOMIC_OBJECT, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(atomicObject);
+
+		final CheckboxPreference pullUpAssignmentPref= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_PullUpAssignment, CleanUpConstants.PULL_UP_ASSIGNMENT, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(pullUpAssignmentPref);
 
 		Group numberSuffixGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_NumberLiteral);
 

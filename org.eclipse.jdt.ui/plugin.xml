@@ -7106,9 +7106,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.pull_up_assignment"
+            runAfter="org.eclipse.jdt.ui.cleanup.atomic_object">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp"
             id="org.eclipse.jdt.ui.cleanup.number_suffix"
-            runAfter="org.eclipse.jdt.ui.cleanup.atomic_object">
+            runAfter="org.eclipse.jdt.ui.cleanup.pull_up_assignment">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp"

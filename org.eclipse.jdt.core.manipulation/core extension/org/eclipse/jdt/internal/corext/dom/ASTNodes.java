@@ -1270,6 +1270,27 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns true if the if statement is in a else statement, that is to say is an else-if statement.
+	 *
+	 * @param node The if statement
+	 * @return true if the if statement is in a else statement
+	 */
+	public static boolean isInElse(final IfStatement node) {
+		if (node == null) {
+			return false;
+		}
+
+		ASTNode parent= node.getParent();
+
+		if (parent instanceof IfStatement) {
+			IfStatement is= (IfStatement) parent;
+			return node.equals(is.getElseStatement());
+		}
+
+		return false;
+	}
+
+	/**
 	 * Returns all the operands from the provided infix expressions.
 	 *
 	 * @param node the infix expression

@@ -11722,6 +11722,404 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPullUpAssignment() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Queue;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void moveLeftHandSideAssignmentBeforeIf(Queue<Integer> queue) {\n" //
+				+ "        Integer i;\n" //
+				+ "        System.out.println(\"Before polling\");\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((i = queue.poll()) != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveRightHandSideAssignmentBeforeIf(Queue<Integer> q) {\n" //
+				+ "        Integer number;\n" //
+				+ "        System.out.println(\"Before polling\");\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null != (number = q.poll())) {\n" //
+				+ "            System.out.println(\"Value=\" + number);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBeforeIfMultipleParenthesesToRemove(Queue<Integer> q) {\n" //
+				+ "        Integer i;\n" //
+				+ "        System.out.println(\"Before polling\");\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((((i = q.poll()))) != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBeforeIfAndMergeWithDeclaration(Queue<Integer> q) {\n" //
+				+ "        Integer i;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((i = q.poll(/* Keep this comment too */)) != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBelowDeclaration(Queue<Integer> q) {\n" //
+				+ "        Integer i = q.poll();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((i = q.poll()) != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void erasePassiveValue(Queue<Integer> q) {\n" //
+				+ "        Integer i = 0;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((i = q.poll()) != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentWithoutParenthesis(Queue<Boolean> q) {\n" //
+				+ "        Boolean b;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b = q.poll()) {\n" //
+				+ "            System.out.println(\"Value=\" + b);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBeforeIfAtConditionOfTernaryExpression(String s, int i) {\n" //
+				+ "        final char c;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((c = s.charAt(i)) == 'A' ? c == 'B' : c == 'C') {\n" //
+				+ "            System.out.println(\"A, B or C\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBeforeIfAtStartOfInfixExpression(String s, int i) {\n" //
+				+ "        final char c;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((c = s.charAt(i)) == 'A' || c == 'B' || c == 'C') {\n" //
+				+ "            System.out.println(\"A, B or C\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveNotConditionalAssignment(String s, int i, boolean isValid) {\n" //
+				+ "        final char c;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid | (c = s.charAt(i)) == 'A') {\n" //
+				+ "            System.out.println(\"valid or A\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentInComplexExpression(String s, int i, boolean isValid) {\n" //
+				+ "        final char c;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (!(isValid | (i == 10 & (c = s.charAt(i)) == 'A'))) {\n" //
+				+ "            System.out.println(\"valid or A\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean refactorSingleStatementBlock(int i, int j) {\n" //
+				+ "        if (i > 0)\n" //
+				+ "            if ((i = j) < 10)\n" //
+				+ "                return true;\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveLeftHandSideAssignmentInSwitch(Queue<Integer> q, int discriminant) {\n" //
+				+ "        Integer i;\n" //
+				+ "        System.out.println(\"Before polling\");\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if ((i = q.poll()) != null) {\n" //
+				+ "                System.out.println(\"Value=\" + i);\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Empty\");\n" //
+				+ "            }\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"Another case\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentAndKeepUsedInitialization(Queue<Boolean> inputQueue) {\n" //
+				+ "        Boolean overusedVariable = Boolean.TRUE, doNotForgetMe = overusedVariable;\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (overusedVariable = inputQueue.poll()) {\n" //
+				+ "            System.out.println(\"Value=\" + doNotForgetMe);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.PULL_UP_ASSIGNMENT);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Queue;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void moveLeftHandSideAssignmentBeforeIf(Queue<Integer> queue) {\n" //
+				+ "        Integer i;\n" //
+				+ "        System.out.println(\"Before polling\");\n" //
+				+ "        i = queue.poll();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveRightHandSideAssignmentBeforeIf(Queue<Integer> q) {\n" //
+				+ "        Integer number;\n" //
+				+ "        System.out.println(\"Before polling\");\n" //
+				+ "        number = q.poll();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (null != number) {\n" //
+				+ "            System.out.println(\"Value=\" + number);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBeforeIfMultipleParenthesesToRemove(Queue<Integer> q) {\n" //
+				+ "        Integer i;\n" //
+				+ "        System.out.println(\"Before polling\");\n" //
+				+ "        i = q.poll();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBeforeIfAndMergeWithDeclaration(Queue<Integer> q) {\n" //
+				+ "        Integer i = q.poll(/* Keep this comment too */);\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBelowDeclaration(Queue<Integer> q) {\n" //
+				+ "        Integer i = q.poll();\n" //
+				+ "        i = q.poll();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void erasePassiveValue(Queue<Integer> q) {\n" //
+				+ "        Integer i = q.poll();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentWithoutParenthesis(Queue<Boolean> q) {\n" //
+				+ "        Boolean b = q.poll();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(\"Value=\" + b);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBeforeIfAtConditionOfTernaryExpression(String s, int i) {\n" //
+				+ "        final char c = s.charAt(i);\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (c == 'A' ? c == 'B' : c == 'C') {\n" //
+				+ "            System.out.println(\"A, B or C\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentBeforeIfAtStartOfInfixExpression(String s, int i) {\n" //
+				+ "        final char c = s.charAt(i);\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (c == 'A' || c == 'B' || c == 'C') {\n" //
+				+ "            System.out.println(\"A, B or C\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveNotConditionalAssignment(String s, int i, boolean isValid) {\n" //
+				+ "        final char c = s.charAt(i);\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid | c == 'A') {\n" //
+				+ "            System.out.println(\"valid or A\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentInComplexExpression(String s, int i, boolean isValid) {\n" //
+				+ "        final char c = s.charAt(i);\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (!(isValid | (i == 10 & c == 'A'))) {\n" //
+				+ "            System.out.println(\"valid or A\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean refactorSingleStatementBlock(int i, int j) {\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            i = j;\n" //
+				+ "            if (i < 10)\n" //
+				+ "                return true;\n" //
+				+ "        }\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveLeftHandSideAssignmentInSwitch(Queue<Integer> q, int discriminant) {\n" //
+				+ "        Integer i;\n" //
+				+ "        System.out.println(\"Before polling\");\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "                i = q.poll();\n" //
+				+ "                // Keep this comment\n" //
+				+ "            if (i != null) {\n" //
+				+ "                System.out.println(\"Value=\" + i);\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Empty\");\n" //
+				+ "            }\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"Another case\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveAssignmentAndKeepUsedInitialization(Queue<Boolean> inputQueue) {\n" //
+				+ "        Boolean overusedVariable = Boolean.TRUE, doNotForgetMe = overusedVariable;\n" //
+				+ "\n" //
+				+ "        overusedVariable = inputQueue.poll();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (overusedVariable) {\n" //
+				+ "            System.out.println(\"Value=\" + doNotForgetMe);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_PullUpAssignment_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotPullUpAssignment() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Queue;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotRefactor(Queue<Integer> q) {\n" //
+				+ "        Integer i;\n" //
+				+ "        System.out.println(\"Before polling\");\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (q == null) {\n" //
+				+ "            System.out.println(\"Null queue\");\n" //
+				+ "        } else if ((i = q.poll()) != null) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveAssignmentBeforeIfAtLeftOperandOfTernaryExpression(String s, int i, char c) {\n" //
+				+ "        if (c == 'A' ? (c = s.charAt(i)) == 'B' : c == 'C') {\n" //
+				+ "            System.out.println(\"Found\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not found\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveAssignmentBeforeIfAtRightOperandOfTernaryExpression(String s, int i, char c) {\n" //
+				+ "        if (c == 'A' ? c == 'B' : (c = s.charAt(i)) == 'C') {\n" //
+				+ "            System.out.println(\"Found\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not found\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveAssignmentBeforeIfInsideInfixExpression(String s, int i, char c) {\n" //
+				+ "        if (c == 'A' || (c = s.charAt(i)) == 'A' || c == 'B' || c == 'C') {\n" //
+				+ "            System.out.println(\"A, B or C\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveAssignmentAfterActiveCondition(String s, int i, char c) {\n" //
+				+ "        if (i++ == 10 || (c = s.charAt(i)) == 'A' || c == 'B' || c == 'C') {\n" //
+				+ "            System.out.println(\"A, B or C\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Not A, B or C\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorConditionalAnd(Queue<Boolean> q, boolean isValid) {\n" //
+				+ "        Boolean i;\n" //
+				+ "\n" //
+				+ "        if (isValid && (i = q.poll())) {\n" //
+				+ "            System.out.println(\"Value=\" + i);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Empty\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PULL_UP_ASSIGNMENT);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRemoveQualifier02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

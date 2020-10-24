@@ -1544,6 +1544,18 @@ public class CleanUpConstants {
 	public static final String ATOMIC_OBJECT= "cleanup.atomic_object"; //$NON-NLS-1$
 
 	/**
+	 * Moves assignments inside an if condition above the if node.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String PULL_UP_ASSIGNMENT= "cleanup.pull_up_assignment"; //$NON-NLS-1$
+
+	/**
 	 * Controls whether long literal suffix should be rewritten in uppercase.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
