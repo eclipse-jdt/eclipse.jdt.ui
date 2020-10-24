@@ -15,9 +15,6 @@
 package org.eclipse.jdt.text.tests.performance;
 
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.text.DocumentRewriteSession;
@@ -25,11 +22,14 @@ import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.ITextViewerExtension;
-import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.internal.texteditor.quickdiff.QuickDiffRangeDifference;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**
@@ -60,11 +60,11 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), EditorTestHelper.TEXT_EDITOR_ID, true);
 		fEditor.showChangeInformation(false);
-		ISourceViewer viewer= EditorTestHelper.getSourceViewer(fEditor);
+		SourceViewer viewer= EditorTestHelper.getSourceViewer(fEditor);
 		IDocument document= EditorTestHelper.getDocument(fEditor);
 		DocumentRewriteSession rewriteSession= null;
 		try {
-			if (viewer instanceof ITextViewerExtension)
+			if (viewer != null)
 				((ITextViewerExtension) viewer).getRewriteTarget().beginCompoundChange();
 			if (document instanceof IDocumentExtension4)
 				rewriteSession= ((IDocumentExtension4) document).startRewriteSession(DocumentRewriteSessionType.STRICTLY_SEQUENTIAL);
@@ -74,7 +74,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 		} finally {
 			if (document instanceof IDocumentExtension4)
 				((IDocumentExtension4) document).stopRewriteSession(rewriteSession);
-			if (viewer instanceof ITextViewerExtension)
+			if (viewer != null)
 				((ITextViewerExtension) viewer).getRewriteTarget().endCompoundChange();
 		}
 		EditorTestHelper.joinBackgroundActivities(fEditor);
