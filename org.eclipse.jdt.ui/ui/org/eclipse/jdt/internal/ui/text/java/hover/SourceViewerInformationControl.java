@@ -226,7 +226,7 @@ public class SourceViewerInformationControl
 			fStatusField.setLayoutData(gd2);
 
 			RGB javaDefaultColor= JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_DEFAULT).getRGB();
-			Color statusTextForegroundColor= new Color(fStatusField.getDisplay(), blend(fBackgroundColor.getRGB(), javaDefaultColor, 0.56f));
+			Color statusTextForegroundColor= new Color(fStatusField.getDisplay(), blend(fBackgroundColor.getRGB(), javaDefaultColor, 0.56));
 			fStatusField.setForeground(statusTextForegroundColor);
 			fStatusField.setBackground(fBackgroundColor);
 		}
@@ -246,13 +246,14 @@ public class SourceViewerInformationControl
 	 * @return the interpolated color
 	 * @since 3.6
 	 */
-	private static RGB blend(RGB bg, RGB fg, float factor) {
+	private static RGB blend(RGB bg, RGB fg, double factor) {
 		// copy of org.eclipse.jface.internal.text.revisions.Colors#blend(..)
 		Assert.isLegal(bg != null);
 		Assert.isLegal(fg != null);
-		Assert.isLegal(factor >= 0f && factor <= 1f);
+		Assert.isLegal(factor >= 0.0);
+		Assert.isLegal(factor <= 1.0);
 
-		float complement= 1f - factor;
+		double complement= 1.0 - factor;
 		return new RGB(
 				(int) (complement * bg.red + factor * fg.red),
 				(int) (complement * bg.green + factor * fg.green),
