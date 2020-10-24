@@ -560,7 +560,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					}
 				}
 			}
-			if (!javaElements.equals(fInputElements)) {
+			if (!Arrays.equals(javaElements,fInputElements)) {
 				addHistoryEntry(javaElements);
 			}
 		}
@@ -599,7 +599,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (inputElements == null) {
 			clearInput();
 		} else {
-			if (!inputElements.equals(prevInput)) {
+			if (!Arrays.equals(inputElements,prevInput)) {
 				for (TypeHierarchyViewer viewer : fAllViewers) {
 					viewer.setInput(null);
 				}
