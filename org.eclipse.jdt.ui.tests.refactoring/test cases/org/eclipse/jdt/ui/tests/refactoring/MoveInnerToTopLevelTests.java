@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -726,8 +727,7 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 
 	@Test
 	public void test_secondary_2() throws Exception {
-		if (BUG_304827)
-			return;
+		assumeFalse(BUG_304827);
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
@@ -738,22 +738,19 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 
 	@Test
 	public void test_secondary_4() throws Exception {
-		if (BUG_304827)
-			return;
+		assumeFalse(BUG_304827);
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
 	@Test
 	public void test_secondary_5() throws Exception {
-		if (BUG_304827)
-			return;
+		assumeFalse(BUG_304827);
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
 	@Test
 	public void test_secondary_6() throws Exception {
-		if (BUG_304827)
-			return;
+		assumeFalse(BUG_304827);
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 

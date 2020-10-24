@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import org.junit.Test;
 
@@ -157,8 +158,7 @@ public class RenameVirtualMethodInClassTests extends GenericRefactoringTest {
 
 	@Test
 	public void testEnumFail1() throws Exception {
-		if (BUG_83217_IMPLICIT_ENUM_METHODS)
-			return;
+		assumeFalse(BUG_83217_IMPLICIT_ENUM_METHODS);
 		helper1_0("value", "valueOf", new String[]{"QString;"});
 	}
 

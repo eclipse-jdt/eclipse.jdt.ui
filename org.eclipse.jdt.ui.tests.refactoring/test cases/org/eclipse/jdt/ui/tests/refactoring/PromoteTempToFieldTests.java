@@ -16,6 +16,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import java.util.Hashtable;
 
@@ -617,8 +618,7 @@ public class PromoteTempToFieldTests extends GenericRefactoringTest{
 	@Test
 	public void test18() throws Exception{
 		//printTestDisabledMessage("regression test for bug 39363");
-		if (BUG_39363)
-			return;
+		assumeFalse(BUG_39363);
 		int accessModifier= Modifier.PRIVATE;
 		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
 		boolean declareFinal= false;

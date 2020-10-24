@@ -16,6 +16,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -267,8 +268,7 @@ public class BinaryReferencesTests {
 
 	@Test
 	public void testRenameField04() throws Exception {
-		if (BUG_226660) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=226660
-			return;
+		assumeFalse(BUG_226660); // https://bugs.eclipse.org/bugs/show_bug.cgi?id=226660
 		List<SearchMatch> matches= doRenameField("source.Color", "GREEN");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"

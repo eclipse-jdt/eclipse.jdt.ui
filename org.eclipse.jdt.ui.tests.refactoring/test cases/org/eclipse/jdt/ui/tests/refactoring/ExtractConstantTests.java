@@ -17,6 +17,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import java.util.Hashtable;
 
@@ -347,8 +348,7 @@ public class ExtractConstantTests extends GenericRefactoringTest {
 
 	@Test
 	public void test34() throws Exception { // syntax error
-		if (BUG_405780)
-			return;
+		assumeFalse(BUG_405780);
 		helper1(7, 20, 7, 35, true, false, "STRING", "STRING");
 	}
 
