@@ -17,6 +17,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -175,14 +176,32 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 		}
 	}
 
+	/**
+	 * @param cus The compilation units
+	 * @param expectedGroupCategories The expected group categories
+	 * @throws CoreException The core exception
+	 * @deprecated Use assertGroupCategoryUsed(ICompilationUnit[] cus, Set<String> expectedGroupCategories) instead.
+	 */
+	@Deprecated
 	protected void assertGroupCategoryUsed(ICompilationUnit[] cus, String[] expectedGroupCategories) throws CoreException {
+		assertGroupCategoryUsed(cus, new HashSet<>(Arrays.asList(expectedGroupCategories)));
+	}
+
+	/**
+	 * @param cus The compilation units
+	 * @param setOfExpectedGroupCategories The expected group categories
+	 * @throws CoreException The core exception
+	 */
+	protected void assertGroupCategoryUsed(ICompilationUnit[] cus, Set<String> setOfExpectedGroupCategories) throws CoreException {
 		final CleanUpRefactoring ref= new CleanUpRefactoring();
 		ref.setUseOptionsFromProfile(true);
 		ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 
 		for (ICompilationUnit cu : cus) {
+			assertNotNull("No compilation unit should be null", cu);
 			ref.addCompilationUnit(cu);
 		}
+
 		for (ICleanUp cleanUp : cleanUps) {
 			ref.addCleanUp(cleanUp);
 		}
@@ -194,18 +213,14 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 		create.run(new NullProgressMonitor());
 		Change change= create.getChange();
 
-		Set<GroupCategory> set= new HashSet<>();
+		Set<GroupCategory> categories= new HashSet<>();
 
-		collectGroupCategories(set, change);
+		collectGroupCategories(categories, change);
 
-		for (String expectedGroupCategory : expectedGroupCategories) {
-			boolean found= false;
-			for (GroupCategory category : set) {
-				if (category.getName().equals(expectedGroupCategory)) {
-					found= true;
-				}
+		for (GroupCategory category : categories) {
+			if (!setOfExpectedGroupCategories.contains(category.getName())) {
+				fail("Should have group category: " + category.getName() + ", found instead: " + categories.stream().map(e -> e.getName()).reduce("", String::concat));
 			}
-			assertTrue("should have group category: " + expectedGroupCategory + ", found instead: "+set.stream().map(e -> e.getName()).reduce("", String::concat), found);
 		}
 	}
 
