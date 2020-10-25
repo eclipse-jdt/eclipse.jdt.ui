@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.testplugin.util;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 import org.junit.Assert;
 
@@ -67,9 +67,7 @@ public class DialogCheck {
 			//force the creation of the verify dialog
 			getShell();
 		}
-		if (_verifyDialog.open(dialog) == IDialogConstants.NO_ID) {
-			fail(_verifyDialog.getFailureText());
-		}
+		assertNotEquals(_verifyDialog.getFailureText(), IDialogConstants.NO_ID, _verifyDialog.open(dialog));
 	}
 
 
