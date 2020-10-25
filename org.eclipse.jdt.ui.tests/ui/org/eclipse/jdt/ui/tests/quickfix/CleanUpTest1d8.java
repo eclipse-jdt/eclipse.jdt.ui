@@ -274,7 +274,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_AtomicObject_description)));
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(
+				MultiFixMessages.CodeStyleCleanUp_AtomicObject_usage+" "+2,
+				MultiFixMessages.CodeStyleCleanUp_AtomicObject_usage+" "+1,
+				MultiFixMessages.CodeStyleCleanUp_AtomicObject_declaration)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 
@@ -318,11 +321,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static void doNotRefactorBadlyInitializedArray() {\n" //
-				+ "        Date[] dateRef= new Date[] {new Date(), new Date()};\n" //
+				+ "        Date[] dateReference= new Date[] {new Date(), new Date()};\n" //
 				+ "        Runnable runnable = () -> {\n" //
-				+ "            dateRef[0] = new Date();\n" //
+				+ "            dateReference[0] = new Date();\n" //
 				+ "        };\n" //
-				+ "        System.out.println(dateRef[0]);\n" //
+				+ "        System.out.println(dateReference[0]);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static Date doNotTouchUnknownPurpose() {\n" //
@@ -2711,7 +2714,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.JoinCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.JoinCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 

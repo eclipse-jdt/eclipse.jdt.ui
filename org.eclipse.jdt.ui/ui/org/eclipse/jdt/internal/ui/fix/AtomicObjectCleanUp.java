@@ -300,7 +300,7 @@ public class AtomicObjectCleanUp extends AbstractMultiFix {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
 			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_AtomicObject_description, cuRewrite);
+			TextEditGroup groupdeclaration= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_AtomicObject_declaration, cuRewrite);
 
 			Class<?> atomicClass;
 			Type objectClass= null;
@@ -337,10 +337,10 @@ public class AtomicObjectCleanUp extends AbstractMultiFix {
 				arguments.add(ASTNodes.createMoveTarget(rewrite, (Expression) arrayCreation.getInitializer().expressions().get(0)));
 			}
 
-			ASTNodes.replaceButKeepComment(rewrite, arrayCreation, newAtomicObject, group);
+			ASTNodes.replaceButKeepComment(rewrite, arrayCreation, newAtomicObject, groupdeclaration);
 
 			for (Object variableDimension : variableDimensions) {
-				rewrite.remove((ASTNode) variableDimension, group);
+				rewrite.remove((ASTNode) variableDimension, groupdeclaration);
 			}
 
 			Type atomicType= ast.newSimpleType(ASTNodeFactory.newName(ast, atomicClassNameText));
@@ -351,13 +351,15 @@ public class AtomicObjectCleanUp extends AbstractMultiFix {
 				atomicInstance= newParameterizedType;
 			}
 
-			ASTNodes.replaceButKeepComment(rewrite, type, atomicInstance, group);
+			ASTNodes.replaceButKeepComment(rewrite, type, atomicInstance, groupdeclaration);
 
+			int i=1;
 			for (ArrayAccess accessRead : accessReads) {
 				MethodInvocation newMethodInvocation= ast.newMethodInvocation();
 				newMethodInvocation.setExpression(ASTNodes.createMoveTarget(rewrite, accessRead.getArray()));
 				newMethodInvocation.setName(ast.newSimpleName("get")); //$NON-NLS-1$
-				ASTNodes.replaceButKeepComment(rewrite, accessRead, newMethodInvocation, group);
+				TextEditGroup groupusage= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_AtomicObject_usage+" "+Integer.toString(i++), cuRewrite); //$NON-NLS-1$
+				ASTNodes.replaceButKeepComment(rewrite, accessRead, newMethodInvocation, groupusage);
 			}
 
 			for (Assignment assignmentRead : assignmentReads) {
@@ -365,7 +367,8 @@ public class AtomicObjectCleanUp extends AbstractMultiFix {
 				newMethodInvocation.setExpression(ASTNodes.createMoveTarget(rewrite, ((ArrayAccess) assignmentRead.getLeftHandSide()).getArray()));
 				newMethodInvocation.setName(ast.newSimpleName("set")); //$NON-NLS-1$
 				newMethodInvocation.arguments().add(ASTNodes.createMoveTarget(rewrite, assignmentRead.getRightHandSide()));
-				ASTNodes.replaceButKeepComment(rewrite, assignmentRead, newMethodInvocation, group);
+				TextEditGroup groupusage= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_AtomicObject_usage+" "+Integer.toString(i++), cuRewrite); //$NON-NLS-1$
+				ASTNodes.replaceButKeepComment(rewrite, assignmentRead, newMethodInvocation, groupusage);
 			}
 		}
 	}
