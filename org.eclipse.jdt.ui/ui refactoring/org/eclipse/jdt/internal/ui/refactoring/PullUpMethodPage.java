@@ -227,8 +227,9 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		final Map<IType, HashSet<IMember>> typeToMemberSet= createTypeToMemberSetMapping(members);
 
 		final Map<IType, IMember[]> typeToMemberArray= new HashMap<>();
-		for (IType type : typeToMemberSet.keySet()) {
-			final Set<IMember> memberSet= typeToMemberSet.get(type);
+		for (Map.Entry<IType, HashSet<IMember>> entry : typeToMemberSet.entrySet()) {
+			IType type = entry.getKey();
+			final Set<IMember> memberSet= entry.getValue();
 			final IMember[] memberArray= memberSet.toArray(new IMember[memberSet.size()]);
 			typeToMemberArray.put(type, memberArray);
 		}

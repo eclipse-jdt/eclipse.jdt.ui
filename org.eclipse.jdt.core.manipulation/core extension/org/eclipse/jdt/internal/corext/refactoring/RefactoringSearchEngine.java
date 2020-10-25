@@ -182,8 +182,9 @@ public class RefactoringSearchEngine {
 
 		SearchResultGroup[] result= new SearchResultGroup[grouped.size()];
 		int i= 0;
-		for (IResource resource : grouped.keySet()) {
-			List<SearchMatch> searchMatches= grouped.get(resource);
+		for (Map.Entry<IResource, List<SearchMatch>> entry : grouped.entrySet()) {
+			IResource resource = entry.getKey();
+			List<SearchMatch> searchMatches= entry.getValue();
 			SearchMatch[] matchArray= searchMatches.toArray(new SearchMatch[searchMatches.size()]);
 			result[i]= new SearchResultGroup(resource, matchArray);
 			i++;

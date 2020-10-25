@@ -768,8 +768,9 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		final int commonActionCode= getCommonActionCodeForSelectedInfos();
 		if (commonActionCode == -1)
 			return 0;
-		for (String key : stringMapping.keySet()) {
-			final int action= stringMapping.get(key);
+		for (Map.Entry<String, Integer> entry : stringMapping.entrySet()) {
+			String key = entry.getKey();
+			final int action= entry.getValue();
 			if (commonActionCode == action) {
 				for (int i= 0; i < keys.length; i++) {
 					if (key.equals(keys[i]))

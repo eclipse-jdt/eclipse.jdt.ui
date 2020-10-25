@@ -253,8 +253,9 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		if (eventDetail == DND.DROP_MOVE) {
 			ITreeSelection treeSelection= (ITreeSelection)fSelection;
 			Map<IWorkingSet, List<Object>> workingSets= groupByWorkingSets(treeSelection.getPaths());
-			for (IWorkingSet ws : workingSets.keySet()) {
-				List<Object> toRemove= workingSets.get(ws);
+			for (Map.Entry<IWorkingSet, List<Object>> entry : workingSets.entrySet()) {
+				IWorkingSet ws = entry.getKey();
+				List<Object> toRemove= entry.getValue();
 				List<IAdaptable> currentElements= new ArrayList<>(Arrays.asList(ws.getElements()));
 				currentElements.removeAll(toRemove);
 				ws.setElements(currentElements.toArray(new IAdaptable[currentElements.size()]));

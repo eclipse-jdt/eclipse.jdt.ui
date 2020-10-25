@@ -286,8 +286,8 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 		private int countFilesWithValue(int i) {
 			int count= 0;
-			for (IType iType : fFileCount.keySet()) {
-				if (fFileCount.get(iType).intValue() == i)
+			for (Map.Entry<IType, Integer> entry : fFileCount.entrySet()) {
+				if (entry.getValue().intValue() == i)
 					count++;
 			}
 			return count;
