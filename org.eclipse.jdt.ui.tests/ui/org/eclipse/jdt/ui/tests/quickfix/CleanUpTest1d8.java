@@ -15,6 +15,9 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertNotEquals;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -125,6 +128,16 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return booleanRef[0];\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public static String useNonInitializedAtomicString() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String[] stringRef= new String[] {null};\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        Runnable runnable = () -> stringRef[0] = \"foo\";\n" //
+				+ "        runnable.run();\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return stringRef[0];\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static Date useAtomicReferenceInAnonymousClass() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        Date[] dateRef= new Date[1];\n" //
@@ -225,6 +238,16 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return booleanRef.get();\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public static String useNonInitializedAtomicString() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        AtomicReference<String> stringRef= new AtomicReference<>();\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        Runnable runnable = () -> stringRef.set(\"foo\");\n" //
+				+ "        runnable.run();\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return stringRef.get();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static Date useAtomicReferenceInAnonymousClass() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        AtomicReference<Date> dateRef= new AtomicReference<>();\n" //
@@ -251,7 +274,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.CodeStyleCleanUp_AtomicObject_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_AtomicObject_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 

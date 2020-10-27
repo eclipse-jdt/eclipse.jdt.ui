@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -330,7 +331,8 @@ public class AtomicObjectCleanUp extends AbstractMultiFix {
 			ClassInstanceCreation newAtomicObject= ast.newClassInstanceCreation();
 			newAtomicObject.setType(atomicInstance);
 
-			if (arrayCreation.getInitializer() != null) {
+			if (arrayCreation.getInitializer() != null
+					&& !ASTNodes.is((Expression) arrayCreation.getInitializer().expressions().get(0), NullLiteral.class)) {
 				List<Expression> arguments= newAtomicObject.arguments();
 				arguments.add(ASTNodes.createMoveTarget(rewrite, (Expression) arrayCreation.getInitializer().expressions().get(0)));
 			}
