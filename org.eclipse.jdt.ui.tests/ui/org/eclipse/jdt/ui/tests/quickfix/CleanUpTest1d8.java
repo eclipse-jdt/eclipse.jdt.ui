@@ -1551,7 +1551,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testDoNotRefactorWithExpressions() throws Exception {
+	public void testDoNotRefactorWithAnonymousInstantiation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
 				+ "package test1;\n" //
@@ -1579,7 +1579,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	@Test
 	public void testSimplifyLambdaExpression() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
+		String input= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import static java.util.Calendar.getInstance;\n" //
@@ -1619,7 +1619,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<String, String> removeReturnAndBracketsWithParentheses() {\n" //
-				+ "        return someString -> {return someString.trim().toLowerCase() + \"bar\";};\n" //
+				+ "        return (someString) -> {return someString.trim().toLowerCase() + \"bar\";};\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<String, String> doNotRemoveReturnWithSeveralStatements() {\n" //
@@ -1628,11 +1628,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Supplier<ArrayList<String>> useCreationReference() {\n" //
-				+ "        return () -> new ArrayList<>();\n" //
+				+ "        return () -> { return new ArrayList<>(); };\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameter() {\n" //
-				+ "        return capacity -> new ArrayList<>(capacity);\n" //
+				+ "        return (capacity) -> new ArrayList<>(capacity);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameterAndType() {\n" //
@@ -1661,7 +1661,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<String, Long> useTypeReference() {\n" //
-				+ "        return numberInText -> Long.getLong(numberInText);\n" //
+				+ "        return (numberInText) -> { return Long.getLong(numberInText); };\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static Function<Instant, Date> useTypeReferenceOnClassMethod() {\n" //
@@ -1710,11 +1710,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return numberToPrint -> Integer.toString(numberToPrint);\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", input, false, null);
 
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
 
-		sample= "" //
+		String output= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import static java.util.Calendar.getInstance;\n" //
@@ -1845,9 +1845,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return numberToPrint -> Integer.toString(numberToPrint);\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertNotEquals("The class must be changed", input, output);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 
 	@Test

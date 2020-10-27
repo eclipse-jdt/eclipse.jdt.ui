@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -83,7 +82,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		this(Collections.emptyMap());
 	}
 
-	public LambdaExpressionAndMethodRefCleanUp(Map<String, String> options) {
+	public LambdaExpressionAndMethodRefCleanUp(final Map<String, String> options) {
 		super(options);
 	}
 
@@ -104,24 +103,24 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuilder bld= new StringBuilder();
-
 		if (isEnabled(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF)) {
-			bld.append("someString -> someString.trim().toLowerCase();\n"); //$NON-NLS-1$
-			bld.append("someString -> someString.trim().toLowerCase();\n"); //$NON-NLS-1$
-			bld.append("someString -> (someString.trim().toLowerCase() + \"bar\");\n"); //$NON-NLS-1$
-			bld.append("ArrayList::new;\n"); //$NON-NLS-1$
-			bld.append("Date::getTime;\n"); //$NON-NLS-1$
-		} else {
-			bld.append("(someString) -> someString.trim().toLowerCase();\n"); //$NON-NLS-1$
-			bld.append("someString -> {return someString.trim().toLowerCase();};\n"); //$NON-NLS-1$
-			bld.append("someString -> {return someString.trim().toLowerCase() + \"bar\";};\n"); //$NON-NLS-1$
-			bld.append("() -> new ArrayList<>();\n"); //$NON-NLS-1$
-			bld.append("date -> date.getTime();\n"); //$NON-NLS-1$
+			return "" //$NON-NLS-1$
+					+ "someString -> someString.trim().toLowerCase();\n" //$NON-NLS-1$
+					+ "someString -> someString.trim().toLowerCase();\n" //$NON-NLS-1$
+					+ "someString -> (someString.trim().toLowerCase() + \"bar\");\n" //$NON-NLS-1$
+					+ "ArrayList::new;\n" //$NON-NLS-1$
+					+ "Date::getTime;\n"; //$NON-NLS-1$
 		}
 
-		return bld.toString();
+		return "" //$NON-NLS-1$
+				+ "(someString) -> someString.trim().toLowerCase();\n" //$NON-NLS-1$
+				+ "someString -> {return someString.trim().toLowerCase();};\n" //$NON-NLS-1$
+				+ "someString -> {return someString.trim().toLowerCase() + \"bar\";};\n" //$NON-NLS-1$
+				+ "() -> new ArrayList<>();\n" //$NON-NLS-1$
+				+ "date -> date.getTime();\n"; //$NON-NLS-1$
 	}
+
+	private enum ActionType { DO_NOTHING, REMOVE_RETURN, CLASS_INSTANCE_REF, TYPE_REF, SUPER_METHOD_REF, METHOD_REF }
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
@@ -134,156 +133,187 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		unit.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(final LambdaExpression node) {
-				if (node.hasParentheses() && node.parameters().size() == 1
-						&& node.parameters().get(0) instanceof VariableDeclarationFragment) {
-					rewriteOperations.add(new RemoveParamParenthesesOperation(node));
-					return false;
-				} else if (node.getBody() instanceof Block) {
-					List<Statement> statements= ((Block) node.getBody()).statements();
+				ActionType actionType= ActionType.DO_NOTHING;
+				ITypeBinding classBinding= null;
 
-					if (statements.size() == 1 && statements.get(0) instanceof ReturnStatement) {
-						rewriteOperations.add(new RemoveReturnAndBracketsOperation(node, statements));
-						return false;
+				boolean removeParamParentheses= hasToRemoveParamParentheses(node);
+				Expression bodyExpression= null;
+
+				if (node.getBody() instanceof Block) {
+					ReturnStatement returnStatement= ASTNodes.as((Block) node.getBody(), ReturnStatement.class);
+
+					if (returnStatement != null) {
+						bodyExpression= returnStatement.getExpression();
+						actionType= ActionType.REMOVE_RETURN;
 					}
-				} else if (node.getBody() instanceof ClassInstanceCreation) {
-					ClassInstanceCreation ci= (ClassInstanceCreation) node.getBody();
+				} else if (node.getBody() instanceof Expression) {
+					bodyExpression= (Expression) node.getBody();
+				}
 
-					List<Expression> arguments= ci.arguments();
+				if (bodyExpression instanceof ClassInstanceCreation) {
+					ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) bodyExpression;
+					List<Expression> arguments= classInstanceCreation.arguments();
+
 					if (node.parameters().size() == arguments.size()
 							&& areSameIdentifiers(node, arguments)
-							&& ci.getAnonymousClassDeclaration() == null) {
-						rewriteOperations.add(new ReplaceByCreationReferenceOperation(node, ci));
-						return false;
+							&& classInstanceCreation.getAnonymousClassDeclaration() == null) {
+						actionType= ActionType.CLASS_INSTANCE_REF;
 					}
-				} else if (node.getBody() instanceof SuperMethodInvocation) {
-					SuperMethodInvocation smi= (SuperMethodInvocation) node.getBody();
-					List<Expression> arguments= smi.arguments();
+				} else if (bodyExpression instanceof SuperMethodInvocation) {
+					SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) bodyExpression;
+					List<Expression> arguments= superMethodInvocation.arguments();
 
 					if (node.parameters().size() == arguments.size() && areSameIdentifiers(node, arguments)) {
-						rewriteOperations.add(new ReplaceBySuperMethodReferenceOperation(node, smi));
-						return false;
+						actionType= ActionType.SUPER_METHOD_REF;
 					}
-				} else if (node.getBody() instanceof MethodInvocation) {
-					MethodInvocation methodInvocation= (MethodInvocation) node.getBody();
+				} else if (bodyExpression instanceof MethodInvocation) {
+					MethodInvocation methodInvocation= (MethodInvocation) bodyExpression;
 					Expression calledExpression= methodInvocation.getExpression();
 					List<Expression> arguments= methodInvocation.arguments();
 
 					if (node.parameters().size() == arguments.size()) {
-						if (!areSameIdentifiers(node, arguments)) {
-							return true;
-						}
+						if (areSameIdentifiers(node, arguments)) {
 
-						IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+							IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
 
-						if (Boolean.TRUE.equals(ASTNodes.isStatic(methodInvocation))) {
-							if (methodBinding == null || methodBinding.getDeclaringClass() == null) {
-								return true;
-							}
+							if (Boolean.TRUE.equals(ASTNodes.isStatic(methodInvocation))) {
+								boolean valid= true;
 
-							ITypeBinding calledType= methodBinding.getDeclaringClass();
+								if (methodBinding != null && methodBinding.getDeclaringClass() != null) {
+									ITypeBinding calledType= methodBinding.getDeclaringClass();
 
-							if (!arguments.isEmpty()) {
-								String[] remainingParams= new String[arguments.size() - 1];
+									if (!arguments.isEmpty()) {
+										String[] remainingParams= new String[arguments.size() - 1];
 
-								for (int i= 0; i < arguments.size() - 1; i++) {
-									ITypeBinding resolveTypeBinding= arguments.get(i + 1).resolveTypeBinding();
+										for (int i= 0; i < arguments.size() - 1; i++) {
+											ITypeBinding resolveTypeBinding= arguments.get(i + 1).resolveTypeBinding();
 
-									if (resolveTypeBinding == null) {
-										return true;
+											if (resolveTypeBinding == null) {
+												valid= false;
+												break;
+											}
+
+											remainingParams[i]= resolveTypeBinding.getQualifiedName();
+										}
+
+										if (valid) {
+											for (IMethodBinding declaredMethodBinding : calledType.getDeclaredMethods()) {
+												if ((declaredMethodBinding.getModifiers() & Modifier.STATIC) == 0 && ASTNodes.usesGivenSignature(declaredMethodBinding,
+														calledType.getQualifiedName(), methodInvocation.getName().getIdentifier(), remainingParams)) {
+													valid= false;
+													break;
+												}
+											}
+										}
 									}
 
-									remainingParams[i]= resolveTypeBinding.getQualifiedName();
-								}
-
-								for (IMethodBinding declaredMethodBinding : calledType.getDeclaredMethods()) {
-									if ((declaredMethodBinding.getModifiers() & Modifier.STATIC) == 0 && ASTNodes.usesGivenSignature(declaredMethodBinding,
-											calledType.getQualifiedName(), methodInvocation.getName().getIdentifier(), remainingParams)) {
-										return true;
+									if (valid) {
+										actionType= ActionType.TYPE_REF;
+										classBinding= calledType;
 									}
 								}
 							}
 
-							rewriteOperations.add(new ReplaceByTypeReferenceOperation(node, methodInvocation, calledType));
-							return false;
-						}
+							if (calledExpression == null) {
+								if (methodBinding != null) {
+									ITypeBinding calledType= methodBinding.getDeclaringClass();
+									ITypeBinding enclosingType= Bindings.getBindingOfParentType(node);
 
-						if (calledExpression == null) {
-							if (methodBinding != null) {
-								ITypeBinding calledType= methodBinding.getDeclaringClass();
-								ITypeBinding enclosingType= Bindings.getBindingOfParentType(node);
-
-								if (calledType != null && Bindings.isSuperType(calledType, enclosingType)) {
-									rewriteOperations.add(new ReplaceByMethodReferenceOperation(node, methodInvocation));
-									return false;
+									if (calledType != null && Bindings.isSuperType(calledType, enclosingType)) {
+										actionType= ActionType.METHOD_REF;
+									}
 								}
-							}
-						} else if (calledExpression instanceof StringLiteral || calledExpression instanceof NumberLiteral
-								|| calledExpression instanceof ThisExpression) {
-							rewriteOperations.add(new ReplaceByMethodReferenceOperation(node, methodInvocation));
-							return false;
-						} else if (calledExpression instanceof FieldAccess) {
-							FieldAccess fieldAccess= (FieldAccess) calledExpression;
+							} else if (calledExpression instanceof StringLiteral || calledExpression instanceof NumberLiteral
+									|| calledExpression instanceof ThisExpression) {
+								actionType= ActionType.METHOD_REF;
+							} else if (calledExpression instanceof FieldAccess) {
+								FieldAccess fieldAccess= (FieldAccess) calledExpression;
 
-							if (fieldAccess.resolveFieldBinding() != null && fieldAccess.resolveFieldBinding().isEffectivelyFinal()) {
-								rewriteOperations.add(new ReplaceByMethodReferenceOperation(node, methodInvocation));
-								return false;
-							}
-						} else if (calledExpression instanceof SuperFieldAccess) {
-							SuperFieldAccess fieldAccess= (SuperFieldAccess) calledExpression;
+								if (fieldAccess.resolveFieldBinding() != null && fieldAccess.resolveFieldBinding().isEffectivelyFinal()) {
+									actionType= ActionType.METHOD_REF;
+								}
+							} else if (calledExpression instanceof SuperFieldAccess) {
+								SuperFieldAccess fieldAccess= (SuperFieldAccess) calledExpression;
 
-							if (fieldAccess.resolveFieldBinding() != null && fieldAccess.resolveFieldBinding().isEffectivelyFinal()) {
-								rewriteOperations.add(new ReplaceByMethodReferenceOperation(node, methodInvocation));
-								return false;
+								if (fieldAccess.resolveFieldBinding() != null && fieldAccess.resolveFieldBinding().isEffectivelyFinal()) {
+									actionType= ActionType.METHOD_REF;
+								}
 							}
 						}
 					} else if (calledExpression instanceof SimpleName && node.parameters().size() == arguments.size() + 1) {
 						SimpleName calledObject= (SimpleName) calledExpression;
 
 						if (isSameIdentifier(node, 0, calledObject)) {
+							boolean valid= true;
+
 							for (int i= 0; i < arguments.size(); i++) {
 								ASTNode expression= ASTNodes.getUnparenthesedExpression(arguments.get(i));
 
 								if (!(expression instanceof SimpleName) || !isSameIdentifier(node, i + 1, (SimpleName) expression)) {
-									return true;
+									valid= false;
+									break;
 								}
 							}
 
-							ITypeBinding clazz= null;
-							if (calledExpression.resolveTypeBinding() != null) {
-								clazz= calledExpression.resolveTypeBinding();
-							} else if (methodInvocation.resolveMethodBinding() != null && methodInvocation.resolveMethodBinding().getDeclaringClass() != null) {
-								clazz= methodInvocation.resolveMethodBinding().getDeclaringClass();
-							} else {
-								return true;
-							}
+							if (valid) {
+								ITypeBinding clazz= null;
 
-							String[] cumulativeParams= new String[arguments.size() + 1];
-							cumulativeParams[0]= clazz.getQualifiedName();
-
-							for (int i= 0; i < arguments.size(); i++) {
-								ITypeBinding resolveTypeBinding= arguments.get(i).resolveTypeBinding();
-
-								if (resolveTypeBinding == null) {
-									return true;
+								if (calledExpression.resolveTypeBinding() != null) {
+									clazz= calledExpression.resolveTypeBinding();
+								} else if (methodInvocation.resolveMethodBinding() != null && methodInvocation.resolveMethodBinding().getDeclaringClass() != null) {
+									clazz= methodInvocation.resolveMethodBinding().getDeclaringClass();
 								}
 
-								cumulativeParams[i + 1]= resolveTypeBinding.getQualifiedName();
-							}
+								if (clazz != null) {
+									String[] cumulativeParams= new String[arguments.size() + 1];
+									cumulativeParams[0]= clazz.getQualifiedName();
 
-							for (IMethodBinding declaredMethodBinding : clazz.getDeclaredMethods()) {
-								if ((declaredMethodBinding.getModifiers() & Modifier.STATIC) > 0 && ASTNodes.usesGivenSignature(declaredMethodBinding,
-										clazz.getQualifiedName(), methodInvocation.getName().getIdentifier(), cumulativeParams)) {
-									return true;
+									for (int i= 0; i < arguments.size(); i++) {
+										ITypeBinding resolveTypeBinding= arguments.get(i).resolveTypeBinding();
+
+										if (resolveTypeBinding == null) {
+											valid= false;
+											break;
+										}
+
+										cumulativeParams[i + 1]= resolveTypeBinding.getQualifiedName();
+									}
+
+									if (valid) {
+										for (IMethodBinding declaredMethodBinding : clazz.getDeclaredMethods()) {
+											if ((declaredMethodBinding.getModifiers() & Modifier.STATIC) > 0 && ASTNodes.usesGivenSignature(declaredMethodBinding,
+													clazz.getQualifiedName(), methodInvocation.getName().getIdentifier(), cumulativeParams)) {
+												valid= false;
+												break;
+											}
+										}
+									}
+
+									if (valid) {
+										actionType= ActionType.TYPE_REF;
+										classBinding= clazz;
+									}
 								}
 							}
-
-							rewriteOperations.add(new ReplaceByTypeReferenceOperation(node, methodInvocation, clazz));
-							return false;
 						}
 					}
 				}
 
+				if (removeParamParentheses || actionType != ActionType.DO_NOTHING) {
+					rewriteOperations.add(new ReplaceLambdaOperation(node, removeParamParentheses, actionType, bodyExpression, classBinding));
+					return false;
+				}
+
 				return true;
+			}
+
+			private boolean hasToRemoveParamParentheses(final LambdaExpression node) {
+				if (node.hasParentheses() && node.parameters().size() == 1
+						&& node.parameters().get(0) instanceof VariableDeclarationFragment) {
+					return true;
+				}
+
+				return false;
 			}
 
 			/**
@@ -310,8 +340,8 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 				Object param0= node.parameters().get(i);
 
 				if (param0 instanceof VariableDeclarationFragment) {
-					VariableDeclarationFragment vdf= (VariableDeclarationFragment) param0;
-					return vdf.getName().getIdentifier().equals(argument.getIdentifier());
+					VariableDeclarationFragment variableDeclarationFragment= (VariableDeclarationFragment) param0;
+					return variableDeclarationFragment.getName().getIdentifier().equals(argument.getIdentifier());
 				}
 
 				return false;
@@ -323,24 +353,32 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[rewriteOperations.size()]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocation problem) {
 		return false;
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(final CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
 		return null;
 	}
 
-	private static class RemoveParamParenthesesOperation extends CompilationUnitRewriteOperation {
+	private static class ReplaceLambdaOperation extends CompilationUnitRewriteOperation {
 		private final LambdaExpression node;
+		private final boolean removeParentheses;
+		private final ActionType action;
+		private final Expression bodyExpression;
+		private final ITypeBinding classBinding;
 
-		public RemoveParamParenthesesOperation(final LambdaExpression node) {
+		public ReplaceLambdaOperation(final LambdaExpression node, final boolean removeParentheses, final ActionType action, final Expression bodyExpression, final ITypeBinding classBinding) {
 			this.node= node;
+			this.removeParentheses= removeParentheses;
+			this.action= action;
+			this.bodyExpression= bodyExpression;
+			this.classBinding= classBinding;
 		}
 
 		@Override
@@ -349,148 +387,95 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
 
-			LambdaExpression copyOfLambdaExpression= ast.newLambdaExpression();
-			ASTNode copyOfParameter= rewrite.createCopyTarget((ASTNode) node.parameters().get(0));
-			copyOfLambdaExpression.parameters().add(copyOfParameter);
-			copyOfLambdaExpression.setBody(rewrite.createCopyTarget(node.getBody()));
-			copyOfLambdaExpression.setParentheses(false);
-			ASTNodes.replaceButKeepComment(rewrite, node, copyOfLambdaExpression, group);
-		}
-	}
+			switch (action) {
+				case REMOVE_RETURN:
+					LambdaExpression copyOfLambdaExpression2= ast.newLambdaExpression();
+					copyParameters(rewrite, node, copyOfLambdaExpression2);
 
-	private static class RemoveReturnAndBracketsOperation extends CompilationUnitRewriteOperation {
-		private final LambdaExpression node;
+					if (removeParentheses) {
+						copyOfLambdaExpression2.setParentheses(false);
+					}
 
-		private final List<Statement> statements;
+					copyOfLambdaExpression2.setBody(ASTNodeFactory.parenthesizeIfNeeded(ast, ASTNodes.createMoveTarget(rewrite, bodyExpression)));
+					ASTNodes.replaceButKeepComment(rewrite, node, copyOfLambdaExpression2, group);
+					break;
 
-		public RemoveReturnAndBracketsOperation(final LambdaExpression node, final List<Statement> statements) {
-			this.node= node;
-			this.statements= statements;
-		}
+				case TYPE_REF:
+					TypeMethodReference typeMethodRef= ast.newTypeMethodReference();
+					MethodInvocation typeMethodInvocation= (MethodInvocation) bodyExpression;
 
-		@Override
-		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			AST ast= cuRewrite.getRoot().getAST();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
+					typeMethodRef.setType(copyType(cuRewrite, ast, typeMethodInvocation, classBinding));
+					typeMethodRef.setName(ASTNodes.createMoveTarget(rewrite, typeMethodInvocation.getName()));
+					ASTNodes.replaceButKeepComment(rewrite, node, typeMethodRef, group);
+					break;
 
-			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
-			Expression copyOfExpression= (Expression) rewrite.createCopyTarget(returnStatement.getExpression());
-			ASTNode node1= node.getBody();
-			ASTNode replacement= ASTNodeFactory.parenthesizeIfNeeded(ast, copyOfExpression);
-			ASTNodes.replaceButKeepComment(rewrite, node1, replacement, group);
-		}
-	}
+				case METHOD_REF:
+					ExpressionMethodReference methodRef= ast.newExpressionMethodReference();
+					MethodInvocation methodInvocation= (MethodInvocation) bodyExpression;
 
-	private static class ReplaceByCreationReferenceOperation extends CompilationUnitRewriteOperation {
-		private final LambdaExpression node;
+					if (methodInvocation.getExpression() != null) {
+						methodRef.setExpression(ASTNodes.createMoveTarget(rewrite, methodInvocation.getExpression()));
+					} else {
+						methodRef.setExpression(ast.newThisExpression());
+					}
 
-		private final ClassInstanceCreation classInstanceCreation;
+					methodRef.setName(ASTNodes.createMoveTarget(rewrite, methodInvocation.getName()));
+					ASTNodes.replaceButKeepComment(rewrite, node, methodRef, group);
+					break;
 
-		public ReplaceByCreationReferenceOperation(final LambdaExpression node, final ClassInstanceCreation classInstanceCreation) {
-			this.node= node;
-			this.classInstanceCreation= classInstanceCreation;
-		}
+				case SUPER_METHOD_REF:
+					SuperMethodReference superMethodRef= ast.newSuperMethodReference();
+					SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) bodyExpression;
 
-		@Override
-		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			AST ast= cuRewrite.getRoot().getAST();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
+					superMethodRef.setName(ASTNodes.createMoveTarget(rewrite, superMethodInvocation.getName()));
+					ASTNodes.replaceButKeepComment(rewrite, node, superMethodRef, group);
+					break;
 
-			CreationReference creationRef= ast.newCreationReference();
-			creationRef.setType(copyType(cuRewrite, ast, classInstanceCreation, classInstanceCreation.resolveTypeBinding()));
-			ASTNodes.replaceButKeepComment(rewrite, node, creationRef, group);
-		}
-	}
+				case CLASS_INSTANCE_REF:
+					CreationReference creationRef= ast.newCreationReference();
+					ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) bodyExpression;
 
-	private static class ReplaceBySuperMethodReferenceOperation extends CompilationUnitRewriteOperation {
-		private final LambdaExpression node;
+					creationRef.setType(copyType(cuRewrite, ast, classInstanceCreation, classInstanceCreation.resolveTypeBinding()));
+					ASTNodes.replaceButKeepComment(rewrite, node, creationRef, group);
+					break;
 
-		private final SuperMethodInvocation superMethodInvocation;
+				case DO_NOTHING:
+				default:
+					LambdaExpression copyOfLambdaExpression= ast.newLambdaExpression();
+					copyParameters(rewrite, node, copyOfLambdaExpression);
 
-		public ReplaceBySuperMethodReferenceOperation(final LambdaExpression node, final SuperMethodInvocation superMethodInvocation) {
-			this.node= node;
-			this.superMethodInvocation= superMethodInvocation;
-		}
+					if (removeParentheses) {
+						copyOfLambdaExpression.setParentheses(false);
+					}
 
-		@Override
-		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			AST ast= cuRewrite.getRoot().getAST();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
+					copyOfLambdaExpression.setBody(rewrite.createMoveTarget(node.getBody()));
+					ASTNodes.replaceButKeepComment(rewrite, node, copyOfLambdaExpression, group);
+					break;
 
-			SuperMethodReference creationRef= ast.newSuperMethodReference();
-			creationRef.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
-			ASTNodes.replaceButKeepComment(rewrite, node, creationRef, group);
-		}
-	}
-
-	private static class ReplaceByTypeReferenceOperation extends CompilationUnitRewriteOperation {
-		private final LambdaExpression node;
-		private final MethodInvocation methodInvocation;
-
-		private final ITypeBinding type;
-
-		public ReplaceByTypeReferenceOperation(LambdaExpression node, MethodInvocation methodInvocation, ITypeBinding type) {
-			this.node= node;
-			this.methodInvocation= methodInvocation;
-			this.type= type;
+			}
 		}
 
-		@Override
-		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			AST ast= cuRewrite.getRoot().getAST();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
-
-			TypeMethodReference typeMethodRef= ast.newTypeMethodReference();
-
-			typeMethodRef.setType(copyType(cuRewrite, ast, methodInvocation, type));
-			typeMethodRef.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
-			ASTNodes.replaceButKeepComment(rewrite, node, typeMethodRef, group);
-		}
-	}
-
-	private static class ReplaceByMethodReferenceOperation extends CompilationUnitRewriteOperation {
-		private final LambdaExpression node;
-
-		private final MethodInvocation methodInvocation;
-
-		public ReplaceByMethodReferenceOperation(LambdaExpression node, MethodInvocation methodInvocation) {
-			this.node= node;
-			this.methodInvocation= methodInvocation;
-		}
-
-		@Override
-		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			AST ast= cuRewrite.getRoot().getAST();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
-			ExpressionMethodReference typeMethodRef= ast.newExpressionMethodReference();
-
-			if (methodInvocation.getExpression() != null) {
-				typeMethodRef.setExpression((Expression) rewrite.createCopyTarget(methodInvocation.getExpression()));
-			} else {
-				typeMethodRef.setExpression(ast.newThisExpression());
+		private void copyParameters(final ASTRewrite rewrite, final LambdaExpression oldLambdaExpression, final LambdaExpression copyOfLambdaExpression) {
+			for (Object oldParameter : oldLambdaExpression.parameters()) {
+				ASTNode copyOfParameter= ASTNodes.createMoveTarget(rewrite, (ASTNode) oldParameter);
+				copyOfLambdaExpression.parameters().add(copyOfParameter);
 			}
 
-			typeMethodRef.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
-			ASTNodes.replaceButKeepComment(rewrite, node, typeMethodRef, group);
-		}
-	}
-
-	private static Type copyType(final CompilationUnitRewrite cuRewrite, final AST ast, final ASTNode node, final ITypeBinding typeBinding) {
-		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-		ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
-		ITypeBinding modifiedType;
-
-		if (typeBinding.getTypeParameters().length == 0) {
-			modifiedType= typeBinding.getErasure();
-		} else {
-			modifiedType= typeBinding;
+			copyOfLambdaExpression.setParentheses(oldLambdaExpression.hasParentheses());
 		}
 
-		return ASTNodeFactory.newCreationType(ast, modifiedType, importRewrite, importContext);
+		private static Type copyType(final CompilationUnitRewrite cuRewrite, final AST ast, final ASTNode node, final ITypeBinding typeBinding) {
+			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
+			ITypeBinding modifiedType;
+
+			if (typeBinding.getTypeParameters().length == 0) {
+				modifiedType= typeBinding.getErasure();
+			} else {
+				modifiedType= typeBinding;
+			}
+
+			return ASTNodeFactory.newCreationType(ast, modifiedType, importRewrite, importContext);
+		}
 	}
 }
