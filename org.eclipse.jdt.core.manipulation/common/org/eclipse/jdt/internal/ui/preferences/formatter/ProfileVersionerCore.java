@@ -117,18 +117,19 @@ public class ProfileVersionerCore {
 			version20to21(oldSettings);
 			//$FALL-THROUGH$
 		default:
-				for (String key : oldSettings.keySet()) {
-				    if (!newSettings.containsKey(key))
-				        continue;
+			for (Map.Entry<String, String> entry : oldSettings.entrySet()) {
+				final String key= entry.getKey();
+				if (!newSettings.containsKey(key))
+					continue;
 
-				    final String value= oldSettings.get(key);
-				    if (value != null) {
-				        newSettings.put(key, value);
-				    }
+				final String value= entry.getValue();
+				if (value != null) {
+					newSettings.put(key, value);
 				}
+			}
 		    // copy over profile options (not formatter settings)
 		    if (oldSettings.containsKey(JavaCore.JAVA_FORMATTER)) {
-		        newSettings.put(JavaCore.JAVA_FORMATTER, oldSettings.get(JavaCore.JAVA_FORMATTER));
+		    	newSettings.put(JavaCore.JAVA_FORMATTER, oldSettings.get(JavaCore.JAVA_FORMATTER));
 		    }
 		}
 		return newSettings;
