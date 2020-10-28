@@ -18,10 +18,13 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -5037,6 +5040,153 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.CodeStyleCleanUp_LazyLogical_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testPrimitiveSerialization() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public String simplifyIntegerSerialization(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyDoubleSerialization(double number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyFloatSerialization(float number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyShortSerialization(short number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyLongSerialization(long number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyCharacterSerialization(char number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyByteSerialization(byte number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyBooleanSerialization(boolean number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorIntegerInstantiation(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return new Integer(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorIntegerCast(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return ((Integer) number).toString();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_SERIALIZATION);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public String simplifyIntegerSerialization(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.toString(number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyDoubleSerialization(double number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.toString(number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyFloatSerialization(float number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.toString(number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyShortSerialization(short number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.toString(number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyLongSerialization(long number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.toString(number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyCharacterSerialization(char number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.toString(number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyByteSerialization(byte number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.toString(number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String simplifyBooleanSerialization(boolean number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.toString(number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorIntegerInstantiation(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.toString(number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorIntegerCast(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.toString(number);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", input, output);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveSerializationCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveSerialization() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public String doNotRefactorWrapper(Integer number) {\n" //
+				+ "        return Integer.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorString(String number) {\n" //
+				+ "        return Integer.valueOf(number).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorBadMethod(int number) {\n" //
+				+ "        return Integer.valueOf(number).toBinaryString(0);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_SERIALIZATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test

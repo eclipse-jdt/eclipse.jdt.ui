@@ -736,6 +736,18 @@ public class CleanUpConstants {
 	public static final String USE_LAZY_LOGICAL_OPERATOR= "cleanup.lazy_logical_operator"; //$NON-NLS-1$
 
 	/**
+	 * Replaces a primitive boxing to serialize by a call to the static <code>toString()</code> method.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String PRIMITIVE_SERIALIZATION= "cleanup.primitive_serialization"; //$NON-NLS-1$
+
+	/**
 	 * Controls the usage of 'final' modifier for variable declarations. For detailed settings
 	 * use:<br>
 	 * {@link #VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES}<br>

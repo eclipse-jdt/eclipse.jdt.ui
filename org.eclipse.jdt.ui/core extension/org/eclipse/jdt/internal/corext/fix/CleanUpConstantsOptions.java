@@ -59,7 +59,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.FALSE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
-		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 		options.setOption(ATOMIC_OBJECT, CleanUpOptions.FALSE);
 
@@ -80,6 +79,10 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 		options.setOption(NO_STRING_CREATION, CleanUpOptions.FALSE);
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
+
+		// Optimization
+		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
+		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
@@ -183,7 +186,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.FALSE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
-		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 		options.setOption(ATOMIC_OBJECT, CleanUpOptions.FALSE);
 
@@ -204,6 +206,10 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 		options.setOption(NO_STRING_CREATION, CleanUpOptions.FALSE);
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
+
+		// Optimization
+		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
+		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.FALSE);
