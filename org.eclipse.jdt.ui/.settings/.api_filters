@@ -34,6 +34,20 @@
         </filter>
     </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/rename/RenameFieldProcessor.java" type="org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor">
+        <filter comment="Java preview feature API usage" id="640712815">
+            <message_arguments>
+                <message_argument value="IMethodBinding"/>
+                <message_argument value="RenameFieldProcessor"/>
+                <message_argument value="isCanonicalConstructor()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Java preview feature API usage" id="640712815">
+            <message_arguments>
+                <message_argument value="IMethodBinding"/>
+                <message_argument value="RenameFieldProcessor"/>
+                <message_argument value="isCompactConstructor()"/>
+            </message_arguments>
+        </filter>
         <filter comment="This is a Java15 preview feature" id="640712815">
             <message_arguments>
                 <message_argument value="IType"/>
@@ -134,6 +148,15 @@
             <message_arguments>
                 <message_argument value="StructureDiffViewer"/>
                 <message_argument value="JavaStructureDiffViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/fix/PatternMatchingForInstanceofCleanUp.java" type="org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp$PatternMatchingForInstanceofOperation">
+        <filter comment="Java preview feature API usage" id="640712815">
+            <message_arguments>
+                <message_argument value="InstanceofExpression"/>
+                <message_argument value="PatternMatchingForInstanceofOperation"/>
+                <message_argument value="setPatternVariable(SingleVariableDeclaration)"/>
             </message_arguments>
         </filter>
     </resource>
