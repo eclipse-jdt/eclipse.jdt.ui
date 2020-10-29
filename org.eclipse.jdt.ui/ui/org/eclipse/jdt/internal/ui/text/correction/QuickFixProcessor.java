@@ -879,6 +879,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.FeatureNotSupported:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals);
+				break;
 			case IProblem.SwitchExpressionsReturnWithinSwitchExpression:
 				ReturnTypeSubProcessor.replaceReturnWithYieldStatementProposals(context, problem, proposals);
 				break;
