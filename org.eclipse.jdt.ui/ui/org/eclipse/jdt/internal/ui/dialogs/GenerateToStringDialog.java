@@ -863,7 +863,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			if (fLastValidBuilderType != null && fLastValidBuilderType.equals(type)) {
 				return fLastValidResultMethodSuggestions;
 			}
-			return getMethodSuggestions(type, method -> Flags.isPublic(method.getFlags()) && method.getParameterTypes().length == 0 && "java.lang.String".equals(JavaModelUtil.getResolvedTypeName(method.getReturnType(), type)));
+			return getMethodSuggestions(type, method -> Flags.isPublic(method.getFlags()) && method.getParameterTypes().length == 0 && "java.lang.String".equals(JavaModelUtil.getResolvedTypeName(method.getReturnType(), type))); //$NON-NLS-1$
 		}
 
 		private interface MethodChecker {

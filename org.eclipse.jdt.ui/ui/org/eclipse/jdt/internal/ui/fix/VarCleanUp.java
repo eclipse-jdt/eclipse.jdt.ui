@@ -280,9 +280,9 @@ public class VarCleanUp extends AbstractMultiFix {
 				ASTNode replacement= ast.newNumberLiteral(literal.getToken() + postfix);
 				ASTNodes.replaceButKeepComment(rewrite, literal, replacement, group);
 			}
-			ASTNode replacement= ast.newSimpleType(ast.newSimpleName("var"));
+			ASTNode replacement= ast.newSimpleType(ast.newSimpleName("var")); //$NON-NLS-1$
 
-			ASTNodes.replaceButKeepComment(rewrite, node, replacement, group); //$NON-NLS-1$
+			ASTNodes.replaceButKeepComment(rewrite, node, replacement, group);
 		}
 	}
 }
