@@ -348,7 +348,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	}
 
 	@Test
-	public void testOverride4() throws CoreException {
+	public void testOverride0() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
