@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
+import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
@@ -61,6 +62,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new HashCleanUp(values),
 				new JoinCleanUp(values),
 				new ArraysFillCleanUp(values),
+				new EvaluateNullableCleanUp(values),
 				new AutoboxingCleanUp(values),
 				new UnboxingCleanUp(values),
 				new PushDownNegationCleanUp(values),
@@ -119,6 +121,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference arraysFill= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ArraysFill, CleanUpConstants.ARRAYS_FILL, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(arraysFill);
+
+		CheckboxPreference evaluateNullable= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_EvaluateNullable, CleanUpConstants.EVALUATE_NULLABLE, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(evaluateNullable);
 
 		CheckboxPreference autoboxing= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_Autoboxing, CleanUpConstants.USE_AUTOBOXING, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(autoboxing);

@@ -105,6 +105,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -2364,6 +2365,31 @@ public class ASTNodes {
 			current= current.getParent();
 		}
 		return current;
+	}
+
+	/**
+	 * Returns the null-checked expression if the provided node is a null check.
+	 *
+	 * @param expression the suspected null-checked expression
+	 * @return the null-checked expression if the provided node is a null-check, or
+	 *         {@code null} otherwise.
+	 */
+	public static Expression getNullCheckedExpression(final Expression expression) {
+		InfixExpression infixExpression= as(expression, InfixExpression.class);
+
+		if (infixExpression != null
+				&& !infixExpression.hasExtendedOperands()
+						&& hasOperator(infixExpression, InfixExpression.Operator.NOT_EQUALS)) {
+			if (is(infixExpression.getRightOperand(), NullLiteral.class)) {
+				return infixExpression.getLeftOperand();
+			}
+
+			if (is(infixExpression.getLeftOperand(), NullLiteral.class)) {
+				return infixExpression.getRightOperand();
+			}
+		}
+
+		return null;
 	}
 
 	/**

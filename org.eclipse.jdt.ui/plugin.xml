@@ -7251,9 +7251,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.join">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.evaluate_nullable"
+            runAfter="org.eclipse.jdt.ui.cleanup.arrays_fill">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp"
             id="org.eclipse.jdt.ui.cleanup.autoboxing"
-            runAfter="org.eclipse.jdt.ui.cleanup.arrays_fill">
+            runAfter="org.eclipse.jdt.ui.cleanup.evaluate_nullable">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp"

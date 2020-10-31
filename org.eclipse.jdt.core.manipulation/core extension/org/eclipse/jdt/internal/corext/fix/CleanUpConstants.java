@@ -1176,6 +1176,18 @@ public class CleanUpConstants {
 	public static final String ARRAYS_FILL= "cleanup.arrays_fill"; //$NON-NLS-1$
 
 	/**
+	 * Removes redundant null checks.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String EVALUATE_NULLABLE= "cleanup.evaluate_nullable"; //$NON-NLS-1$
+
+	/**
 	 * Raises embedded if into parent if.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

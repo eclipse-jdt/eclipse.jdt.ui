@@ -103,6 +103,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(MODERNIZE_HASH, CleanUpOptions.FALSE);
 		options.setOption(JOIN, CleanUpOptions.FALSE);
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
+		options.setOption(EVALUATE_NULLABLE, CleanUpOptions.FALSE);
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
@@ -233,6 +234,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(MODERNIZE_HASH, CleanUpOptions.FALSE);
 		options.setOption(JOIN, CleanUpOptions.FALSE);
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
+		options.setOption(EVALUATE_NULLABLE, CleanUpOptions.FALSE);
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);

@@ -5190,6 +5190,185 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testEvaluateNullable() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void removeUselessNullCheck(String s) {\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b1 = s != null && \"\".equals(s);\n" //
+				+ "        boolean b2 = s != null && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b3 = s != null && s instanceof String;\n" //
+				+ "\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b4 = null != s && \"\".equals(s);\n" //
+				+ "        boolean b5 = null != s && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b6 = null != s && s instanceof String;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeExtendedNullCheck(boolean enabled, String s) {\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b1 = enabled && s != null && \"\".equals(s);\n" //
+				+ "        boolean b2 = enabled && s != null && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b3 = enabled && s != null && s instanceof String;\n" //
+				+ "\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b4 = enabled && null != s && \"\".equals(s);\n" //
+				+ "        boolean b5 = enabled && null != s && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b6 = enabled && null != s && s instanceof String;\n" //
+				+ "\n" //
+				+ "        return b1 && b2 && b3 && b4 && b5 && b6;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeExtendedNullCheck(boolean enabled, boolean isValid, String s) {\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b1 = enabled && isValid && s != null && \"\".equals(s);\n" //
+				+ "        boolean b2 = enabled && isValid && s != null && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b3 = enabled && isValid && s != null && s instanceof String;\n" //
+				+ "\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b4 = enabled && isValid && null != s && \"\".equals(s);\n" //
+				+ "        boolean b5 = enabled && isValid && null != s && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b6 = enabled && isValid && null != s && s instanceof String;\n" //
+				+ "\n" //
+				+ "        return b1 && b2 && b3 && b4 && b5 && b6;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeNullCheckInTheMiddle(boolean enabled, boolean isValid, String s) {\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b1 = enabled && s != null && \"\".equals(s) && isValid;\n" //
+				+ "        boolean b2 = enabled && s != null && \"\".equalsIgnoreCase(s) && isValid;\n" //
+				+ "        boolean b3 = enabled && s != null && s instanceof String && isValid;\n" //
+				+ "\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b4 = enabled && null != s && \"\".equals(s) && isValid;\n" //
+				+ "        boolean b5 = enabled && null != s && \"\".equalsIgnoreCase(s) && isValid;\n" //
+				+ "        boolean b6 = enabled && null != s && s instanceof String && isValid;\n" //
+				+ "\n" //
+				+ "        return b1 && b2 && b3 && b4 && b5 && b6;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.EVALUATE_NULLABLE);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void removeUselessNullCheck(String s) {\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b1 = \"\".equals(s);\n" //
+				+ "        boolean b2 = \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b3 = s instanceof String;\n" //
+				+ "\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b4 = \"\".equals(s);\n" //
+				+ "        boolean b5 = \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b6 = s instanceof String;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeExtendedNullCheck(boolean enabled, String s) {\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b1 = enabled && \"\".equals(s);\n" //
+				+ "        boolean b2 = enabled && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b3 = enabled && s instanceof String;\n" //
+				+ "\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b4 = enabled && \"\".equals(s);\n" //
+				+ "        boolean b5 = enabled && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b6 = enabled && s instanceof String;\n" //
+				+ "\n" //
+				+ "        return b1 && b2 && b3 && b4 && b5 && b6;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeExtendedNullCheck(boolean enabled, boolean isValid, String s) {\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b1 = enabled && isValid && \"\".equals(s);\n" //
+				+ "        boolean b2 = enabled && isValid && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b3 = enabled && isValid && s instanceof String;\n" //
+				+ "\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b4 = enabled && isValid && \"\".equals(s);\n" //
+				+ "        boolean b5 = enabled && isValid && \"\".equalsIgnoreCase(s);\n" //
+				+ "        boolean b6 = enabled && isValid && s instanceof String;\n" //
+				+ "\n" //
+				+ "        return b1 && b2 && b3 && b4 && b5 && b6;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeNullCheckInTheMiddle(boolean enabled, boolean isValid, String s) {\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b1 = enabled && \"\".equals(s) && isValid;\n" //
+				+ "        boolean b2 = enabled && \"\".equalsIgnoreCase(s) && isValid;\n" //
+				+ "        boolean b3 = enabled && s instanceof String && isValid;\n" //
+				+ "\n" //
+				+ "        // Remove redundant null checks\n" //
+				+ "        boolean b4 = enabled && \"\".equals(s) && isValid;\n" //
+				+ "        boolean b5 = enabled && \"\".equalsIgnoreCase(s) && isValid;\n" //
+				+ "        boolean b6 = enabled && s instanceof String && isValid;\n" //
+				+ "\n" //
+				+ "        return b1 && b2 && b3 && b4 && b5 && b6;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", input, output);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.EvaluateNullableCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotEvaluateNullable() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final String NULL_CONSTANT = null;\n" //
+				+ "\n" //
+				+ "    public boolean doNotRemoveUselessNullCheckOnInstance(Object o) {\n" //
+				+ "        return o != null && equals(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRemoveUselessNullCheckOnThis(Object o) {\n" //
+				+ "        return o != null && this.equals(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRemoveNullCheck(String s) {\n" //
+				+ "        // Do not remove non redundant null checks\n" //
+				+ "        boolean b1 = s != null && s.equals(NULL_CONSTANT);\n" //
+				+ "        boolean b2 = s != null && s.equalsIgnoreCase(NULL_CONSTANT);\n" //
+				+ "\n" //
+				+ "        // Do not remove non redundant null checks\n" //
+				+ "        boolean b3 = null != s && s.equals(NULL_CONSTANT);\n" //
+				+ "        boolean b4 = null != s && s.equalsIgnoreCase(NULL_CONSTANT);\n" //
+				+ "\n" //
+				+ "        return b1 && b2 && b3 && b4;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRemoveNullCheckOnActiveExpression(List<String> texts) {\n" //
+				+ "        boolean b1 = texts.remove(0) != null && \"foo\".equals(texts.remove(0));\n" //
+				+ "        boolean b2 = texts.remove(0) != null && \"foo\".equalsIgnoreCase(texts.remove(0));\n" //
+				+ "        boolean b3 = null != texts.remove(0) && \"foo\".equals(texts.remove(0));\n" //
+				+ "        boolean b4 = null != texts.remove(0) && \"foo\".equalsIgnoreCase(texts.remove(0));\n" //
+				+ "\n" //
+				+ "        boolean b5 = texts.remove(0) != null && texts.remove(0) instanceof String;\n" //
+				+ "        boolean b6 = null != texts.remove(0) && texts.remove(0) instanceof String;\n" //
+				+ "\n" //
+				+ "        return b1 && b2 && b3 && b4 && b5 && b6;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.EVALUATE_NULLABLE);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPushDownNegationReplaceDoubleNegation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
