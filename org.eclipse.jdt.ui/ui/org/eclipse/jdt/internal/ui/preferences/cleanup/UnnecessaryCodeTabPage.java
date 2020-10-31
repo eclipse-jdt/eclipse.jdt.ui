@@ -23,15 +23,16 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
-import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
+import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp;
@@ -63,6 +64,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new AutoboxingCleanUp(values),
 				new UnboxingCleanUp(values),
 				new PushDownNegationCleanUp(values),
+				new DoubleNegationCleanUp(values),
 				new RedundantComparisonStatementCleanUp(values),
 				new RedundantSuperCallCleanUp(values),
 				new MapMethodCleanUp(values),
@@ -127,6 +129,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		CheckboxPreference pushDownNegation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PushDownNegation, CleanUpConstants.PUSH_DOWN_NEGATION,
 				CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(pushDownNegation);
+
+		CheckboxPreference doubleNegation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_DoubleNegation, CleanUpConstants.DOUBLE_NEGATION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(doubleNegation);
 
 		CheckboxPreference comparisonStatement= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ComparisonStatement, CleanUpConstants.REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(comparisonStatement);

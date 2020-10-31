@@ -5722,6 +5722,73 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoubleNegation() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean reduceBooleanExpression(boolean b1, boolean b2) {\n" //
+				+ "        boolean b3 = !b1 == !b2;\n" //
+				+ "        boolean b4 = !b1 != !b2;\n" //
+				+ "        boolean b5 = !b1 ^ !b2;\n" //
+				+ "        boolean b6 = !b1 == b2;\n" //
+				+ "        boolean b7 = !b1 != b2;\n" //
+				+ "        boolean b8 = !b1 ^ b2;\n" //
+				+ "        boolean b9 = b1 == !b2;\n" //
+				+ "        boolean b10 = b1 != !b2;\n" //
+				+ "        boolean b11 = b1 ^ !b2;\n" //
+				+ "        return b3 && b4 && b5 && b6 && b7 && b8 && b9 && b10 && b11;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.DOUBLE_NEGATION);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean reduceBooleanExpression(boolean b1, boolean b2) {\n" //
+				+ "        boolean b3 = b1 == b2;\n" //
+				+ "        boolean b4 = b1 ^ b2;\n" //
+				+ "        boolean b5 = b1 ^ b2;\n" //
+				+ "        boolean b6 = b1 ^ b2;\n" //
+				+ "        boolean b7 = b1 == b2;\n" //
+				+ "        boolean b8 = b1 == b2;\n" //
+				+ "        boolean b9 = b1 ^ b2;\n" //
+				+ "        boolean b10 = b1 == b2;\n" //
+				+ "        boolean b11 = b1 == b2;\n" //
+				+ "        return b3 && b4 && b5 && b6 && b7 && b8 && b9 && b10 && b11;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", input, output);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.DoubleNegationCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotRemoveDoubleNegation() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean doNotRefactorPositiveExpression(boolean isValid, boolean isEnabled) {\n" //
+				+ "        boolean b1 = isValid == isEnabled;\n" //
+				+ "        boolean b2 = isValid != isEnabled;\n" //
+				+ "        return b1 && b2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.DOUBLE_NEGATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRedundantComparisonStatement() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //

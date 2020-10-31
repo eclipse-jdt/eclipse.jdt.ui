@@ -106,6 +106,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
+		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
@@ -235,6 +236,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
+		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);

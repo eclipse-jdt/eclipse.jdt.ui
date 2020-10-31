@@ -7266,9 +7266,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unboxing">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.double_negation"
+            runAfter="org.eclipse.jdt.ui.cleanup.push_down_negation">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp"
             id="org.eclipse.jdt.ui.cleanup.overridden_assignment"
-            runAfter="org.eclipse.jdt.ui.cleanup.push_down_negation">
+            runAfter="org.eclipse.jdt.ui.cleanup.double_negation">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp"
