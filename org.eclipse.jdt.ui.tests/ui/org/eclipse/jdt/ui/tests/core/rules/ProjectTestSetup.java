@@ -42,15 +42,26 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  */
 public class ProjectTestSetup extends ExternalResource {
 
-	public static final String PROJECT_NAME= "TestSetupProject";
+	protected String projectname;
+	protected IPath ipath;
+
+	public ProjectTestSetup() {
+		this.projectname="TestSetupProject";
+		this.ipath=JavaProjectHelper.RT_STUBS_15;
+	}
+
+	public ProjectTestSetup(String projectname, IPath ipath) {
+		this.projectname=projectname;
+		this.ipath=ipath;
+	}
 
 	public IJavaProject getProject() {
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
+		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(projectname);
 		return JavaCore.create(project);
 	}
 
 	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_15);
+		IPath[] rtJarPath= JavaProjectHelper.findRtJar(ipath);
 		return new IClasspathEntry[] {  JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
 	}
 
@@ -59,8 +70,8 @@ public class ProjectTestSetup extends ExternalResource {
 
 	private boolean fAutobuilding;
 
-	 @Override
-     protected void before() throws Throwable {
+	@Override
+	protected void before() throws Throwable {
 
 		if (projectExists()) { // allow nesting of ProjectTestSetups
 			return;
@@ -80,14 +91,14 @@ public class ProjectTestSetup extends ExternalResource {
 	}
 
 	protected IJavaProject createAndInitializeProject() throws CoreException {
-		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject(projectname, "bin");
 		javaProject.setRawClasspath(getDefaultClasspath(), null);
 		TestOptions.initializeProjectOptions(javaProject);
 		return javaProject;
 	}
 
 	@Override
-    protected void after() {
+	protected void after() {
 		if (fJProject != null) {
 			try {
 				JavaProjectHelper.delete(fJProject);

@@ -15,11 +15,8 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -37,7 +34,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-@RunWith(JUnit4.class)
 public class QuickFixTest15 extends QuickFixTest {
 
 	@Rule
@@ -47,16 +43,9 @@ public class QuickFixTest15 extends QuickFixTest {
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	@After
-	public void tearDown() throws Exception {
-		if (fJProject != null) {
-			JavaProjectHelper.delete(fJProject);
-		}
-	}
-
 	@Test
 	public void testTextBlockGetNeedHigherComplianceProposal() throws Exception {
-		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject= projectsetup.getProject();
 		fJProject.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject, false);
 

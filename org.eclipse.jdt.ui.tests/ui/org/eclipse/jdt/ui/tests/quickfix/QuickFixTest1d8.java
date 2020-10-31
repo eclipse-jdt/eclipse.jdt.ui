@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
  */
 public class QuickFixTest1d8 extends QuickFixTest {
 	@Rule
-    public ProjectTestSetup projectSetup = new Java1d8ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 

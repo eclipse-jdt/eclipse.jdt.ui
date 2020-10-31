@@ -22,9 +22,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -32,33 +29,26 @@ import org.eclipse.jdt.core.JavaCore;
 
 public class Java9ProjectTestSetup extends ProjectTestSetup {
 
-	public static final String PROJECT_NAME9= "TestSetupProject9";
+	public Java9ProjectTestSetup() {
+		super("TestSetupProject9", JavaProjectHelper.RT_STUBS_9);
+	}
 
-	@Override
-	public IJavaProject getProject() {
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME9);
-		return JavaCore.create(project);
+	public Java9ProjectTestSetup(String projectname) {
+		super(projectname, JavaProjectHelper.RT_STUBS_9);
 	}
 
 	@Override
 	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_9);
+		IPath[] rtJarPath= JavaProjectHelper.findRtJar(ipath);
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2],
 						null,
 						new IClasspathAttribute[] {JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true")},
 						true) };
 	}
 
-
-	@Override
-	protected boolean projectExists() {
-		return getProject().exists();
-	}
-
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
-		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME9, "bin");
-		javaProject.setRawClasspath(getDefaultClasspath(), null);
+		IJavaProject javaProject= super.createAndInitializeProject();
 		JavaProjectHelper.set9CompilerOptions(javaProject);
 		return javaProject;
 	}
