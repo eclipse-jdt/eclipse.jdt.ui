@@ -1120,7 +1120,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		repairPresentation(viewer);
 		fRememberedStyleRange= null;
 
-		if (!insertCompletion() ^ smartToggle) {
+		if (insertCompletion() == smartToggle) {
 			StyleRange range= createStyleRange(viewer);
 			if (range == null)
 				return;
