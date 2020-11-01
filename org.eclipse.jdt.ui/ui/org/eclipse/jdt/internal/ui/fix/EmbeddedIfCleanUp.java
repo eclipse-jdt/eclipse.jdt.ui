@@ -26,6 +26,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -98,14 +99,21 @@ public class EmbeddedIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 
 		unit.accept(new ASTVisitor() {
 			@Override
-			public boolean visit(final IfStatement node) {
-				if (node.getElseStatement() == null) {
-					IfStatement innerIf= ASTNodes.as(node.getThenStatement(), IfStatement.class);
+			public boolean visit(final IfStatement visited) {
+				if (visited.getElseStatement() == null) {
+					IfStatement innerIf= ASTNodes.as(visited.getThenStatement(), IfStatement.class);
 
 					if (innerIf != null
 							&& innerIf.getElseStatement() == null
-							&& ASTNodes.getNbOperands(node.getExpression()) + ASTNodes.getNbOperands(innerIf.getExpression()) < ASTNodes.EXCESSIVE_OPERAND_NUMBER) {
-						rewriteOperations.add(new EmbeddedIfOperation(node, innerIf));
+							&& ASTNodes.getNbOperands(visited.getExpression()) + ASTNodes.getNbOperands(innerIf.getExpression()) < ASTNodes.EXCESSIVE_OPERAND_NUMBER) {
+						// The parsing crashes when there are two embedded lone ifs with an end of line comment at the right of the statement
+						// So we disable the rule on double lone if
+						if (!(visited.getThenStatement() instanceof Block)
+								&& !(innerIf.getThenStatement() instanceof Block)) {
+							return true;
+						}
+
+						rewriteOperations.add(new EmbeddedIfOperation(visited, innerIf));
 						return false;
 					}
 				}
@@ -138,11 +146,11 @@ public class EmbeddedIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 	}
 
 	private static class EmbeddedIfOperation extends CompilationUnitRewriteOperation {
-		private final IfStatement node;
+		private final IfStatement visited;
 		private final IfStatement innerIf;
 
-		public EmbeddedIfOperation(final IfStatement node, final IfStatement innerIf) {
-			this.node= node;
+		public EmbeddedIfOperation(final IfStatement visited, final IfStatement innerIf) {
+			this.visited= visited;
 			this.innerIf= innerIf;
 		}
 
@@ -153,11 +161,11 @@ public class EmbeddedIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.EmbeddedIfCleanup_description, cuRewrite);
 
 			InfixExpression infixExpression= ast.newInfixExpression();
-			infixExpression.setLeftOperand(ASTNodeFactory.parenthesizeIfNeeded(ast, ASTNodes.createMoveTarget(rewrite, node.getExpression())));
+			infixExpression.setLeftOperand(ASTNodeFactory.parenthesizeIfNeeded(ast, ASTNodes.createMoveTarget(rewrite, visited.getExpression())));
 			infixExpression.setOperator(InfixExpression.Operator.CONDITIONAL_AND);
 			infixExpression.setRightOperand(ASTNodeFactory.parenthesizeIfNeeded(ast, ASTNodes.createMoveTarget(rewrite, innerIf.getExpression())));
 			ASTNodes.replaceButKeepComment(rewrite, innerIf.getExpression(), infixExpression, group);
-			ASTNodes.replaceButKeepComment(rewrite, node, ASTNodes.createMoveTarget(rewrite, innerIf), group);
+			ASTNodes.replaceButKeepComment(rewrite, visited, ASTNodes.createMoveTarget(rewrite, innerIf), group);
 		}
 	}
 }
