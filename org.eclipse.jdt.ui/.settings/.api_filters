@@ -175,6 +175,13 @@
         </filter>
     </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/fix/PatternMatchingForInstanceofCleanUp.java" type="org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp$PatternMatchingForInstanceofOperation">
+        <filter comment="For Java 15" id="640712815">
+            <message_arguments>
+                <message_argument value="InstanceofExpression"/>
+                <message_argument value="PatternMatchingForInstanceofOperation"/>
+                <message_argument value="setPatternVariable(SimpleName)"/>
+            </message_arguments>
+        </filter>
         <filter comment="Java preview feature API usage" id="640712815">
             <message_arguments>
                 <message_argument value="InstanceofExpression"/>

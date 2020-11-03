@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
+ *     IBM Corporation - Bug 565447
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -37,7 +38,6 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -268,13 +268,9 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.PatternMatchingForInstanceofCleanup_description, cuRewrite);
 
-			SingleVariableDeclaration newSingleVariableDeclaration= ast.newSingleVariableDeclaration();
-			newSingleVariableDeclaration.setName(ASTNodes.createMoveTarget(rewrite, expressionToMove));
-			newSingleVariableDeclaration.setType(ASTNodes.createMoveTarget(rewrite, nodeToComplete.getRightOperand()));
-
 			InstanceofExpression newInstanceof= ast.newInstanceofExpression();
 			newInstanceof.setLeftOperand(ASTNodes.createMoveTarget(rewrite, nodeToComplete.getLeftOperand()));
-			newInstanceof.setPatternVariable(newSingleVariableDeclaration);
+			newInstanceof.setPatternVariable(ASTNodes.createMoveTarget(rewrite, expressionToMove));
 
 			ASTNodes.replaceButKeepComment(rewrite, nodeToComplete, newInstanceof, group);
 
