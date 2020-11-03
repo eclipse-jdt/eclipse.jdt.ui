@@ -13,7 +13,7 @@
  * to allow use as junit "@Rule"
  *
  * Contributors:
- *     Fabrice TIERCELIN - Split the tests
+ *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.rules;
 
@@ -22,41 +22,25 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 /**
- * Setups the tests related to Java 5 (i.e. Tiger).
+ * Setup the tests related to Java 6 (i.e. Mustang).
  */
-public class Java1d5ProjectTestSetup extends ProjectTestSetup {
-	public static final String PROJECT_NAME1d5= "TestSetupProject1d5";
-
-	@Override
-	public IJavaProject getProject() {
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME1d5);
-		return JavaCore.create(project);
-	}
-
+public class Java1d6ProjectTestSetup extends ProjectTestSetup {
 	@Override
 	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_15);
+		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_16);
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
 	}
 
 	@Override
-	protected boolean projectExists() {
-		return getProject().exists();
-	}
-
-	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
-		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME1d5, "bin");
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		javaProject.setRawClasspath(getDefaultClasspath(), null);
-		JavaProjectHelper.set15CompilerOptions(javaProject);
+		JavaProjectHelper.set16CompilerOptions(javaProject);
 		return javaProject;
 	}
 }

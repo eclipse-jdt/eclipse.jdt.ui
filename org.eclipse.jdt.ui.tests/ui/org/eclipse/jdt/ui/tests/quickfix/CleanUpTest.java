@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.tests.core.rules.Java13ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -76,7 +77,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 public class CleanUpTest extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup= new ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java13ProjectTestSetup(false);
 
 	IJavaProject fJProject1= getProject();
 
@@ -1458,8 +1459,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.ArrayList;\n" //
 				+ "public class E1 {\n" //
 				+ "    public void foo() {\n" //
-				+ "        ArrayList list= new ArrayList<String>();\n" //
-				+ "        ArrayList list2= new ArrayList<String>();\n" //
+				+ "        ArrayList list= new ArrayList<>();\n" //
+				+ "        ArrayList list2= new ArrayList<>();\n" //
 				+ "        \n" //
 				+ "        System.out.println(list);\n" //
 				+ "        System.out.println(list2);\n" //
@@ -1492,200 +1493,6 @@ public class CleanUpTest extends CleanUpTestCase {
 		for (IProblem problem : problems) {
 			ProblemLocation location= new ProblemLocation(problem);
 			assertTrue(cleanUp.canFix(cu1, location));
-		}
-	}
-
-	@Test
-	public void testAddOverride15() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "interface I {\n" //
-				+ "    void m();\n" //
-				+ "    boolean equals(Object obj);\n" //
-				+ "}\n" //
-				+ "interface J extends I {\n" //
-				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-				+ "}\n" //
-				+ "class X implements J {\n" //
-				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-				+ "    public int hashCode() { return 0; }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("I.java", sample, false, null);
-
-		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
-		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
-		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
-
-		sample= "" //
-				+ "package test1;\n" //
-				+ "interface I {\n" //
-				+ "    void m();\n" //
-				+ "    boolean equals(Object obj);\n" //
-				+ "}\n" //
-				+ "interface J extends I {\n" //
-				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-				+ "}\n" //
-				+ "class X implements J {\n" //
-				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-				+ "    @Override\n" //
-				+ "    public int hashCode() { return 0; }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
-	}
-
-	@Test
-	public void testAddOverride16() throws Exception {
-		IJavaProject project= JavaProjectHelper.createJavaProject("CleanUpTestProject", "bin");
-		try {
-			JavaProjectHelper.addRTJar16(project);
-			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
-
-			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
-			String sample= "" //
-					+ "package test1;\n" //
-					+ "interface I {\n" //
-					+ "    void m();\n" //
-					+ "    boolean equals(Object obj);\n" //
-					+ "}\n" //
-					+ "interface J extends I {\n" //
-					+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-					+ "}\n" //
-					+ "class X implements J {\n" //
-					+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-					+ "    public int hashCode() { return 0; }\n" //
-					+ "}\n";
-			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", sample, false, null);
-
-			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
-			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
-			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
-
-			sample= "" //
-					+ "package test1;\n" //
-					+ "interface I {\n" //
-					+ "    void m();\n" //
-					+ "    @Override\n" //
-					+ "    boolean equals(Object obj);\n" //
-					+ "}\n" //
-					+ "interface J extends I {\n" //
-					+ "    @Override\n" //
-					+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-					+ "}\n" //
-					+ "class X implements J {\n" //
-					+ "    @Override\n" //
-					+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-					+ "    @Override\n" //
-					+ "    public int hashCode() { return 0; }\n" //
-					+ "}\n";
-			String expected1= sample;
-
-			assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
-		} finally {
-			JavaProjectHelper.delete(project);
-		}
-	}
-
-	@Test
-	public void testAddOverride16_no_interface_methods() throws Exception {
-		IJavaProject project= JavaProjectHelper.createJavaProject("CleanUpTestProject", "bin");
-		try {
-			JavaProjectHelper.addRTJar16(project);
-			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
-
-			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
-			String sample= "" //
-					+ "package test1;\n" //
-					+ "interface I {\n" //
-					+ "    void m();\n" //
-					+ "    boolean equals(Object obj);\n" //
-					+ "}\n" //
-					+ "interface J extends I {\n" //
-					+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-					+ "}\n" //
-					+ "class X implements J {\n" //
-					+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-					+ "    public int hashCode() { return 0; }\n" //
-					+ "}\n";
-			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", sample, false, null);
-
-			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
-			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
-
-			sample= "" //
-					+ "package test1;\n" //
-					+ "interface I {\n" //
-					+ "    void m();\n" //
-					+ "    boolean equals(Object obj);\n" //
-					+ "}\n" //
-					+ "interface J extends I {\n" //
-					+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-					+ "}\n" //
-					+ "class X implements J {\n" //
-					+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-					+ "    @Override\n" //
-					+ "    public int hashCode() { return 0; }\n" //
-					+ "}\n";
-			String expected1= sample;
-
-			assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
-		} finally {
-			JavaProjectHelper.delete(project);
-		}
-	}
-
-	/**
-	 * Tests if CleanUp works when the number of problems in a single CU is greater than the
-	 * Compiler option {@link JavaCore#COMPILER_PB_MAX_PER_UNIT} which has a default value of 100,
-	 * see http://bugs.eclipse.org/322543 for details.
-	 *
-	 * @throws Exception if the something fails while executing this test
-	 * @since 3.7
-	 */
-	@Test
-	public void testCleanUpWithCUProblemsGreaterThanMaxProblemsPerCUPreference() throws Exception {
-		IJavaProject project= JavaProjectHelper.createJavaProject("CleanUpTestProject", "bin");
-		try {
-			int count;
-			final int PROBLEMS_COUNT= 101;
-			JavaProjectHelper.addRTJar16(project);
-			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainer(project, "src");
-			IPackageFragment pack1= src.createPackageFragment("test1", false, null);
-			StringBuilder bld= new StringBuilder();
-			bld.append("package test1;\n");
-			bld.append("interface I {\n");
-			for (count= 0; count < PROBLEMS_COUNT; count++)
-				bld.append("    void m" + count + "();\n");
-			bld.append("}\n");
-			bld.append("class X implements I {\n");
-			for (count= 0; count < PROBLEMS_COUNT; count++)
-				bld.append("    public void m" + count + "() {} // @Override error in 1.5, not in 1.6\n");
-			bld.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("I.java", bld.toString(), false, null);
-
-			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
-			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
-			enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
-
-			bld= new StringBuilder();
-			bld.append("package test1;\n");
-			bld.append("interface I {\n");
-			for (count= 0; count < PROBLEMS_COUNT; count++)
-				bld.append("    void m" + count + "();\n");
-			bld.append("}\n");
-			bld.append("class X implements I {\n");
-			for (count= 0; count < PROBLEMS_COUNT; count++) {
-				bld.append("    @Override\n");
-				bld.append("    public void m" + count + "() {} // @Override error in 1.5, not in 1.6\n");
-			}
-			bld.append("}\n");
-			String expected1= bld.toString();
-
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-		} finally {
-			JavaProjectHelper.delete(project);
 		}
 	}
 
@@ -4500,7 +4307,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.RedundantSuperCallCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -5038,7 +4845,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = b1 | new SideEffect() instanceof SideEffect;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.CodeStyleCleanUp_LazyLogical_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_LazyLogical_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -5437,7 +5244,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.PushDownNegationCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.PushDownNegationCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -6484,7 +6291,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return null;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.RedundantComparisonStatementCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparisonStatementCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 
@@ -6649,7 +6456,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.RedundantSuperCallCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -6993,7 +6800,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.MergeConditionalBlocksCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.MergeConditionalBlocksCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -7663,7 +7470,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.RedundantFallingThroughBlockEndCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantFallingThroughBlockEndCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 
@@ -8018,7 +7825,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return i;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.RedundantIfConditionCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantIfConditionCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 
@@ -8241,7 +8048,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.UselessReturnCleanUp_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.UselessReturnCleanUp_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -8465,7 +8272,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.UselessContinueCleanUp_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UselessContinueCleanUp_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 
@@ -8672,7 +8479,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.UseDirectlyMapMethodCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.UseDirectlyMapMethodCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -8736,27 +8543,27 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E1 {\n" //
 				+ "    public void replaceNewNoArgsAssignmentThenAddAll(List<String> col, List<String> output) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        output = new ArrayList<String>();\n" //
+				+ "        output = new ArrayList<>();\n" //
 				+ "        output.addAll(col);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<String> replaceNewNoArgsThenAddAll(List<String> col) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final List<String> output = new ArrayList<String>();\n" //
+				+ "        final List<String> output = new ArrayList<>();\n" //
 				+ "        output.addAll(col);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<Date> replaceNewOneArgThenAddAll(List<Date> col) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final List<Date> output = new ArrayList<Date>(0);\n" //
+				+ "        final List<Date> output = new ArrayList<>(0);\n" //
 				+ "        output.addAll(col);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<Integer> replaceNewCollectionSizeThenAddAll(List<Integer> col, List<List<Integer>> listOfCol) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final List<Integer> output = new ArrayList<Integer>(col.size());\n" //
+				+ "        final List<Integer> output = new ArrayList<>(col.size());\n" //
 				+ "        output.addAll(col);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
@@ -8785,24 +8592,24 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E1 {\n" //
 				+ "    public void replaceNewNoArgsAssignmentThenAddAll(List<String> col, List<String> output) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        output = new ArrayList<String>(col);\n" //
+				+ "        output = new ArrayList<>(col);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<String> replaceNewNoArgsThenAddAll(List<String> col) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final List<String> output = new ArrayList<String>(col);\n" //
+				+ "        final List<String> output = new ArrayList<>(col);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<Date> replaceNewOneArgThenAddAll(List<Date> col) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final List<Date> output = new ArrayList<Date>(col);\n" //
+				+ "        final List<Date> output = new ArrayList<>(col);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<Integer> replaceNewCollectionSizeThenAddAll(List<Integer> col, List<List<Integer>> listOfCol) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final List<Integer> output = new ArrayList<Integer>(col);\n" //
+				+ "        final List<Integer> output = new ArrayList<>(col);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -8813,7 +8620,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.CollectionCloningCleanUp_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.CollectionCloningCleanUp_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -8829,24 +8636,24 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E1 {\n" //
 				+ "    public void doNotReplaceStackCtor(List<String> col, List<String> output) {\n" //
-				+ "        output = new Stack<String>();\n" //
+				+ "        output = new Stack<>();\n" //
 				+ "        output.addAll(col);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<String> doNotReplaceAlreadyInitedCol(List<String> col1, List<String> col2) {\n" //
-				+ "        final List<String> output = new ArrayList<String>(col1);\n" //
+				+ "        final List<String> output = new ArrayList<>(col1);\n" //
 				+ "        output.addAll(col2);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<String> doNotReplaceWithSpecificSize(List<String> col) {\n" //
-				+ "        final List<String> output = new ArrayList<String>(10);\n" //
+				+ "        final List<String> output = new ArrayList<>(10);\n" //
 				+ "        output.addAll(col);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<Object> doNotReplaceNewThenAddAllIncompatibleTypes(List<String> col) {\n" //
-				+ "        final List<Object> output = new ArrayList<Object>();\n" //
+				+ "        final List<Object> output = new ArrayList<>();\n" //
 				+ "        output.addAll(col);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
@@ -8871,41 +8678,41 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E1 {\n" //
 				+ "    public void replaceNewNoArgsAssignmentThenPutAll(Map<String, String> map, Map<String, String> output) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        output = new HashMap<String, String>();\n" //
+				+ "        output = new HashMap<>();\n" //
 				+ "        output.putAll(map);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceNewNoArgsThenPutAll(Map<String, String> map) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>();\n" //
+				+ "        final Map<String, String> output = new HashMap<>();\n" //
 				+ "        output.putAll(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceNew0ArgThenPutAll(Map<String, String> map) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(0);\n" //
+				+ "        final Map<String, String> output = new HashMap<>(0);\n" //
 				+ "        output.putAll(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceNew1ArgThenPutAll(Map<String, String> map) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(0);\n" //
+				+ "        final Map<String, String> output = new HashMap<>(0);\n" //
 				+ "        output.putAll(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceNewMapSizeThenPutAll(Map<String, String> map) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(map.size());\n" //
+				+ "        final Map<String, String> output = new HashMap<>(map.size());\n" //
 				+ "        output.putAll(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceWithSizeOfSubMap(List<Map<String, String>> listOfMap) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(listOfMap.get(0).size());\n" //
+				+ "        final Map<String, String> output = new HashMap<>(listOfMap.get(0).size());\n" //
 				+ "        output.putAll(listOfMap.get(0));\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
@@ -8924,41 +8731,41 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E1 {\n" //
 				+ "    public void replaceNewNoArgsAssignmentThenPutAll(Map<String, String> map, Map<String, String> output) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        output = new HashMap<String, String>(map);\n" //
+				+ "        output = new HashMap<>(map);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceNewNoArgsThenPutAll(Map<String, String> map) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(map);\n" //
+				+ "        final Map<String, String> output = new HashMap<>(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceNew0ArgThenPutAll(Map<String, String> map) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(map);\n" //
+				+ "        final Map<String, String> output = new HashMap<>(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceNew1ArgThenPutAll(Map<String, String> map) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(map);\n" //
+				+ "        final Map<String, String> output = new HashMap<>(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceNewMapSizeThenPutAll(Map<String, String> map) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(map);\n" //
+				+ "        final Map<String, String> output = new HashMap<>(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> replaceWithSizeOfSubMap(List<Map<String, String>> listOfMap) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(listOfMap.get(0));\n" //
+				+ "        final Map<String, String> output = new HashMap<>(listOfMap.get(0));\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.MapCloningCleanUp_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.MapCloningCleanUp_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -8973,25 +8780,25 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E1 {\n" //
 				+ "    public Map<String, String> doNotReplaceAlreadyInitedMap(Map<String, String> map1, Map<String, String> map2) {\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>(map1);\n" //
+				+ "        final Map<String, String> output = new HashMap<>(map1);\n" //
 				+ "        output.putAll(map2);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> doNotReplaceWithSpecificSize(Map<String, String> map) {\n" //
-				+ "        Map<String, String> output = new HashMap<String, String>(10);\n" //
+				+ "        Map<String, String> output = new HashMap<>(10);\n" //
 				+ "        output.putAll(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<Object, Object> doNotReplaceNewThenAddAllIncompatibleTypes(Map<String, String> map) {\n" //
-				+ "        final Map<Object, Object> output = new HashMap<Object, Object>();\n" //
+				+ "        final Map<Object, Object> output = new HashMap<>();\n" //
 				+ "        output.putAll(map);\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, String> doNotReplaceAnonymousMap(Map<String, String> map) {\n" //
-				+ "        final Map<String, String> output = new HashMap<String, String>() {\n" //
+				+ "        final Map<String, String> output = new HashMap<>() {\n" //
 				+ "            private static final long serialVersionUID= 1L;\n" //
 				+ "\n" //
 				+ "            @Override\n" //
@@ -9086,7 +8893,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.OverriddenAssignmentCleanUp_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 
@@ -12753,7 +12560,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.EmbeddedIfCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.EmbeddedIfCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -13223,7 +13030,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.CodeStyleFix_removeThis_groupDescription });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.CodeStyleFix_removeThis_groupDescription)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
@@ -13544,9 +13351,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] {
-				FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description
-				});
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
@@ -14434,7 +14239,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION);
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.CheckSignOfBitwiseOperation_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CheckSignOfBitwiseOperation_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
@@ -15240,36 +15045,39 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.ADD_MISSING_METHODES);
 
-		sample= "" //
+		String expected1= "" //
 				+ "package test;\n" //
 				+ "public class E01 implements IFace {\n" //
 				+ "\n" //
 				+ "    /* comment */\n" //
+				+ "    @Override\n" //
 				+ "    public void foo() {\n" //
 				+ "        //TODO\n" //
 				+ "        \n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /* comment */\n" //
+				+ "    @Override\n" //
 				+ "    public void bar() {\n" //
 				+ "        //TODO\n" //
 				+ "        \n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		sample= "" //
+		String expected2= "" //
 				+ "package test;\n" //
 				+ "public class E02 implements IFace {\n" //
 				+ "    public class Inner implements IFace {\n" //
 				+ "\n" //
 				+ "        /* comment */\n" //
+				+ "        @Override\n" //
 				+ "        public void foo() {\n" //
 				+ "            //TODO\n" //
 				+ "            \n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        /* comment */\n" //
+				+ "        @Override\n" //
 				+ "        public void bar() {\n" //
 				+ "            //TODO\n" //
 				+ "            \n" //
@@ -15277,18 +15085,19 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /* comment */\n" //
+				+ "    @Override\n" //
 				+ "    public void foo() {\n" //
 				+ "        //TODO\n" //
 				+ "        \n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /* comment */\n" //
+				+ "    @Override\n" //
 				+ "    public void bar() {\n" //
 				+ "        //TODO\n" //
 				+ "        \n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
 	}
@@ -15614,9 +15423,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] {
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(new String[] {
 				Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
-		});
+		})));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 }

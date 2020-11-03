@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertNotEquals;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -32,7 +34,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 /**
- * Tests the cleanup features related to Java 5.
+ * Tests the cleanup features related to Java 5 (i.e. Tiger).
  */
 public class CleanUpTest1d5 extends CleanUpTestCase {
 	@Rule
@@ -46,6 +48,47 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		return projectSetup.getDefaultClasspath();
+	}
+
+	@Test
+	public void testAddOverride1d5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "interface I {\n" //
+				+ "    void m();\n" //
+				+ "    boolean equals(Object obj);\n" //
+				+ "}\n" //
+				+ "interface J extends I {\n" //
+				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
+				+ "}\n" //
+				+ "class X implements J {\n" //
+				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
+				+ "    public int hashCode() { return 0; }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("I.java", given, false, null);
+
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "interface I {\n" //
+				+ "    void m();\n" //
+				+ "    boolean equals(Object obj);\n" //
+				+ "}\n" //
+				+ "interface J extends I {\n" //
+				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
+				+ "}\n" //
+				+ "class X implements J {\n" //
+				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
+				+ "    @Override\n" //
+				+ "    public int hashCode() { return 0; }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected});
 	}
 
 	@Test

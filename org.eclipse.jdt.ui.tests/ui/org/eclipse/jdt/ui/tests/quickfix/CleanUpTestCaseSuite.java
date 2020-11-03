@@ -22,6 +22,7 @@ import org.junit.runners.Suite;
 	CleanUpStressTest.class,
 	CleanUpTest.class,
 	CleanUpTest1d5.class,
+	CleanUpTest1d6.class,
 	CleanUpTest1d7.class,
 	CleanUpTest1d8.class,
 	CleanUpTest1d10.class,
