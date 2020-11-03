@@ -51,6 +51,7 @@ import org.junit.runners.Suite;
 	//-- structure
 	ChangeSignatureTests.class,
 	ChangeSignatureTests1d8.class,
+	ChangeSignatureTests15.class,
 	IntroduceParameterObjectTests.class,
 	PullUpTests.class,
 	PullUpTests1d8.class,
