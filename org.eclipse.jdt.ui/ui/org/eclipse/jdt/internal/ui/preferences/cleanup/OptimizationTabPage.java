@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringBuilderCleanUp;
 
 public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.optimization"; //$NON-NLS-1$
@@ -35,6 +36,7 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
 				new BreakLoopCleanUp(values),
+				new StringBuilderCleanUp(values),
 				new LazyLogicalCleanUp(values),
 				new PrimitiveSerializationCleanUp(values),
 				new PatternCleanUp(values),
@@ -49,6 +51,9 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference breakLoopPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_BreakLoop, CleanUpConstants.BREAK_LOOP, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(breakLoopPref);
+
+		final CheckboxPreference stringBuilderPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_StringBuilder, CleanUpConstants.STRINGBUILDER, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(stringBuilderPref);
 
 		final CheckboxPreference useLazyLogicalPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_UseLazyLogicalOperator,
 				CleanUpConstants.USE_LAZY_LOGICAL_OPERATOR, CleanUpModifyDialog.FALSE_TRUE);

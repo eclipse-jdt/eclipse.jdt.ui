@@ -12061,6 +12061,388 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testStringBuilder() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static String useStringBuilder() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable+= \"foo\";\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithInitializer() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"foo\";\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable+= \"bar\";\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnBasicAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable= variable + \"foo\";\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithExtendedOperation(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable+= text + \"foo\";\n" //
+				+ "        variable= variable + text + \"bar\";\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithDifferentAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable+= \"foo\";\n" //
+				+ "        variable= variable + \"bar\";\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithBlock(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable+= \"foo\";\n" //
+				+ "            variable= variable + \"bar\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithLoop(List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable+= text;\n" //
+				+ "            variable= variable + \",\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithWhile(String text, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "\n" //
+				+ "        while (i-- > 0) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable+= text;\n" //
+				+ "            variable= variable + \",\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithTry(String number, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "\n" //
+				+ "        try {\n" //
+				+ "            while (i-- > 0) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                variable+= (Integer.parseInt(number) + 1);\n" //
+				+ "                variable= variable + \",\";\n" //
+				+ "            }\n" //
+				+ "        } catch (NumberFormatException e) {\n" //
+				+ "            return \"0\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithFinally(String number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        int i= 123;\n" //
+				+ "\n" //
+				+ "        try {\n" //
+				+ "            i+= Integer.parseInt(number);\n" //
+				+ "        } catch (NumberFormatException e) {\n" //
+				+ "            System.out.println(\"error\");\n" //
+				+ "        } finally {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable+= \"foo\";\n" //
+				+ "            variable= variable + \"bar\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable + i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithConditionalRead(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable+= \"foo\";\n" //
+				+ "            variable= variable + \"bar\";\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return variable;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return \"\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInElse(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable= \"\";\n" //
+				+ "\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            return \"OK\";\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable+= \"foo\";\n" //
+				+ "            variable= variable + \"bar\";\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return variable;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.STRINGBUILDER);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static String useStringBuilder() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable.append(\"foo\");\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithInitializer() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder(\"foo\");\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable.append(\"bar\");\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnBasicAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable.append(\"foo\");\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithExtendedOperation(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable.append(text).append(\"foo\");\n" //
+				+ "        variable.append(text).append(\"bar\");\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithDifferentAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        variable.append(\"foo\");\n" //
+				+ "        variable.append(\"bar\");\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithBlock(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(\"foo\");\n" //
+				+ "            variable.append(\"bar\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithLoop(List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(text);\n" //
+				+ "            variable.append(\",\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithWhile(String text, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "\n" //
+				+ "        while (i-- > 0) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(text);\n" //
+				+ "            variable.append(\",\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithTry(String number, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "\n" //
+				+ "        try {\n" //
+				+ "            while (i-- > 0) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                variable.append(Integer.parseInt(number)).append(1);\n" //
+				+ "                variable.append(\",\");\n" //
+				+ "            }\n" //
+				+ "        } catch (NumberFormatException e) {\n" //
+				+ "            return \"0\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithFinally(String number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        int i= 123;\n" //
+				+ "\n" //
+				+ "        try {\n" //
+				+ "            i+= Integer.parseInt(number);\n" //
+				+ "        } catch (NumberFormatException e) {\n" //
+				+ "            System.out.println(\"error\");\n" //
+				+ "        } finally {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(\"foo\");\n" //
+				+ "            variable.append(\"bar\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString() + i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithConditionalRead(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(\"foo\");\n" //
+				+ "            variable.append(\"bar\");\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return variable.toString();\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return \"\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInElse(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            return \"OK\";\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(\"foo\");\n" //
+				+ "            variable.append(\"bar\");\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return variable.toString();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", input, output);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StringBuilderCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotUseStringBuilder() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private String field= \"\";\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorNullString() {\n" //
+				+ "        String text= null;\n" //
+				+ "        text+= \"foo\";\n" //
+				+ "        return text;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorMultideclaration() {\n" //
+				+ "        String variable= \"\", anotherVariable= \"\";\n" //
+				+ "        variable+= \"foo\";\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorStringUsedAsExpression() {\n" //
+				+ "        String variable= \"foo\";\n" //
+				+ "        if ((variable+= \"bar\").contains(\"i\")) {\n" //
+				+ "            return \"foobar\";\n" //
+				+ "        }\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotUseStringBuilderWithoutAppending() {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable= \"foo\" + variable;\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUILDER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRegExPrecompilationInLambda() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

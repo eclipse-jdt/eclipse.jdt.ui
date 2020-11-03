@@ -973,6 +973,18 @@ public class CleanUpConstants {
 	public static final String BREAK_LOOP= "cleanup.break_loop"; //$NON-NLS-1$
 
 	/**
+	 * Replaces String concatenation by StringBuilder when possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String STRINGBUILDER= "cleanup.stringbuilder"; //$NON-NLS-1$
+
+	/**
 	 * Removes unused imports. <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
