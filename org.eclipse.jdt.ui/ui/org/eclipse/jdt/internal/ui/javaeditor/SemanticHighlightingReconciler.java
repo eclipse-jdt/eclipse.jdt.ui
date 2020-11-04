@@ -54,11 +54,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.DeprecatedMemberHighlighting;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.PermitsKeywordHighlighting;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.RecordKeywordHighlighting;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.SealedKeywordsHighlighting;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.VarKeywordHighlighting;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.YieldKeywordHighlighting;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.RestrictedKeywordsHighlighting;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
@@ -141,7 +137,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				if (offset > -1 && length > 0) {
 					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
 						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
-						if (semanticHighlighting instanceof VarKeywordHighlighting) {
+						if (semanticHighlighting instanceof RestrictedKeywordsHighlighting) {
 							addPosition(offset, length, fJobHighlightings[i]);
 							return false;
 						}
@@ -160,7 +156,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				if (offset > -1 && length > 0) {
 					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
 						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
-						if (semanticHighlighting instanceof YieldKeywordHighlighting) {
+						if (semanticHighlighting instanceof RestrictedKeywordsHighlighting) {
 							addPosition(offset, length, fJobHighlightings[i]);
 							return false;
 						}
@@ -179,7 +175,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				if (offset > -1 && length > 0) {
 					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
 						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
-						if (semanticHighlighting instanceof RecordKeywordHighlighting) {
+						if (semanticHighlighting instanceof RestrictedKeywordsHighlighting) {
 							addPosition(offset, length, fJobHighlightings[i]);
 							return false;
 						}
@@ -198,7 +194,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 					if (offset > -1) {
 						for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
 							SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
-							if (semanticHighlighting instanceof PermitsKeywordHighlighting) {
+							if (semanticHighlighting instanceof RestrictedKeywordsHighlighting) {
 								addPosition(offset, length, fJobHighlightings[i]);
 								return true;
 							}
@@ -228,7 +224,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				if (offset > -1 && length > 0) {
 					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
 						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
-						if (semanticHighlighting instanceof SealedKeywordsHighlighting) {
+						if (semanticHighlighting instanceof RestrictedKeywordsHighlighting) {
 							addPosition(offset, length, fJobHighlightings[i]);
 							return false;
 						}

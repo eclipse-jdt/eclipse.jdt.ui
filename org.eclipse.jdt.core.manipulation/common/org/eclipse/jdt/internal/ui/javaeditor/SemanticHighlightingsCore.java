@@ -161,24 +161,9 @@ public class SemanticHighlightingsCore {
 	public static final String INHERITED_FIELD="inheritedField"; //$NON-NLS-1$
 
 	/**
-	 * A named preference part that controls the highlighting of 'var' keywords.
-	 */
-	public static final String VAR_KEYWORD= "varKeyword"; //$NON-NLS-1$
-
-	/**
-	 * A named preference part that controls the highlighting of 'yield' keywords.
-	 */
-	public static final String YIELD_KEYWORD= "yieldKeyword"; //$NON-NLS-1$
-
-	/**
-	 * A named preference part that controls the highlighting of 'record' keywords.
-	 */
-	public static final String RECORD_KEYWORD= "recordKeyword"; //$NON-NLS-1$
-
-	/**
 	 * A named preference part that controls the highlighting of 'sealed' and 'non-sealed' keywords.
 	 */
-	public static final String SEALED_KEYWORDS= "sealedKeywords"; //$NON-NLS-1$
+	public static final String RESTRICTED_KEYWORDS= "restrictedKeywords"; //$NON-NLS-1$
 
 	/**
 	 * Do not instantiate
