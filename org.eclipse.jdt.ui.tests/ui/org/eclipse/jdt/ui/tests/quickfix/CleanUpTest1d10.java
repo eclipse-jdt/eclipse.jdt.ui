@@ -269,6 +269,27 @@ public class CleanUpTest1d10 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoNotUseVarOnLambdaType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private interface I1 {\n" //
+				+ "        public void run(String s, int i, Boolean b);\n" //
+				+ "    }\n" //
+				+ "    public void foo(int doNotRefactorParameter) {\n" //
+				+ "        I1 i1 = (String s, int i, Boolean b) -> { System.out.println(\"hello\"); };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testDoNotUseVarOnNarrowingType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

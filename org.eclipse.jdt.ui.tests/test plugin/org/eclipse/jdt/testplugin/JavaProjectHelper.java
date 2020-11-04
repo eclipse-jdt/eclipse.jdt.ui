@@ -230,6 +230,19 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 11 for the given project.
+	 *
+	 * @param project the java project
+	 * @param enable_preview_feature sets enable-preview compliance project option based on the value specified.
+	 * @since 4.18
+	 */
+	public static void set11CompilerOptions(IJavaProject project) {
+		Map<String, String> options= project.getOptions(false);
+		set11CompilerOptions(options);
+		project.setOptions(options);
+	}
+
+	/**
 	 * Sets the compiler options to 12 for the given project.
 	 *
 	 * @param project the java project
@@ -368,6 +381,15 @@ public class JavaProjectHelper {
 	 */
 	public static void set10CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_10, options);
+	}
+
+	/**
+	 * Sets the compiler options to 11.
+	 *
+	 * @param options the compiler options to configure
+	 */
+	public static void set11CompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_11, options);
 	}
 
 	/**
