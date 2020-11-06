@@ -182,13 +182,6 @@
                 <message_argument value="setPatternVariable(SimpleName)"/>
             </message_arguments>
         </filter>
-        <filter comment="Java preview feature API usage" id="640712815">
-            <message_arguments>
-                <message_argument value="InstanceofExpression"/>
-                <message_argument value="PatternMatchingForInstanceofOperation"/>
-                <message_argument value="setPatternVariable(SingleVariableDeclaration)"/>
-            </message_arguments>
-        </filter>
     </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/AddClassFileMarkerAction.java" type="org.eclipse.jdt.internal.ui.javaeditor.AddClassFileMarkerAction">
         <filter id="571473929">
