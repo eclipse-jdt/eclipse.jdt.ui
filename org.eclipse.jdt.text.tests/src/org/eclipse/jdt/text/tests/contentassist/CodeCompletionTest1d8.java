@@ -355,11 +355,11 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Collection;\n");
 		buf.append("abstract class X implements Collection<Integer> {\n");
-		buf.append("    parallelS\n");
+		buf.append("    parallelStre\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 
-		String str= "parallelS";
+		String str= "parallelStre";
 		int offset= buf.toString().lastIndexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
