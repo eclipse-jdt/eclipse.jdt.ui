@@ -11977,7 +11977,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testStringBuilder() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String input= "" //
+		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.List;\n" //
@@ -11985,59 +11985,137 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public static String useStringBuilder() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable+= \"foo\";\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return text;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInFinalConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text + \"append me!\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInPreviousConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return \"previous text\" + text + \"append me!\";\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithInitializer() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"foo\";\n" //
+				+ "        String concatenation = \"foo\";\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable+= \"bar\";\n" //
+				+ "        concatenation += \"bar\";\n" //
+				+ "        concatenation += \"foobar\";\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return concatenation;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public static String useStringBuilderOnBasicAssignment() {\n" //
+				+ "    public static String useStringBuilderWithConcatenationInitializer() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String concatenation = \"foo\" + \"bar\";\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable= variable + \"foo\";\n" //
+				+ "        concatenation += \"bar\";\n" //
+				+ "        concatenation += \"foobar\";\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithNonStringInitializer() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = 123 + \"bar\";\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        concatenation += \"bar\";\n" //
+				+ "        concatenation += \"foobar\";\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderAndRemoveValueOfMethod() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += String.valueOf(123);\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderAndRemoveValueOfMethodInFinalConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text + String.valueOf(123) + new String(456);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnBasicAssignment(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String serialization = \"\";\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        serialization = serialization + \"foo\";\n" //
+				+ "        serialization = serialization + number;\n" //
+				+ "        serialization = serialization + \"bar\";\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return serialization;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithExtendedOperation(String text) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable+= text + \"foo\";\n" //
-				+ "        variable= variable + text + \"bar\";\n" //
+				+ "        variable += text + \"foo\";\n" //
+				+ "        variable = variable + text + \"bar\";\n" //
 				+ "        // Keep this comment too\n" //
 				+ "        return variable;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithDifferentAssignment() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variousConcatenations = \"\";\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable+= \"foo\";\n" //
-				+ "        variable= variable + \"bar\";\n" //
+				+ "        variousConcatenations += \"foo\";\n" //
+				+ "        variousConcatenations = variousConcatenations + \"bar\" + \"foobar\";\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return variousConcatenations;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithBlock(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= \"foo\";\n" //
-				+ "            variable= variable + \"bar\";\n" //
+				+ "            variable += \"foo\";\n" //
+				+ "            variable = variable + \"bar\";\n" //
+				+ "            variable = variable + \"foobar\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12046,12 +12124,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithLoop(List<String> texts) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "\n" //
 				+ "        for (String text : texts) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= text;\n" //
-				+ "            variable= variable + \",\";\n" //
+				+ "            variable = variable + \"[\";\n" //
+				+ "            variable += text;\n" //
+				+ "            variable = variable + \"]\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnOneLoopedAssignment(List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable = \"\";\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable += text;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnOneLoopedReassignment(List<String> words) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable = \"\";\n" //
+				+ "\n" //
+				+ "        for (String word : words) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable = variable + word;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12060,12 +12165,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithWhile(String text, int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "\n" //
 				+ "        while (i-- > 0) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= text;\n" //
-				+ "            variable= variable + \",\";\n" //
+				+ "            variable = variable + \"{\";\n" //
+				+ "            variable += text;\n" //
+				+ "            variable = variable + \"}\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12074,26 +12180,27 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithTry(String number, int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String iterableConcatenation = \"\";\n" //
 				+ "\n" //
 				+ "        try {\n" //
 				+ "            while (i-- > 0) {\n" //
 				+ "                // Keep this comment also\n" //
-				+ "                variable+= (Integer.parseInt(number) + 1);\n" //
-				+ "                variable= variable + \",\";\n" //
+				+ "                iterableConcatenation = iterableConcatenation + \"(\";\n" //
+				+ "                iterableConcatenation += (Integer.parseInt(number) + 1);\n" //
+				+ "                iterableConcatenation = iterableConcatenation + \")\";\n" //
 				+ "            }\n" //
 				+ "        } catch (NumberFormatException e) {\n" //
 				+ "            return \"0\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return iterableConcatenation;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithFinally(String number) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
-				+ "        int i= 123;\n" //
+				+ "        String variable = \"\";\n" //
+				+ "        int i = 123;\n" //
 				+ "\n" //
 				+ "        try {\n" //
 				+ "            i+= Integer.parseInt(number);\n" //
@@ -12101,8 +12208,9 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            System.out.println(\"error\");\n" //
 				+ "        } finally {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= \"foo\";\n" //
-				+ "            variable= variable + \"bar\";\n" //
+				+ "            variable += \"foo\";\n" //
+				+ "            variable = variable + \"bar\";\n" //
+				+ "            variable = variable + \"foobar\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12111,12 +12219,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithConditionalRead(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= \"foo\";\n" //
-				+ "            variable= variable + \"bar\";\n" //
+				+ "            variable += \"foo\";\n" //
+				+ "            variable = variable + \"bar\";\n" //
+				+ "            variable = variable + \"foobar\";\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            return variable;\n" //
 				+ "        }\n" //
@@ -12126,24 +12235,38 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderInElse(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String conditionalConcatenation = \"\";\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            return \"OK\";\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= \"foo\";\n" //
-				+ "            variable= variable + \"bar\";\n" //
+				+ "            conditionalConcatenation += \"foo\";\n" //
+				+ "            conditionalConcatenation = conditionalConcatenation + \"bar\";\n" //
+				+ "            conditionalConcatenation = conditionalConcatenation + \"foobar\";\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            return variable;\n" //
+				+ "            return \"Another \" + \"text \" + conditionalConcatenation;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithAdditions() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"1 + 2 = \" + (1 + 2);\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \" foo\";\n" //
+				+ "        text += \"bar \";\n" //
+				+ "        text += \"3 + 4 = \";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text + (3 + 4);\n" //
+				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
 
 		enable(CleanUpConstants.STRINGBUILDER);
 
-		String output= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.List;\n" //
@@ -12151,34 +12274,111 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public static String useStringBuilder() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable.append(\"foo\");\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(\"foobar\");\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return text.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInFinalConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(\"foobar\");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.append(\"append me!\").toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInPreviousConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(\"foobar\");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return \"previous text\" + text.append(\"append me!\").toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithInitializer() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder(\"foo\");\n" //
+				+ "        StringBuilder concatenation = new StringBuilder(\"foo\");\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable.append(\"bar\");\n" //
+				+ "        concatenation.append(\"bar\");\n" //
+				+ "        concatenation.append(\"foobar\");\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return concatenation.toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public static String useStringBuilderOnBasicAssignment() {\n" //
+				+ "    public static String useStringBuilderWithConcatenationInitializer() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder concatenation = new StringBuilder(\"foo\").append(\"bar\");\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable.append(\"foo\");\n" //
+				+ "        concatenation.append(\"bar\");\n" //
+				+ "        concatenation.append(\"foobar\");\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithNonStringInitializer() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder concatenation = new StringBuilder().append(123).append(\"bar\");\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        concatenation.append(\"bar\");\n" //
+				+ "        concatenation.append(\"foobar\");\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderAndRemoveValueOfMethod() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(123);\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderAndRemoveValueOfMethodInFinalConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(\"foobar\");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.append(123).append(456).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnBasicAssignment(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder serialization = new StringBuilder();\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        serialization.append(\"foo\");\n" //
+				+ "        serialization.append(number);\n" //
+				+ "        serialization.append(\"bar\");\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return serialization.toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithExtendedOperation(String text) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "        // Keep this comment also\n" //
 				+ "        variable.append(text).append(\"foo\");\n" //
 				+ "        variable.append(text).append(\"bar\");\n" //
@@ -12188,22 +12388,23 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithDifferentAssignment() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variousConcatenations = new StringBuilder();\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable.append(\"foo\");\n" //
-				+ "        variable.append(\"bar\");\n" //
+				+ "        variousConcatenations.append(\"foo\");\n" //
+				+ "        variousConcatenations.append(\"bar\").append(\"foobar\");\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return variousConcatenations.toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithBlock(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            variable.append(\"foo\");\n" //
 				+ "            variable.append(\"bar\");\n" //
+				+ "            variable.append(\"foobar\");\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12212,12 +12413,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithLoop(List<String> texts) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(\"[\");\n" //
+				+ "            variable.append(text);\n" //
+				+ "            variable.append(\"]\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnOneLoopedAssignment(List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        for (String text : texts) {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            variable.append(text);\n" //
-				+ "            variable.append(\",\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnOneLoopedReassignment(List<String> words) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String word : words) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(word);\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12226,12 +12454,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithWhile(String text, int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        while (i-- > 0) {\n" //
 				+ "            // Keep this comment also\n" //
+				+ "            variable.append(\"{\");\n" //
 				+ "            variable.append(text);\n" //
-				+ "            variable.append(\",\");\n" //
+				+ "            variable.append(\"}\");\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12240,26 +12469,27 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithTry(String number, int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder iterableConcatenation = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        try {\n" //
 				+ "            while (i-- > 0) {\n" //
 				+ "                // Keep this comment also\n" //
-				+ "                variable.append(Integer.parseInt(number)).append(1);\n" //
-				+ "                variable.append(\",\");\n" //
+				+ "                iterableConcatenation.append(\"(\");\n" //
+				+ "                iterableConcatenation.append(Integer.parseInt(number)).append(1);\n" //
+				+ "                iterableConcatenation.append(\")\");\n" //
 				+ "            }\n" //
 				+ "        } catch (NumberFormatException e) {\n" //
 				+ "            return \"0\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return iterableConcatenation.toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithFinally(String number) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
-				+ "        int i= 123;\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
+				+ "        int i = 123;\n" //
 				+ "\n" //
 				+ "        try {\n" //
 				+ "            i+= Integer.parseInt(number);\n" //
@@ -12269,20 +12499,22 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            // Keep this comment also\n" //
 				+ "            variable.append(\"foo\");\n" //
 				+ "            variable.append(\"bar\");\n" //
+				+ "            variable.append(\"foobar\");\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString() + i;\n" //
+				+ "        return variable.append(i).toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithConditionalRead(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            variable.append(\"foo\");\n" //
 				+ "            variable.append(\"bar\");\n" //
+				+ "            variable.append(\"foobar\");\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            return variable.toString();\n" //
 				+ "        }\n" //
@@ -12292,23 +12524,37 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderInElse(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder conditionalConcatenation = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            return \"OK\";\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable.append(\"foo\");\n" //
-				+ "            variable.append(\"bar\");\n" //
+				+ "            conditionalConcatenation.append(\"foo\");\n" //
+				+ "            conditionalConcatenation.append(\"bar\");\n" //
+				+ "            conditionalConcatenation.append(\"foobar\");\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            return variable.toString();\n" //
+				+ "            return \"Another \" + \"text \" + conditionalConcatenation.toString();\n" //
 				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithAdditions() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder(\"1 + 2 = \").append(1 + 2);\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\" foo\");\n" //
+				+ "        text.append(\"bar \");\n" //
+				+ "        text.append(\"3 + 4 = \");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.append(3 + 4).toString();\n" //
 				+ "    }\n" //
 				+ "}\n";
 
-		assertNotEquals("The class must be changed", input, output);
+		assertNotEquals("The class must be changed", given, expected);
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StringBuilderCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
 	@Test
@@ -12321,22 +12567,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    private String field= \"\";\n" //
+				+ "    private String field = \"\";\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorWithoutAssignment() {\n" //
+				+ "        String concatenation = 123 + \"bar\";\n" //
+				+ "        return concatenation + String.valueOf(456);\n" //
+				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String doNotRefactorNullString() {\n" //
-				+ "        String text= null;\n" //
-				+ "        text+= \"foo\";\n" //
+				+ "        String text = null;\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
+				+ "        return text;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorConcatenationOfOnlyTwoStrings() {\n" //
+				+ "        String text= \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
 				+ "        return text;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String doNotRefactorMultideclaration() {\n" //
-				+ "        String variable= \"\", anotherVariable= \"\";\n" //
-				+ "        variable+= \"foo\";\n" //
-				+ "        return variable;\n" //
+				+ "        String serialization= \"\", anotherSerialization= \"\";\n" //
+				+ "        serialization += \"foo\";\n" //
+				+ "        serialization += \"bar\";\n" //
+				+ "        serialization += \"foobar\";\n" //
+				+ "        return serialization;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String doNotRefactorStringUsedAsExpression() {\n" //
 				+ "        String variable= \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
 				+ "        if ((variable+= \"bar\").contains(\"i\")) {\n" //
 				+ "            return \"foobar\";\n" //
 				+ "        }\n" //
@@ -12345,8 +12608,104 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String doNotUseStringBuilderWithoutAppending() {\n" //
 				+ "        String variable= \"\";\n" //
-				+ "        variable= \"foo\" + variable;\n" //
+				+ "        variable = \"foo\" + variable;\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
 				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorWrongAssignmentOperator() {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable = \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorBadAssignmentOperator() {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable += variable + \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotUseStringBuilderWithoutConcatenation() {\n" //
+				+ "        String variable = \"\";\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotRefactorStringChangedAfterUse(String text) {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable += text + \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        System.out.println(variable);\n" //
+				+ "        variable= variable + text + \"bar\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotBuildStringSeveralTimes() {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable += \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        variable = variable + \"bar\";\n" //
+				+ "        return variable + variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static List<String> doNotStringifySeveralTimes(List<String> texts) {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        List<String> output= new ArrayList<String>();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            variable += text;\n" //
+				+ "            variable += \"bar\";\n" //
+				+ "            variable += \"foobar\";\n" //
+				+ "            variable = variable + \",\";\n" //
+				+ "            output.add(variable);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotStringifySeveralTimesToo(List<String> words) {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable += \"foo\";\n" //
+				+ "        variable = variable + \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "\n" //
+				+ "        for (String word : words) {\n" //
+				+ "            System.out.println(variable);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorStringsWithoutConcatenation(boolean isEnabled) {\n" //
+				+ "        String variable1 = \"First variable\";\n" //
+				+ "        String variable2 = \"Second variable\";\n" //
+				+ "\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            variable1 += \"foo\";\n" //
+				+ "            variable1 = variable2 + \"bar\";\n" //
+				+ "        } else {\n" //
+				+ "            variable2 += \"foo\";\n" //
+				+ "            variable2 = variable1 + \"bar\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return variable1 + variable2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotUseStringBuilderOnParameter(String variable) {\n" //
+				+ "        variable += \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotUseStringBuilderOnField() {\n" //
+				+ "        field = \"Lorem\";\n" //
+				+ "        field += \" ipsum\";\n" //
+				+ "        field += \" dolor sit amet\";\n" //
+				+ "        return field;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
