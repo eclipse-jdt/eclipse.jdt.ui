@@ -202,7 +202,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			private int getVariableUseCount(final IVariableBinding variableBinding, final Statement toVisit) {
 				if (variableBinding != null) {
 					VarDefinitionsUsesVisitor variableUseVisitor= new VarDefinitionsUsesVisitor(variableBinding,
-							toVisit, true).find();
+					toVisit, true);
 					return variableUseVisitor.getReads().size();
 				}
 

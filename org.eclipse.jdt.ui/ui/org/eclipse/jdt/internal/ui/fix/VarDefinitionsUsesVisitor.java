@@ -45,22 +45,15 @@ public final class VarDefinitionsUsesVisitor extends ASTVisitor {
 	 * @param includeInnerScopes True if the sub blocks should be analyzed
 	 */
 	public VarDefinitionsUsesVisitor(final IVariableBinding variableBinding, final ASTNode scopeNode, final boolean includeInnerScopes) {
+		if (variableBinding == null || scopeNode == null) {
+			throw new IllegalArgumentException("Variable binding and scope node should be provided"); //$NON-NLS-1$
+		}
+
 		this.variableBinding= variableBinding;
 		this.scopeNode= scopeNode;
 		this.includeInnerScopes= includeInnerScopes;
-	}
 
-	/**
-	 * Finds all the definitions and uses of the variable.
-	 *
-	 * @return this visitor
-	 */
-	public VarDefinitionsUsesVisitor find() {
-		if (variableBinding != null && scopeNode != null) {
-			scopeNode.accept(this);
-		}
-
-		return this;
+		scopeNode.accept(this);
 	}
 
 	@Override

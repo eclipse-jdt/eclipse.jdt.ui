@@ -188,7 +188,7 @@ public class AtomicObjectCleanUp extends AbstractMultiFix {
 									char.class.getCanonicalName(),
 									byte.class.getCanonicalName())) {
 						VarDefinitionsUsesVisitor varOccurrencesVisitor= new VarDefinitionsUsesVisitor(variableBinding,
-								startNode, true).find();
+						startNode, true);
 
 						List<SimpleName> reads= varOccurrencesVisitor.getReads();
 						List<SimpleName> writes= varOccurrencesVisitor.getWrites();

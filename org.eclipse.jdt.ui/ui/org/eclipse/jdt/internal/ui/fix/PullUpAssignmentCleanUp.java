@@ -221,7 +221,7 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 
 						for (Expression expression : evaluatedExpression) {
 							VarDefinitionsUsesVisitor variableUseVisitor= new VarDefinitionsUsesVisitor(variableBinding,
-									expression, true).find();
+							expression, true);
 
 							if (!variableUseVisitor.getReads().isEmpty()) {
 								return true;
@@ -257,7 +257,7 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 						for (VariableDeclarationFragment aFragment : (List<VariableDeclarationFragment>) variableDeclarationStatement.fragments()) {
 							if (bindingOfPreviousVariable != null) {
 								VarDefinitionsUsesVisitor varOccurrencesVisitor= new VarDefinitionsUsesVisitor(bindingOfPreviousVariable,
-										aFragment, true).find();
+								aFragment, true);
 
 								if (!varOccurrencesVisitor.getReads().isEmpty()) {
 									return null;

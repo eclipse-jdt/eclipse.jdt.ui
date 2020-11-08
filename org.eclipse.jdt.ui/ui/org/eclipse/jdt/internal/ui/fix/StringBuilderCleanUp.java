@@ -248,7 +248,7 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 							&& ASTNodes.hasType(type.resolveBinding(), String.class.getCanonicalName())
 							&& !ASTNodes.is(initializer, NullLiteral.class)) {
 						VarDefinitionsUsesVisitor varOccurrencesVisitor= new VarDefinitionsUsesVisitor(variableBinding,
-								startNode, true).find();
+						startNode, true);
 
 						List<SimpleName> reads= varOccurrencesVisitor.getReads();
 						List<SimpleName> writes= varOccurrencesVisitor.getWrites();
