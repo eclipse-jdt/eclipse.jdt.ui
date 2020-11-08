@@ -21,7 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -99,6 +101,34 @@ public class CleanUpTest extends CleanUpTestCase {
 		@Override
 		protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
 			return super.createFix(unit);
+		}
+	}
+
+	@Test
+	public void testCleanUpConstantsAreDistinct() throws Exception {
+		Field[] allCleanUpConstantsFields= CleanUpConstants.class.getDeclaredFields();
+
+		Map<String, Field> stringFieldsByValue= new HashMap<>();
+
+		for (Field field : allCleanUpConstantsFields) {
+			if (String.class.equals(field.getType())
+					&& field.getAnnotation(Deprecated.class) == null
+					&& !field.getName().startsWith("DEFAULT_")) {
+				final String constantValue= (String) field.get(null);
+
+				assertFalse(stringFieldsByValue.containsKey(constantValue),
+						() -> CleanUpConstants.class.getCanonicalName()
+						+ "."
+						+ field.getName()
+						+ " and "
+						+ CleanUpConstants.class.getCanonicalName()
+						+ "."
+						+ stringFieldsByValue.get(constantValue).getName()
+						+ " should not share the same value: "
+						+ constantValue);
+
+				stringFieldsByValue.put(constantValue, field);
+			}
 		}
 	}
 
