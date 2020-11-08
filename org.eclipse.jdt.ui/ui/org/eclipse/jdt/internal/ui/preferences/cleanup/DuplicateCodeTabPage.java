@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp;
 
 public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.duplicate_code"; //$NON-NLS-1$
@@ -31,6 +32,7 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
+				new StrictlyEqualOrDifferentCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
 				new RedundantIfConditionCleanUp(values)
@@ -39,15 +41,18 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 
 	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
-		Group optimizationGroup= createGroup(numColumns, composite, CleanUpMessages.DuplicateCodeTabPage_GroupName_DuplicateCode);
+		Group duplicateGroup= createGroup(numColumns, composite, CleanUpMessages.DuplicateCodeTabPage_GroupName_DuplicateCode);
 
-		final CheckboxPreference mergeConditionalBlocks= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_MergeConditionalBlocks, CleanUpConstants.MERGE_CONDITIONAL_BLOCKS, CleanUpModifyDialog.FALSE_TRUE);
+		final CheckboxPreference strictlyEqualOrDifferent= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_StrictlyEqualOrDifferent, CleanUpConstants.STRICTLY_EQUAL_OR_DIFFERENT, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(strictlyEqualOrDifferent);
+
+		final CheckboxPreference mergeConditionalBlocks= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_MergeConditionalBlocks, CleanUpConstants.MERGE_CONDITIONAL_BLOCKS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(mergeConditionalBlocks);
 
-		final CheckboxPreference redundantFallingThroughBlockEnd= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd, CleanUpConstants.REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpModifyDialog.FALSE_TRUE);
+		final CheckboxPreference redundantFallingThroughBlockEnd= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd, CleanUpConstants.REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(redundantFallingThroughBlockEnd);
 
-		final CheckboxPreference redundantIfCondition= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_RedundantIfCondition, CleanUpConstants.REDUNDANT_IF_CONDITION, CleanUpModifyDialog.FALSE_TRUE);
+		final CheckboxPreference redundantIfCondition= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_RedundantIfCondition, CleanUpConstants.REDUNDANT_IF_CONDITION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(redundantIfCondition);
 	}
 }

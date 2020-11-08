@@ -7302,9 +7302,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.collection_cloning">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.strictly_equal_or_different"
+            runAfter="org.eclipse.jdt.ui.cleanup.map_cloning">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp"
             id="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks"
-            runAfter="org.eclipse.jdt.ui.cleanup.map_cloning">
+            runAfter="org.eclipse.jdt.ui.cleanup.strictly_equal_or_different">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp"

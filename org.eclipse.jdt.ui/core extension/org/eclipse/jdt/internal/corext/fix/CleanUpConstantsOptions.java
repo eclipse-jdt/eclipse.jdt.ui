@@ -157,6 +157,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		options.setOption(SORT_MEMBERS, CleanUpOptions.FALSE);
 		options.setOption(SORT_MEMBERS_ALL, CleanUpOptions.FALSE);
+
+		// Duplicate Code
+		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
 	}
 
 	private static void setSaveParticipantSettings(CleanUpOptions options) {
@@ -292,6 +295,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(SORT_MEMBERS_ALL, CleanUpOptions.FALSE);
 
 		options.setOption(CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, CleanUpOptions.FALSE);
+
+		// Duplicate Code
+		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
 	}
 
 	public static void initDefaults(IPreferenceStore store) {

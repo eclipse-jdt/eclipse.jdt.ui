@@ -1284,6 +1284,19 @@ public class CleanUpConstants {
 	public static final String REDUNDANT_SUPER_CALL= "cleanup.no_super"; //$NON-NLS-1$
 
 	/**
+	 * Replaces <code>(X && !Y) || (!X && Y)</code> by <code>X ^ Y</code>.
+	 * Replaces also <code>(X && Y) || (!X && !Y)</code> by <code>X == Y</code>.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String STRICTLY_EQUAL_OR_DIFFERENT= "cleanup.strictly_equal_or_different"; //$NON-NLS-1$
+
+	/**
 	 * Merge conditions of if/else if/else that have the same blocks.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
