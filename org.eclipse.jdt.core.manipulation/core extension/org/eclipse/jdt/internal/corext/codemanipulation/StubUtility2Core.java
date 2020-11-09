@@ -679,7 +679,11 @@ public final class StubUtility2Core {
 		final List<DelegateEntry> tuples= new ArrayList<>();
 		final List<IMethodBinding> declared= new ArrayList<>();
 		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
-		declared.addAll(Arrays.asList(typeMethods));
+		for (IMethodBinding typeMethod : typeMethods) {
+			if (!typeMethod.isSyntheticRecordMethod()) {
+				declared.add(typeMethod);
+			}
+		}
 		for (IVariableBinding fieldBinding : binding.getDeclaredFields()) {
 			if (fieldBinding.isField() && !fieldBinding.isEnumConstant() && !fieldBinding.isSynthetic())
 				getDelegatableMethods(new ArrayList<>(declared), fieldBinding, fieldBinding.getType(), binding, tuples);
@@ -731,7 +735,9 @@ public final class StubUtility2Core {
 			final int modifiers= typeMethod.getModifiers();
 			if (!typeMethod.isConstructor() && !Modifier.isStatic(modifiers) && (isInterface || Modifier.isPublic(modifiers))) {
 				IMethodBinding result= Bindings.findOverriddenMethodInHierarchy(hierarchy, typeMethod);
-				if (result != null && Flags.isFinal(result.getModifiers()))
+				if (result != null
+						&& Flags.isFinal(result.getModifiers())
+						&& !result.isSyntheticRecordMethod())
 					continue;
 				ITypeBinding[] parameterBindings= typeMethod.getParameterTypes();
 				boolean upper= false;
