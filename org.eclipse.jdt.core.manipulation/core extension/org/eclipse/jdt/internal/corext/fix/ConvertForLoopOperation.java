@@ -359,21 +359,22 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	}
 
 	private boolean isCollection(ITypeBinding classBinding) {
-		ITypeBinding[] interfaces= classBinding.getInterfaces();
-		for (ITypeBinding binding : interfaces) {
-			if (binding.getErasure().getQualifiedName().startsWith("java.util.Collection")) { //$NON-NLS-1$
-				return true;
-			}
+		if (classBinding.getErasure().getQualifiedName().startsWith("java.util.Collection")) { //$NON-NLS-1$
+			return true;
 		}
+
 		ITypeBinding superClass= classBinding.getSuperclass();
+
 		if (superClass != null && isCollection(superClass)) {
 			return true;
 		}
-		for (ITypeBinding binding : interfaces) {
+
+		for (ITypeBinding binding : classBinding.getInterfaces()) {
 			if (isCollection(binding)) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 

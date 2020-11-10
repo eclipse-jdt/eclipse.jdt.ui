@@ -349,6 +349,44 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testCollection() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuilder bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("import java.util.Collection;\n");
+		bld.append("\n");
+		bld.append("public class I {\n");
+		bld.append("    public void foo(Collection<? super String> wildcardCollection) {\n");
+		bld.append("        for (int q = 0; q < wildcardCollection.size(); q++) {\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("I.java", bld.toString(), false, null);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(bld, cu);
+		assertNotNull(fConvertLoopProposal);
+		assertCorrectLabels(proposals);
+		String preview1= getPreviewContent(fConvertLoopProposal);
+
+		bld= new StringBuilder();
+		bld.append("package test1;\n");
+		bld.append("\n");
+		bld.append("import java.util.Collection;\n");
+		bld.append("\n");
+		bld.append("public class I {\n");
+		bld.append("    public void foo(Collection<? super String> wildcardCollection) {\n");
+		bld.append("        for (Object element : wildcardCollection) {\n");
+		bld.append("        }\n");
+		bld.append("    }\n");
+		bld.append("}\n");
+		String expected= bld.toString();
+
+		assertEqualString(preview1, expected);
+	}
+
+	@Test
 	public void testNameDetectionChildren() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
