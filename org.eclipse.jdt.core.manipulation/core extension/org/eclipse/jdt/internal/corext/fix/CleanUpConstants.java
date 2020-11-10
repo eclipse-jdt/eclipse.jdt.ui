@@ -1333,6 +1333,19 @@ public class CleanUpConstants {
 	public static final String MERGE_CONDITIONAL_BLOCKS= "cleanup.merge_conditional_blocks"; //$NON-NLS-1$
 
 	/**
+	 * Factorizes common code in all if / else if / else statements at the end of each blocks.
+	 * Ultimately it removes the empty and passive if conditions.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String CONTROLFLOW_MERGE= "cleanup.controlflow_merge"; //$NON-NLS-1$
+
+	/**
 	 * Merges blocks that end with a jump statement into the following same code.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

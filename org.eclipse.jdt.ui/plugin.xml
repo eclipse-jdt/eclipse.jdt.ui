@@ -7272,9 +7272,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.strictly_equal_or_different">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.controlflow_merge"
+            runAfter="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp"
             id="org.eclipse.jdt.ui.cleanup.redundant_falling_through_block_end"
-            runAfter="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks">
+            runAfter="org.eclipse.jdt.ui.cleanup.controlflow_merge">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp"

@@ -12673,6 +12673,445 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testControlFlowMerge() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "import java.util.function.Predicate;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Date j = new Date();\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove if statement */\n" //
+				+ "    public void ifElseRemoveIfNoBrackets(boolean isValid, int i) {\n" //
+				+ "        // Keep this!\n" //
+				+ "        if (isValid)\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        else\n" //
+				+ "            i = i + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove if statement */\n" //
+				+ "    public void ifElseRemoveIf(boolean b, int number) {\n" //
+				+ "        if (b) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            number = number + 1;\n" //
+				+ "        } else {\n" //
+				+ "            number++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove then case */\n" //
+				+ "    public void ifElseRemoveThen(boolean condition, int i, int j) {\n" //
+				+ "        if (condition) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            ++i;\n" //
+				+ "        } else {\n" //
+				+ "            j++;\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i = i + 1;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove else case */\n" //
+				+ "    public void ifElseRemoveElse(boolean b, int i, int j) {\n" //
+				+ "        if (b) {\n" //
+				+ "            j++;\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove second case */\n" //
+				+ "    public void reverseMiddle(boolean isActive, boolean isEnabled, int i, int j) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            j++;\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        } else if (isEnabled) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        } else {\n" //
+				+ "            j++;\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove second case */\n" //
+				+ "    public void reverseEmptySecond(boolean isActive, boolean isEnabled, int i, int j) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            j++;\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        } else if (isEnabled) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        } else if (i > 0) {\n" //
+				+ "            j--;\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        } else {\n" //
+				+ "            j++;\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Only common code, Remove if statement */\n" //
+				+ "    public void ifElseRemoveIfSeveralStatements(boolean b1, boolean b2, int i, int j) {\n" //
+				+ "        if (b1) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "            if (b2 && true) {\n" //
+				+ "                i++;\n" //
+				+ "            } else {\n" //
+				+ "                j++;\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "            if (false || !b2) {\n" //
+				+ "                j++;\n" //
+				+ "            } else {\n" //
+				+ "                i++;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Not all cases covered, Do not remove anything */\n" //
+				+ "    public void ifElseIfNoElseDoNotTouch(boolean isValid, int k, int l) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            k++;\n" //
+				+ "            l++;\n" //
+				+ "        } else if (!isValid) {\n" //
+				+ "            k++;\n" //
+				+ "            l++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Only common code: remove if statement */\n" //
+				+ "    public void ifElseIfElseRemoveIf(boolean b, int i, int j) {\n" //
+				+ "        if (b) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "            j++;\n" //
+				+ "        } else if (!b) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "            j++;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "            j++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Specific code: keep some if statement */\n" //
+				+ "    public void ifElseIfElseRemoveSomeIf(boolean b1, boolean b2, List<String> modifiableList, int i, int j) {\n" //
+				+ "        if (b1) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "            j++;\n" //
+				+ "        } else if (b2) {\n" //
+				+ "            i++;\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "            j++;\n" //
+				+ "        } else if (modifiableList.remove(\"foo\")) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "            j++;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            i++;\n" //
+				+ "            j++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMethodInvocation(boolean b, Object o) {\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(b);\n" //
+				+ "            o.toString();\n" //
+				+ "        } else {\n" //
+				+ "            o.toString();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.CONTROLFLOW_MERGE);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "import java.util.function.Predicate;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Date j = new Date();\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove if statement */\n" //
+				+ "    public void ifElseRemoveIfNoBrackets(boolean isValid, int i) {\n" //
+				+ "        // Keep this!\n" //
+				+ "        // Keep this comment\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove if statement */\n" //
+				+ "    public void ifElseRemoveIf(boolean b, int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        number = number + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove then case */\n" //
+				+ "    public void ifElseRemoveThen(boolean condition, int i, int j) {\n" //
+				+ "        if (!condition) {\n" //
+				+ "            j++;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment\n" //
+				+ "        ++i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove else case */\n" //
+				+ "    public void ifElseRemoveElse(boolean b, int i, int j) {\n" //
+				+ "        if (b) {\n" //
+				+ "            j++;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove second case */\n" //
+				+ "    public void reverseMiddle(boolean isActive, boolean isEnabled, int i, int j) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            j++;\n" //
+				+ "        } else if (!isEnabled) {\n" //
+				+ "            j++;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Common code: i++, Remove second case */\n" //
+				+ "    public void reverseEmptySecond(boolean isActive, boolean isEnabled, int i, int j) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            j++;\n" //
+				+ "        } else if (isEnabled) {\n" //
+				+ "        } else if (i > 0) {\n" //
+				+ "            j--;\n" //
+				+ "        } else {\n" //
+				+ "            j++;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Only common code, Remove if statement */\n" //
+				+ "    public void ifElseRemoveIfSeveralStatements(boolean b1, boolean b2, int i, int j) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        i++;\n" //
+				+ "        if (b2 && true) {\n" //
+				+ "            i++;\n" //
+				+ "        } else {\n" //
+				+ "            j++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Not all cases covered, Do not remove anything */\n" //
+				+ "    public void ifElseIfNoElseDoNotTouch(boolean isValid, int k, int l) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            k++;\n" //
+				+ "            l++;\n" //
+				+ "        } else if (!isValid) {\n" //
+				+ "            k++;\n" //
+				+ "            l++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Only common code: remove if statement */\n" //
+				+ "    public void ifElseIfElseRemoveIf(boolean b, int i, int j) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        i++;\n" //
+				+ "        j++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Specific code: keep some if statement */\n" //
+				+ "    public void ifElseIfElseRemoveSomeIf(boolean b1, boolean b2, List<String> modifiableList, int i, int j) {\n" //
+				+ "        if (b1) {\n" //
+				+ "        } else if (b2) {\n" //
+				+ "            i++;\n" //
+				+ "        } else if (modifiableList.remove(\"foo\")) {\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment\n" //
+				+ "        i++;\n" //
+				+ "        j++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMethodInvocation(boolean b, Object o) {\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(b);\n" //
+				+ "        }\n" //
+				+ "        o.toString();\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ControlFlowMergeCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotControlFlowMerge() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "import java.util.function.Predicate;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Date j = new Date();\n" //
+				+ "\n" //
+				+ "    /** No common code, Do not remove anything */\n" //
+				+ "    public void doNotRemoveNotCommonCode(boolean condition, int number1, int number2) {\n" //
+				+ "        if (condition) {\n" //
+				+ "            number1++;\n" //
+				+ "        } else {\n" //
+				+ "            number2++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorDifferentVariablesInReturn(boolean condition) {\n" //
+				+ "        if (condition) {\n" //
+				+ "            int i = 1;\n" //
+				+ "            return i;\n" //
+				+ "        } else {\n" //
+				+ "            int i = 2;\n" //
+				+ "            return i;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorNoElse(boolean b) {\n" //
+				+ "        if (b) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithNameConflict(boolean isActive) {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        if (isActive) {\n" //
+				+ "            int j = 1;\n" //
+				+ "            i = j + 10;\n" //
+				+ "        } else {\n" //
+				+ "            int j = 1;\n" //
+				+ "            i = j + 10;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        int j = 123;\n" //
+				+ "        System.out.println(\"Other number: \" + j);\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithNameConflictInBlock(boolean isActive) {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        if (isActive) {\n" //
+				+ "            int j = 1;\n" //
+				+ "            i = j + 10;\n" //
+				+ "        } else {\n" //
+				+ "            int j = 1;\n" //
+				+ "            i = j + 10;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive) {\n" //
+				+ "            int j = 123;\n" //
+				+ "            System.out.println(\"Other number: \" + j);\n" //
+				+ "        }\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithNameConfusion(boolean b) {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        if (b) {\n" //
+				+ "            int j = 1;\n" //
+				+ "            i = j + 10;\n" //
+				+ "        } else {\n" //
+				+ "            int j = 1;\n" //
+				+ "            i = j + 10;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        System.out.println(\"Today: \" + j);\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveVarOutsideItsScope(boolean b) {\n" //
+				+ "        if (b) {\n" //
+				+ "            int dontMoveMeIMLocal = 1;\n" //
+				+ "            return dontMoveMeIMLocal + 10;\n" //
+				+ "        } else {\n" //
+				+ "            int dontMoveMeIMLocal = 2;\n" //
+				+ "            return dontMoveMeIMLocal + 10;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Predicate<String> doNotMergeDifferentLambdaExpression(final boolean caseSensitive, final String... allowedSet) {\n" //
+				+ "        if (caseSensitive) {\n" //
+				+ "            return x -> Arrays.stream(allowedSet).anyMatch(y -> (x == null && y == null) || (x != null && x.equals(y)));\n" //
+				+ "        } else {\n" //
+				+ "            Function<String,String> toLower = x -> x == null ? null : x.toLowerCase();\n" //
+				+ "            return x -> Arrays.stream(allowedSet).map(toLower).anyMatch(y -> (x == null && y == null) || (x != null && toLower.apply(x).equals(y)));\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithNotFallingThroughCase(boolean isValid, boolean isEnabled, int i, int j) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            i++;\n" //
+				+ "            if (isEnabled && true) {\n" //
+				+ "                i++;\n" //
+				+ "            } else {\n" //
+				+ "                j++;\n" //
+				+ "            }\n" //
+				+ "        } else if (i > 0) {\n" //
+				+ "            \"Do completely other things\".chars();\n" //
+				+ "        } else {\n" //
+				+ "            i++;\n" //
+				+ "            if (false || !isEnabled) {\n" //
+				+ "                j++;\n" //
+				+ "            } else {\n" //
+				+ "                i++;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return \"Common code\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROLFLOW_MERGE);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRegExPrecompilationInLambda() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
