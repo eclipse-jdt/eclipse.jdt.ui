@@ -51,7 +51,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
-import org.eclipse.jdt.internal.corext.dom.VarOccurrenceVisitor;
+import org.eclipse.jdt.internal.corext.dom.VarConflictVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
@@ -338,10 +338,10 @@ public class BreakLoopCleanUp extends AbstractMultiFix {
 							&& ASTNodes.hasOperator(assignment, Assignment.Operator.ASSIGN)
 							&& ASTNodes.isHardCoded(assignment.getRightHandSide())
 							&& ASTNodes.isPassive(assignment.getLeftHandSide())) {
-						VarOccurrenceVisitor varOccurrenceVisitor= new VarOccurrenceVisitor(allowedVars, true);
+						VarConflictVisitor varOccurrenceVisitor= new VarConflictVisitor(allowedVars, true);
 						varOccurrenceVisitor.traverseNodeInterruptibly(assignment.getLeftHandSide());
 
-						if (varOccurrenceVisitor.isVarUsed()) {
+						if (varOccurrenceVisitor.isVarConflicting()) {
 							return false;
 						}
 					} else {
