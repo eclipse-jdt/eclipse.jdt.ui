@@ -121,6 +121,30 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceUsingVariableForEnd(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        for (int i = 0, len = elems1.length; i < len; i++) {\n" //
+				+ "            output.add(elems1[i]);\n" //
+				+ "        }\n" //
+				+ "        for (int i = 0, len = elems2.length; i < len; i++) {\n" //
+				+ "            output.add(elems2[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceStartingWithVariableForEnd(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        for (int len = elems1.length, i = 0; i < len; i++) {\n" //
+				+ "            output.add(elems1[i]);\n" //
+				+ "        }\n" //
+				+ "        for (int len = elems2.length, i = 0; i < len; i++) {\n" //
+				+ "            output.add(elems2[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public Collection<? super java.util.Date> replaceBackwardLoopOnSet(\n" //
 				+ "            Set<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
 				+ "        for (int i = elems1.length - 1; i >= 0; i--) {\n" //
@@ -272,6 +296,22 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceUsingVariableForEnd(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        Collections.addAll(output, elems1);\n" //
+				+ "        Collections.addAll(output, elems2);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceStartingWithVariableForEnd(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        Collections.addAll(output, elems1);\n" //
+				+ "        Collections.addAll(output, elems2);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public Collection<? super java.util.Date> replaceBackwardLoopOnSet(\n" //
 				+ "            Set<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
 				+ "        Collections.addAll(output, elems1);\n" //
@@ -387,6 +427,15 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "            add(doNotRefactorWithCyclicCall);\n" //
 				+ "        }\n" //
 				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<? super java.util.Date>[] doNotReplaceWithUsesVariableForEnd(\n" //
+				+ "            List<? super java.util.Date>[] output, java.util.Date[] elems1, java.util.Date[] elems2) {\n" //
+				+ "        for (int i = 0, len = elems1.length; i < len; i++) {\n" //
+				+ "            output[len].add(elems1[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Collection<? super java.util.Date> doNotReplaceBackwardLoopOnCollection(\n" //
