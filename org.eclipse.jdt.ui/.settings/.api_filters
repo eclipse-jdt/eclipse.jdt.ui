@@ -354,6 +354,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/UnresolvedElementsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor">
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="ITypeBinding"/>
+                <message_argument value="UnresolvedElementsSubProcessor"/>
+                <message_argument value="isRecord()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/proposals/InitializeFinalFieldProposal.java" type="org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal">
         <filter id="640712815">
             <message_arguments>

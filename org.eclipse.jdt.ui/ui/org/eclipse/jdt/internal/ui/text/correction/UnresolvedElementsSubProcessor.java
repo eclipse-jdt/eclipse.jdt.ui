@@ -1544,7 +1544,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		// remove parameters
-		if (!declaringType.isFromSource()) {
+		if (!declaringType.isFromSource() || (methodBinding.isConstructor() && declaringType.isRecord())) {
 			return;
 		}
 
@@ -1651,7 +1651,7 @@ public class UnresolvedElementsSubProcessor {
 		ITypeBinding declaringType= methodDecl.getDeclaringClass();
 
 		// add parameters
-		if (!declaringType.isFromSource()) {
+		if (!declaringType.isFromSource() || (methodDecl.isConstructor() && declaringType.isRecord())) {
 			return;
 		}
 		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
@@ -1736,7 +1736,7 @@ public class UnresolvedElementsSubProcessor {
 		CompilationUnit astRoot= context.getASTRoot();
 
 		ASTNode nameNode= problem.getCoveringNode(astRoot);
-		if (nameNode == null) {
+		if (nameNode == null || ( methodBinding.isConstructor() && declaringTypeDecl.isRecord())) {
 			return;
 		}
 
