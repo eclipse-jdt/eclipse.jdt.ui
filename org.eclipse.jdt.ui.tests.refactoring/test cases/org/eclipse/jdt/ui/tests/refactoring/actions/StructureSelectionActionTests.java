@@ -47,10 +47,10 @@ public class StructureSelectionActionTests extends GenericRefactoringTest {
 	}
 
 	private String getSimpleTestFileName(boolean input){
-		String fileName = "A_" + getName();
-		fileName += input ? "": "_out";
-		fileName +=  input ? ".java": ".txt";
-		return fileName;
+		StringBuilder fileName = new StringBuilder("A_").append(getName());
+		fileName.append(input ? "": "_out");
+		fileName.append(input ? ".java": ".txt");
+		return fileName.toString();
 	}
 
 	private String getTestFileName(boolean input){

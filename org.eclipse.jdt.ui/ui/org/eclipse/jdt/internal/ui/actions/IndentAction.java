@@ -874,7 +874,7 @@ public class IndentAction extends TextEditorAction {
 			if (textBlockIndentationOption == DefaultCodeFormatterConstants.INDENT_ON_COLUMN) {
 				String newStr= indentation;
 				int length= IndentAction.measureLengthInSpaces(stringTocalculate, CodeFormatterUtil.getTabWidth(javaProject));
-				String str= IndentAction.EMPTY_STR;
+				StringBuilder str= new StringBuilder();
 				if (getUseTabsOnlyForLeadingIndentations(javaProject)) {
 					int existing= IndentAction.measureLengthInSpaces(indentation, CodeFormatterUtil.getTabWidth(javaProject));
 					if (length - existing > 0) {
@@ -884,9 +884,9 @@ public class IndentAction extends TextEditorAction {
 					}
 				} else {
 					for (int i= 0; i < length; i++) {
-						str+= IndentAction.SPACE_STR;
+						str.append(IndentAction.SPACE_STR);
 					}
-					int units= Strings.computeIndentUnits(str, javaProject);
+					int units= Strings.computeIndentUnits(str.toString(), javaProject);
 					newStr= CodeFormatterUtil.createIndentString(units, javaProject);
 					int newLength= IndentManipulation.measureIndentInSpaces(newStr, CodeFormatterUtil.getTabWidth(javaProject));
 					if (newLength < length) {
@@ -939,7 +939,7 @@ public class IndentAction extends TextEditorAction {
 		if (textBlockIndentationOption == DefaultCodeFormatterConstants.INDENT_ON_COLUMN) {
 			String newStr= indentation;
 			int length= IndentAction.measureLengthInSpaces(stringTocalculate, CodeFormatterUtil.getTabWidth(javaProject));
-			String str= IndentAction.EMPTY_STR;
+			StringBuilder str= new StringBuilder();
 			if (getUseTabsOnlyForLeadingIndentations(javaProject)) {
 				int existing= IndentAction.measureLengthInSpaces(indentation, CodeFormatterUtil.getTabWidth(javaProject));
 				if (length - existing > 0) {
@@ -949,9 +949,9 @@ public class IndentAction extends TextEditorAction {
 				}
 			} else {
 				for (int i= 0; i < length; i++) {
-					str+= IndentAction.SPACE_STR;
+					str.append(IndentAction.SPACE_STR);
 				}
-				int units= Strings.computeIndentUnits(str, javaProject);
+				int units= Strings.computeIndentUnits(str.toString(), javaProject);
 				newStr= CodeFormatterUtil.createIndentString(units, javaProject);
 				int newLength= IndentManipulation.measureIndentInSpaces(newStr, CodeFormatterUtil.getTabWidth(javaProject));
 				if (newLength < length) {

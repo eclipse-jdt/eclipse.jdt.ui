@@ -76,10 +76,10 @@ public class PromoteTempToFieldTests extends GenericRefactoringTest{
 	}
 
 	private String getSimpleTestFileName(boolean canRename, boolean input){
-		String fileName = "A_" + getName();
+		StringBuilder fileName = new StringBuilder("A_").append(getName());
 		if (canRename)
-			fileName += input ? "_in": "_out";
-		return fileName + ".java";
+			fileName.append(input ? "_in": "_out");
+		return fileName.append(".java").toString();
 	}
 
 	private String getSimpleEnablementTestFileName(){
@@ -87,15 +87,15 @@ public class PromoteTempToFieldTests extends GenericRefactoringTest{
 	}
 
 	private String getTestFileName(boolean canRename, boolean input){
-		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
-		fileName += (canRename ? "canPromote/": "cannotPromote/");
-		return fileName + getSimpleTestFileName(canRename, input);
+		StringBuilder fileName= new StringBuilder(TEST_PATH_PREFIX).append(getRefactoringPath());
+		fileName.append(canRename ? "canPromote/": "cannotPromote/");
+		return fileName.append(getSimpleTestFileName(canRename, input)).toString();
 	}
 
 	private String getEnablementTestFileName(){
-		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
-		fileName += "testEnablement/";
-		return fileName + getSimpleEnablementTestFileName();
+		StringBuilder fileName= new StringBuilder(TEST_PATH_PREFIX).append(getRefactoringPath());
+		fileName.append("testEnablement/");
+		return fileName.append(getSimpleEnablementTestFileName()).toString();
 	}
 
 

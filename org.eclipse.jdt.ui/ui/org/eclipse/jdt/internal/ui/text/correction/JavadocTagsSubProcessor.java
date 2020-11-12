@@ -163,23 +163,21 @@ public class JavadocTagsSubProcessor {
 				if (javadoc == null) {
 					return;
 				}
-				String comment= ""; //$NON-NLS-1$
+				StringBuilder comment= new StringBuilder();
 				int insertPosition= findInsertPosition(javadoc, fMissingNode, document, lineDelimiter);
 
 			 	if (fMissingNode instanceof UsesDirective) {
 			 		UsesDirective directive= (UsesDirective)fMissingNode;
-			 		comment+= " * " + TagElement.TAG_USES + //$NON-NLS-1$
-			 				" " + directive.getName().getFullyQualifiedName().toString() + lineDelimiter; //$NON-NLS-1$
+			 		comment.append(" * ").append(TagElement.TAG_USES).append(" ").append(directive.getName().getFullyQualifiedName().toString()).append(lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
 			 	} else if (fMissingNode instanceof ProvidesDirective) {
 			 		ProvidesDirective directive= (ProvidesDirective)fMissingNode;
-			 		comment+= " * " + TagElement.TAG_PROVIDES + //$NON-NLS-1$
-			 				" " + directive.getName().getFullyQualifiedName().toString() + lineDelimiter; //$NON-NLS-1$
+			 		comment.append(" * ").append(TagElement.TAG_PROVIDES).append(" ").append(directive.getName().getFullyQualifiedName().toString()).append(lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
 			 	}
 				IRegion region= document.getLineInformationOfOffset(insertPosition);
 
 				String lineContent= document.get(region.getOffset(), region.getLength());
 				String indentString= Strings.getIndentString(lineContent, project);
-				String str= Strings.changeIndent(comment, 0, project, indentString, lineDelimiter);
+				String str= Strings.changeIndent(comment.toString(), 0, project, indentString, lineDelimiter);
 				InsertEdit edit= new InsertEdit(insertPosition, str);
 				rootEdit.addChild(edit);
 			} catch (BadLocationException e) {
@@ -255,7 +253,7 @@ public class JavadocTagsSubProcessor {
 				if (javadoc == null) {
 					return;
 				}
-				String comment= ""; //$NON-NLS-1$
+				StringBuilder comment= new StringBuilder();
 				insertPosition= AddMissingModuleJavadocTagProposal.findInsertPosition(javadoc, fMissingNode, document, lineDelimiter);
 
 			 	List<ModuleDirective> moduleStatements= fDecl.moduleStatements();
@@ -265,8 +263,7 @@ public class JavadocTagsSubProcessor {
 			 		if (directive instanceof ProvidesDirective) {
 			 			name= ((ProvidesDirective)directive).getName().getFullyQualifiedName().toString();
 			 			if (findTag(javadoc, TagElement.TAG_PROVIDES, name) == null) {
-					 		comment+= " * " + TagElement.TAG_PROVIDES + //$NON-NLS-1$
-					 				" " + name + lineDelimiter; //$NON-NLS-1$
+					 		comment.append(" * ").append(TagElement.TAG_PROVIDES).append(" ").append(name).append(lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
 			 			}
 			 		}
 			 	}
@@ -277,8 +274,7 @@ public class JavadocTagsSubProcessor {
 			 		if (directive instanceof UsesDirective) {
 			 			name= ((UsesDirective)directive).getName().getFullyQualifiedName().toString();
 			 			if (findTag(javadoc, TagElement.TAG_USES, name) == null) {
-					 		comment+= " * " + TagElement.TAG_USES + //$NON-NLS-1$
-					 				" " + name + lineDelimiter; //$NON-NLS-1$
+					 		comment.append(" * ").append(TagElement.TAG_USES).append(" ").append(name).append(lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
 			 			}
 			 		}
 			 	}
@@ -287,7 +283,7 @@ public class JavadocTagsSubProcessor {
 
 				String lineContent= document.get(region.getOffset(), region.getLength());
 				String indentString= Strings.getIndentString(lineContent, project);
-				String str= Strings.changeIndent(comment, 0, project, indentString, lineDelimiter);
+				String str= Strings.changeIndent(comment.toString(), 0, project, indentString, lineDelimiter);
 				InsertEdit edit= new InsertEdit(insertPosition, str);
 				rootEdit.addChild(edit);
 			} catch (BadLocationException e) {

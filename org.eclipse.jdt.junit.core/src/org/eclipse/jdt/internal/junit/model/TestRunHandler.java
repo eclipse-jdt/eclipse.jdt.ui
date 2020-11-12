@@ -332,11 +332,11 @@ public class TestRunHandler extends DefaultHandler {
 
 	private void handleUnknownNode(String qName) throws SAXException {
 		//TODO: just log if debug option is enabled?
-		String msg= "unknown node '" + qName + "'"; //$NON-NLS-1$//$NON-NLS-2$
+		StringBuilder msg= new StringBuilder("unknown node '").append(qName).append("'"); //$NON-NLS-1$//$NON-NLS-2$
 		if (fLocator != null) {
-			msg += " at line " + fLocator.getLineNumber() + ", column " + fLocator.getColumnNumber();  //$NON-NLS-1$//$NON-NLS-2$
+			msg.append(" at line ").append(fLocator.getLineNumber()).append(", column ").append(fLocator.getColumnNumber());  //$NON-NLS-1$//$NON-NLS-2$
 		}
-		throw new SAXException(msg);
+		throw new SAXException(msg.toString());
 	}
 
 	@Override

@@ -47,16 +47,16 @@ public class InlineTempTests extends GenericRefactoringTest {
 	}
 
 	protected String getSimpleTestFileName(boolean canInline, boolean input){
-		String fileName = "A_" + getName();
+		StringBuilder fileName = new StringBuilder("A_").append(getName());
 		if (canInline)
-			fileName += input ? "_in": "_out";
-		return fileName + ".java";
+			fileName.append(input ? "_in": "_out");
+		return fileName.append(".java").toString();
 	}
 
 	protected String getTestFileName(boolean canInline, boolean input){
-		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
-		fileName += (canInline ? "canInline/": "cannotInline/");
-		return fileName + getSimpleTestFileName(canInline, input);
+		StringBuilder fileName= new StringBuilder(TEST_PATH_PREFIX).append(getRefactoringPath());
+		fileName.append(canInline ? "canInline/": "cannotInline/");
+		return fileName.append(getSimpleTestFileName(canInline, input)).toString();
 	}
 
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canInline, boolean input) throws Exception {

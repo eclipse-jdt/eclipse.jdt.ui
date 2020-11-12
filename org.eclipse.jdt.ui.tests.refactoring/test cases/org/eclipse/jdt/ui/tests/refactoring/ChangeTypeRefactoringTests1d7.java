@@ -36,11 +36,11 @@ public class ChangeTypeRefactoringTests1d7 extends ChangeTypeRefactoringTests {
 	}
 	@Override
 	protected String getTestFileName(boolean positive, boolean input) {
-		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
+		StringBuilder fileName= new StringBuilder(TEST_PATH_PREFIX).append(getRefactoringPath());
 
-		fileName+= (positive ? "positive17/" : "negative17/");
-		fileName += getSimpleTestFileName(input);
-		return fileName;
+		fileName.append(positive ? "positive17/" : "negative17/");
+		fileName.append(getSimpleTestFileName(input));
+		return fileName.toString();
 	}
 
 	//--- TESTS

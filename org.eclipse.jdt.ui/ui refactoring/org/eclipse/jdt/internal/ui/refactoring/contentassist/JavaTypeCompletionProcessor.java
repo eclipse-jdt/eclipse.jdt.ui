@@ -97,17 +97,17 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 		} else if (javaElement instanceof IType) {
 			// pattern: public class OuterType { public class Type extends /*caret*/  {} }
 			IType type= (IType) javaElement;
-			String before= "public class " + type.getElementName() + " extends "; //$NON-NLS-1$ //$NON-NLS-2$
-			String after= " {}"; //$NON-NLS-1$
+			StringBuilder before= new StringBuilder("public class ").append(type.getElementName()).append(" extends "); //$NON-NLS-1$ //$NON-NLS-2$
+			StringBuilder after= new StringBuilder(" {}"); //$NON-NLS-1$
 			IJavaElement parent= type.getParent();
 			while (parent instanceof IType) {
 				type= (IType) parent;
-				before+= "public class " + type.getElementName() + " {"; //$NON-NLS-1$ //$NON-NLS-2$
-				after+= "}"; //$NON-NLS-1$
+				before.append("public class ").append(type.getElementName()).append(" {"); //$NON-NLS-1$ //$NON-NLS-2$
+				after.append("}"); //$NON-NLS-1$
 				parent= type.getParent();
 			}
 			ICompilationUnit cu= type.getCompilationUnit();
-			setCompletionContext(cu, before, after);
+			setCompletionContext(cu, before.toString(), after.toString());
 		} else {
 			setCompletionContext(null, null, null);
 		}

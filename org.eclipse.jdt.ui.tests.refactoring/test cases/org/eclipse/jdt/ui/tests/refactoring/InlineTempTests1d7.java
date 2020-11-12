@@ -33,9 +33,9 @@ public class InlineTempTests1d7 extends InlineTempTests {
 
 	@Override
 	protected String getTestFileName(boolean canInline, boolean input){
-		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
-		fileName += (canInline ? "canInline17/": "cannotInline17/");
-		return fileName + getSimpleTestFileName(canInline, input);
+		StringBuilder fileName= new StringBuilder(TEST_PATH_PREFIX).append(getRefactoringPath());
+		fileName.append(canInline ? "canInline17/": "cannotInline17/");
+		return fileName.append(getSimpleTestFileName(canInline, input)).toString();
 	}
 
 	//--- tests

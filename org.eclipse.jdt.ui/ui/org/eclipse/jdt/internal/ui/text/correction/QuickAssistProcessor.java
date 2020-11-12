@@ -2391,18 +2391,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			for (VariableDeclarationFragment oldFragment : oldFragments) {
 				int extendedStartPositionFragment= cup.getExtendedStartPosition(oldFragment);
 				int extendedLengthFragment= cup.getExtendedLength(oldFragment);
-				String codeFragment= buffer.getText(extendedStartPositionFragment, extendedLengthFragment);
+				StringBuilder codeFragment= new StringBuilder(buffer.getText(extendedStartPositionFragment, extendedLengthFragment));
 				if (oldFragment.getInitializer() == null) {
 					ITypeBinding typeBinding= type.resolveBinding();
 					if ("Z".equals(typeBinding.getBinaryName())) { //$NON-NLS-1$
-						codeFragment+= " = false"; //$NON-NLS-1$
+						codeFragment.append(" = false"); //$NON-NLS-1$
 					} else if (type.isPrimitiveType()) {
-						codeFragment+= " = 0"; //$NON-NLS-1$
+						codeFragment.append(" = 0"); //$NON-NLS-1$
 					} else {
-						codeFragment+= " = null"; //$NON-NLS-1$
+						codeFragment.append(" = null"); //$NON-NLS-1$
 					}
 				}
-				Assignment newAssignmentFragment= (Assignment) rewrite.createStringPlaceholder(codeFragment, ASTNode.ASSIGNMENT);
+				Assignment newAssignmentFragment= (Assignment) rewrite.createStringPlaceholder(codeFragment.toString(), ASTNode.ASSIGNMENT);
 				forListRewrite.insertLast(newAssignmentFragment, null);
 			}
 

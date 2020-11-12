@@ -72,11 +72,11 @@ public class ChangeTypeRefactoringTests extends GenericRefactoringTest {
 	}
 
 	protected String getTestFileName(boolean positive, boolean input) {
-		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
+		StringBuilder fileName= new StringBuilder(TEST_PATH_PREFIX).append(getRefactoringPath());
 
-		fileName += (positive ? "positive/": "negative/");
-		fileName += getSimpleTestFileName(input);
-		return fileName;
+		fileName.append(positive ? "positive/": "negative/");
+		fileName.append(getSimpleTestFileName(input));
+		return fileName.toString();
 	}
 
 	private ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean positive, boolean input) throws Exception {

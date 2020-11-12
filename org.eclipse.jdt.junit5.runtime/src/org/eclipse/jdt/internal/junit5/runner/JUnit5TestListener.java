@@ -131,8 +131,8 @@ public class JUnit5TestListener implements TestExecutionListener {
 	}
 
 	protected FailedComparison getComparisonForMultipleFailures(Throwable exception) {
-		String expectedStr= ""; //$NON-NLS-1$
-		String actualStr= ""; //$NON-NLS-1$
+		StringBuilder expectedStr= new StringBuilder();
+		StringBuilder actualStr= new StringBuilder();
 		String delimiter= "\n\n"; //$NON-NLS-1$
 		List<Throwable> failures= ((MultipleFailuresError) exception).getFailures();
 		for (Throwable assertionError : failures) {
@@ -146,8 +146,8 @@ public class JUnit5TestListener implements TestExecutionListener {
 				if (expected == null || actual == null) {
 					return null;
 				}
-				expectedStr+= expected;
-				actualStr+= actual;
+				expectedStr.append(expected);
+				actualStr.append(actual);
 			} else if (assertionError instanceof AssertionFailedError) {
 				AssertionFailedError assertionFailedError= (AssertionFailedError) assertionError;
 				ValueWrapper expected= assertionFailedError.getExpected();
@@ -155,13 +155,13 @@ public class JUnit5TestListener implements TestExecutionListener {
 				if (expected == null || actual == null) {
 					return null;
 				}
-				expectedStr+= expected.getStringRepresentation() + delimiter;
-				actualStr+= actual.getStringRepresentation() + delimiter;
+				expectedStr.append(expected.getStringRepresentation()).append(delimiter);
+				actualStr.append(actual.getStringRepresentation()).append(delimiter);
 			} else {
 				return null;
 			}
 		}
-		return new FailedComparison(expectedStr, actualStr);
+		return new FailedComparison(expectedStr.toString(), actualStr.toString());
 	}
 
 	@Override
