@@ -480,4 +480,62 @@ public class QuickFixTestPreview extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
+
+	@Test
+	public void testRecordCanonicalConstructordUninitializedFieldProposal() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+					"package test;\n" +
+					"\n" +
+					"public record Rec1(int a, int b){\n" +
+					"\n" +
+					"	public Rec1(int a, int b) {\n" +
+					"		\n" +
+					"	}\n\n" +
+					"	public Rec1(int a) {\n" +
+					"		this(a, a);\n" +
+					"	}\n\n" +
+					"	public Rec1(int a, int b, int c) {\n" +
+					"		this(a, b+c);\n" +
+					"	}\n\n" +
+					"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Rec1.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= "" +
+					"package test;\n" +
+					"\n" +
+					"public record Rec1(int a, int b){\n" +
+					"\n" +
+					"	public Rec1(int a, int b) {\n" +
+					"		this.a = 0;\n" +
+					"		\n" +
+					"	}\n\n" +
+					"	public Rec1(int a) {\n" +
+					"		this(a, a);\n" +
+					"	}\n\n" +
+					"	public Rec1(int a, int b, int c) {\n" +
+					"		this(a, b+c);\n" +
+					"	}\n\n" +
+					"}\n";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
 }
