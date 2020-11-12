@@ -740,6 +740,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 			// While tests are running, always use the execution order
 			getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					fTestViewer.setSortingCriterion(SortingCriterion.SORT_BY_EXECUTION_ORDER);
 				}
@@ -776,6 +777,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 			// When test session ended, apply user sorting criterion
 			getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					setSortingCriterion(fSortingCriterion);
 				}
