@@ -772,7 +772,7 @@ public class TestRunnerViewPart extends ViewPart {
 				warnOfContentChange();
 			});
 			stopUpdateJobs();
-			showMessageIfNoTests();
+			logMessageIfNoTests();
 
 			// When test session ended, apply user sorting criterion
 			getDisplay().asyncExec(new Runnable() {
@@ -1531,15 +1531,13 @@ public class TestRunnerViewPart extends ViewPart {
 			updateRerunFailedFirstAction();
 		});
 		stopUpdateJobs();
-		showMessageIfNoTests();
+		logMessageIfNoTests();
 	}
 
-	private void showMessageIfNoTests() {
+	private void logMessageIfNoTests() {
 		if (fTestRunSession != null && TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId()) && fTestRunSession.getTotalCount() == 0) {
-			Display.getDefault().asyncExec(() -> {
-				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
-				MessageDialog.openInformation(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.TestRunnerViewPart__error_cannotrun, msg);
-			});
+			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
+			Platform.getLog(getClass()).error(msg);
 		}
 	}
 
