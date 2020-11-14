@@ -144,12 +144,10 @@ public class RedundantComparisonStatementCleanUp extends AbstractMultiFix implem
 								&& ASTNodes.hasOperator(elseAssignment, Assignment.Operator.ASSIGN)
 								&& ASTNodes.match(thenAssignment.getLeftHandSide(), elseAssignment.getLeftHandSide())) {
 							if (isEqual) {
-								return maybeReplace(node, condition, thenAssignment.getRightHandSide(), elseAssignment.getRightHandSide(), elseStatement, null)
-										&& maybeReplace(node, condition, elseAssignment.getRightHandSide(), thenAssignment.getRightHandSide(), elseStatement, null);
+								return maybeReplace(node, condition, thenAssignment.getRightHandSide(), elseAssignment.getRightHandSide(), elseStatement, null);
 							}
 
-							return maybeReplace(node, condition, elseAssignment.getRightHandSide(), thenAssignment.getRightHandSide(), thenStatement, null)
-									&& maybeReplace(node, condition, thenAssignment.getRightHandSide(), elseAssignment.getRightHandSide(), thenStatement, null);
+							return maybeReplace(node, condition, elseAssignment.getRightHandSide(), thenAssignment.getRightHandSide(), thenStatement, null);
 						}
 
 						ReturnStatement thenReturnStatement= ASTNodes.as(thenStatement, ReturnStatement.class);
@@ -157,12 +155,10 @@ public class RedundantComparisonStatementCleanUp extends AbstractMultiFix implem
 
 						if (thenReturnStatement != null && elseReturnStatement != null) {
 							if (isEqual) {
-								return maybeReplace(node, condition, thenReturnStatement.getExpression(), elseReturnStatement.getExpression(), elseReturnStatement, thenReturnStatement)
-										&& maybeReplace(node, condition, elseReturnStatement.getExpression(), thenReturnStatement.getExpression(), elseReturnStatement, thenReturnStatement);
+								return maybeReplace(node, condition, thenReturnStatement.getExpression(), elseReturnStatement.getExpression(), elseReturnStatement, thenReturnStatement);
 							}
 
-							return maybeReplace(node, condition, elseReturnStatement.getExpression(), thenReturnStatement.getExpression(), thenReturnStatement, elseReturnStatement)
-									&& maybeReplace(node, condition, thenReturnStatement.getExpression(), elseReturnStatement.getExpression(), thenReturnStatement, elseReturnStatement);
+							return maybeReplace(node, condition, elseReturnStatement.getExpression(), thenReturnStatement.getExpression(), thenReturnStatement, elseReturnStatement);
 						}
 					}
 
