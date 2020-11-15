@@ -13,6 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javadocexport;
 
+import static org.eclipse.jdt.internal.ui.javadocexport.JavadocTreeWizardPage.JavadocTree.CUSTOMSTATUS;
+import static org.eclipse.jdt.internal.ui.javadocexport.JavadocTreeWizardPage.JavadocTree.JAVADOCSTATUS;
+import static org.eclipse.jdt.internal.ui.javadocexport.JavadocTreeWizardPage.JavadocTree.PREFERENCESTATUS;
+import static org.eclipse.jdt.internal.ui.javadocexport.JavadocTreeWizardPage.JavadocTree.STANDARDSTATUS;
+import static org.eclipse.jdt.internal.ui.javadocexport.JavadocTreeWizardPage.JavadocTree.TREESTATUS;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -73,11 +79,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 public class JavadocTreeWizardPage extends JavadocWizardPage {
-	private static final int PREFERENCESTATUS= 0;
-	private static final int CUSTOMSTATUS= 1;
-	private static final int STANDARDSTATUS= 2;
-	private static final int TREESTATUS= 3;
-	private static final int JAVADOCSTATUS= 4;
+	enum JavadocTree {PREFERENCESTATUS,CUSTOMSTATUS,STANDARDSTATUS,TREESTATUS,JAVADOCSTATUS}
 
 	private CheckboxTreeAndListGroup fInputGroup;
 
@@ -573,10 +575,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		return res.toArray(new IJavaProject[res.size()]);
 	}
 
-	protected void doValidation(int validate) {
+	protected void doValidation(JavadocTree javadocstatus) {
 
 
-		switch (validate) {
+		switch (javadocstatus) {
 			case PREFERENCESTATUS :
 				fPreferenceStatus= new StatusInfo();
 				fDocletStatus= new StatusInfo();

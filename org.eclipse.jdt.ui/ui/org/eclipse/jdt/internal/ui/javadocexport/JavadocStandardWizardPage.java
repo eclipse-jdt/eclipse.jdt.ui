@@ -14,6 +14,9 @@
 
 package org.eclipse.jdt.internal.ui.javadocexport;
 
+import static org.eclipse.jdt.internal.ui.javadocexport.JavadocStandardWizardPage.JavadocStandard.LINK_REFERENCES;
+import static org.eclipse.jdt.internal.ui.javadocexport.JavadocStandardWizardPage.JavadocStandard.STYLESHEETSTATUS;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -74,8 +77,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 
-	private final int STYLESHEETSTATUS= 1;
-	private final int LINK_REFERENCES= 2;
+	enum JavadocStandard{ STYLESHEETSTATUS,LINK_REFERENCES}
 
 	private JavadocOptionsManager fStore;
 	private Composite fUpperComposite;
@@ -315,7 +317,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		}
 	}
 
-	final void doValidation(int VALIDATE) {
+	final void doValidation(JavadocStandard VALIDATE) {
 		switch (VALIDATE) {
 			case STYLESHEETSTATUS :
 				fStyleSheetStatus= new StatusInfo();
