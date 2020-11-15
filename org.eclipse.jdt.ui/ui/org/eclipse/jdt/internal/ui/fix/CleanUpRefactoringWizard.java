@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -96,7 +96,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 	private static class ProjectProfileLableProvider extends LabelProvider implements ITableLabelProvider {
 
-		private Hashtable<String, Profile> fProfileIdsTable;
+		private Map<String, Profile> fProfileIdsTable;
 
 		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
@@ -126,8 +126,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			return null;
 		}
 
-		private Hashtable<String, Profile> loadProfiles() {
-    		Hashtable<String, Profile> profileIdsTable= new Hashtable<>();
+		private Map<String, Profile> loadProfiles() {
+    		Map<String, Profile> profileIdsTable= new HashMap<>();
 			for (Profile profile : CleanUpPreferenceUtil.loadProfiles(InstanceScope.INSTANCE)) {
 				profileIdsTable.put(profile.getID(), profile);
 			}
@@ -135,7 +135,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
     		return profileIdsTable;
         }
 
-		private String getProjectProfileName(final IJavaProject project, Hashtable<String, Profile> profileIdsTable, String workbenchProfileId) {
+		private String getProjectProfileName(final IJavaProject project, Map<String, Profile> profileIdsTable, String workbenchProfileId) {
 			ProjectScope projectScope= new ProjectScope(project.getProject());
 	        IEclipsePreferences node= projectScope.getNode(JavaUI.ID_PLUGIN);
 	        String id= node.get(CleanUpConstants.CLEANUP_PROFILE, null);
@@ -360,7 +360,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			configure.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					Hashtable<String, String> workingValues= new Hashtable<>(fCustomSettings);
+					Map<String, String> workingValues= new HashMap<>(fCustomSettings);
 					CleanUpSelectionDialog dialog= new WizardCleanUpSelectionDialog(getShell(), workingValues);
 					if (dialog.open() == Window.OK) {
 						fCustomSettings= workingValues;
