@@ -7047,9 +7047,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.control_statements">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.SwitchCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.switch"
+            runAfter="org.eclipse.jdt.ui.cleanup.loop">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.AddAllCleanUp"
             id="org.eclipse.jdt.ui.cleanup.add_all"
-            runAfter="org.eclipse.jdt.ui.cleanup.loop">
+            runAfter="org.eclipse.jdt.ui.cleanup.switch">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp"

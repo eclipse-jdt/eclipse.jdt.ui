@@ -644,6 +644,18 @@ public class CleanUpConstants {
 	public static String CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED;
 
 	/**
+	 * Replaces <code>if</code>/<code>else if</code>/<code>else</code> blocks to use <code>switch</code> where possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String USE_SWITCH= "cleanup.switch"; //$NON-NLS-1$
+
+	/**
 	 * Convert switch statements to switch expressions.IF_LOOP_VAR_USED}<br>
 	 * <p>
 	 * Example:

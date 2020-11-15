@@ -78,6 +78,7 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleCleanUp_QualifyStaticMethod_description;
 	public static String CodeStyleCleanUp_removeFieldThis_description;
 	public static String CodeStyleCleanUp_removeMethodThis_description;
+	public static String CodeStyleCleanUp_Switch_description;
 
 	public static String Java50MultiFix_AddMissingDeprecated_description;
 	public static String Java50MultiFix_AddMissingOverride_description;
