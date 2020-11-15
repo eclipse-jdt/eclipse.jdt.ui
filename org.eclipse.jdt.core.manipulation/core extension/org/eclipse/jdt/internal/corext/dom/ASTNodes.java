@@ -2124,6 +2124,26 @@ public class ASTNodes {
 		return siblings.get(siblings.size() - 1);
 	}
 
+	/**
+	 * Returns the previous statement in the source file if it exists.
+	 *
+	 * @param startNode the start node
+	 * @return the previous statement in the source file if it exists, null
+	 *         otherwise
+	 */
+	public static Statement getPreviousStatement(final Statement startNode) {
+		Statement previousSibling= getPreviousSibling(startNode);
+		if (previousSibling != null) {
+			return previousSibling;
+		}
+		ASTNode parent= startNode.getParent();
+		if (parent instanceof Statement) {
+			return getPreviousStatement((Statement) parent);
+		}
+
+		return null;
+	}
+
 	private static List<Statement> getSiblings(final Statement startNode, final boolean isForward) {
 		Statement statementAtLevel= statementAtLevel(startNode);
 
@@ -2611,6 +2631,24 @@ public class ASTNodes {
 	public static boolean isSameVariable(final FieldAccess field1, final FieldAccess field2) {
 		return areVariableBindingsEqual(field1, field2)
 				&& isSameVariable(field1.getExpression(), field2.getExpression());
+	}
+
+	/**
+	 * Returns whether the provided nodes all represent the same variable.
+	 *
+	 * @param node0      the first node to compare
+	 * @param otherNodes the other nodes to compare
+	 * @return true if all the provided nodes represent the same variable, false
+	 *         otherwise
+	 */
+	public static boolean areSameVariables(final ASTNode node0, final ASTNode... otherNodes) {
+		for (ASTNode nodeN : otherNodes) {
+			if (!isSameVariable(node0, nodeN)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

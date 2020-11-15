@@ -173,6 +173,8 @@ public class CleanUpMessages extends NLS {
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd;
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantIfCondition;
 
+	public static String JavaFeatureTabPage_CheckboxName_TryWithResource;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, CleanUpMessages.class);

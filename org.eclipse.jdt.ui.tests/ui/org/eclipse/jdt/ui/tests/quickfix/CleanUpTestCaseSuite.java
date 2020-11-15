@@ -25,6 +25,7 @@ import org.junit.runners.Suite;
 	CleanUpTest1d6.class,
 	CleanUpTest1d7.class,
 	CleanUpTest1d8.class,
+	CleanUpTest1d9.class,
 	CleanUpTest1d10.class,
 	CleanUpAnnotationTest.class,
 	SaveParticipantTest.class,

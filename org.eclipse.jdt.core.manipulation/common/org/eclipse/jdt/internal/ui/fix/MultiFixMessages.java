@@ -161,6 +161,8 @@ public class MultiFixMessages extends NLS {
 
 	public static String CheckSignOfBitwiseOperation_description;
 
+	public static String TryWithResourceCleanup_description;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, MultiFixMessages.class);

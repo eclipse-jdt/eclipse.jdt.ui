@@ -160,6 +160,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		// Duplicate Code
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
+
+		// Java Features
+		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
 	}
 
 	private static void setSaveParticipantSettings(CleanUpOptions options) {
@@ -298,6 +301,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		// Duplicate Code
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
+
+		// Java Features
+		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
