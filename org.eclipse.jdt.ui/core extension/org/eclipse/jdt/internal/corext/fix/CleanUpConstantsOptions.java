@@ -113,7 +113,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
-		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_IF_CONDITION, CleanUpOptions.FALSE);
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);
@@ -160,7 +159,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(SORT_MEMBERS_ALL, CleanUpOptions.FALSE);
 
 		// Duplicate Code
+		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
+		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 
 		// Java Features
 		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
@@ -253,7 +254,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
-		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_IF_CONDITION, CleanUpOptions.FALSE);
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);
@@ -302,7 +302,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, CleanUpOptions.FALSE);
 
 		// Duplicate Code
+		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
+		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 
 		// Java Features
 		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);

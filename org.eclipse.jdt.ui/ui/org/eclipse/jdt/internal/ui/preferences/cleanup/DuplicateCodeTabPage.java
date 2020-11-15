@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp;
+import org.eclipse.jdt.internal.ui.fix.TernaryOperatorCleanUp;
 
 public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.duplicate_code"; //$NON-NLS-1$
@@ -32,6 +33,7 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
+				new TernaryOperatorCleanUp(values),
 				new StrictlyEqualOrDifferentCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
@@ -42,6 +44,9 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		Group duplicateGroup= createGroup(numColumns, composite, CleanUpMessages.DuplicateCodeTabPage_GroupName_DuplicateCode);
+
+		final CheckboxPreference ternaryOperator= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_TernaryOperator, CleanUpConstants.TERNARY_OPERATOR, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(ternaryOperator);
 
 		final CheckboxPreference strictlyEqualOrDifferent= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_StrictlyEqualOrDifferent, CleanUpConstants.STRICTLY_EQUAL_OR_DIFFERENT, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(strictlyEqualOrDifferent);

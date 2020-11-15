@@ -1296,6 +1296,18 @@ public class CleanUpConstants {
 	public static final String REDUNDANT_SUPER_CALL= "cleanup.no_super"; //$NON-NLS-1$
 
 	/**
+	 * Replaces (X && Y) || (!X && Z) by X ? Y : Z.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String TERNARY_OPERATOR= "cleanup.ternary_operator"; //$NON-NLS-1$
+
+	/**
 	 * Replaces <code>(X && !Y) || (!X && Y)</code> by <code>X ^ Y</code>.
 	 * Replaces also <code>(X && Y) || (!X && !Y)</code> by <code>X == Y</code>.
 	 * <p>

@@ -5527,6 +5527,245 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testTernaryOperator() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean isValid, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = isValid && b2 || !isValid && b3;\n" //
+				+ "        boolean newBoolean2 = isValid && !b2 || !isValid && b3;\n" //
+				+ "        boolean newBoolean3 = isValid && b2 || !isValid && !b3;\n" //
+				+ "        boolean newBoolean4 = isValid && !b2 || !isValid && !b3;\n" //
+				+ "        boolean newBoolean5 = !isValid && b2 || isValid && b3;\n" //
+				+ "        boolean newBoolean6 = !isValid && !b2 || isValid && b3;\n" //
+				+ "        boolean newBoolean7 = !isValid && b2 || isValid && !b3;\n" //
+				+ "        boolean newBoolean8 = !isValid && !b2 || isValid && !b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 & b2 | !b1 & b3;\n" //
+				+ "        boolean newBoolean2 = b1 & !b2 | !b1 & b3;\n" //
+				+ "        boolean newBoolean3 = b1 & b2 | !b1 & !b3;\n" //
+				+ "        boolean newBoolean4 = b1 & !b2 | !b1 & !b3;\n" //
+				+ "        boolean newBoolean5 = !b1 & b2 | b1 & b3;\n" //
+				+ "        boolean newBoolean6 = !b1 & !b2 | b1 & b3;\n" //
+				+ "        boolean newBoolean7 = !b1 & b2 | b1 & !b3;\n" //
+				+ "        boolean newBoolean8 = !b1 & !b2 | b1 & !b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 && b2 || b3 && !b1;\n" //
+				+ "        boolean newBoolean2 = b1 && !b2 || b3 && !b1;\n" //
+				+ "        boolean newBoolean3 = b1 && b2 || !b3 && !b1;\n" //
+				+ "        boolean newBoolean4 = b1 && !b2 || !b3 && !b1;\n" //
+				+ "        boolean newBoolean5 = !b1 && b2 || b3 && b1;\n" //
+				+ "        boolean newBoolean6 = !b1 && !b2 || b3 && b1;\n" //
+				+ "        boolean newBoolean7 = !b1 && b2 || !b3 && b1;\n" //
+				+ "        boolean newBoolean8 = !b1 && !b2 || !b3 && b1;\n" //
+				+ "\n" //
+				+ "        newBoolean1 = b2 && b1 || !b1 && b3;\n" //
+				+ "        newBoolean2 = !b2 && b1 || !b1 && b3;\n" //
+				+ "        newBoolean3 = b2 && b1 || !b1 && !b3;\n" //
+				+ "        newBoolean4 = !b2 && b1 || !b1 && !b3;\n" //
+				+ "        newBoolean5 = !b1 && b2 || b1 && b3;\n" //
+				+ "        newBoolean6 = !b1 && !b2 || b1 && b3;\n" //
+				+ "        newBoolean7 = !b1 && b2 || b1 && !b3;\n" //
+				+ "        newBoolean8 = !b1 && !b2 || b1 && !b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithOtherCondition(boolean b1, boolean b2, boolean b3, boolean unrevelantCondition) {\n" //
+				+ "        boolean newBoolean1 = unrevelantCondition || (b1 && b2) || (!b1 && b3);\n" //
+				+ "        boolean newBoolean2 = unrevelantCondition || (b1 && !b2) || (b3 && !b1);\n" //
+				+ "        boolean newBoolean3 = unrevelantCondition || (b1 && b2) || (!b3 && !b1);\n" //
+				+ "        boolean newBoolean4 = unrevelantCondition || (b1 && !b2) || (!b3 && !b1);\n" //
+				+ "        boolean newBoolean5 = unrevelantCondition || (!b1 && b2) || (b3 && b1);\n" //
+				+ "        boolean newBoolean6 = unrevelantCondition || (!b1 && !b2) || (b3 && b1);\n" //
+				+ "        boolean newBoolean7 = unrevelantCondition || (!b1 && b2) || (!b3 && b1);\n" //
+				+ "        boolean newBoolean8 = unrevelantCondition || (!b1 && !b2) || (!b3 && b1);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithOtherConditionAfter(boolean b1, boolean b2, boolean b3, boolean unrevelantCondition) {\n" //
+				+ "        boolean newBoolean1 = (b1 && b2) || (!b1 && b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean2 = (b1 && !b2) || (b3 && !b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean3 = (b1 && b2) || (!b3 && !b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean4 = (b1 && !b2) || (!b3 && !b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean5 = (!b1 && b2) || (b3 && b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean6 = (!b1 && !b2) || (b3 && b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean7 = (!b1 && b2) || (!b3 && b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean8 = (!b1 && !b2) || (!b3 && b1) || unrevelantCondition;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2 * 2) && !(i3 == i4) || !(i1 == 2 * i2 * 1) && (i5 == i6);\n" //
+				+ "        boolean newBoolean2 = (i1 + 1 + 0 == i2) && (i3 == i4) || !(1 + i1 == i2) && !(i5 == i6);\n" //
+				+ "        boolean newBoolean3 = (i1 < i2) && (i3 == i4) || (i1 >= i2) && !(i5 == i6);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.TERNARY_OPERATOR);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean isValid, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (isValid ? b2 : b3);\n" //
+				+ "        boolean newBoolean2 = (isValid ? !b2 : b3);\n" //
+				+ "        boolean newBoolean3 = (isValid ? b2 : !b3);\n" //
+				+ "        boolean newBoolean4 = (isValid ? !b2 : !b3);\n" //
+				+ "        boolean newBoolean5 = (isValid ? b3 : b2);\n" //
+				+ "        boolean newBoolean6 = (isValid ? b3 : !b2);\n" //
+				+ "        boolean newBoolean7 = (isValid ? !b3 : b2);\n" //
+				+ "        boolean newBoolean8 = (isValid ? !b3 : !b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (b1 ? b2 : b3);\n" //
+				+ "        boolean newBoolean2 = (b1 ? !b2 : b3);\n" //
+				+ "        boolean newBoolean3 = (b1 ? b2 : !b3);\n" //
+				+ "        boolean newBoolean4 = (b1 ? !b2 : !b3);\n" //
+				+ "        boolean newBoolean5 = (b1 ? b3 : b2);\n" //
+				+ "        boolean newBoolean6 = (b1 ? b3 : !b2);\n" //
+				+ "        boolean newBoolean7 = (b1 ? !b3 : b2);\n" //
+				+ "        boolean newBoolean8 = (b1 ? !b3 : !b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (b1 ? b2 : b3);\n" //
+				+ "        boolean newBoolean2 = (b1 ? !b2 : b3);\n" //
+				+ "        boolean newBoolean3 = (b1 ? b2 : !b3);\n" //
+				+ "        boolean newBoolean4 = (b1 ? !b2 : !b3);\n" //
+				+ "        boolean newBoolean5 = (b1 ? b3 : b2);\n" //
+				+ "        boolean newBoolean6 = (b1 ? b3 : !b2);\n" //
+				+ "        boolean newBoolean7 = (b1 ? !b3 : b2);\n" //
+				+ "        boolean newBoolean8 = (b1 ? !b3 : !b2);\n" //
+				+ "\n" //
+				+ "        newBoolean1 = (b1 ? b2 : b3);\n" //
+				+ "        newBoolean2 = (b1 ? !b2 : b3);\n" //
+				+ "        newBoolean3 = (b1 ? b2 : !b3);\n" //
+				+ "        newBoolean4 = (b1 ? !b2 : !b3);\n" //
+				+ "        newBoolean5 = (b1 ? b3 : b2);\n" //
+				+ "        newBoolean6 = (b1 ? b3 : !b2);\n" //
+				+ "        newBoolean7 = (b1 ? !b3 : b2);\n" //
+				+ "        newBoolean8 = (b1 ? !b3 : !b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithOtherCondition(boolean b1, boolean b2, boolean b3, boolean unrevelantCondition) {\n" //
+				+ "        boolean newBoolean1 = unrevelantCondition || (b1 ? b2 : b3);\n" //
+				+ "        boolean newBoolean2 = unrevelantCondition || (b1 ? !b2 : b3);\n" //
+				+ "        boolean newBoolean3 = unrevelantCondition || (b1 ? b2 : !b3);\n" //
+				+ "        boolean newBoolean4 = unrevelantCondition || (b1 ? !b2 : !b3);\n" //
+				+ "        boolean newBoolean5 = unrevelantCondition || (b1 ? b3 : b2);\n" //
+				+ "        boolean newBoolean6 = unrevelantCondition || (b1 ? b3 : !b2);\n" //
+				+ "        boolean newBoolean7 = unrevelantCondition || (b1 ? !b3 : b2);\n" //
+				+ "        boolean newBoolean8 = unrevelantCondition || (b1 ? !b3 : !b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithOtherConditionAfter(boolean b1, boolean b2, boolean b3, boolean unrevelantCondition) {\n" //
+				+ "        boolean newBoolean1 = (b1 ? b2 : b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean2 = (b1 ? !b2 : b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean3 = (b1 ? b2 : !b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean4 = (b1 ? !b2 : !b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean5 = (b1 ? b3 : b2) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean6 = (b1 ? b3 : !b2) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean7 = (b1 ? !b3 : b2) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean8 = (b1 ? !b3 : !b2) || unrevelantCondition;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = ((i1 == i2 * 2) ? !(i3 == i4) : (i5 == i6));\n" //
+				+ "        boolean newBoolean2 = ((i1 + 1 + 0 == i2) ? (i3 == i4) : !(i5 == i6));\n" //
+				+ "        boolean newBoolean3 = ((i1 < i2) ? (i3 == i4) : !(i5 == i6));\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.TernaryOperatorCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseTernaryOperator() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public void doNoReplaceDuplicateConditionsWithOtherCondition(boolean b1, boolean b2, boolean b3, boolean b4) {\n" //
+				+ "        boolean newBoolean1 = b1 && b2 || !b1 && b3 && b4;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNoReplaceDuplicateConditionsWithWrappers(Boolean b1, Boolean b2, Boolean b3) {\n" //
+				+ "        boolean newBoolean1 = b1 && b2 || !b1 && b3;\n" //
+				+ "        boolean newBoolean2 = b1 && !b2 || !b1 && b3;\n" //
+				+ "        boolean newBoolean3 = b1 && b2 || !b1 && !b3;\n" //
+				+ "        boolean newBoolean4 = b1 && !b2 || !b1 && !b3;\n" //
+				+ "        boolean newBoolean5 = !b1 && b2 || b1 && b3;\n" //
+				+ "        boolean newBoolean6 = !b1 && !b2 || b1 && b3;\n" //
+				+ "        boolean newBoolean7 = !b1 && b2 || b1 && !b3;\n" //
+				+ "        boolean newBoolean8 = !b1 && !b2 || b1 && !b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithMethods(List<String> myList) {\n" //
+				+ "        boolean newBoolean1 = myList.remove(\"foo\") && !myList.remove(\"bar\") || !myList.remove(\"lorem\")\n" //
+				+ "                && myList.remove(\"ipsum\");\n" //
+				+ "        boolean newBoolean2 = myList.remove(\"foo\") && myList.remove(\"bar\") || !myList.remove(\"lorem\")\n" //
+				+ "                && !myList.remove(\"ipsum\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithIncrements(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && !(i3 == i4++) || !(i1 == i2) && (i5 == i6++);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) && !(i3 == ++i4) || !(i1 == i2) && (i5 == ++i6);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) && !(i3 == i4--) || !(i1 == i2) && (i5 == i6--);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) && !(i3 == --i4) || !(i1 == i2) && (i5 == --i6);\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) && (i3 == i4++) || !(i1 == i2) && !(i5 == i6++);\n" //
+				+ "        boolean newBoolean6 = (i1 == i2) && (i3 == ++i4) || !(i1 == i2) && !(i5 == ++i6);\n" //
+				+ "        boolean newBoolean7 = (i1 == i2) && (i3 == i4--) || !(i1 == i2) && !(i5 == i6--);\n" //
+				+ "        boolean newBoolean8 = (i1 == i2) && (i3 == --i4) || !(i1 == i2) && !(i5 == --i6);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithAssignments(int i1, int i2, boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && !(b1 = b2) || !(i1 == i2) && (b1 = b3);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) && (b1 = b2) || !(i1 == i2) && !(b1 = b3);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class SideEffect {\n" //
+				+ "        private SideEffect() {\n" //
+				+ "            staticField++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithInstanciations(Boolean b1) {\n" //
+				+ "        boolean newBoolean1 = b1 && !(new SideEffect() instanceof SideEffect)\n" //
+				+ "                || !b1 && new SideEffect() instanceof Object;\n" //
+				+ "        boolean newBoolean2 = b1 && new SideEffect() instanceof SideEffect\n" //
+				+ "                || !b1 && !(new SideEffect() instanceof Object);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.TERNARY_OPERATOR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testStrictlyEqualOrDifferent() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= "" //
