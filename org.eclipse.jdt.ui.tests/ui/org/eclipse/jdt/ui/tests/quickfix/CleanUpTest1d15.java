@@ -13,6 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertNotEquals;
+
+import java.util.Arrays;
+import java.util.HashSet;
+
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -88,10 +94,11 @@ public class CleanUpTest1d15 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Ignore
 	@Test
 	public void testPatternMatchingForInstanceof() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String input= "" //
+		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.Date;\n" //
@@ -177,11 +184,11 @@ public class CleanUpTest1d15 extends CleanUpTestCase {
 				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
 
 		enable(CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF);
 
-		String output= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.Date;\n" //
@@ -259,10 +266,13 @@ public class CleanUpTest1d15 extends CleanUpTestCase {
 				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.PatternMatchingForInstanceofCleanup_description });
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PatternMatchingForInstanceofCleanup_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
+	@Ignore
 	@Test
 	public void testDoNotMatchPatternForInstanceof() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);

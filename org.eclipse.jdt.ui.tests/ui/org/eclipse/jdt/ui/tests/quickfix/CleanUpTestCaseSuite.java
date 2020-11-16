@@ -30,6 +30,7 @@ import org.junit.runners.Suite;
 	CleanUpTest1d10.class,
 	CleanUpTest1d11.class,
 	CleanUpTest1d14.class,
+	CleanUpTest1d15.class,
 	CleanUpAnnotationTest.class,
 	SaveParticipantTest.class,
 	CleanUpActionTest.class,

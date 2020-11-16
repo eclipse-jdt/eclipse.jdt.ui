@@ -270,6 +270,7 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 
 			InstanceofExpression newInstanceof= ast.newInstanceofExpression();
 			newInstanceof.setLeftOperand(ASTNodes.createMoveTarget(rewrite, nodeToComplete.getLeftOperand()));
+			newInstanceof.setRightOperand(ASTNodes.createMoveTarget(rewrite, nodeToComplete.getRightOperand()));
 			newInstanceof.setPatternVariable(ASTNodes.createMoveTarget(rewrite, expressionToMove));
 
 			ASTNodes.replaceButKeepComment(rewrite, nodeToComplete, newInstanceof, group);
