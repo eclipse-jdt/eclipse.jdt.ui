@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 /**
  * Tests the cleanup features related to Java 9.
  */
-public class CleanUpTest1d9 extends CleanUpTestCase {
+public class CleanUpTest9 extends CleanUpTestCase {
 	@Rule
 	public ProjectTestSetup projectSetup= new Java9ProjectTestSetup();
 

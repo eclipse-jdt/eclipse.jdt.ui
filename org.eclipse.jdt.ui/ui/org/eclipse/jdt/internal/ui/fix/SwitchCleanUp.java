@@ -124,7 +124,7 @@ public class SwitchCleanUp extends AbstractMultiFix implements ICleanUpFix {
 				+ "    k = 20;\n" //$NON-NLS-1$
 				+ "} else {\n" //$NON-NLS-1$
 				+ "    m = -1;\n" //$NON-NLS-1$
-				+ "}\n\n\n\n\n\n\n"; //$NON-NLS-1$
+				+ "}\n\n\n\n\n\n"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -31,7 +31,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 /**
  * Tests the cleanup features related to Java 10.
  */
-public class CleanUpTest1d10 extends CleanUpTestCase {
+public class CleanUpTest10 extends CleanUpTestCase {
 	@Rule
 	public ProjectTestSetup projectSetup= new Java10ProjectTestSetup();
 

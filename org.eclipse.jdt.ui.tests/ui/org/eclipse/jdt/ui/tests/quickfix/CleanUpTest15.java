@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 /**
  * Tests the cleanup features related to Java 15.
  */
-public class CleanUpTest1d15 extends CleanUpTestCase {
+public class CleanUpTest15 extends CleanUpTestCase {
 	@Rule
 	public ProjectTestSetup projectSetup= new Java15ProjectTestSetup(true);
 

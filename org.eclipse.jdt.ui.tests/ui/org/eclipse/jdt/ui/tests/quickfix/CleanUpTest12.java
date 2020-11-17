@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 /**
  * Tests the cleanup features related to Java 12.
  */
-public class CleanUpTest1d12 extends CleanUpTestCase {
+public class CleanUpTest12 extends CleanUpTestCase {
 	@Rule
 	public ProjectTestSetup projectSetup= new Java12ProjectTestSetup(false);
 

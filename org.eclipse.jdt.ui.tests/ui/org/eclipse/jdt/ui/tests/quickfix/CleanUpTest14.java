@@ -31,7 +31,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 /**
  * Tests the cleanup features related to Java 14.
  */
-public class CleanUpTest1d14 extends CleanUpTestCase {
+public class CleanUpTest14 extends CleanUpTestCase {
 
 	@Rule
     public ProjectTestSetup projectSetup = new Java14ProjectTestSetup(false);
