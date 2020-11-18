@@ -144,7 +144,7 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		assertParticipant(classA);
 	}
 
-	private static void assertParticipant(IType typeOfMethod) throws JavaModelException {
+	protected static void assertParticipant(IType typeOfMethod) throws JavaModelException {
 		TestChangeMethodSignaturParticipant.testParticipant(typeOfMethod);
 	}
 
@@ -152,10 +152,24 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 	 * Rename method 'A.m(signature)' to 'A.newMethodName(signature)'
 	 */
 	protected void helperRenameMethod(String[] signature, String newMethodName, boolean createDelegate, boolean markAsDeprecated) throws Exception {
+		helperRenameMethod(signature, newMethodName, createDelegate, markAsDeprecated, "A");
+	}
+
+	/*
+	 * Rename method 'A.B.m(signature)' to 'A.B.newMethodName(signature)'
+	 */
+	protected void helperRenameInnerClassMethod(String[] signature, String newMethodName, boolean createDelegate, boolean markAsDeprecated) throws Exception {
+		helperRenameMethod(signature, newMethodName, createDelegate, markAsDeprecated, "B");
+	}
+
+	/*
+	 * Rename method 'm(signature)' to 'newMethodName(signature)'
+	 */
+	private void helperRenameMethod(String[] signature, String newMethodName, boolean createDelegate, boolean markAsDeprecated, String typeName) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
-		IType classA= getType(cu, "A");
-		IMethod method = classA.getMethod("m", signature);
-		assertTrue("method m does not exist in A", method.exists());
+		IType classType= getType(cu, typeName);
+		IMethod method = classType.getMethod("m", signature);
+		assertTrue("method m does not exist in " +typeName, method.exists());
 		assertTrue("refactoring not available", RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
 
 		ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
@@ -176,7 +190,7 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
 		assertEqualLines("invalid change of method name", expectedFileContents, newcu.getSource());
 
-		assertParticipant(classA);
+		assertParticipant(classType);
 	}
 
 	private void helperDoAll(String typeName,

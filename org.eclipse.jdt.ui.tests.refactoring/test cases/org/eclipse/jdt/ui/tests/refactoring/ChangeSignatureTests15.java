@@ -58,17 +58,31 @@ public class ChangeSignatureTests15 extends ChangeSignatureTests {
 		RefactoringCore.getUndoManager().flush();
 	}
 
-	// Exchange the method parameters
+	// Exchange the method parameters of a method in Record
 	@Test
 	public void testRecordMethod() throws Exception {
 		String[] signature= {};
 		helperRenameMethod(signature, "newName", false, false);
 	}
 
-	// Rename method involving method reference
+	// Rename method involving method reference in a Record
 	@Test
 	public void testRecordMethodReference() throws Exception {
 		String[] signature= {};
 		helperRenameMethod(signature, "newName", false, true);
+	}
+
+	// Exchange the method parameters of a method in an inner Record
+	@Test
+	public void testInnerRecordMethod() throws Exception {
+		String[] signature= {};
+		helperRenameInnerClassMethod(signature, "newName", false, false);
+	}
+
+	// Rename inner record method involving method reference
+	@Test
+	public void testInnerRecordMethodReference() throws Exception {
+		String[] signature= {};
+		helperRenameInnerClassMethod(signature, "newName", false, true);
 	}
 }
