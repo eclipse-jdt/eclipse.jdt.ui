@@ -552,4 +552,72 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
+
+	@Test
+	public void testReplaceIncorrectReturnInSwitchExpressionWithYieldStatement2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String test= "" +
+					"package test;\n" +
+					"public class Cls {\n" +
+					"\n" +
+					"	public static int process(int i) {\n" +
+					"		var t = switch (i) {\n" +
+					"	        case 0:\n" +
+					"	             return 1; // Error - Quick Fix works only if the return statement is surrounded in curly braces\n" +
+					"	        default:\n" +
+					"                     yield 100;\n" +
+					"		};\n" +
+					"       System.out.println(t);\n" +
+					"		return t;\n" +
+					"	}\n" +
+					"	public static void main(String[] args) {\n" +
+					"		process(1);\n" +
+					"		process(0);\n" +
+					"		process(2);\n" +
+					"	}\n" +
+					"}";
+
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+		String expected= "" +
+				"package test;\n" +
+				"public class Cls {\n" +
+				"\n" +
+				"	public static int process(int i) {\n" +
+				"		var t = switch (i) {\n" +
+				"	        case 0:\n" +
+				"	             yield 1;\n" +
+				"	        default:\n" +
+				"                     yield 100;\n" +
+				"		};\n" +
+				"       System.out.println(t);\n" +
+				"		return t;\n" +
+				"	}\n" +
+				"	public static void main(String[] args) {\n" +
+				"		process(1);\n" +
+				"		process(0);\n" +
+				"		process(2);\n" +
+				"	}\n" +
+				"}";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
 }
