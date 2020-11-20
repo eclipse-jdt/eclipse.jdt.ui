@@ -63,6 +63,20 @@
                 <message_argument value="isCanonicalConstructor()"/>
             </message_arguments>
         </filter>
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="IMethodBinding"/>
+                <message_argument value="IntroduceFactoryRefactoring"/>
+                <message_argument value="isCompactConstructor()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="IntroduceFactoryRefactoring"/>
+                <message_argument value="recordComponents()"/>
+            </message_arguments>
+        </filter>
     </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
         <filter id="571519004">

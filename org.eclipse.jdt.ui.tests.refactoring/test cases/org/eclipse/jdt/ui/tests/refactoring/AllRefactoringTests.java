@@ -47,6 +47,7 @@ import org.junit.runners.Suite;
 	IntroduceParameterTests.class,
 	IntroduceParameterTests1d7.class,
 	IntroduceFactoryTests.class,
+	IntroduceFactoryTests15.class,
 
 	//-- structure
 	ChangeSignatureTests.class,

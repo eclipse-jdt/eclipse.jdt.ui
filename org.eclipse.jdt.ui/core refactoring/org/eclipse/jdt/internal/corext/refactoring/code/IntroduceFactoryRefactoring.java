@@ -66,6 +66,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -579,7 +580,13 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		if (ctorDecl != null) {
 			List<SingleVariableDeclaration>	formalArgs= ctorDecl.parameters();
 			int i= 0;
-
+			if (formalArgs.size() == 0 && numArgs > 0 && fCtorBinding.isCompactConstructor()) {
+				ASTNode parent= ctorDecl.getParent();
+				if (parent instanceof RecordDeclaration) {
+					RecordDeclaration recDecl= (RecordDeclaration) parent;
+					formalArgs= recDecl.recordComponents();
+				}
+			}
 			for(Iterator<SingleVariableDeclaration> iter= formalArgs.iterator(); iter.hasNext(); i++) {
 				SingleVariableDeclaration svd= iter.next();
 
