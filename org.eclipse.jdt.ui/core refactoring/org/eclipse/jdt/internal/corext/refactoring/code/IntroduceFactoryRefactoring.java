@@ -1251,7 +1251,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @return return <code>true</code> if the constructor can be made protected
 	 */
 	public boolean canProtectConstructor() {
-		return !fCtorBinding.isSynthetic() && fFactoryCU.findDeclaringNode(fCtorBinding.getKey()) != null;
+		return !fCtorBinding.isSynthetic()
+				&& fFactoryCU.findDeclaringNode(fCtorBinding.getKey()) != null
+				&& !fCtorBinding.isCanonicalConstructor();
 	}
 
 	/**
