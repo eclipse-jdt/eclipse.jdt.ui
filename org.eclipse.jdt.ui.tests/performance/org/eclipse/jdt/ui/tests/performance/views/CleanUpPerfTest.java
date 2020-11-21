@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
@@ -621,6 +622,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new EvaluateNullableCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testJoinCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.JOIN, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new JoinCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}
