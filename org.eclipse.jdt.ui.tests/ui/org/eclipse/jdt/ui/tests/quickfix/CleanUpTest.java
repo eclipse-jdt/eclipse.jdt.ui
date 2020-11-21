@@ -5996,6 +5996,14 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean1 = b1 && b2 || !b1 && b3 && b4;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void doNoUseTernaryOperatorWithSameExpressions(boolean b1, int number) {\n" //
+				+ "        boolean newBoolean1 = b1 && (number > 0) || !b1 && (0 < number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNoUseTernaryOperatorWithNegativeExpressions(boolean b1, int number) {\n" //
+				+ "        boolean newBoolean1 = b1 && (number > 0) || !b1 && (0 >= number);\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void doNoReplaceDuplicateConditionsWithWrappers(Boolean b1, Boolean b2, Boolean b3) {\n" //
 				+ "        boolean newBoolean1 = b1 && b2 || !b1 && b3;\n" //
 				+ "        boolean newBoolean2 = b1 && !b2 || !b1 && b3;\n" //

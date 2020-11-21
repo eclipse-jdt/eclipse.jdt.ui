@@ -143,7 +143,8 @@ public class TernaryOperatorCleanUp extends AbstractMultiFix {
 					final Expression oppositeCondition, final Expression oneExpression, final Expression oppositeExpression,
 					final List<Expression> previousOperands, final List<Expression> nextOperands) {
 				if (ASTSemanticMatcher.INSTANCE.matchNegative(oneCondition, oppositeCondition)
-						&& !ASTNodes.match(oneExpression, oppositeExpression)) {
+						&& !ASTNodes.match(oneExpression, oppositeExpression)
+						&& !ASTSemanticMatcher.INSTANCE.matchNegative(oneExpression, oppositeExpression)) {
 					rewriteOperations.add(new TernaryOperatorOperation(visited, oneCondition, oneExpression, oppositeExpression, previousOperands,
 							nextOperands));
 					return false;
