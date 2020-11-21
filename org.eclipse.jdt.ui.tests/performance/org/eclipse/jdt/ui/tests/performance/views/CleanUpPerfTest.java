@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
@@ -570,6 +571,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new DoubleNegationCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testElseIfCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.ELSE_IF, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new ElseIfCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}
