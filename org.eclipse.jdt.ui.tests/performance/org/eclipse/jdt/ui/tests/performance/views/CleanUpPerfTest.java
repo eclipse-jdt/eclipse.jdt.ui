@@ -79,6 +79,7 @@ import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
+import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
@@ -655,6 +656,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new LazyLogicalCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testMapCloningCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.MAP_CLONING, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new MapCloningCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}
