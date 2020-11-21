@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
+import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
@@ -604,6 +605,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new EmbeddedIfCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testEvaluateNullableCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.EVALUATE_NULLABLE, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new EvaluateNullableCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}
