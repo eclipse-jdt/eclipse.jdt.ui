@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
+import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
@@ -672,6 +673,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new MapCloningCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testMergeConditionalBlockCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new MergeConditionalBlocksCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}
