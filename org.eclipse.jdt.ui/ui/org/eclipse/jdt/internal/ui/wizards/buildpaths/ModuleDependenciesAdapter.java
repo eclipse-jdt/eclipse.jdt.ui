@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 GK Software SE, and others.
+ * Copyright (c) 2019, 2020 GK Software SE, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -314,7 +314,17 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 
 			Set<String> possibleTargetModules= new HashSet<>(fDependenciesPage.getAllModules());
 			possibleTargetModules.remove(fFocusModule.getElementName());
-			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(shell, new IJavaElement[] { jContainer }, possibleTargetModules, initial);
+			Object moduleAttributes= fElem.getAttribute(CPListElement.MODULE);
+			Set<String> alreadyExportedPackages= new HashSet<>();
+			if (moduleAttributes instanceof ModuleEncapsulationDetail[]) {
+				ModuleEncapsulationDetail encapDetails[]= (ModuleEncapsulationDetail[]) moduleAttributes;
+				for (ModuleEncapsulationDetail moduleEncapsulationDetail : encapDetails) {
+					if (moduleEncapsulationDetail instanceof ModuleAddExport) {
+						alreadyExportedPackages.add(((ModuleAddExport) moduleEncapsulationDetail).fPackage);
+					}
+				}
+			}
+			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(shell, new IJavaElement[] { jContainer }, possibleTargetModules, initial, alreadyExportedPackages);
 			if (dialog.open() == Window.OK) {
 				try {
 					moduleAttribute = ensureModuleAttribute(moduleAttribute);

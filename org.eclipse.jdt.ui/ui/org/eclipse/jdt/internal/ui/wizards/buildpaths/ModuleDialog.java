@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 GK Software SE, and others.
+ * Copyright (c) 2017, 2020 GK Software SE, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -940,7 +940,7 @@ public class ModuleDialog extends StatusDialog {
 		@Override
 		void addEntry(ListDialogField<ModuleAddExpose> field) {
 			ModuleAddExport initialValue= new ModuleAddExport(getSourceModuleName(), NO_NAME, getCurrentModuleName(), null);
-			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, null, initialValue);
+			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, null, initialValue, null);
 			if (dialog.open() == Window.OK) {
 				ModuleAddExpose export= dialog.getExport(fCurrCPElement.findAttributeElement(CPListElement.MODULE));
 				if (export != null)
@@ -950,7 +950,7 @@ public class ModuleDialog extends StatusDialog {
 
 		@Override
 		void editEntry(ListDialogField<ModuleAddExpose> field, ModuleAddExpose export) {
-			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, null, export);
+			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, null, export, null);
 			if (dialog.open() == Window.OK) {
 				ModuleAddExpose newExport= dialog.getExport(fCurrCPElement.findAttributeElement(CPListElement.MODULE));
 				if (newExport != null) {
