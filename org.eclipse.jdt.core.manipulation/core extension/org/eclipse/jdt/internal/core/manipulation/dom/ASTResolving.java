@@ -63,7 +63,6 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -244,22 +243,28 @@ public class ASTResolving {
 			}
 			break;
 		case ASTNode.CONDITIONAL_EXPRESSION:
-			ReturnStatement parentReturnStatement= (ReturnStatement) ASTNodes.getParent(node, ASTNode.RETURN_STATEMENT);
-			if (parentReturnStatement != null) {
-				return getPossibleReferenceBinding(parentReturnStatement.getExpression());
-			}
-			VariableDeclarationStatement variableDeclarationStatement= (VariableDeclarationStatement) ASTNodes.getParent(node, ASTNode.VARIABLE_DECLARATION_STATEMENT);
-			if (variableDeclarationStatement != null) {
-				return variableDeclarationStatement.getType().resolveBinding();
-			}
 			ConditionalExpression expression= (ConditionalExpression) parent;
-			if (node.equals(expression.getExpression())) {
+
+			if (node.getLocationInParent() == ConditionalExpression.EXPRESSION_PROPERTY) {
 				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 			}
-			if (node.equals(expression.getElseExpression())) {
+
+			if (node.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY
+					&& expression.getElseExpression().resolveTypeBinding() != null) {
+				return expression.getElseExpression().resolveTypeBinding();
+			}
+
+			if (node.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY
+					&& expression.getThenExpression().resolveTypeBinding() != null) {
 				return expression.getThenExpression().resolveTypeBinding();
 			}
-			return expression.getElseExpression().resolveTypeBinding();
+
+			if (node.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY
+					|| node.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
+				return getPossibleReferenceBinding(expression);
+			}
+
+			break;
 		case ASTNode.POSTFIX_EXPRESSION:
 			return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 		case ASTNode.PREFIX_EXPRESSION:
