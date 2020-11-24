@@ -1098,6 +1098,46 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	}
 
 	@Test
+	public void testTypeMismatchInAssignment5() throws Exception {
+		// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=565752
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E {\n");
+		buf.append("    static <K1, K2, V> V bar(K1 key1, Map<K1, Map<K2, V>> map) {\n");
+		buf.append("        Map<K2, V> secondLevelMap = map.get(key1);\n");
+		buf.append("        V v = secondLevelMap == null ? null : secondLevelMap.entrySet();\n");
+		buf.append("        return v;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E {\n");
+		buf.append("    static <K1, K2, V> V bar(K1 key1, Map<K1, Map<K2, V>> map) {\n");
+		buf.append("        Map<K2, V> secondLevelMap = map.get(key1);\n");
+		buf.append("        V v = (V) (secondLevelMap == null ? null : secondLevelMap.entrySet());\n");
+		buf.append("        return v;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
+
+	@Test
 	public void testTypeMismatchInExpression() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("test0", false, null);
