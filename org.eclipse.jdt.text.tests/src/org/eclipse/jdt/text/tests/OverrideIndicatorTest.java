@@ -75,10 +75,6 @@ public class OverrideIndicatorTest {
 		fAnnotationModel= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 	}
 
-	/*
-	 * @see junit.framework.TestCase#tearDown()
-	 * @since 3.1
-	 */
 	@After
 	public void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();

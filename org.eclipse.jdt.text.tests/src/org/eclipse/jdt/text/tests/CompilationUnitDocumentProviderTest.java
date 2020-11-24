@@ -13,7 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -44,14 +50,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 
 
-public class CompilationUnitDocumentProviderTest extends TestCase {
+public class CompilationUnitDocumentProviderTest {
 
 	private IJavaProject fJavaProject;
 	private IProject fLinkedProject;
-
-	public CompilationUnitDocumentProviderTest(String name) {
-		super(name);
-	}
 
 	private void setupProject() throws CoreException, JavaModelException {
 		fJavaProject= JavaProjectHelper.createJavaProject("P", "bin");
@@ -70,8 +72,8 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 	 *
 	 * @throws CoreException if deletion fails
 	 */
-	@Override
-	protected void tearDown() throws CoreException {
+	@After
+	public void tearDown() throws CoreException {
 		if (fJavaProject != null)
 			JavaProjectHelper.delete(fJavaProject);
 
@@ -79,12 +81,14 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 			ResourceHelper.delete(fLinkedProject, false);
 	}
 
+	@Test
 	public void test1() throws Exception {
 		setupProject();
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(new Path("/P/src/testA/testB/A.java"));
 		checkFile(file);
 	}
 
+	@Test
 	public void test2() throws Exception {
 		setupProject();
 		IProject project= (IProject) fJavaProject.getUnderlyingResource();
@@ -97,6 +101,7 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 		checkFile(file);
 	}
 
+	@Test
 	public void test3() throws Exception {
 		fLinkedProject= ResourceHelper.createLinkedProject("P2", JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
 		assertNotNull(fLinkedProject);
@@ -107,6 +112,7 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 		checkFile(file);
 	}
 
+	@Test
 	public void testNewFile() throws Exception {
 		setupProject();
 		String source= "// some source";

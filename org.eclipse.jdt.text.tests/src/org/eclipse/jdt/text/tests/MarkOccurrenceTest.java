@@ -142,10 +142,6 @@ public class MarkOccurrenceTest {
 		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fSelWASTListener);
 	}
 
-	/*
-	 * @see junit.framework.TestCase#tearDown()
-	 * @since 3.1
-	 */
 	@After
 	public void tearDown() throws Exception {
 		SelectionListenerWithASTManager.getDefault().removeListener(fEditor, fSelWASTListener);

@@ -434,17 +434,11 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		assertEquals(buf.toString(), fDocument.get());
 	}
 
-	/*
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Before
 	public void setUp() throws Exception {
 		JavaPlugin.getDefault().getLog().addLogListener(this);
 	}
 
-	/*
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 		JavaPlugin.getDefault().getLog().removeLogListener(this);

@@ -54,9 +54,6 @@ public class BreakContinueTargetFinderTest {
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	/*
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Before
 	public void setUp() throws Exception {
 		fParser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
