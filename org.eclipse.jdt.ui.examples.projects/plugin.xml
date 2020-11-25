@@ -35,6 +35,33 @@
             </import>
          </projectsetup>
       </wizard>
+       <wizard
+            name="%JUnitProjectExampleCreationWizard.title"
+            icon="$nl$/icons/full/etool16/newjprjex_wiz.gif"
+            category="org.eclipse.ui.Examples/org.eclipse.jdt.ui.java"
+            class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectCreationWizard"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="org.eclipse.jdt.examples.projects.JUnitProjectExampleCreationWizard2">
+         <description>
+            %JUnitProjectExampleCreationWizard.description
+         </description>
+         <projectsetup
+         	   banner="$nl$/icons/full/wizban/newjprjex_wiz.png"
+         	   encoding="ISO-8859-1"
+               pagetitle="%JUnitProjectExampleCreationWizard.pagetitle"
+               name="JUnit"
+               label="%JUnitProjectExampleCreationWizard.label"
+               pagedescription="%JUnitProjectExampleCreationWizard.pagedescription">
+            <nature
+                  id="org.eclipse.jdt.core.javanature">
+            </nature>
+            <import
+                  dest=""
+                  src="archive/junit/org.eclipse.jdt.ui.junit.sampleproject-1.0.0-SNAPSHOT-dist.jar">
+            </import>
+         </projectsetup>
+      </wizard>
    </extension>
 
 </plugin>

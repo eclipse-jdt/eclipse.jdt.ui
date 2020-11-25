@@ -409,6 +409,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		} else if (type.isInterface()) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_interface_not_applicable);
 			return false;
+		} else if (type.isRecord()) {
+			return (canRunOn(type.getRecordComponents()) || canRunOn(type.getFields()));
 		}
 		return canRunOn(type.getFields());
 	}

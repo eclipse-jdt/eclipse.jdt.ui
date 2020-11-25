@@ -51,6 +51,7 @@ public class CleanUpMessages extends NLS {
 
 	public static String CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced;
 	public static String CodeStyleTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed;
+	public static String CodeStyleTabPage_CheckboxName_Switch;
 	public static String CodeStyleTabPage_CheckboxName_ConvertToSwitchExpressions;
 	public static String CodeStyleTabPage_CheckboxName_UseAddAllRemoveAll;
 	public static String CodeStyleTabPage_CheckboxName_UseBlocks;
@@ -66,8 +67,8 @@ public class CleanUpMessages extends NLS {
 
 	public static String CodeStyleTabPage_GroupName_Expressions;
 	public static String CodeStyleTabPage_CheckboxName_CheckSignOfBitwiseOperation;
-	public static String CodeStyleTabPage_CheckboxName_AtomicObject;
 	public static String CodeStyleTabPage_CheckboxName_PullUpAssignment;
+	public static String CodeStyleTabPage_CheckboxName_ElseIf;
 
 	public static String CodeStyleTabPage_GroupName_NumberLiteral;
 	public static String CodeStyleTabPage_CheckboxName_NumberSuffix;
@@ -167,9 +168,13 @@ public class CleanUpMessages extends NLS {
 
 	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
 
+	public static String DuplicateCodeTabPage_CheckboxName_TernaryOperator;
+	public static String DuplicateCodeTabPage_CheckboxName_StrictlyEqualOrDifferent;
 	public static String DuplicateCodeTabPage_CheckboxName_MergeConditionalBlocks;
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd;
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantIfCondition;
+
+	public static String JavaFeatureTabPage_CheckboxName_TryWithResource;
 
 	static {
 		// initialize resource bundle

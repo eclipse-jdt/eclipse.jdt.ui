@@ -618,10 +618,12 @@ public class TypeContextChecker {
 				RecordDeclaration recordDecl= (RecordDeclaration) decl;
 				buf.append("record "); //$NON-NLS-1$
 				buf.append(recordDecl.getName().getIdentifier());
+				buf.append("("); //$NON-NLS-1$
+				appendRecordComponents(buf, recordDecl.recordComponents());
+				buf.append(")"); //$NON-NLS-1$
 				appendTypeParameters(buf, recordDecl.typeParameters());
 				List<Type> superInterfaces= recordDecl.superInterfaceTypes();
 				appendSuperInterfaces(buf, superInterfaces);
-				buf.append("(){\n"); //$NON-NLS-1$
 			}
 
 			buf.append("{\n"); //$NON-NLS-1$
@@ -630,6 +632,18 @@ public class TypeContextChecker {
 			fillWithTypeStubs(bufBefore, bufAfter, focalPosition, decl.bodyDeclarations());
 			buf= decl.getStartPosition() + decl.getLength() < focalPosition ? bufBefore : bufAfter;
 			buf.append("}\n"); //$NON-NLS-1$
+		}
+	}
+
+	private static void appendRecordComponents(StringBuilder buf, List<SingleVariableDeclaration> recordComponents) {
+		int recCompsCount= recordComponents.size();
+		if (recCompsCount > 0) {
+			for (int i= 0; i < recCompsCount; i++) {
+				SingleVariableDeclaration recComp= recordComponents.get(i);
+				buf.append(ASTNodes.asString(recComp));
+				if (i < recCompsCount - 1)
+					buf.append(',');
+			}
 		}
 	}
 

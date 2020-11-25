@@ -43,8 +43,6 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class QuickFixTestPreview extends QuickFixTest {
 
-//	private static final Class<QuickFixTest14> THIS= QuickFixTest14.class;
-
     @Rule
     public ProjectTestSetup projectsetup = new Java16ProjectTestSetup(true);
 
@@ -202,14 +200,13 @@ public class QuickFixTestPreview extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		StringBuffer buf= new StringBuffer();
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("public sealed class Shape permits Square {}\n");
-		buf.append("\n");
-		buf.append("class Square extends Shape {}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", buf.toString(), false, null);
+		String test= "" +
+					"package test;\n" +
+					"\n" +
+					"public sealed class Shape permits Square {}\n" +
+					"\n" +
+					"class Square extends Shape {}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java",test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -219,35 +216,32 @@ public class QuickFixTestPreview extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("public sealed class Shape permits Square {}\n");
-		buf.append("\n");
-		buf.append("final class Square extends Shape {}\n");
-		String expected1= buf.toString();
+		String expected1= "" +
+						"package test;\n" +
+						"\n" +
+						"public sealed class Shape permits Square {}\n" +
+						"\n" +
+						"final class Square extends Shape {}\n";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("public sealed class Shape permits Square {}\n");
-		buf.append("\n");
-		buf.append("non-sealed class Square extends Shape {}\n");
-		String expected2= buf.toString();
+		String expected2= "" +
+						"package test;\n" +
+						"\n" +
+						"public sealed class Shape permits Square {}\n" +
+						"\n" +
+						"non-sealed class Square extends Shape {}\n";
 
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("public sealed class Shape permits Square {}\n");
-		buf.append("\n");
-		buf.append("sealed class Square extends Shape {}\n");
-		String expected3= buf.toString();
+		String expected3= "" +
+						"package test;\n" +
+						"\n" +
+						"public sealed class Shape permits Square {}\n" +
+						"\n" +
+						"sealed class Square extends Shape {}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 
@@ -266,14 +260,13 @@ public class QuickFixTestPreview extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		StringBuffer buf= new StringBuffer();
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("public sealed interface Shape permits Square {}\n");
-		buf.append("\n");
-		buf.append("interface Square extends Shape {}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", buf.toString(), false, null);
+		String test = "" +
+					"package test;\n" +
+					"\n" +
+					"public sealed interface Shape permits Square {}\n" +
+					"\n" +
+					"interface Square extends Shape {}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -283,26 +276,265 @@ public class QuickFixTestPreview extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("public sealed interface Shape permits Square {}\n");
-		buf.append("\n");
-		buf.append("sealed interface Square extends Shape {}\n");
-		String expected1= buf.toString();
+		String expected1= "" +
+						"package test;\n" +
+						"\n" +
+						"public sealed interface Shape permits Square {}\n" +
+						"\n" +
+						"sealed interface Square extends Shape {}\n";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("public sealed interface Shape permits Square {}\n");
-		buf.append("\n");
-		buf.append("non-sealed interface Square extends Shape {}\n");
-		String expected2= buf.toString();
+		String expected2= "" +
+						"package test;\n" +
+						"\n" +
+						"public sealed interface Shape permits Square {}\n" +
+						"\n" +
+						"non-sealed interface Square extends Shape {}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
+	}
+
+	@Test
+	public void testRecordConstructorIncorrectParamsProposal1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+					"package test;\n" +
+					"\n" +
+					"public record Rec1(int a){\n" +
+					"\n" +
+					"	public static void main(String[] args) {\n" +
+					"		Rec1 abc = new Rec1();\n" +
+					"	}\n" +
+					"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Rec1.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= "" +
+						"package test;\n" +
+						"\n" +
+						"public record Rec1(int a){\n" +
+						"\n" +
+						"	public static void main(String[] args) {\n" +
+						"		Rec1 abc = new Rec1(a);\n" +
+						"	}\n" +
+						"}\n";
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		String expected2= "" +
+						"package test;\n" +
+						"\n" +
+						"public record Rec1(int a){\n" +
+						"\n" +
+						"	/**\n" +
+						"	 * \n" +
+						"	 */\n" +
+						"	public Rec1() {\n" +
+						"		// TODO Auto-generated constructor stub\n" +
+						"	}\n" +
+						"\n" +
+						"	public static void main(String[] args) {\n" +
+						"		Rec1 abc = new Rec1();\n" +
+						"	}\n" +
+						"}\n";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testRecordConstructorIncorrectParamsProposal2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+					"package test;\n" +
+					"\n" +
+					"public record Rec1(int a){\n" +
+					"\n" +
+					"	public static void main(String[] args) {\n" +
+					"		Rec1 abc = new Rec1(10, 20);\n" +
+					"	}\n" +
+					"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Rec1.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= "" +
+						"package test;\n" +
+						"\n" +
+						"public record Rec1(int a){\n" +
+						"\n" +
+						"	public static void main(String[] args) {\n" +
+						"		Rec1 abc = new Rec1(10);\n" +
+						"	}\n" +
+						"}\n";
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		String expected2= "" +
+						"package test;\n" +
+						"\n" +
+						"public record Rec1(int a){\n" +
+						"\n" +
+						"	/**\n" +
+						"	 * @param i\n" +
+						"	 * @param j\n" +
+						"	 */\n" +
+						"	public Rec1(int i, int j) {\n" +
+						"		// TODO Auto-generated constructor stub\n" +
+						"	}\n" +
+						"\n" +
+						"	public static void main(String[] args) {\n" +
+						"		Rec1 abc = new Rec1(10, 20);\n" +
+						"	}\n" +
+						"}\n";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testRecordConstructorIncorrectParamsProposal3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+					"package test;\n" +
+					"\n" +
+					"public record Rec1(int a){\n" +
+					"\n" +
+					"	public static void main(String[] args) {\n" +
+					"		Rec1 abc = new Rec1(\"str\");\n" +
+					"	}\n" +
+					"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Rec1.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= "" +
+						"package test;\n" +
+						"\n" +
+						"public record Rec1(int a){\n" +
+						"\n" +
+						"	/**\n" +
+						"	 * @param string\n" +
+						"	 */\n" +
+						"	public Rec1(String string) {\n" +
+						"		// TODO Auto-generated constructor stub\n" +
+						"	}\n" +
+						"\n" +
+						"	public static void main(String[] args) {\n" +
+						"		Rec1 abc = new Rec1(\"str\");\n" +
+						"	}\n" +
+						"}\n";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testRecordCanonicalConstructordUninitializedFieldProposal() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+					"package test;\n" +
+					"\n" +
+					"public record Rec1(int a, int b){\n" +
+					"\n" +
+					"	public Rec1(int a, int b) {\n" +
+					"		\n" +
+					"	}\n\n" +
+					"	public Rec1(int a) {\n" +
+					"		this(a, a);\n" +
+					"	}\n\n" +
+					"	public Rec1(int a, int b, int c) {\n" +
+					"		this(a, b+c);\n" +
+					"	}\n\n" +
+					"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Rec1.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= "" +
+					"package test;\n" +
+					"\n" +
+					"public record Rec1(int a, int b){\n" +
+					"\n" +
+					"	public Rec1(int a, int b) {\n" +
+					"		this.a = 0;\n" +
+					"		\n" +
+					"	}\n\n" +
+					"	public Rec1(int a) {\n" +
+					"		this(a, a);\n" +
+					"	}\n\n" +
+					"	public Rec1(int a, int b, int c) {\n" +
+					"		this(a, b+c);\n" +
+					"	}\n\n" +
+					"}\n";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 }

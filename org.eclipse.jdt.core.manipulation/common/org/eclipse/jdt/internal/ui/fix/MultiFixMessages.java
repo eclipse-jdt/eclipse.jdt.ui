@@ -68,15 +68,14 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleMultiFix_ConvertSingleStatementInControlBodyToBlock_description;
 	public static String CodeStyleCleanUp_addDefaultSerialVersionId_description;
 
-	public static String CodeStyleCleanUp_AtomicObject_description;
-	public static String CodeStyleCleanUp_AtomicObject_declaration;
-	public static String CodeStyleCleanUp_AtomicObject_usage;
 	public static String CodeStyleCleanUp_PullUpAssignment_description;
+	public static String CodeStyleCleanUp_ElseIf_description;
 	public static String CodeStyleCleanUp_numberSuffix_description;
 	public static String CodeStyleCleanUp_QualifyNonStaticMethod_description;
 	public static String CodeStyleCleanUp_QualifyStaticMethod_description;
 	public static String CodeStyleCleanUp_removeFieldThis_description;
 	public static String CodeStyleCleanUp_removeMethodThis_description;
+	public static String CodeStyleCleanUp_Switch_description;
 
 	public static String Java50MultiFix_AddMissingDeprecated_description;
 	public static String Java50MultiFix_AddMissingOverride_description;
@@ -143,6 +142,8 @@ public class MultiFixMessages extends NLS {
 	public static String DoubleNegationCleanUp_description;
 	public static String RedundantComparisonStatementCleanup_description;
 	public static String RedundantSuperCallCleanup_description;
+	public static String TernaryOperatorCleanUp_description;
+	public static String StrictlyEqualOrDifferentCleanUp_description;
 	public static String MergeConditionalBlocksCleanup_description;
 	public static String RedundantFallingThroughBlockEndCleanup_description;
 	public static String RedundantIfConditionCleanup_description;
@@ -158,6 +159,8 @@ public class MultiFixMessages extends NLS {
 	public static String ObjectsEqualsCleanup_description;
 
 	public static String CheckSignOfBitwiseOperation_description;
+
+	public static String TryWithResourceCleanup_description;
 
 	static {
 		// initialize resource bundle

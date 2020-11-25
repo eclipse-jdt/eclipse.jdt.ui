@@ -22,15 +22,16 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AddAllCleanUp;
-import org.eclipse.jdt.internal.ui.fix.AtomicObjectCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SwitchCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VarCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
@@ -44,10 +45,11 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new SwitchExpressionsCleanUp(values),
 				new ControlStatementsCleanUp(values),
 				new ConvertLoopCleanUp(values),
+				new SwitchCleanUp(values),
 				new AddAllCleanUp(values),
+				new ElseIfCleanUp(values),
 				new ExpressionsCleanUp(values),
 				new BitwiseConditionalExpressionCleanup(values),
-				new AtomicObjectCleanUp(values),
 				new PullUpAssignmentCleanUp(values),
 				new NumberSuffixCleanUp(values),
 				new VariableDeclarationCleanUp(values),
@@ -73,11 +75,17 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		final RadioPreference useBlockNeverPref= createRadioPref(controlGroup, numColumns - 1, CleanUpMessages.CodeStyleTabPage_RadioName_NeverUseBlocks, CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_NEVER, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useBlockPref, new RadioPreference[] {useBlockAlwaysPref, useBlockJDTStylePref, useBlockNeverPref});
 
+		CheckboxPreference elseIf= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ElseIf, CleanUpConstants.ELSE_IF, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(elseIf);
+
 		CheckboxPreference convertLoop= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced, CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(convertLoop);
 		intent(controlGroup);
 		final CheckboxPreference convertLoopOnlyIfLoopVariableUsed= createCheckboxPref(controlGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed, CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(convertLoop, new CheckboxPreference[] {convertLoopOnlyIfLoopVariableUsed});
+
+		final CheckboxPreference switchPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_Switch, CleanUpConstants.USE_SWITCH, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(switchPref);
 
 		final CheckboxPreference addAllPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseAddAllRemoveAll, CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_ALL,
 				CleanUpModifyDialog.FALSE_TRUE);
@@ -93,9 +101,6 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference bitwiseComparison= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_CheckSignOfBitwiseOperation, CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(bitwiseComparison);
-
-		final CheckboxPreference atomicObject= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_AtomicObject, CleanUpConstants.ATOMIC_OBJECT, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(atomicObject);
 
 		final CheckboxPreference pullUpAssignmentPref= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_PullUpAssignment, CleanUpConstants.PULL_UP_ASSIGNMENT, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(pullUpAssignmentPref);

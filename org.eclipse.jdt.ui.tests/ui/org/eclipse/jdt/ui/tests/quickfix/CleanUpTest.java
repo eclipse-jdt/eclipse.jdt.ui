@@ -21,7 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,9 +37,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -99,6 +98,34 @@ public class CleanUpTest extends CleanUpTestCase {
 		@Override
 		protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
 			return super.createFix(unit);
+		}
+	}
+
+	@Test
+	public void testCleanUpConstantsAreDistinct() throws Exception {
+		Field[] allCleanUpConstantsFields= CleanUpConstants.class.getDeclaredFields();
+
+		Map<String, Field> stringFieldsByValue= new HashMap<>();
+
+		for (Field field : allCleanUpConstantsFields) {
+			if (String.class.equals(field.getType())
+					&& field.getAnnotation(Deprecated.class) == null
+					&& !field.getName().startsWith("DEFAULT_")) {
+				final String constantValue= (String) field.get(null);
+
+				assertFalse(stringFieldsByValue.containsKey(constantValue),
+						() -> CleanUpConstants.class.getCanonicalName()
+						+ "."
+						+ field.getName()
+						+ " and "
+						+ CleanUpConstants.class.getCanonicalName()
+						+ "."
+						+ stringFieldsByValue.get(constantValue).getName()
+						+ " should not share the same value: "
+						+ constantValue);
+
+				stringFieldsByValue.put(constantValue, field);
+			}
 		}
 	}
 
@@ -4026,214 +4053,6 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testSerialVersion01() throws Exception {
-
-		JavaProjectHelper.set14CompilerOptions(getProject());
-
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "}\n";
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
-			getProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
-
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-
-			sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "\n" //
-					+ "    " + FIELD_COMMENT + "\n" //
-					+ "    private static final long serialVersionUID = 1L;\n" //
-					+ "}\n";
-			String expected1= sample;
-			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
-		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
-		}
-	}
-
-	@Test
-	public void testSerialVersion02() throws Exception {
-
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
-
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "    public class B1 implements Serializable {\n" //
-					+ "    }\n" //
-					+ "    public class B2 extends B1 {\n" //
-					+ "    }\n" //
-					+ "}\n";
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
-
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-
-			sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "    " + FIELD_COMMENT + "\n" //
-					+ "    private static final long serialVersionUID = 1L;\n" //
-					+ "    public class B1 implements Serializable {\n" //
-					+ "\n" //
-					+ "        " + FIELD_COMMENT + "\n" //
-					+ "        private static final long serialVersionUID = 1L;\n" //
-					+ "    }\n" //
-					+ "    public class B2 extends B1 {\n" //
-					+ "\n" //
-					+ "        " + FIELD_COMMENT + "\n" //
-					+ "        private static final long serialVersionUID = 1L;\n" //
-					+ "    }\n" //
-					+ "}\n";
-			String expected1= sample;
-			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
-		} finally {
-			JavaProjectHelper.set15CompilerOptions(getProject());
-		}
-	}
-
-	@Test
-	public void testSerialVersion03() throws Exception {
-
-		JavaProjectHelper.set14CompilerOptions(getProject());
-
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "}\n";
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
-			sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Externalizable;\n" //
-					+ "public class E2 implements Externalizable {\n" //
-					+ "}\n";
-			ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
-
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-
-			sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "\n" //
-					+ "    " + FIELD_COMMENT + "\n" //
-					+ "    private static final long serialVersionUID = 1L;\n" //
-					+ "}\n";
-			String expected2= sample;
-			sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Externalizable;\n" //
-					+ "public class E2 implements Externalizable {\n" //
-					+ "}\n";
-			String expected1= sample;
-
-			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
-		} finally {
-			JavaProjectHelper.set15CompilerOptions(getProject());
-		}
-	}
-
-	@Test
-	public void testSerialVersion04() throws Exception {
-
-		JavaProjectHelper.set14CompilerOptions(getProject());
-
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "    public void foo() {\n" //
-					+ "        Serializable s= new Serializable() {\n" //
-					+ "        };\n" //
-					+ "    }\n" //
-					+ "}\n";
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
-
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-
-			sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "    " + FIELD_COMMENT + "\n" //
-					+ "    private static final long serialVersionUID = 1L;\n" //
-					+ "\n" //
-					+ "    public void foo() {\n" //
-					+ "        Serializable s= new Serializable() {\n" //
-					+ "\n" //
-					+ "            " + FIELD_COMMENT + "\n" //
-					+ "            private static final long serialVersionUID = 1L;\n" //
-					+ "        };\n" //
-					+ "    }\n" //
-					+ "}\n";
-			String expected1= sample;
-			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
-		} finally {
-			JavaProjectHelper.set15CompilerOptions(getProject());
-		}
-	}
-
-	@Test
-	public void testSerialVersion05() throws Exception {
-
-		JavaProjectHelper.set14CompilerOptions(getProject());
-
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "\n" //
-					+ "    private Serializable s= new Serializable() {\n" //
-					+ "        \n" //
-					+ "    };\n" //
-					+ "}\n";
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
-
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-
-			sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 implements Serializable {\n" //
-					+ "\n" //
-					+ "    " + FIELD_COMMENT + "\n" //
-					+ "    private static final long serialVersionUID = 1L;\n" //
-					+ "    private Serializable s= new Serializable() {\n" //
-					+ "\n" //
-					+ "        " + FIELD_COMMENT + "\n" //
-					+ "        private static final long serialVersionUID = 1L;\n" //
-					+ "        \n" //
-					+ "    };\n" //
-					+ "}\n";
-			String expected1= sample;
-			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
-		} finally {
-			JavaProjectHelper.set15CompilerOptions(getProject());
-		}
-	}
-
-	@Test
 	public void testKeepCommentOnReplacement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -5708,6 +5527,406 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testTernaryOperator() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean isValid, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = isValid && b2 || !isValid && b3;\n" //
+				+ "        boolean newBoolean2 = isValid && !b2 || !isValid && b3;\n" //
+				+ "        boolean newBoolean3 = isValid && b2 || !isValid && !b3;\n" //
+				+ "        boolean newBoolean4 = isValid && !b2 || !isValid && !b3;\n" //
+				+ "        boolean newBoolean5 = !isValid && b2 || isValid && b3;\n" //
+				+ "        boolean newBoolean6 = !isValid && !b2 || isValid && b3;\n" //
+				+ "        boolean newBoolean7 = !isValid && b2 || isValid && !b3;\n" //
+				+ "        boolean newBoolean8 = !isValid && !b2 || isValid && !b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 & b2 | !b1 & b3;\n" //
+				+ "        boolean newBoolean2 = b1 & !b2 | !b1 & b3;\n" //
+				+ "        boolean newBoolean3 = b1 & b2 | !b1 & !b3;\n" //
+				+ "        boolean newBoolean4 = b1 & !b2 | !b1 & !b3;\n" //
+				+ "        boolean newBoolean5 = !b1 & b2 | b1 & b3;\n" //
+				+ "        boolean newBoolean6 = !b1 & !b2 | b1 & b3;\n" //
+				+ "        boolean newBoolean7 = !b1 & b2 | b1 & !b3;\n" //
+				+ "        boolean newBoolean8 = !b1 & !b2 | b1 & !b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 && b2 || b3 && !b1;\n" //
+				+ "        boolean newBoolean2 = b1 && !b2 || b3 && !b1;\n" //
+				+ "        boolean newBoolean3 = b1 && b2 || !b3 && !b1;\n" //
+				+ "        boolean newBoolean4 = b1 && !b2 || !b3 && !b1;\n" //
+				+ "        boolean newBoolean5 = !b1 && b2 || b3 && b1;\n" //
+				+ "        boolean newBoolean6 = !b1 && !b2 || b3 && b1;\n" //
+				+ "        boolean newBoolean7 = !b1 && b2 || !b3 && b1;\n" //
+				+ "        boolean newBoolean8 = !b1 && !b2 || !b3 && b1;\n" //
+				+ "\n" //
+				+ "        newBoolean1 = b2 && b1 || !b1 && b3;\n" //
+				+ "        newBoolean2 = !b2 && b1 || !b1 && b3;\n" //
+				+ "        newBoolean3 = b2 && b1 || !b1 && !b3;\n" //
+				+ "        newBoolean4 = !b2 && b1 || !b1 && !b3;\n" //
+				+ "        newBoolean5 = !b1 && b2 || b1 && b3;\n" //
+				+ "        newBoolean6 = !b1 && !b2 || b1 && b3;\n" //
+				+ "        newBoolean7 = !b1 && b2 || b1 && !b3;\n" //
+				+ "        newBoolean8 = !b1 && !b2 || b1 && !b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithOtherCondition(boolean b1, boolean b2, boolean b3, boolean unrevelantCondition) {\n" //
+				+ "        boolean newBoolean1 = unrevelantCondition || (b1 && b2) || (!b1 && b3);\n" //
+				+ "        boolean newBoolean2 = unrevelantCondition || (b1 && !b2) || (b3 && !b1);\n" //
+				+ "        boolean newBoolean3 = unrevelantCondition || (b1 && b2) || (!b3 && !b1);\n" //
+				+ "        boolean newBoolean4 = unrevelantCondition || (b1 && !b2) || (!b3 && !b1);\n" //
+				+ "        boolean newBoolean5 = unrevelantCondition || (!b1 && b2) || (b3 && b1);\n" //
+				+ "        boolean newBoolean6 = unrevelantCondition || (!b1 && !b2) || (b3 && b1);\n" //
+				+ "        boolean newBoolean7 = unrevelantCondition || (!b1 && b2) || (!b3 && b1);\n" //
+				+ "        boolean newBoolean8 = unrevelantCondition || (!b1 && !b2) || (!b3 && b1);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithOtherConditionAfter(boolean b1, boolean b2, boolean b3, boolean unrevelantCondition) {\n" //
+				+ "        boolean newBoolean1 = (b1 && b2) || (!b1 && b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean2 = (b1 && !b2) || (b3 && !b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean3 = (b1 && b2) || (!b3 && !b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean4 = (b1 && !b2) || (!b3 && !b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean5 = (!b1 && b2) || (b3 && b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean6 = (!b1 && !b2) || (b3 && b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean7 = (!b1 && b2) || (!b3 && b1) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean8 = (!b1 && !b2) || (!b3 && b1) || unrevelantCondition;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2 * 2) && !(i3 == i4) || !(i1 == 2 * i2 * 1) && (i5 == i6);\n" //
+				+ "        boolean newBoolean2 = (i1 + 1 + 0 == i2) && (i3 == i4) || !(1 + i1 == i2) && !(i5 == i6);\n" //
+				+ "        boolean newBoolean3 = (i1 < i2) && (i3 == i4) || (i1 >= i2) && !(i5 == i6);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.TERNARY_OPERATOR);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean isValid, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (isValid ? b2 : b3);\n" //
+				+ "        boolean newBoolean2 = (isValid ? !b2 : b3);\n" //
+				+ "        boolean newBoolean3 = (isValid ? b2 : !b3);\n" //
+				+ "        boolean newBoolean4 = (isValid ? !b2 : !b3);\n" //
+				+ "        boolean newBoolean5 = (isValid ? b3 : b2);\n" //
+				+ "        boolean newBoolean6 = (isValid ? b3 : !b2);\n" //
+				+ "        boolean newBoolean7 = (isValid ? !b3 : b2);\n" //
+				+ "        boolean newBoolean8 = (isValid ? !b3 : !b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (b1 ? b2 : b3);\n" //
+				+ "        boolean newBoolean2 = (b1 ? !b2 : b3);\n" //
+				+ "        boolean newBoolean3 = (b1 ? b2 : !b3);\n" //
+				+ "        boolean newBoolean4 = (b1 ? !b2 : !b3);\n" //
+				+ "        boolean newBoolean5 = (b1 ? b3 : b2);\n" //
+				+ "        boolean newBoolean6 = (b1 ? b3 : !b2);\n" //
+				+ "        boolean newBoolean7 = (b1 ? !b3 : b2);\n" //
+				+ "        boolean newBoolean8 = (b1 ? !b3 : !b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (b1 ? b2 : b3);\n" //
+				+ "        boolean newBoolean2 = (b1 ? !b2 : b3);\n" //
+				+ "        boolean newBoolean3 = (b1 ? b2 : !b3);\n" //
+				+ "        boolean newBoolean4 = (b1 ? !b2 : !b3);\n" //
+				+ "        boolean newBoolean5 = (b1 ? b3 : b2);\n" //
+				+ "        boolean newBoolean6 = (b1 ? b3 : !b2);\n" //
+				+ "        boolean newBoolean7 = (b1 ? !b3 : b2);\n" //
+				+ "        boolean newBoolean8 = (b1 ? !b3 : !b2);\n" //
+				+ "\n" //
+				+ "        newBoolean1 = (b1 ? b2 : b3);\n" //
+				+ "        newBoolean2 = (b1 ? !b2 : b3);\n" //
+				+ "        newBoolean3 = (b1 ? b2 : !b3);\n" //
+				+ "        newBoolean4 = (b1 ? !b2 : !b3);\n" //
+				+ "        newBoolean5 = (b1 ? b3 : b2);\n" //
+				+ "        newBoolean6 = (b1 ? b3 : !b2);\n" //
+				+ "        newBoolean7 = (b1 ? !b3 : b2);\n" //
+				+ "        newBoolean8 = (b1 ? !b3 : !b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithOtherCondition(boolean b1, boolean b2, boolean b3, boolean unrevelantCondition) {\n" //
+				+ "        boolean newBoolean1 = unrevelantCondition || (b1 ? b2 : b3);\n" //
+				+ "        boolean newBoolean2 = unrevelantCondition || (b1 ? !b2 : b3);\n" //
+				+ "        boolean newBoolean3 = unrevelantCondition || (b1 ? b2 : !b3);\n" //
+				+ "        boolean newBoolean4 = unrevelantCondition || (b1 ? !b2 : !b3);\n" //
+				+ "        boolean newBoolean5 = unrevelantCondition || (b1 ? b3 : b2);\n" //
+				+ "        boolean newBoolean6 = unrevelantCondition || (b1 ? b3 : !b2);\n" //
+				+ "        boolean newBoolean7 = unrevelantCondition || (b1 ? !b3 : b2);\n" //
+				+ "        boolean newBoolean8 = unrevelantCondition || (b1 ? !b3 : !b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithOtherConditionAfter(boolean b1, boolean b2, boolean b3, boolean unrevelantCondition) {\n" //
+				+ "        boolean newBoolean1 = (b1 ? b2 : b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean2 = (b1 ? !b2 : b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean3 = (b1 ? b2 : !b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean4 = (b1 ? !b2 : !b3) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean5 = (b1 ? b3 : b2) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean6 = (b1 ? b3 : !b2) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean7 = (b1 ? !b3 : b2) || unrevelantCondition;\n" //
+				+ "        boolean newBoolean8 = (b1 ? !b3 : !b2) || unrevelantCondition;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = ((i1 == i2 * 2) ? !(i3 == i4) : (i5 == i6));\n" //
+				+ "        boolean newBoolean2 = ((i1 + 1 + 0 == i2) ? (i3 == i4) : !(i5 == i6));\n" //
+				+ "        boolean newBoolean3 = ((i1 < i2) ? (i3 == i4) : !(i5 == i6));\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.TernaryOperatorCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseTernaryOperator() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public void doNoReplaceDuplicateConditionsWithOtherCondition(boolean b1, boolean b2, boolean b3, boolean b4) {\n" //
+				+ "        boolean newBoolean1 = b1 && b2 || !b1 && b3 && b4;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNoReplaceDuplicateConditionsWithWrappers(Boolean b1, Boolean b2, Boolean b3) {\n" //
+				+ "        boolean newBoolean1 = b1 && b2 || !b1 && b3;\n" //
+				+ "        boolean newBoolean2 = b1 && !b2 || !b1 && b3;\n" //
+				+ "        boolean newBoolean3 = b1 && b2 || !b1 && !b3;\n" //
+				+ "        boolean newBoolean4 = b1 && !b2 || !b1 && !b3;\n" //
+				+ "        boolean newBoolean5 = !b1 && b2 || b1 && b3;\n" //
+				+ "        boolean newBoolean6 = !b1 && !b2 || b1 && b3;\n" //
+				+ "        boolean newBoolean7 = !b1 && b2 || b1 && !b3;\n" //
+				+ "        boolean newBoolean8 = !b1 && !b2 || b1 && !b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithMethods(List<String> myList) {\n" //
+				+ "        boolean newBoolean1 = myList.remove(\"foo\") && !myList.remove(\"bar\") || !myList.remove(\"lorem\")\n" //
+				+ "                && myList.remove(\"ipsum\");\n" //
+				+ "        boolean newBoolean2 = myList.remove(\"foo\") && myList.remove(\"bar\") || !myList.remove(\"lorem\")\n" //
+				+ "                && !myList.remove(\"ipsum\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithIncrements(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && !(i3 == i4++) || !(i1 == i2) && (i5 == i6++);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) && !(i3 == ++i4) || !(i1 == i2) && (i5 == ++i6);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) && !(i3 == i4--) || !(i1 == i2) && (i5 == i6--);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) && !(i3 == --i4) || !(i1 == i2) && (i5 == --i6);\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) && (i3 == i4++) || !(i1 == i2) && !(i5 == i6++);\n" //
+				+ "        boolean newBoolean6 = (i1 == i2) && (i3 == ++i4) || !(i1 == i2) && !(i5 == ++i6);\n" //
+				+ "        boolean newBoolean7 = (i1 == i2) && (i3 == i4--) || !(i1 == i2) && !(i5 == i6--);\n" //
+				+ "        boolean newBoolean8 = (i1 == i2) && (i3 == --i4) || !(i1 == i2) && !(i5 == --i6);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithAssignments(int i1, int i2, boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && !(b1 = b2) || !(i1 == i2) && (b1 = b3);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) && (b1 = b2) || !(i1 == i2) && !(b1 = b3);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class SideEffect {\n" //
+				+ "        private SideEffect() {\n" //
+				+ "            staticField++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithInstanciations(Boolean b1) {\n" //
+				+ "        boolean newBoolean1 = b1 && !(new SideEffect() instanceof SideEffect)\n" //
+				+ "                || !b1 && new SideEffect() instanceof Object;\n" //
+				+ "        boolean newBoolean2 = b1 && new SideEffect() instanceof SideEffect\n" //
+				+ "                || !b1 && !(new SideEffect() instanceof Object);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.TERNARY_OPERATOR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testStrictlyEqualOrDifferent() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 & !b2 | !b1 & b2;\n" //
+				+ "        boolean newBoolean2 = b1 & b2 | !b1 & !b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 && !b2 || !b1 && b2;\n" //
+				+ "        boolean newBoolean2 = b1 && b2 || !b1 && !b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 && !b2 || b2 && !b1;\n" //
+				+ "        boolean newBoolean2 = b1 && b2 || !b2 && !b1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithWrappers(Boolean b1, Boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 && !b2 || !b1 && b2;\n" //
+				+ "        boolean newBoolean2 = b1 && b2 || !b1 && !b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && !(i3 == i4) || !(i2 == i1) && (i3 == i4);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) && (i3 <= i4) || !(i1 == i2) && !(i4 >= i3);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) && (i3 != i4) || (i2 != i1) && (i3 == i4);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) && (i3 < i4) || (i1 != i2) && (i4 <= i3);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithFields() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (staticField > 0) && (staticField < 100) || (staticField <= 0) && (staticField >= 100);\n" //
+				+ "        boolean newBoolean2 = (staticField > 0) && (staticField < 100) || (staticField >= 100) && !(staticField > 0);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.STRICTLY_EQUAL_OR_DIFFERENT);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 ^ b2;\n" //
+				+ "        boolean newBoolean2 = b1 == b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 ^ b2;\n" //
+				+ "        boolean newBoolean2 = b1 == b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 ^ b2;\n" //
+				+ "        boolean newBoolean2 = b1 == b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithWrappers(Boolean b1, Boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 ^ b2;\n" //
+				+ "        boolean newBoolean2 = b1 == b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) ^ (i3 == i4);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) == (i3 <= i4);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) == (i3 != i4);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) == (i3 < i4);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithFields() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (staticField > 0) == (staticField < 100);\n" //
+				+ "        boolean newBoolean2 = (staticField > 0) == (staticField < 100);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StrictlyEqualOrDifferentCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseStrictlyEqualOrDifferent() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public void doNoReplaceDuplicateConditionsWithOtherCondition(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        boolean newBoolean1 = b1 && !b2 || !b1 && b2 && b3;\n" //
+				+ "        boolean newBoolean2 = b1 && b2 || !b1 && !b2 && b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithMethods(List<String> myList) {\n" //
+				+ "        boolean newBoolean1 = myList.remove(\"lorem\") && !myList.remove(\"ipsum\") || !myList.remove(\"lorem\")\n" //
+				+ "                && myList.remove(\"ipsum\");\n" //
+				+ "        boolean newBoolean2 = myList.remove(\"lorem\") && myList.remove(\"ipsum\") || !myList.remove(\"lorem\")\n" //
+				+ "                && !myList.remove(\"ipsum\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithIncrements(int i1, int i2, int i3, int i4) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && !(i3 == i4++) || !(i1 == i2) && (i3 == i4++);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) && !(i3 == ++i4) || !(i1 == i2) && (i3 == ++i4);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) && !(i3 == i4--) || !(i1 == i2) && (i3 == i4--);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) && !(i3 == --i4) || !(i1 == i2) && (i3 == --i4);\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) && (i3 == i4++) || !(i1 == i2) && !(i3 == i4++);\n" //
+				+ "        boolean newBoolean6 = (i1 == i2) && (i3 == ++i4) || !(i1 == i2) && !(i3 == ++i4);\n" //
+				+ "        boolean newBoolean7 = (i1 == i2) && (i3 == i4--) || !(i1 == i2) && !(i3 == i4--);\n" //
+				+ "        boolean newBoolean8 = (i1 == i2) && (i3 == --i4) || !(i1 == i2) && !(i3 == --i4);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithAssignments(int i1, int i2, boolean b1, boolean b2) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && !(b1 = b2) || !(i1 == i2) && (b1 = b2);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) && (b1 = b2) || !(i1 == i2) && !(b1 = b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class SideEffect {\n" //
+				+ "        private SideEffect() {\n" //
+				+ "            staticField++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithInstanciations(Boolean b1) {\n" //
+				+ "        boolean newBoolean1 = b1 && !(new SideEffect() instanceof SideEffect)\n" //
+				+ "                || !b1 && new SideEffect() instanceof SideEffect;\n" //
+				+ "        boolean newBoolean2 = b1 && new SideEffect() instanceof SideEffect\n" //
+				+ "                || !b1 && !(new SideEffect() instanceof SideEffect);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.STRICTLY_EQUAL_OR_DIFFERENT);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testDoubleNegation() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //
@@ -5777,7 +5996,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testRedundantComparisonStatement() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String input= "" //
+		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.Date;\n" //
@@ -5972,131 +6191,19 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return null;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public String refactorReturnNoElse4(String input) {\n" //
+				+ "    public Integer refactorReturnNoElse4(Integer number) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        if (null != input) {\n" //
-				+ "            return input;\n" //
-				+ "        }\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstant1(String input) {\n" //
-				+ "        String output;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (input != null) {\n" //
-				+ "            output = /* Keep this comment too */ null;\n" //
-				+ "        } else {\n" //
-				+ "            output = input;\n" //
-				+ "        }\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstant2(String input) {\n" //
-				+ "        String output;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (null != input) {\n" //
-				+ "            output = null;\n" //
-				+ "        } else {\n" //
-				+ "            output = input;\n" //
-				+ "        }\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstant3(String input) {\n" //
-				+ "        String output;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (input == null) {\n" //
-				+ "            output = input;\n" //
-				+ "        } else {\n" //
-				+ "            output = null;\n" //
-				+ "        }\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstant4(String input) {\n" //
-				+ "        String output;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (null == input) {\n" //
-				+ "            output = input;\n" //
-				+ "        } else {\n" //
-				+ "            output = null;\n" //
-				+ "        }\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturn1(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (input != null) {\n" //
-				+ "            return /* Keep this comment too */ null;\n" //
-				+ "        } else {\n" //
-				+ "            return input;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturn2(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (null != input) {\n" //
-				+ "            return null;\n" //
-				+ "        } else {\n" //
-				+ "            return input;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturn3(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (input == null) {\n" //
-				+ "            return input;\n" //
-				+ "        } else {\n" //
-				+ "            return null;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturn4(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (null == input) {\n" //
-				+ "            return input;\n" //
-				+ "        } else {\n" //
-				+ "            return null;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturnNoElse1(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (input != null) {\n" //
-				+ "            return null;\n" //
-				+ "        }\n" //
-				+ "        return input;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturnNoElse2(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (null != input) {\n" //
-				+ "            return null;\n" //
-				+ "        }\n" //
-				+ "        return input;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturnNoElse3(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (input == null) {\n" //
-				+ "            return input;\n" //
-				+ "        }\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturnNoElse4(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (null == input) {\n" //
-				+ "            return input;\n" //
+				+ "        if (null != number) {\n" //
+				+ "            return number;\n" //
 				+ "        }\n" //
 				+ "        return null;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
 
 		enable(CleanUpConstants.REMOVE_REDUNDANT_COMPARISON_STATEMENT);
 
-		String output= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.Date;\n" //
@@ -6218,81 +6325,15 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return input;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public String refactorReturnNoElse4(String input) {\n" //
+				+ "    public Integer refactorReturnNoElse4(Integer number) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        return input;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstant1(String input) {\n" //
-				+ "        String output;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        output = /* Keep this comment too */ null;\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstant2(String input) {\n" //
-				+ "        String output;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        output = null;\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstant3(String input) {\n" //
-				+ "        String output;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        output = null;\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstant4(String input) {\n" //
-				+ "        String output;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        output = null;\n" //
-				+ "        return output;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturn1(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return /* Keep this comment too */ null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturn2(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturn3(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturn4(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturnNoElse1(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturnNoElse2(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturnNoElse3(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String refactorConstantReturnNoElse4(String input) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return null;\n" //
+				+ "        return number;\n" //
 				+ "    }\n" //
 				+ "}\n";
+
+		assertNotEquals("The class must be changed", given, expected);
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparisonStatementCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
 	@Test
@@ -9012,60 +9053,6 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testSerialVersionBug139381() throws Exception {
-		JavaProjectHelper.set14CompilerOptions(getProject());
-
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 {\n" //
-					+ "    void foo1() {\n" //
-					+ "        new Serializable() {\n" //
-					+ "        };\n" //
-					+ "    }\n" //
-					+ "    void foo2() {\n" //
-					+ "        new Object() {\n" //
-					+ "        };\n" //
-					+ "        new Serializable() {\n" //
-					+ "        };\n" //
-					+ "    }\n" //
-					+ "}\n";
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
-
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-
-			sample= "" //
-					+ "package test1;\n" //
-					+ "import java.io.Serializable;\n" //
-					+ "public class E1 {\n" //
-					+ "    void foo1() {\n" //
-					+ "        new Serializable() {\n" //
-					+ "\n" //
-					+ "            " + FIELD_COMMENT + "\n" //
-					+ "            private static final long serialVersionUID = 1L;\n" //
-					+ "        };\n" //
-					+ "    }\n" //
-					+ "    void foo2() {\n" //
-					+ "        new Object() {\n" //
-					+ "        };\n" //
-					+ "        new Serializable() {\n" //
-					+ "\n" //
-					+ "            " + FIELD_COMMENT + "\n" //
-					+ "            private static final long serialVersionUID = 1L;\n" //
-					+ "        };\n" //
-					+ "    }\n" //
-					+ "}\n";
-			String expected1= sample;
-			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
-		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
-		}
-	}
-
-	@Test
 	public void testAddBlockBug149110_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -9516,6 +9503,83 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+
+	@Test
+	public void testElseIf() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactor(boolean isValid, boolean isEnabled) throws Exception {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            System.out.println(isValid);\n" //
+				+ "        } else {\n" //
+				+ "            if (isEnabled) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                System.out.println(isEnabled);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.ELSE_IF);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactor(boolean isValid, boolean isEnabled) throws Exception {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            System.out.println(isValid);\n" //
+				+ "        } else if (isEnabled) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            System.out.println(isEnabled);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", input, output);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ElseIf_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
+	public void testDoNotUseElseIf() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotRefactor(boolean isValid, boolean isEnabled) throws Exception {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(isValid);\n" //
+				+ "        } else if (isEnabled) {\n" //
+				+ "            System.out.println(isEnabled);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotLoseRemainingStatements(boolean isValid, boolean isEnabled) throws Exception {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(isValid);\n" //
+				+ "        } else {\n" //
+				+ "            if (isEnabled) {\n" //
+				+ "                System.out.println(isEnabled);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            System.out.println(\"Don't forget me!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.ELSE_IF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -11870,7 +11934,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testStringBuilder() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String input= "" //
+		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.List;\n" //
@@ -11878,59 +11942,137 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public static String useStringBuilder() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable+= \"foo\";\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return text;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInFinalConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text + \"append me!\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInPreviousConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return \"previous text\" + text + \"append me!\";\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithInitializer() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"foo\";\n" //
+				+ "        String concatenation = \"foo\";\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable+= \"bar\";\n" //
+				+ "        concatenation += \"bar\";\n" //
+				+ "        concatenation += \"foobar\";\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return concatenation;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public static String useStringBuilderOnBasicAssignment() {\n" //
+				+ "    public static String useStringBuilderWithConcatenationInitializer() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String concatenation = \"foo\" + \"bar\";\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable= variable + \"foo\";\n" //
+				+ "        concatenation += \"bar\";\n" //
+				+ "        concatenation += \"foobar\";\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithNonStringInitializer() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = 123 + \"bar\";\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        concatenation += \"bar\";\n" //
+				+ "        concatenation += \"foobar\";\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderAndRemoveValueOfMethod() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += String.valueOf(123);\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderAndRemoveValueOfMethodInFinalConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text + String.valueOf(123) + new String(456);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnBasicAssignment(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String serialization = \"\";\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        serialization = serialization + \"foo\";\n" //
+				+ "        serialization = serialization + number;\n" //
+				+ "        serialization = serialization + \"bar\";\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return serialization;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithExtendedOperation(String text) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable+= text + \"foo\";\n" //
-				+ "        variable= variable + text + \"bar\";\n" //
+				+ "        variable += text + \"foo\";\n" //
+				+ "        variable = variable + text + \"bar\";\n" //
 				+ "        // Keep this comment too\n" //
 				+ "        return variable;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithDifferentAssignment() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variousConcatenations = \"\";\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable+= \"foo\";\n" //
-				+ "        variable= variable + \"bar\";\n" //
+				+ "        variousConcatenations += \"foo\";\n" //
+				+ "        variousConcatenations = variousConcatenations + \"bar\" + \"foobar\";\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return variousConcatenations;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithBlock(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= \"foo\";\n" //
-				+ "            variable= variable + \"bar\";\n" //
+				+ "            variable += \"foo\";\n" //
+				+ "            variable = variable + \"bar\";\n" //
+				+ "            variable = variable + \"foobar\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -11939,12 +12081,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithLoop(List<String> texts) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "\n" //
 				+ "        for (String text : texts) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= text;\n" //
-				+ "            variable= variable + \",\";\n" //
+				+ "            variable = variable + \"[\";\n" //
+				+ "            variable += text;\n" //
+				+ "            variable = variable + \"]\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnOneLoopedAssignment(List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable = \"\";\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable += text;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnOneLoopedReassignment(List<String> words) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String variable = \"\";\n" //
+				+ "\n" //
+				+ "        for (String word : words) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable = variable + word;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -11953,12 +12122,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithWhile(String text, int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "\n" //
 				+ "        while (i-- > 0) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= text;\n" //
-				+ "            variable= variable + \",\";\n" //
+				+ "            variable = variable + \"{\";\n" //
+				+ "            variable += text;\n" //
+				+ "            variable = variable + \"}\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -11967,26 +12137,27 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithTry(String number, int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String iterableConcatenation = \"\";\n" //
 				+ "\n" //
 				+ "        try {\n" //
 				+ "            while (i-- > 0) {\n" //
 				+ "                // Keep this comment also\n" //
-				+ "                variable+= (Integer.parseInt(number) + 1);\n" //
-				+ "                variable= variable + \",\";\n" //
+				+ "                iterableConcatenation = iterableConcatenation + \"(\";\n" //
+				+ "                iterableConcatenation += (Integer.parseInt(number) + 1);\n" //
+				+ "                iterableConcatenation = iterableConcatenation + \")\";\n" //
 				+ "            }\n" //
 				+ "        } catch (NumberFormatException e) {\n" //
 				+ "            return \"0\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable;\n" //
+				+ "        return iterableConcatenation;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithFinally(String number) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
-				+ "        int i= 123;\n" //
+				+ "        String variable = \"\";\n" //
+				+ "        int i = 123;\n" //
 				+ "\n" //
 				+ "        try {\n" //
 				+ "            i+= Integer.parseInt(number);\n" //
@@ -11994,8 +12165,9 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            System.out.println(\"error\");\n" //
 				+ "        } finally {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= \"foo\";\n" //
-				+ "            variable= variable + \"bar\";\n" //
+				+ "            variable += \"foo\";\n" //
+				+ "            variable = variable + \"bar\";\n" //
+				+ "            variable = variable + \"foobar\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12004,12 +12176,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithConditionalRead(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String variable = \"\";\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= \"foo\";\n" //
-				+ "            variable= variable + \"bar\";\n" //
+				+ "            variable += \"foo\";\n" //
+				+ "            variable = variable + \"bar\";\n" //
+				+ "            variable = variable + \"foobar\";\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            return variable;\n" //
 				+ "        }\n" //
@@ -12019,24 +12192,38 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderInElse(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String variable= \"\";\n" //
+				+ "        String conditionalConcatenation = \"\";\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            return \"OK\";\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable+= \"foo\";\n" //
-				+ "            variable= variable + \"bar\";\n" //
+				+ "            conditionalConcatenation += \"foo\";\n" //
+				+ "            conditionalConcatenation = conditionalConcatenation + \"bar\";\n" //
+				+ "            conditionalConcatenation = conditionalConcatenation + \"foobar\";\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            return variable;\n" //
+				+ "            return \"Another \" + \"text \" + conditionalConcatenation;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithAdditions() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = \"1 + 2 = \" + (1 + 2);\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \" foo\";\n" //
+				+ "        text += \"bar \";\n" //
+				+ "        text += \"3 + 4 = \";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text + (3 + 4);\n" //
+				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
 
 		enable(CleanUpConstants.STRINGBUILDER);
 
-		String output= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.List;\n" //
@@ -12044,34 +12231,111 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public static String useStringBuilder() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable.append(\"foo\");\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(\"foobar\");\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return text.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInFinalConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(\"foobar\");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.append(\"append me!\").toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderInPreviousConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(\"foobar\");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return \"previous text\" + text.append(\"append me!\").toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithInitializer() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder(\"foo\");\n" //
+				+ "        StringBuilder concatenation = new StringBuilder(\"foo\");\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable.append(\"bar\");\n" //
+				+ "        concatenation.append(\"bar\");\n" //
+				+ "        concatenation.append(\"foobar\");\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return concatenation.toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public static String useStringBuilderOnBasicAssignment() {\n" //
+				+ "    public static String useStringBuilderWithConcatenationInitializer() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder concatenation = new StringBuilder(\"foo\").append(\"bar\");\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable.append(\"foo\");\n" //
+				+ "        concatenation.append(\"bar\");\n" //
+				+ "        concatenation.append(\"foobar\");\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithNonStringInitializer() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder concatenation = new StringBuilder().append(123).append(\"bar\");\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        concatenation.append(\"bar\");\n" //
+				+ "        concatenation.append(\"foobar\");\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderAndRemoveValueOfMethod() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(123);\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderAndRemoveValueOfMethodInFinalConcatenation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\"foo\");\n" //
+				+ "        text.append(\"bar\");\n" //
+				+ "        text.append(\"foobar\");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.append(123).append(456).toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnBasicAssignment(int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder serialization = new StringBuilder();\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        serialization.append(\"foo\");\n" //
+				+ "        serialization.append(number);\n" //
+				+ "        serialization.append(\"bar\");\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return serialization.toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithExtendedOperation(String text) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "        // Keep this comment also\n" //
 				+ "        variable.append(text).append(\"foo\");\n" //
 				+ "        variable.append(text).append(\"bar\");\n" //
@@ -12081,22 +12345,23 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithDifferentAssignment() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variousConcatenations = new StringBuilder();\n" //
 				+ "        // Keep this comment also\n" //
-				+ "        variable.append(\"foo\");\n" //
-				+ "        variable.append(\"bar\");\n" //
+				+ "        variousConcatenations.append(\"foo\");\n" //
+				+ "        variousConcatenations.append(\"bar\").append(\"foobar\");\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return variousConcatenations.toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithBlock(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            variable.append(\"foo\");\n" //
 				+ "            variable.append(\"bar\");\n" //
+				+ "            variable.append(\"foobar\");\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12105,12 +12370,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithLoop(List<String> texts) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(\"[\");\n" //
+				+ "            variable.append(text);\n" //
+				+ "            variable.append(\"]\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnOneLoopedAssignment(List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        for (String text : texts) {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            variable.append(text);\n" //
-				+ "            variable.append(\",\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return variable.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderOnOneLoopedReassignment(List<String> words) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        for (String word : words) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            variable.append(word);\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12119,12 +12411,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithWhile(String text, int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        while (i-- > 0) {\n" //
 				+ "            // Keep this comment also\n" //
+				+ "            variable.append(\"{\");\n" //
 				+ "            variable.append(text);\n" //
-				+ "            variable.append(\",\");\n" //
+				+ "            variable.append(\"}\");\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
@@ -12133,26 +12426,27 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderWithTry(String number, int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder iterableConcatenation = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        try {\n" //
 				+ "            while (i-- > 0) {\n" //
 				+ "                // Keep this comment also\n" //
-				+ "                variable.append(Integer.parseInt(number)).append(1);\n" //
-				+ "                variable.append(\",\");\n" //
+				+ "                iterableConcatenation.append(\"(\");\n" //
+				+ "                iterableConcatenation.append(Integer.parseInt(number)).append(1);\n" //
+				+ "                iterableConcatenation.append(\")\");\n" //
 				+ "            }\n" //
 				+ "        } catch (NumberFormatException e) {\n" //
 				+ "            return \"0\";\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString();\n" //
+				+ "        return iterableConcatenation.toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithFinally(String number) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
-				+ "        int i= 123;\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
+				+ "        int i = 123;\n" //
 				+ "\n" //
 				+ "        try {\n" //
 				+ "            i+= Integer.parseInt(number);\n" //
@@ -12162,20 +12456,22 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            // Keep this comment also\n" //
 				+ "            variable.append(\"foo\");\n" //
 				+ "            variable.append(\"bar\");\n" //
+				+ "            variable.append(\"foobar\");\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        // Keep this comment too\n" //
-				+ "        return variable.toString() + i;\n" //
+				+ "        return variable.append(i).toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String useStringBuilderWithConditionalRead(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder variable = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            // Keep this comment also\n" //
 				+ "            variable.append(\"foo\");\n" //
 				+ "            variable.append(\"bar\");\n" //
+				+ "            variable.append(\"foobar\");\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            return variable.toString();\n" //
 				+ "        }\n" //
@@ -12185,23 +12481,37 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String useStringBuilderInElse(boolean isEnabled) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        StringBuilder variable= new StringBuilder();\n" //
+				+ "        StringBuilder conditionalConcatenation = new StringBuilder();\n" //
 				+ "\n" //
 				+ "        if (isEnabled) {\n" //
 				+ "            return \"OK\";\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            variable.append(\"foo\");\n" //
-				+ "            variable.append(\"bar\");\n" //
+				+ "            conditionalConcatenation.append(\"foo\");\n" //
+				+ "            conditionalConcatenation.append(\"bar\");\n" //
+				+ "            conditionalConcatenation.append(\"foobar\");\n" //
 				+ "            // Keep this comment too\n" //
-				+ "            return variable.toString();\n" //
+				+ "            return \"Another \" + \"text \" + conditionalConcatenation.toString();\n" //
 				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithAdditions() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder(\"1 + 2 = \").append(1 + 2);\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\" foo\");\n" //
+				+ "        text.append(\"bar \");\n" //
+				+ "        text.append(\"3 + 4 = \");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.append(3 + 4).toString();\n" //
 				+ "    }\n" //
 				+ "}\n";
 
-		assertNotEquals("The class must be changed", input, output);
+		assertNotEquals("The class must be changed", given, expected);
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StringBuilderCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
 	@Test
@@ -12214,22 +12524,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    private String field= \"\";\n" //
+				+ "    private String field = \"\";\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorWithoutAssignment() {\n" //
+				+ "        String concatenation = 123 + \"bar\";\n" //
+				+ "        return concatenation + String.valueOf(456);\n" //
+				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String doNotRefactorNullString() {\n" //
-				+ "        String text= null;\n" //
-				+ "        text+= \"foo\";\n" //
+				+ "        String text = null;\n" //
+				+ "        text += \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
+				+ "        text += \"foobar\";\n" //
+				+ "        return text;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorConcatenationOfOnlyTwoStrings() {\n" //
+				+ "        String text= \"foo\";\n" //
+				+ "        text += \"bar\";\n" //
 				+ "        return text;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String doNotRefactorMultideclaration() {\n" //
-				+ "        String variable= \"\", anotherVariable= \"\";\n" //
-				+ "        variable+= \"foo\";\n" //
-				+ "        return variable;\n" //
+				+ "        String serialization= \"\", anotherSerialization= \"\";\n" //
+				+ "        serialization += \"foo\";\n" //
+				+ "        serialization += \"bar\";\n" //
+				+ "        serialization += \"foobar\";\n" //
+				+ "        return serialization;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static String doNotRefactorStringUsedAsExpression() {\n" //
 				+ "        String variable= \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
 				+ "        if ((variable+= \"bar\").contains(\"i\")) {\n" //
 				+ "            return \"foobar\";\n" //
 				+ "        }\n" //
@@ -12238,8 +12565,104 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public static String doNotUseStringBuilderWithoutAppending() {\n" //
 				+ "        String variable= \"\";\n" //
-				+ "        variable= \"foo\" + variable;\n" //
+				+ "        variable = \"foo\" + variable;\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
 				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorWrongAssignmentOperator() {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable = \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorBadAssignmentOperator() {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable += variable + \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotUseStringBuilderWithoutConcatenation() {\n" //
+				+ "        String variable = \"\";\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotRefactorStringChangedAfterUse(String text) {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable += text + \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        System.out.println(variable);\n" //
+				+ "        variable= variable + text + \"bar\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotBuildStringSeveralTimes() {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable += \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        variable = variable + \"bar\";\n" //
+				+ "        return variable + variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static List<String> doNotStringifySeveralTimes(List<String> texts) {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        List<String> output= new ArrayList<String>();\n" //
+				+ "\n" //
+				+ "        for (String text : texts) {\n" //
+				+ "            variable += text;\n" //
+				+ "            variable += \"bar\";\n" //
+				+ "            variable += \"foobar\";\n" //
+				+ "            variable = variable + \",\";\n" //
+				+ "            output.add(variable);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotStringifySeveralTimesToo(List<String> words) {\n" //
+				+ "        String variable= \"\";\n" //
+				+ "        variable += \"foo\";\n" //
+				+ "        variable = variable + \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "\n" //
+				+ "        for (String word : words) {\n" //
+				+ "            System.out.println(variable);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotRefactorStringsWithoutConcatenation(boolean isEnabled) {\n" //
+				+ "        String variable1 = \"First variable\";\n" //
+				+ "        String variable2 = \"Second variable\";\n" //
+				+ "\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            variable1 += \"foo\";\n" //
+				+ "            variable1 = variable2 + \"bar\";\n" //
+				+ "        } else {\n" //
+				+ "            variable2 += \"foo\";\n" //
+				+ "            variable2 = variable1 + \"bar\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return variable1 + variable2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String doNotUseStringBuilderOnParameter(String variable) {\n" //
+				+ "        variable += \"foo\";\n" //
+				+ "        variable += \"bar\";\n" //
+				+ "        variable += \"foobar\";\n" //
+				+ "        return variable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotUseStringBuilderOnField() {\n" //
+				+ "        field = \"Lorem\";\n" //
+				+ "        field += \" ipsum\";\n" //
+				+ "        field += \" dolor sit amet\";\n" //
+				+ "        return field;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
@@ -12469,99 +12892,150 @@ public class CleanUpTest extends CleanUpTestCase {
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "\n" //
-				+ "    public void collapseIfStatements(boolean isActive, boolean isValid) {\n" //
+				+ "public class E {\n" //
+				+ "    public int collapseIfStatements(boolean isActive, boolean isValid) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (isActive) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            if (isValid) {\n" //
 				+ "                // Keep this comment also\n" //
-				+ "                int i = 0;\n" //
+				+ "                return 1;\n" //
 				+ "            }\n" //
 				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void collapseWithFourOperands(int i1, int i2) {\n" //
+				+ "    public int collapseInnerLoneIf(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid)\n" //
+				+ "                return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int collapseOutterLoneIf(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid) {\n" //
+				+ "                return 1;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int collapseWithFourOperands(int i1, int i2) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (0 < i1 && i1 < 10) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            if (0 < i2 && i2 < 10) {\n" //
 				+ "                // Keep this comment also\n" //
-				+ "                int i = 0;\n" //
+				+ "                return 1;\n" //
 				+ "            }\n" //
 				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "    public int collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (isActive) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            if (isValid || isEditMode) {\n" //
 				+ "                // Keep this comment also\n" //
-				+ "                int i = 0;\n" //
+				+ "                return 1;\n" //
 				+ "            }\n" //
 				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "    public int collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (isActive) {\n" //
 				+ "            // Keep this comment too\n" //
 				+ "            if (isValid | isEditMode) {\n" //
 				+ "                // Keep this comment also\n" //
-				+ "                int i = 0;\n" //
+				+ "                return 1;\n" //
 				+ "            }\n" //
 				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.RAISE_EMBEDDED_IF);
 
 		sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "\n" //
-				+ "    public void collapseIfStatements(boolean isActive, boolean isValid) {\n" //
+				+ "public class E {\n" //
+				+ "    public int collapseIfStatements(boolean isActive, boolean isValid) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        // Keep this comment too\n" //
 				+ "        if (isActive && isValid) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            int i = 0;\n" //
+				+ "            return 1;\n" //
 				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void collapseWithFourOperands(int i1, int i2) {\n" //
+				+ "    public int collapseInnerLoneIf(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            return 1;\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int collapseOutterLoneIf(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int collapseWithFourOperands(int i1, int i2) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        // Keep this comment too\n" //
 				+ "        if ((0 < i1 && i1 < 10) && (0 < i2 && i2 < 10)) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            int i = 0;\n" //
+				+ "            return 1;\n" //
 				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "    public int collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        // Keep this comment too\n" //
 				+ "        if (isActive && (isValid || isEditMode)) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            int i = 0;\n" //
+				+ "            return 1;\n" //
 				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "    public int collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        // Keep this comment too\n" //
 				+ "        if (isActive && (isValid | isEditMode)) {\n" //
 				+ "            // Keep this comment also\n" //
-				+ "            int i = 0;\n" //
+				+ "            return 1;\n" //
 				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.EmbeddedIfCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.EmbeddedIfCleanup_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { sample });
 	}
 
 	@Test
@@ -12570,13 +13044,23 @@ public class CleanUpTest extends CleanUpTestCase {
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void doNotCollapseWithFiveOperands(int i1, int i2) {\n" //
+				+ "public class E {\n" //
+				+ "    public int doNotCollapseWithFiveOperands(int i1, int i2) {\n" //
 				+ "        if (0 < i1 && i1 < 10) {\n" //
 				+ "            if (100 < i2 && i2 < 200 || i2 < 0) {\n" //
-				+ "                int i = 0;\n" //
+				+ "                return 1;\n" //
 				+ "            }\n" //
 				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotCollapseTwoLoneIfsWithEndOfLineComment(boolean isActive, boolean isValid) {\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid)\n" //
+				+ "                return 1; // This comment makes crash the parser\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void doNotCollapseOuterIfWithElseStatement(boolean isActive, boolean isValid) {\n" //
@@ -12599,11 +13083,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.RAISE_EMBEDDED_IF);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test

@@ -53,6 +53,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_USE_ADD_ALL, CleanUpOptions.FALSE);
 
+		options.setOption(USE_SWITCH, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
 
 		//Expressions
@@ -60,9 +61,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
-		options.setOption(ATOMIC_OBJECT, CleanUpOptions.FALSE);
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
+		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations
@@ -111,7 +112,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
-		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_IF_CONDITION, CleanUpOptions.FALSE);
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);
@@ -156,6 +156,14 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		options.setOption(SORT_MEMBERS, CleanUpOptions.FALSE);
 		options.setOption(SORT_MEMBERS_ALL, CleanUpOptions.FALSE);
+
+		// Duplicate Code
+		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);
+		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
+		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
+
+		// Java Features
+		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
 	}
 
 	private static void setSaveParticipantSettings(CleanUpOptions options) {
@@ -185,6 +193,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_USE_ADD_ALL, CleanUpOptions.FALSE);
 
+		options.setOption(USE_SWITCH, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
 
 		//Expressions
@@ -192,9 +201,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
-		options.setOption(ATOMIC_OBJECT, CleanUpOptions.FALSE);
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
+		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations
@@ -243,7 +252,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
-		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_IF_CONDITION, CleanUpOptions.FALSE);
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);
@@ -290,6 +298,14 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(SORT_MEMBERS_ALL, CleanUpOptions.FALSE);
 
 		options.setOption(CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, CleanUpOptions.FALSE);
+
+		// Duplicate Code
+		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);
+		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
+		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
+
+		// Java Features
+		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
 	}
 
 	public static void initDefaults(IPreferenceStore store) {

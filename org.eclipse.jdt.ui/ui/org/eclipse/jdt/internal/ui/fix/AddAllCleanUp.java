@@ -202,7 +202,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			private int getVariableUseCount(final IVariableBinding variableBinding, final Statement toVisit) {
 				if (variableBinding != null) {
 					VarDefinitionsUsesVisitor variableUseVisitor= new VarDefinitionsUsesVisitor(variableBinding,
-							toVisit, true).find();
+					toVisit, true);
 					return variableUseVisitor.getReads().size();
 				}
 
@@ -310,7 +310,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 				addAllMethod.setName(ast.newSimpleName("addAll")); //$NON-NLS-1$
 				addAllMethod.arguments().add(asListMethod);
 
-				rewrite.replace(toReplace, ast.newExpressionStatement(addAllMethod), group);
+				ASTNodes.replaceButKeepComment(rewrite, toReplace, ast.newExpressionStatement(addAllMethod), group);
 			} else {
 				String collectionsNameText= importRewrite.addImport(Collections.class.getCanonicalName());
 
@@ -322,7 +322,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 
 				ExpressionStatement expressionStatement= ast.newExpressionStatement(newMethod);
 
-				rewrite.replace(toReplace, expressionStatement, group);
+				ASTNodes.replaceButKeepComment(rewrite, toReplace, expressionStatement, group);
 			}
 		}
 	}
@@ -349,7 +349,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			newMethod.setName(ast.newSimpleName("addAll")); //$NON-NLS-1$
 			newMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(addedData)));
 
-			rewrite.replace(toReplace, ast.newExpressionStatement(newMethod), group);
+			ASTNodes.replaceButKeepComment(rewrite, toReplace, ast.newExpressionStatement(newMethod), group);
 		}
 	}
 }

@@ -644,6 +644,18 @@ public class CleanUpConstants {
 	public static String CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED;
 
 	/**
+	 * Replaces <code>if</code>/<code>else if</code>/<code>else</code> blocks to use <code>switch</code> where possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String USE_SWITCH= "cleanup.switch"; //$NON-NLS-1$
+
+	/**
 	 * Convert switch statements to switch expressions.IF_LOOP_VAR_USED}<br>
 	 * <p>
 	 * Example:
@@ -1128,7 +1140,7 @@ public class CleanUpConstants {
 	public static final String INSERT_INFERRED_TYPE_ARGUMENTS= "cleanup.insert_inferred_type_arguments"; //$NON-NLS-1$
 
 	/**
-	 * Removes redundant type arguments from class instance creations and creates a diamond.<br>
+	 * Removes redundant type arguments from class instance creations and creates a diamond operator.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
 	 * <br>
@@ -1282,6 +1294,31 @@ public class CleanUpConstants {
 	 * @since 4.18
 	 */
 	public static final String REDUNDANT_SUPER_CALL= "cleanup.no_super"; //$NON-NLS-1$
+
+	/**
+	 * Replaces (X && Y) || (!X && Z) by X ? Y : Z.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String TERNARY_OPERATOR= "cleanup.ternary_operator"; //$NON-NLS-1$
+
+	/**
+	 * Replaces <code>(X && !Y) || (!X && Y)</code> by <code>X ^ Y</code>.
+	 * Replaces also <code>(X && Y) || (!X && !Y)</code> by <code>X == Y</code>.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String STRICTLY_EQUAL_OR_DIFFERENT= "cleanup.strictly_equal_or_different"; //$NON-NLS-1$
 
 	/**
 	 * Merge conditions of if/else if/else that have the same blocks.
@@ -1580,18 +1617,6 @@ public class CleanUpConstants {
 	public static final String ADD_MISSING_SERIAL_VERSION_ID_DEFAULT= "cleanup.add_default_serial_version_id"; //$NON-NLS-1$
 
 	/**
-	 * Replace an array with one index by an atomic object.
-	 * <p>
-	 * Possible values: {TRUE, FALSE}
-	 * <p>
-	 *
-	 * @see CleanUpOptionsCore#TRUE
-	 * @see CleanUpOptionsCore#FALSE
-	 * @since 4.18
-	 */
-	public static final String ATOMIC_OBJECT= "cleanup.atomic_object"; //$NON-NLS-1$
-
-	/**
 	 * Moves assignments inside an if condition above the if node.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -1602,6 +1627,18 @@ public class CleanUpConstants {
 	 * @since 4.18
 	 */
 	public static final String PULL_UP_ASSIGNMENT= "cleanup.pull_up_assignment"; //$NON-NLS-1$
+
+	/**
+	 * Uses the <code>else if</code> pseudo keyword.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String ELSE_IF= "cleanup.else_if"; //$NON-NLS-1$
 
 	/**
 	 * Controls whether long literal suffix should be rewritten in uppercase.<br>
@@ -1691,6 +1728,18 @@ public class CleanUpConstants {
 	 * @since 3.4
 	 */
 	public static final String ADD_MISSING_METHODES= "cleanup.add_missing_methods"; //$NON-NLS-1$
+
+	/**
+	 * Changes code to make use of Java 7 try-with-resources feature. In particular, it removes now useless finally clauses.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String TRY_WITH_RESOURCE= "cleanup.try_with_resource"; //$NON-NLS-1$
 
 	/**
 	 * Should the Clean Up Wizard be shown when executing the Clean Up Action? <br>

@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -37,6 +38,16 @@ public final class VarDefinitionsUsesVisitor extends ASTVisitor {
 	private final List<SimpleName> reads= new ArrayList<>();
 
 	/**
+	 * Builds from a {@link VariableDeclaration} and infers the variable binding and
+	 * the scope from it.
+	 *
+	 * @param variableDeclaration the variable declaration, cannot be {@code null}
+	 */
+	public VarDefinitionsUsesVisitor(final VariableDeclaration variableDeclaration) {
+		this(variableDeclaration.resolveBinding(), getDeclaringScope(variableDeclaration), true);
+	}
+
+	/**
 	 * Builds with the variable binding to look for and the scope where to look for
 	 * references.
 	 *
@@ -45,22 +56,37 @@ public final class VarDefinitionsUsesVisitor extends ASTVisitor {
 	 * @param includeInnerScopes True if the sub blocks should be analyzed
 	 */
 	public VarDefinitionsUsesVisitor(final IVariableBinding variableBinding, final ASTNode scopeNode, final boolean includeInnerScopes) {
+		if (variableBinding == null || scopeNode == null) {
+			throw new IllegalArgumentException("Variable binding and scope node should be provided"); //$NON-NLS-1$
+		}
+
 		this.variableBinding= variableBinding;
 		this.scopeNode= scopeNode;
 		this.includeInnerScopes= includeInnerScopes;
+
+		scopeNode.accept(this);
 	}
 
-	/**
-	 * Finds all the definitions and uses of the variable.
-	 *
-	 * @return this visitor
-	 */
-	public VarDefinitionsUsesVisitor find() {
-		if (variableBinding != null && scopeNode != null) {
-			scopeNode.accept(this);
+	private static ASTNode getDeclaringScope(final VariableDeclaration variableDeclaration) {
+		ASTNode node= variableDeclaration.getParent();
+		while (isVariableDeclaration(node)) {
+			node= node.getParent();
 		}
 
-		return this;
+		return node;
+	}
+
+	private static boolean isVariableDeclaration(final ASTNode node) {
+		switch (node.getNodeType()) {
+		case ASTNode.SINGLE_VARIABLE_DECLARATION:
+		case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
+		case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+		case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+			return true;
+
+		default:
+			return false;
+		}
 	}
 
 	@Override

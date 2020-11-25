@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javadocexport;
 
+import static org.eclipse.jdt.internal.ui.javadocexport.JavadocSpecificsWizardPage.JavadocsSpecifics.ANTSTATUS;
+import static org.eclipse.jdt.internal.ui.javadocexport.JavadocSpecificsWizardPage.JavadocsSpecifics.OVERVIEWSTATUS;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,8 +69,9 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	private JavadocOptionsManager fStore;
 
-	private final int OVERVIEWSTATUS= 1;
-	private final int ANTSTATUS= 2;
+	enum JavadocsSpecifics {
+		OVERVIEWSTATUS, ANTSTATUS;
+	}
 
 	protected JavadocSpecificsWizardPage(String pageName, JavadocTreeWizardPage firstPage, JavadocOptionsManager store) {
 		super(pageName);
@@ -226,7 +230,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		});
 	} //end method createExtraOptionsGroup
 
-	private void doValidation(int val) {
+	private void doValidation(JavadocsSpecifics val) {
 		switch (val) {
 
 			case OVERVIEWSTATUS :

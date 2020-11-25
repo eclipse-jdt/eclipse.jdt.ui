@@ -15,6 +15,9 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertNotEquals;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -94,7 +97,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	@Test
 	public void testAddAll() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String input= "" //
+		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.ArrayList;\n" //
@@ -111,6 +114,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Collection<? super java.util.Date> replaceAddWithForLoopByCollectionsAddAll(\n" //
 				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (int i = 0; i < elems1.length; i++) {\n" //
 				+ "            output.add(elems1[i]);\n" //
 				+ "        }\n" //
@@ -121,8 +125,35 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceUsingVariableForEnd(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elements1, java.sql.Date[] elements2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int i = 0, len = elements1.length; i < len; i++) {\n" //
+				+ "            output.add(elements1[i]);\n" //
+				+ "        }\n" //
+				+ "        for (int i = 0, len = elements2.length; i < len; i++) {\n" //
+				+ "            output.add(elements2[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceStartingWithVariableForEnd(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (int len = elems1.length, i = 0; i < len; i++) {\n" //
+				+ "            output.add(elems1[i]);\n" //
+				+ "        }\n" //
+				+ "        for (int len = elems2.length, i = 0; i < len; i++) {\n" //
+				+ "            output.add(elems2[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public Collection<? super java.util.Date> replaceBackwardLoopOnSet(\n" //
 				+ "            Set<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (int i = elems1.length - 1; i >= 0; i--) {\n" //
 				+ "            output.add(elems1[i]);\n" //
 				+ "        }\n" //
@@ -134,36 +165,42 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAddWithNotEqualOperator(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (int i = 0; i != dates.length; i++) {\n" //
 				+ "            output.add(dates[i]);\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAddWithForLoopByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (int i = 0; i < dates.length; i++) {\n" //
 				+ "            output.add(dates[i]);\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceLoopWithFieldArray(Collection<? super java.util.Date> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (int i = 0; i < innerArray.length; i++) {\n" //
 				+ "            output.add(innerArray[i]);\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceForeachWithFieldArray(Collection<? super java.util.Date> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (java.util.Date d : this.innerArray) {\n" //
 				+ "            output.add(d);\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceLoopWithFieldList(Collection<? super java.util.Date> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (int i = 0; i < this.innerList.size(); i++) {\n" //
 				+ "            output.add(this.innerList.get(i));\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceForeachWithFieldList(Collection<? super java.util.Date> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (java.util.Date d : innerList) {\n" //
 				+ "            output.add(d);\n" //
 				+ "        }\n" //
@@ -171,6 +208,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Collection replaceAddWithForEachByCollectionsAddAll(\n" //
 				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (java.util.Date d : elems1) {\n" //
 				+ "            output.add(d);\n" //
 				+ "        }\n" //
@@ -182,6 +220,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAddWithForEachByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (java.util.Date date : dates) {\n" //
 				+ "            output.add(date);\n" //
 				+ "        }\n" //
@@ -189,6 +228,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithArray(\n" //
 				+ "            Map<String, List<String>> mapToFill, String[] inputList) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (String input : inputList) {\n" //
 				+ "            mapToFill.get(\"foo\").add(input);\n" //
 				+ "        }\n" //
@@ -198,6 +238,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Collection replaceLoopOnRawCollectionWithArray(\n" //
 				+ "            List colToFill, String[] inputList) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (String input : inputList) {\n" //
 				+ "            colToFill.add(input);\n" //
 				+ "        }\n" //
@@ -207,6 +248,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithList(\n" //
 				+ "            Map<String, List<String>> mapToFill, List<String> inputList) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (String input : inputList) {\n" //
 				+ "            mapToFill.get(\"foo\").add(input);\n" //
 				+ "        }\n" //
@@ -216,6 +258,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Collection replaceLoopOnRawCollectionWithList(\n" //
 				+ "            List colToFill, List<String> inputList) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (String input : inputList) {\n" //
 				+ "            colToFill.add(input);\n" //
 				+ "        }\n" //
@@ -224,6 +267,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Collection<String> replaceAddWithForLoopByAddAll(List<String> col, List<String> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (int i = 0; i < col.size(); i++) {\n" //
 				+ "            output.add(col.get(i));\n" //
 				+ "        }\n" //
@@ -232,6 +276,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Collection<String> replaceAddWithForEachByAddAll(Collection<String> col, List<String> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        for (String s : col) {\n" //
 				+ "            output.add(s);\n" //
 				+ "        }\n" //
@@ -243,11 +288,11 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return null;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", input, false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", given, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_ADD_ALL);
 
-		String output= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.ArrayList;\n" //
@@ -266,6 +311,25 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Collection<? super java.util.Date> replaceAddWithForLoopByCollectionsAddAll(\n" //
 				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.addAll(output, elems1);\n" //
+				+ "        Collections.addAll(output, elems2);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceUsingVariableForEnd(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elements1, java.sql.Date[] elements2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.addAll(output, elements1);\n" //
+				+ "        Collections.addAll(output, elements2);\n" //
+				+ "\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Collection<? super java.util.Date> replaceStartingWithVariableForEnd(\n" //
+				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Collections.addAll(output, elems1);\n" //
 				+ "        Collections.addAll(output, elems2);\n" //
 				+ "\n" //
@@ -274,6 +338,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Collection<? super java.util.Date> replaceBackwardLoopOnSet(\n" //
 				+ "            Set<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Collections.addAll(output, elems1);\n" //
 				+ "        Collections.addAll(output, elems2);\n" //
 				+ "\n" //
@@ -281,31 +346,38 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAddWithNotEqualOperator(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Collections.addAll(output, dates);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAddWithForLoopByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Collections.addAll(output, dates);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceLoopWithFieldArray(Collection<? super java.util.Date> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Collections.addAll(output, innerArray);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceForeachWithFieldArray(Collection<? super java.util.Date> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Collections.addAll(output, this.innerArray);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceLoopWithFieldList(Collection<? super java.util.Date> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        output.addAll(this.innerList);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceForeachWithFieldList(Collection<? super java.util.Date> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        output.addAll(innerList);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Collection replaceAddWithForEachByCollectionsAddAll(\n" //
 				+ "            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Collections.addAll(output, elems1);\n" //
 				+ "        Collections.addAll(output, elems2);\n" //
 				+ "\n" //
@@ -313,11 +385,13 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAddWithForEachByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Collections.addAll(output, dates);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithArray(\n" //
 				+ "            Map<String, List<String>> mapToFill, String[] inputList) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        Collections.addAll(mapToFill.get(\"foo\"), inputList);\n" //
 				+ "\n" //
 				+ "        return mapToFill;\n" //
@@ -325,6 +399,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Collection replaceLoopOnRawCollectionWithArray(\n" //
 				+ "            List colToFill, String[] inputList) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        colToFill.addAll(Arrays.asList(inputList));\n" //
 				+ "\n" //
 				+ "        return colToFill;\n" //
@@ -332,6 +407,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithList(\n" //
 				+ "            Map<String, List<String>> mapToFill, List<String> inputList) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        mapToFill.get(\"foo\").addAll(inputList);\n" //
 				+ "\n" //
 				+ "        return mapToFill;\n" //
@@ -339,18 +415,21 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Collection replaceLoopOnRawCollectionWithList(\n" //
 				+ "            List colToFill, List<String> inputList) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        colToFill.addAll(inputList);\n" //
 				+ "\n" //
 				+ "        return colToFill;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Collection<String> replaceAddWithForLoopByAddAll(List<String> col, List<String> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        output.addAll(col);\n" //
 				+ "\n" //
 				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Collection<String> replaceAddWithForEachByAddAll(Collection<String> col, List<String> output) {\n" //
+				+ "        // Keep this comment\n" //
 				+ "        output.addAll(col);\n" //
 				+ "\n" //
 				+ "        return output;\n" //
@@ -361,8 +440,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.AddAllCleanup_description });
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { output });
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.AddAllCleanup_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
 	@Test
@@ -387,6 +467,15 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "            add(doNotRefactorWithCyclicCall);\n" //
 				+ "        }\n" //
 				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<? super java.util.Date>[] doNotReplaceWithUsesVariableForEnd(\n" //
+				+ "            List<? super java.util.Date>[] output, java.util.Date[] elems1, java.util.Date[] elems2) {\n" //
+				+ "        for (int i = 0, len = elems1.length; i < len; i++) {\n" //
+				+ "            output[len].add(elems1[i]);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return output;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Collection<? super java.util.Date> doNotReplaceBackwardLoopOnCollection(\n" //

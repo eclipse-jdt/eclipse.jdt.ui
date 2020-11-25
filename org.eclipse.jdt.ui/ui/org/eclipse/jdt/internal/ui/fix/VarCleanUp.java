@@ -142,6 +142,16 @@ public class VarCleanUp extends AbstractMultiFix {
 			private boolean maybeUseVar(final Type type, final Expression initializer, final int extraDimensions) {
 				if (type.isVar() || initializer == null || initializer.resolveTypeBinding() == null || type.resolveBinding() == null
 						|| extraDimensions > 0) {
+					if (JavaModelUtil.is11OrHigher(unit.getJavaElement().getJavaProject())) {
+						if (!type.isVar() && initializer == null && type.resolveBinding() != null && extraDimensions == 0) {
+							if (type.getParent() instanceof SingleVariableDeclaration &&
+									type.getParent().getParent() instanceof LambdaExpression &&
+									type.getParent().getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+								rewriteOperations.add(new VarOperation(type));
+								return false;
+							}
+						}
+					}
 					return true;
 				}
 
@@ -158,7 +168,7 @@ public class VarCleanUp extends AbstractMultiFix {
 						LambdaExpression lambdaExpression= ASTNodes.as(initializer, LambdaExpression.class);
 						Expression expression= ASTNodes.as(initializer, Expression.class);
 
-						if (!variableType.isParameterizedType()
+						if (!variableType.isParameterizedType() && lambdaExpression == null
 								|| (classInstanceCreation != null
 										&& classInstanceCreation.getType().isParameterizedType()
 										&& classInstanceCreation.getType().resolveBinding() != null

@@ -231,11 +231,19 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 		fAstNode.getRoot().accept(cv);
 
 		for (MethodDeclaration md : cv.getNodes()) {
+			if (!isCanonical(md)) {
+				continue;
+			}
 			Block body= md.getBody();
 			rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY).insertAt(statement, 0, null);
 			setEndPosition(rewrite.track(assignment)); // set cursor after expression statement
 		}
 		return rewrite;
+	}
+
+	private boolean isCanonical(MethodDeclaration md) {
+		IMethodBinding methodBinding= md.resolveBinding();
+		return ((methodBinding == null) ? false : methodBinding.isCanonicalConstructor());
 	}
 
 	private ASTRewrite doUpdateConstructorWithParameter() {

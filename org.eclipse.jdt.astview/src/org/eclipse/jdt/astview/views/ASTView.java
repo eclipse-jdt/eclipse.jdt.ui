@@ -142,6 +142,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	/**
 	 * @deprecated to get rid of deprecation warnings in code
 	 */
+	@Deprecated
 	private static final int JLS14= AST.JLS14;
 
 	/**

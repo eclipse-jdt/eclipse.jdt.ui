@@ -3978,6 +3978,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
+		store.setDefault(PreferenceConstants.APPEARANCE_SORT_LIBRARY_ENTRIES_BY_NAME, true);
 		store.setDefault(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 

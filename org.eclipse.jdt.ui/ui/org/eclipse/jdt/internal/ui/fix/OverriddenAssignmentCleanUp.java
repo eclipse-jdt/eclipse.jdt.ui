@@ -109,7 +109,7 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 					boolean isOverridden= false;
 
 					while (stmtToInspect != null) {
-						if (!new VarDefinitionsUsesVisitor(variable, stmtToInspect, true).find().getReads().isEmpty()) {
+						if (!new VarDefinitionsUsesVisitor(variable, stmtToInspect, true).getReads().isEmpty()) {
 							return true;
 						}
 

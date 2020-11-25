@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.TryWithResourceCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
@@ -80,7 +81,8 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new UnnecessaryArrayCreationCleanUp(values),
 				new UselessReturnCleanUp(values),
 				new UselessContinueCleanUp(values),
-				new ObjectsEqualsCleanUp(values)
+				new ObjectsEqualsCleanUp(values),
+				new TryWithResourceCleanUp(values)
 		};
 	}
 
@@ -163,8 +165,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		CheckboxPreference embeddedIf= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_EmbeddedIf, CleanUpConstants.RAISE_EMBEDDED_IF, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(embeddedIf);
 
-		CheckboxPreference patternMatchingForInstanceof= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PatternMatchingForInstanceof, CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(patternMatchingForInstanceof);
+		// Disabled as long as it is buggy
+		//CheckboxPreference patternMatchingForInstanceof= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PatternMatchingForInstanceof, CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpModifyDialog.FALSE_TRUE);
+		//registerPreference(patternMatchingForInstanceof);
 
 		CheckboxPreference semicolons= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons, CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(semicolons);
@@ -180,5 +183,8 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference objectsEquals= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ObjectsEquals, CleanUpConstants.USE_OBJECTS_EQUALS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(objectsEquals);
+
+		CheckboxPreference tryWithResource= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_TryWithResource, CleanUpConstants.TRY_WITH_RESOURCE, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(tryWithResource);
     }
 }
