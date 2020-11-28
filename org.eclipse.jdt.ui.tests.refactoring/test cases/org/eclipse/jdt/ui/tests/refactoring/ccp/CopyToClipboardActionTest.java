@@ -82,7 +82,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 	public void genericbefore() throws Exception {
 		super.genericbefore();
 		fClipboard= new MockClipboard(Display.getDefault());
-		fDefaultPackage= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("", true, null);
+		fDefaultPackage= rts.getDefaultSourceFolder().createPackageFragment("", true, null);
 
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java",
 			"package p;" +
@@ -94,7 +94,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 			"class Inner{}" +
 			"}");
 
-		fPackageQ= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
+		fPackageQ= rts.getDefaultSourceFolder().createPackageFragment("q", true, null);
 		fCuB= createCU(fPackageQ, CU_B_NAME + ".java",
 				"package q;" +
 				"import java.util.Set;" +
@@ -104,10 +104,10 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 				"class InnerB{}" +
 				"}");
 
-		fPackageQ_R= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
+		fPackageQ_R= rts.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
 
 		faTxt= createFile((IFolder)getPackageP().getUnderlyingResource(), "a.txt");
-		fOlder= createFolder(RefactoringTestSetup.getProject().getProject(), "fOlder");
+		fOlder= createFolder(rts.getProject().getProject(), "fOlder");
 
 		fLabelProvider= new JavaElementLabelProvider(	JavaElementLabelProvider.SHOW_VARIABLE +
 														JavaElementLabelProvider.SHOW_PARAMETERS +
@@ -337,7 +337,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 
 	@Test
 	public void testDisabled3() throws Exception {
-		Object[] elements= {RefactoringTestSetup.getProject(), getPackageP()};
+		Object[] elements= {rts.getProject(), getPackageP()};
 		checkDisabled(elements);
 	}
 
@@ -368,7 +368,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 
 	@Test
 	public void testDisabled9() throws Exception {
-		checkDisabled(new Object[]{RefactoringTestSetup.getProject().getPackageFragmentRoots()});
+		checkDisabled(new Object[]{rts.getProject().getPackageFragmentRoots()});
 	}
 
 	@Test
@@ -442,7 +442,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 	@Test
 	public void testDisabled21() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
-		Object[] elements= {fieldF, RefactoringTestSetup.getProject()};
+		Object[] elements= {fieldF, rts.getProject()};
 		checkDisabled(elements);
 	}
 
@@ -461,7 +461,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 
 	@Test
 	public void testEnabled0() throws Exception {
-		Object[] elements= {RefactoringTestSetup.getProject()};
+		Object[] elements= {rts.getProject()};
 		checkEnabled(elements);
 	}
 
@@ -479,7 +479,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 
 	@Test
 	public void testEnabled3() throws Exception {
-		Object[] elements= {RefactoringTestSetup.getDefaultSourceFolder()};
+		Object[] elements= {rts.getDefaultSourceFolder()};
 		checkEnabled(elements);
 	}
 

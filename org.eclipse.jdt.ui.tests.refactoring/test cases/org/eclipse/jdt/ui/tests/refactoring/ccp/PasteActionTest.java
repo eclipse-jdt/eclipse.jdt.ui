@@ -120,7 +120,7 @@ public class PasteActionTest extends GenericRefactoringTest {
 
 	@Test
 	public void testEnabled_javaProject() throws Exception {
-		IJavaElement[] javaElements= {RefactoringTestSetup.getProject()};
+		IJavaElement[] javaElements= {rts.getProject()};
 		IResource[] resources= {};
 		verifyEnabled(resources, javaElements, new IResource[0], new IJavaElement[0]);
 	}
@@ -128,7 +128,7 @@ public class PasteActionTest extends GenericRefactoringTest {
 	@Test
 	public void testEnabled_project() throws Exception {
 		IJavaElement[] javaElements= {};
-		IResource[] resources= {RefactoringTestSetup.getProject().getProject()};
+		IResource[] resources= {rts.getProject().getProject()};
 		verifyEnabled(resources, javaElements, new IResource[0], new IJavaElement[0]);
 	}
 
@@ -136,7 +136,7 @@ public class PasteActionTest extends GenericRefactoringTest {
 	public void testEnabled_workingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test", new IAdaptable[] {});
 		try {
-			verifyEnabled(new IResource[0], new IJavaElement[] {RefactoringTestSetup.getProject()}, ws);
+			verifyEnabled(new IResource[0], new IJavaElement[] {rts.getProject()}, ws);
 		} finally {
 			PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(ws);
 		}
@@ -239,11 +239,11 @@ public class PasteActionTest extends GenericRefactoringTest {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test", new IAdaptable[] {});
 		try {
 			IResource[] resources= {};
-			IJavaElement[] jElements= {RefactoringTestSetup.getProject()};
+			IJavaElement[] jElements= {rts.getProject()};
 			PasteAction paste= verifyEnabled(resources , jElements, ws);
 			paste.run((IStructuredSelection)paste.getSelection());
 			assertEquals("Only one element", 1, ws.getElements().length);
-			assertEquals(RefactoringTestSetup.getProject(), ws.getElements()[0]);
+			assertEquals(rts.getProject(), ws.getElements()[0]);
 		} finally {
 			PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(ws);
 		}
@@ -252,7 +252,7 @@ public class PasteActionTest extends GenericRefactoringTest {
 	@Test
 	public void testPastingResourceIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test", new IAdaptable[] {});
-		IFolder folder= RefactoringTestSetup.getProject().getProject().getFolder("folder");
+		IFolder folder= rts.getProject().getProject().getFolder("folder");
 		folder.create(true, true, null);
 		try {
 			IResource[] resources= {folder};
@@ -270,12 +270,12 @@ public class PasteActionTest extends GenericRefactoringTest {
 	public void testPastingJavaElementAsResourceIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test", new IAdaptable[] {});
 		try {
-			IResource[] resources= {RefactoringTestSetup.getProject().getProject()};
+			IResource[] resources= {rts.getProject().getProject()};
 			IJavaElement[] jElements= {};
 			PasteAction paste= verifyEnabled(resources , jElements, ws);
 			paste.run((IStructuredSelection)paste.getSelection());
 			assertEquals("Only one element", 1, ws.getElements().length);
-			assertEquals(RefactoringTestSetup.getProject(), ws.getElements()[0]);
+			assertEquals(rts.getProject(), ws.getElements()[0]);
 		} finally {
 			PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(ws);
 		}
@@ -284,14 +284,14 @@ public class PasteActionTest extends GenericRefactoringTest {
 	@Test
 	public void testPastingExistingElementIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
-				new IAdaptable[] {RefactoringTestSetup.getProject()});
+				new IAdaptable[] {rts.getProject()});
 		try {
 			IResource[] resources= {};
-			IJavaElement[] jElements= {RefactoringTestSetup.getProject()};
+			IJavaElement[] jElements= {rts.getProject()};
 			PasteAction paste= verifyEnabled(resources , jElements, ws);
 			paste.run((IStructuredSelection)paste.getSelection());
 			assertEquals("Only one element", 1, ws.getElements().length);
-			assertEquals(RefactoringTestSetup.getProject(), ws.getElements()[0]);
+			assertEquals(rts.getProject(), ws.getElements()[0]);
 		} finally {
 			PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(ws);
 		}
@@ -300,14 +300,14 @@ public class PasteActionTest extends GenericRefactoringTest {
 	@Test
 	public void testPastingChildJavaElementIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
-				new IAdaptable[] {RefactoringTestSetup.getProject()});
+				new IAdaptable[] {rts.getProject()});
 		try {
 			IResource[] resources= {};
 			IJavaElement[] jElements= {getPackageP()};
 			PasteAction paste= verifyEnabled(resources , jElements, ws);
 			paste.run((IStructuredSelection)paste.getSelection());
 			assertEquals("Only one element", 1, ws.getElements().length);
-			assertEquals(RefactoringTestSetup.getProject(), ws.getElements()[0]);
+			assertEquals(rts.getProject(), ws.getElements()[0]);
 		} finally {
 			PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(ws);
 		}
@@ -315,7 +315,7 @@ public class PasteActionTest extends GenericRefactoringTest {
 
 	@Test
 	public void testPastingChildResourceIntoWorkingSet() throws Exception {
-		IFolder folder= RefactoringTestSetup.getProject().getProject().getFolder("folder");
+		IFolder folder= rts.getProject().getProject().getFolder("folder");
 		folder.create(true, true, null);
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
 				new IAdaptable[] {folder});
@@ -336,8 +336,8 @@ public class PasteActionTest extends GenericRefactoringTest {
 	@Test
 	public void testPastingChildResourceIntoWorkingSetContainingParent() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
-				new IAdaptable[] {RefactoringTestSetup.getProject()});
-		IFolder folder= RefactoringTestSetup.getProject().getProject().getFolder("folder");
+				new IAdaptable[] {rts.getProject()});
+		IFolder folder= rts.getProject().getProject().getFolder("folder");
 		folder.create(true, true, null);
 		try {
 			IResource[] resources= {folder};
@@ -345,7 +345,7 @@ public class PasteActionTest extends GenericRefactoringTest {
 			PasteAction paste= verifyEnabled(resources , jElements, ws);
 			paste.run((IStructuredSelection)paste.getSelection());
 			assertEquals("Only one element", 1, ws.getElements().length);
-			assertEquals(RefactoringTestSetup.getProject(), ws.getElements()[0]);
+			assertEquals(rts.getProject(), ws.getElements()[0]);
 		} finally {
 			PlatformUI.getWorkbench().getWorkingSetManager().removeWorkingSet(ws);
 		}

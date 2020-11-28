@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -54,7 +53,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d8Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -62,19 +60,20 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class RenameTests18 extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenameTests18/";
 
-	@Rule
-	public RefactoringTestSetup rts= new Java1d8Setup() {
-		@Override
-		public void before() throws Exception {
-			JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
-			super.before();
-		}
-		@Override
-		public void after() {
-			super.after();
-			JavaProjectHelper.PERFORM_DUMMY_SEARCH--;
-		}
-	};
+	public RenameTests18() {
+		super(new Java1d8Setup() {
+			@Override
+			public void before() throws Exception {
+				JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
+				super.before();
+			}
+			@Override
+			public void after() {
+				super.after();
+				JavaProjectHelper.PERFORM_DUMMY_SEARCH--;
+			}
+		});
+	}
 
 	@Override
 	protected String getRefactoringPath() {

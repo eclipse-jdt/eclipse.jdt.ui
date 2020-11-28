@@ -263,7 +263,7 @@ public class TypeEnvironmentTests extends AbstractJunit4CUTestCase {
 		for (int i= 0; i < bindings.length; i++) {
 			assertEquals("Equal to second environment", types[i], secondEnvironment.create(bindings[i]));
 		}
-		ITypeBinding[] restoredBindings= TypeEnvironment.createTypeBindings(types, RefactoringTestSetup.getProject());
+		ITypeBinding[] restoredBindings= TypeEnvironment.createTypeBindings(types, mts.getProject());
 		assertEquals("Not same length", restoredBindings.length, bindings.length);
 		for (int i= 0; i < restoredBindings.length; i++) {
 			assertTrue("Not same binding", bindings[i].isEqualTo(restoredBindings[i]));

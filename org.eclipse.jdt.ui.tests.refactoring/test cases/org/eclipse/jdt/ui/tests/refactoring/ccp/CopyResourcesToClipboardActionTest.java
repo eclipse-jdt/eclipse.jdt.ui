@@ -63,14 +63,14 @@ public class CopyResourcesToClipboardActionTest extends GenericRefactoringTest{
 	@Before
 	public void before() throws Exception {
 		fClipboard= new MockClipboard(Display.getDefault());
-		fDefaultPackage= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("", true, null);
+		fDefaultPackage= rts.getDefaultSourceFolder().createPackageFragment("", true, null);
 
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java", "package p; class A{}");
 
-		fPackageQ= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
+		fPackageQ= rts.getDefaultSourceFolder().createPackageFragment("q", true, null);
 		fCuB= createCU(fPackageQ, CU_B_NAME + ".java", "package q; class B{}");
 
-		fPackageQ_R= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
+		fPackageQ_R= rts.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
 
 		faTxt= createFile((IFolder)getPackageP().getUnderlyingResource(), "a.txt");
 
@@ -175,7 +175,7 @@ public class CopyResourcesToClipboardActionTest extends GenericRefactoringTest{
 
 	@Test
 	public void testDisabled9() throws Exception{
-		checkDisabled(new Object[]{RefactoringTestSetup.getProject().getPackageFragmentRoots()});
+		checkDisabled(new Object[]{rts.getProject().getPackageFragmentRoots()});
 	}
 
 	@Test

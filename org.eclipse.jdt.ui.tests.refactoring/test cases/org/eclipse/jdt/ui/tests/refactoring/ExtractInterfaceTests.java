@@ -52,7 +52,11 @@ public class ExtractInterfaceTests extends GenericRefactoringTest {
 	protected boolean fGenerateAnnotations= false;
 
 	public ExtractInterfaceTests() {
-		rts= new RefactoringTestSetup();
+		super(new RefactoringTestSetup());
+	}
+
+	protected ExtractInterfaceTests(RefactoringTestSetup rts) {
+		super(rts);
 	}
 
 	@Override
@@ -877,15 +881,14 @@ public class ExtractInterfaceTests extends GenericRefactoringTest {
 	public void test109() throws Exception{
 		// Generate @Override in 1.6 project
 		fGenerateAnnotations= true;
-		RefactoringTestSetup refactoringTestSetup= new RefactoringTestSetup();
 		try {
 			JavaProjectHelper.addRTJar16(getRoot().getJavaProject());
 
 			standardPassingTest();
 
-			refactoringTestSetup.after();
+			rts.after();
 		} finally {
-			refactoringTestSetup.before();
+			rts.before();
 		}
 	}
 

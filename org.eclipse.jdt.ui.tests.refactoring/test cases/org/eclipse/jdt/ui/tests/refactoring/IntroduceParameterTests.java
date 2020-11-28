@@ -82,7 +82,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 
 	protected void perform(int expectedActivationStatus, int expectedInputStatus) throws Exception {
 		String packageName= adaptPackage(getName());
-		IPackageFragment packageFragment= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment(packageName, true , null);
+		IPackageFragment packageFragment= rts.getDefaultSourceFolder().createPackageFragment(packageName, true , null);
 		ICompilationUnit cu= createCU(packageFragment, getName());
 
 		ISourceRange selection= getSelection(cu);

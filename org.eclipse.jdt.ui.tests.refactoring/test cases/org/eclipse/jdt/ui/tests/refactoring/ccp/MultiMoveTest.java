@@ -297,8 +297,8 @@ public class MultiMoveTest extends GenericRefactoringTest {
 	@Test
 	public void testPackageMoveParticipants() throws Exception {
 		ParticipantTesting.reset();
-		IPackageFragmentRoot r1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src1");
-		IPackageFragmentRoot r2= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
+		IPackageFragmentRoot r1= JavaProjectHelper.addSourceContainer(rts.getProject(), "src1");
+		IPackageFragmentRoot r2= JavaProjectHelper.addSourceContainer(rts.getProject(), "src2");
 		IPackageFragment p1= r1.createPackageFragment("p1", true, null);
 		p1.createCompilationUnit("A.java", "public class A {}", true, null);
 		p1.createCompilationUnit("B.java", "public class B {}", true, null);
@@ -329,8 +329,8 @@ public class MultiMoveTest extends GenericRefactoringTest {
 	public void testPackageMoveParticipants2() throws Exception {
 		fIsPreDeltaTest= false;
 		ParticipantTesting.reset();
-		IPackageFragmentRoot r1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src1");
-		IPackageFragmentRoot r2= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
+		IPackageFragmentRoot r1= JavaProjectHelper.addSourceContainer(rts.getProject(), "src1");
+		IPackageFragmentRoot r2= JavaProjectHelper.addSourceContainer(rts.getProject(), "src2");
 		IPackageFragment p1= r1.createPackageFragment("p1", true, null);
 		r1.createPackageFragment("p1.p2", true, null);
 		ICompilationUnit c1= p1.createCompilationUnit("A.java", "public class A {}", true, null);
@@ -371,8 +371,8 @@ public class MultiMoveTest extends GenericRefactoringTest {
 	@Test
 	public void testPackageMoveParticipants3() throws Exception {
 		ParticipantTesting.reset();
-		IPackageFragmentRoot r1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src1");
-		IPackageFragmentRoot r2= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
+		IPackageFragmentRoot r1= JavaProjectHelper.addSourceContainer(rts.getProject(), "src1");
+		IPackageFragmentRoot r2= JavaProjectHelper.addSourceContainer(rts.getProject(), "src2");
 		IPackageFragment p1= r1.createPackageFragment("p1", true, null);
 		r2.createPackageFragment("p1", true, null);
 		ICompilationUnit c1= p1.createCompilationUnit("A.java", "public class A {}", true, null);

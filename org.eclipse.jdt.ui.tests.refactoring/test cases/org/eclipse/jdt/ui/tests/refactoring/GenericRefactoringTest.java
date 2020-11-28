@@ -123,9 +123,9 @@ public abstract class GenericRefactoringTest {
 
 	@Before
 	public void genericbefore() throws Exception {
-		fRoot= RefactoringTestSetup.getDefaultSourceFolder();
-		fPackageP= RefactoringTestSetup.getPackageP();
-		fPackageQ= RefactoringTestSetup.getPackageQ();
+		fRoot= rts.getDefaultSourceFolder();
+		fPackageP= rts.getPackageP();
+		fPackageQ= rts.getPackageQ();
 		fIsPreDeltaTest= false;
 
 		if (fIsVerbose){
@@ -196,7 +196,7 @@ public abstract class GenericRefactoringTest {
 		IJavaProject javaProject= getRoot().getJavaProject();
 		if (javaProject.exists()) {
 			IClasspathEntry srcEntry= getRoot().getRawClasspathEntry();
-			IClasspathEntry jreEntry= RefactoringTestSetup.getJRELibrary().getRawClasspathEntry();
+			IClasspathEntry jreEntry= rts.getJRELibrary().getRawClasspathEntry();
 			ArrayList<IClasspathEntry> newCPEs= new ArrayList<>();
 			boolean cpChanged= false;
 			for (IClasspathEntry cpe : javaProject.getRawClasspath()) {

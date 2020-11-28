@@ -43,7 +43,11 @@ public class InlineTempTests extends GenericRefactoringTest {
 	}
 
 	public InlineTempTests() {
-		rts= new RefactoringTestSetup();
+		super(new RefactoringTestSetup());
+	}
+
+	protected InlineTempTests(RefactoringTestSetup rts) {
+		super(rts);
 	}
 
 	protected String getSimpleTestFileName(boolean canInline, boolean input){

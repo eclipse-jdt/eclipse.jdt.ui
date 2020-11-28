@@ -103,7 +103,7 @@ public class DeleteTest extends GenericRefactoringTest {
 
 	private IPackageFragmentRoot getArchiveRoot() throws JavaModelException, Exception {
 		IPackageFragmentRoot archive= null;
-		for (IPackageFragmentRoot root : RefactoringTestSetup.getProject().getPackageFragmentRoots()) {
+		for (IPackageFragmentRoot root : rts.getProject().getPackageFragmentRoots()) {
 			if (root.isArchive() && root.isExternal())
 				archive= root;
 		}
@@ -248,7 +248,7 @@ public class DeleteTest extends GenericRefactoringTest {
 
 	@Test
 	public void testDisabled_projectAndNonProject() throws Exception{
-		IJavaElement[] javaElements= {RefactoringTestSetup.getProject(), getPackageP()};
+		IJavaElement[] javaElements= {rts.getProject(), getPackageP()};
 		verifyDisabled(javaElements);
 	}
 
@@ -271,7 +271,7 @@ public class DeleteTest extends GenericRefactoringTest {
 
 	@Test
 	public void testDisabled_nullResource() throws Exception{
-		Object[] elements= {RefactoringTestSetup.getProject(), null};
+		Object[] elements= {rts.getProject(), null};
 		verifyDisabled(elements);
 	}
 
@@ -311,7 +311,7 @@ public class DeleteTest extends GenericRefactoringTest {
 
 	@Test
 	public void testDisabled_javaProject() throws Exception{
-		Object[] elements= {RefactoringTestSetup.getProject()};
+		Object[] elements= {rts.getProject()};
 		verifyDisabled(elements);
 	}
 
@@ -326,7 +326,7 @@ public class DeleteTest extends GenericRefactoringTest {
 
 	@Test
 	public void testDisabled_simpleProject() throws Exception{
-		Object[] elements= {RefactoringTestSetup.getProject().getProject()};
+		Object[] elements= {rts.getProject().getProject()};
 		verifyDisabled(elements);
 	}
 
@@ -894,7 +894,7 @@ public class DeleteTest extends GenericRefactoringTest {
 	@Test
 	public void testDeleteSourceFolder() throws Exception{
 		ParticipantTesting.reset();
-		IPackageFragmentRoot fredRoot= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "fred");
+		IPackageFragmentRoot fredRoot= JavaProjectHelper.addSourceContainer(rts.getProject(), "fred");
 		assertTrue("not created", fredRoot.exists());
 
 		Object[] elements= {fredRoot};
@@ -913,7 +913,7 @@ public class DeleteTest extends GenericRefactoringTest {
 		ParticipantTesting.reset();
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib does not exist",  lib.exists());
-		IPackageFragmentRoot internalJAR= JavaProjectHelper.addLibraryWithImport(RefactoringTestSetup.getProject(), Path.fromOSString(lib.getPath()), null, null);
+		IPackageFragmentRoot internalJAR= JavaProjectHelper.addLibraryWithImport(rts.getProject(), Path.fromOSString(lib.getPath()), null, null);
 
 		Object[] elements= {internalJAR};
 		verifyEnabled(elements);
@@ -1158,7 +1158,7 @@ public class DeleteTest extends GenericRefactoringTest {
 		// newPackage.file
 		// Both the package and the folder must be deleted.
 		ParticipantTesting.reset();
-		IProject project= RefactoringTestSetup.getProject().getProject();
+		IProject project= rts.getProject().getProject();
 		IFolder folder= project.getFolder("folder");
 		folder.create(true, true, null);
 		IPackageFragment newPackage= getRoot().createPackageFragment("newPackage", true, new NullProgressMonitor());
