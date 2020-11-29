@@ -618,7 +618,7 @@ public class CleanUpConstants {
 	 * @see CleanUpOptionsCore#FALSE
 	 * @since 4.18
 	 */
-	public static String CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= "cleanup.convert_to_enhanced_for_loop_if_loop_var_used"; //$NON-NLS-1$
+	public static final String CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= "cleanup.convert_to_enhanced_for_loop_if_loop_var_used"; //$NON-NLS-1$
 
 	/**
 	 * Convert a for loop to enhanced for loop only if the loop variable will be used.
