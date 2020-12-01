@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionPro
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.OptionalCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
@@ -159,7 +160,7 @@ public class TypeMismatchSubProcessor {
 
 		if (!(nodeToCast instanceof ArrayInitializer)) {
 			String castTypeName= castTypeBinding.getErasure().getQualifiedName();
-			if (castTypeName.equals("java.util.Optional") && ast.apiLevel() >= AST.JLS8) { //$NON-NLS-1$
+			if (castTypeName.equals("java.util.Optional") && ast.apiLevel() >= ASTHelper.JLS8) { //$NON-NLS-1$
 				ITypeBinding nodeToCastTypeBinding= nodeToCast.resolveTypeBinding();
 				String label0= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changetooptionalempty_description, nodeToCast.toString());
 				proposals.add(new OptionalCorrectionProposal(label0, cu, nodeToCast, IProposalRelevance.CREATE_EMPTY_OPTIONAL, OptionalCorrectionProposal.OPTIONAL_EMPTY));

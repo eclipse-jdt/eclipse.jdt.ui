@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -59,6 +58,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -83,7 +84,7 @@ public class JDTFlagsTest18 {
 	}
 
 	protected CompilationUnit getCompilationUnitNode(String source) {
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		ASTParser parser = ASTParser.newParser(ASTHelper.JLS8);
 		parser.setSource(source.toCharArray());
 		Hashtable<String, String> options= JavaCore.getOptions();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);

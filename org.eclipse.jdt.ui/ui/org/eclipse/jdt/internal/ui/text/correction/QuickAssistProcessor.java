@@ -3047,7 +3047,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		SimpleName name= (SimpleName) node;
-		if (name.getAST().apiLevel() >= AST.JLS10 && name.isVar()) {
+		if (name.getAST().apiLevel() >= ASTHelper.JLS10 && name.isVar()) {
 			return false;
 		}
 		IBinding binding= name.resolveBinding();
@@ -3085,7 +3085,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		SimpleName name= (SimpleName) node;
-		if (name.getAST().apiLevel() >= AST.JLS10 && name.isVar()) {
+		if (name.getAST().apiLevel() >= ASTHelper.JLS10 && name.isVar()) {
 			return false;
 		}
 		IBinding binding= name.resolveBinding();

@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class NewProviderMethodDeclaration extends AbstractMethodCorrectionProposal {
 
@@ -67,7 +68,7 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 		typeProposals.addAll(Arrays.asList(subTypes));
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 
-		ASTParser parser= ASTParser.newParser(AST.JLS9);
+		ASTParser parser= ASTParser.newParser(ASTHelper.JLS9);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setProject(compilationUnit.getJavaProject());
 		parser.setSource(compilationUnit);

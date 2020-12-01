@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -61,7 +60,6 @@ public class QuickFixTestPreview extends QuickFixTest {
 		}
 	}
 
-	@Ignore("temporarily disabling this test")
 	@Test
 	public void testEnablePreviewsAndOpenCompilerPropertiesProposals() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
@@ -132,12 +130,12 @@ public class QuickFixTestPreview extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
-	@Ignore("See bug 562103 comment 4")
+	//@Ignore("See bug 562103 comment 4")
 	@Test
 	public void testGetNeedHigherComplianceProposalsAndEnablePreviewsProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -156,7 +154,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
 
 		assertNumberOfProposals(proposals, 1);
-		String label1= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, "14");
+		String label1= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, "16");
 		String label2= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;
 		String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_combine_two_quickfixes, new String[] {label1, label2});
 		assertProposalExists(proposals, label);
@@ -301,7 +299,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	public void testRecordConstructorIncorrectParamsProposal1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
 
 		Map<String, String> options= fJProject1.getOptions(false);
 		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
@@ -366,7 +364,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	public void testRecordConstructorIncorrectParamsProposal2() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
 
 		Map<String, String> options= fJProject1.getOptions(false);
 		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
@@ -432,7 +430,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	public void testRecordConstructorIncorrectParamsProposal3() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
 
 		Map<String, String> options= fJProject1.getOptions(false);
 		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
@@ -484,7 +482,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	public void testRecordCanonicalConstructordUninitializedFieldProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
 
 		Map<String, String> options= fJProject1.getOptions(false);
 		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);

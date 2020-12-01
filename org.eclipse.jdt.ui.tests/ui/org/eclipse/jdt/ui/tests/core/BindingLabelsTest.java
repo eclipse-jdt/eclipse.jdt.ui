@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -41,6 +40,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 /**
@@ -485,7 +485,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IJavaElement t1= cu.getElementAt(content.indexOf("T1"));
 		IJavaElement t2= cu.getElementAt(content.indexOf("T2"));
 
-		ASTParser parser= ASTParser.newParser(AST.JLS8);
+		ASTParser parser= ASTParser.newParser(ASTHelper.JLS8);
 		parser.setResolveBindings(true);
 		parser.setProject(fJProject1);
 		IBinding[] bindings= parser.createBindings(new IJavaElement[]{main, t1, t2}, null);

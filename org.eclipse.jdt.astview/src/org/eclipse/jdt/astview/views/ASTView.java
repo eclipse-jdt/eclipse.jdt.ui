@@ -114,7 +114,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
@@ -132,70 +131,23 @@ import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
+
 
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 
-	static final int JLS_LATEST= AST.JLS15;
-
-	private static final int JLS15= AST.JLS15;
-
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS14= AST.JLS14;
-
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS13= AST.JLS13;
-
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS12= AST.JLS12;
-
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS11= AST.JLS11;
-
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS10= AST.JLS10;
-
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS9= AST.JLS9;
-
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS8= AST.JLS8;
-
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS4= AST.JLS4;
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS3= AST.JLS3;
-	/**
-	 * @deprecated to get rid of deprecation warnings in code
-	 */
-	@Deprecated
-	private static final int JLS2= AST.JLS2;
+	static final int JLS_LATEST= ASTHelper.JLS_Latest;
+	private static final int JLS15= ASTHelper.JLS15;
+	private static final int JLS14= ASTHelper.JLS14;
+	private static final int JLS13= ASTHelper.JLS13;
+	private static final int JLS12= ASTHelper.JLS12;
+	private static final int JLS11= ASTHelper.JLS11;
+	private static final int JLS10= ASTHelper.JLS10;
+	private static final int JLS9= ASTHelper.JLS9;
+	private static final int JLS8= ASTHelper.JLS8;
+	private static final int JLS4= ASTHelper.JLS4;
+	private static final int JLS3= ASTHelper.JLS3;
+	private static final int JLS2= ASTHelper.JLS2;
 
 	private class ASTViewSelectionProvider implements ISelectionProvider {
 		ListenerList<ISelectionChangedListener> fListeners= new ListenerList<>(ListenerList.IDENTITY);
