@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
  *     Jens Reimann <jreimann@redhat.com> Bug 38201: [quick assist] Allow creating abstract method - https://bugs.eclipse.org/38201
+ *     Red Hat Inc. - Bug 546819: Quickfix may remove varargs parameter
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -3368,6 +3369,72 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
 
+	@Test
+	public void testMethodMismatchVarargsAddedArguments() throws Exception { // fix for Bug 546819
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean b, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("    public void foo1(int i) {\n");
+		buf.append("        foo(true, 42);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean b, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("    public void foo1(int i) {\n");
+		buf.append("        foo(true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean b, int i, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("    public void foo1(int i) {\n");
+		buf.append("        foo(true, 42);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean b, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("    public void foo1(int i) {\n");
+		buf.append("        foo(true, 42);\n");
+		buf.append("    }\n");
+		buf.append("    private void foo(boolean b, int i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+	}
 
 
 	@Test
@@ -4615,6 +4682,72 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testClassInstanceCreationVarargsAddedArguments() throws Exception { // fix for Bug 546819
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        A a= new A(i, true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public A(boolean b, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        A a= new A(true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public A(int i, boolean b, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public A(boolean b, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public A(int i, boolean b) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+	}
+
+	@Test
 	public void testClassInstanceCreationMoreArgumentsInGenericType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -4920,6 +5053,72 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 
+	}
+
+	@Test
+	public void testSuperMethodVarargsAddedArguments() throws Exception { // fix for Bug 546819
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends A {\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        super(i, true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public A(boolean b, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends A {\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        super(true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public A(int i, boolean b, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public A(boolean b, String ... strings) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public A(int i, boolean b) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
 
 	@Test
