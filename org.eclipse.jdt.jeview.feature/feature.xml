@@ -2,13 +2,13 @@
 <feature
       id="org.eclipse.jdt.jeview.feature"
       label="JavaElement View"
-      version="1.0.11.qualifier"
+      version="1.0.12.qualifier"
       provider-name="Eclipse.org"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
 
    <description>
-      JavaElement View for Eclipse 2020-06 and later (jdt.core 3.22)
+      JavaElement View for Eclipse 2020-12 and later (jdt.core 3.24)
    </description>
 
    <license url="%licenseURL">
@@ -20,8 +20,8 @@
    </url>
 
    <requires>
-      <import plugin="org.eclipse.jdt.core" version="3.11.0" match="compatible"/>
-      <import plugin="org.eclipse.jdt.ui" version="3.10.100" match="compatible"/>
+      <import plugin="org.eclipse.jdt.core" version="3.24.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.ui" version="3.22.0" match="compatible"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.resources"/>
@@ -29,7 +29,7 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.views"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.ui.workbench" version="3.107" match="compatible"/>
+      <import plugin="org.eclipse.ui.workbench" version="3.122" match="compatible"/>
    </requires>
 
    <plugin
