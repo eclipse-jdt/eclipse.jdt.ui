@@ -141,7 +141,6 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetMessages;
  */
 public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener {
 
-
 	/**
 	 * The view id for the workbench's Resource Navigator standard component.
 	 * @since 3.6
@@ -182,7 +181,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * The template context type registry for the java editor.
 	 * @since 3.0
 	 */
-	private ContextTypeRegistry fContextTypeRegistry;
+	private volatile ContextTypeRegistry fContextTypeRegistry;
 	/**
 	 * The code template context type registry for the java editor.
 	 * @since 3.0
@@ -193,7 +192,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * The template store for the java editor.
 	 * @since 3.0
 	 */
-	private TemplateStore fTemplateStore;
+	private volatile TemplateStore fTemplateStore;
 	/**
 	 * The coded template store for the java editor.
 	 * @since 3.0
@@ -204,10 +203,10 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * Default instance of the appearance type filters.
 	 * @since 3.0
 	 */
-	private TypeFilter fTypeFilter;
+	private volatile TypeFilter fTypeFilter;
 
 
-	private WorkingCopyManager fWorkingCopyManager;
+	private volatile WorkingCopyManager fWorkingCopyManager;
 
 	private static final String CODE_ASSIST_MIGRATED= "code_assist_migrated"; //$NON-NLS-1$
 
@@ -218,21 +217,21 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 */
 	@Deprecated
 	private org.eclipse.jdt.core.IBufferFactory fBufferFactory;
-	private ICompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
-	private ClassFileDocumentProvider fClassFileDocumentProvider;
-	private JavaTextTools fJavaTextTools;
-	private ProblemMarkerManager fProblemMarkerManager;
-	private ImageDescriptorRegistry fImageDescriptorRegistry;
+	private volatile ICompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
+	private volatile ClassFileDocumentProvider fClassFileDocumentProvider;
+	private volatile JavaTextTools fJavaTextTools;
+	private volatile ProblemMarkerManager fProblemMarkerManager;
+	private volatile ImageDescriptorRegistry fImageDescriptorRegistry;
 
-	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
+	private volatile MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 
-	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
+	private volatile JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
 
 	/**
 	 * The AST provider.
 	 * @since 3.0
 	 */
-	private ASTProvider fASTProvider;
+	private volatile ASTProvider fASTProvider;
 
 	/**
 	 * The combined preference store.
@@ -246,13 +245,13 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 *
 	 * @since 3.0
 	 */
-	private JavaFoldingStructureProviderRegistry fFoldingStructureProviderRegistry;
+	private volatile JavaFoldingStructureProviderRegistry fFoldingStructureProviderRegistry;
 
 	/**
 	 * The shared Java properties file document provider.
 	 * @since 3.1
 	 */
-	private IDocumentProvider fPropertiesFileDocumentProvider;
+	private volatile IDocumentProvider fPropertiesFileDocumentProvider;
 
 	/**
 	 * Content assist history.
@@ -264,23 +263,23 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * The save participant registry.
 	 * @since 3.3
 	 */
-	private SaveParticipantRegistry fSaveParticipantRegistry;
+	private volatile SaveParticipantRegistry fSaveParticipantRegistry;
 
 	/**
 	 * The clean up registry
 	 * @since 3.4
 	 */
-	private CleanUpRegistry fCleanUpRegistry;
+	private volatile CleanUpRegistry fCleanUpRegistry;
 
 	/**
 	 * The descriptors from the 'classpathAttributeConfiguration' extension point.
 	 * @since 3.3
 	 */
-	private ClasspathAttributeConfigurationDescriptors fClasspathAttributeConfigurationDescriptors;
+	private volatile ClasspathAttributeConfigurationDescriptors fClasspathAttributeConfigurationDescriptors;
 
 	private FormToolkit fDialogsFormToolkit;
 
-	private ImagesOnFileSystemRegistry fImagesOnFSRegistry;
+	private volatile ImagesOnFileSystemRegistry fImagesOnFSRegistry;
 
 	/**
 	 * Theme listener.
@@ -588,10 +587,17 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		return fBufferFactory;
 	}
 
-	public synchronized ICompilationUnitDocumentProvider getCompilationUnitDocumentProvider() {
-		if (fCompilationUnitDocumentProvider == null)
-			fCompilationUnitDocumentProvider= new CompilationUnitDocumentProvider();
-		return fCompilationUnitDocumentProvider;
+	public ICompilationUnitDocumentProvider getCompilationUnitDocumentProvider() {
+		ICompilationUnitDocumentProvider result= fCompilationUnitDocumentProvider;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fCompilationUnitDocumentProvider == null) { // Second check (with locking)
+				fCompilationUnitDocumentProvider= new CompilationUnitDocumentProvider();
+			}
+			return fCompilationUnitDocumentProvider;
+		}
 	}
 
 	/**
@@ -601,36 +607,70 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the shared document provider for Java properties files
 	 * @since 3.1
 	 */
-	public synchronized IDocumentProvider getPropertiesFileDocumentProvider() {
-		if (fPropertiesFileDocumentProvider == null)
-			fPropertiesFileDocumentProvider= new PropertiesFileDocumentProvider();
-		return fPropertiesFileDocumentProvider;
-	}
-
-	public synchronized ClassFileDocumentProvider getClassFileDocumentProvider() {
-		if (fClassFileDocumentProvider == null)
-			fClassFileDocumentProvider= new ClassFileDocumentProvider();
-		return fClassFileDocumentProvider;
-	}
-
-	public synchronized WorkingCopyManager getWorkingCopyManager() {
-		if (fWorkingCopyManager == null) {
-			ICompilationUnitDocumentProvider provider= getCompilationUnitDocumentProvider();
-			fWorkingCopyManager= new WorkingCopyManager(provider);
+	public IDocumentProvider getPropertiesFileDocumentProvider() {
+		IDocumentProvider result= fPropertiesFileDocumentProvider;
+		if (result != null) { // First check (no locking)
+			return result;
 		}
-		return fWorkingCopyManager;
+		synchronized(this) {
+			if (fPropertiesFileDocumentProvider == null) { // Second check (with locking)
+				fPropertiesFileDocumentProvider= new PropertiesFileDocumentProvider();
+			}
+			return fPropertiesFileDocumentProvider;
+		}
 	}
 
-	public synchronized ProblemMarkerManager getProblemMarkerManager() {
-		if (fProblemMarkerManager == null)
-			fProblemMarkerManager= new ProblemMarkerManager();
-		return fProblemMarkerManager;
+	public ClassFileDocumentProvider getClassFileDocumentProvider() {
+		ClassFileDocumentProvider result= fClassFileDocumentProvider;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fClassFileDocumentProvider == null) { // Second check (with locking)
+				fClassFileDocumentProvider= new ClassFileDocumentProvider();
+			}
+			return fClassFileDocumentProvider;
+		}
 	}
 
-	public synchronized JavaTextTools getJavaTextTools() {
-		if (fJavaTextTools == null)
-			fJavaTextTools= new JavaTextTools(getPreferenceStore(), getJavaCorePluginPreferences());
-		return fJavaTextTools;
+	public WorkingCopyManager getWorkingCopyManager() {
+		WorkingCopyManager result= fWorkingCopyManager;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fWorkingCopyManager == null) { // Second check (with locking)
+				ICompilationUnitDocumentProvider provider= getCompilationUnitDocumentProvider();
+				fWorkingCopyManager= new WorkingCopyManager(provider);
+			}
+			return fWorkingCopyManager;
+		}
+	}
+
+	public ProblemMarkerManager getProblemMarkerManager() {
+		ProblemMarkerManager result= fProblemMarkerManager;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fProblemMarkerManager == null) { // Second check (with locking)
+				fProblemMarkerManager= new ProblemMarkerManager();
+			}
+			return fProblemMarkerManager;
+		}
+	}
+
+	public JavaTextTools getJavaTextTools() {
+		JavaTextTools result= fJavaTextTools;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fJavaTextTools == null) { // Second check (with locking)
+				fJavaTextTools= new JavaTextTools(getPreferenceStore(), getJavaCorePluginPreferences());
+			}
+			return fJavaTextTools;
+		}
 	}
 
 	/**
@@ -649,23 +689,36 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the AST provider
 	 * @since 3.0
 	 */
-	public synchronized ASTProvider getASTProvider() {
-		if (fASTProvider == null)
-			fASTProvider= new ASTProvider();
-
-		return fASTProvider;
+	public ASTProvider getASTProvider() {
+		ASTProvider result= fASTProvider;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fASTProvider == null) { // Second check (with locking)
+				fASTProvider= new ASTProvider();
+			}
+			return fASTProvider;
+		}
 	}
 
-	public synchronized MembersOrderPreferenceCache getMemberOrderPreferenceCache() {
+	public MembersOrderPreferenceCache getMemberOrderPreferenceCache() {
 		// initialized on startup
 		return fMembersOrderPreferenceCache;
 	}
 
 
-	public synchronized TypeFilter getTypeFilter() {
-		if (fTypeFilter == null)
-			fTypeFilter= new TypeFilter();
-		return fTypeFilter;
+	public TypeFilter getTypeFilter() {
+		TypeFilter result= fTypeFilter;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fTypeFilter == null) { // Second check (with locking)
+				fTypeFilter= new TypeFilter();
+			}
+			return fTypeFilter;
+		}
 	}
 
 	public FormToolkit getDialogsFormToolkit() {
@@ -684,34 +737,40 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return an array of JavaEditorTextHoverDescriptor
 	 * @since 2.1
 	 */
-	public synchronized JavaEditorTextHoverDescriptor[] getJavaEditorTextHoverDescriptors() {
-		if (fJavaEditorTextHoverDescriptors == null) {
-			fJavaEditorTextHoverDescriptors= JavaEditorTextHoverDescriptor.getContributedHovers();
-			ConfigurationElementSorter sorter= new ConfigurationElementSorter() {
-				/*
-				 * @see org.eclipse.ui.texteditor.ConfigurationElementSorter#getConfigurationElement(java.lang.Object)
-				 */
-				@Override
-				public IConfigurationElement getConfigurationElement(Object object) {
-					return ((JavaEditorTextHoverDescriptor)object).getConfigurationElement();
-				}
-			};
-			sorter.sort(fJavaEditorTextHoverDescriptors);
-
-			// Move Best Match hover to front
-			for (int i= 0; i < fJavaEditorTextHoverDescriptors.length - 1; i++) {
-				if (PreferenceConstants.ID_BESTMATCH_HOVER.equals(fJavaEditorTextHoverDescriptors[i].getId())) {
-					JavaEditorTextHoverDescriptor hoverDescriptor= fJavaEditorTextHoverDescriptors[i];
-					for (int j= i; j > 0; j--)
-						fJavaEditorTextHoverDescriptors[j]= fJavaEditorTextHoverDescriptors[j-1];
-					fJavaEditorTextHoverDescriptors[0]= hoverDescriptor;
-					break;
-				}
-
-			}
+	public JavaEditorTextHoverDescriptor[] getJavaEditorTextHoverDescriptors() {
+		JavaEditorTextHoverDescriptor[] result= fJavaEditorTextHoverDescriptors;
+		if (result != null) { // First check (no locking)
+			return result;
 		}
+		synchronized(this) {
+			if (fJavaEditorTextHoverDescriptors == null) { // Second check (with locking)
+				JavaEditorTextHoverDescriptor[] tmp= JavaEditorTextHoverDescriptor.getContributedHovers();
+				ConfigurationElementSorter sorter= new ConfigurationElementSorter() {
+					/*
+					 * @see org.eclipse.ui.texteditor.ConfigurationElementSorter#getConfigurationElement(java.lang.Object)
+					 */
+					@Override
+					public IConfigurationElement getConfigurationElement(Object object) {
+						return ((JavaEditorTextHoverDescriptor)object).getConfigurationElement();
+					}
+				};
+				sorter.sort(tmp);
 
-		return fJavaEditorTextHoverDescriptors;
+				// Move Best Match hover to front
+				for (int i= 0; i < tmp.length - 1; i++) {
+					if (PreferenceConstants.ID_BESTMATCH_HOVER.equals(tmp[i].getId())) {
+						JavaEditorTextHoverDescriptor hoverDescriptor= tmp[i];
+						for (int j= i; j > 0; j--)
+							tmp[j]= tmp[j-1];
+						tmp[0]= hoverDescriptor;
+						break;
+					}
+
+				}
+				fJavaEditorTextHoverDescriptors= tmp;
+			}
+			return fJavaEditorTextHoverDescriptors;
+		}
 	}
 
 	/**
@@ -756,31 +815,35 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the template context type registry for the java plug-in
 	 * @since 3.0
 	 */
-	public synchronized ContextTypeRegistry getTemplateContextRegistry() {
-		if (fContextTypeRegistry == null) {
-			ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry(JavaUI.ID_CU_EDITOR);
-
-			TemplateContextType all_contextType= registry.getContextType(JavaContextType.ID_ALL);
-			((AbstractJavaContextType) all_contextType).initializeContextTypeResolvers();
-
-			registerJavaContext(registry, JavaContextType.ID_MEMBERS, all_contextType);
-			registerJavaContext(registry, JavaContextType.ID_STATEMENTS, all_contextType);
-			registerJavaContext(registry, JavaContextType.ID_MODULE, all_contextType);
-			registerJavaContext(registry, JavaContextType.ID_EMPTY, all_contextType);
-
-			registerJavaContext(registry, SWTContextType.ID_ALL, all_contextType);
-			all_contextType= registry.getContextType(SWTContextType.ID_ALL);
-
-			registerJavaContext(registry, SWTContextType.ID_MEMBERS, all_contextType);
-			registerJavaContext(registry, SWTContextType.ID_STATEMENTS, all_contextType);
-
-			registerJavaContext(registry, JavaPostfixContextType.ID_ALL, all_contextType);
-			all_contextType= registry.getContextType(JavaPostfixContextType.ID_ALL);
-
-			fContextTypeRegistry= registry;
+	public ContextTypeRegistry getTemplateContextRegistry() {
+		ContextTypeRegistry result= fContextTypeRegistry;
+		if (result != null) { // First check (no locking)
+			return result;
 		}
+		synchronized(this) {
+			if (fContextTypeRegistry == null) { // Second check (with locking)
+				ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry(JavaUI.ID_CU_EDITOR);
 
-		return fContextTypeRegistry;
+				TemplateContextType all_contextType= registry.getContextType(JavaContextType.ID_ALL);
+				((AbstractJavaContextType) all_contextType).initializeContextTypeResolvers();
+
+				registerJavaContext(registry, JavaContextType.ID_MEMBERS, all_contextType);
+				registerJavaContext(registry, JavaContextType.ID_STATEMENTS, all_contextType);
+				registerJavaContext(registry, JavaContextType.ID_MODULE, all_contextType);
+				registerJavaContext(registry, JavaContextType.ID_EMPTY, all_contextType);
+
+				registerJavaContext(registry, SWTContextType.ID_ALL, all_contextType);
+				all_contextType= registry.getContextType(SWTContextType.ID_ALL);
+
+				registerJavaContext(registry, SWTContextType.ID_MEMBERS, all_contextType);
+				registerJavaContext(registry, SWTContextType.ID_STATEMENTS, all_contextType);
+
+				registerJavaContext(registry, JavaPostfixContextType.ID_ALL, all_contextType);
+				all_contextType= registry.getContextType(JavaPostfixContextType.ID_ALL);
+				fContextTypeRegistry= registry;
+			}
+			return fContextTypeRegistry;
+		}
 	}
 
 	/**
@@ -807,7 +870,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	public TemplateStore getTemplateStore() {
 		if (fTemplateStore == null) {
 			final IPreferenceStore store= getPreferenceStore();
-				fTemplateStore= new ContributionTemplateStore(getTemplateContextRegistry(), store, TEMPLATES_KEY);
+			fTemplateStore= new ContributionTemplateStore(getTemplateContextRegistry(), store, TEMPLATES_KEY);
 			try {
 				fTemplateStore.load();
 			} catch (IOException e) {
@@ -815,7 +878,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			}
 			fTemplateStore.startListeningForPreferenceChanges();
 		}
-
 		return fTemplateStore;
 	}
 
@@ -861,10 +923,17 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		return fCodeTemplateStore;
 	}
 
-	private synchronized ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
-		if (fImageDescriptorRegistry == null)
-			fImageDescriptorRegistry= new ImageDescriptorRegistry();
-		return fImageDescriptorRegistry;
+	ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
+		ImageDescriptorRegistry result= fImageDescriptorRegistry;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fImageDescriptorRegistry == null) { // Second check (with locking)
+				fImageDescriptorRegistry= new ImageDescriptorRegistry();
+			}
+			return fImageDescriptorRegistry;
+		}
 	}
 
 	/**
@@ -902,10 +971,17 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the registry of contributed <code>IJavaFoldingStructureProvider</code>
 	 * @since 3.0
 	 */
-	public synchronized JavaFoldingStructureProviderRegistry getFoldingStructureProviderRegistry() {
-		if (fFoldingStructureProviderRegistry == null)
-			fFoldingStructureProviderRegistry= new JavaFoldingStructureProviderRegistry();
-		return fFoldingStructureProviderRegistry;
+	public JavaFoldingStructureProviderRegistry getFoldingStructureProviderRegistry() {
+		JavaFoldingStructureProviderRegistry result= fFoldingStructureProviderRegistry;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fFoldingStructureProviderRegistry == null) { // Second check (with locking)
+				fFoldingStructureProviderRegistry= new JavaFoldingStructureProviderRegistry();
+			}
+			return fFoldingStructureProviderRegistry;
+		}
 	}
 
 	/**
@@ -914,17 +990,30 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the save participant registry, not null
 	 * @since 3.3
 	 */
-	public synchronized SaveParticipantRegistry getSaveParticipantRegistry() {
-		if (fSaveParticipantRegistry == null)
-			fSaveParticipantRegistry= new SaveParticipantRegistry();
-		return fSaveParticipantRegistry;
+	public SaveParticipantRegistry getSaveParticipantRegistry() {
+		SaveParticipantRegistry result= fSaveParticipantRegistry;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fSaveParticipantRegistry == null) { // Second check (with locking)
+				fSaveParticipantRegistry= new SaveParticipantRegistry();
+			}
+			return fSaveParticipantRegistry;
+		}
 	}
 
-	public synchronized CleanUpRegistry getCleanUpRegistry() {
-		if (fCleanUpRegistry == null)
-			fCleanUpRegistry= new CleanUpRegistry();
-
-		return fCleanUpRegistry;
+	public CleanUpRegistry getCleanUpRegistry() {
+		CleanUpRegistry result= fCleanUpRegistry;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fCleanUpRegistry == null) { // Second check (with locking)
+				fCleanUpRegistry= new CleanUpRegistry();
+			}
+			return fCleanUpRegistry;
+		}
 	}
 
 	/**
@@ -970,10 +1059,16 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @since 3.3
 	 */
 	public ClasspathAttributeConfigurationDescriptors getClasspathAttributeConfigurationDescriptors() {
-		if (fClasspathAttributeConfigurationDescriptors == null) {
-			fClasspathAttributeConfigurationDescriptors= new ClasspathAttributeConfigurationDescriptors();
+		ClasspathAttributeConfigurationDescriptors result= fClasspathAttributeConfigurationDescriptors;
+		if (result != null) { // First check (no locking)
+			return result;
 		}
-		return fClasspathAttributeConfigurationDescriptors;
+		synchronized(this) {
+			if (fClasspathAttributeConfigurationDescriptors == null) { // Second check (with locking)
+				fClasspathAttributeConfigurationDescriptors= new ClasspathAttributeConfigurationDescriptors();
+			}
+			return fClasspathAttributeConfigurationDescriptors;
+		}
 	}
 
 	/**
@@ -983,10 +1078,16 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @since 3.4
 	 */
 	public ImagesOnFileSystemRegistry getImagesOnFSRegistry() {
-		if (fImagesOnFSRegistry == null) {
-			fImagesOnFSRegistry= new ImagesOnFileSystemRegistry();
+		ImagesOnFileSystemRegistry result= fImagesOnFSRegistry;
+		if (result != null) { // First check (no locking)
+			return result;
 		}
-		return fImagesOnFSRegistry;
+		synchronized(this) {
+			if (fImagesOnFSRegistry == null) { // Second check (with locking)
+				fImagesOnFSRegistry= new ImagesOnFileSystemRegistry();
+			}
+			return fImagesOnFSRegistry;
+		}
 	}
 
 	/**
