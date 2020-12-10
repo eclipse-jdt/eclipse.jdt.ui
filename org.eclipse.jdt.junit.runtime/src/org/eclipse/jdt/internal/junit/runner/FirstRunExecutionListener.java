@@ -30,11 +30,13 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 
 	public void notifyTestEnded(ITestIdentifier test) {
 		sendMessage(test, MessageIds.TEST_END);
+		fSender.flush();
 	}
 
 	public void notifyTestFailed(TestReferenceFailure failure) {
 		sendMessage(failure.getTest(), failure.getStatus());
 		sendFailure(failure, MessageIds.TRACE_START, MessageIds.TRACE_END);
+		// fSender.flush(); // flush is implicitly done by sendFailure()
 	}
 
 	public void notifyTestStarted(ITestIdentifier test) {
