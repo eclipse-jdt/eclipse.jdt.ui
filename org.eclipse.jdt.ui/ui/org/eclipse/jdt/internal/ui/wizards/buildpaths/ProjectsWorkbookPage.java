@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,6 +54,7 @@ import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.RootCPListElement.RootNodeChange;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
@@ -417,6 +418,15 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 					return;
 				boolean isClassRootExpanded= getRootExpansionState(fProjectsList, true);
 				boolean isModuleRootExpanded= getRootExpansionState(fProjectsList, false);
+				List<CPListElement> checkedElements= new ArrayList<>();
+				if (fClassPathList instanceof CheckedListDialogField) {
+					CheckedListDialogField<CPListElement> checkedDialogField= (CheckedListDialogField<CPListElement>)fClassPathList;
+					for (CPListElement element : checkedDialogField.getElements()) {
+						if (checkedDialogField.isChecked(element)) {
+							checkedElements.add(element);
+						}
+					}
+				}
 				fProjectsList.removeAllElements();
 				for (Object selectedElement : selectedElements) {
 					if( ((CPListElement)selectedElement).isClassPathRootNode()) {
@@ -442,6 +452,15 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				fProjectsList.getTreeViewer().expandToLevel(2);
 				setRootExpansionState(fProjectsList, isClassRootExpanded, true);
 				setRootExpansionState(fProjectsList, isModuleRootExpanded, false);
+				if (fClassPathList instanceof CheckedListDialogField) {
+					CheckedListDialogField<CPListElement> checkedDialogField= (CheckedListDialogField<CPListElement>)fClassPathList;
+					List<CPListElement> dialogElements= checkedDialogField.getElements();
+					for (CPListElement element : checkedElements) {
+						if (dialogElements.contains(element)) {
+							checkedDialogField.setChecked(element, true);
+						}
+					}
+				}
 			}
 
 			if (index == IDX_ADDPROJECT && !hasRootNodes()) {
