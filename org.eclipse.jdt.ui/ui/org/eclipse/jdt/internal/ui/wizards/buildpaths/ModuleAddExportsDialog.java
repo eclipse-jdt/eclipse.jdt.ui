@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 GK Software AG, and others.
+ * Copyright (c) 2017, 2020 GK Software AG, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -51,12 +52,13 @@ public class ModuleAddExportsDialog extends StatusDialog {
 	 * @param sourceJavaElements java elements representing the source modules from where packages should be exported
 	 * @param possibleTargetModules modules to be offered in content assist, or {@code null}
 	 * @param value The value to edit.
+	 * @param alreadyExportedPackages The packages for which add-exports already done
 	 */
-	public ModuleAddExportsDialog(Shell parent, IJavaElement[] sourceJavaElements, Collection<String> possibleTargetModules, ModuleAddExpose value) {
+	public ModuleAddExportsDialog(Shell parent, IJavaElement[] sourceJavaElements, Collection<String> possibleTargetModules, ModuleAddExpose value, Set<String> alreadyExportedPackages) {
 		super(parent);
 
 		IStatusChangeListener listener= this::updateStatus;
-		fAddExportsBlock= new ModuleAddExportsBlock(listener, sourceJavaElements, possibleTargetModules, value);
+		fAddExportsBlock= new ModuleAddExportsBlock(listener, sourceJavaElements, possibleTargetModules, value, alreadyExportedPackages);
 
 		setTitle(NewWizardMessages.AddExportsDialog_title);
 		if (sourceJavaElements == null)

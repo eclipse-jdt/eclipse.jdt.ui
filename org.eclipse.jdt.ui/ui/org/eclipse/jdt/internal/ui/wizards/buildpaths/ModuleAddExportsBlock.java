@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 GK Software AG, and others.
+ * Copyright (c) 2017, 2020 GK Software AG, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -91,18 +91,21 @@ public class ModuleAddExportsBlock {
 
 	private IJavaElement[] fSourceJavaElements;
 	private Collection<String> fPossibleTargetModules;
+	private Set<String> fAlreadyExportedPackages = new HashSet<>();
 
 	/**
 	 * @param context listeners for status updates
 	 * @param sourceJavaElements java element representing the source modules from where packages should be exported
 	 * @param possibleTargetModules modules to be offered in content assist, or {@code null}
 	 * @param initialValue The value to edit
+	 * @param alreadyExportedPackages The packages for which add-exports already done
 	 */
-	public ModuleAddExportsBlock(IStatusChangeListener context, IJavaElement[] sourceJavaElements, Collection<String> possibleTargetModules, ModuleAddExpose initialValue) {
+	public ModuleAddExportsBlock(IStatusChangeListener context, IJavaElement[] sourceJavaElements, Collection<String> possibleTargetModules, ModuleAddExpose initialValue, Set<String> alreadyExportedPackages) {
 		fContext= context;
 		fInitialValue= initialValue;
 		fSourceJavaElements= sourceJavaElements;
 		fPossibleTargetModules= possibleTargetModules;
+		fAlreadyExportedPackages= alreadyExportedPackages;
 
 		fSourceModuleStatus= new StatusInfo();
 		fPackageStatus= new StatusInfo();
@@ -304,6 +307,10 @@ public class ModuleAddExportsBlock {
 			try {
 				if (!fragment.containsJavaResources()) {
 					return false; // don't propose "empty" packages
+				}
+				// don't propose the packages already added
+				if (fAlreadyExportedPackages != null) {
+					return !fAlreadyExportedPackages.contains(fragment.getElementName());
 				}
 				String sourceModule= getSourceModuleText();
 				if (!sourceModule.isEmpty()) {
