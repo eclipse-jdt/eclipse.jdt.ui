@@ -5811,6 +5811,26 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean1 = (staticField > 0) && (staticField < 100) || (staticField <= 0) && (staticField >= 100);\n" //
 				+ "        boolean newBoolean2 = (staticField > 0) && (staticField < 100) || (staticField >= 100) && !(staticField > 0);\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithPrimitiveTypes(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 ? !b2 : b2;\n" //
+				+ "        boolean newBoolean2 = b1 ? b2 : !b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithExpressions(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) ? !(i3 == i4) : (i3 == i4);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) ? (i3 <= i4) : !(i4 >= i3);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) ? (i3 != i4) : (i3 == i4);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) ? (i3 < i4) : (i4 <= i3);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithFields() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (staticField > 0) ? (staticField < 100) : (staticField >= 100);\n" //
+				+ "        boolean newBoolean2 = (staticField > 0) ? (staticField < 100) : !(staticField < 100);\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
 
@@ -5855,6 +5875,26 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceDuplicateConditionsWithFields() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (staticField > 0) == (staticField < 100);\n" //
+				+ "        boolean newBoolean2 = (staticField > 0) == (staticField < 100);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithPrimitiveTypes(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 ^ b2;\n" //
+				+ "        boolean newBoolean2 = b1 == b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithExpressions(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) ^ (i3 == i4);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) == (i3 <= i4);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) == (i3 != i4);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) == (i3 < i4);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithFields() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        boolean newBoolean1 = (staticField > 0) == (staticField < 100);\n" //
 				+ "        boolean newBoolean2 = (staticField > 0) == (staticField < 100);\n" //
@@ -5917,6 +5957,22 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "                || !b1 && new SideEffect() instanceof SideEffect;\n" //
 				+ "        boolean newBoolean2 = b1 && new SideEffect() instanceof SideEffect\n" //
 				+ "                || !b1 && !(new SideEffect() instanceof SideEffect);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotReplaceNullableObjects(Boolean booleanObject1, Boolean booleanObject2) {\n" //
+				+ "        return booleanObject1 ? booleanObject2 : !booleanObject2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceTernaryWithIncrements(int i1, int i2, int i3, int i4) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) ? !(i3 == i4++) : (i3 == i4++);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) ? !(i3 == ++i4) : (i3 == ++i4);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) ? !(i3 == i4--) : (i3 == i4--);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) ? !(i3 == --i4) : (i3 == --i4);\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) ? (i3 == i4++) : !(i3 == i4++);\n" //
+				+ "        boolean newBoolean6 = (i1 == i2) ? (i3 == ++i4) : !(i3 == ++i4);\n" //
+				+ "        boolean newBoolean7 = (i1 == i2) ? (i3 == i4--) : !(i3 == i4--);\n" //
+				+ "        boolean newBoolean8 = (i1 == i2) ? (i3 == --i4) : !(i3 == --i4);\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
