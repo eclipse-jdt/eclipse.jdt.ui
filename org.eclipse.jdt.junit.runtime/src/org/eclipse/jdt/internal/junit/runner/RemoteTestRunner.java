@@ -400,8 +400,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 		if (fDebugMode) {
 			System.out.println("Packages:"); //$NON-NLS-1$
-			for (int i= 0; i < fPackageNames.length; i++) {
-				System.out.println("    "+fPackageNames[i]); //$NON-NLS-1$
+			for (String fPackageName : fPackageNames) {
+				System.out.println("    "+fPackageName); //$NON-NLS-1$
 			}
 		}
 	}
@@ -421,8 +421,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 		if (fDebugMode) {
 			System.out.println("Tests:"); //$NON-NLS-1$
-			for (int i= 0; i < fTestClassNames.length; i++) {
-				System.out.println("    "+fTestClassNames[i]); //$NON-NLS-1$
+			for (String fTestClassName : fTestClassNames) {
+				System.out.println("    "+fTestClassName); //$NON-NLS-1$
 			}
 		}
 	}
@@ -442,8 +442,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 		if (fDebugMode) {
 			System.out.println("Failures:"); //$NON-NLS-1$
-			for (int i= 0; i < fFailureNames.length; i++) {
-				System.out.println("    "+fFailureNames[i]); //$NON-NLS-1$
+			for (String fFailureName : fFailureNames) {
+				System.out.println("    "+fFailureName); //$NON-NLS-1$
 			}
 		}
 	}
@@ -498,8 +498,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 
 	protected Class<?>[] loadClasses(String[] testClassNames) {
 		Vector<Class<?>> classes= new Vector<Class<?>>();
-		for (int i = 0; i < testClassNames.length; i++) {
-			String name = testClassNames[i];
+		for (String name : testClassNames) {
 			Class<?> clazz = loadClass(name, this);
 			if (clazz != null) {
 				classes.add(clazz);
@@ -547,8 +546,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		long startTime = System.currentTimeMillis();
 		if (fDebugMode)
 			System.out.print("start send tree..."); //$NON-NLS-1$
-		for (int i = 0; i < suites.length; i++) {
-			suites[i].sendTree(this);
+		for (ITestReference suite : suites) {
+			suite.sendTree(this);
 			}
 		if (fDebugMode)
 			System.out.println("done send tree - time(ms): " + (System.currentTimeMillis() - startTime)); //$NON-NLS-1$
@@ -556,8 +555,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 
 	private int countTests(ITestReference[] tests) {
 		int count= 0;
-		for (int i= 0; i < tests.length; i++) {
-			ITestReference test= tests[i];
+		for (ITestReference test : tests) {
 			if (test != null)
 				count= count + test.countTestCases();
 		}

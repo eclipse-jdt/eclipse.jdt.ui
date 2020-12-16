@@ -161,24 +161,23 @@ public class JavaFormatter {
 			MultiTextEdit root= new MultiTextEdit(0, document.getLength());
 			List<TextEdit> edits= new ArrayList<>();
 			boolean hasModifications= false;
-			for (int i= 0; i != variables.length; i++) {
-				final TemplateVariable variable= variables[i];
+			for (final TemplateVariable variable : variables) {
 				int[] offsets= variable.getOffsets();
 
 				String value= variable.getDefaultValue();
 				if (isWhitespaceVariable(value)) {
 					// replace whitespace positions with unformattable comments
 					String placeholder= COMMENT_START + value + COMMENT_END;
-					for (int j= 0; j != offsets.length; j++) {
-						ReplaceEdit replace= new ReplaceEdit(offsets[j], value.length(), placeholder);
+					for (int offset : offsets) {
+						ReplaceEdit replace= new ReplaceEdit(offset, value.length(), placeholder);
 						root.addChild(replace);
 						hasModifications= true;
 						markerToOriginal.put(replace, value);
 						edits.add(replace);
 					}
 				} else {
-					for (int j= 0; j != offsets.length; j++) {
-						RangeMarker marker= new RangeMarker(offsets[j], value.length());
+					for (int offset : offsets) {
+						RangeMarker marker= new RangeMarker(offset, value.length());
 						root.addChild(marker);
 						edits.add(marker);
 					}
@@ -225,9 +224,7 @@ public class JavaFormatter {
 			}
 
 			Iterator<TypedPosition> it= positions.iterator();
-			for (int i= 0; i != variables.length; i++) {
-				TemplateVariable variable= variables[i];
-
+			for (TemplateVariable variable : variables) {
 				int[] offsets= new int[variable.getOffsets().length];
 				for (int j= 0; j != offsets.length; j++)
 					offsets[j]= it.next().getOffset();

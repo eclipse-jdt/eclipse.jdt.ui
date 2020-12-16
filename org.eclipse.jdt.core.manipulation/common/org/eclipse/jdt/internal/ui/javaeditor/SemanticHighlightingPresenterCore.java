@@ -67,9 +67,9 @@ public class SemanticHighlightingPresenterCore {
 			try {
 				Position[] positions= event.getDocument().getPositions(fCategory);
 
-				for (int i= 0; i != positions.length; i++) {
+				for (Position position2 : positions) {
 
-					HighlightedPositionCore position= (HighlightedPositionCore) positions[i];
+					HighlightedPositionCore position= (HighlightedPositionCore) position2;
 
 					// Also update deleted positions because they get deleted by the background thread and removed/invalidated only in the UI runnable
 //					if (position.isDeleted())

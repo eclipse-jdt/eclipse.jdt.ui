@@ -811,8 +811,7 @@ public class JavadocConfigurationBlock {
 				List<?> list= fProvider.getChildren(elem);
 				String name= segments[i];
 				elem= null;
-				for (int k= 0; k < list.size(); k++) {
-					Object curr= list.get(k);
+				for (Object curr : list) {
 					if (fProvider.isFolder(curr) && name.equals(fProvider.getLabel(curr))) {
 						elem= curr;
 						break;
@@ -852,8 +851,8 @@ public class JavadocConfigurationBlock {
 		public boolean hasChildren(Object element) {
 			List<?> list= fProvider.getChildren(element);
 			if (list != null) {
-				for (int i= 0; i < list.size(); i++) {
-					if (fProvider.isFolder(list.get(i))) {
+				for (Object element2 : list) {
+					if (fProvider.isFolder(element2)) {
 						return true;
 					}
 				}
@@ -869,8 +868,7 @@ public class JavadocConfigurationBlock {
 			List<?> list= fProvider.getChildren(element);
 			ArrayList<Object> res= new ArrayList<>();
 			if (list != null) {
-				for (int i= 0; i < list.size(); i++) {
-					Object curr= list.get(i);
+				for (Object curr : list) {
 					if (fProvider.isFolder(curr)) {
 						res.add(curr);
 					}

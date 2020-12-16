@@ -451,8 +451,8 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	public void setSelection(List<?> selElements, boolean expand) {
 		fDetailsList.selectElements(new StructuredSelection(selElements));
 		if (expand) {
-			for (int i= 0; i < selElements.size(); i++) {
-				fDetailsList.expandElement(selElements.get(i), 1);
+			for (Object selElement : selElements) {
+				fDetailsList.expandElement(selElement, 1);
 			}
 		}
 	}

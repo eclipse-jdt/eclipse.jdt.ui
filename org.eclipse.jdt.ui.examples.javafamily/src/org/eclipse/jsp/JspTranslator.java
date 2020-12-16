@@ -142,9 +142,9 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 
 		buffer.append(fDeclarations.toString() + "\n"); //$NON-NLS-1$
 		System.out.println(fDeclarations.toString());
-		for (int i= 0; i < fDeclarationLines.size(); i++)  {
-			fSmap[line++]= ((Integer)fDeclarationLines.get(i)).intValue();
-			System.out.println("" + ((Integer)fDeclarationLines.get(i)).intValue()); //$NON-NLS-1$
+		for (Object fDeclarationLine : fDeclarationLines) {
+			fSmap[line++]= ((Integer)fDeclarationLine).intValue();
+			System.out.println("" + ((Integer)fDeclarationLine).intValue()); //$NON-NLS-1$
 		}
 		fSmap[line]= fSmap[line - 1] + 1;
 		line++;
@@ -156,17 +156,17 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 		if (fLocalDeclarations.length() > 0)  {
 			buffer.append(fLocalDeclarations.toString());
 			System.out.println(fLocalDeclarations);
-			for (int i= 0; i < fLocalDeclarationLines.size(); i++) {
-				System.out.println("" + ((Integer)fLocalDeclarationLines.get(i)).intValue()); //$NON-NLS-1$
-				fSmap[line++]= ((Integer)fLocalDeclarationLines.get(i)).intValue();
+			for (Object fLocalDeclarationLine : fLocalDeclarationLines) {
+				System.out.println("" + ((Integer)fLocalDeclarationLine).intValue()); //$NON-NLS-1$
+				fSmap[line++]= ((Integer)fLocalDeclarationLine).intValue();
 			}
 		}
 
 		buffer.append(fContent.toString());
 		System.out.println(fContent);
-		for (int i= 0; i < fContentLines.size(); i++)  {
-			fSmap[line++]= ((Integer)fContentLines.get(i)).intValue();
-			System.out.println("" + ((Integer)fContentLines.get(i)).intValue()); //$NON-NLS-1$
+		for (Object fContentLine : fContentLines) {
+			fSmap[line++]= ((Integer)fContentLine).intValue();
+			System.out.println("" + ((Integer)fContentLine).intValue()); //$NON-NLS-1$
 		}
 
 		buffer.append("  }\n"); //$NON-NLS-1$

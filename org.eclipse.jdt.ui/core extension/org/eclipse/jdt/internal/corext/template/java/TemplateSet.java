@@ -236,9 +236,7 @@ public class TemplateSet {
 			Node root= document.createElement("templates"); //$NON-NLS-1$
 			document.appendChild(root);
 
-			for (int i= 0; i != fTemplates.size(); i++) {
-				Template template= fTemplates.get(i);
-
+			for (Template template : fTemplates) {
 				Node node= document.createElement(getTemplateTag());
 				root.appendChild(node);
 

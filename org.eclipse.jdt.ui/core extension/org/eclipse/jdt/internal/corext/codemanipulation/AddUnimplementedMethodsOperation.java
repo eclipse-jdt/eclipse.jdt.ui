@@ -245,8 +245,8 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	private ASTNode getNodeToInsertBefore(ListRewrite rewriter) {
 		if (fInsertPos != -1) {
 			List<?> members= rewriter.getOriginalList();
-			for (int i= 0; i < members.size(); i++) {
-				ASTNode curr= (ASTNode) members.get(i);
+			for (Object member : members) {
+				ASTNode curr= (ASTNode) member;
 				if (curr.getStartPosition() >= fInsertPos) {
 					return curr;
 				}

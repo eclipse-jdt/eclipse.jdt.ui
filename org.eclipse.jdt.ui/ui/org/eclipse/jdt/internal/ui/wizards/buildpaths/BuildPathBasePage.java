@@ -258,8 +258,7 @@ public abstract class BuildPathBasePage {
 		if (selElements.isEmpty()) {
 			return true;
 		}
-		for (int i= 0; i < selElements.size(); i++) {
-			Object elem= selElements.get(i);
+		for (Object elem : selElements) {
 			if (elem instanceof CPListElement) {
 				if (((CPListElement) elem).getParentContainer() != null) {
 					return false;

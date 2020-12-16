@@ -156,8 +156,7 @@ public class TemplateEngine {
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 		boolean needsCheck= !isJava12OrHigherProject(compilationUnit);
 		if (selectedRange.y == 0) {
-			for (int i= 0; i != templates.length; i++) {
-				Template template= templates[i];
+			for (Template template : templates) {
 				if (canEvaluate(context, template, needsCheck)) {
 					fProposals.add(new TemplateProposal(template, context, region, getImage()));
 				}
@@ -170,14 +169,13 @@ public class TemplateEngine {
 
 			boolean multipleLinesSelected= areMultipleLinesSelected(document, selectedRange);
 
-			for (int i= 0; i != templates.length; i++) {
-				Template template= templates[i];
+			for (Template template : templates) {
 				if (canEvaluate(context, template, needsCheck))
 				{
 					Matcher wordSelectionMatcher= $_WORD_SELECTION_PATTERN.matcher(template.getPattern());
 					Matcher lineSelectionMatcher= $_LINE_SELECTION_PATTERN.matcher(template.getPattern());
 					if ((!multipleLinesSelected && wordSelectionMatcher.find()) || (multipleLinesSelected && lineSelectionMatcher.find())) {
-						fProposals.add(new TemplateProposal(templates[i], context, region, getImage()));
+						fProposals.add(new TemplateProposal(template, context, region, getImage()));
 					}
 				}
 			}

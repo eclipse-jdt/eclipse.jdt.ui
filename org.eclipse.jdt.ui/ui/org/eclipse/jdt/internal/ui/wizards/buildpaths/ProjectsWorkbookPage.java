@@ -334,8 +334,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	public void setSelection(List<?> selElements, boolean expand) {
 		fProjectsList.selectElements(new StructuredSelection(selElements));
 		if (expand) {
-			for (int i= 0; i < selElements.size(); i++) {
-				fProjectsList.expandElement(selElements.get(i), 1);
+			for (Object selElement : selElements) {
+				fProjectsList.expandElement(selElement, 1);
 			}
 		}
 	}
@@ -499,8 +499,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			return false;
 		}
 
-		for (int i= 0; i < selElements.size(); i++) {
-			Object elem= selElements.get(i);
+		for (Object elem : selElements) {
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				if (IClasspathAttribute.MODULE.equals(attrib.getKey())) {
