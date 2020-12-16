@@ -116,11 +116,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		}
 		@Override
 		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + ((fBaseImage == null) ? 0 : fBaseImage.hashCode());
-			result= prime * result + ((fOverlay == null) ? 0 : fOverlay.hashCode());
-			return result;
+			return Objects.hash(fBaseImage, fOverlay);
 		}
 		@Override
 		public boolean equals(Object obj) {
