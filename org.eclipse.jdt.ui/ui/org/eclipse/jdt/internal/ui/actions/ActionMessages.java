@@ -208,6 +208,7 @@ public final class ActionMessages extends NLS {
 	public static String AddUnimplementedConstructorsAction_not_applicable;
 	public static String AddUnimplementedConstructorsAction_interface_not_applicable;
 	public static String AddUnimplementedConstructorsAction_enum_not_applicable;
+	public static String AddUnimplementedConstructorsAction_record_not_applicable;
 	public static String AddUnimplementedConstructorsAction_annotation_not_applicable;
 	public static String AddUnimplementedConstructorsAction_methods_selected;
 	public static String AddUnimplementedConstructorsAction_error_nothing_found;
