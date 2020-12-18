@@ -1262,6 +1262,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_REDUNDANT_MODIFIERS= "cleanup.remove_redundant_modifiers"; //$NON-NLS-1$
 
 	/**
+	 * Removes the second <code>substring()</code> parameter if this parameter is the length of the string.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String SUBSTRING= "cleanup.substring"; //$NON-NLS-1$
+
+	/**
 	 * Replaces for loops to use String.join() where possible.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

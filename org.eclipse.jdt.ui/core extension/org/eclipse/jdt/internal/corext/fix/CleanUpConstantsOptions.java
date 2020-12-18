@@ -96,6 +96,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_UNNECESSARY_CASTS, CleanUpOptions.TRUE);
 		options.setOption(REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.TRUE);
 		options.setOption(INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
+		options.setOption(SUBSTRING, CleanUpOptions.FALSE);
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
 		options.setOption(EVALUATE_NULLABLE, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
@@ -250,6 +251,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_UNNECESSARY_CASTS, CleanUpOptions.TRUE);
 		options.setOption(REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.FALSE);
 		options.setOption(INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
+		options.setOption(SUBSTRING, CleanUpOptions.FALSE);
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
 		options.setOption(EVALUATE_NULLABLE, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);

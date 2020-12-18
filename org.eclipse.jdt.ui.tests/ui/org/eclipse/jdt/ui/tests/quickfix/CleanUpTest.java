@@ -4131,6 +4131,93 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testSubstring() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private String textInInstance = \"foo\";\n" //
+				+ "\n" //
+				+ "    public String reduceSubstring(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return text.substring(2, text.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String reduceSubstringOnField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return textInInstance.substring(3, textInInstance.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String reduceSubstringOnExpression(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (textInInstance + text).substring(4, (textInInstance + text).length());\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.SUBSTRING);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private String textInInstance = \"foo\";\n" //
+				+ "\n" //
+				+ "    public String reduceSubstring(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return text.substring(2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String reduceSubstringOnField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return textInInstance.substring(3);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String reduceSubstringOnExpression(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (textInInstance + text).substring(4);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SubstringCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testKeepSubstring() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public String doNotReduceSubstringOnOtherExpression(String text) {\n" //
+				+ "        return text.substring(5, text.hashCode());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotReduceSubstringOnConstant(String text) {\n" //
+				+ "        return text.substring(6, 123);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotReduceSubstringOnDifferentVariable(String text1, String text2) {\n" //
+				+ "        return text1.substring(7, text2.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotReduceSubstringOnActiveExpression(List<String> texts) {\n" //
+				+ "        return texts.remove(0).substring(7, texts.remove(0).length());\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.SUBSTRING);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testUseArraysFill() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //

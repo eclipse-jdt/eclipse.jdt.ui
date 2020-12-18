@@ -7253,9 +7253,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.imports">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.SubstringCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.substring"
+            runAfter="org.eclipse.jdt.ui.cleanup.format">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp"
             id="org.eclipse.jdt.ui.cleanup.arrays_fill"
-            runAfter="org.eclipse.jdt.ui.cleanup.format">
+            runAfter="org.eclipse.jdt.ui.cleanup.substring">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp"

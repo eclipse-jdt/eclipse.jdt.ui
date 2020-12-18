@@ -141,6 +141,7 @@ public class MultiFixMessages extends NLS {
 	public static String HashCleanup_description;
 
 	public static String RedundantModifiersCleanup_description;
+	public static String SubstringCleanUp_description;
 	public static String JoinCleanup_description;
 	public static String ArraysFillCleanUp_description;
 	public static String EvaluateNullableCleanUp_description;
