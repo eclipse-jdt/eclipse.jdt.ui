@@ -26,6 +26,6 @@ public class Java16Setup extends RefactoringTestSetup {
 	 */
 	@Override
 	protected IPackageFragmentRoot addRTJar(IJavaProject project) throws CoreException {
-		return JavaProjectHelper.addRTJar_16(project, true);
+		return JavaProjectHelper.addRTJar_16(project, false);
 	}
 }

@@ -49,7 +49,7 @@ public class ASTHelper {
 				return ast.apiLevel() >= JLS15;
 			case ASTNode.RECORD_DECLARATION:
 			case ASTNode.INSTANCEOF_EXPRESSION:
-				return ast.isPreviewEnabled();
+				return ast.apiLevel() >= JLS16;
 			default:
 				break;
 		}

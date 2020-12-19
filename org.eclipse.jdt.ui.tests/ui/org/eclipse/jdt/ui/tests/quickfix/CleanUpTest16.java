@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java15ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java16ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
@@ -39,9 +39,9 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 /**
  * Tests the cleanup features related to Java 15.
  */
-public class CleanUpTest15 extends CleanUpTestCase {
+public class CleanUpTest16 extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup= new Java15ProjectTestSetup(true);
+	public ProjectTestSetup projectSetup= new Java16ProjectTestSetup(false);
 
 	@Override
 	protected IJavaProject getProject() {

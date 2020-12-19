@@ -39,7 +39,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
  * @see org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation
  *
  */
-public class GenerateGettersSettersTest14 extends SourceTestCase14 {
+public class GenerateGettersSettersTest16 extends SourceTestCase16 {
 	@Rule
 	public ProjectTestSetup pts= new ProjectTestSetup();
 

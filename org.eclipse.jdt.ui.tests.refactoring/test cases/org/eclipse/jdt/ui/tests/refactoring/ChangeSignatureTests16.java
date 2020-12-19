@@ -26,16 +26,16 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
-import org.eclipse.jdt.ui.tests.core.rules.Java15ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java16ProjectTestSetup;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
  */
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
-public class ChangeSignatureTests15 extends ChangeSignatureTests {
+public class ChangeSignatureTests16 extends ChangeSignatureTests {
 	@Rule
-	public Java15ProjectTestSetup jps= new Java15ProjectTestSetup(true);
+	public Java16ProjectTestSetup jps= new Java16ProjectTestSetup(false);
 
 	private IJavaProject fJProject1;
 

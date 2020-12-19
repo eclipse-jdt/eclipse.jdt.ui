@@ -56,8 +56,6 @@ import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
-
 /**
  * A fix that uses pattern matching for the instanceof expression when possible.
  */
@@ -104,8 +102,7 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
 		if (!isEnabled(CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF)
-				|| !PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(unit.getJavaElement().getJavaProject())
-				|| !JavaModelUtil.is15OrHigher(unit.getJavaElement().getJavaProject())) {
+				|| !JavaModelUtil.is16OrHigher(unit.getJavaElement().getJavaProject())) {
 			return null;
 		}
 

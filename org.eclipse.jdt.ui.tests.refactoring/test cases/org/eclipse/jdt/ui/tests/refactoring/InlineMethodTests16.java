@@ -26,10 +26,10 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
-public class InlineMethodTests14 extends InlineMethodTests {
+public class InlineMethodTests16 extends InlineMethodTests {
 
 	@Rule
-	public InlineMethodTestSetup14 fgTestSetup= new InlineMethodTestSetup14();
+	public InlineMethodTestSetup16 fgTestSetup= new InlineMethodTestSetup16();
 
 	protected void performSimpleTest() throws Exception {
 		performTestInlineCall(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, fgTestSetup.getSimplePkgOutName());

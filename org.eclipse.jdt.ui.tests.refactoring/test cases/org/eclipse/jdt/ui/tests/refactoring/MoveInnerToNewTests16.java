@@ -31,15 +31,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.JavaPreviewSetup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java16Setup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class MoveInnerToNewTests14 extends GenericRefactoringTest {
+public class MoveInnerToNewTests16 extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "MoveInnerToNew14/";
 
-	public MoveInnerToNewTests14() {
-		rts= new JavaPreviewSetup();
+	public MoveInnerToNewTests16() {
+		rts= new Java16Setup();
 	}
 
 	@Override
