@@ -149,7 +149,6 @@ public class JavadocTagsSubProcessor {
 		protected void addEdits(IDocument document, TextEdit rootEdit) throws CoreException {
 			try {
 				Javadoc javadoc= null;
-				int insertPosition= -1;
 				String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
 				final IJavaProject project= getCompilationUnit().getJavaProject();
 				CompilationUnit cu= (CompilationUnit)fDecl.getParent();
@@ -165,7 +164,7 @@ public class JavadocTagsSubProcessor {
 					return;
 				}
 				String comment= ""; //$NON-NLS-1$
-				insertPosition= findInsertPosition(javadoc, fMissingNode, document, lineDelimiter);
+				int insertPosition= findInsertPosition(javadoc, fMissingNode, document, lineDelimiter);
 
 			 	if (fMissingNode instanceof UsesDirective) {
 			 		UsesDirective directive= (UsesDirective)fMissingNode;
@@ -241,7 +240,7 @@ public class JavadocTagsSubProcessor {
 		protected void addEdits(IDocument document, TextEdit rootEdit) throws CoreException {
 			try {
 				Javadoc javadoc= null;
-				int insertPosition= -1;
+				int insertPosition;
 				String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
 				final IJavaProject project= getCompilationUnit().getJavaProject();
 				CompilationUnit cu= (CompilationUnit)fDecl.getParent();

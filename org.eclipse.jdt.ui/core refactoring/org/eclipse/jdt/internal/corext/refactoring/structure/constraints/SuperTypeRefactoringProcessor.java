@@ -814,10 +814,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 *            the text edit group to use
 	 */
 	protected final void rewriteTypeOccurrence(final CompilationUnitRange range, final TType estimate, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final CompilationUnit copy, final Set<String> replacements, final TextEditGroup group) {
-		ASTNode node= null;
 		IBinding binding= null;
 		final CompilationUnit target= rewrite.getRoot();
-		node= NodeFinder.perform(copy, range.getSourceRange());
+		ASTNode node= NodeFinder.perform(copy, range.getSourceRange());
 		if (node != null) {
 			node= ASTNodes.getNormalizedNode(node).getParent();
 			if (node instanceof VariableDeclaration) {
@@ -1225,8 +1224,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					for (IJavaProject project : keySet) {
 						if (level == 3 && !JavaModelUtil.is50OrHigher(project))
 							level= 2;
-						Collection<ICompilationUnit> cuCollection= null;
-						cuCollection= secondPass.get(project);
+						Collection<ICompilationUnit> cuCollection= secondPass.get(project);
 						if (cuCollection != null) {
 							parser.setWorkingCopyOwner(fOwner);
 							parser.setResolveBindings(true);

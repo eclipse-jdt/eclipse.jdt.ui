@@ -319,10 +319,9 @@ public class BuildPathsBlock {
 	 */
 	public void init(IJavaProject jproject, IPath outputLocation, IClasspathEntry[] classpathEntries) {
 		fCurrJProject= jproject;
-		boolean projectExists= false;
 		List<CPListElement> newClassPath= null;
 		IProject project= fCurrJProject.getProject();
-		projectExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
+		boolean projectExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
 		IClasspathEntry[] existingEntries= null;
 		if  (projectExists) {
 			if (outputLocation == null) {

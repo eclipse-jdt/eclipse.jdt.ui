@@ -2069,13 +2069,12 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 
-		AbstractTypeDeclaration typeDeclaration= null;
 		StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
 		if (locationInParent != TypeDeclaration.NAME_PROPERTY && locationInParent != EnumDeclaration.NAME_PROPERTY) {
 			return;
 		}
 
-		typeDeclaration= (AbstractTypeDeclaration) selectedNode.getParent();
+		AbstractTypeDeclaration typeDeclaration= (AbstractTypeDeclaration) selectedNode.getParent();
 
 		ITypeBinding binding= typeDeclaration.resolveBinding();
 		if (binding == null || binding.getSuperclass() == null) {

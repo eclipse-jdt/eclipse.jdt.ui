@@ -262,7 +262,6 @@ public class PropertiesQuickAssistProcessor {
 		IDocument document= invocationContext.getDocument();
 		int selectionOffset= invocationContext.getOffset();
 		int selectionLength= invocationContext.getLength();
-		IField field= null;
 
 		IType accessorClass= invocationContext.getAccessorType();
 		if (accessorClass == null || !isEclipseNLSUsed(accessorClass))
@@ -272,7 +271,7 @@ public class PropertiesQuickAssistProcessor {
 		if (keys == null || keys.size() != 1)
 			return false;
 
-		field= accessorClass.getField(keys.get(0));
+		IField field= accessorClass.getField(keys.get(0));
 		if (!field.exists())
 			return false;
 		if (resultingCollections == null)

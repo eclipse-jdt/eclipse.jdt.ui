@@ -64,7 +64,6 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		setControl(result);
 		GridLayout layout= new GridLayout();
 		result.setLayout(layout);
-		GridData gd= null;
 
 		boolean all= fRefactoring.getInitialMode() == InlineMethodRefactoring.Mode.INLINE_ALL;
 		Label label= new Label(result, SWT.NONE);
@@ -89,7 +88,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		});
 
 		fRemove= new Button(result, SWT.CHECK);
-		gd= new GridData(GridData.FILL_HORIZONTAL);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= LayoutUtil.getIndent();
 		fRemove.setLayoutData(gd);
 		fRemove.setText(RefactoringMessages.InlineMethodInputPage_delete_declaration);

@@ -64,11 +64,9 @@ public class JavadocWriter {
 	}
 
 	public Element createXML(JavadocOptionsManager store) throws ParserConfigurationException {
-
-		DocumentBuilder docBuilder= null;
 		DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);
-		docBuilder= factory.newDocumentBuilder();
+		DocumentBuilder docBuilder= factory.newDocumentBuilder();
 		Document document= docBuilder.newDocument();
 
 		// Create the document

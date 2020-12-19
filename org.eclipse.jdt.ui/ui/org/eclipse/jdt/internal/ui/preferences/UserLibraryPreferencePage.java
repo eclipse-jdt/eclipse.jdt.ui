@@ -559,10 +559,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		protected static void saveLibraries(List<CPUserLibraryElement> libraries, File file, String encoding, IProgressMonitor monitor) throws IOException {
 			OutputStream stream= new FileOutputStream(file);
 			try {
-				DocumentBuilder docBuilder= null;
 				DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 				factory.setValidating(false);
-				docBuilder= factory.newDocumentBuilder();
+				DocumentBuilder docBuilder= factory.newDocumentBuilder();
 				Document document= docBuilder.newDocument();
 
 				// Create the document

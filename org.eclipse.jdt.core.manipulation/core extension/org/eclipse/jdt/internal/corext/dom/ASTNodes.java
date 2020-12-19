@@ -3635,9 +3635,8 @@ public class ASTNodes {
 
 		Type type= null;
 		if (node instanceof SimpleName) {
-			IBinding binding= null;
 			SimpleName name= (SimpleName) node;
-			binding= name.resolveBinding();
+			IBinding binding= name.resolveBinding();
 			if (!(binding instanceof IVariableBinding)) {
 				return false;
 			}

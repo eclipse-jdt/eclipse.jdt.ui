@@ -88,9 +88,8 @@ public class ExternalNullAnnotationQuickAssistProcessor implements IQuickAssistP
 			ISourceViewer viewer= quickAssistContext.getSourceViewer();
 			int documentOffset= quickAssistContext.getOffset();
 
-			AssistContext context= null;
 			int length= viewer != null ? viewer.getSelectedRange().y : 0;
-			context= new AssistContext(cu, viewer, part, documentOffset, length);
+			AssistContext context= new AssistContext(cu, viewer, part, documentOffset, length);
 
 			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 

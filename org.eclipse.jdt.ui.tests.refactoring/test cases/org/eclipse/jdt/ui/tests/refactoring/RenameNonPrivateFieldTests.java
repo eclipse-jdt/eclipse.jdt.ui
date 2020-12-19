@@ -414,9 +414,8 @@ public class RenameNonPrivateFieldTests extends GenericRefactoringTest {
 	public void testStaticImport() throws Exception{
 		//bug 77622
 		IPackageFragment test1= getRoot().createPackageFragment("test1", true, null);
-		ICompilationUnit cuC= null;
 		ICompilationUnit cuB= createCUfromTestFile(test1, "B");
-		cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
+		ICompilationUnit cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
 
 		helper2("PI", "e");
 
@@ -428,9 +427,8 @@ public class RenameNonPrivateFieldTests extends GenericRefactoringTest {
 	public void testEnumConst() throws Exception {
 		//bug 77619
 		IPackageFragment test1= getRoot().createPackageFragment("test1", true, null);
-		ICompilationUnit cuC= null;
 		ICompilationUnit cuB= createCUfromTestFile(test1, "B");
-		cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
+		ICompilationUnit cuC= createCUfromTestFile(getRoot().getPackageFragment(""), "C");
 
 		helper2("RED", "REDDISH");
 

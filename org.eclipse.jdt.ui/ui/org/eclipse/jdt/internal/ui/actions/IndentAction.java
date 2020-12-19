@@ -1024,9 +1024,8 @@ public class IndentAction extends TextEditorAction {
 	}
 
 	private static String getTabSpaceString(IJavaProject javaProject) {
-		String tabString= ""; //$NON-NLS-1$
 		int tabWidth= CodeFormatterUtil.getTabWidth(javaProject);
-		tabString= EMPTY_STR;
+		String tabString= EMPTY_STR;
 		for (int i= 0; i < tabWidth; i++) {
 			tabString+= SPACE_STR;
 		}

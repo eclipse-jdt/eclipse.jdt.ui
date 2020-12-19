@@ -112,9 +112,8 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							fMapToPackageFragments.clear();
 							IResource resource= root.getUnderlyingResource();
 							if (root.isArchive() || root.isExternal()) {
-								IPackageFragment[] fragments= new IPackageFragment[0];
 								IJavaElement[] els= root.getChildren();
-								fragments= getTopLevelChildrenByElementName(els);
+								IPackageFragment[] fragments= getTopLevelChildrenByElementName(els);
 								addFragmentsToMap(fragments);
 								return fragments;
 

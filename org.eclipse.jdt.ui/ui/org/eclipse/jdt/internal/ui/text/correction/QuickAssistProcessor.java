@@ -1789,9 +1789,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		// add proposal
 		ASTRewriteCorrectionProposal proposal;
-		String label= null;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		label= CorrectionMessages.QuickAssistProcessor_remove_lambda_parameter_types;
+		String label= CorrectionMessages.QuickAssistProcessor_remove_lambda_parameter_types;
 		if (removeImports) {
 			ASTRewriteRemoveImportsCorrectionProposal newProposal= new ASTRewriteRemoveImportsCorrectionProposal(label, context.getCompilationUnit(), rewrite,
 					IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
