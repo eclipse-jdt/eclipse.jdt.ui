@@ -65,6 +65,7 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_CheckboxName_PullUpAssignment;
 	public static String CodeStyleTabPage_CheckboxName_ElseIf;
 	public static String CodeStyleTabPage_CheckboxName_ReduceIndentation;
+	public static String CodeStyleTabPage_CheckboxName_Instanceof;
 
 	public static String CodeStyleTabPage_GroupName_NumberLiteral;
 	public static String CodeStyleTabPage_CheckboxName_NumberSuffix;

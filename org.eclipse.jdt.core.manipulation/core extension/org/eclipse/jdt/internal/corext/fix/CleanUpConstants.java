@@ -1848,6 +1848,18 @@ public class CleanUpConstants {
 	public static final String REDUCE_INDENTATION= "cleanup.reduce_indentation"; //$NON-NLS-1$
 
 	/**
+	 * Uses an <code>instanceof</code> expression to check an object against a hardcoded class.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String INSTANCEOF= "cleanup.instanceof_keyword"; //$NON-NLS-1$
+
+	/**
 	 * Controls whether long literal suffix should be rewritten in uppercase.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>

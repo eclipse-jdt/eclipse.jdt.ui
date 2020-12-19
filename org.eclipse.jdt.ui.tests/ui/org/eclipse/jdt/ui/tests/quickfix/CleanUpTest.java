@@ -17616,6 +17616,90 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testInstanceof() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean useInstanceof(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return String.class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean useInstanceofOnComplexType(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return String[].class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean useInstanceofOnQualifiedType(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return java.util.Date.class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean useInstanceof(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (o instanceof String);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean useInstanceofOnComplexType(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (o instanceof String[]);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean useInstanceofOnQualifiedType(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (o instanceof java.util.Date);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.INSTANCEOF);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_Instanceof_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseInstanceof() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean doNotUseInstanceofOnPrimitive(Object o) {\n" //
+				+ "        return int.class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUseInstanceofOnDynamicClass(Object o, Class<?> clazz) {\n" //
+				+ "        return clazz.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUseInstanceofOnOtherMethod(Object o) {\n" //
+				+ "        return String.class.equals(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUseInstanceofOnIncompatibleTypes(Integer o) {\n" //
+				+ "        return String.class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.INSTANCEOF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRemoveQualifier02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

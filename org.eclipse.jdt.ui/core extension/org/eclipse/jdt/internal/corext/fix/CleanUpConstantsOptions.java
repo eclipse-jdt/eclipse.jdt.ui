@@ -58,6 +58,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
 		options.setOption(REDUCE_INDENTATION, CleanUpOptions.FALSE);
+		options.setOption(INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations
@@ -217,6 +218,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
 		options.setOption(REDUCE_INDENTATION, CleanUpOptions.FALSE);
+		options.setOption(INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations

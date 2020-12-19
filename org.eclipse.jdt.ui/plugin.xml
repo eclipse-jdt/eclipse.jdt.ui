@@ -7113,9 +7113,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.extract_increment">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.InstanceofCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.instanceof"
+            runAfter="org.eclipse.jdt.ui.cleanup.pull_up_assignment">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp"
             id="org.eclipse.jdt.ui.cleanup.number_suffix"
-            runAfter="org.eclipse.jdt.ui.cleanup.pull_up_assignment">
+            runAfter="org.eclipse.jdt.ui.cleanup.instanceof">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp"

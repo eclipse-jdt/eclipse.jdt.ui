@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExtractIncrementCleanUp;
+import org.eclipse.jdt.internal.ui.fix.InstanceofCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
@@ -48,6 +49,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new ExtractIncrementCleanUp(values),
 				new PullUpAssignmentCleanUp(values),
 				new NumberSuffixCleanUp(values),
+				new InstanceofCleanUp(values),
 				new VariableDeclarationCleanUp(values),
 				new LambdaExpressionAndMethodRefCleanUp(values)
 		};
@@ -92,6 +94,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference pullUpAssignmentPref= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_PullUpAssignment, CleanUpConstants.PULL_UP_ASSIGNMENT, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(pullUpAssignmentPref);
+
+		final CheckboxPreference instanceofPref= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_Instanceof, CleanUpConstants.INSTANCEOF, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(instanceofPref);
 
 		Group numberSuffixGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_NumberLiteral);
 
