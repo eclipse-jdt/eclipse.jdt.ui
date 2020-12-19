@@ -1329,7 +1329,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, SimpleName[] simpleNames, AbstractTypeDeclaration declaration) {
 		for (SimpleName simpleName : simpleNames) {
 			IBinding binding= simpleName.resolveBinding();
-			if (binding != null && binding instanceof IVariableBinding && !(simpleName.getParent() instanceof FieldAccess)) {
+			if (binding instanceof IVariableBinding && !(simpleName.getParent() instanceof FieldAccess)) {
 				IVariableBinding variable= (IVariableBinding) binding;
 				final FieldAccess access= simpleName.getAST().newFieldAccess();
 				access.setExpression(createAccessExpressionToEnclosingInstanceFieldText(simpleName, variable, declaration));

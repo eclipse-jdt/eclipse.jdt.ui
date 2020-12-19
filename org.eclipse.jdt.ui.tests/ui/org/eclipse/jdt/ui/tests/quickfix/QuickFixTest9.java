@@ -98,7 +98,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		}
 		for (ICompilationUnit cu : fCus) {
 			IEditorPart part= EditorUtility.isOpenInEditor(cu);
-			if (part != null && part instanceof ITextEditor) {
+			if (part instanceof ITextEditor) {
 				((ITextEditor)part).close(false);
 			}
 			if (cu.getJavaProject().exists()) {

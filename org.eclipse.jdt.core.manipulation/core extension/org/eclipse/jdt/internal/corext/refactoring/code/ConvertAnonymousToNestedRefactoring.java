@@ -394,7 +394,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			@Override
 			public boolean visit(QualifiedName node) {
 				final IBinding binding= node.resolveBinding();
-				if (binding != null && binding instanceof IVariableBinding) {
+				if (binding instanceof IVariableBinding) {
 					IVariableBinding variable= (IVariableBinding) binding;
 					if (!variable.isEnumConstant() && variable.isField())
 						accessedFields.add(binding);
@@ -405,7 +405,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			@Override
 			public boolean visit(SimpleName node) {
 				final IBinding binding= node.resolveBinding();
-				if (binding != null && binding instanceof IVariableBinding) {
+				if (binding instanceof IVariableBinding) {
 					IVariableBinding variable= (IVariableBinding) binding;
 					if (!variable.isEnumConstant() && variable.isField())
 						accessedFields.add(binding);

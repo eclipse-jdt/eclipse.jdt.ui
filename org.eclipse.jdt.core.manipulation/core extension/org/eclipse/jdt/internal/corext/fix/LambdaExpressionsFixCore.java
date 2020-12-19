@@ -607,9 +607,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 											&& (!(node.getParent() instanceof SuperFieldAccess) || node.getLocationInParent() != SuperFieldAccess.NAME_PROPERTY)) {
 										ASTNode declaration= ASTNodes.findDeclaration(node.resolveBinding(), declarationClass);
 
-										if (declaration != null
-												&& declaration instanceof VariableDeclarationFragment
-												&& declaration.getParent() instanceof FieldDeclaration) {
+										if (declaration instanceof VariableDeclarationFragment && declaration.getParent() instanceof FieldDeclaration) {
 											FieldDeclaration currentField= (FieldDeclaration) declaration.getParent();
 
 											if (nextFields.contains(currentField)) {

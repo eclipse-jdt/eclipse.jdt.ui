@@ -1012,7 +1012,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			Expression expression= ((ExpressionMethodReference) methodReference).getExpression();
 			if (expression instanceof Name) {
 				IBinding nameBinding= ((Name) expression).resolveBinding();
-				if (nameBinding != null && nameBinding instanceof ITypeBinding) {
+				if (nameBinding instanceof ITypeBinding) {
 					return true;
 				}
 			}
