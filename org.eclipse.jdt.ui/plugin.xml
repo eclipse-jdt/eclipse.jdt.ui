@@ -7283,9 +7283,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.comparison_statement">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UnreachableBlockCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.unreachable_block"
+            runAfter="org.eclipse.jdt.ui.cleanup.no_super">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp"
             id="org.eclipse.jdt.ui.cleanup.use_directly_map_method"
-            runAfter="org.eclipse.jdt.ui.cleanup.no_super">
+            runAfter="org.eclipse.jdt.ui.cleanup.unreachable_block">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp"

@@ -132,6 +132,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_DoubleNegation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ComparisonStatement;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSuperCall;
+	public static String UnnecessaryCodeTabPage_CheckboxName_UnreachableBlock;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UseDirectlyMapMethod;
 	public static String UnnecessaryCodeTabPage_CheckboxName_CollectionCloning;
 	public static String UnnecessaryCodeTabPage_CheckboxName_MapCloning;

@@ -1370,6 +1370,18 @@ public class CleanUpConstants {
 	public static final String REDUNDANT_SUPER_CALL= "cleanup.no_super"; //$NON-NLS-1$
 
 	/**
+	 * Detect two successive <code>if</code> conditions that are identical and remove the second one.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String UNREACHABLE_BLOCK= "cleanup.unreachable_block"; //$NON-NLS-1$
+
+	/**
 	 * Replaces (X && Y) || (!X && Z) by X ? Y : Z.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

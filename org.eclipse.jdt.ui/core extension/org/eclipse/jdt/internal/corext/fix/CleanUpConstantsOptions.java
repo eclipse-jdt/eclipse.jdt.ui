@@ -102,6 +102,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
+		options.setOption(UNREACHABLE_BLOCK, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_IF_CONDITION, CleanUpOptions.FALSE);
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);
@@ -254,6 +255,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
+		options.setOption(UNREACHABLE_BLOCK, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_IF_CONDITION, CleanUpOptions.FALSE);
 		options.setOption(USE_DIRECTLY_MAP_METHOD, CleanUpOptions.FALSE);

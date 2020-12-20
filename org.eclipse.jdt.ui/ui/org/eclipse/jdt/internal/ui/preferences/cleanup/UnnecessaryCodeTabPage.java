@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnreachableBlockCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UselessContinueCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UselessReturnCleanUp;
@@ -58,6 +59,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new DoubleNegationCleanUp(values),
 				new RedundantComparisonStatementCleanUp(values),
 				new RedundantSuperCallCleanUp(values),
+				new UnreachableBlockCleanUp(values),
 				new MapMethodCleanUp(values),
 				new CollectionCloningCleanUp(values),
 				new MapCloningCleanUp(values),
@@ -116,6 +118,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference redundantSuperCall= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantSuperCall, CleanUpConstants.REDUNDANT_SUPER_CALL, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(redundantSuperCall);
+
+		CheckboxPreference unreachableBlock= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnreachableBlock, CleanUpConstants.UNREACHABLE_BLOCK, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(unreachableBlock);
 
 		CheckboxPreference mapMethod= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UseDirectlyMapMethod,
 				CleanUpConstants.USE_DIRECTLY_MAP_METHOD, CleanUpModifyDialog.FALSE_TRUE);
