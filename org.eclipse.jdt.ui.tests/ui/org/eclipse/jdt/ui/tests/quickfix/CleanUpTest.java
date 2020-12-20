@@ -11932,6 +11932,369 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testStaticInnerClass() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import static java.lang.Integer.bitCount;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorThisInnerClassThatAccessesField {\n" //
+				+ "        File picture;\n" //
+				+ "\n" //
+				+ "        public char anotherMethod() {\n" //
+				+ "            return picture.separatorChar;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorThisInnerClassThatUsesStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorThisInnerClassThatUsesQualifiedStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return E.CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorThisInnerClassThatUsesFullyQualifiedStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return test1.E.CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassThatOnlyUsesItsFields {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return i == 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassThatUsesStaticMethod {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aStaticMethod();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public final class RefactorThisFinalInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class RefactorThisInnerClassWithoutModifier {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Deprecated\n" //
+				+ "    class RefactorThisInnerClassWithAnnotation {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassThatUsesStaticImport {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public int anotherMethod() {\n" //
+				+ "            return bitCount(0);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassThatUsesStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public char anotherMethod() {\n" //
+				+ "            return File.separatorChar;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInheritedInnerClass extends File {\n" //
+				+ "        private static final long serialVersionUID = -1124849036813595100L;\n" //
+				+ "        private int i;\n" //
+				+ "\n" //
+				+ "        public RefactorInheritedInnerClass(File arg0, String arg1) {\n" //
+				+ "            super(arg0, arg1);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorGenericInnerClass<T> {\n" //
+				+ "        T i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final String CONSTANT= \"foo\";\n" //
+				+ "\n" //
+				+ "    private String aString= \"bar\";\n" //
+				+ "\n" //
+				+ "    public static boolean aStaticMethod() {\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean aMethod() {\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import static java.lang.Integer.bitCount;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorThisInnerClassThatAccessesField {\n" //
+				+ "        File picture;\n" //
+				+ "\n" //
+				+ "        public char anotherMethod() {\n" //
+				+ "            return picture.separatorChar;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorThisInnerClassThatUsesStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorThisInnerClassThatUsesQualifiedStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return E.CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorThisInnerClassThatUsesFullyQualifiedStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return test1.E.CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassThatOnlyUsesItsFields {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return i == 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassThatUsesStaticMethod {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aStaticMethod();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static final class RefactorThisFinalInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    static class RefactorThisInnerClassWithoutModifier {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Deprecated\n" //
+				+ "    static\n" //
+				+ "    class RefactorThisInnerClassWithAnnotation {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassThatUsesStaticImport {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public int anotherMethod() {\n" //
+				+ "            return bitCount(0);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassThatUsesStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public char anotherMethod() {\n" //
+				+ "            return File.separatorChar;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInheritedInnerClass extends File {\n" //
+				+ "        private static final long serialVersionUID = -1124849036813595100L;\n" //
+				+ "        private int i;\n" //
+				+ "\n" //
+				+ "        public RefactorInheritedInnerClass(File arg0, String arg1) {\n" //
+				+ "            super(arg0, arg1);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorGenericInnerClass<T> {\n" //
+				+ "        T i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final String CONSTANT= \"foo\";\n" //
+				+ "\n" //
+				+ "    private String aString= \"bar\";\n" //
+				+ "\n" //
+				+ "    public static boolean aStaticMethod() {\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean aMethod() {\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.STATIC_INNER_CLASS);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StaticInnerClassCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseStaticInnerClass() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public interface DoNotRefactorInnerInterface {\n" //
+				+ "        boolean anotherMethod();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aString != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassThatUsesMethod {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aMethod();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class DoNotRefactorAlreadyStaticInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class NotStaticClass {\n" //
+				+ "        public class DoNotRefactorInnerClassInNotStaticClass {\n" //
+				+ "            int i;\n" //
+				+ "\n" //
+				+ "            public boolean anotherMethod() {\n" //
+				+ "                return true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aMethod();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final String CONSTANT= \"foo\";\n" //
+				+ "\n" //
+				+ "    private String aString= \"bar\";\n" //
+				+ "\n" //
+				+ "    public static boolean aStaticMethod() {\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean aMethod() {\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.STATIC_INNER_CLASS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testStringBuilder() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= "" //

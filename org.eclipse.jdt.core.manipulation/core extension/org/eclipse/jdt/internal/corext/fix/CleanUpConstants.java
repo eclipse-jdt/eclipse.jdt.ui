@@ -985,6 +985,18 @@ public class CleanUpConstants {
 	public static final String BREAK_LOOP= "cleanup.break_loop"; //$NON-NLS-1$
 
 	/**
+	 * Make inner <code>class</code> static.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String STATIC_INNER_CLASS= "cleanup.static_inner_class"; //$NON-NLS-1$
+
+	/**
 	 * Replaces String concatenation by StringBuilder when possible.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

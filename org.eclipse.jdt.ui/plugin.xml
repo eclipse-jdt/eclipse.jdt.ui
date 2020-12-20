@@ -7107,9 +7107,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.number_suffix">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.static_inner_class"
+            runAfter="org.eclipse.jdt.ui.cleanup.break_loop">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StringBuilderCleanUp"
             id="org.eclipse.jdt.ui.cleanup.stringbuilder"
-            runAfter="org.eclipse.jdt.ui.cleanup.break_loop">
+            runAfter="org.eclipse.jdt.ui.cleanup.static_inner_class">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp"
