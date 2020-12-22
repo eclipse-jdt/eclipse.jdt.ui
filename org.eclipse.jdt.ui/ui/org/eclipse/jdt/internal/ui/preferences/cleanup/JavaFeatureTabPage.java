@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
@@ -46,6 +47,7 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 				new LambdaExpressionsCleanUp(values),
 				new JoinCleanUp(values),
 				new TryWithResourceCleanUp(values),
+				new MultiCatchCleanUp(values),
 				new TypeParametersCleanUp(values),
 				new HashCleanUp(values),
 				new ObjectsEqualsCleanUp(values),
@@ -87,6 +89,9 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference tryWithResource= createCheckboxPref(java1d7Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_TryWithResource, CleanUpConstants.TRY_WITH_RESOURCE, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(tryWithResource);
+
+		CheckboxPreference multiCatch= createCheckboxPref(java1d7Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_MultiCatch, CleanUpConstants.MULTI_CATCH, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(multiCatch);
 
 		CheckboxPreference typeArgs= createCheckboxPref(java1d7Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_RedundantTypeArguments, CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(typeArgs);

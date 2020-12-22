@@ -1755,6 +1755,18 @@ public class CleanUpConstants {
 	public static final String TRY_WITH_RESOURCE= "cleanup.try_with_resource"; //$NON-NLS-1$
 
 	/**
+	 * Refactors <code>catch</code> clauses with the same body to use Java 7's multi-catch.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String MULTI_CATCH= "cleanup.multi_catch"; //$NON-NLS-1$
+
+	/**
 	 * Should the Clean Up Wizard be shown when executing the Clean Up Action? <br>
 	 * <br>
 	 * Possible values: {<code><b>true</b></code>, <code><b>false</b></code>} <br>

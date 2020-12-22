@@ -7317,9 +7317,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.join">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.multi_catch"
+            runAfter="org.eclipse.jdt.ui.cleanup.try_with_resource">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp"
             id="org.eclipse.jdt.ui.cleanup.type_parameters"
-            runAfter="org.eclipse.jdt.ui.cleanup.try_with_resource">
+            runAfter="org.eclipse.jdt.ui.cleanup.multi_catch">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.HashCleanUp"

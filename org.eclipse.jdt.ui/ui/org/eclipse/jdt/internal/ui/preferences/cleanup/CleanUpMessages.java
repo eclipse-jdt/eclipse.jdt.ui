@@ -179,6 +179,7 @@ public class CleanUpMessages extends NLS {
 	public static String JavaFeatureTabPage_GroupName_Java1d7;
 
 	public static String JavaFeatureTabPage_CheckboxName_TryWithResource;
+	public static String JavaFeatureTabPage_CheckboxName_MultiCatch;
 	public static String JavaFeatureTabPage_CheckboxName_RedundantTypeArguments;
 	public static String JavaFeatureTabPage_CheckboxName_Hash;
 	public static String JavaFeatureTabPage_CheckboxName_ObjectsEquals;

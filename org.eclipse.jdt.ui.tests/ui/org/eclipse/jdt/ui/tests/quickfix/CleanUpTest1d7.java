@@ -252,7 +252,7 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 				+ "                Arrays.hashCode(texts), anotherDouble);\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.HashCleanup_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.HashCleanup_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
 	}
 
@@ -653,6 +653,405 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testMultiCatch() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.IOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final class ThrowingObject<E1 extends Throwable, E2 extends Throwable> {\n" //
+				+ "        private void throwingMethod() throws E1, E2 {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class Ex1 extends Exception {\n" //
+				+ "        private void print() {\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        private String getExplanation() {\n" //
+				+ "            return \"\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class Ex2 extends Exception {\n" //
+				+ "        private void print() {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class OverridingException1 extends Exception {\n" //
+				+ "        @Override\n" //
+				+ "        public void printStackTrace() {\n" //
+				+ "            super.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class OverridingException2 extends Exception {\n" //
+				+ "        @Override\n" //
+				+ "        public void printStackTrace() {\n" //
+				+ "            super.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            iae.printStackTrace();\n" //
+				+ "        } catch (IOException ioe) {\n" //
+				+ "            ioe.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorAddToMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException | IllegalStateException iae) {\n" //
+				+ "            iae.printStackTrace();\n" //
+				+ "        } catch (IOException ioe) {\n" //
+				+ "            ioe.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeMoreSpecializedException(ThrowingObject<IllegalArgumentException, RuntimeException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            iae.printStackTrace();\n" //
+				+ "        } catch (RuntimeException re) {\n" //
+				+ "            re.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMultiCatchWithOverridenMethods(ThrowingObject<IllegalArgumentException, OverridingException1> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            iae.printStackTrace();\n" //
+				+ "        } catch (OverridingException1 oe1) {\n" //
+				+ "            oe1.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMultiCatchWithOverridenMethodsFromSupertype(ThrowingObject<OverridingException1, OverridingException2> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (OverridingException1 oe1) {\n" //
+				+ "            oe1.printStackTrace();\n" //
+				+ "        } catch (OverridingException2 oe2) {\n" //
+				+ "            oe2.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorUp(ThrowingObject<IllegalArgumentException, IllegalAccessException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            iae.printStackTrace();\n" //
+				+ "        } catch (RuntimeException re) {\n" //
+				+ "            re.toString();\n" //
+				+ "        } catch (IllegalAccessException ne) {\n" //
+				+ "            ne.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorDown(ThrowingObject<IllegalAccessException, RuntimeException> obj, int errorCount) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalAccessException iae) {\n" //
+				+ "            errorCount++;\n" //
+				+ "            iae.printStackTrace();\n" //
+				+ "        } catch (RuntimeException ioe) {\n" //
+				+ "            errorCount++;\n" //
+				+ "            ioe.toString();\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            errorCount = errorCount + 1;\n" //
+				+ "            e.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Error count: \" + errorCount);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMultiCatchWithLocalVariables(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            String s = \"[\" + iae;\n" //
+				+ "            String s1 = \"]\";\n" //
+				+ "            System.out.println(s + s1);\n" //
+				+ "        } catch (IOException ioe) {\n" //
+				+ "            String s = \"[\" + ioe;\n" //
+				+ "            String s2 = \"]\";\n" //
+				+ "            System.out.println(s + s2);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class EA extends Exception {}\n" //
+				+ "    public class EB extends Exception {}\n" //
+				+ "    public class EB1 extends EB {}\n" //
+				+ "    public class EC extends Exception {}\n" //
+				+ "\n" //
+				+ "    public String refactorUp2() {\n" //
+				+ "        try {\n" //
+				+ "            return throwingMethod();\n" //
+				+ "        } catch (EA | EB1 e) {\n" //
+				+ "            throw new RuntimeException(\"v1\", e);\n" //
+				+ "        } catch (EB e) {\n" //
+				+ "            throw new RuntimeException(\"v2\", e);\n" //
+				+ "        } catch (EC e) {\n" //
+				+ "            throw new RuntimeException(\"v1\", e);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private String throwingMethod() throws EA, EB1, EB, EC {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.IOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final class ThrowingObject<E1 extends Throwable, E2 extends Throwable> {\n" //
+				+ "        private void throwingMethod() throws E1, E2 {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class Ex1 extends Exception {\n" //
+				+ "        private void print() {\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        private String getExplanation() {\n" //
+				+ "            return \"\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class Ex2 extends Exception {\n" //
+				+ "        private void print() {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class OverridingException1 extends Exception {\n" //
+				+ "        @Override\n" //
+				+ "        public void printStackTrace() {\n" //
+				+ "            super.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class OverridingException2 extends Exception {\n" //
+				+ "        @Override\n" //
+				+ "        public void printStackTrace() {\n" //
+				+ "            super.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException | IOException ioe) {\n" //
+				+ "            ioe.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorAddToMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException | IllegalStateException | IOException ioe) {\n" //
+				+ "            ioe.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeMoreSpecializedException(ThrowingObject<IllegalArgumentException, RuntimeException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (RuntimeException re) {\n" //
+				+ "            re.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMultiCatchWithOverridenMethods(ThrowingObject<IllegalArgumentException, OverridingException1> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException | OverridingException1 oe1) {\n" //
+				+ "            oe1.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMultiCatchWithOverridenMethodsFromSupertype(ThrowingObject<OverridingException1, OverridingException2> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (OverridingException1 | OverridingException2 oe2) {\n" //
+				+ "            oe2.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorUp(ThrowingObject<IllegalArgumentException, IllegalAccessException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException | IllegalAccessException iae) {\n" //
+				+ "            iae.printStackTrace();\n" //
+				+ "        } catch (RuntimeException re) {\n" //
+				+ "            re.toString();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorDown(ThrowingObject<IllegalAccessException, RuntimeException> obj, int errorCount) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (RuntimeException ioe) {\n" //
+				+ "            errorCount++;\n" //
+				+ "            ioe.toString();\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            errorCount = errorCount + 1;\n" //
+				+ "            e.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Error count: \" + errorCount);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorMultiCatchWithLocalVariables(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException | IOException ioe) {\n" //
+				+ "            String s = \"[\" + ioe;\n" //
+				+ "            String s2 = \"]\";\n" //
+				+ "            System.out.println(s + s2);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class EA extends Exception {}\n" //
+				+ "    public class EB extends Exception {}\n" //
+				+ "    public class EB1 extends EB {}\n" //
+				+ "    public class EC extends Exception {}\n" //
+				+ "\n" //
+				+ "    public String refactorUp2() {\n" //
+				+ "        try {\n" //
+				+ "            return throwingMethod();\n" //
+				+ "        } catch (EA | EB1 | EC e) {\n" //
+				+ "            throw new RuntimeException(\"v1\", e);\n" //
+				+ "        } catch (EB e) {\n" //
+				+ "            throw new RuntimeException(\"v2\", e);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private String throwingMethod() throws EA, EB1, EB, EC {\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.MULTI_CATCH);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.MultiCatchCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseMultiCatch() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final class MyException extends RuntimeException {\n" //
+				+ "        private static final long serialVersionUID = 1L;\n" //
+				+ "\n" //
+				+ "        private MyException(Ex1 ex1) {\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        private MyException(Ex2 ex2) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class ThrowingObject<E1 extends Throwable, E2 extends Throwable> {\n" //
+				+ "        private void throwingMethod() throws E1, E2 {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class Ex1 extends Exception {\n" //
+				+ "        private static final long serialVersionUID = 1L;\n" //
+				+ "\n" //
+				+ "        private void print() {\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        private String getExplanation() {\n" //
+				+ "            return \"\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class Ex2 extends Exception {\n" //
+				+ "        private static final long serialVersionUID = 1L;\n" //
+				+ "\n" //
+				+ "        private void print() {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final class Ex3 extends Exception {\n" //
+				+ "        private static final long serialVersionUID = 1L;\n" //
+				+ "\n" //
+				+ "        private void print() {\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        private String getExplanation() {\n" //
+				+ "            return \"\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorMultiCatchWithNoOverridenMethods(ThrowingObject<Ex3, Ex1> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (Ex3 ne) {\n" //
+				+ "            ne.getExplanation();\n" //
+				+ "        } catch (Ex1 ex1) {\n" //
+				+ "            ex1.getExplanation();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorNoCommonSuperType(ThrowingObject<Ex1, Ex2> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (Ex1 e1) {\n" //
+				+ "            e1.print();\n" //
+				+ "        } catch (Ex2 e2) {\n" //
+				+ "            e2.print();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorChangeInBehaviourClassHierarchy(ThrowingObject<IllegalArgumentException, Exception> obj) {\n" //
+				+ "        try {\n" //
+				+ "            obj.throwingMethod();\n" //
+				+ "        } catch (IllegalArgumentException iae) {\n" //
+				+ "            iae.printStackTrace();\n" //
+				+ "        } catch (Exception ioe) {\n" //
+				+ "            ioe.toString();\n" //
+				+ "        } catch (Throwable t) {\n" //
+				+ "            t.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorMultiCatchWhenMethodDoesNotCallCommonSupertype(ThrowingObject<Ex1, Ex2> object) {\n" //
+				+ "        try {\n" //
+				+ "            object.throwingMethod();\n" //
+				+ "        } catch (Ex1 ex1) {\n" //
+				+ "            throw new MyException(ex1);\n" //
+				+ "        } catch (Ex2 ex2) {\n" //
+				+ "            throw new MyException(ex2);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.MULTI_CATCH);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testObjectsEqualsWithImportConflict() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -778,7 +1177,7 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.Java50Fix_ConvertToEnhancedForLoop_description });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 

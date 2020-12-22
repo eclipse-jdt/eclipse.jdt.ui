@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1380,6 +1381,24 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns the {@link ITypeBinding} of the {@link VariableDeclaration}.
+	 *
+	 * @param varDecl the variable declaration
+	 * @return the fragment's type binding, or null if none can be found
+	 */
+	public static ITypeBinding resolveTypeBinding(final VariableDeclaration varDecl) {
+		if (varDecl != null) {
+			IVariableBinding varBinding= varDecl.resolveBinding();
+
+			if (varBinding != null) {
+				return varBinding.getType();
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Returns whether the provided operator is the same as the one of provided node.
 	 *
 	 * @param node the node for which to test the operator
@@ -2385,6 +2404,46 @@ public class ASTNodes {
 			current= current.getParent();
 		}
 		return current;
+	}
+
+	/**
+	 * Returns a set made of all the method bindings which are overridden by the
+	 * provided method binding.
+	 *
+	 * @param overridingMethod the overriding method binding
+	 * @return a set made of all the method bindings which are overridden by the
+	 *         provided method binding
+	 */
+	public static Set<IMethodBinding> getOverridenMethods(final IMethodBinding overridingMethod) {
+		Set<IMethodBinding> results= new HashSet<>();
+		findOverridenMethods(overridingMethod, results, overridingMethod.getDeclaringClass());
+		return results;
+	}
+
+	private static void findOverridenMethods(final IMethodBinding overridingMethod, final Set<IMethodBinding> results,
+			final ITypeBinding declaringClass) {
+		ITypeBinding superclass= declaringClass.getSuperclass();
+		if (superclass != null && !addOverridenMethods(overridingMethod, superclass, results)) {
+			findOverridenMethods(overridingMethod, results, superclass);
+		}
+
+		for (ITypeBinding itf : declaringClass.getInterfaces()) {
+			if (!addOverridenMethods(overridingMethod, itf, results)) {
+				findOverridenMethods(overridingMethod, results, itf);
+			}
+		}
+	}
+
+	private static boolean addOverridenMethods(final IMethodBinding overridingMethod, final ITypeBinding superType,
+			final Set<IMethodBinding> results) {
+		for (IMethodBinding methodFromType : superType.getDeclaredMethods()) {
+			if (overridingMethod.overrides(methodFromType) && !results.add(methodFromType)) {
+				// Type has already been visited
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

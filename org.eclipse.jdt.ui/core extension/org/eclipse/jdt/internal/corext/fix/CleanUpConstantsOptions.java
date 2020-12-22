@@ -165,6 +165,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		// Java Features
 		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
+		options.setOption(MULTI_CATCH, CleanUpOptions.FALSE);
 	}
 
 	private static void setSaveParticipantSettings(CleanUpOptions options) {
@@ -308,6 +309,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		// Java Features
 		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
+		options.setOption(MULTI_CATCH, CleanUpOptions.FALSE);
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
