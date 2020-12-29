@@ -165,7 +165,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, null)
 					|| getConvertSwitchToIfProposals(context, coveringNode, null)
 					|| getConvertIfElseToSwitchProposals(context, coveringNode, null)
-					|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null);
+					|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null)
+					|| ExternalNullAnnotationQuickAssistProcessor.canAssist(context);
 		}
 		return false;
 	}
@@ -208,6 +209,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertSwitchToIfProposals(context, coveringNode, resultingCollections);
 				getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections);
 				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, locations, resultingCollections);
+
+				ExternalNullAnnotationQuickAssistProcessor.getAnnotateProposals(context, resultingCollections);
 			}
 
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -36,8 +37,12 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 
+import org.eclipse.ui.part.FileEditorInput;
+
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -46,8 +51,10 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.tests.quickfix.JarUtil.ClassFileFilter;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.ExternalNullAnnotationQuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 
@@ -63,16 +70,23 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 			((IFolder)parent).create(true, true, null);
 	}
 
-	public List<ICompletionProposal> collectAnnotateProposals(JavaEditor javaEditor, int offset) {
-		JavaSourceViewer viewer= (JavaSourceViewer)javaEditor.getViewer();
-		viewer.setSelection(new TextSelection(offset, 0));
+	public List<ICompletionProposal> collectAnnotateProposals(JavaEditor javaEditor, int offset) throws CoreException {
+		if (javaEditor instanceof ClassFileEditor) {
+			JavaSourceViewer viewer= (JavaSourceViewer)javaEditor.getViewer();
+			viewer.setSelection(new TextSelection(offset, 0));
 
-		JavaCorrectionAssistant correctionAssist= new JavaCorrectionAssistant(javaEditor);
-		IQuickAssistProcessor assistProcessor= new ExternalNullAnnotationQuickAssistProcessor(correctionAssist);
-		ICompletionProposal[] proposals= assistProcessor.computeQuickAssistProposals(viewer.getQuickAssistInvocationContext());
+			JavaCorrectionAssistant correctionAssist= new JavaCorrectionAssistant(javaEditor);
+			IQuickAssistProcessor assistProcessor= new ExternalNullAnnotationQuickAssistProcessor(correctionAssist);
+			ICompletionProposal[] proposals= assistProcessor.computeQuickAssistProposals(viewer.getQuickAssistInvocationContext());
 
-		List<ICompletionProposal> list= Arrays.asList(proposals);
-		return list;
+			List<ICompletionProposal> list= Arrays.asList(proposals);
+			return list;
+		} else {
+			// for source compilation units:
+			IJavaElement element= JavaCore.create(((FileEditorInput) javaEditor.getEditorInput()).getFile());
+			AssistContext context= new AssistContext((ICompilationUnit) element, offset, 0);
+			return collectAssists(context, false).stream().map(ICompletionProposal.class::cast).collect(Collectors.toList());
+		}
 	}
 
 	// === from jdt.core.tests.model: ===

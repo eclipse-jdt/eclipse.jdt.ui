@@ -28,7 +28,6 @@ import static org.eclipse.jdt.internal.ui.text.spelling.WordCorrectionProposal.g
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -376,7 +375,7 @@ public class ExternalNullAnnotationChangeProposals {
 	}
 
 	/* Quick assist on class file, propose changes on any type detail. */
-	public static void collectExternalAnnotationProposals(ICompilationUnit cu, ASTNode coveringNode, int offset, ArrayList<IJavaCompletionProposal> resultingCollection) {
+	public static void collectExternalAnnotationProposals(ICompilationUnit cu, ASTNode coveringNode, int offset, List<IJavaCompletionProposal> resultingCollection) {
 
 		IJavaProject javaProject= cu.getJavaProject();
 		if (JavaCore.DISABLED.equals(javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true)))
@@ -642,7 +641,7 @@ public class ExternalNullAnnotationChangeProposals {
 	/* Create one proposal from each of the three given renderers. */
 	static void createProposalsForType(ICompilationUnit cu, ASTNode type, int dims,
 			int outerDims, boolean annotateVarargs, int offset,
-			TypeRenderer rendererNonNull, TypeRenderer rendererNullable, TypeRenderer rendererRemove, ProposalCreator creator, ArrayList<IJavaCompletionProposal> resultingCollection) {
+			TypeRenderer rendererNonNull, TypeRenderer rendererNullable, TypeRenderer rendererRemove, ProposalCreator creator, List<IJavaCompletionProposal> resultingCollection) {
 		SignatureAnnotationChangeProposal operation;
 		String label;
 		// propose adding @NonNull:

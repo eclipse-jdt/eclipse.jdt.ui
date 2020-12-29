@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
@@ -25,13 +26,16 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.corext.fix.ExternalNullAnnotationChangeProposals;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
@@ -111,5 +115,28 @@ public class ExternalNullAnnotationQuickAssistProcessor implements IQuickAssistP
 				// ignore
 			}
 		}
+	}
+
+	/**
+	 * API for regular assist processor working on a source file / compilation unit.
+	 * @param context the invocation context
+	 * @param proposals list of proposals to which new proposals may be added
+	 */
+	public static void getAnnotateProposals(IInvocationContext context, List<ICommandAccess> proposals) {
+		List<IJavaCompletionProposal> eeaList= new ArrayList<>();
+		ExternalNullAnnotationChangeProposals.collectExternalAnnotationProposals(context.getCompilationUnit(),
+				context.getCoveringNode(), context.getSelectionOffset(), eeaList);
+		for (IJavaCompletionProposal proposal : eeaList)
+			proposals.add((ICommandAccess) proposal);
+	}
+
+	public static boolean canAssist(IInvocationContext context) {
+		ICompilationUnit cu= context.getCompilationUnit();
+		if (cu != null) {
+			IJavaProject javaProject= cu.getJavaProject();
+			return javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)
+					&& ExternalNullAnnotationChangeProposals.hasAnnotationPathInWorkspace(javaProject, cu);
+		}
+		return false;
 	}
 }

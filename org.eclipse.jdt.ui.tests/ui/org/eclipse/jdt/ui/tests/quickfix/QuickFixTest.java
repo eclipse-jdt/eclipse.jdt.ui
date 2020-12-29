@@ -357,7 +357,7 @@ public class QuickFixTest {
 		return false;
 	}
 
-	protected static final ArrayList<IJavaCompletionProposal> collectAssists(IInvocationContext context, boolean includeLinkedRename) throws CoreException {
+	public static final ArrayList<IJavaCompletionProposal> collectAssists(IInvocationContext context, boolean includeLinkedRename) throws CoreException {
 		Class<?>[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class };
 		return collectAssists(context, filteredTypes);
 	}
