@@ -50,7 +50,6 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 
 import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -247,14 +246,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		return composite;
 	}
 
-	private Shell getShell() {
-		if (fSWTControl != null) {
-			return fSWTControl.getShell();
-		}
-		return JavaPlugin.getActiveWorkbenchShell();
-	}
-
-
 	private class SourceContainerAdapter implements ITreeListAdapter<CPListElement>, IDialogFieldListener {
 
 		private final Object[] EMPTY_ARR= new Object[0];
@@ -448,6 +439,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			if (editCustomAttribute(getShell(), elem)) {
 				fFoldersList.refresh();
 				fClassPathList.dialogFieldChanged(); // validate
+				checkAttributeEffect(key, fCurrJProject);
 			}
 		}
 	}

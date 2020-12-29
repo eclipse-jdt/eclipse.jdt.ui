@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -395,5 +397,26 @@ public abstract class BuildPathBasePage {
 			}
 		}
 		return null;
+	}
+
+	protected Shell getShell() {
+		if (fSWTControl != null) {
+			return fSWTControl.getShell();
+		}
+		return JavaPlugin.getActiveWorkbenchShell();
+	}
+
+	protected void checkAttributeEffect(String key, IJavaProject javaProject) {
+		if (key.equals(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH)) {
+			if (javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.DISABLED)) {
+				MessageDialog messageDialog= new MessageDialog(getShell(),
+						NewWizardMessages.LibrariesWorkbookPage_externalAnnotationNeedsNullAnnotationEnabled_title,
+						null,
+						NewWizardMessages.LibrariesWorkbookPage_externalAnnotationNeedsNullAnnotationEnabled_message,
+						MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL },
+						0);
+				messageDialog.open();
+			}
+		}
 	}
 }

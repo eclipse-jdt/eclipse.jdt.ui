@@ -247,13 +247,6 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		return composite;
 	}
 
-	public Shell getShell() {
-		if (fSWTControl != null) {
-			return fSWTControl.getShell();
-		}
-		return JavaPlugin.getActiveWorkbenchShell();
-	}
-
 	@Override
 	public void init(IJavaProject jproject) {
 		fCurrJProject= jproject;

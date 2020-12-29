@@ -28,7 +28,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -52,7 +51,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.RootCPListElement.RootNodeChange;
@@ -625,14 +623,6 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
-
-	private Shell getShell() {
-		if (fSWTControl != null) {
-			return fSWTControl.getShell();
-		}
-		return JavaPlugin.getActiveWorkbenchShell();
-	}
-
 
 	private CPListElement[] addProjectDialog() {
 
