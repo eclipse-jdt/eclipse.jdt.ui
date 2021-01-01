@@ -1630,6 +1630,18 @@ public class CleanUpConstants {
 	public static final String ADD_MISSING_SERIAL_VERSION_ID_DEFAULT= "cleanup.add_default_serial_version_id"; //$NON-NLS-1$
 
 	/**
+	 * Moves increment or decrement outside an expression when possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String EXTRACT_INCREMENT= "cleanup.extract_increment"; //$NON-NLS-1$
+
+	/**
 	 * Moves assignments inside an if condition above the if node.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

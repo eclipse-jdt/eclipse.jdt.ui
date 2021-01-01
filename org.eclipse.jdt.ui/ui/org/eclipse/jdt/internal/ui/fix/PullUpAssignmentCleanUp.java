@@ -24,7 +24,6 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -313,7 +312,7 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_PullUpAssignment_description, cuRewrite);
 
-			ASTNodes.replaceButKeepComment(rewrite, getParent(assignment, ParenthesizedExpression.class), rewrite.createCopyTarget(leftHandSide), group);
+			ASTNodes.replaceButKeepComment(rewrite, ASTNodes.getHighestCompatibleNode(assignment, ParenthesizedExpression.class), rewrite.createCopyTarget(leftHandSide), group);
 			Statement newAssignment= ast.newExpressionStatement(ASTNodes.createMoveTarget(rewrite, assignment));
 
 			if (ASTNodes.canHaveSiblings(visited)) {
@@ -345,31 +344,7 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_PullUpAssignment_description, cuRewrite);
 
 			rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, ASTNodes.createMoveTarget(rewrite, assignment.getRightHandSide()), group);
-			ASTNodes.replaceButKeepComment(rewrite, getParent(assignment, ParenthesizedExpression.class), ASTNodes.createMoveTarget(rewrite, leftHandSide), group);
+			ASTNodes.replaceButKeepComment(rewrite, ASTNodes.getHighestCompatibleNode(assignment, ParenthesizedExpression.class), ASTNodes.createMoveTarget(rewrite, leftHandSide), group);
 		}
-	}
-
-	private static ASTNode getParent(final ASTNode node, final Class<?>... includedClasses) {
-		ASTNode parent= node.getParent();
-
-		if (instanceOf(parent, includedClasses)) {
-			return getParent(parent, includedClasses);
-		}
-
-		return node;
-	}
-
-	private static boolean instanceOf(final ASTNode node, final Class<?>... clazzes) {
-		if (node == null) {
-			return false;
-		}
-
-		for (Class<?> clazz : clazzes) {
-			if (clazz.isAssignableFrom(node.getClass())) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 }

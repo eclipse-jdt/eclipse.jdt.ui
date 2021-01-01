@@ -2315,14 +2315,9 @@ public class ASTNodes {
 
 		ASTNode parent= node.getParent();
 
-		if (ancestorClass.isAssignableFrom(parent.getClass())) {
+		if (ancestorClass.isAssignableFrom(parent.getClass())
+				|| instanceOf(parent, ancestorClasses)) {
 			return parent;
-		}
-
-		for (Class<? extends ASTNode> oneClass : ancestorClasses) {
-			if (oneClass.isAssignableFrom(parent.getClass())) {
-				return parent;
-			}
 		}
 
 		return getFirstAncestorOrNull(parent, ancestorClass, ancestorClasses);
@@ -2378,6 +2373,41 @@ public class ASTNodes {
 				return current;
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the highest compatible parent node only linked by a chain of accepted classes.
+	 *
+	 * @param node            the node
+	 * @param compatibleClasses the classes to include when looking for the parent
+	 *                        node
+	 * @return the last parent node of the provided classes, or the current node
+	 *         otherwise
+	 */
+	@SafeVarargs
+	public static ASTNode getHighestCompatibleNode(final ASTNode node, final Class<? extends ASTNode>... compatibleClasses) {
+		ASTNode parent= node.getParent();
+
+		if (instanceOf(parent, compatibleClasses)) {
+			return getHighestCompatibleNode(parent, compatibleClasses);
+		}
+
+		return node;
+	}
+
+	@SafeVarargs
+	private static boolean instanceOf(final ASTNode node, final Class<? extends ASTNode>... classes) {
+		if (node == null) {
+			return false;
+		}
+
+		for (Class<? extends ASTNode> clazz : classes) {
+			if (clazz.isAssignableFrom(node.getClass())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

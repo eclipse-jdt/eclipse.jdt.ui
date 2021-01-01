@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ExtractIncrementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
@@ -44,6 +45,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new ElseIfCleanUp(values),
 				new ExpressionsCleanUp(values),
 				new BitwiseConditionalExpressionCleanup(values),
+				new ExtractIncrementCleanUp(values),
 				new PullUpAssignmentCleanUp(values),
 				new NumberSuffixCleanUp(values),
 				new VariableDeclarationCleanUp(values),
@@ -84,6 +86,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference bitwiseComparison= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_CheckSignOfBitwiseOperation, CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(bitwiseComparison);
+
+		final CheckboxPreference extractIncrementPref= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ExtractIncrement, CleanUpConstants.EXTRACT_INCREMENT, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(extractIncrementPref);
 
 		final CheckboxPreference pullUpAssignmentPref= createCheckboxPref(expressionsGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_PullUpAssignment, CleanUpConstants.PULL_UP_ASSIGNMENT, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(pullUpAssignmentPref);

@@ -13530,6 +13530,410 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testExtractIncrement() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E extends ArrayList<String> {\n" //
+				+ "    private static final long serialVersionUID = -5909621993540999616L;\n" //
+				+ "\n" //
+				+ "    private int field= 0;\n" //
+				+ "\n" //
+				+ "    public E(int i) {\n" //
+				+ "        super(i++);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E(int doNotRefactor, boolean isEnabled) {\n" //
+				+ "        super(++doNotRefactor);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E(int i, int j) {\n" //
+				+ "        this(i++);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveIncrementBeforeIf(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (++i > 0) {\n" //
+				+ "            return \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"Negative\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveDecrementBeforeIf(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (--i > 0) {\n" //
+				+ "            return \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"Negative\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveDecrementBeforeThrow(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        throw new NullPointerException(\"++i \" + ++i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String[] texts= new String[++i];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement2(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        texts.wait(++i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement3(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int j= i++, k= ++z;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement4(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        j= i-- + 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement5(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        boolean isString= obj[++i] instanceof String;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement6(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        List<Date> dates= new ArrayList<>(--i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement7(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        long l= (long)i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement8(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int m= (i++);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement9(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        boolean isEqual= !(i++ == 10);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement10(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        theClass[i++].field--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement11(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int[] integers= {i++, 1, 2, 3};\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementOutsideStatement12(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        return ++i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean moveIncrementOutsideInfix(int i, boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean isEqual= (i++ == 10) && isEnabled;\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveIncrementOutsideSuperMethod(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return super.remove(++i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean moveIncrementOutsideEagerInfix(int i, boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean isEqual= isEnabled & (i++ == 10);\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementOutsideTernaryExpression(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int j= (i++ == 10) ? 10 : 20;\n" //
+				+ "        return j * 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementInIf(int i, boolean isEnabled) {\n" //
+				+ "        if (isEnabled)\n" //
+				+ "            return ++i;\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementInSwitch(int i, int discriminant) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "                return ++i;\n" //
+				+ "        case 1:\n" //
+				+ "                return --i;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E extends ArrayList<String> {\n" //
+				+ "    private static final long serialVersionUID = -5909621993540999616L;\n" //
+				+ "\n" //
+				+ "    private int field= 0;\n" //
+				+ "\n" //
+				+ "    public E(int i) {\n" //
+				+ "        super(i);\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E(int doNotRefactor, boolean isEnabled) {\n" //
+				+ "        super(++doNotRefactor);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E(int i, int j) {\n" //
+				+ "        this(i);\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveIncrementBeforeIf(int i) {\n" //
+				+ "        i++;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            return \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"Negative\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveDecrementBeforeIf(int i) {\n" //
+				+ "        i--;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            return \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"Negative\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveDecrementBeforeThrow(int i) {\n" //
+				+ "        i++;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        throw new NullPointerException(\"++i \" + i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i++;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String[] texts= new String[i];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement2(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i++;\n" //
+				+ "        texts.wait(i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement3(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int j= i, k= ++z;\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement4(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        j= i + 123;\n" //
+				+ "        i--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement5(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i++;\n" //
+				+ "        boolean isString= obj[i] instanceof String;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement6(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i--;\n" //
+				+ "        List<Date> dates= new ArrayList<>(i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement7(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        long l= (long)i;\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement8(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int m= i;\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement9(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        boolean isEqual= !(i == 10);\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement10(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        theClass[i].field--;\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement11(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int[] integers= {i, 1, 2, 3};\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementOutsideStatement12(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i++;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean moveIncrementOutsideInfix(int i, boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean isEqual= (i == 10) && isEnabled;\n" //
+				+ "        i++;\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveIncrementOutsideSuperMethod(int i) {\n" //
+				+ "        i++;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return super.remove(i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean moveIncrementOutsideEagerInfix(int i, boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean isEqual= isEnabled & (i == 10);\n" //
+				+ "        i++;\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementOutsideTernaryExpression(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int j= (i == 10) ? 10 : 20;\n" //
+				+ "        i++;\n" //
+				+ "        return j * 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementInIf(int i, boolean isEnabled) {\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            i++;\n" //
+				+ "            return i;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementInSwitch(int i, int discriminant) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "                i++;\n" //
+				+ "                return i;\n" //
+				+ "        case 1:\n" //
+				+ "                return --i;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.EXTRACT_INCREMENT);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ExtractIncrement_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotExtractIncrement() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public String doNotMoveIncrementAfterIf(int i) {\n" //
+				+ "        String result= null;\n" //
+				+ "\n" //
+				+ "        if (i++ > 0) {\n" //
+				+ "            result= \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            result= \"Negative\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return result;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveDecrementAfterReturn(int i) {\n" //
+				+ "        return i--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveDecrementAfterThrow(int i) {\n" //
+				+ "        throw new NullPointerException(\"i++ \" + i++);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveIncrementAfterFallThrough(boolean isEnabled, int i) {\n" //
+				+ "        if (i-- > 0) {\n" //
+				+ "            return i++;\n" //
+				+ "        } else {\n" //
+				+ "            throw new NullPointerException(\"i++ \" + i++);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotMoveIncrementOutsideConditionalInfix(int i, boolean isEnabled) {\n" //
+				+ "        boolean isEqual= isEnabled && (i++ == 10);\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveIncrementOutsideTernaryExpression(int i) {\n" //
+				+ "        int j= (i == 10) ? i++ : 20;\n" //
+				+ "        return j * 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveIncrementOnReadVariable(int i) {\n" //
+				+ "        int j= i++ + i++;\n" //
+				+ "        int k= i++ + i;\n" //
+				+ "        int l= i + i++;\n" //
+				+ "        int m= (i = 0) + i++;\n" //
+				+ "        return j + k + l + m;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorIncrementStatement(int i) {\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveIncrementOutsideWhile(int i) {\n" //
+				+ "        while (i-- > 0) {\n" //
+				+ "            System.out.println(\"Must decrement on each loop\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveIncrementOutsideDoWhile(int i) {\n" //
+				+ "        do {\n" //
+				+ "            System.out.println(\"Must decrement on each loop\");\n" //
+				+ "        } while (i-- > 0);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveIncrementOutsideFor() {\n" //
+				+ "        for (int i = 0; i < 10; i++) {\n" //
+				+ "            System.out.println(\"Must increment on each loop\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveIncrementOutsideElseIf(int i) {\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"I equals zero\");\n" //
+				+ "        } else if (i++ == 10) {\n" //
+				+ "            System.out.println(\"I has equaled ten\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.EXTRACT_INCREMENT);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPullUpAssignment() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //
