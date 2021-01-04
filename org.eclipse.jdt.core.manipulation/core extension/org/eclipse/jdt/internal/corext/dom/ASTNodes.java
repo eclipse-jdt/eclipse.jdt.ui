@@ -122,12 +122,14 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -787,6 +789,63 @@ public class ASTNodes {
 
 			if (value != null) {
 				return -value.longValue();
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the field simple name.
+	 *
+	 * @param expression The expression
+	 *
+	 * @return the field simple name
+	 */
+	public static SimpleName getField(final Expression expression) {
+		SimpleName simpleName= as(expression, SimpleName.class);
+
+		if (simpleName != null) {
+			return simpleName;
+		}
+
+		FieldAccess fieldName= as(expression, FieldAccess.class);
+
+		if (fieldName != null) {
+			ThisExpression thisExpression= as(fieldName.getExpression(), ThisExpression.class);
+
+			if (thisExpression != null) {
+				if (thisExpression.getQualifier() == null) {
+					return fieldName.getName();
+				}
+
+				if (thisExpression.getQualifier().isSimpleName()) {
+					SimpleName qualifier= (SimpleName) thisExpression.getQualifier();
+					TypeDeclaration visitedClass= getTypedAncestor(expression, TypeDeclaration.class);
+
+					if (visitedClass != null
+							&& isSameVariable(visitedClass.getName(), qualifier)) {
+						return fieldName.getName();
+					}
+				}
+			}
+		}
+
+		SuperFieldAccess superFieldAccess= as(expression, SuperFieldAccess.class);
+
+		if (superFieldAccess != null) {
+			if (superFieldAccess.getQualifier() == null) {
+				return superFieldAccess.getName();
+			}
+
+			if (superFieldAccess.getQualifier().isSimpleName()) {
+				SimpleName qualifier= (SimpleName) superFieldAccess.getQualifier();
+				TypeDeclaration visitedClass= getTypedAncestor(expression, TypeDeclaration.class);
+
+				if (visitedClass != null
+						&& isSameVariable(visitedClass.getName(), qualifier)) {
+					return superFieldAccess.getName();
+				}
 			}
 		}
 

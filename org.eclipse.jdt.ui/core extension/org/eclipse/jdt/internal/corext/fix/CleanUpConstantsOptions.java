@@ -25,9 +25,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 
 public class CleanUpConstantsOptions extends CleanUpConstants {
-
 	private static void setEclipseDefaultSettings(CleanUpOptions options) {
-
 		//Member Accesses
 		options.setOption(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpOptions.FALSE);
 		options.setOption(MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpOptions.FALSE);
@@ -76,6 +74,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
 
 		// Optimization
+		options.setOption(SINGLE_USED_FIELD, CleanUpOptions.FALSE);
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
@@ -222,6 +221,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
 
 		// Optimization
+		options.setOption(SINGLE_USED_FIELD, CleanUpOptions.FALSE);
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);

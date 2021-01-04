@@ -213,13 +213,13 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 		create.run(new NullProgressMonitor());
 		Change change= create.getChange();
 
-		Set<GroupCategory> categories= new HashSet<>();
+		Set<GroupCategory> actualCategories= new HashSet<>();
 
-		collectGroupCategories(categories, change);
+		collectGroupCategories(actualCategories, change);
 
-		for (GroupCategory category : categories) {
-			if (!setOfExpectedGroupCategories.contains(category.getName())) {
-				fail("Should have group category: " + category.getName() + ", found instead: " + categories.stream().map(e -> e.getName()).reduce("", String::concat));
+		for (GroupCategory actualCategory : actualCategories) {
+			if (!setOfExpectedGroupCategories.contains(actualCategory.getName())) {
+				fail("Unexpected group category: " + actualCategory.getName() + ", should find: " + String.join(", ", setOfExpectedGroupCategories));
 			}
 		}
 	}

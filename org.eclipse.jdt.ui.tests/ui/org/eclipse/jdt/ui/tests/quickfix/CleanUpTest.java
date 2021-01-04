@@ -12030,6 +12030,435 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testSingleUsedFieldInInnerClass() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public class SubClass {\n" //
+				+ "        private int refactorField;\n" //
+				+ "\n" //
+				+ "        public void refactorFieldInSubClass() {\n" //
+				+ "            this.refactorField = 123;\n" //
+				+ "            System.out.println(refactorField);\n" //
+				+ "        }\n" //
+				+ "    }\n"
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public class SubClass {\n" //
+				+ "        public void refactorFieldInSubClass() {\n" //
+				+ "            int refactorField = 123;\n" //
+				+ "            System.out.println(refactorField);\n" //
+				+ "        }\n" //
+				+ "    }\n"
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldWithComplexUse() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private short refactorFieldWithComplexUse= 42;\n" //
+				+ "\n" //
+				+ "    public void refactorFieldWithComplexUse(boolean b, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        refactorFieldWithComplexUse = 123;\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(refactorFieldWithComplexUse);\n" //
+				+ "        } else {\n" //
+				+ "            refactorFieldWithComplexUse = 321;\n" //
+				+ "\n" //
+				+ "            for (String text : texts) {\n" //
+				+ "                System.out.println(text);\n" //
+				+ "                System.out.println(this.refactorFieldWithComplexUse);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorFieldWithComplexUse(boolean b, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short refactorFieldWithComplexUse = 123;\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(refactorFieldWithComplexUse);\n" //
+				+ "        } else {\n" //
+				+ "            refactorFieldWithComplexUse = 321;\n" //
+				+ "\n" //
+				+ "            for (String text : texts) {\n" //
+				+ "                System.out.println(text);\n" //
+				+ "                System.out.println(refactorFieldWithComplexUse);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldArray() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int refactorArray[];\n" //
+				+ "\n" //
+				+ "    public void refactorArray() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        this.refactorArray = new int[]{123};\n" //
+				+ "        System.out.println(refactorArray);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorArray() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int refactorArray[] = new int[]{123};\n" //
+				+ "        System.out.println(refactorArray);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldInMultiFragment() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int refactorOneFragment, severalUses;\n" //
+				+ "\n" //
+				+ "    public void refactorOneFragment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        refactorOneFragment = 123;\n" //
+				+ "        System.out.println(refactorOneFragment);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void severalUses() {\n" //
+				+ "        severalUses = 123;\n" //
+				+ "        System.out.println(severalUses);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void severalUses(int i) {\n" //
+				+ "        severalUses = i;\n" //
+				+ "        System.out.println(severalUses);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int severalUses;\n" //
+				+ "\n" //
+				+ "    public void refactorOneFragment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int refactorOneFragment = 123;\n" //
+				+ "        System.out.println(refactorOneFragment);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void severalUses() {\n" //
+				+ "        severalUses = 123;\n" //
+				+ "        System.out.println(severalUses);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void severalUses(int i) {\n" //
+				+ "        severalUses = i;\n" //
+				+ "        System.out.println(severalUses);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldStatic() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static long refactorStaticField;\n" //
+				+ "\n" //
+				+ "    public void refactorStaticField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        refactorStaticField = 123;\n" //
+				+ "        System.out.println(refactorStaticField);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorStaticField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long refactorStaticField = 123;\n" //
+				+ "        System.out.println(refactorStaticField);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldWithSameNameAsLocalVariable() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int refactorFieldWithSameNameAsLocalVariable;\n" //
+				+ "\n" //
+				+ "    public void refactorFieldWithSameNameAsLocalVariable() {\n" //
+				+ "        refactorFieldWithSameNameAsLocalVariable = 123;\n" //
+				+ "        System.out.println(test1.E.this.refactorFieldWithSameNameAsLocalVariable);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void methodWithLocalVariable() {\n" //
+				+ "        long refactorFieldWithSameNameAsLocalVariable = 123;\n" //
+				+ "        System.out.println(refactorFieldWithSameNameAsLocalVariable);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorFieldWithSameNameAsLocalVariable() {\n" //
+				+ "        int refactorFieldWithSameNameAsLocalVariable = 123;\n" //
+				+ "        System.out.println(refactorFieldWithSameNameAsLocalVariable);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void methodWithLocalVariable() {\n" //
+				+ "        long refactorFieldWithSameNameAsLocalVariable = 123;\n" //
+				+ "        System.out.println(refactorFieldWithSameNameAsLocalVariable);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldWithSameNameAsAttribute() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int out;\n" //
+				+ "\n" //
+				+ "    public void refactorFieldWithSameNameAsAttribute() {\n" //
+				+ "        out = 123;\n" //
+				+ "        System.out.println(out);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorFieldWithSameNameAsAttribute() {\n" //
+				+ "        int out = 123;\n" //
+				+ "        System.out.println(out);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testKeepSingleUsedField() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int doNotRefactorPublicField;\n" //
+				+ "    protected int doNotRefactorProtectedField;\n" //
+				+ "    int doNotRefactorPackageField;\n" //
+				+ "    private int doNotRefactorFieldsInSeveralMethods;\n" //
+				+ "    private int doNotRefactorFieldInOtherField;\n" //
+				+ "    private int oneField = doNotRefactorFieldInOtherField;\n" //
+				+ "    private int doNotRefactorReadFieldBeforeAssignment;\n" //
+				+ "    private int doNotRefactorUnusedField;\n" //
+				+ "    private List<String> dynamicList= new ArrayList<>(Arrays.asList(\"foo\", \"bar\"));\n" //
+				+ "    private boolean doNotRefactorFieldWithActiveInitializer = dynamicList.remove(\"foo\");\n" //
+				+ "    private Runnable doNotRefactorObject;\n" //
+				+ "    @Deprecated\n" //
+				+ "    private int doNotRefactorFieldWithAnnotation;\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorPublicField() {\n" //
+				+ "        doNotRefactorPublicField = 123;\n" //
+				+ "        System.out.println(doNotRefactorPublicField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorProtectedField() {\n" //
+				+ "        doNotRefactorProtectedField = 123;\n" //
+				+ "        System.out.println(doNotRefactorProtectedField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorPackageField() {\n" //
+				+ "        doNotRefactorPackageField = 123;\n" //
+				+ "        System.out.println(doNotRefactorPackageField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldsInSeveralMethods() {\n" //
+				+ "        doNotRefactorFieldsInSeveralMethods = 123;\n" //
+				+ "        System.out.println(doNotRefactorFieldsInSeveralMethods);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldsInSeveralMethods(int i) {\n" //
+				+ "        doNotRefactorFieldsInSeveralMethods = i;\n" //
+				+ "        System.out.println(doNotRefactorFieldsInSeveralMethods);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorReadFieldBeforeAssignment() {\n" //
+				+ "        System.out.println(doNotRefactorReadFieldBeforeAssignment);\n" //
+				+ "        doNotRefactorReadFieldBeforeAssignment = 123;\n" //
+				+ "        System.out.println(doNotRefactorReadFieldBeforeAssignment);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldInOtherField() {\n" //
+				+ "        doNotRefactorFieldInOtherField = 123;\n" //
+				+ "        System.out.println(doNotRefactorFieldInOtherField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldWithActiveInitializer() {\n" //
+				+ "        doNotRefactorFieldWithActiveInitializer = true;\n" //
+				+ "        System.out.println(doNotRefactorFieldWithActiveInitializer);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorObject() {\n" //
+				+ "        doNotRefactorObject = new Runnable() {\n" //
+				+ "            @Override\n" //
+				+ "            public void run() {\n" //
+				+ "                while (true) {\n" //
+				+ "                    System.out.println(\"Don't stop me!\");\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "        doNotRefactorObject.run();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldWithAnnotation() {\n" //
+				+ "        doNotRefactorFieldWithAnnotation = 123456;\n" //
+				+ "        System.out.println(doNotRefactorFieldWithAnnotation);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class SubClass {\n" //
+				+ "        private int subClassField = 42;\n" //
+				+ "\n" //
+				+ "        public void doNotRefactorFieldInSubClass() {\n" //
+				+ "            this.subClassField = 123;\n" //
+				+ "            System.out.println(subClassField);\n" //
+				+ "        }\n" //
+				+ "    }\n"
+				+ "\n" //
+				+ "    public void oneMethod() {\n" //
+				+ "        SubClass aSubClass = new SubClass();\n" //
+				+ "        System.out.println(aSubClass.subClassField);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testBreakLoop() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //

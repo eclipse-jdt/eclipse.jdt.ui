@@ -999,6 +999,18 @@ public class CleanUpConstants {
 	public static final String VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES= "cleanup.use_arguments_for_raw_type_references"; //$NON-NLS-1$
 
 	/**
+	 * Refactors a field into a local variable if its use is only local.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String SINGLE_USED_FIELD= "cleanup.single_used_field"; //$NON-NLS-1$
+
+	/**
 	 * Add a break to avoid passive for loop iterations.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

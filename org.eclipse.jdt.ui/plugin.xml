@@ -7102,9 +7102,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.pull_up_assignment">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.single_used_field"
+            runAfter="org.eclipse.jdt.ui.cleanup.number_suffix">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUp"
             id="org.eclipse.jdt.ui.cleanup.break_loop"
-            runAfter="org.eclipse.jdt.ui.cleanup.number_suffix">
+            runAfter="org.eclipse.jdt.ui.cleanup.single_used_field">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp"
