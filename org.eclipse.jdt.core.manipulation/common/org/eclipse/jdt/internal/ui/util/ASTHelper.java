@@ -38,7 +38,6 @@ public class ASTHelper {
 	 */
 	public static final int JLS_Latest = AST.JLS_Latest;
 
-
 	private static boolean isNodeTypeSupportedInAST(AST ast, int nodeType) {
 		switch (nodeType) {
 			case ASTNode.SWITCH_CASE:
