@@ -25,36 +25,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/TypeContextChecker.java" type="org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker">
-        <filter comment="This is a Java15 preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="AbstractTypeDeclaration"/>
-                <message_argument value="TypeContextChecker"/>
-                <message_argument value="getName()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="This is a Java15 preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="TypeContextChecker"/>
-                <message_argument value="recordComponents()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="This is a Java 15 preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="TypeContextChecker"/>
-                <message_argument value="superInterfaceTypes()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="This is a Java 15 preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="TypeContextChecker"/>
-                <message_argument value="typeParameters()"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/IntroduceFactoryRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring">
         <filter comment="This is a Java 15 preview feature" id="640712815">
             <message_arguments>
@@ -68,13 +38,6 @@
                 <message_argument value="IMethodBinding"/>
                 <message_argument value="IntroduceFactoryRefactoring"/>
                 <message_argument value="isCompactConstructor()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="This is a Java 15 preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="IntroduceFactoryRefactoring"/>
-                <message_argument value="recordComponents()"/>
             </message_arguments>
         </filter>
     </resource>
@@ -213,15 +176,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/fix/PatternMatchingForInstanceofCleanUp.java" type="org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp$PatternMatchingForInstanceofOperation">
-        <filter comment="For Java 15" id="640712815">
-            <message_arguments>
-                <message_argument value="InstanceofExpression"/>
-                <message_argument value="PatternMatchingForInstanceofOperation"/>
-                <message_argument value="setPatternVariable(SimpleName)"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/AddClassFileMarkerAction.java" type="org.eclipse.jdt.internal.ui.javaeditor.AddClassFileMarkerAction">
         <filter id="571473929">
             <message_arguments>
@@ -271,20 +225,6 @@
         </filter>
     </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/SemanticHighlightingReconciler.java" type="org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingReconciler$PositionCollector">
-        <filter comment="This is a Java15 preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="ASTNode"/>
-                <message_argument value="PositionCollector"/>
-                <message_argument value="getAST()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 14 preview features" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="PositionCollector"/>
-                <message_argument value="getRestrictedIdentifierStartPosition()"/>
-            </message_arguments>
-        </filter>
         <filter comment="This is a Java 15 preview feature" id="640712815">
             <message_arguments>
                 <message_argument value="TypeDeclaration"/>
@@ -301,98 +241,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/JavadocTagsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor">
-        <filter comment="For Java 14 Enable Preview feature" id="623939596">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="JavadocTagsSubProcessor"/>
-                <message_argument value="RECORD_COMPONENTS_PROPERTY"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 14 Enable Preview feature" id="623939596">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="JavadocTagsSubProcessor"/>
-                <message_argument value="TYPE_PARAMETERS_PROPERTY"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 14 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="JavadocTagsSubProcessor"/>
-                <message_argument value="recordComponents()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 14 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="JavadocTagsSubProcessor"/>
-                <message_argument value="typeParameters()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/JavadocTagsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor$AddAllMissingJavadocTagsProposal">
-        <filter comment="For Java 14 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="ASTNode"/>
-                <message_argument value="AddAllMissingJavadocTagsProposal"/>
-                <message_argument value="getAST()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 14 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="BodyDeclaration"/>
-                <message_argument value="AddAllMissingJavadocTagsProposal"/>
-                <message_argument value="getJavadoc()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 14 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="AddAllMissingJavadocTagsProposal"/>
-                <message_argument value="recordComponents()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 14 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="AddAllMissingJavadocTagsProposal"/>
-                <message_argument value="typeParameters()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/JavadocTagsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor$AddMissingJavadocTagProposal">
-        <filter comment="This is a Java15 preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="AddMissingJavadocTagProposal"/>
-                <message_argument value="recordComponents()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 14 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="AddMissingJavadocTagProposal"/>
-                <message_argument value="typeParameters()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/SuppressWarningsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.SuppressWarningsSubProcessor">
-        <filter comment="For Java 14 Enable Preview feature" id="623939596">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="SuppressWarningsSubProcessor"/>
-                <message_argument value="MODIFIERS2_PROPERTY"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 14 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="AbstractTypeDeclaration"/>
-                <message_argument value="SuppressWarningsSubProcessor"/>
-                <message_argument value="getName()"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/UnresolvedElementsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor">
         <filter comment="This is a Java 15 preview feature" id="640712815">
             <message_arguments>
@@ -403,27 +251,11 @@
         </filter>
     </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/proposals/InitializeFinalFieldProposal.java" type="org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal">
-        <filter id="640712815">
-            <message_arguments>
-                <message_argument value="AbstractTypeDeclaration"/>
-                <message_argument value="InitializeFinalFieldProposal"/>
-                <message_argument value="getName()"/>
-            </message_arguments>
-        </filter>
         <filter comment="This is a Java 15 preview feature" id="640712815">
             <message_arguments>
                 <message_argument value="IMethodBinding"/>
                 <message_argument value="InitializeFinalFieldProposal"/>
                 <message_argument value="isCanonicalConstructor()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/proposals/InitializeFinalFieldProposal.java" type="org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal$RecordComponentVisitor">
-        <filter id="640712815">
-            <message_arguments>
-                <message_argument value="RecordDeclaration"/>
-                <message_argument value="RecordComponentVisitor"/>
-                <message_argument value="recordComponents()"/>
             </message_arguments>
         </filter>
     </resource>
