@@ -188,8 +188,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		ASTNode[] selectedNodes= SurroundWith.getValidSelectedNodes(invocationContext);
 
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
-		for (int i= 0; i != templates.length; i++) {
-			Template currentTemplate= templates[i];
+		for (Template currentTemplate : templates) {
 			if (canEvaluate(context, currentTemplate)) {
 
 				if (selectedNodes != null) {

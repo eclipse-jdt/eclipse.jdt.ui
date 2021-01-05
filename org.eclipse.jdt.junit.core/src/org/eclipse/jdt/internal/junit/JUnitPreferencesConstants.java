@@ -178,14 +178,7 @@ public class JUnitPreferencesConstants {
 		if (list == null)
 			return ""; //$NON-NLS-1$
 
-		StringBuilder buffer= new StringBuilder();
-		for (int i= 0; i < list.length; i++) {
-			if (i > 0)
-				buffer.append(',');
-
-			buffer.append(list[i]);
-		}
-		return buffer.toString();
+		return String.join(String.valueOf(','), list);
 	}
 
 	/**

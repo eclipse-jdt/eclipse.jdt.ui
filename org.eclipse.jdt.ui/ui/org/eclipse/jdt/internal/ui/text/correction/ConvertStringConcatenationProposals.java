@@ -278,16 +278,16 @@ class ConvertStringConcatenationProposals {
 		collectInfixPlusOperands(fOldInfixExpression, operands);
 
 		List<Expression> formatArguments= new ArrayList<>();
-		String formatString= ""; //$NON-NLS-1$
+		StringBuilder formatString= new StringBuilder();
 		int i= 0;
 		for (Expression operand : operands) {
 			if (operand instanceof StringLiteral) {
 				String value= ((StringLiteral) operand).getEscapedValue();
 				value= value.substring(1, value.length() - 1);
 				value= value.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
-				formatString+= value;
+				formatString.append(value);
 			} else {
-				formatString+= "{" + i + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+				formatString.append("{").append(i).append("}"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				Expression argument;
 				if (is50OrHigher) {
@@ -336,7 +336,7 @@ class ConvertStringConcatenationProposals {
 		List<Expression> arguments= formatInvocation.arguments();
 
 		StringLiteral formatStringArgument= fAst.newStringLiteral();
-		formatStringArgument.setEscapedValue("\"" + formatString + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+		formatStringArgument.setEscapedValue("\"" + formatString.append("\"").toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		arguments.add(formatStringArgument);
 
 		if (is50OrHigher) {
@@ -375,18 +375,18 @@ class ConvertStringConcatenationProposals {
 		collectInfixPlusOperands(fOldInfixExpression, operands);
 
 		List<Expression> formatArguments= new ArrayList<>();
-		String formatString= ""; //$NON-NLS-1$
+		StringBuilder formatString= new StringBuilder();
 		for (Expression operand : operands) {
 			if (operand instanceof StringLiteral) {
 				String value= ((StringLiteral) operand).getEscapedValue();
 				value= value.substring(1, value.length() - 1);
-				formatString+= value;
+				formatString.append(value);
 			} else {
 				ITypeBinding binding= operand.resolveTypeBinding();
 				if (binding == null)
 					return null;
 
-				formatString += "%" + stringFormatConversion(binding); //$NON-NLS-1$
+				formatString.append("%").append(stringFormatConversion(binding)); //$NON-NLS-1$
 				formatArguments.add((Expression) rewrite.createCopyTarget(operand));
 			}
 		}
@@ -407,7 +407,7 @@ class ConvertStringConcatenationProposals {
 		List<Expression> arguments= formatInvocation.arguments();
 
 		StringLiteral formatStringArgument= fAst.newStringLiteral();
-		formatStringArgument.setEscapedValue("\"" + formatString + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+		formatStringArgument.setEscapedValue("\"" + formatString.append("\"").toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		arguments.add(formatStringArgument);
 
 		arguments.addAll(formatArguments);

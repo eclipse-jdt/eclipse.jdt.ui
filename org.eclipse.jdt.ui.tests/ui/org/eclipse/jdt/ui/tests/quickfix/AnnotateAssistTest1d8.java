@@ -29,10 +29,13 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -1169,4 +1172,87 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}
 	}
+
+	/**
+	 * Assert two proposals ("@NonNull" and "@Nullable") on a simple return type (type variable).
+	 * Apply the second proposal and check the effect.
+	 *
+	 * Similar to AnnotateAssistTest1d5.testAnnotateReturn2() but annotating source not binary.
+	 *
+	 * @throws Exception Any exception
+	 */
+	@Test
+	public void testAnnotateReturnInSourceFolder() throws Exception {
+		String MY_MAP_PATH= "pack/age/MyMap";
+		String[] pathAndContents= new String[] {
+					MY_MAP_PATH+".java",
+					"package pack.age;\n" +
+					"public interface MyMap<K,V> {\n" +
+					"    public V get(K key);\n" +
+					"}\n"
+				};
+		JarUtil.createSourceDir(pathAndContents, fJProject1.getProject().getLocation()+"/src");
+		fJProject1.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+
+		IClasspathEntry[] rawClasspath= fJProject1.getRawClasspath();
+		fJProject1.setRawClasspath(new IClasspathEntry[] {
+				rawClasspath[0],
+				JavaCore.newSourceEntry(fJProject1.getPath().append("src"))
+			},
+			null);
+		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+
+		try {
+			int offset= pathAndContents[1].indexOf("V get");
+
+			List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
+			assertNumberOfProposals(list, 0); // no annotation path defined
+
+			fJProject1.setRawClasspath(new IClasspathEntry[] {
+					rawClasspath[0],
+					JavaCore.newSourceEntry(fJProject1.getPath().append("src"), null, null, null,
+							new IClasspathAttribute[] {
+									JavaCore.newClasspathAttribute(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, ANNOTATION_PATH)
+					})
+				},
+				null);
+
+			list= collectAnnotateProposals(javaEditor, offset);
+			assertCorrectLabels(list);
+			assertNumberOfProposals(list, 2);
+
+			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull V'", list);
+			String expectedInfo=
+					"<dl><dt>get</dt>" +
+					"<dd>(TK;)TV;</dd>" +
+					"<dd>(TK;)T<b>1</b>V;</dd>" + // <= 1
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			proposal= findProposalByName("Annotate as '@Nullable V'", list);
+			expectedInfo=
+					"<dl><dt>get</dt>" +
+					"<dd>(TK;)TV;</dd>" +
+					"<dd>(TK;)T<b>0</b>V;</dd>" + // <= 0
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+			proposal.apply(document);
+
+			IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(MY_MAP_PATH + ".eea"));
+			assertTrue("Annotation file should have been created", annotationFile.exists());
+
+			String expectedContent=
+					"class pack/age/MyMap\n" +
+					"get\n" +
+					" (TK;)TV;\n" +
+					" (TK;)T0V;\n";
+			checkContentOfFile("annotation file content", annotationFile, expectedContent);
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+
 }

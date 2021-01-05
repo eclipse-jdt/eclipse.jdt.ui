@@ -137,6 +137,7 @@ public class CPListElement {
 				createAttributeElement(INCLUSION, new Path[0], true);
 				createAttributeElement(EXCLUSION, new Path[0], true);
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
+				createAttributeElement(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, null, false);
 				createAttributeElement(IGNORE_OPTIONAL_PROBLEMS, null, false);
 				createAttributeElement(TEST, null, false);
 				break;

@@ -184,12 +184,12 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 		}
 	    if (existingFolders.size() > 0) {
 	    	if (existingFolders.size() > 1) {
-	    		String message= "Found more then one existing folders:"; //$NON-NLS-1$
+	    		StringBuilder message= new StringBuilder("Found more then one existing folders:"); //$NON-NLS-1$
 	    		for (IResource iResource : existingFolders) {
 	                IFolder folder= (IFolder)iResource;
-	                message+= "\n" + folder.toString(); //$NON-NLS-1$
+	                message.append("\n").append(folder.toString()); //$NON-NLS-1$
 	            }
-	    		Assert.isTrue(false, message);
+	    		Assert.isTrue(false, message.toString());
 	    	}
 	    	return (IFolder)existingFolders.get(0);
 	    }

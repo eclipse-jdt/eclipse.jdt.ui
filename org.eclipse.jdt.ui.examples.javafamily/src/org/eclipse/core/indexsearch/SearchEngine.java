@@ -187,10 +187,9 @@ public class SearchEngine {
 	}
 
 	private IIndex[] getIndexes(IIndexQuery search) {
-		IPath[] fIndexKeys= null; // cache of the keys for looking index up
 		ArrayList requiredIndexKeys= new ArrayList();
 		search.computePathsKeyingIndexFiles(requiredIndexKeys);
-		fIndexKeys= new IPath[requiredIndexKeys.size()];
+		IPath[] fIndexKeys= new IPath[requiredIndexKeys.size()]; // cache of the keys for looking index up
 		requiredIndexKeys.toArray(fIndexKeys);
 
 		// acquire the in-memory indexes on the fly

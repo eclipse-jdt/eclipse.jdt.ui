@@ -170,11 +170,7 @@ public abstract class ModuleEncapsulationDetail {
 
 		@Override
 		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + ((fModule == null) ? 0 : fModule.hashCode());
-			result= prime * result + ((fPaths == null) ? 0 : fPaths.hashCode());
-			return result;
+			return Objects.hash(fModule, fPaths);
 		}
 
 		@Override
@@ -331,12 +327,7 @@ public abstract class ModuleEncapsulationDetail {
 
 		@Override
 		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + ((fPackage == null) ? 0 : fPackage.hashCode());
-			result= prime * result + ((fSourceModule == null) ? 0 : fSourceModule.hashCode());
-			result= prime * result + ((fTargetModules == null) ? 0 : fTargetModules.hashCode());
-			return result;
+			return Objects.hash(fPackage, fSourceModule, fTargetModules);
 		}
 
 		@Override
@@ -434,11 +425,7 @@ public abstract class ModuleEncapsulationDetail {
 
 		@Override
 		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + ((fSourceModule == null) ? 0 : fSourceModule.hashCode());
-			result= prime * result + ((fTargetModule == null) ? 0 : fTargetModule.hashCode());
-			return result;
+			return Objects.hash(fSourceModule, fTargetModule);
 		}
 
 		@Override

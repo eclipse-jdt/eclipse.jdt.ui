@@ -71,10 +71,10 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 	}
 
 	private String getSimpleTestFileName(boolean canReorder, boolean input){
-		String fileName = "A_" + getName();
+		StringBuilder fileName = new StringBuilder("A_").append(getName());
 		if (canReorder)
-			fileName += input ? "_in": "_out";
-		return fileName + ".java";
+			fileName.append(input ? "_in": "_out");
+		return fileName.append(".java").toString();
 	}
 
 	private String getTestFileName(boolean canReorder, boolean input){
@@ -83,9 +83,9 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 	}
 
 	private String getTestFolderPath(boolean canModify) {
-		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
-		fileName += (canModify ? "canModify/": "cannotModify/");
-		return fileName;
+		StringBuilder fileName= new StringBuilder(TEST_PATH_PREFIX).append(getRefactoringPath());
+		fileName.append(canModify ? "canModify/": "cannotModify/");
+		return fileName.toString();
 	}
 
 	//---helpers

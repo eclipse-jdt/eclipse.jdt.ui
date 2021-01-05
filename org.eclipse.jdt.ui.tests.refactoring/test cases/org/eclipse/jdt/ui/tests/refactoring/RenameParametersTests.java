@@ -51,16 +51,16 @@ public class RenameParametersTests extends GenericRefactoringTest{
 	}
 
 	private String getSimpleTestFileName(boolean canRename, boolean input){
-		String fileName = "A_" + getName();
+		StringBuilder fileName = new StringBuilder("A_").append(getName());
 		if (canRename)
-			fileName += input ? "_in": "_out";
-		return fileName + ".java";
+			fileName.append(input ? "_in": "_out");
+		return fileName.append(".java").toString();
 	}
 
 	private String getTestFileName(boolean canRename, boolean input){
-		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
-		fileName += (canRename ? "canRename/": "cannotRename/");
-		return fileName + getSimpleTestFileName(canRename, input);
+		StringBuilder fileName= new StringBuilder(TEST_PATH_PREFIX).append(getRefactoringPath());
+		fileName.append(canRename ? "canRename/": "cannotRename/");
+		return fileName.append(getSimpleTestFileName(canRename, input)).toString();
 	}
 
 	//------------

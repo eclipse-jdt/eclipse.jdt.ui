@@ -1421,8 +1421,8 @@ public class ClasspathModifier {
 
 			@Override
 			public boolean validate(IPath outputLocation) {
-				for (int i= 0; i < newElements.size(); i++) {
-					if (isInvalid(newElements.get(i), outputLocation))
+				for (Object newElement : newElements) {
+					if (isInvalid(newElement, outputLocation))
 						return false;
 				}
 

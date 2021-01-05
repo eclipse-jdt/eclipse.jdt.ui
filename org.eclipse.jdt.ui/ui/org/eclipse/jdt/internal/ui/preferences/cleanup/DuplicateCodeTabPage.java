@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp;
@@ -36,6 +37,7 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 				new TernaryOperatorCleanUp(values),
 				new StrictlyEqualOrDifferentCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
+				new ControlFlowMergeCleanUp(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
 				new RedundantIfConditionCleanUp(values)
 		};
@@ -53,6 +55,9 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference mergeConditionalBlocks= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_MergeConditionalBlocks, CleanUpConstants.MERGE_CONDITIONAL_BLOCKS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(mergeConditionalBlocks);
+
+		final CheckboxPreference controlFlowMerge= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_ControlFlowMerge, CleanUpConstants.CONTROLFLOW_MERGE, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(controlFlowMerge);
 
 		final CheckboxPreference redundantFallingThroughBlockEnd= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd, CleanUpConstants.REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(redundantFallingThroughBlockEnd);

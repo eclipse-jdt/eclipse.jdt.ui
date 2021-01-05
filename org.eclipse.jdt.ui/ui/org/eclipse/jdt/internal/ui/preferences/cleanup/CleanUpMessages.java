@@ -49,18 +49,13 @@ public class CleanUpMessages extends NLS {
 
 	public static String CodeFormatingTabPage_SortMembersSemanticChange_warning;
 
-	public static String CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced;
-	public static String CodeStyleTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed;
 	public static String CodeStyleTabPage_CheckboxName_Switch;
-	public static String CodeStyleTabPage_CheckboxName_ConvertToSwitchExpressions;
 	public static String CodeStyleTabPage_CheckboxName_UseAddAllRemoveAll;
 	public static String CodeStyleTabPage_CheckboxName_UseBlocks;
 	public static String CodeStyleTabPage_CheckboxName_UseFinal;
 	public static String CodeStyleTabPage_CheckboxName_UseFinalForFields;
 	public static String CodeStyleTabPage_CheckboxName_UseFinalForLocals;
 	public static String CodeStyleTabPage_CheckboxName_UseFinalForParameters;
-
-	public static String CodeStyleTabPage_CheckboxName_UseVar;
 
 	public static String CodeStyleTabPage_CheckboxName_UseParentheses;
 	public static String CodeStyleTabPage_GroupName_ControlStatements;
@@ -81,10 +76,6 @@ public class CleanUpMessages extends NLS {
 
 	public static String CodeStyleTabPage_RadioName_UseBlocksSpecial;
 
-	public static String CodeStyleTabPage_GroupName_FunctionalInterfaces;
-	public static String CodeStyleTabPage_CheckboxName_ConvertFunctionalInterfaces;
-	public static String CodeStyleTabPage_RadioName_UseLambdaWherePossible;
-	public static String CodeStyleTabPage_RadioName_UseAnonymous;
 	public static String CodeStyleTabPage_CheckboxName_SimplifyLambdaExpressionAndMethodRefSyntax;
 
 	public static String OptimizationTabPage_GroupName_Optimization;
@@ -130,14 +121,8 @@ public class CleanUpMessages extends NLS {
 
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryCasts;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryNLSTags;
-	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantTypeArguments;
-	public static String UnnecessaryCodeTabPage_CheckboxName_Hash;
-	public static String UnnecessaryCodeTabPage_CheckboxName_Join;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ArraysFill;
 	public static String UnnecessaryCodeTabPage_CheckboxName_EvaluateNullable;
-	public static String UnnecessaryCodeTabPage_CheckboxName_Autoboxing;
-	public static String UnnecessaryCodeTabPage_CheckboxName_Unboxing;
-	public static String UnnecessaryCodeTabPage_CheckboxName_PatternMatchingForInstanceof;
 	public static String UnnecessaryCodeTabPage_CheckboxName_PushDownNegation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_DoubleNegation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ComparisonStatement;
@@ -154,7 +139,6 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantArrayCreation_description;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UselessReturn;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UselessContinue;
-	public static String UnnecessaryCodeTabPage_CheckboxName_ObjectsEquals;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryVarargsArrayCreation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedConstructors;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedFields;
@@ -171,10 +155,41 @@ public class CleanUpMessages extends NLS {
 	public static String DuplicateCodeTabPage_CheckboxName_TernaryOperator;
 	public static String DuplicateCodeTabPage_CheckboxName_StrictlyEqualOrDifferent;
 	public static String DuplicateCodeTabPage_CheckboxName_MergeConditionalBlocks;
+	public static String DuplicateCodeTabPage_CheckboxName_ControlFlowMerge;
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd;
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantIfCondition;
 
+	public static String UnnecessaryCodeTabPage_CheckboxName_PatternMatchingForInstanceof;
+
+	public static String JavaFeatureTabPage_GroupName_Java14;
+	public static String JavaFeatureTabPage_CheckboxName_ConvertToSwitchExpressions;
+
+	public static String JavaFeatureTabPage_GroupName_Java10;
+
+	public static String JavaFeatureTabPage_CheckboxName_UseVar;
+
+	public static String JavaFeatureTabPage_GroupName_Java1d8;
+
+	public static String JavaFeatureTabPage_GroupName_FunctionalInterfaces;
+	public static String JavaFeatureTabPage_CheckboxName_ConvertFunctionalInterfaces;
+	public static String JavaFeatureTabPage_RadioName_UseLambdaWherePossible;
+	public static String JavaFeatureTabPage_RadioName_UseAnonymous;
+	public static String JavaFeatureTabPage_CheckboxName_Join;
+
+	public static String JavaFeatureTabPage_GroupName_Java1d7;
+
 	public static String JavaFeatureTabPage_CheckboxName_TryWithResource;
+	public static String JavaFeatureTabPage_CheckboxName_MultiCatch;
+	public static String JavaFeatureTabPage_CheckboxName_RedundantTypeArguments;
+	public static String JavaFeatureTabPage_CheckboxName_Hash;
+	public static String JavaFeatureTabPage_CheckboxName_ObjectsEquals;
+
+	public static String JavaFeatureTabPage_GroupName_Java1d5;
+
+	public static String JavaFeatureTabPage_CheckboxName_ConvertForLoopToEnhanced;
+	public static String JavaFeatureTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed;
+	public static String JavaFeatureTabPage_CheckboxName_Autoboxing;
+	public static String JavaFeatureTabPage_CheckboxName_Unboxing;
 
 	static {
 		// initialize resource bundle

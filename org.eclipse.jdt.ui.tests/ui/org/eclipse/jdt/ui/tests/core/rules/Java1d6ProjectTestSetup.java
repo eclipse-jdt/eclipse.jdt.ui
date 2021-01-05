@@ -20,26 +20,21 @@ package org.eclipse.jdt.ui.tests.core.rules;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 /**
  * Setup the tests related to Java 6 (i.e. Mustang).
  */
 public class Java1d6ProjectTestSetup extends ProjectTestSetup {
-	@Override
-	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_16);
-		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
+
+	public Java1d6ProjectTestSetup() {
+		super("TestSetupProject1d6", JavaProjectHelper.RT_STUBS_16);
 	}
 
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
-		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
-		javaProject.setRawClasspath(getDefaultClasspath(), null);
+		IJavaProject javaProject= super.createAndInitializeProject();
 		JavaProjectHelper.set16CompilerOptions(javaProject);
 		return javaProject;
 	}

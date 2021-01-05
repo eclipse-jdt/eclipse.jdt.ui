@@ -54,8 +54,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
-
 	/**
  * Semantic highlightings
  *
@@ -1924,7 +1922,7 @@ public class SemanticHighlightings {
 	/**
 	 *
 	 */
-	static final class RestrictedKeywordsHighlighting extends SemanticHighlighting {
+	static final class RestrictedIdentifiersHighlighting extends SemanticHighlighting {
 
 		@Override
 		public String getPreferenceKey() {
@@ -1953,7 +1951,7 @@ public class SemanticHighlightings {
 
 		@Override
 		public String getDisplayName() {
-			return PreferencesMessages.JavaEditorPreferencePage_restrictedKeywords;
+			return JavaEditorMessages.SemanticHighlighting_restrictedIdentifiers;
 		}
 
 		@Override
@@ -2053,7 +2051,7 @@ public class SemanticHighlightings {
 				new AnnotationHighlighting(), // before interfaces
 				new InterfaceHighlighting(),
 				new NumberHighlighting(),
-				new RestrictedKeywordsHighlighting()
+				new RestrictedIdentifiersHighlighting()
 			};
 		return fgSemanticHighlightings;
 	}

@@ -17,7 +17,6 @@
 package org.eclipse.jdt.internal.junit.runner;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class TestExecution {
 	private boolean fShouldStop = false;
@@ -35,10 +34,10 @@ public class TestExecution {
 	}
 
 	public void run(ITestReference[] suites) {
-		for (int i = 0; i < suites.length; i++) {
+		for (ITestReference suite : suites) {
 			if (fShouldStop)
 				return;
-			suites[i].run(this);
+			suite.run(this);
 		}
 	}
 
@@ -48,8 +47,7 @@ public class TestExecution {
 
 	public void stop() {
 		fShouldStop = true;
-		for (Iterator<IStopListener> iter = fStopListeners.iterator(); iter.hasNext();) {
-			IStopListener listener = iter.next();
+		for (IStopListener listener : fStopListeners) {
 			listener.stop();
 		}
 	}

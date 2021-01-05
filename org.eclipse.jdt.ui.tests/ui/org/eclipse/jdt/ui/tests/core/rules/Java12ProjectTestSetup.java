@@ -22,9 +22,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,36 +31,27 @@ import org.eclipse.jdt.internal.core.ClasspathEntry;
 
 public class Java12ProjectTestSetup extends ProjectTestSetup {
 
-	public static final String PROJECT_NAME12= "TestSetupProject12";
+	public Java12ProjectTestSetup() {
+		super("TestSetupProject12", JavaProjectHelper.RT_STUBS_12);
+	}
 
 	private boolean enable_preview_feature;
 
 	@Override
-	public IJavaProject getProject() {
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME12);
-		return JavaCore.create(project);
-	}
-
-	@Override
 	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_12);
+		IPath[] rtJarPath= JavaProjectHelper.findRtJar(ipath);
 		IClasspathAttribute[] extraAttributes= { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, Boolean.TRUE.toString()) };
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], ClasspathEntry.NO_ACCESS_RULES, extraAttributes, true) };
 	}
 
 	public Java12ProjectTestSetup( boolean enable_preview_feature) {
+		this();
 		this.enable_preview_feature= enable_preview_feature;
 	}
 
 	@Override
-	protected boolean projectExists() {
-		return getProject().exists();
-	}
-
-	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
-		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME12, "bin");
-		javaProject.setRawClasspath(getDefaultClasspath(), null);
+		IJavaProject javaProject= super.createAndInitializeProject();
 		JavaProjectHelper.set12CompilerOptions(javaProject, enable_preview_feature);
 		return javaProject;
 	}

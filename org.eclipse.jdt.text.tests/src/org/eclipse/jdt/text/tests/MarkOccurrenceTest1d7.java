@@ -60,9 +60,6 @@ public class MarkOccurrenceTest1d7 {
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	/*
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Before
 	public void setUp() throws Exception {
 		fParser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);

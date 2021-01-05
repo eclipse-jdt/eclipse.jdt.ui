@@ -26,14 +26,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -41,18 +35,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * This class is made to run tests on Java Spider 1.8 .
  */
 public class Java1d8ProjectTestSetup extends ProjectTestSetup {
-	public static final String PROJECT_NAME18= "TestSetupProject18";
 
-	@Override
-	public IJavaProject getProject() {
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME18);
-		return JavaCore.create(project);
-	}
-
-	@Override
-	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_18);
-		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
+	public Java1d8ProjectTestSetup() {
+		super("TestSetupProject1d8", JavaProjectHelper.RT_STUBS_18);
 	}
 
 	public static String getJdtAnnotations20Path() throws IOException {
@@ -66,14 +51,8 @@ public class Java1d8ProjectTestSetup extends ProjectTestSetup {
 	}
 
 	@Override
-	protected boolean projectExists() {
-		return getProject().exists();
-	}
-
-	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
-		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME18, "bin");
-		javaProject.setRawClasspath(getDefaultClasspath(), null);
+		IJavaProject javaProject= super.createAndInitializeProject();
 		JavaProjectHelper.set18CompilerOptions(javaProject);
 		return javaProject;
 	}

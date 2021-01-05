@@ -95,9 +95,6 @@ public class IndentActionTest {
 	private SourceViewer fSourceViewer;
 	private IDocument fDocument;
 
-	/*
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Before
 	public void setUp() throws Exception {
 		String filename= createFileName("Before");
@@ -106,9 +103,6 @@ public class IndentActionTest {
 		fDocument= fSourceViewer.getDocument();
 	}
 
-	/*
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 		EditorTestHelper.closeEditor(fEditor);

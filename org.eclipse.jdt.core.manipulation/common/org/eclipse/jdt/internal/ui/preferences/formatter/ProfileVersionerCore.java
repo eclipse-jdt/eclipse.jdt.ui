@@ -23,97 +23,75 @@ import org.eclipse.jdt.internal.ui.PreferenceConstantsCore;
 
 public class ProfileVersionerCore {
 
-	private static final int VERSION_1= 1; // < 20040113 (includes M6)
-	private static final int VERSION_2= 2; // before renaming almost all
-	private static final int VERSION_3= 3; // after renaming almost all
-	private static final int VERSION_4= 4;
-	private static final int VERSION_5= 5; // after splitting of FORMATTER_INDENT_BLOCK_STATEMENTS
-	private static final int VERSION_6= 6; // after splitting of new_line_in_control_statements
-	private static final int VERSION_7= 7; // after moving comment formatter to JDT Core
-	private static final int VERSION_8= 8; // fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=89739
-	private static final int VERSION_9= 9; // after storing project profile names in preferences
-	private static final int VERSION_10= 10; // splitting options for annotation types
-	private static final int VERSION_11= 11; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=49412
-	private static final int VERSION_12= 12; // https://bugs.eclipse.org/318010
-	private static final int VERSION_13= 13; // https://bugs.eclipse.org/514019
-	private static final int VERSION_14= 14; // https://bugs.eclipse.org/128653, https://bugs.eclipse.org/531826
-	private static final int VERSION_15= 15; // https://bugs.eclipse.org/205973
-	private static final int VERSION_16= 16; // https://bugs.eclipse.org/543080, https://bugs.eclipse.org/543475
-	private static final int VERSION_17= 17; // https://bugs.eclipse.org/214283
-	private static final int VERSION_18= 18; // https://bugs.eclipse.org/552919
-	private static final int VERSION_19= 19; // https://bugs.eclipse.org/553155
-	private static final int VERSION_20= 20; // https://bugs.eclipse.org/118641
-	private static final int VERSION_21= 20; // https://bugs.eclipse.org/545078
-
-	private static final int CURRENT_VERSION= VERSION_21;
+	private static final int CURRENT_VERSION= 21;
 
 	public static int getFirstVersion() {
-	    return VERSION_1;
-    }
+		return 1;
+	}
 
 	public static int getCurrentVersion() {
-	    return CURRENT_VERSION;
-    }
+		return CURRENT_VERSION;
+	}
 
 	public static Map<String, String> updateAndComplete(Map<String, String> oldSettings, int version) {
 		final Map<String, String> newSettings= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
 
 		switch (version) {
 
-		case VERSION_1:
+		case 1:
 			version1to2(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_2:
+		case 2:
 			version2to3(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_3:
+		case 3:
 		    version3to4(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_4:
+		case 4:
 			version4to5(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_5:
+		case 5:
 		    version5to6(oldSettings);
 		    //$FALL-THROUGH$
-		case VERSION_6:
+		case 6:
 		    version6to7(oldSettings);
 		    //$FALL-THROUGH$
-		case VERSION_7:
-		case VERSION_8:
-		case VERSION_9:
+		case 7:
+		case 8:
+		case 9:
 		    version9to10(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_10 :
+		case 10 :
 			version10to11(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_11 :
+		case 11 :
 			version11to12(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_12 :
+		case 12 :
 			version12to13(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_13 :
+		case 13 :
 			version13to14(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_14:
+		case 14:
 			version14to15(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_15:
+		case 15:
 			version15to16(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_16:
+		case 16:
 			version16to17(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_17:
+		case 17:
 			version17to18(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_18:
+		case 18:
 			version18to19(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_19:
+		case 19:
 			version19to20(oldSettings);
 			//$FALL-THROUGH$
-		case VERSION_20:
+		case 20:
 			version20to21(oldSettings);
 			//$FALL-THROUGH$
 		default:

@@ -316,8 +316,6 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					ExpressionStatement oldExpStatement= (ExpressionStatement)oldStatements.get(statementsLen - 1);
 					Assignment oldAssignment= (Assignment)oldExpStatement.getExpression();
 					Expression rhs= oldAssignment.getRightHandSide();
-					Expression newYieldExpression= null;
-					YieldStatement newYield= null;
 					IBuffer buffer= cuRewrite.getCu().getBuffer();
 					StringBuffer b= new StringBuffer();
 					List<Comment> leadingComments= ASTNodes.getLeadingComments(oldExpStatement);
@@ -331,8 +329,8 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						b.append(" " + buffer.getText(comment.getStartPosition(), comment.getLength())); //$NON-NLS-1$
 					}
 
-					newYield = (YieldStatement)rewrite.createStringPlaceholder(b.toString(), ASTNode.YIELD_STATEMENT);
-					newYieldExpression= (Expression) rewrite.createStringPlaceholder(b.toString(), rhs.getNodeType());
+					YieldStatement newYield = (YieldStatement)rewrite.createStringPlaceholder(b.toString(), ASTNode.YIELD_STATEMENT);
+					Expression newYieldExpression= (Expression) rewrite.createStringPlaceholder(b.toString(), rhs.getNodeType());
 					newYield.setExpression(newYieldExpression);
 					newBlock.statements().add(newYield);
 					newSwitchExpression.statements().add(newBlock);

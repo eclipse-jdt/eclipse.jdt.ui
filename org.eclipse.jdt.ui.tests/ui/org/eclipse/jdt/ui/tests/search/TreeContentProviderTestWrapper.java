@@ -41,10 +41,6 @@ public class TreeContentProviderTestWrapper {
 		fTest.setUp();
 	}
 
-	/*
-	 * @see junit.framework.TestCase#tearDown()
-	 * @since 3.1
-	 */
 	@After
 	public void tearDown() throws Exception {
 		fTest.tearDown();

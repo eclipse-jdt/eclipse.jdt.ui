@@ -88,7 +88,6 @@ public class InlineConstantWizard extends RefactoringWizard {
 			setControl(result);
 			GridLayout layout= new GridLayout();
 			result.setLayout(layout);
-			GridData gd= null;
 
 			Label label= new Label(result, SWT.NONE);
 			String constantLabel= JavaElementLabels.getElementLabel(fRefactoring.getField(), JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
@@ -111,7 +110,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 			});
 
 			fRemove= new Button(result, SWT.CHECK);
-			gd= new GridData(GridData.FILL_HORIZONTAL);
+			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalIndent= LayoutUtil.getIndent();
 			fRemove.setLayoutData(gd);
 			fRemove.setText(RefactoringMessages.InlineConstantInputPage_Delete_constant);

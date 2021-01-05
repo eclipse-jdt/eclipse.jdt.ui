@@ -208,7 +208,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		fShell= JUnitPlugin.getActiveWorkbenchShell();
 		if (selection instanceof IStructuredSelection) {
 			Object testSuiteObj= ((IStructuredSelection) selection).getFirstElement();
-			if (testSuiteObj != null && testSuiteObj instanceof ICompilationUnit) {
+			if (testSuiteObj instanceof ICompilationUnit) {
 				fTestSuite= (ICompilationUnit) testSuiteObj;
 				IJavaElement packIJE= fTestSuite.getParent();
 				if (packIJE instanceof IPackageFragment) {

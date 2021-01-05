@@ -549,8 +549,8 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		}
 
 		IProblem[] problems= compilationUnit.getProblems();
-		for (int i= 0; i != problems.length; ++i) {
-			if (problems[i].getID() == IProblem.UnmatchedBracket)
+		for (IProblem problem : problems) {
+			if (problem.getID() == IProblem.UnmatchedBracket)
 				return true;
 		}
 

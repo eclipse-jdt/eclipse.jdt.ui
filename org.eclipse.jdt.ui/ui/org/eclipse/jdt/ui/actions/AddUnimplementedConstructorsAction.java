@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -433,13 +433,22 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isInterface() && !type.isEnum() && !type.isAnonymous();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isEnum() && !type.isRecord() && !type.isAnonymous();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
 			return true;
 
 		return false;
+	}
+
+	private boolean canEnable(ITextSelection selection) throws JavaModelException {
+		if (selection != null && ActionUtil.isProcessable(fEditor)) {
+			IType type= SelectionConverter.getTypeAtOffset(fEditor);
+			return type != null && type.getCompilationUnit() != null && !type.isInterface() && !type.isEnum() && !type.isRecord() && !type.isAnonymous();
+		}
+
+		return true;
 	}
 
 	private boolean checkEnabledEditor() {
@@ -460,7 +469,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		} else if (elements[0] instanceof ICompilationUnit) {
 			ICompilationUnit cu= (ICompilationUnit) elements[0];
 			IType type= cu.findPrimaryType();
-			if (type != null && !type.isInterface() && !type.isEnum())
+			if (type != null)
 				return type;
 		}
 		return null;
@@ -471,21 +480,9 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		Shell shell= getShell();
 		try {
 			IType type= getSelectedType(selection);
-			if (type == null) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable);
-				return;
+			if (isValidType(type)) {
+				run(shell, type, false);
 			}
-			if (type.isAnnotation()) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_annotation_not_applicable);
-				return;
-			} else if (type.isInterface()) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_interface_not_applicable);
-				return;
-			} else if (type.isEnum()) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_enum_not_applicable);
-				return;
-			}
-			run(shell, type, false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null);
 		}
@@ -498,16 +495,36 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		try {
 			Shell shell= getShell();
 			IType type= SelectionConverter.getTypeAtOffset(fEditor);
-			if (type != null)
+			if (isValidType(type)) {
 				run(shell, type, true);
-			else
-				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable);
+			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		}
 	}
 
 	// ---- Helpers -------------------------------------------------------------------
+
+	private boolean isValidType(IType type) throws CoreException {
+		if (type == null) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable);
+			return false;
+		}
+		if (type.isAnnotation()) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_annotation_not_applicable);
+			return false;
+		} else if (type.isInterface()) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_interface_not_applicable);
+			return false;
+		} else if (type.isEnum()) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_enum_not_applicable);
+			return false;
+		} else if (type.isRecord()) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_record_not_applicable);
+			return false;
+		}
+		return true;
+	}
 
 	private void run(Shell shell, IType type, boolean activatedFromEditor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), getDialogTitle(), activatedFromEditor)) {
@@ -633,5 +650,12 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 	@Override
 	public void selectionChanged(ITextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			if (JavaModelUtil.isExceptionToBeLogged(e))
+				JavaPlugin.log(e);
+			setEnabled(false);
+		}
 	}
 }

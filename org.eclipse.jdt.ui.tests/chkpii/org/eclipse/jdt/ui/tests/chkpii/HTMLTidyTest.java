@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.chkpii;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -41,7 +43,7 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
  *
  * Note: Currently disabled.
  */
-public class HTMLTidyTest extends TestCase {
+public class HTMLTidyTest {
 
 	private static final int TIDY_TIMEOUT= 10000;
 	private static final Pattern EXCLUSION_PATTERN_TABLE_SUMMARY= Pattern.compile("line \\d+ column \\d+ - Warning: <table> lacks \"summary\" attribute");
@@ -75,6 +77,7 @@ public class HTMLTidyTest extends TestCase {
 			test.checkFile(file);
 	}
 
+	@Test
 	public void testHTML() throws Exception {
 		URL testBundleRoot= JavaTestPlugin.getDefault().getBundle().getEntry("/");
 		URL testBundleFile= FileLocator.toFileURL(testBundleRoot);

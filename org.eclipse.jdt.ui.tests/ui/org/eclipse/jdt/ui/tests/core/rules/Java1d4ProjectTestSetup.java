@@ -20,27 +20,22 @@ package org.eclipse.jdt.ui.tests.core.rules;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 /**
  * Setup the tests related to Java 1.4 (i.e. Merlin).
  */
 public class Java1d4ProjectTestSetup extends ProjectTestSetup {
-	@Override
-	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
+
+	public Java1d4ProjectTestSetup() {
 		// Here we load Java 1.5 classes because JavaProjectHelper.RT_STUBS_14 does not exist
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_15);
-		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
+		super("TestSetupProject1d4", JavaProjectHelper.RT_STUBS_15);
 	}
 
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
-		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
-		javaProject.setRawClasspath(getDefaultClasspath(), null);
+		IJavaProject javaProject= super.createAndInitializeProject();
 		JavaProjectHelper.set14CompilerOptions(javaProject);
 		return javaProject;
 	}

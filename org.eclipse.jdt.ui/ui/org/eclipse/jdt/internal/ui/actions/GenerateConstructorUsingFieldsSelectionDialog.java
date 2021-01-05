@@ -197,7 +197,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		GridData gd= null;
+		GridData gd;
 
 		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);

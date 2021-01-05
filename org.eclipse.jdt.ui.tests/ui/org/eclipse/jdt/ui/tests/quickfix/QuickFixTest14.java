@@ -15,7 +15,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -33,28 +32,21 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 public class QuickFixTest14 extends QuickFixTest {
-    @Rule
-    public ProjectTestSetup projectSetup = new Java14ProjectTestSetup(true);
+	@Rule
+	public ProjectTestSetup projectSetup= new Java14ProjectTestSetup(true);
 
-    private IJavaProject fJProject1;
+	private IJavaProject fJProject1;
 
-    private IPackageFragmentRoot fSourceFolder;
+	private IPackageFragmentRoot fSourceFolder;
 
-    public static String MODULE_INFO_FILE = "module-info.java";
-    public static String MODULE_INFO_FILE_CONTENT = ""
+	public static final String MODULE_INFO_FILE= "module-info.java";
+	public static final String MODULE_INFO_FILE_CONTENT= ""
 										+ "module test {\n"
 										+ "}\n";
 
-	@After
-	public void tearDown() throws Exception {
-		if (fJProject1 != null) {
-			JavaProjectHelper.delete(fJProject1);
-		}
-	}
-
 	@Test
 	public void testAddDefaultCaseSwitchStatement1() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -108,7 +100,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 	@Test
 	public void testAddDefaultCaseSwitchStatement2() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -163,7 +155,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 	@Test
 	public void testAddDefaultCaseSwitchStatement3() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -214,7 +206,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 	@Test
 	public void testAddMissingCaseSwitchStatement1() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -270,7 +262,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 	@Test
 	public void testAddDefaultCaseSwitchExpression1() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -324,7 +316,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 	@Test
 	public void testAddDefaultCaseSwitchExpression2() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -384,7 +376,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 	@Test
 	public void testAddDefaultCaseSwitchExpression3() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -428,7 +420,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 	@Test
 	public void testAddMissingCaseSwitchExpression() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -496,7 +488,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 	@Test
 	public void testReplaceIncorrectReturnInSwitchExpressionWithYieldStatement() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");

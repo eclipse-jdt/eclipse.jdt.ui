@@ -93,8 +93,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
     private Hashtable<String, String> fExpectedChangesAllTests;
     {
         fExpectedChangesAllTests= new Hashtable<>();
-        StringBuffer buf= null;
-        buf= new StringBuffer();
+        StringBuffer buf= new StringBuffer();
         buf.append("package junit.runner;\n");
         buf.append("\n");
         buf.append("import java.io.BufferedReader;\n");

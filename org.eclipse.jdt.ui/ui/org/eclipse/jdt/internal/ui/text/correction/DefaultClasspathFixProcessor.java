@@ -155,9 +155,8 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 							continue;
 						}
 
-						IModuleDescription projectModule= null;
 						String moduleName= null;
-						projectModule= root.getModuleDescription();
+						IModuleDescription projectModule= root.getModuleDescription();
 						if (projectModule != null && projectModule.exists()) {
 							moduleName= projectModule.getElementName();
 						}

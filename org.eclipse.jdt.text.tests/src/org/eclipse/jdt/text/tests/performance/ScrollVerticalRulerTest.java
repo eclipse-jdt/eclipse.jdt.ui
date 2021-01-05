@@ -68,7 +68,7 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		PreferenceConstants.getPreferenceStore().putValue(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, Integer.valueOf(100000).toString());
+		PreferenceConstants.getPreferenceStore().putValue(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, Integer.toString(100000));
 
 		boolean isInstalled= EditorsUI.getSpellingService().getSpellingEngineDescriptors().length > 0;
 		assertTrue("No spelling engine installed", isInstalled);

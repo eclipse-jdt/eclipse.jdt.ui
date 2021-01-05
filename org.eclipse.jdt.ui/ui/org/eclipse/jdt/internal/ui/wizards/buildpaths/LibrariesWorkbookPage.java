@@ -34,7 +34,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.IPath;
 
@@ -46,7 +45,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -396,14 +394,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 		return composite;
 	}
-
-	private Shell getShell() {
-		if (fSWTControl != null) {
-			return fSWTControl.getShell();
-		}
-		return JavaPlugin.getActiveWorkbenchShell();
-	}
-
 
 	private class LibrariesAdapter extends CPListAdapter {
 
@@ -832,17 +822,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				}
 				fClassPathList.dialogFieldChanged(); // validate
 				updateEnabledState();
-				if (key.equals(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH)) {
-					if (fCurrJProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.DISABLED)) {
-						MessageDialog messageDialog= new MessageDialog(getShell(),
-								NewWizardMessages.LibrariesWorkbookPage_externalAnnotationNeedsNullAnnotationEnabled_title,
-								null,
-								NewWizardMessages.LibrariesWorkbookPage_externalAnnotationNeedsNullAnnotationEnabled_message,
-								MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL },
-								0);
-						messageDialog.open();
-					}
-				}
+				checkAttributeEffect(key, fCurrJProject);
 			}
 		}
 	}

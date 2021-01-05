@@ -6,6 +6,7 @@
  */
 public class ClassName<E> extends AnyClass implements InterfaceName<String> {
 	enum Color { RED, GREEN, BLUE };
+	record Point(int x, int y) {};
 	/* This comment may span multiple lines. */
 	static Object staticField;
 	// This comment may span only this line
@@ -16,7 +17,8 @@ public class ClassName<E> extends AnyClass implements InterfaceName<String> {
 	public int foo(Integer parameter) {
 		abstractMethod(inheritedField);
 		int local= 42*hashCode();
+		var varLocal= local;
 		staticMethod();
-		return bar(local) + parameter;
+		return bar(varLocal) + parameter;
 	}
 }

@@ -116,8 +116,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
-		boolean enabled= false;
-		enabled= getSelectedCompilationUnit(selection) != null;
+		boolean enabled= getSelectedCompilationUnit(selection) != null;
 		setEnabled(enabled);
 	}
 

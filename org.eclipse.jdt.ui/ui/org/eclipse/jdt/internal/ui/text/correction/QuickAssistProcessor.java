@@ -1012,7 +1012,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			Expression expression= ((ExpressionMethodReference) methodReference).getExpression();
 			if (expression instanceof Name) {
 				IBinding nameBinding= ((Name) expression).resolveBinding();
-				if (nameBinding != null && nameBinding instanceof ITypeBinding) {
+				if (nameBinding instanceof ITypeBinding) {
 					return true;
 				}
 			}
@@ -1789,9 +1789,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		// add proposal
 		ASTRewriteCorrectionProposal proposal;
-		String label= null;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		label= CorrectionMessages.QuickAssistProcessor_remove_lambda_parameter_types;
+		String label= CorrectionMessages.QuickAssistProcessor_remove_lambda_parameter_types;
 		if (removeImports) {
 			ASTRewriteRemoveImportsCorrectionProposal newProposal= new ASTRewriteRemoveImportsCorrectionProposal(label, context.getCompilationUnit(), rewrite,
 					IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
@@ -2392,18 +2391,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			for (VariableDeclarationFragment oldFragment : oldFragments) {
 				int extendedStartPositionFragment= cup.getExtendedStartPosition(oldFragment);
 				int extendedLengthFragment= cup.getExtendedLength(oldFragment);
-				String codeFragment= buffer.getText(extendedStartPositionFragment, extendedLengthFragment);
+				StringBuilder codeFragment= new StringBuilder(buffer.getText(extendedStartPositionFragment, extendedLengthFragment));
 				if (oldFragment.getInitializer() == null) {
 					ITypeBinding typeBinding= type.resolveBinding();
 					if ("Z".equals(typeBinding.getBinaryName())) { //$NON-NLS-1$
-						codeFragment+= " = false"; //$NON-NLS-1$
+						codeFragment.append(" = false"); //$NON-NLS-1$
 					} else if (type.isPrimitiveType()) {
-						codeFragment+= " = 0"; //$NON-NLS-1$
+						codeFragment.append(" = 0"); //$NON-NLS-1$
 					} else {
-						codeFragment+= " = null"; //$NON-NLS-1$
+						codeFragment.append(" = null"); //$NON-NLS-1$
 					}
 				}
-				Assignment newAssignmentFragment= (Assignment) rewrite.createStringPlaceholder(codeFragment, ASTNode.ASSIGNMENT);
+				Assignment newAssignmentFragment= (Assignment) rewrite.createStringPlaceholder(codeFragment.toString(), ASTNode.ASSIGNMENT);
 				forListRewrite.insertLast(newAssignmentFragment, null);
 			}
 

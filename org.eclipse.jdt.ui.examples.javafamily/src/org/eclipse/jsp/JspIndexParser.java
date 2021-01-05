@@ -74,7 +74,7 @@ public class JspIndexParser extends AbstractJspParser implements IIndexer {
 	public void index(IIndex indexerOutput) throws IOException {
 
 		String type= fFile.getFileExtension();
-		if (type != null && JspUIPlugin.JSP_TYPE.equalsIgnoreCase(type)) {
+		if (JspUIPlugin.JSP_TYPE.equalsIgnoreCase(type)) {
 
 			// Add the name of the file to the index
 			String path= fFile.getFullPath().toString();

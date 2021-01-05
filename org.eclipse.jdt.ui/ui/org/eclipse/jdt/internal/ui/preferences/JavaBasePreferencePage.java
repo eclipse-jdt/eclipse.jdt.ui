@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -39,6 +40,7 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -72,11 +74,15 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private ArrayList<Button> fRadioButtons;
 	private ArrayList<Text> fTextControls;
 
+	private IPreferenceStore fJavaCorePreferences;
+	private static final String SEARCH_ENABLE_PARALLEL_SEARCH= "enableParallelJavaIndexSearch"; //PatternSearchJob.ENABLE_PARALLEL_SEARCH //$NON-NLS-1$
+
 	public JavaBasePreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(PreferencesMessages.JavaBasePreferencePage_description);
 
+		fJavaCorePreferences = new ScopedPreferenceStore(InstanceScope.INSTANCE, JavaCore.PLUGIN_ID);
 		fRadioButtons= new ArrayList<>();
 		fCheckBoxes= new ArrayList<>();
 		fTextControls= new ArrayList<>();
@@ -182,6 +188,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		group.setText(PreferencesMessages.JavaBasePreferencePage_search);
 
 		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_small_menu, null, PreferenceConstants.SEARCH_USE_REDUCED_MENU);
+		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_enable_parallel, fJavaCorePreferences, SEARCH_ENABLE_PARALLEL_SEARCH);
 
 		Button rebuildIndexButton= new Button(group, SWT.PUSH);
 		rebuildIndexButton.setText(PreferencesMessages.JavaBasePreferencePage_rebuildIndexButtonName);

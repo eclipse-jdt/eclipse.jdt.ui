@@ -394,7 +394,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			@Override
 			public boolean visit(QualifiedName node) {
 				final IBinding binding= node.resolveBinding();
-				if (binding != null && binding instanceof IVariableBinding) {
+				if (binding instanceof IVariableBinding) {
 					IVariableBinding variable= (IVariableBinding) binding;
 					if (!variable.isEnumConstant() && variable.isField())
 						accessedFields.add(binding);
@@ -405,7 +405,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			@Override
 			public boolean visit(SimpleName node) {
 				final IBinding binding= node.resolveBinding();
-				if (binding != null && binding instanceof IVariableBinding) {
+				if (binding instanceof IVariableBinding) {
 					IVariableBinding variable= (IVariableBinding) binding;
 					if (!variable.isEnumConstant() && variable.isField())
 						accessedFields.add(binding);
@@ -567,10 +567,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_static);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(projectName, fCu));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fClassName);
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + ' ' + Integer.valueOf(fSelectionLength).toString());
-		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
-		arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
-		arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(fVisibility).toString());
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.toString(fSelectionStart) + ' ' + Integer.toString(fSelectionLength));
+		arguments.put(ATTRIBUTE_FINAL, Boolean.toString(fDeclareFinal));
+		arguments.put(ATTRIBUTE_STATIC, Boolean.toString(fDeclareStatic));
+		arguments.put(ATTRIBUTE_VISIBILITY, Integer.toString(fVisibility));
 
 		ConvertAnonymousDescriptor descriptor= RefactoringSignatureDescriptorFactory.createConvertAnonymousDescriptor(projectName, description, comment.asString(), arguments, flags);
 		return new RefactoringChangeDescriptor(descriptor);

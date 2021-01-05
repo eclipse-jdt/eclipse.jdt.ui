@@ -783,10 +783,10 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			arguments.put(ATTRIBUTE_FIELD_NAME, fEnclosingInstanceFieldName);
 		if (fNameForEnclosingInstanceConstructorParameter != null && !"".equals(fNameForEnclosingInstanceConstructorParameter)) //$NON-NLS-1$
 			arguments.put(ATTRIBUTE_PARAMETER_NAME, fNameForEnclosingInstanceConstructorParameter);
-		arguments.put(ATTRIBUTE_FIELD, Boolean.valueOf(fCreateInstanceField).toString());
-		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fMarkInstanceFieldAsFinal).toString());
-		arguments.put(ATTRIBUTE_POSSIBLE, Boolean.valueOf(fIsInstanceFieldCreationPossible).toString());
-		arguments.put(ATTRIBUTE_MANDATORY, Boolean.valueOf(fIsInstanceFieldCreationMandatory).toString());
+		arguments.put(ATTRIBUTE_FIELD, Boolean.toString(fCreateInstanceField));
+		arguments.put(ATTRIBUTE_FINAL, Boolean.toString(fMarkInstanceFieldAsFinal));
+		arguments.put(ATTRIBUTE_POSSIBLE, Boolean.toString(fIsInstanceFieldCreationPossible));
+		arguments.put(ATTRIBUTE_MANDATORY, Boolean.toString(fIsInstanceFieldCreationMandatory));
 		final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.MoveInnerToTopRefactoring_move_to_Top);
 		result.addAll(fChangeManager.getAllChanges());
 		result.add(createCompilationUnitForMovedType(new SubProgressMonitor(monitor, 1)));
@@ -1329,7 +1329,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, SimpleName[] simpleNames, AbstractTypeDeclaration declaration) {
 		for (SimpleName simpleName : simpleNames) {
 			IBinding binding= simpleName.resolveBinding();
-			if (binding != null && binding instanceof IVariableBinding && !(simpleName.getParent() instanceof FieldAccess)) {
+			if (binding instanceof IVariableBinding && !(simpleName.getParent() instanceof FieldAccess)) {
 				IVariableBinding variable= (IVariableBinding) binding;
 				final FieldAccess access= simpleName.getAST().newFieldAccess();
 				access.setExpression(createAccessExpressionToEnclosingInstanceFieldText(simpleName, variable, declaration));

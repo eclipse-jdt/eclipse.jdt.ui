@@ -80,7 +80,7 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 		for (int i=0; i < typeProposals.size(); i++) {
 			IType t= typeProposals.get(i);
 			if (compilationUnit.equals(t.getCompilationUnit()) || JavaModelUtil.isVisible(t, pack)) {
-				if (typeBindings[i] != null && typeBindings[i] instanceof ITypeBinding) {
+				if (typeBindings[i] instanceof ITypeBinding) {
 					addLinkedPositionProposal("return_type", (ITypeBinding) typeBindings[i]); //$NON-NLS-1$
 				} else {
 					addLinkedPositionProposal("return_type", t.getElementName(), image); //$NON-NLS-1$

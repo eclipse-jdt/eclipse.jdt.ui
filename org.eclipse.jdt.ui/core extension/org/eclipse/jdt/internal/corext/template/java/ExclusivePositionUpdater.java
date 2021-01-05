@@ -51,9 +51,7 @@ final class ExclusivePositionUpdater implements IPositionUpdater {
 		try {
 			Position[] positions= event.getDocument().getPositions(fCategory);
 
-			for (int i= 0; i != positions.length; i++) {
-
-				Position position= positions[i];
+			for (Position position : positions) {
 
 				if (position.isDeleted())
 					continue;

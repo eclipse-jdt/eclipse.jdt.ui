@@ -28,7 +28,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -52,7 +51,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.RootCPListElement.RootNodeChange;
@@ -334,8 +332,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	public void setSelection(List<?> selElements, boolean expand) {
 		fProjectsList.selectElements(new StructuredSelection(selElements));
 		if (expand) {
-			for (int i= 0; i < selElements.size(); i++) {
-				fProjectsList.expandElement(selElements.get(i), 1);
+			for (Object selElement : selElements) {
+				fProjectsList.expandElement(selElement, 1);
 			}
 		}
 	}
@@ -499,8 +497,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			return false;
 		}
 
-		for (int i= 0; i < selElements.size(); i++) {
-			Object elem= selElements.get(i);
+		for (Object elem : selElements) {
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				if (IClasspathAttribute.MODULE.equals(attrib.getKey())) {
@@ -626,14 +623,6 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
-
-	private Shell getShell() {
-		if (fSWTControl != null) {
-			return fSWTControl.getShell();
-		}
-		return JavaPlugin.getActiveWorkbenchShell();
-	}
-
 
 	private CPListElement[] addProjectDialog() {
 

@@ -183,11 +183,11 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 			IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(name);
 			project.refreshLocal(IResource.DEPTH_INFINITE, null);
 			long end= System.currentTimeMillis();
-			String message= "Took " + ((end - start) / 1000) + "s to create the stubs";
+			StringBuilder message= new StringBuilder("Took ").append((end - start) / 1000).append("s to create the stubs");
 			if (!defaultPackages.isEmpty() ) {
-				message+= "\n\nNo stubs generated for packages: " + defaultPackages.toString();
+				message.append("\n\nNo stubs generated for packages: ").append(defaultPackages.toString());
 			}
-			MessageDialog.openInformation(fTargetPart.getSite().getShell(), CREATE_STUBS_DIALOG_TITLE, message);
+			MessageDialog.openInformation(fTargetPart.getSite().getShell(), CREATE_STUBS_DIALOG_TITLE, message.toString());
 		} catch (InterruptedException e) {
 			// Do not log
 		} catch (InvocationTargetException e) {

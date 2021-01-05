@@ -114,12 +114,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 
 		@Override
 		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + ((fClasspathEntry == null) ? 0 : fClasspathEntry.hashCode());
-			result= prime * result + ((fParent == null) ? 0 : fParent.hashCode());
-			result= prime * result + ((fProject == null) ? 0 : fProject.hashCode());
-			return result;
+			return Objects.hash(fClasspathEntry, fParent, fProject);
 		}
 
 		@Override

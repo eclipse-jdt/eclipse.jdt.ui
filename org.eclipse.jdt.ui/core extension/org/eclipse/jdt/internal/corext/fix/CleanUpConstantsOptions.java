@@ -161,9 +161,11 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
+		options.setOption(CONTROLFLOW_MERGE, CleanUpOptions.FALSE);
 
 		// Java Features
 		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
+		options.setOption(MULTI_CATCH, CleanUpOptions.FALSE);
 	}
 
 	private static void setSaveParticipantSettings(CleanUpOptions options) {
@@ -303,9 +305,11 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
+		options.setOption(CONTROLFLOW_MERGE, CleanUpOptions.FALSE);
 
 		// Java Features
 		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
+		options.setOption(MULTI_CATCH, CleanUpOptions.FALSE);
 	}
 
 	public static void initDefaults(IPreferenceStore store) {

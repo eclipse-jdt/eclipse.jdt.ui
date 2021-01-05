@@ -59,7 +59,7 @@ public class OpenAndExpand extends SelectionDispatchAction {
 	@Override
 	public void run(ISelection selection) {
 		fOpenAction.run(selection);
-		if(selection != null && selection instanceof IStructuredSelection)
+		if(selection instanceof IStructuredSelection)
 			expand(((IStructuredSelection)selection).getFirstElement());
 	}
 

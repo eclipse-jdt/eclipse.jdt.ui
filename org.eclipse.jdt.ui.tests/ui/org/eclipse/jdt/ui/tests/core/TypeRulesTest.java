@@ -265,8 +265,7 @@ public class TypeRulesTest extends CoreTests {
 				parser.setProject(fJProject1);
 				parser.setUnitName("F.java");
 
-				CompilationUnit astRoot= null;
-				astRoot= (CompilationUnit) parser.createAST(null);
+				CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
 
 				ITypeBinding b1= f1.resolveBinding().getType();
@@ -322,8 +321,7 @@ public class TypeRulesTest extends CoreTests {
 				if (b1.isPrimitive() != b2.isPrimitive())
 					continue;
 
-				CompilationUnit astRoot= null;
-				astRoot= (CompilationUnit) parser.createAST(null);
+				CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
 
 				boolean res= TypeRules.canCast(b2, b1);

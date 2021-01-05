@@ -23,27 +23,19 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
-import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
-import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
-import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
-import org.eclipse.jdt.internal.ui.fix.TryWithResourceCleanUp;
-import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
@@ -59,13 +51,8 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new UnusedCodeCleanUp(values),
 				new UnnecessaryCodeCleanUp(values),
 				new StringCleanUp(values),
-				new TypeParametersCleanUp(values),
-				new HashCleanUp(values),
-				new JoinCleanUp(values),
 				new ArraysFillCleanUp(values),
 				new EvaluateNullableCleanUp(values),
-				new AutoboxingCleanUp(values),
-				new UnboxingCleanUp(values),
 				new PushDownNegationCleanUp(values),
 				new DoubleNegationCleanUp(values),
 				new RedundantComparisonStatementCleanUp(values),
@@ -76,13 +63,10 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new OverriddenAssignmentCleanUp(values),
 				new RedundantModifiersCleanUp(values),
 				new EmbeddedIfCleanUp(values),
-				new PatternMatchingForInstanceofCleanUp(values),
 				new RedundantSemicolonsCleanUp(values),
 				new UnnecessaryArrayCreationCleanUp(values),
 				new UselessReturnCleanUp(values),
-				new UselessContinueCleanUp(values),
-				new ObjectsEqualsCleanUp(values),
-				new TryWithResourceCleanUp(values)
+				new UselessContinueCleanUp(values)
 		};
 	}
 
@@ -112,26 +96,11 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
     	CheckboxPreference nls= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnnecessaryNLSTags, CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS, CleanUpModifyDialog.FALSE_TRUE);
     	registerPreference(nls);
 
-		CheckboxPreference typeArgs= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantTypeArguments, CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(typeArgs);
-
-		CheckboxPreference hash= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_Hash, CleanUpConstants.MODERNIZE_HASH, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(hash);
-
-		CheckboxPreference join= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_Join, CleanUpConstants.JOIN, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(join);
-
 		CheckboxPreference arraysFill= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ArraysFill, CleanUpConstants.ARRAYS_FILL, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(arraysFill);
 
 		CheckboxPreference evaluateNullable= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_EvaluateNullable, CleanUpConstants.EVALUATE_NULLABLE, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(evaluateNullable);
-
-		CheckboxPreference autoboxing= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_Autoboxing, CleanUpConstants.USE_AUTOBOXING, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(autoboxing);
-
-		CheckboxPreference unboxing= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_Unboxing, CleanUpConstants.USE_UNBOXING, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(unboxing);
 
 		CheckboxPreference pushDownNegation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PushDownNegation, CleanUpConstants.PUSH_DOWN_NEGATION,
 				CleanUpModifyDialog.FALSE_TRUE);
@@ -165,10 +134,6 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		CheckboxPreference embeddedIf= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_EmbeddedIf, CleanUpConstants.RAISE_EMBEDDED_IF, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(embeddedIf);
 
-		// Disabled as long as it is buggy
-		//CheckboxPreference patternMatchingForInstanceof= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PatternMatchingForInstanceof, CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpModifyDialog.FALSE_TRUE);
-		//registerPreference(patternMatchingForInstanceof);
-
 		CheckboxPreference semicolons= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons, CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(semicolons);
 
@@ -180,11 +145,5 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference uselessContinue= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UselessContinue, CleanUpConstants.REMOVE_USELESS_CONTINUE, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(uselessContinue);
-
-		CheckboxPreference objectsEquals= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ObjectsEquals, CleanUpConstants.USE_OBJECTS_EQUALS, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(objectsEquals);
-
-		CheckboxPreference tryWithResource= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_TryWithResource, CleanUpConstants.TRY_WITH_RESOURCE, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(tryWithResource);
     }
 }

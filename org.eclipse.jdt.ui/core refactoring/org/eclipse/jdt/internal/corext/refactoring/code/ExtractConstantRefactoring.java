@@ -588,7 +588,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.toString(fSelectionStart) + " " + Integer.toString(fSelectionLength)); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_REPLACE, Boolean.toString(fReplaceAllOccurrences));
 		arguments.put(ATTRIBUTE_QUALIFY, Boolean.toString(fQualifyReferencesWithDeclaringClassName));
-		arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(JdtFlags.getVisibilityCode(fVisibility)).toString());
+		arguments.put(ATTRIBUTE_VISIBILITY, Integer.toString(JdtFlags.getVisibilityCode(fVisibility)));
 
 		ExtractConstantDescriptor descriptor= RefactoringSignatureDescriptorFactory.createExtractConstantDescriptor(project, description, comment.asString(), arguments, flags);
 		return descriptor;

@@ -340,8 +340,7 @@ public class ModuleCorrectionsSubProcessor {
 				break;
 			case IClasspathEntry.CPE_CONTAINER:
 				try {
-					IClasspathContainer container= null;
-					container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());
+					IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());
 					if (container != null) {
 						String name= container.getDescription();
 						if (name != null && name.length() > 0) {

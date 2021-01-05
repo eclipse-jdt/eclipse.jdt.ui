@@ -170,10 +170,10 @@ public class TestKindRegistry {
 
 	public String getAllKindIds() {
 		ArrayList<TestKind> allKinds= getAllKinds();
-		String returnThis= ""; //$NON-NLS-1$
+		StringBuilder returnThis= new StringBuilder();
 		for (ITestKind kind : allKinds) {
-			returnThis+= "(" + kind.getId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			returnThis.append("(").append(kind.getId()).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		return returnThis;
+		return returnThis.toString();
 	}
 }

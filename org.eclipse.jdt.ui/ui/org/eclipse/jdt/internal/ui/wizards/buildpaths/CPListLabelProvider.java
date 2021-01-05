@@ -344,26 +344,26 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 					}
 					return buf.toString();
 				} else {
-					String label= getPathString(path, resource == null);
+					StringBuilder label= new StringBuilder(getPathString(path, resource == null));
 					if (cpentry.isMissing()) {
-						label= label + ' ' + fMissing;
+						label.append(' ').append(fMissing);
 					}
-					return label;
+					return label.toString();
 				}
 			}
 			case IClasspathEntry.CPE_VARIABLE: {
-				String label= getVariableString(path);
+				StringBuilder label= new StringBuilder(getVariableString(path));
 				if (cpentry.isMissing()) {
-					label= label + ' ' + fMissing;
+					label.append(' ').append(fMissing);
 				}
-				return label;
+				return label.toString();
 			}
 			case IClasspathEntry.CPE_PROJECT:
-				String label= path.lastSegment();
+				StringBuilder label= new StringBuilder(path.lastSegment());
 				if (cpentry.isMissing()) {
-					label= label + ' ' + fMissing;
+					label.append(' ').append(fMissing);
 				}
-				return label;
+				return label.toString();
 			case IClasspathEntry.CPE_CONTAINER:
 				try {
 					IClasspathContainer container= JavaCore.getClasspathContainer(path, cpentry.getJavaProject());

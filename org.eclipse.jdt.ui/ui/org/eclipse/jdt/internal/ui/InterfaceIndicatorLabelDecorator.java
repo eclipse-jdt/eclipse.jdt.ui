@@ -115,12 +115,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		 */
 		@Override
 		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + (fDeprecated ? 1231 : 1237);
-			result= prime * result + (fPackageDefault ? 1231 : 1237);
-			result= prime * result + ((fType == null) ? 0 : fType.hashCode());
-			return result;
+			return Objects.hash(fDeprecated, fPackageDefault, fType);
 		}
 	}
 

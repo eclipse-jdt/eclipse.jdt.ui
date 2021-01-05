@@ -248,9 +248,7 @@ public class TemplateProposal
 			MultiVariableGuess guess= fContext instanceof JavaContext ? ((JavaContext) fContext).getMultiVariableGuess() : null;
 
 			boolean hasPositions= false;
-			for (int i= 0; i != variables.length; i++) {
-				TemplateVariable variable= variables[i];
-
+			for (TemplateVariable variable : variables) {
 				if (variable.isUnambiguous())
 					continue;
 
@@ -385,8 +383,7 @@ public class TemplateProposal
 	private int getCaretOffset(TemplateBuffer buffer) {
 
 	    TemplateVariable[] variables= buffer.getVariables();
-		for (int i= 0; i != variables.length; i++) {
-			TemplateVariable variable= variables[i];
+		for (TemplateVariable variable : variables) {
 			if (variable.getType().equals(GlobalTemplateVariables.Cursor.NAME))
 				return variable.getOffsets()[0];
 		}

@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import java.text.BreakIterator;
 
@@ -21,7 +21,7 @@ import java.text.BreakIterator;
 /**
  * @since 3.0
  */
-public class BreakIteratorTest extends TestCase {
+public class BreakIteratorTest {
 
 	protected BreakIterator fBreakIterator;
 

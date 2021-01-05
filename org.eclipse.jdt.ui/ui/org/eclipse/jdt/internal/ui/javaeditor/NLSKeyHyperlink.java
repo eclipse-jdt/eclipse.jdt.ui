@@ -185,8 +185,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 							}
 						} else if (document instanceof IDocumentExtension3) {
 							// Fall back: test using properties file partitioning
-							ITypedRegion partition= null;
-							partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
+							ITypedRegion partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
 							found= IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
 							&& key.equals(document.get(partition.getOffset(), partition.getLength()).trim());
 						}

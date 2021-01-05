@@ -713,16 +713,16 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	}
 
 	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
-		String version= "AST Level " + root.getAST().apiLevel();
+		StringBuilder version= new StringBuilder("AST Level ").append(root.getAST().apiLevel());
 		switch (getCurrentInputKind()) {
 		case ASTInputKindAction.USE_RECONCILE:
-			version+= ", from reconciler"; //$NON-NLS-1$
+			version.append(", from reconciler"); //$NON-NLS-1$
 			break;
 		case ASTInputKindAction.USE_CACHE:
-			version+= ", from ASTProvider"; //$NON-NLS-1$
+			version.append(", from ASTProvider"); //$NON-NLS-1$
 			break;
 		case ASTInputKindAction.USE_FOCAL:
-			version+= ", using focal position"; //$NON-NLS-1$
+			version.append(", using focal position"); //$NON-NLS-1$
 			break;
 		default:
 			break;
@@ -730,7 +730,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		TreeInfoCollector collector= new TreeInfoCollector(root);
 
 		String msg= "{0} ({1}).  Creation time: {2,number} ms.  Size: {3,number} nodes, {4,number} bytes (AST nodes only)."; //$NON-NLS-1$
-		Object[] args= { element.getElementName(), version, Long.valueOf(time),  Integer.valueOf(collector.getNumberOfNodes()), Integer.valueOf(collector.getSize())};
+		Object[] args= { element.getElementName(), version.toString(), Long.valueOf(time),  Integer.valueOf(collector.getNumberOfNodes()), Integer.valueOf(collector.getSize())};
 		setContentDescription(MessageFormat.format(msg, args));
 
 	}

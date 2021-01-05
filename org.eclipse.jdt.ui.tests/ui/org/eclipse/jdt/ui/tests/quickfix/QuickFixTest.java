@@ -94,8 +94,7 @@ public class QuickFixTest {
 			+ "}\n";
 
 	public static void assertCorrectLabels(List<? extends ICompletionProposal> proposals) {
-		for (int i= 0; i < proposals.size(); i++) {
-			ICompletionProposal proposal= proposals.get(i);
+		for (ICompletionProposal proposal : proposals) {
 			String name= proposal.getDisplayString();
 			if (name == null || name.length() == 0 || name.charAt(0) == '!' || name.contains("{0}") || name.contains("{1}")) {
 				fail("wrong proposal label: " + name);
@@ -363,7 +362,7 @@ public class QuickFixTest {
 		return false;
 	}
 
-	protected static final ArrayList<IJavaCompletionProposal> collectAssists(IInvocationContext context, boolean includeLinkedRename) throws CoreException {
+	public static final ArrayList<IJavaCompletionProposal> collectAssists(IInvocationContext context, boolean includeLinkedRename) throws CoreException {
 		Class<?>[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class };
 		return collectAssists(context, filteredTypes);
 	}
@@ -467,8 +466,7 @@ public class QuickFixTest {
 		if (proposals.size() != expectedProposals) {
 			StringBuffer buf= new StringBuffer();
 			buf.append("Wrong number of proposals, is: ").append(proposals.size()). append(", expected: ").append(expectedProposals).append('\n');
-			for (int i= 0; i < proposals.size(); i++) {
-				ICompletionProposal curr= proposals.get(i);
+			for (ICompletionProposal curr : proposals) {
 				buf.append(" - ").append(curr.getDisplayString()).append('\n');
 				if (curr instanceof CUCorrectionProposal) {
 					appendSource(((CUCorrectionProposal) curr), buf);
@@ -479,8 +477,7 @@ public class QuickFixTest {
 	}
 
 	protected static ICommandAccess findProposalByCommandId(String commandId, List<? extends ICompletionProposal> proposals) {
-		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
+		for (ICompletionProposal curr : proposals) {
 			if (curr instanceof ICommandAccess) {
 				if (commandId.equals(((ICommandAccess) curr).getCommandId())) {
 					return (ICommandAccess) curr;
@@ -491,10 +488,9 @@ public class QuickFixTest {
 	}
 
 	protected static ICompletionProposal findProposalByName(String name, List<? extends ICompletionProposal> proposals) {
-		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
-			if (curr instanceof ICompletionProposal && name.equals(((ICompletionProposal)curr).getDisplayString()))
-				return (ICompletionProposal)curr;
+		for (ICompletionProposal curr : proposals) {
+			if (name.equals(curr.getDisplayString()))
+				return curr;
 		}
 		return null;
 	}

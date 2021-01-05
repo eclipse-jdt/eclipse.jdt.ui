@@ -47,9 +47,6 @@ public class JavaHeuristicScannerTest {
 	private JavaIndenter fScanner;
 	private JavaHeuristicScanner fHeuristicScanner;
 
-	/*
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	@Before
 	public void setUp() {
 		if (JavaCore.getPlugin() != null) {
@@ -81,9 +78,6 @@ public class JavaHeuristicScannerTest {
 		fScanner= new JavaIndenter(fDocument, fHeuristicScanner);
 	}
 
-	/*
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 		fDocument.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, null);

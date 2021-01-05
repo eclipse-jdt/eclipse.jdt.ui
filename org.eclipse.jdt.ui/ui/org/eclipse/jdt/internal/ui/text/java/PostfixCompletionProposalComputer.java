@@ -280,9 +280,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 		if (result instanceof InfixExpression) {
 			ASTNode completionNodeGrandParent= result.getParent();
 			int safeGuard= 0;
-			while (completionNodeGrandParent != null
-					&& completionNodeGrandParent instanceof ParenthesizedExpression
-					&& safeGuard++ < 64) {
+			while (completionNodeGrandParent instanceof ParenthesizedExpression && safeGuard++ < 64) {
 				result= completionNodeGrandParent;
 				completionNodeGrandParent= result.getParent();
 			}

@@ -145,6 +145,7 @@ public class MultiFixMessages extends NLS {
 	public static String TernaryOperatorCleanUp_description;
 	public static String StrictlyEqualOrDifferentCleanUp_description;
 	public static String MergeConditionalBlocksCleanup_description;
+	public static String ControlFlowMergeCleanUp_description;
 	public static String RedundantFallingThroughBlockEndCleanup_description;
 	public static String RedundantIfConditionCleanup_description;
 	public static String UseDirectlyMapMethodCleanup_description;
@@ -161,6 +162,7 @@ public class MultiFixMessages extends NLS {
 	public static String CheckSignOfBitwiseOperation_description;
 
 	public static String TryWithResourceCleanup_description;
+	public static String MultiCatchCleanUp_description;
 
 	static {
 		// initialize resource bundle

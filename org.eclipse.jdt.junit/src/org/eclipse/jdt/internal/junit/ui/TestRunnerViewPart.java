@@ -1318,8 +1318,8 @@ public class TestRunnerViewPart extends ViewPart {
 			sortingCriterion= SortingCriterion.values() [tagSortingCriterion];
 		}
 		setSortingCriterion(sortingCriterion);
-		for (int i= 0; i < fToggleSortingActions.length; i++) {
-			fToggleSortingActions[i].setChecked(sortingCriterion == fToggleSortingActions[i].getActionSortingCriterion());
+		for (ToggleSortingAction fToggleSortingAction : fToggleSortingActions) {
+			fToggleSortingAction.setChecked(sortingCriterion == fToggleSortingAction.getActionSortingCriterion());
 		}
 
 		setFilterAndLayout(showFailuresOnly, showIgnoredOnly, layoutValue);
@@ -2104,8 +2104,8 @@ action enablement
 						new ToggleSortingAction(SortingCriterion.SORT_BY_EXECUTION_TIME),
 						new ToggleSortingAction(SortingCriterion.SORT_BY_NAME)};
 		fSortByMenu= new MenuManager(JUnitMessages.TestRunnerViewPart_sort_by_menu);
-		for (int i= 0; i < fToggleSortingActions.length; ++i) {
-			fSortByMenu.add(fToggleSortingActions[i]);
+		for (ToggleSortingAction fToggleSortingAction : fToggleSortingActions) {
+			fSortByMenu.add(fToggleSortingAction);
 		}
 		viewMenu.add(fSortByMenu);
 		viewMenu.add(new Separator());

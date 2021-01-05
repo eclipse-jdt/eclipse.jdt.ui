@@ -125,8 +125,8 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Including, 2 * elements.size());
 
 			List<CPListElement> entries= ClasspathModifier.getExistingEntries(project);
-			for (int i= 0; i < elements.size(); i++) {
-				IResource resource= (IResource) elements.get(i);
+			for (Object element : elements) {
+				IResource resource= (IResource) element;
 				IPackageFragmentRoot root= ClasspathModifier.getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 1));
 				if (root != null) {
 					CPListElement entry= ClasspathModifier.getClasspathEntry(entries, root);

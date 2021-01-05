@@ -816,22 +816,22 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				@Override
 				@SuppressWarnings("deprecation")
 				public void elementChanged(ElementChangedEvent event) {
-					String type= "\nEvent type: ";
+					StringBuilder type= new StringBuilder("\nEvent type: ");
 					switch (event.getType()) {
 					case ElementChangedEvent.POST_CHANGE:
-						type+= "POST_CHANGE";
+						type.append("POST_CHANGE");
 						break;
 					case ElementChangedEvent.POST_RECONCILE:
-						type+= "POST_RECONCILE";
+						type.append("POST_RECONCILE");
 						break;
 					case ElementChangedEvent.PRE_AUTO_BUILD:
-						type+= "PRE_AUTO_BUILD";
+						type.append("PRE_AUTO_BUILD");
 						break;
 					default:
-						type+= event.getType();
+						type.append(event.getType());
 						break;
 					}
-					JEViewPlugin.logMessage(event.getDelta().toString() + type);
+					JEViewPlugin.logMessage(event.getDelta().toString() + type.toString());
 				}
 			};
 

@@ -88,7 +88,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							List<Object> folders= new ArrayList<>();
 							for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
 								IResource resource= root.getUnderlyingResource();
-								if (resource != null && resource instanceof IFolder) {
+								if (resource instanceof IFolder) {
 									folders.addAll(getFolders(((IFolder)resource).members()));
 								}
 							}
@@ -112,13 +112,12 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							fMapToPackageFragments.clear();
 							IResource resource= root.getUnderlyingResource();
 							if (root.isArchive() || root.isExternal()) {
-								IPackageFragment[] fragments= new IPackageFragment[0];
 								IJavaElement[] els= root.getChildren();
-								fragments= getTopLevelChildrenByElementName(els);
+								IPackageFragment[] fragments= getTopLevelChildrenByElementName(els);
 								addFragmentsToMap(fragments);
 								return fragments;
 
-							} else if (resource != null && resource instanceof IFolder) {
+							} else if (resource instanceof IFolder) {
 								List<IAdaptable> children= getFoldersAndElements(((IFolder)resource).members());
 
 								IPackageFragment defaultPackage= root.getPackageFragment(""); //$NON-NLS-1$

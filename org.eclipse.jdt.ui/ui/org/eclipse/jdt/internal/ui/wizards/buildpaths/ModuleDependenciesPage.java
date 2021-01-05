@@ -116,11 +116,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		}
 		@Override
 		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + ((fBaseImage == null) ? 0 : fBaseImage.hashCode());
-			result= prime * result + ((fOverlay == null) ? 0 : fOverlay.hashCode());
-			return result;
+			return Objects.hash(fBaseImage, fOverlay);
 		}
 		@Override
 		public boolean equals(Object obj) {
@@ -249,13 +245,6 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		fSWTControl= composite;
 
 		return composite;
-	}
-
-	public Shell getShell() {
-		if (fSWTControl != null) {
-			return fSWTControl.getShell();
-		}
-		return JavaPlugin.getActiveWorkbenchShell();
 	}
 
 	@Override
@@ -455,8 +444,8 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	public void setSelection(List<?> selElements, boolean expand) {
 		fDetailsList.selectElements(new StructuredSelection(selElements));
 		if (expand) {
-			for (int i= 0; i < selElements.size(); i++) {
-				fDetailsList.expandElement(selElements.get(i), 1);
+			for (Object selElement : selElements) {
+				fDetailsList.expandElement(selElement, 1);
 			}
 		}
 	}
