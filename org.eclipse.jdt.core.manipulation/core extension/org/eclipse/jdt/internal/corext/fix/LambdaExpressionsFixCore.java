@@ -274,7 +274,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 
 		@Override
 		public boolean visit(SimpleName node) {
-			node.getParent();
 			IBinding binding= node.resolveBinding();
 			checkForUninitializedFinalReference(binding);
 			return true;
@@ -282,7 +281,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 
 		@Override
 		public boolean visit(QualifiedName node) {
-			node.getParent();
 			IBinding binding= node.resolveBinding();
 			checkForUninitializedFinalReference(binding);
 			return true;
