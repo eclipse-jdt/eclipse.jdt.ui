@@ -18,7 +18,6 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -94,7 +93,6 @@ public class CleanUpTest15 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
-	@Ignore
 	@Test
 	public void testPatternMatchingForInstanceof() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -107,6 +105,16 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "    public long matchPatternForInstanceof(Object object) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (object instanceof Date) {\n" //
+				+ "            Date date = (Date) object;\n" //
+				+ "            return date.getTime();\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long matchPatternForInstanceofOnFinalVariable(Object object) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (object instanceof Date) {\n" //
 				+ "            final Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
@@ -116,7 +124,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long matchPatternInConditionalAndExpression(Object object, boolean isValid) {\n" //
 				+ "        if (isValid && object instanceof Date) {\n" //
-				+ "            final Date date = (Date) object;\n" //
+				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -126,7 +134,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long matchPatternInAndExpression(Object object, boolean isValid) {\n" //
 				+ "        if (object instanceof Date & isValid) {\n" //
-				+ "            final Date date = (Date) object;\n" //
+				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -137,7 +145,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        if (!(object instanceof Date)) {\n" //
 				+ "            return 0;\n" //
 				+ "        } else {\n" //
-				+ "            final Date date = (Date) object;\n" //
+				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "    }\n" //
@@ -146,7 +154,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        if (!(object instanceof Date) || isValid) {\n" //
 				+ "            return 0;\n" //
 				+ "        } else {\n" //
-				+ "            final Date date = (Date) object;\n" //
+				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "    }\n" //
@@ -155,7 +163,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        if (isValid | !(object instanceof Date)) {\n" //
 				+ "            return 0;\n" //
 				+ "        } else {\n" //
-				+ "            final Date date = (Date) object;\n" //
+				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "    }\n" //
@@ -165,21 +173,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "            return 0;\n" //
 				+ "        }\n" //
 				+ "\n" //
-				+ "        final Date date = (Date) object;\n" //
+				+ "        Date date = (Date) object;\n" //
 				+ "        return date.getTime();\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public long matchPatternOnLoneStatement(Object object) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (object instanceof Date) final Date date = (Date) object;\n" //
-				+ "\n" //
-				+ "        return 0;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int matchPatternOnLoneElse(Object object) {\n" //
+				+ "    public int matchPatternOnLoneStatement(Object object) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (!(object instanceof Date)) object.toString();\n" //
-				+ "        else final Date date = (Date) object;\n" //
+				+ "        else {Date date = (Date) object;}\n" //
 				+ "\n" //
 				+ "        return 0;\n" //
 				+ "    }\n" //
@@ -195,6 +196,15 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public long matchPatternForInstanceof(Object object) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (object instanceof Date date) {\n" //
+				+ "            return date.getTime();\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long matchPatternForInstanceofOnFinalVariable(Object object) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (object instanceof Date date) {\n" //
 				+ "            return date.getTime();\n" //
@@ -252,16 +262,10 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        return date.getTime();\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public long matchPatternOnLoneStatement(Object object) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (object instanceof Date date) {}\n" //
-				+ "\n" //
-				+ "        return 0;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int matchPatternOnLoneElse(Object object) {\n" //
+				+ "    public int matchPatternOnLoneStatement(Object object) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (!(object instanceof Date date)) object.toString();\n" //
+				+ "        else {}\n" //
 				+ "\n" //
 				+ "        return 0;\n" //
 				+ "    }\n" //
@@ -272,7 +276,6 @@ public class CleanUpTest15 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
-	@Ignore
 	@Test
 	public void testDoNotMatchPatternForInstanceof() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -285,17 +288,8 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public long doNotMatchInOppositeCondition(Object object) {\n" //
 				+ "        if (!(object instanceof Date)) {\n" //
-				+ "            final Date theDate = (Date) object;\n" //
+				+ "            Date theDate = (Date) object;\n" //
 				+ "            return theDate.getTime();\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return 0;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public long doNotMatchNotFinalVariable(Object object) {\n" //
-				+ "        if (object instanceof Date) {\n" //
-				+ "            Date date = (Date) object;\n" //
-				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        return 0;\n" //
@@ -303,7 +297,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long doNotMatchWithBadOperator(Object object, boolean isEnabled) {\n" //
 				+ "        if (object instanceof Date || isEnabled) {\n" //
-				+ "            final Date date = (Date) object;\n" //
+				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -314,14 +308,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        if (isValid && !(object instanceof Date)) {\n" //
 				+ "            return 0;\n" //
 				+ "        } else {\n" //
-				+ "            final Date date = (Date) object;\n" //
+				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public long doNotMatchWrongObject(Object object, Object object2) {\n" //
 				+ "        if (object instanceof Date) {\n" //
-				+ "            final Date date = (Date) object2;\n" //
+				+ "            Date date = (Date) object2;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -330,7 +324,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long doNotMatchWrongType(Object object) {\n" //
 				+ "        if (object instanceof Date) {\n" //
-				+ "            final java.sql.Date date = (java.sql.Date) object;\n" //
+				+ "            java.sql.Date date = (java.sql.Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -339,7 +333,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long doNotMatchActiveExpression(List<Object> objects) {\n" //
 				+ "        if (objects.remove(0) instanceof Date) {\n" //
-				+ "            final Date date = (Date) objects.remove(0);\n" //
+				+ "            Date date = (Date) objects.remove(0);\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -348,7 +342,8 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long doNotMatchAlreadyMatchedInstanceof(Object object) {\n" //
 				+ "        if (object instanceof Date anotherDate) {\n" //
-				+ "            final Date date = (Date) object;\n" //
+				+ "            Date date = (Date) object;\n" //
+				+ "            date = new Date();\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -358,7 +353,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "    public long doNotMatchReassignedObject(Object object, Object object2) {\n" //
 				+ "        if (object instanceof Date) {\n" //
 				+ "            object = object2;\n" //
-				+ "            final Date date = (Date) object;\n" //
+				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -367,16 +362,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long doNotMatchPatternInWhile(Object object) {\n" //
 				+ "        while (object instanceof Date) {\n" //
-				+ "            final Date date = (Date) object;\n" //
-				+ "            return date.getTime();\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return 0;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public long doNotMatchActiveExpression(List<Object> objects) {\n" //
-				+ "        if (objects.remove(0) instanceof Date) {\n" //
-				+ "            final Date date = (Date) objects.remove(0);\n" //
+				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -385,7 +371,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long doNotMatchMultiDeclaration(Object object) {\n" //
 				+ "        if (object instanceof Date) {\n" //
-				+ "            final Date date = (Date) object, anotherDate = null;\n" //
+				+ "            Date date = (Date) object, anotherDate = null;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -395,7 +381,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "    public void doNotMatchOppositeStatements() {\n" //
 				+ "        Object bah = 1;\n" //
 				+ "        if (bah instanceof Integer) return;\n" //
-				+ "        final Integer i = (Integer) bah;\n" //
+				+ "        Integer i = (Integer) bah;\n" //
 				+ "        System.out.println(i);\n" //
 				+ "    }\n" //
 				+ "}\n";

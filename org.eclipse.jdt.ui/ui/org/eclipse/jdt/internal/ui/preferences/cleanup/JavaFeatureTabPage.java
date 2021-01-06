@@ -59,9 +59,10 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 
 	@Override
 	protected void doCreatePreferences(final Composite composite, final int numColumns) {
-		// Disabled as long as it is buggy
-		//CheckboxPreference patternMatchingForInstanceof= createCheckboxPref(java15Group, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PatternMatchingForInstanceof, CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpModifyDialog.FALSE_TRUE);
-		//registerPreference(patternMatchingForInstanceof);
+		Group java15Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java15);
+
+		CheckboxPreference patternMatchingForInstanceof= createCheckboxPref(java15Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_PatternMatchingForInstanceof, CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(patternMatchingForInstanceof);
 
 		Group java14Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java14);
 
