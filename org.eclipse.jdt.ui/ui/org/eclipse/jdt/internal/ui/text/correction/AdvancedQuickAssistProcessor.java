@@ -2635,45 +2635,51 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 
-		if(!getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections, true))
+		if(!getConvertIfElseToSwitchProposals(context, (IfStatement) coveringNode, resultingCollections, true))
 			return false;
-		return getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections, false);
+		return getConvertIfElseToSwitchProposals(context, (IfStatement) coveringNode, resultingCollections, false);
 	}
 
-	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections, boolean handleNullArg) {
+	private static boolean getConvertIfElseToSwitchProposals(final IInvocationContext context, final IfStatement coveringNode, final List<ICommandAccess> resultingCollections, final boolean handleNullArg) {
 		final AST ast= coveringNode.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(coveringNode), importRewrite);
-		IfStatement ifStatement= (IfStatement) coveringNode;
-		IfStatement currentIf= ifStatement;
-		Statement currentStatement= ifStatement;
+
+		IfStatement currentIf= coveringNode;
+		Statement currentStatement= coveringNode;
 		Expression currentExpression= currentIf.getExpression();
 		SwitchStatement switchStatement= ast.newSwitchStatement();
 		Expression switchExpression= null;
 		boolean executeDefaultOnNullExpression= false;
-		Statement defaultStatement=null;
+		Statement defaultStatement= null;
 
 		while (currentStatement != null) {
 			Expression expression= null;
 			List<Expression> caseExpressions= new ArrayList<>();
+
 			if (currentIf != null) {
 				while (currentExpression != null) { // loop for fall through cases - multiple expressions with || operator
 					Expression leftOperand;
 					Expression rightOperand;
 					boolean isMethodInvocationCase= false;
+
 					if (currentExpression instanceof MethodInvocation) {
 						isMethodInvocationCase= true;
-						if (!(((MethodInvocation) currentExpression).getName().getIdentifier()).equals("equals")) //$NON-NLS-1$
+
+						if (!"equals".equals((((MethodInvocation) currentExpression).getName().getIdentifier()))) //$NON-NLS-1$
 							return false;
 
 						MethodInvocation invocation= (MethodInvocation) currentExpression;
 						leftOperand= invocation.getExpression();
+
 						if (leftOperand == null)
 							return false;
+
 						ITypeBinding leftBinding= leftOperand.resolveTypeBinding();
+
 						if (leftBinding != null) {
-							if (leftBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+							if ("java.lang.String".equals(leftBinding.getQualifiedName())) { //$NON-NLS-1$
 								if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
 									return false;
 							} else if (!leftBinding.isEnum()) {
@@ -2682,12 +2688,16 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						}
 
 						List<Expression> arguments= invocation.arguments();
-						if (arguments.size() != 1)
+
+						if (arguments.size() != 1) {
 							return false;
+						}
+
 						rightOperand= arguments.get(0);
 						ITypeBinding rightBinding= leftOperand.resolveTypeBinding();
+
 						if (rightBinding != null) {
-							if (rightBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+							if ("java.lang.String".equals(rightBinding.getQualifiedName())) { //$NON-NLS-1$
 								if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
 									return false;
 							} else if (!rightBinding.isEnum()) {
@@ -2698,20 +2708,26 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 					} else if (currentExpression instanceof InfixExpression) {
 						InfixExpression infixExpression= (InfixExpression) currentExpression;
-						Operator operator= infixExpression.getOperator();
-						if (!operator.equals(InfixExpression.Operator.CONDITIONAL_OR)
-								&& !operator.equals(InfixExpression.Operator.EQUALS))
+						InfixExpression.Operator operator= infixExpression.getOperator();
+
+						if (!InfixExpression.Operator.EQUALS.equals(operator)
+								&& !InfixExpression.Operator.CONDITIONAL_OR.equals(operator)
+								&& !InfixExpression.Operator.OR.equals(operator)
+								&& !InfixExpression.Operator.XOR.equals(operator))
 							return false;
 
 						leftOperand= infixExpression.getLeftOperand();
 						rightOperand= infixExpression.getRightOperand();
 
-						if (operator.equals(InfixExpression.Operator.EQUALS)) {
+						if (InfixExpression.Operator.EQUALS.equals(operator)) {
 							ITypeBinding typeBinding= leftOperand.resolveTypeBinding();
-							if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
-								return false; // don't propose quick assist when == is used to compare strings, since switch will use equals()
+
+							if (typeBinding != null && "java.lang.String".equals(typeBinding.getQualifiedName())) { //$NON-NLS-1$
+								return false; // Don't propose quick assist when == is used to compare strings, since switch will use equals()
 							}
-						} else if (operator.equals(InfixExpression.Operator.CONDITIONAL_OR)) {
+						} else if (InfixExpression.Operator.CONDITIONAL_OR.equals(operator)
+								|| InfixExpression.Operator.OR.equals(operator)
+								|| InfixExpression.Operator.XOR.equals(operator)) {
 							currentExpression= leftOperand;
 							continue;
 						}
@@ -2729,8 +2745,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					} else if (leftOperand instanceof QualifiedName) {
 						QualifiedName qualifiedName= (QualifiedName) leftOperand;
 						IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
+
 						if (binding == null || !binding.isEnumConstant())
 							return false;
+
 						importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
 						caseExpressions.add(qualifiedName.getName());
 						expression= rightOperand;
@@ -2738,14 +2756,17 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					} else if (rightOperand instanceof QualifiedName) {
 						QualifiedName qualifiedName= (QualifiedName) rightOperand;
 						IVariableBinding binding= (IVariableBinding) qualifiedName.resolveBinding();
+
 						if (binding == null || !binding.isEnumConstant())
 							return false;
+
 						importRewrite.addImport(binding.getDeclaringClass(), importRewriteContext);
 						caseExpressions.add(qualifiedName.getName());
 						expression= leftOperand;
 					} else {
 						return false;
 					}
+
 					if (expression == null) { // paranoidal check: this condition should never be true
 						return false;
 					}
@@ -2775,26 +2796,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 
 			switchStatement.statements().addAll(Arrays.asList(createSwitchCaseStatements(ast, rewrite, caseExpressions)));
-			boolean isBreakRequired= true;
-			if (thenStatement instanceof Block) {
-				Statement statement= null;
-				for (Iterator<Statement> iter= ((Block) thenStatement).statements().iterator(); iter.hasNext();) {
-					statement= iter.next();
-					switchStatement.statements().add(rewrite.createCopyTarget(statement));
-				}
-				if (statement instanceof ReturnStatement || statement instanceof ThrowStatement)
-					isBreakRequired= false;
-			} else {
-				if (thenStatement instanceof ReturnStatement || thenStatement instanceof ThrowStatement)
-					isBreakRequired= false;
-				switchStatement.statements().add(rewrite.createCopyTarget(thenStatement));
-			}
-			if (isBreakRequired)
-				switchStatement.statements().add(ast.newBreakStatement());
 
-			// advance currentStatement to the next "else if" or "else":
+			if (!addStatementsAndBreakIfNeeded(switchStatement, thenStatement, ast, rewrite)) {
+				return false;
+			}
+
+			// Advance currentStatement to the next "else if" or "else":
 			if (currentIf != null && currentIf.getElseStatement() != null) {
 				Statement elseStatement= currentIf.getElseStatement();
+
 				if (elseStatement instanceof IfStatement) {
 					currentIf= (IfStatement) elseStatement;
 					currentStatement= currentIf;
@@ -2809,8 +2819,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		if (switchExpression == null)
+		if (switchExpression == null) {
 			return false;
+		}
+
 		switchStatement.setExpression((Expression) rewrite.createCopyTarget(switchExpression));
 
 		if (handleNullArg) {
@@ -2827,19 +2839,21 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					Block block= ast.newBlock();
 					newIfStatement.setThenStatement(block);
 				} else if (defaultStatement instanceof Block) {
+					List<Statement> statements= ASTNodes.createMoveTarget(rewrite, (List<Statement>) ((Block) defaultStatement).statements());
+
 					Block block= ast.newBlock();
-					for (Iterator<Statement> iter= ((Block) defaultStatement).statements().iterator(); iter.hasNext();) {
-						block.statements().add(rewrite.createCopyTarget(iter.next()));
-					}
+					block.statements().addAll(statements);
+
 					newIfStatement.setThenStatement(block);
 				} else {
-					newIfStatement.setThenStatement((Statement) rewrite.createCopyTarget(defaultStatement));
+					newIfStatement.setThenStatement(ASTNodes.createMoveTarget(rewrite, defaultStatement));
 				}
+
 				Block block= ast.newBlock();
 				block.statements().add(switchStatement);
 				newIfStatement.setElseStatement(block);
 
-				rewrite.replace(ifStatement, newIfStatement, null);
+				rewrite.replace(coveringNode, newIfStatement, null);
 
 				String source= ASTNodes.asString(switchExpression).replaceAll("\r\n?|\n", " "); //$NON-NLS-1$ //$NON-NLS-2$
 				String label= Messages.format(CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch_handleNullArg, source);
@@ -2848,13 +2862,50 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				resultingCollections.add(proposal);
 			}
 		} else {
-			rewrite.replace(ifStatement, switchStatement, null);
+			rewrite.replace(coveringNode, switchStatement, null);
 
 			String label= CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch;
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_IF_ELSE_TO_SWITCH);
 			proposal.setImportRewrite(importRewrite);
 			resultingCollections.add(proposal);
 		}
+
+		return true;
+	}
+
+	private static boolean addStatementsAndBreakIfNeeded(final SwitchStatement switchStatement, final Statement thenStatement, final AST ast, final ASTRewrite rewrite) {
+		if (thenStatement instanceof Block) {
+			List<Statement> statements= ((Block) thenStatement).statements();
+			Statement lastStatement= null;
+
+			for (Statement statement : statements) {
+				switchStatement.statements().add(rewrite.createCopyTarget(statement));
+				lastStatement= statement;
+			}
+
+			return addBreakIfNeeded(switchStatement, lastStatement, ast);
+		}
+
+		switchStatement.statements().add(rewrite.createCopyTarget(thenStatement));
+		return addBreakIfNeeded(switchStatement, thenStatement, ast);
+	}
+
+	private static boolean addBreakIfNeeded(final SwitchStatement switchStatement, final Statement lastStatementOrNull, final AST ast) {
+		if (lastStatementOrNull instanceof BreakStatement) {
+			if (((BreakStatement) lastStatementOrNull).getLabel() == null) {
+				return false;
+			}
+
+			return true;
+		}
+
+		if (lastStatementOrNull instanceof ReturnStatement
+				|| lastStatementOrNull instanceof ThrowStatement
+				|| lastStatementOrNull instanceof ContinueStatement) {
+			return true;
+		}
+
+		switchStatement.statements().add(ast.newBreakStatement());
 		return true;
 	}
 
