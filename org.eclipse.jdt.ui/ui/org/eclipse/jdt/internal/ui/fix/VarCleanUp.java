@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2021 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -167,6 +168,7 @@ public class VarCleanUp extends AbstractMultiFix {
 						SuperMethodInvocation superMethodInvocation= ASTNodes.as(initializer, SuperMethodInvocation.class);
 						LambdaExpression lambdaExpression= ASTNodes.as(initializer, LambdaExpression.class);
 						Expression expression= ASTNodes.as(initializer, Expression.class);
+						MethodReference methodReference= ASTNodes.as(initializer, MethodReference.class);
 
 						if (!variableType.isParameterizedType() && lambdaExpression == null
 								|| (classInstanceCreation != null
@@ -194,6 +196,7 @@ public class VarCleanUp extends AbstractMultiFix {
 										&& methodInvocation == null
 										&& superMethodInvocation == null
 										&& lambdaExpression == null
+										&& methodReference == null
 										&& expression != null
 										&& expression.resolveTypeBinding() != null
 										&& expression.resolveTypeBinding().isParameterizedType()
@@ -201,6 +204,7 @@ public class VarCleanUp extends AbstractMultiFix {
 							rewriteOperations.add(new VarOperation(type));
 							return false;
 						} else if (variableType.isParameterizedType()
+								&& methodReference == null
 								&& classInstanceCreation != null
 								&& classInstanceCreation.getType().isParameterizedType()
 								&& ((ParameterizedType) classInstanceCreation.getType()).typeArguments().isEmpty()) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2021 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -646,6 +646,27 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "public class E1 {\n" //
 				+ "    public void foo() {\n" //
 				+ "        Function<Integer, String> doNotUseVarOnFromLambdaExpression = i -> String.valueOf(i);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotUseVarOnFromLambdaMethodReference() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    Function<String, Integer> field = String::length;\n" //
+				+ "    public void foo() {\n" //
+				+ "        Function<String, Integer> doNotUseVarOnFromLambdaMethodReference = String::length;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
