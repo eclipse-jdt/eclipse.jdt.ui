@@ -748,6 +748,18 @@ public class CleanUpConstants {
 	public static final String USE_LAZY_LOGICAL_OPERATOR= "cleanup.lazy_logical_operator"; //$NON-NLS-1$
 
 	/**
+	 * Avoids to create primitive wrapper when parsing a string.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String PRIMITIVE_PARSING= "cleanup.primitive_parsing"; //$NON-NLS-1$
+
+	/**
 	 * Replaces a primitive boxing to serialize by a call to the static <code>toString()</code> method.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

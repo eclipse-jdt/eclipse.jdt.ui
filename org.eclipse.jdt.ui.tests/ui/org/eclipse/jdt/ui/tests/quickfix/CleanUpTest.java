@@ -4669,6 +4669,292 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPrimitiveParsing() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void convertValueOfCallsToParseCallsInPrimitiveContext() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by1 = Byte.valueOf(\"0\");\n" //
+				+ "        byte by2 = Byte.valueOf(\"0\", 10);\n" //
+				+ "        boolean bo = Boolean.valueOf(\"true\");\n" //
+				+ "        int i1 = Integer.valueOf(\"42\");\n" //
+				+ "        int i2 = Integer.valueOf(\"42\", 10);\n" //
+				+ "        long l1 = Long.valueOf(\"42\");\n" //
+				+ "        long l2 = Long.valueOf(\"42\", 10);\n" //
+				+ "        short s1 = Short.valueOf(\"42\");\n" //
+				+ "        short s2 = Short.valueOf(\"42\", 10);\n" //
+				+ "        float f = Float.valueOf(\"42.42\");\n" //
+				+ "        double d = Double.valueOf(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c = Character.valueOf('&');\n" //
+				+ "        byte by = Byte.valueOf((byte) 0);\n" //
+				+ "        boolean bo = Boolean.valueOf(true);\n" //
+				+ "        int i = Integer.valueOf(42);\n" //
+				+ "        long l = Long.valueOf(42);\n" //
+				+ "        short s = Short.valueOf((short) 42);\n" //
+				+ "        float f = Float.valueOf(42.42F);\n" //
+				+ "        double d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c;\n" //
+				+ "        c = Character.valueOf('&');\n" //
+				+ "        byte by;\n" //
+				+ "        by = Byte.valueOf((byte) 0);\n" //
+				+ "        boolean bo1;\n" //
+				+ "        bo1 = Boolean.valueOf(true);\n" //
+				+ "        int i;\n" //
+				+ "        i = Integer.valueOf(42);\n" //
+				+ "        long l;\n" //
+				+ "        l = Long.valueOf(42);\n" //
+				+ "        short s;\n" //
+				+ "        s = Short.valueOf((short) 42);\n" //
+				+ "        float f;\n" //
+				+ "        f = Float.valueOf(42.42F);\n" //
+				+ "        double d;\n" //
+				+ "        d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static char removeUnnecessaryValueOfCallsInCharacterPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.valueOf('&');\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static byte removeUnnecessaryValueOfCallsInBytePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.valueOf((byte) 0);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static boolean removeUnnecessaryValueOfCallsInBooleanPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.valueOf(true);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static int removeUnnecessaryValueOfCallsInIntegerPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.valueOf(42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static long removeUnnecessaryValueOfCallsInLongPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.valueOf(42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static short removeUnnecessaryValueOfCallsInShortPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.valueOf((short) 42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static float removeUnnecessaryValueOfCallsInFloatPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.valueOf(42.42F);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static double removeUnnecessaryValueOfCallsInDoublePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        new Byte(\"0\").byteValue();\n" //
+				+ "        new Boolean(\"true\").booleanValue();\n" //
+				+ "        new Integer(\"42\").intValue();\n" //
+				+ "        new Short(\"42\").shortValue();\n" //
+				+ "        new Long(\"42\").longValue();\n" //
+				+ "        new Float(\"42.42\").floatValue();\n" //
+				+ "        new Double(\"42.42\").doubleValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCalls() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte.valueOf(\"0\").byteValue();\n" //
+				+ "        Byte.valueOf(\"0\", 8).byteValue();\n" //
+				+ "        Byte.valueOf(\"0\", 10).byteValue();\n" //
+				+ "        Boolean.valueOf(\"true\").booleanValue();\n" //
+				+ "        Integer.valueOf(\"42\").intValue();\n" //
+				+ "        Integer.valueOf(\"42\", 8).intValue();\n" //
+				+ "        Integer.valueOf(\"42\", 10).intValue();\n" //
+				+ "        Short.valueOf(\"42\").shortValue();\n" //
+				+ "        Short.valueOf(\"42\", 8).shortValue();\n" //
+				+ "        Short.valueOf(\"42\", 10).shortValue();\n" //
+				+ "        Long.valueOf(\"42\").longValue();\n" //
+				+ "        Long.valueOf(\"42\", 8).longValue();\n" //
+				+ "        Long.valueOf(\"42\", 10).longValue();\n" //
+				+ "        Float.valueOf(\"42.42\").floatValue();\n" //
+				+ "        Double.valueOf(\"42.42\").doubleValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void convertValueOfCallsToParseCallsInPrimitiveContext() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by1 = Byte.parseByte(\"0\");\n" //
+				+ "        byte by2 = Byte.parseByte(\"0\", 10);\n" //
+				+ "        boolean bo = Boolean.parseBoolean(\"true\");\n" //
+				+ "        int i1 = Integer.parseInt(\"42\");\n" //
+				+ "        int i2 = Integer.parseInt(\"42\", 10);\n" //
+				+ "        long l1 = Long.parseLong(\"42\");\n" //
+				+ "        long l2 = Long.parseLong(\"42\", 10);\n" //
+				+ "        short s1 = Short.parseShort(\"42\");\n" //
+				+ "        short s2 = Short.parseShort(\"42\", 10);\n" //
+				+ "        float f = Float.parseFloat(\"42.42\");\n" //
+				+ "        double d = Double.parseDouble(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c = '&';\n" //
+				+ "        byte by = (byte) 0;\n" //
+				+ "        boolean bo = true;\n" //
+				+ "        int i = 42;\n" //
+				+ "        long l = 42;\n" //
+				+ "        short s = (short) 42;\n" //
+				+ "        float f = 42.42F;\n" //
+				+ "        double d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c;\n" //
+				+ "        c = '&';\n" //
+				+ "        byte by;\n" //
+				+ "        by = (byte) 0;\n" //
+				+ "        boolean bo1;\n" //
+				+ "        bo1 = true;\n" //
+				+ "        int i;\n" //
+				+ "        i = 42;\n" //
+				+ "        long l;\n" //
+				+ "        l = 42;\n" //
+				+ "        short s;\n" //
+				+ "        s = (short) 42;\n" //
+				+ "        float f;\n" //
+				+ "        f = 42.42F;\n" //
+				+ "        double d;\n" //
+				+ "        d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static char removeUnnecessaryValueOfCallsInCharacterPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return '&';\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static byte removeUnnecessaryValueOfCallsInBytePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (byte) 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static boolean removeUnnecessaryValueOfCallsInBooleanPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static int removeUnnecessaryValueOfCallsInIntegerPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static long removeUnnecessaryValueOfCallsInLongPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static short removeUnnecessaryValueOfCallsInShortPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (short) 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static float removeUnnecessaryValueOfCallsInFloatPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42.42F;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static double removeUnnecessaryValueOfCallsInDoublePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte.parseByte(\"0\");\n" //
+				+ "        Boolean.parseBoolean(\"true\");\n" //
+				+ "        Integer.parseInt(\"42\");\n" //
+				+ "        Short.parseShort(\"42\");\n" //
+				+ "        Long.parseLong(\"42\");\n" //
+				+ "        Float.parseFloat(\"42.42\");\n" //
+				+ "        Double.parseDouble(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCalls() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte.parseByte(\"0\");\n" //
+				+ "        Byte.parseByte(\"0\", 8);\n" //
+				+ "        Byte.parseByte(\"0\", 10);\n" //
+				+ "        Boolean.parseBoolean(\"true\");\n" //
+				+ "        Integer.parseInt(\"42\");\n" //
+				+ "        Integer.parseInt(\"42\", 8);\n" //
+				+ "        Integer.parseInt(\"42\", 10);\n" //
+				+ "        Short.parseShort(\"42\");\n" //
+				+ "        Short.parseShort(\"42\", 8);\n" //
+				+ "        Short.parseShort(\"42\", 10);\n" //
+				+ "        Long.parseLong(\"42\");\n" //
+				+ "        Long.parseLong(\"42\", 8);\n" //
+				+ "        Long.parseLong(\"42\", 10);\n" //
+				+ "        Float.parseFloat(\"42.42\");\n" //
+				+ "        Double.parseDouble(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_PARSING);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveParsingCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveParsing() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void doNotConvertToPrimitiveWithObjectUse() {\n" //
+				+ "        Byte by1 = Byte.valueOf(\"0\");\n" //
+				+ "        Byte by2 = Byte.valueOf(\"0\", 10);\n" //
+				+ "        Boolean bo = Boolean.valueOf(\"true\");\n" //
+				+ "        Integer i1 = Integer.valueOf(\"42\");\n" //
+				+ "        Integer i2 = Integer.valueOf(\"42\", 10);\n" //
+				+ "        Long l1 = Long.valueOf(\"42\");\n" //
+				+ "        Long l2 = Long.valueOf(\"42\", 10);\n" //
+				+ "        Short s1 = Short.valueOf(\"42\");\n" //
+				+ "        Short s2 = Short.valueOf(\"42\", 10);\n" //
+				+ "        Float f = Float.valueOf(\"42.42\");\n" //
+				+ "        Double d = Double.valueOf(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_PARSING);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPrimitiveSerialization() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //

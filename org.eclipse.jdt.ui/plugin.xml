@@ -7122,9 +7122,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.stringbuilder">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PrimitiveParsingCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.primitive_parsing"
+            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp"
             id="org.eclipse.jdt.ui.cleanup.primitive_serialization"
-            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+            runAfter="org.eclipse.jdt.ui.cleanup.primitive_parsing">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PatternCleanUp"
