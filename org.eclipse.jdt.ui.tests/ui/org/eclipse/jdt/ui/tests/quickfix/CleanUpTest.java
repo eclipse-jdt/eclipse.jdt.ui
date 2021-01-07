@@ -12692,18 +12692,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this!\n" //
 				+ "        if (isValid)\n" //
 				+ "            // Keep this comment\n" //
-				+ "            i = 1;\n" //
+				+ "            i++;\n" //
 				+ "        else\n" //
-				+ "            i = (2 - 1) * 1;\n" //
+				+ "            i = i + 1;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /** Common code: i++, Remove if statement */\n" //
 				+ "    public void ifElseRemoveIf(boolean b, int number) {\n" //
 				+ "        if (b) {\n" //
 				+ "            // Keep this comment\n" //
-				+ "            number = 1;\n" //
+				+ "            number = number + 1;\n" //
 				+ "        } else {\n" //
-				+ "            number = 001;\n" //
+				+ "            number++;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -12867,13 +12867,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public void ifElseRemoveIfNoBrackets(boolean isValid, int i) {\n" //
 				+ "        // Keep this!\n" //
 				+ "        // Keep this comment\n" //
-				+ "        i = 1;\n" //
+				+ "        i++;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /** Common code: i++, Remove if statement */\n" //
 				+ "    public void ifElseRemoveIf(boolean b, int number) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        number = 1;\n" //
+				+ "        number = number + 1;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /** Common code: i++, Remove then case */\n" //

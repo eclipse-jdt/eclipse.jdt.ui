@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -186,41 +185,14 @@ public class ASTSemanticMatcher extends ASTMatcher {
 	};
 
 	@Override
-	public boolean match(final NumberLiteral node, final Object otherObject) {
-		Object other= unbracket(otherObject);
-
-		if (super.match(node, other)) {
-			return true;
-		}
-
-		if (!(other instanceof Expression)) {
-			return false;
-		}
-
-
-		Expression expression= (Expression) other;
-
-		return node.resolveTypeBinding() != null
-				&& node.resolveTypeBinding().equals(expression.resolveTypeBinding())
-				&& node.resolveConstantExpressionValue() != null
-				&& node.resolveConstantExpressionValue().equals(expression.resolveConstantExpressionValue());
-	}
-
-	@Override
 	public boolean match(final InfixExpression node, final Object otherObject) {
 		Object other= unbracket(otherObject);
 
-		if (other instanceof NumberLiteral) {
-			NumberLiteral numberLiteral= (NumberLiteral) other;
-
-			return match(numberLiteral, node);
-		}
-
 		if (other instanceof PrefixExpression) {
-			PrefixExpression prefixExpression= (PrefixExpression) other;
+			PrefixExpression pe= (PrefixExpression) other;
 
-			if (ASTNodes.hasOperator(prefixExpression, PrefixExpression.Operator.NOT)) {
-				return matchNegative(node, prefixExpression.getOperand());
+			if (ASTNodes.hasOperator(pe, PrefixExpression.Operator.NOT)) {
+				return matchNegative(node, pe.getOperand());
 			}
 		}
 
@@ -272,12 +244,6 @@ public class ASTSemanticMatcher extends ASTMatcher {
 	public boolean match(final PrefixExpression node, final Object otherObject) {
 		Object other= unbracket(otherObject);
 
-		if (other instanceof NumberLiteral) {
-			NumberLiteral numberLiteral= (NumberLiteral) other;
-
-			return match(numberLiteral, node);
-		}
-
 		if (!(other instanceof PrefixExpression) && ASTNodes.hasOperator(node, PrefixExpression.Operator.NOT)) {
 			return matchNegative(node.getOperand(), other);
 		}
@@ -297,12 +263,6 @@ public class ASTSemanticMatcher extends ASTMatcher {
 	@Override
 	public boolean match(final PostfixExpression node, final Object otherObject) {
 		Object other= unbracket(otherObject);
-
-		if (other instanceof NumberLiteral) {
-			NumberLiteral numberLiteral= (NumberLiteral) other;
-
-			return match(numberLiteral, node);
-		}
 
 		if (node.getParent() instanceof Statement) {
 			if (other instanceof Assignment) {
