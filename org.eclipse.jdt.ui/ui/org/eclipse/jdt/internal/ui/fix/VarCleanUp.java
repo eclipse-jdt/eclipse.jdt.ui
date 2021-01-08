@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -142,7 +143,7 @@ public class VarCleanUp extends AbstractMultiFix {
 
 			private boolean maybeUseVar(final Type type, final Expression initializer, final int extraDimensions) {
 				if (type.isVar() || initializer == null || initializer.resolveTypeBinding() == null || type.resolveBinding() == null
-						|| extraDimensions > 0) {
+						|| extraDimensions > 0 || initializer instanceof ArrayInitializer) {
 					if (JavaModelUtil.is11OrHigher(unit.getJavaElement().getJavaProject())) {
 						if (!type.isVar() && initializer == null && type.resolveBinding() != null && extraDimensions == 0) {
 							if (type.getParent() instanceof SingleVariableDeclaration &&
