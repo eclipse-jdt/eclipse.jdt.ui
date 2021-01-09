@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2020 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -5764,4 +5764,43 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
 	}
 
+	@Test
+	public void testAssignInTryWithResources() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.FileInputStream;\n" +
+				"import java.io.IOException;\n" +
+				"\n" +
+				"class E {\n" +
+				"    void f() throws IOException {\n" +
+				"        new FileInputStream(\"f\");\n" +
+				"    }\n" +
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", src, false, null);
+
+		int offset= src.indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 6);
+		assertCorrectLabels(proposals);
+
+		String expected=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.FileInputStream;\n" +
+				"import java.io.IOException;\n" +
+				"\n" +
+				"class E {\n" +
+				"    void f() throws IOException {\n" +
+				"        try (FileInputStream fileInputStream = new FileInputStream(\"f\")) {\n" +
+				"            \n" +
+				"        };\n" +
+				"    }\n" +
+				"}";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
 }

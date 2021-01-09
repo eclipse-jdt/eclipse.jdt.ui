@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <!--
-     Copyright (c) 2000, 2020 IBM Corporation and others.
+     Copyright (c) 2000, 2021 IBM Corporation and others.
 
      This program and the accompanying materials
      are made available under the terms of the Eclipse Public License 2.0
@@ -3810,6 +3810,12 @@
             id="org.eclipse.jdt.ui.correction.assignToLocal.assist">
       </command>
       <command
+            name="%ActionDefinition.corrections.assignInTryWithResources.name"
+            description="%ActionDefinition.corrections.assignInTryWithResources.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.assignInTryWithResources.assist">
+      </command>
+      <command
             name="%ActionDefinition.corrections.assignToField.name"
             description="%ActionDefinition.corrections.assignToField.description"
             categoryId="org.eclipse.jdt.ui.category.source"
@@ -4657,6 +4663,11 @@
             sequence="M1+2 L"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.correction.assignToLocal.assist"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+       <key
+            sequence="M1+2 T"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.correction.assignInTryWithResources.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
        <key
             sequence="M1+2 F"

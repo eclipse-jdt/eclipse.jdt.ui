@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -51,6 +52,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -60,6 +62,9 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -80,10 +85,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.AbstractSavePartic
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
 
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
-
 /**
  * Proposals for 'Assign to variable' quick assist
  * - Assign an expression from an ExpressionStatement to a local or field
@@ -93,6 +94,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;
+	public static final int TRY_WITH_RESOURCES= 3;
 
 	private final String KEY_NAME= "name";  //$NON-NLS-1$
 	private final String KEY_TYPE= "type";  //$NON-NLS-1$
@@ -114,9 +116,12 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		if (variableKind == LOCAL) {
 			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description);
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
-		} else {
+		} else if (variableKind == FIELD) {
 			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntofield_description);
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
+		} else {
+			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignintrywithresources_description);
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		}
 		createImportRewrite((CompilationUnit) node.getRoot());
 	}
@@ -159,7 +164,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			} else {
 				return doAddAllFields(rewrite);
 			}
-		} else { // LOCAL
+		} else { // LOCAL or TRY_WITH_RESOURCES
 			return doAddLocal();
 		}
 	}
@@ -184,26 +189,40 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 		Type type= evaluateType(ast, nodeToAssign, fTypeBinding, KEY_TYPE, TypeLocation.LOCAL_VARIABLE);
 
-		if (ASTNodes.isControlStatementBody(nodeToAssign.getLocationInParent())) {
-			Block block= ast.newBlock();
-			block.statements().add(rewrite.createMoveTarget(nodeToAssign));
-			rewrite.replace(nodeToAssign, block, null);
-		}
+		if (fVariableKind == LOCAL) {
+			if (ASTNodes.isControlStatementBody(nodeToAssign.getLocationInParent())) {
+				Block block= ast.newBlock();
+				block.statements().add(rewrite.createMoveTarget(nodeToAssign));
+				rewrite.replace(nodeToAssign, block, null);
+			}
 
-		if (needsSemicolon(expression)) {
-			VariableDeclarationStatement varStatement= ast.newVariableDeclarationStatement(newDeclFrag);
-			varStatement.setType(type);
-			rewrite.replace(expression, varStatement, null);
+			if (needsSemicolon(expression)) {
+				VariableDeclarationStatement varStatement= ast.newVariableDeclarationStatement(newDeclFrag);
+				varStatement.setType(type);
+				rewrite.replace(expression, varStatement, null);
+			} else {
+				// trick for bug 43248: use an VariableDeclarationExpression and keep the ExpressionStatement
+				VariableDeclarationExpression varExpression= ast.newVariableDeclarationExpression(newDeclFrag);
+				varExpression.setType(type);
+				rewrite.replace(expression, varExpression, null);
+			}
+			setEndPosition(rewrite.track(nodeToAssign)); // set cursor after expression statement
 		} else {
-			// trick for bug 43248: use an VariableDeclarationExpression and keep the ExpressionStatement
+			TryStatement tryStatement= ast.newTryStatement();
+
 			VariableDeclarationExpression varExpression= ast.newVariableDeclarationExpression(newDeclFrag);
 			varExpression.setType(type);
-			rewrite.replace(expression, varExpression, null);
+			tryStatement.resources().add(varExpression);
+
+			EmptyStatement blankLine = (EmptyStatement) rewrite.createStringPlaceholder("", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
+			tryStatement.getBody().statements().add(blankLine);
+
+			rewrite.replace(expression, tryStatement, null);
+			setEndPosition(rewrite.track(blankLine));
 		}
 
 		addLinkedPosition(rewrite.track(newDeclFrag.getName()), true, KEY_NAME);
 		addLinkedPosition(rewrite.track(type), false, KEY_TYPE);
-		setEndPosition(rewrite.track(nodeToAssign)); // set cursor after expression statement
 
 		return rewrite;
 	}
@@ -377,7 +396,9 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	private Type evaluateType(AST ast, ASTNode nodeToAssign, ITypeBinding typeBinding, String groupID, TypeLocation location) {
 		for (ITypeBinding proposal : ASTResolving.getRelaxingTypes(ast, typeBinding)) {
-			addLinkedPositionProposal(groupID, proposal);
+			if (fVariableKind != TRY_WITH_RESOURCES || Bindings.findTypeInHierarchy(proposal, "java.lang.AutoCloseable") != null) { //$NON-NLS-1$
+				addLinkedPositionProposal(groupID, proposal);
+			}
 		}
 		ImportRewrite importRewrite= getImportRewrite();
 		CompilationUnit cuNode= (CompilationUnit) nodeToAssign.getRoot();
