@@ -248,6 +248,8 @@ public class LinkedNodeFinder  {
 				return NAME;
 			case IProblem.UndefinedType:
 				return TYPE;
+			default:
+				break;
 		}
 		return 0;
 	}

@@ -168,6 +168,9 @@ public final class RefactoringAvailabilityTesterCore  {
 				return null;
 			case ASTNode.EXPRESSION_STATEMENT:
 				node= ((ExpressionStatement)node).getExpression();
+				break;
+			default:
+				break;
 		}
 		switch (node.getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
@@ -176,6 +179,8 @@ public final class RefactoringAvailabilityTesterCore  {
 			case ASTNode.SUPER_METHOD_INVOCATION:
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				return unit instanceof ICompilationUnit ? node : null; // don't start on invocations in binary
+			default:
+				break;
 		}
 		return null;
 	}

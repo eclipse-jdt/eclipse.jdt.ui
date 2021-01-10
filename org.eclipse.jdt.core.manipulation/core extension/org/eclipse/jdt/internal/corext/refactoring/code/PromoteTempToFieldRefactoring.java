@@ -703,6 +703,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			case INITIALIZE_IN_METHOD:
 				comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_initialize_method);
 				break;
+			default:
+				break;
 		}
 		String visibility= JdtFlags.getVisibilityString(fVisibility);
 		if ("".equals(visibility)) //$NON-NLS-1$

@@ -75,6 +75,8 @@ public final class TypeVariable extends AbstractTypeVariable {
 				return doExtends((TypeVariable)lhs);
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(this);
+			default:
+				break;
 		}
 		return false;
 	}

@@ -455,6 +455,8 @@ public abstract class FlowInfo {
 		 		return 4;
 		 	case UNKNOWN:
 		 		return 5;
+			default:
+				break;
 		 }
 		 return -1;
 	}

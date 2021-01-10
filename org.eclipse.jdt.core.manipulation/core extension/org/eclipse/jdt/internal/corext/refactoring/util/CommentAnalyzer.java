@@ -60,6 +60,8 @@ public class CommentAnalyzer {
 							break loop;
 						}
 						break;
+					default:
+						break;
 				}
 			}
 		} catch (InvalidInputException e) {

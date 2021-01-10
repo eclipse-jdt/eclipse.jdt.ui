@@ -1137,6 +1137,9 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
                 		return false;
                 	}
                 }
+					break;
+				default:
+					break;
             }
             current = current.getParent();
         }

@@ -2768,6 +2768,8 @@ public class ASTNodes {
 
 			case ASTNode.FIELD_ACCESS:
 				return isSameVariable(sn, (FieldAccess) node2);
+			default:
+				break;
 			}
 			break;
 
@@ -2782,6 +2784,8 @@ public class ASTNodes {
 
 			case ASTNode.FIELD_ACCESS:
 				return isSameVariable(qn, (FieldAccess) node2);
+			default:
+				break;
 			}
 			break;
 
@@ -2796,7 +2800,12 @@ public class ASTNodes {
 
 			case ASTNode.FIELD_ACCESS:
 				return isSameVariable(fa, (FieldAccess) node2);
+			default:
+				break;
 			}
+			break;
+		default:
+			break;
 		}
 
 		return areVariableBindingsEqual(node1, node2);
