@@ -656,12 +656,26 @@ public class CleanUpConstants {
 	public static final String USE_SWITCH= "cleanup.switch"; //$NON-NLS-1$
 
 	/**
-	 * Convert switch statements to switch expressions.IF_LOOP_VAR_USED}<br>
+	 * Convert switch statements to switch expressions.<br>
 	 * <p>
 	 * Example:
 	 *
 	 * <pre>
-	 *                   int i; switch(j) {case 1: i = 2; break; default: i = 3;}  -&gt; int i = switch(j) {case 1 -> 2; default -> 3;};
+	 *      int i;
+	 *      switch(j) {
+	 *        case 1:
+	 *          i = 2;
+	 *          break;
+	 *        default:
+	 *          i = 3;
+	 *        }
+	 *
+	 *        ->
+	 *
+	 *       int i = switch(j) {
+	 *         case 1 -> 2;
+	 *         default -> 3;
+	 *       };
 	 * </pre>
 	 *
 	 * Possible values: {TRUE, FALSE}<br>
