@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -202,7 +203,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fConfigureButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Map<String, String> workingValues= new HashMap<>(fSettings);
+				Hashtable<String, String> workingValues= new Hashtable<>(fSettings);
 				SaveActionSelectionDialog dialog= new SaveActionSelectionDialog(parent.getShell(), workingValues);
 				if (dialog.open() == Window.OK) {
 					fSettings= workingValues;
