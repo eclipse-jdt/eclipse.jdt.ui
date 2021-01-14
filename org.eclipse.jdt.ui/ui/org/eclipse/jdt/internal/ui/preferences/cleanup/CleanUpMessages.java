@@ -142,6 +142,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantArrayCreation_description;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UselessReturn;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UselessContinue;
+	public static String UnnecessaryCodeTabPage_CheckboxName_UnloopedWhile;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryVarargsArrayCreation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedConstructors;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedFields;

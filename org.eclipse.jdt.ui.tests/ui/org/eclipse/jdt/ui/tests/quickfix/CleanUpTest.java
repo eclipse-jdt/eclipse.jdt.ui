@@ -8726,6 +8726,212 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUnloopedWhile() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void replaceWhileByIf(boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (isValid) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileThrowingExceptions(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (isEnabled) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            throw new NullPointerException();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileByIfAndRemoveBreak(boolean isVisible) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (isVisible) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileByIfAndReplaceBreaksByBlocks(boolean isVisible, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (isVisible) {\n" //
+				+ "            if (i > 0)\n" //
+				+ "                break;\n" //
+				+ "            else\n" //
+				+ "                break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileWithComplexCode(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (b1) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            if (b2) {\n" //
+				+ "                System.out.println(\"bar\");\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new NullPointerException();\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileButOnlyRemoveBreakForTheWhileLoop(boolean b, int magicValue) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (b) {\n" //
+				+ "            for (int i = 0; i < 10; i++) {\n" //
+				+ "                if (i == magicValue) {\n" //
+				+ "                    System.out.println(\"Magic value! Goodbye!\");\n" //
+				+ "                    break;\n" //
+				+ "                } else {\n" //
+				+ "                    System.out.println(\"Current value: \" + i);\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void replaceWhileByIf(boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileThrowingExceptions(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            throw new NullPointerException();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileByIfAndRemoveBreak(boolean isVisible) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isVisible) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileByIfAndReplaceBreaksByBlocks(boolean isVisible, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isVisible) {\n" //
+				+ "            if (i > 0) {\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileWithComplexCode(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b1) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            if (b2) {\n" //
+				+ "                System.out.println(\"bar\");\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new NullPointerException();\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileButOnlyRemoveBreakForTheWhileLoop(boolean b, int magicValue) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b) {\n" //
+				+ "            for (int i = 0; i < 10; i++) {\n" //
+				+ "                if (i == magicValue) {\n" //
+				+ "                    System.out.println(\"Magic value! Goodbye!\");\n" //
+				+ "                    break;\n" //
+				+ "                } else {\n" //
+				+ "                    System.out.println(\"Current value: \" + i);\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.UNLOOPED_WHILE);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UnloopedWhileCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testKeepUnloopedWhile() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotReplaceWhileEndedByContinue(boolean b) {\n" //
+				+ "        while (b) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWhileUsingContinue(boolean b1, boolean b2) {\n" //
+				+ "        while (b1) {\n" //
+				+ "            if (b2) {\n" //
+				+ "                System.out.println(\"bar\");\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWhileThatMayHaveSeveralIterations(int i) {\n" //
+				+ "        while (i-- > 0) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            if (i == 1) {\n" //
+				+ "                System.out.println(\"bar\");\n" //
+				+ "                return;\n" //
+				+ "            } else if (i == 2) {\n" //
+				+ "                throw new NullPointerException();\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWhileThatHasLabeledBreak(boolean b) {\n" //
+				+ "        doNotTrashThisSpecialBreak:while (b) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            break doNotTrashThisSpecialBreak;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveBreakThatShortcutsCode(boolean b1, boolean b2) {\n" //
+				+ "        while (b1) {\n" //
+				+ "            if (b2) {\n" //
+				+ "                System.out.println(\"foo\");\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"bar\");\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.UNLOOPED_WHILE);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testMapMethodRatherThanKeySetMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

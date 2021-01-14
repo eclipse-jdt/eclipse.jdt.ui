@@ -1504,6 +1504,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_USELESS_CONTINUE= "cleanup.useless_continue"; //$NON-NLS-1$
 
 	/**
+	 * Replaces a <code>while</code> loop that always terminates during the first iteration by an <code>if</code>.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String UNLOOPED_WHILE= "cleanup.unlooped_while"; //$NON-NLS-1$
+
+	/**
 	 * Replaces a loop on elements by Collection.addAll(), Collection.addAll(Arrays.asList()) or Collections.addAll().
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
