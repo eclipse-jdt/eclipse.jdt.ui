@@ -7332,9 +7332,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.var">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.comparing_on_criteria"
+            runAfter="org.eclipse.jdt.ui.cleanup.lambda">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.JoinCleanUp"
             id="org.eclipse.jdt.ui.cleanup.join"
-            runAfter="org.eclipse.jdt.ui.cleanup.lambda">
+            runAfter="org.eclipse.jdt.ui.cleanup.comparing_on_criteria">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.TryWithResourceCleanUp"

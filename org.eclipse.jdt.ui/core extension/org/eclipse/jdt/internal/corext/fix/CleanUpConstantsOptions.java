@@ -159,6 +159,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(USE_VAR, CleanUpOptions.FALSE);
 		options.setOption(USE_LAMBDA, CleanUpOptions.TRUE);
 		options.setOption(USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.FALSE);
+		options.setOption(COMPARING_ON_CRITERIA, CleanUpOptions.FALSE);
 		options.setOption(JOIN, CleanUpOptions.FALSE);
 		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
 		options.setOption(MULTI_CATCH, CleanUpOptions.FALSE);
@@ -308,6 +309,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(USE_VAR, CleanUpOptions.FALSE);
 		options.setOption(USE_LAMBDA, CleanUpOptions.TRUE);
 		options.setOption(USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.FALSE);
+		options.setOption(COMPARING_ON_CRITERIA, CleanUpOptions.FALSE);
 		options.setOption(JOIN, CleanUpOptions.FALSE);
 		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
 		options.setOption(MULTI_CATCH, CleanUpOptions.FALSE);

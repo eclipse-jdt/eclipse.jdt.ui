@@ -1577,6 +1577,397 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testComparingOnCriteria() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Locale;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public List<Date> useMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.toString().compareTo(o2.toString());\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useReversedMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o2.toString().compareTo(o1.toString());\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useNegatedMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return -o1.toString().compareTo(o2.toString());\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> useTypedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<File> comparator = new Comparator<File>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(File f1, File f2) {\n" //
+				+ "                return f1.separator.compareTo(f2.separator);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> useUntypedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator comparator = new Comparator<File>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(File f1, File f2) {\n" //
+				+ "                return f1.separator.compareTo(f2.separator);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> useReversedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<File> comparator = new Comparator<File>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(File f1, File f2) {\n" //
+				+ "                return f2.separator.compareTo(f1.separator);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> replaceLambdaByMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = (o1, o2) -> o1.toString().compareTo(o2.toString());\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> replaceLambdaByReversedMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = (o1, o2) -> o2.toString().compareTo(o1.toString());\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> replaceLambdaByNegatedMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = (o1, o2) -> -o1.toString().compareTo(o2.toString());\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> replaceLambdaByTypedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<File> comparator = (f1, f2) -> f1.separator.compareTo(f2.separator);\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> replaceLambdaByReversedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<File> comparator = (f1, f2) -> f2.separator.compareTo(f1.separator);\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Locale;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public List<Date> useMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.comparing(Date::toString);\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useReversedMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.comparing(Date::toString).reversed();\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useNegatedMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.comparing(Date::toString).reversed();\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> useTypedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<File> comparator = Comparator.comparing(f1 -> f1.separator);\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> useUntypedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator comparator = Comparator.comparing((File f1) -> f1.separator);\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> useReversedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<File> comparator = Comparator.comparing((File f1) -> f1.separator).reversed();\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> replaceLambdaByMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.comparing(Date::toString);\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> replaceLambdaByReversedMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.comparing(Date::toString).reversed();\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> replaceLambdaByNegatedMethodRef(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.comparing(Date::toString).reversed();\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> replaceLambdaByTypedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<File> comparator = Comparator.comparing(f1 -> f1.separator);\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<File> replaceLambdaByReversedLambdaExpression(List<File> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<File> comparator = Comparator.comparing((File f1) -> f1.separator).reversed();\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.COMPARING_ON_CRITERIA);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ComparingOnCriteriaCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseComparingOnCriteria() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Locale;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public List<Date> doNotUseMethodRefWithWeirdBehavior(List<Date> listToSort) {\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                if (o1 != null) {\n" //
+				+ "                    if (o2 != null) {\n" //
+				+ "                        return o1.toString().compareTo(o2.toString());\n" //
+				+ "                    } else {\n" //
+				+ "                        return 1;\n" //
+				+ "                    }\n" //
+				+ "                } else if (o2 != null) {\n" //
+				+ "                    return -1;\n" //
+				+ "                } else {\n" //
+				+ "                    return 100;\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> doNotUseMethodRef(List<String> listToSort) {\n" //
+				+ "        Comparator<String> comparator = new Comparator<String>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(String o1, String o2) {\n" //
+				+ "                return o1.toLowerCase(Locale.ENGLISH).compareTo(o2.toLowerCase(Locale.ENGLISH));\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Comparator<Date> doNotRefactorComparisonWithoutCompareToMethod(List<Date> listToSort) {\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return (int) (o1.getTime() - o2.getTime());\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "\n" //
+				+ "        return comparator;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Comparator<Date> doNotRemoveSecondaryMethod(List<Date> listToSort) {\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.toString().compareTo(o2.toString());\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public String toString() {\n" //
+				+ "                return \"Compare formatted dates\";\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "\n" //
+				+ "        return comparator;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotReplaceLambdaByUseMethodRefWithWeirdBehavior(List<Date> listToSort) {\n" //
+				+ "        Comparator<Date> comparator = (o1, o2) -> {\n" //
+				+ "            if (o1 != null) {\n" //
+				+ "                if (o2 != null) {\n" //
+				+ "                    return o1.toString().compareTo(o2.toString());\n" //
+				+ "                } else {\n" //
+				+ "                    return 1;\n" //
+				+ "                }\n" //
+				+ "            } else if (o2 != null) {\n" //
+				+ "                return -1;\n" //
+				+ "            } else {\n" //
+				+ "                return 100;\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> doNotReplaceLambdaByUseMethodRef(List<String> listToSort) {\n" //
+				+ "        Comparator<String> comparator = (o1, o2) -> o1.toLowerCase(Locale.ENGLISH).compareTo(o2.toLowerCase(Locale.ENGLISH));\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Comparator<Date> doNotReplaceLambdaByRefactorComparisonWithoutCompareToMethod(List<Date> listToSort) {\n" //
+				+ "        Comparator<Date> comparator = (o1, o2) -> (int) (o1.getTime() - o2.getTime());\n" //
+				+ "\n" //
+				+ "        return comparator;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Comparator<Date> doNotReplaceLambdaByRemoveSecondaryMethod(List<Date> listToSort) {\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.toString().compareTo(o2.toString());\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public String toString() {\n" //
+				+ "                return \"Compare formatted dates\";\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "\n" //
+				+ "        return comparator;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.COMPARING_ON_CRITERIA);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testJoin() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //

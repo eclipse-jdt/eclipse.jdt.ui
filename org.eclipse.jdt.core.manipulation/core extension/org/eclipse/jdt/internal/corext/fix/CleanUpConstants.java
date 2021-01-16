@@ -934,6 +934,18 @@ public class CleanUpConstants {
 	public static final String SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF= "cleanup.simplify_lambda_expression_and_method_ref"; //$NON-NLS-1$
 
 	/**
+	 * Replaces a plain comparator instance by a lambda expression passed to a <code>Comparator.comparing()</code> method.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String COMPARING_ON_CRITERIA= "cleanup.comparing_on_criteria"; //$NON-NLS-1$
+
+	/**
 	 * Precompiles the regular expressions.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
