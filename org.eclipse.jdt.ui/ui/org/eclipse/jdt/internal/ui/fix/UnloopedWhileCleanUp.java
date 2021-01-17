@@ -234,7 +234,7 @@ public class UnloopedWhileCleanUp extends AbstractMultiFix {
 		unit.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(final WhileStatement visited) {
-				if (ASTNodes.fallsThrough(visited.getBody())) {
+				if (ASTNodes.fallsThrough(visited.getBody()) && !Boolean.TRUE.equals(ASTNodes.peremptoryValue(visited.getExpression()))) {
 					ContinueVisitor continueVisitor= new ContinueVisitor(visited);
 					continueVisitor.traverseNodeInterruptibly(visited);
 

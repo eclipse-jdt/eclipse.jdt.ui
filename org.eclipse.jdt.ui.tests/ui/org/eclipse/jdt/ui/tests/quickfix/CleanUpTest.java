@@ -8883,6 +8883,20 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public int doNotReplaceInfiniteWhile() {\n" //
+				+ "        while (true) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotReplaceComplexInfiniteWhile() {\n" //
+				+ "        while (42 == 42) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void doNotReplaceWhileUsingContinue(boolean b1, boolean b2) {\n" //
 				+ "        while (b1) {\n" //
 				+ "            if (b2) {\n" //
@@ -8913,9 +8927,9 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void doNotRemoveBreakThatShortcutsCode(boolean b1, boolean b2) {\n" //
-				+ "        while (b1) {\n" //
-				+ "            if (b2) {\n" //
+				+ "    public void doNotRemoveBreakThatShortcutsCode(boolean isValid, boolean isEnabled) {\n" //
+				+ "        while (isValid) {\n" //
+				+ "            if (isEnabled) {\n" //
 				+ "                System.out.println(\"foo\");\n" //
 				+ "                break;\n" //
 				+ "            }\n" //
