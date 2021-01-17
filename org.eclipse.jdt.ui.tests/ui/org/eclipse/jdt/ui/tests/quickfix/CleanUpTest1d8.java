@@ -1720,6 +1720,147 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return listToSort;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useMethodRefNullFirst(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                if (o1 != null) {\n" //
+				+ "                    if (o2 != null) {\n" //
+				+ "                        return o1.toString().compareTo(o2.toString());\n" //
+				+ "                    }\n" //
+				+ "\n" //
+				+ "                    return 1;\n" //
+				+ "                } else if (o2 != null) {\n" //
+				+ "                    return -1;\n" //
+				+ "                } else {\n" //
+				+ "                    return 0;\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useMethodRefNullLast(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                if (o1 != null) {\n" //
+				+ "                    if (null != o2) {\n" //
+				+ "                        return o1.toString().compareTo(o2.toString());\n" //
+				+ "                    } else {\n" //
+				+ "                        return -10;\n" //
+				+ "                    }\n" //
+				+ "                } else {\n" //
+				+ "                    return (o2 == null) ? 0 : 20;\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useReversedMethodRefNullFirst(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                if (o1 != null)\n" //
+				+ "                    if (null == o2)\n" //
+				+ "                        return 123;\n" //
+				+ "                     else\n" //
+				+ "                        return o2.toString().compareTo(o1.toString());\n" //
+				+ "\n" //
+				+ "                return (o2 == null) ? 0 : -123;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useReversedMethodRefNullLast(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                if (o1 != null) {\n" //
+				+ "                    if (null == o2) {\n" //
+				+ "                        return -10;\n" //
+				+ "                    } else {\n" //
+				+ "                        return Long.compare(o2.getTime(), o1.getTime());\n" //
+				+ "                    }\n" //
+				+ "                }\n" //
+				+ "\n" //
+				+ "                return (o2 == null) ? 0 : 20;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useMethodRefWithNegation(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                if (!(o1 != null)) {\n" //
+				+ "                    if (o2 != null) {\n" //
+				+ "                        return -1;\n" //
+				+ "                    } else {\n" //
+				+ "                        return 0;\n" //
+				+ "                    }\n" //
+				+ "                } else {\n" //
+				+ "                    if (o2 != null) {\n" //
+				+ "                        return -o1.toString().compareTo(o2.toString());\n" //
+				+ "                    }\n" //
+				+ "\n" //
+				+ "                    return 1;\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "        listToSort.sort(comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useMethodRefUnorderedCondition(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                if (o2 != null) {\n" //
+				+ "                    if (o1 != null) {\n" //
+				+ "                        return o1.toString().compareTo(o2.toString());\n" //
+				+ "                    }\n" //
+				+ "\n" //
+				+ "                    return -1;\n" //
+				+ "                } else if (o1 != null) {\n" //
+				+ "                    return 1;\n" //
+				+ "                } else {\n" //
+				+ "                    return 0;\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        };\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -1820,6 +1961,53 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return listToSort;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useMethodRefNullFirst(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString));\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useMethodRefNullLast(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.nullsLast(Comparator.comparing(Date::toString));\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useReversedMethodRefNullFirst(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString).reversed());\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useReversedMethodRefNullLast(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.nullsLast(Comparator.comparing(Date::getTime)));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useMethodRefWithNegation(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString).reversed());\n" //
+				+ "        listToSort.sort(comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> useMethodRefUnorderedCondition(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString));\n" //
+				+ "        Collections.sort(listToSort, comparator);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		// When
@@ -1838,7 +2026,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "import java.io.File;\n" //
 				+ "import java.util.Collections;\n" //
 				+ "import java.util.Comparator;\n" //
 				+ "import java.util.Date;\n" //

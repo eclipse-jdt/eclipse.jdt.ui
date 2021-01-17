@@ -36,9 +36,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -55,12 +57,16 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.util.ControlWorkflowMatcher;
+import org.eclipse.jdt.internal.corext.util.ControlWorkflowMatcherRunnable;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.NodeMatcher;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -70,10 +76,37 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * A fix that replaces a plain comparator instance by a lambda expression passed to a <code>Comparator.comparing()</code> method:
  * <ul>
  * <li>The <code>Comparator</code> type must be inferred by the destination of the comparator,</li>
- * <li>The algorithm of the comparator must be standard and based on one field or method.</li>
+ * <li>The algorithm of the comparator must be standard and based on one field or method,</li>
+ * <li>The cleanup can handle the null values.</li>
  * </ul>
  */
 public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
+	private static final class ObjectNotNullMatcher extends NodeMatcher<Expression> {
+		private final SimpleName name;
+
+		private ObjectNotNullMatcher(final SimpleName name) {
+			this.name= name;
+		}
+
+		@Override
+		public Boolean isMatching(final Expression node) {
+			InfixExpression condition= ASTNodes.as(node, InfixExpression.class);
+
+			if (condition != null
+					&& ASTNodes.hasOperator(condition, InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS)) {
+				OrderedInfixExpression<SimpleName, NullLiteral> orderedInfix= ASTNodes.orderedInfix(condition, SimpleName.class, NullLiteral.class);
+
+				if (orderedInfix != null
+						&& ASTNodes.isSameVariable(orderedInfix.getFirstOperand(), name)
+						&& ASTNodes.isPassive(orderedInfix.getFirstOperand())) {
+					return ASTNodes.hasOperator(condition, InfixExpression.Operator.NOT_EQUALS);
+				}
+			}
+
+			return null;
+		}
+	}
+
 	public ComparingOnCriteriaCleanUp() {
 		this(Collections.emptyMap());
 	}
@@ -100,15 +133,24 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.COMPARING_ON_CRITERIA)) {
-			return "Comparator<Date> comparator = Comparator.comparing(Date::toString);\n\n\n\n\n\n"; //$NON-NLS-1$
+			return "Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString));\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"; //$NON-NLS-1$
 		}
 
-		return "" // //$NON-NLS-1$
-				+ "Comparator<Date> comparator = new Comparator<Date>() {\n" // //$NON-NLS-1$
-				+ "    @Override\n" // //$NON-NLS-1$
-				+ "    public int compare(Date o1, Date o2) {\n" // //$NON-NLS-1$
-				+ "        return o1.toString().compareTo(o2.toString());\n" // //$NON-NLS-1$
-				+ "    }\n" // //$NON-NLS-1$
+		return "" //$NON-NLS-1$
+				+ "Comparator<Date> comparator = new Comparator<Date>() {\n" //$NON-NLS-1$
+				+ "    @Override\n" //$NON-NLS-1$
+				+ "    public int compare(Date o1, Date o2) {\n" //$NON-NLS-1$
+				+ "        if (o2 != null) {\n" //$NON-NLS-1$
+				+ "            if (o1 != null) {\n" //$NON-NLS-1$
+				+ "                return o1.toString().compareTo(o2.toString());\n" //$NON-NLS-1$
+				+ "            }\n" //$NON-NLS-1$
+				+ "            return -1;\n" //$NON-NLS-1$
+				+ "        } else if (o1 != null) {\n" //$NON-NLS-1$
+				+ "            return 1;\n" //$NON-NLS-1$
+				+ "        } else {\n" //$NON-NLS-1$
+				+ "            return 0;\n" //$NON-NLS-1$
+				+ "        }\n" //$NON-NLS-1$
+				+ "    }\n" //$NON-NLS-1$
 				+ "};\n"; //$NON-NLS-1$
 	}
 
@@ -202,11 +244,95 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 
 			private boolean maybeRefactorBody(final Expression visited, final ITypeBinding typeArgument,
 					final VariableDeclaration object1, final VariableDeclaration object2, final List<Statement> statements) {
+				SimpleName name1= object1.getName();
+				SimpleName name2= object2.getName();
+
+				if (!maybeRefactorCompareToMethod(visited, typeArgument, statements, name1, name2)) {
+					return false;
+				}
+
+				AtomicReference<Expression> criteria= new AtomicReference<>();
+				AtomicBoolean isForward= new AtomicBoolean(true);
+
+				NodeMatcher<Expression> compareToMatcher= new NodeMatcher<Expression>() {
+					@Override
+					public Boolean isMatching(final Expression node) {
+						if (isReturnedExpressionToRefactor(node, criteria, isForward, name1, name2)) {
+							return Boolean.TRUE;
+						}
+
+						return null;
+					}
+				};
+
+				NodeMatcher<Expression> zeroMatcher= new NodeMatcher<Expression>() {
+					@Override
+					public Boolean isMatching(final Expression node) {
+						if (Long.valueOf(0L).equals(ASTNodes.getIntegerLiteral(node))) {
+							return Boolean.TRUE;
+						}
+
+						return null;
+					}
+				};
+
+				NodeMatcher<Expression> positiveMatcher= new NodeMatcher<Expression>() {
+					@Override
+					public Boolean isMatching(final Expression node) {
+						Long value= ASTNodes.getIntegerLiteral(node);
+
+						if (value != null && value > 0L) {
+							return Boolean.TRUE;
+						}
+
+						return null;
+					}
+				};
+
+				NodeMatcher<Expression> negativeMatcher= new NodeMatcher<Expression>() {
+					@Override
+					public Boolean isMatching(final Expression node) {
+						Long value= ASTNodes.getIntegerLiteral(node);
+
+						if (value != null && value < 0L) {
+							return Boolean.TRUE;
+						}
+
+						return null;
+					}
+				};
+
+				ControlWorkflowMatcherRunnable runnableMatcher= ControlWorkflowMatcher.createControlWorkflowMatcher().addWorkflow(new ObjectNotNullMatcher(name1)).condition(new ObjectNotNullMatcher(name2)).returnedValue(compareToMatcher)
+						.addWorkflow(new ObjectNotNullMatcher(name1).negate()).condition(new ObjectNotNullMatcher(name2).negate()).returnedValue(zeroMatcher)
+						.addWorkflow(new ObjectNotNullMatcher(name1).negate()).condition(new ObjectNotNullMatcher(name2)).returnedValue(negativeMatcher)
+						.addWorkflow(new ObjectNotNullMatcher(name1)).condition(new ObjectNotNullMatcher(name2).negate()).returnedValue(positiveMatcher);
+
+				if (runnableMatcher.isMatching(statements)) {
+					rewriteOperations.add(new ComparingOnCriteriaOperation(visited, typeArgument, name1, criteria, isForward, Boolean.TRUE));
+					return false;
+				}
+
+				runnableMatcher= ControlWorkflowMatcher.createControlWorkflowMatcher().addWorkflow(new ObjectNotNullMatcher(name1)).condition(new ObjectNotNullMatcher(name2)).returnedValue(compareToMatcher)
+						.addWorkflow(new ObjectNotNullMatcher(name1).negate()).condition(new ObjectNotNullMatcher(name2).negate()).returnedValue(zeroMatcher)
+						.addWorkflow(new ObjectNotNullMatcher(name1)).condition(new ObjectNotNullMatcher(name2).negate()).returnedValue(negativeMatcher)
+						.addWorkflow(new ObjectNotNullMatcher(name1).negate()).condition(new ObjectNotNullMatcher(name2)).returnedValue(positiveMatcher);
+
+				if (runnableMatcher.isMatching(statements)) {
+					rewriteOperations.add(new ComparingOnCriteriaOperation(visited, typeArgument, name1, criteria, isForward, Boolean.FALSE));
+					return false;
+				}
+
+				return true;
+			}
+
+			private boolean maybeRefactorCompareToMethod(final Expression visited, final ITypeBinding typeArgument,
+					final List<Statement> statements, final SimpleName name1,
+					final SimpleName name2) {
 				if (statements != null && statements.size() == 1) {
 					ReturnStatement returnStatement= ASTNodes.as(statements.get(0), ReturnStatement.class);
 
 					if (returnStatement != null) {
-						return maybeRefactorExpression(visited, typeArgument, object1.getName(), object2.getName(), returnStatement.getExpression());
+						return maybeRefactorExpression(visited, typeArgument, name1, name2, returnStatement.getExpression());
 					}
 				}
 
@@ -214,12 +340,13 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 			}
 
 			private boolean maybeRefactorExpression(final Expression visited, final ITypeBinding typeArgument,
-					final SimpleName name1, final SimpleName name2, final Expression expression) {
+					final SimpleName name1, final SimpleName name2,
+					final Expression expression) {
 				AtomicReference<Expression> criteria= new AtomicReference<>();
 				AtomicBoolean isForward= new AtomicBoolean(true);
 
 				if (isReturnedExpressionToRefactor(expression, criteria, isForward, name1, name2)) {
-					rewriteOperations.add(new ComparingOnCriteriaOperation(visited, typeArgument, name1, criteria, isForward));
+					rewriteOperations.add(new ComparingOnCriteriaOperation(visited, typeArgument, name1, criteria, isForward, null));
 					return false;
 				}
 
@@ -347,14 +474,16 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 		private final SimpleName name1;
 		private final AtomicReference<Expression> criteria;
 		private final AtomicBoolean isForward;
+		private final Boolean isNullFirst;
 
 		public ComparingOnCriteriaOperation(final Expression visited, final ITypeBinding typeArgument,
-				final SimpleName name1, final AtomicReference<Expression> criteria, final AtomicBoolean isForward) {
+				final SimpleName name1, final AtomicReference<Expression> criteria, final AtomicBoolean isForward, final Boolean isNullFirst) {
 			this.visited= visited;
 			this.typeArgument= typeArgument;
 			this.name1= name1;
 			this.criteria= criteria;
 			this.isForward= isForward;
+			this.isNullFirst= isNullFirst;
 		}
 
 		@Override
@@ -370,7 +499,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 			if (criteria.get() instanceof MethodInvocation) {
 				lambda= buildMethod(typeArgument, (MethodInvocation) criteria.get(), rewrite, ast, importRewrite);
 			} else {
-				lambda= buildField(visited, typeArgument, isForward.get(), (QualifiedName) criteria.get(), name1, rewrite, ast, importRewrite);
+				lambda= buildField(visited, typeArgument, isForward.get(), isNullFirst, (QualifiedName) criteria.get(), name1, rewrite, ast, importRewrite);
 			}
 
 			MethodInvocation comparingMethod= ast.newMethodInvocation();
@@ -382,6 +511,14 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 				MethodInvocation newMethodInvocation= ast.newMethodInvocation();
 				newMethodInvocation.setExpression(comparingMethod);
 				newMethodInvocation.setName(ast.newSimpleName("reversed")); //$NON-NLS-1$
+				comparingMethod= newMethodInvocation;
+			}
+
+			if (isNullFirst != null) {
+				MethodInvocation newMethodInvocation= ast.newMethodInvocation();
+				newMethodInvocation.setExpression(ASTNodeFactory.newName(ast, comparatorNameText));
+				newMethodInvocation.setName(ast.newSimpleName(isNullFirst ? "nullsFirst" : "nullsLast")); //$NON-NLS-1$ //$NON-NLS-2$
+				newMethodInvocation.arguments().add(comparingMethod);
 				comparingMethod= newMethodInvocation;
 			}
 
@@ -398,7 +535,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 		}
 
 		private LambdaExpression buildField(final Expression node, final ITypeBinding type, final boolean straightOrder,
-				final QualifiedName field, final SimpleName name, final ASTRewrite rewrite, final AST ast, final ImportRewrite importRewrite) {
+				final Boolean isNullValuesFirst, final QualifiedName field, final SimpleName name, final ASTRewrite rewrite, final AST ast, final ImportRewrite importRewrite) {
 			LambdaExpression lambdaExpression= ast.newLambdaExpression();
 			ITypeBinding destinationType= ASTNodes.getTargetType(node);
 
@@ -408,7 +545,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 					&& destinationType.getTypeArguments().length == 1
 					&& equalNotNull(destinationType.getTypeArguments()[0], type);
 
-			if (isTypeKnown && straightOrder) {
+			if (isTypeKnown && straightOrder && isNullValuesFirst == null) {
 				VariableDeclarationFragment newVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 				newVariableDeclarationFragment.setName((SimpleName) rewrite.createCopyTarget(name));
 				lambdaExpression.parameters().add(newVariableDeclarationFragment);
