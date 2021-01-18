@@ -52,8 +52,6 @@ class MethodReferencesSearchRequestor extends SearchRequestor {
                 case IJavaElement.INITIALIZER:
                     fSearchResults.addMember(member, member, match.getOffset(), match.getOffset()+match.getLength());
                     break;
-				default:
-					break;
             }
         }
     }

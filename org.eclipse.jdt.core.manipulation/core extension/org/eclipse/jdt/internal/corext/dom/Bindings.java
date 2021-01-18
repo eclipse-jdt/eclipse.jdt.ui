@@ -1290,8 +1290,6 @@ public class Bindings {
 				return ((IVariableBinding) binding).getVariableDeclaration() == binding;
 			case IBinding.METHOD:
 				return ((IMethodBinding) binding).getMethodDeclaration() == binding;
-			default:
-				break;
 		}
 		return true;
 	}
@@ -1305,8 +1303,6 @@ public class Bindings {
 				return ((IVariableBinding) binding).getVariableDeclaration();
 			case IBinding.METHOD:
 				return ((IMethodBinding) binding).getMethodDeclaration();
-			default:
-				break;
 		}
 		return binding;
 	}

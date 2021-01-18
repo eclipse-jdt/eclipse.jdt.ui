@@ -99,8 +99,6 @@ public final class ParameterizedType extends HierarchyType {
 			case TYPE_VARIABLE: return false;
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(this);
-			default:
-				break;
 		}
 		return false;
 	}

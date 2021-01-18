@@ -186,8 +186,6 @@ public class ScopeAnalyzer {
 					return 'V' + binding.getName();
 				case IBinding.TYPE:
 					return 'T' + binding.getName();
-				default:
-					break;
 			}
 		}
 		return null;
@@ -569,8 +567,6 @@ public class ScopeAnalyzer {
 					return typeBinding;
 				}
 				return typeBinding;
-			default:
-				break;
 		}
 		return null;
 	}

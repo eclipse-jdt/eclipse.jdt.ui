@@ -130,8 +130,6 @@ public final class ArrayType extends TType {
 			case TYPE_VARIABLE: return false;
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(this);
-			default:
-				break;
 		}
 		return false;
 	}

@@ -233,8 +233,6 @@ public class CallInliner {
 			case ASTNode.INITIALIZER:
 				fNumberOfLocals= LocalVariableIndex.perform(declaration);
 				break;
-			default:
-				break;
 		}
 	}
 
@@ -800,8 +798,6 @@ public class CallInliner {
 						} else {
 							currentStatement= node.getElseStatement();
 						}
-						break;
-					default:
 						break;
 				}
 				Assert.isNotNull(currentStatement);

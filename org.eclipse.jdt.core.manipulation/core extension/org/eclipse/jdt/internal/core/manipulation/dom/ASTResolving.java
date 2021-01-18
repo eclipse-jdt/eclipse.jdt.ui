@@ -493,8 +493,6 @@ public class ASTResolving {
 					}
 				}
 				break;
-			default:
-				break;
 		}
 		return null;
 	}

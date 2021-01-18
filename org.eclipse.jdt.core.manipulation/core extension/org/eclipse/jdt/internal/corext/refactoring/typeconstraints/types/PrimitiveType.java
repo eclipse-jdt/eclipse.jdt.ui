@@ -130,8 +130,6 @@ public final class PrimitiveType extends TType {
 				}
 			case SHORT :
 				return (fId == BYTE);
-			default:
-				break;
 		}
 		return false;
 	}

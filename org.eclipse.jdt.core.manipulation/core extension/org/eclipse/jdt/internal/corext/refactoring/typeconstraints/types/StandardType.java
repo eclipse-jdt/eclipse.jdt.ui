@@ -79,8 +79,6 @@ public final class StandardType extends HierarchyType {
 
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(this);
-			default:
-				break;
 		}
 		return false;
 	}

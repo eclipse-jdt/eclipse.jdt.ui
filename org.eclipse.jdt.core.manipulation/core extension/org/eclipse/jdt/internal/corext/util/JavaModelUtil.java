@@ -710,9 +710,6 @@ public final class JavaModelUtil {
 					else
 						return rawEntry;
 				}
-				break;
-			default:
-				break;
 		}
 		return rawEntry;
 	}

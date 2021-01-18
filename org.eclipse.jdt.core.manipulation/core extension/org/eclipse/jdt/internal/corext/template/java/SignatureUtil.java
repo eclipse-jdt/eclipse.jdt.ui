@@ -315,8 +315,6 @@ public final class SignatureUtil {
 					if (depth == 0)
 						return pos + 1;
 					break;
-				default:
-					break;
 			}
 			pos++;
 		}

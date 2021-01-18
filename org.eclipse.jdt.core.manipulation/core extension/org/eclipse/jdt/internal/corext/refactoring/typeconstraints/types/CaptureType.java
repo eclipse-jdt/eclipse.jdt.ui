@@ -85,8 +85,6 @@ public final class CaptureType extends AbstractTypeVariable {
 
 			case CAPTURE_TYPE:
 				return ((CaptureType)lhs).checkLowerBound(this.getWildcard());
-			default:
-				break;
 
 		}
 		return false;
