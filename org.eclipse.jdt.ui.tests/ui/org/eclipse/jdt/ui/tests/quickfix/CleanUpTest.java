@@ -14028,6 +14028,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testControlFlowMerge() throws Exception {
+		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= "" //
 				+ "package test1;\n" //
@@ -14175,19 +14176,23 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (b1) {\n" //
 				+ "            // Keep this comment\n" //
 				+ "            i++;\n" //
+				+ "\n" //
 				+ "            j++;\n" //
 				+ "        } else if (b2) {\n" //
 				+ "            i++;\n" //
 				+ "            // Keep this comment\n" //
 				+ "            i++;\n" //
+				+ "\n" //
 				+ "            j++;\n" //
 				+ "        } else if (modifiableList.remove(\"foo\")) {\n" //
 				+ "            // Keep this comment\n" //
 				+ "            i++;\n" //
+				+ "\n" //
 				+ "            j++;\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment\n" //
 				+ "            i++;\n" //
+				+ "\n" //
 				+ "            j++;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
@@ -14201,9 +14206,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
-
-		enable(CleanUpConstants.CONTROLFLOW_MERGE);
 
 		String expected= "" //
 				+ "package test1;\n" //
@@ -14311,6 +14313,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "        // Keep this comment\n" //
 				+ "        i++;\n" //
+				+ "\n" //
 				+ "        j++;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -14322,6 +14325,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.CONTROLFLOW_MERGE);
+
+		// Then
 		assertNotEquals("The class must be changed", given, expected);
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ControlFlowMergeCleanUp_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
