@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ProvidesDirective;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
@@ -72,6 +73,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor;
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
@@ -418,6 +420,11 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 					if (binding instanceof ITypeBinding) {
 						return (ITypeBinding) binding;
 					}
+				}
+				break;
+			case ASTNode.TYPE_DECLARATION:
+				if (ASTHelper.isSealedTypeSupportedInAST(ast) && node.getLocationInParent() == TypeDeclaration.PERMITS_TYPES_PROPERTY) {
+					return ((TypeDeclaration) parent).resolveBinding();
 				}
 				break;
 		}
