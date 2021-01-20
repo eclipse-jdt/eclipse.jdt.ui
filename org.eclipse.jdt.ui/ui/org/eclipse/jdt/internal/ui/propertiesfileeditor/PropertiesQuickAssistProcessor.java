@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -364,9 +364,9 @@ public class PropertiesQuickAssistProcessor {
 			final StringBuffer buf= new StringBuffer();
 
 			try {
-				for (Change fChange : fChanges) {
-					if (fChange instanceof TextChange) {
-						TextChange change= (TextChange) fChange;
+				for (Change changeObj : fChanges) {
+					if (changeObj instanceof TextChange) {
+						TextChange change= (TextChange) changeObj;
 						String filename= getFileName(change);
 						if (filename != null) {
 							buf.append("<b>"); //$NON-NLS-1$
