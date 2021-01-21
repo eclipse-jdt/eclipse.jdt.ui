@@ -1591,6 +1591,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "import java.util.Locale;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
+				+ "    private Comparator<Date> refactorField = new Comparator<Date>() {\n" //
+				+ "        @Override\n" //
+				+ "        public int compare(Date o1, Date o2) {\n" //
+				+ "            return o1.toString().compareTo(o2.toString());\n" //
+				+ "        }\n" //
+				+ "    };\n" //
+				+ "\n" //
 				+ "    public List<Date> useMethodRef(List<Date> listToSort) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
@@ -1988,6 +1995,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "import java.util.Locale;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
+				+ "    private Comparator<Date> refactorField = Comparator.comparing(Date::toString);\n" //
+				+ "\n" //
 				+ "    public List<Date> useMethodRef(List<Date> listToSort) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        Comparator<Date> comparator = Comparator.comparing(Date::toString);\n" //
@@ -2242,6 +2251,21 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return comparator;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public int compareTo(E anc) {\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E getNewInstance() {\n" //
+				+ "        return new E();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private Comparator<E> doNotRefactorNotComparableObjects = new Comparator<E>() {\n" //
+				+ "        @Override\n" //
+				+ "        public int compare(E o1, E o2) {\n" //
+				+ "            return o1.getNewInstance().compareTo(o2.getNewInstance());\n" //
+				+ "        }\n" //
+				+ "    };\n" //
 				+ "\n" //
 				+ "    public Comparator<Date> doNotRemoveSecondaryMethod(List<Date> listToSort) {\n" //
 				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //

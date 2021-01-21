@@ -353,6 +353,26 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 				return true;
 			}
 
+			private boolean isComparable(ITypeBinding classBinding) {
+				if ("java.lang.Comparable".equals(classBinding.getErasure().getQualifiedName())) { //$NON-NLS-1$
+					return true;
+				}
+
+				ITypeBinding superClass= classBinding.getSuperclass();
+
+				if (superClass != null && isComparable(superClass)) {
+					return true;
+				}
+
+				for (ITypeBinding binding : classBinding.getInterfaces()) {
+					if (isComparable(binding)) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+
 			private boolean isReturnedExpressionToRefactor(final Expression returnExpression, final AtomicReference<Expression> criteria,
 					final AtomicBoolean isForward, final SimpleName name1,
 					final SimpleName name2) {
@@ -368,7 +388,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 				if (compareToMethod != null && compareToMethod.getExpression() != null) {
 					ITypeBinding comparisonType= compareToMethod.getExpression().resolveTypeBinding();
 
-					if (comparisonType != null) {
+					if (comparisonType != null && isComparable(comparisonType)) {
 						if (compareToMethod.getExpression() != null
 								&& ASTNodes.usesGivenSignature(compareToMethod, comparisonType.getQualifiedName(), "compareTo", comparisonType.getQualifiedName())) { //$NON-NLS-1$
 							return isRefactorComparisonToRefactor(criteria, isForward, name1, name2, compareToMethod.getExpression(), (Expression) compareToMethod.arguments().get(0));

@@ -35,6 +35,92 @@ import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 
 /**
  * Implementation of the control workflow builder.
+ *
+ * The aim is to match a conditional part of code like:
+ *
+ * <pre>
+ * if (c1) {
+ *   if (c2) {
+ *     return A;
+ *   } else {
+ *     return B;
+ *   }
+ * } else {
+ *   if (c3) {
+ *     return C;
+ *   } else {
+ *     return D;
+ *   }
+ * }
+ * </pre>
+ *
+ * Any cases should be handled (no remaining cases). It is expressed this way
+ * <ul>
+ * <li>One case (c1, c2) goes to A</li>
+ * <li>One case (c1, not c2) goes to B</li>
+ * <li>One case (not c1, c3) goes to C</li>
+ * <li>One case (not c1, not c3) goes to D</li>
+ * </ul>
+ *
+ * It can handle as many conditions as you want.
+ * The conditions and the expressions are analyzed as ordinary matcher using <code>org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher</code>.
+ * All the remaining part of the structure may have lots of different forms:
+ *
+ * <pre>
+ * if (c1 && c2) {
+ *     return A;
+ * } else if (c1 && not c2) {
+ *     return B;
+ * } else if (not c1 && not c3) {
+ *     return D;
+ * } else if (not c1 && c3) {
+ *     return C;
+ * }
+ * </pre>
+ *
+ * <pre>
+ * if (c1) {
+ *   if (c2) {
+ *     return A;
+ *   }
+ *   return B;
+ * } else {
+ *   if (c3) {
+ *     return C;
+ *   }
+ *   return D;
+ * }
+ * </pre>
+ *
+ * <pre>
+ * if (c1) {
+ *   if (not c2) {
+ *     return B;
+ *   } else {
+ *     return A;
+ *   }
+ * } else {
+ *   if (not c3) {
+ *     return D;
+ *   } else {
+ *     return C;
+ *   }
+ * }
+ * </pre>
+ *
+ * <pre>
+ * if (c1) {
+ *   return c2 ? A : B;
+ * } else {
+ *   return c3 ? C :D;
+ * }
+ *
+ * if (not c1) {
+ *   return c3 ? C :D;
+ * }
+ *
+ * return not c2 ? A : B;
+ * </pre>
  */
 public final class ControlWorkflowMatcher implements ControlWorkflowMatcherCompletable, ControlWorkflowMatcherRunnable {
 	/**
