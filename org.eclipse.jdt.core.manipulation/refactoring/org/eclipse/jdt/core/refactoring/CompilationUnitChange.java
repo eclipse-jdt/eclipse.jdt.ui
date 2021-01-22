@@ -81,7 +81,7 @@ public class CompilationUnitChange extends TextFileChange {
 	protected IDocument acquireDocument(IProgressMonitor pm) throws CoreException {
 		SubMonitor subMonitor= SubMonitor.convert(pm, 2);
 		fCUnit.becomeWorkingCopy(subMonitor.split(1));
-		Assert.isTrue(fCUnit.isWorkingCopy(), fCUnit.toString());
+		Assert.isTrue(fCUnit.isWorkingCopy(), !fCUnit.isWorkingCopy()?fCUnit.toString():""); //$NON-NLS-1$
 		return super.acquireDocument(subMonitor.split(1));
 	}
 
