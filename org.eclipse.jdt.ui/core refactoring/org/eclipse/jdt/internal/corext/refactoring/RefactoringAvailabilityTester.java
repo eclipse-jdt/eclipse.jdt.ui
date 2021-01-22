@@ -51,13 +51,17 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -165,25 +169,55 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isChangeSignatureAvailable(final IMethod method) throws JavaModelException {
-		return Checks.isAvailable(method) && !Flags.isAnnotation(method.getDeclaringType().getFlags());
+		return (method != null) && Checks.isAvailable(method) && !Flags.isAnnotation(method.getDeclaringType().getFlags());
 	}
 
 	public static boolean isChangeSignatureAvailable(final IStructuredSelection selection) throws JavaModelException {
-		if (selection.size() == 1) {
-			if (selection.getFirstElement() instanceof IMethod) {
-				final IMethod method= (IMethod) selection.getFirstElement();
-				return isChangeSignatureAvailable(method);
-			}
-		}
-		return false;
+		final IMethod method= getSelectedMethod(selection);
+		return isChangeSignatureAvailable(method);
 	}
 
 	public static boolean isChangeSignatureAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IMethod method= getSelectedMethod(selection);
+		return isChangeSignatureAvailable(method);
+	}
+
+	public static IMethod getSelectedMethod(final IStructuredSelection selection) {
+		if (selection.size() == 1) {
+			if (selection.getFirstElement() instanceof IMethod) {
+				return (IMethod) selection.getFirstElement();
+			}
+		}
+		return null;
+	}
+
+	public static IMethod getSelectedMethod(final JavaTextSelection selection) throws JavaModelException {
 		final IJavaElement[] elements= selection.resolveElementAtOffset();
 		if (elements.length == 1 && (elements[0] instanceof IMethod))
-			return isChangeSignatureAvailable((IMethod) elements[0]);
+			return ((IMethod) elements[0]);
 		final IJavaElement element= selection.resolveEnclosingElement();
-		return (element instanceof IMethod) && isChangeSignatureAvailable((IMethod) element);
+		return (element instanceof IMethod) ? (IMethod)element : null;
+	}
+
+	public static boolean isCanonicalConstructor(IMethod method) {
+		boolean isCanonicalConstructor = false;
+		try {
+			if (method != null && method.isConstructor()) {
+				CompilationUnit cUnit= SharedASTProviderCore.getAST(method.getCompilationUnit(), SharedASTProviderCore.WAIT_YES, null);
+				if (cUnit != null) {
+					MethodDeclaration mDecl= ASTNodeSearchUtil.getMethodDeclarationNode(method, cUnit);
+					if (mDecl != null) {
+						IMethodBinding mBinding= mDecl.resolveBinding();
+						if (mBinding != null && mBinding.isCanonicalConstructor()) {
+							isCanonicalConstructor= true;
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			//do nothing
+		}
+		return isCanonicalConstructor;
 	}
 
 	public static boolean isCommonDeclaringType(final IMember[] members) {
@@ -1212,12 +1246,16 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isIntroduceParameterObjectAvailable(IStructuredSelection selection) throws JavaModelException{
-		return isChangeSignatureAvailable(selection); //TODO test selected element for more than 1 parameter?
+		IMethod method= getSelectedMethod(selection); //TODO test selected element for more than 1 parameter?
+		return isChangeSignatureAvailable(method) && !isCanonicalConstructor(method);
 	}
 
 	public static boolean isIntroduceParameterObjectAvailable(JavaTextSelection selection) throws JavaModelException{
-		return isChangeSignatureAvailable(selection); //TODO test selected element for more than 1 parameter?
+		IMethod method= getSelectedMethod(selection); //TODO test selected element for more than 1 parameter?
+		return isChangeSignatureAvailable(method) && !isCanonicalConstructor(method);
 	}
+
+
 
 	public static boolean isExtractClassAvailable(IType type) throws JavaModelException {
 		if (type == null)
@@ -1226,4 +1264,5 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		return ReorgUtils.isInsideCompilationUnit(type) && type.isClass() && !type.isAnonymous()  && !type.isLambda();
 	}
+
 }
