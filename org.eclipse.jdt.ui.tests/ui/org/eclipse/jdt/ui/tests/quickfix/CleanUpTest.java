@@ -4669,6 +4669,160 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPrimitiveComparison() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int simplifyIntegerComparison(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyDoubleComparison(double number, double anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyFloatComparison(float number, float anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyShortComparison(short number, short anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyLongComparison(long number, long anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyCharacterComparison(char number, char anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyByteComparison(byte number, byte anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyBooleanComparison(boolean number, boolean anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIntegerInstantiation(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return new Integer(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIntegerCast(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return ((Integer) number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int simplifyIntegerComparison(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyDoubleComparison(double number, double anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyFloatComparison(float number, float anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyShortComparison(short number, short anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyLongComparison(long number, long anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyCharacterComparison(char number, char anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyByteComparison(byte number, byte anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyBooleanComparison(boolean number, boolean anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIntegerInstantiation(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIntegerCast(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_COMPARISON);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveComparisonCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveComparison() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int doNotRefactorWrapper(Integer number, int anotherNumber) {\n" //
+				+ "        return Integer.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWrapperComparator(int number, Integer anotherNumber) {\n" //
+				+ "        return Integer.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorString(String number, int anotherNumber) {\n" //
+				+ "        return Integer.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorBadMethod(int number, int anotherNumber) {\n" //
+				+ "        return Integer.valueOf(number).valueOf(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_COMPARISON);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPrimitiveParsing() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);

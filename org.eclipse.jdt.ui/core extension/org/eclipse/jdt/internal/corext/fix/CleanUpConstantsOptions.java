@@ -79,6 +79,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
+		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_PARSING, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
 
@@ -232,6 +233,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
+		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_PARSING, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
 
