@@ -155,6 +155,8 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_GroupName_UnnecessaryCode;
 	public static String UnnecessaryCodeTabPage_GroupName_UnusedCode;
 
+	public static String CodeFixingTabPage_CheckboxName_StandardComparison;
+
 	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
 
 	public static String DuplicateCodeTabPage_CheckboxName_TernaryOperator;

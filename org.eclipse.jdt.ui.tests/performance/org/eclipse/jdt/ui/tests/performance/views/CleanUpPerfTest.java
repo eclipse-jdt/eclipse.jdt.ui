@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
@@ -758,6 +759,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new MergeConditionalBlocksCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testStandardComparisonCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.STANDARD_COMPARISON, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new StandardComparisonCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}

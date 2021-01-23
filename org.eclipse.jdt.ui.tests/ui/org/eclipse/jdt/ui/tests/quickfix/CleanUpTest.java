@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16959,6 +16959,175 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu= pack1.createCompilationUnit("Foo.java", original, false, null);
 
 		enable(CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testStandardComparison() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean refactorComparableComparingToZero() {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= s.compareTo(\"smaller\") == -1;\n" //
+				+ "        b &= s.compareTo(\"greater\") != -1;\n" //
+				+ "        b &= s.compareTo(\"smaller\") != 1;\n" //
+				+ "        b &= (s.compareTo(\"greater\")) == 1;\n" //
+				+ "        b &= (s.compareToIgnoreCase(\"greater\")) == 1;\n" //
+				+ "        b &= -1 == (s.compareTo(\"smaller\"));\n" //
+				+ "        b &= -1 != s.compareTo(\"greater\");\n" //
+				+ "        b &= 1 != s.compareTo(\"smaller\");\n" //
+				+ "        b &= 1 == s.compareTo(\"greater\");\n" //
+				+ "        b &= 1 == s.compareToIgnoreCase(\"greater\");\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean refactorComparatorComparingToZero(Comparator<String> comparator) {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") == -1;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") != -1;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") != 1;\n" //
+				+ "        b &= (comparator.compare(s, \"greater\")) == 1;\n" //
+				+ "        b &= -1 == (comparator.compare(s, \"smaller\"));\n" //
+				+ "        b &= -1 != comparator.compare(s, \"greater\");\n" //
+				+ "        b &= 1 != comparator.compare(s, \"smaller\");\n" //
+				+ "        b &= 1 == comparator.compare(s, \"greater\");\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean refactorComparableComparingToZero() {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= s.compareTo(\"smaller\") < 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") >= 0;\n" //
+				+ "        b &= s.compareTo(\"smaller\") <= 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") > 0;\n" //
+				+ "        b &= s.compareToIgnoreCase(\"greater\") > 0;\n" //
+				+ "        b &= s.compareTo(\"smaller\") < 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") >= 0;\n" //
+				+ "        b &= s.compareTo(\"smaller\") <= 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") > 0;\n" //
+				+ "        b &= s.compareToIgnoreCase(\"greater\") > 0;\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean refactorComparatorComparingToZero(Comparator<String> comparator) {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") < 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") >= 0;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") <= 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") > 0;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") < 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") >= 0;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") <= 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") > 0;\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.STANDARD_COMPARISON);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StandardComparisonCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseStandardComparison() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "\n" //
+				+ "public class E implements Comparator<Double> {\n" //
+				+ "    public boolean doNotRefactorValidCases() {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= s.compareTo(\"smaller\") < 0;\n" //
+				+ "        b &= s.compareTo(\"smaller\") <= 0;\n" //
+				+ "        b &= s.compareTo(\"equal\") == 0;\n" //
+				+ "        b &= s.compareTo(\"different\") != 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") >= 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") > 0;\n" //
+				+ "        b &= s.compareToIgnoreCase(\"equal\") == 0;\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRefactorValidCases(Comparator<String> comparator) {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") < 0;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") <= 0;\n" //
+				+ "        b &= comparator.compare(s, \"equal\") == 0;\n" //
+				+ "        b &= comparator.compare(s, \"different\") != 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") >= 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") > 0;\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRefactorLocalComparingToZero() {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final Double s = 123d;\n" //
+				+ "\n" //
+				+ "        b &= compare(s, 100d) < 100;\n" //
+				+ "        b &= compare(s, 100d) <= 100;\n" //
+				+ "        b &= compare(s, 123d) == 100;\n" //
+				+ "        b &= compare(s, 321d) != 100;\n" //
+				+ "        b &= compare(s, 200d) >= 100;\n" //
+				+ "        b &= compare(s, 200d) > 100;\n" //
+				+ "\n" //
+				+ "        b &= compare(s, 100d) == 99;\n" //
+				+ "        b &= compare(s, 200d) != 99;\n" //
+				+ "        b &= compare(s, 100d) != 101;\n" //
+				+ "        b &= (compare(s, 200d)) == 101;\n" //
+				+ "        b &= 99 == (compare(s, 100d));\n" //
+				+ "        b &= 99 != compare(s, 200d);\n" //
+				+ "        b &= 101 != compare(s, 100d);\n" //
+				+ "        b &= 101 == compare(s, 200d);\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Override\n" //
+				+ "    public int compare(Double o1, Double o2) {\n" //
+				+ "        return Double.compare(o1, o2) + 100;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.STANDARD_COMPARISON);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}

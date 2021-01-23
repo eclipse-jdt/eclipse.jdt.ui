@@ -114,6 +114,7 @@ public final class FixMessages extends NLS {
 	public static String CodeStyleFix_ChangeAccessUsingDeclaring_description;
 	public static String CodeStyleFix_QualifyMethodWithDeclClass_description;
 	public static String CodeStyleFix_QualifyFieldWithDeclClass_description;
+	public static String StandardComparisonFix_compare_to_zero;
 
 	public static String SerialVersion_group_description;
 

@@ -168,6 +168,7 @@ public class MultiFixMessages extends NLS {
 	public static String ObjectsEqualsCleanup_description;
 
 	public static String CheckSignOfBitwiseOperation_description;
+	public static String StandardComparisonCleanUp_description;
 
 	public static String ComparingOnCriteriaCleanUp_description;
 	public static String TryWithResourceCleanup_description;

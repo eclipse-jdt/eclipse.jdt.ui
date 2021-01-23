@@ -153,6 +153,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(CONTROLFLOW_MERGE, CleanUpOptions.FALSE);
 
+		// Code fixing
+		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
+
 		// Java Features
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
@@ -262,6 +265,9 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_USELESS_RETURN, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_CONTINUE, CleanUpOptions.FALSE);
 		options.setOption(UNLOOPED_WHILE, CleanUpOptions.FALSE);
+
+		// Code fixing
+		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
 
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);

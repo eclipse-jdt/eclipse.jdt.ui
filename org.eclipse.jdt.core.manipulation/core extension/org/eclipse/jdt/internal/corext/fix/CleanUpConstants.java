@@ -970,6 +970,18 @@ public class CleanUpConstants {
 	public static final String CHECK_SIGN_OF_BITWISE_OPERATION= "cleanup.bitwise_conditional_expression"; //$NON-NLS-1$
 
 	/**
+	 * Fixes <code>Comparable.compareTo()</code> usage.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String STANDARD_COMPARISON= "cleanup.standard_comparison"; //$NON-NLS-1$
+
+	/**
 	 * Removes a String instance from a String literal.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
