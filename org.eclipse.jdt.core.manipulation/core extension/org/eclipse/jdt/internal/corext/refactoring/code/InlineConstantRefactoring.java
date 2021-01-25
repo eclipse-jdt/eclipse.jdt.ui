@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] problem with fields from generic types - https://bugs.eclipse.org/218431
  *     Microsoft Corporation - copied to jdt.core.manipulation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -570,14 +571,14 @@ public class InlineConstantRefactoring extends Refactoring {
 			IDocument document= new Document(fInitializerUnit.getBuffer().getContents()); // could reuse document when generating and applying undo edits
 
 			final RangeMarker marker= new RangeMarker(fInitializer.getStartPosition(), fInitializer.getLength());
-			TextEdit[] rewriteEdits= initializerRewrite.rewriteAST(document, fInitializerUnit.getJavaProject().getOptions(true)).removeChildren();
+			TextEdit[] rewriteEdits= initializerRewrite.rewriteAST(document, fInitializerUnit.getOptions(true)).removeChildren();
 			marker.addChildren(rewriteEdits);
 			try {
 				marker.apply(document, TextEdit.UPDATE_REGIONS);
 				String rewrittenInitializer= document.get(marker.getOffset(), marker.getLength());
 				IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
-				int oldIndent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
-				return Strings.changeIndent(rewrittenInitializer, oldIndent, project, "", TextUtilities.getDefaultLineDelimiter(document)); //$NON-NLS-1$
+				int oldIndent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), fInitializerUnit);
+				return Strings.changeIndent(rewrittenInitializer, oldIndent, fInitializerUnit, "", TextUtilities.getDefaultLineDelimiter(document)); //$NON-NLS-1$
 			} catch (MalformedTreeException | BadLocationException e) {
 				JavaManipulationPlugin.log(e);
 			}

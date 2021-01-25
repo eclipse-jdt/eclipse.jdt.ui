@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -612,10 +613,10 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			final ITrackedNodePosition position= rewriter.track(body);
 			body.accept(new TypeVariableMapper(rewriter, mapping));
 			body.accept(new ThisVisitor(rewriter, fCachedDeclaringType));
-			rewriter.rewriteAST(document, getDeclaringType().getCompilationUnit().getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, getDeclaringType().getCompilationUnit().getOptions(true)).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			String[] lines= Strings.convertIntoLines(content);
-			Strings.trimIndentation(lines, method.getJavaProject(), false);
+			Strings.trimIndentation(lines, method.getCompilationUnit(), false);
 			content= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(method));
 			newMethod.setBody((Block) targetRewrite.createStringPlaceholder(content, ASTNode.BLOCK));
 		} catch (MalformedTreeException | BadLocationException exception) {
@@ -871,7 +872,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		if (info.copyJavadocToCopiesInSubclasses())
 			copyJavadocNode(rewrite, oldMethod, newMethod);
 		final IJavaProject project= rewriter.getCu().getJavaProject();
-		if (info.isNewMethodToBeDeclaredAbstract() && JavaModelUtil.is50OrHigher(project) && JavaPreferencesSettings.getCodeGenerationSettings(project).overrideAnnotation) {
+		if (info.isNewMethodToBeDeclaredAbstract() && JavaModelUtil.is50OrHigher(project) && JavaPreferencesSettings.getCodeGenerationSettings(rewriter.getCu()).overrideAnnotation) {
 			final MarkerAnnotation annotation= ast.newMarkerAnnotation();
 			annotation.setTypeName(ast.newSimpleName("Override")); //$NON-NLS-1$
 			newMethod.modifiers().add(annotation);

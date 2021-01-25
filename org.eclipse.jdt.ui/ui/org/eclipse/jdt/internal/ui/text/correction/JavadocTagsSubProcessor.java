@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc. - add module-info support
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -116,12 +117,12 @@ public class JavadocTagsSubProcessor {
 		protected void addEdits(IDocument document, TextEdit rootEdit) throws CoreException {
 			try {
 				String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
-				final IJavaProject project= getCompilationUnit().getJavaProject();
+				final ICompilationUnit unit= getCompilationUnit();
 				IRegion region= document.getLineInformationOfOffset(fInsertPosition);
 
 				String lineContent= document.get(region.getOffset(), region.getLength());
-				String indentString= Strings.getIndentString(lineContent, project);
-				String str= Strings.changeIndent(fComment, 0, project, indentString, lineDelimiter);
+				String indentString= Strings.getIndentString(lineContent, unit);
+				String str= Strings.changeIndent(fComment, 0, unit, indentString, lineDelimiter);
 				InsertEdit edit= new InsertEdit(fInsertPosition, str);
 				rootEdit.addChild(edit);
 				if (fComment.charAt(fComment.length() - 1) != '\n') {
@@ -150,7 +151,7 @@ public class JavadocTagsSubProcessor {
 			try {
 				Javadoc javadoc= null;
 				String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
-				final IJavaProject project= getCompilationUnit().getJavaProject();
+				final ICompilationUnit unit= getCompilationUnit();
 				CompilationUnit cu= (CompilationUnit)fDecl.getParent();
 				Name name= fDecl.getName();
 				List<Comment> comments= cu.getCommentList();
@@ -176,8 +177,8 @@ public class JavadocTagsSubProcessor {
 				IRegion region= document.getLineInformationOfOffset(insertPosition);
 
 				String lineContent= document.get(region.getOffset(), region.getLength());
-				String indentString= Strings.getIndentString(lineContent, project);
-				String str= Strings.changeIndent(comment.toString(), 0, project, indentString, lineDelimiter);
+				String indentString= Strings.getIndentString(lineContent, unit);
+				String str= Strings.changeIndent(comment.toString(), 0, unit, indentString, lineDelimiter);
 				InsertEdit edit= new InsertEdit(insertPosition, str);
 				rootEdit.addChild(edit);
 			} catch (BadLocationException e) {
@@ -240,7 +241,7 @@ public class JavadocTagsSubProcessor {
 				Javadoc javadoc= null;
 				int insertPosition;
 				String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
-				final IJavaProject project= getCompilationUnit().getJavaProject();
+				final ICompilationUnit unit= getCompilationUnit();
 				CompilationUnit cu= (CompilationUnit)fDecl.getParent();
 				Name moduleName= fDecl.getName();
 				List<Comment> comments= cu.getCommentList();
@@ -282,8 +283,8 @@ public class JavadocTagsSubProcessor {
 				IRegion region= document.getLineInformationOfOffset(insertPosition);
 
 				String lineContent= document.get(region.getOffset(), region.getLength());
-				String indentString= Strings.getIndentString(lineContent, project);
-				String str= Strings.changeIndent(comment.toString(), 0, project, indentString, lineDelimiter);
+				String indentString= Strings.getIndentString(lineContent, unit);
+				String str= Strings.changeIndent(comment.toString(), 0, unit, indentString, lineDelimiter);
 				InsertEdit edit= new InsertEdit(insertPosition, str);
 				rootEdit.addChild(edit);
 			} catch (BadLocationException e) {

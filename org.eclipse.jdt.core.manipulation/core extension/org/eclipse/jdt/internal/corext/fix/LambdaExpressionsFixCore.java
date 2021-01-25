@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2020 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
  *     Jerome Cambon <jerome.cambon@oracle.com> - [1.8][clean up][quick assist] Convert lambda to anonymous must qualify references to 'this'/'super' - https://bugs.eclipse.org/430573
  *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *     Red Hat Inc. - modified to create core class in jdt.core.manipulation
+ *     Microsoft Corporation - read preferences from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -800,7 +801,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		public MethodDeclaration getMethodDeclaration(ICompilationUnit cu, ASTRewrite rewrite, ImportRewrite rewrites,
 				ImportRewriteContext context, IMethodBinding binding, String[] parameterNames, ITypeBinding targetType,
 				boolean inInterface, ASTNode astNode) throws CoreException {
-			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu);
 			MethodDeclaration methodDeclaration= StubUtility2Core.createImplementationStubCore(cu, rewrite, rewrites, context, binding, parameterNames, targetType, settings, inInterface,
 					astNode,
 					false);

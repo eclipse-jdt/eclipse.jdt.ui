@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Jerome Cambon <jerome.cambon@oracle.com> - [code style] don't generate redundant modifiers "public static final abstract" for interface members - https://bugs.eclipse.org/71627
  *     Microsoft Corporation - copied to jdt.core.manipulation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -974,7 +975,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		// extract updated members
 		String[] updatedMemberSources= new String[members.length];
 		IDocument document= new Document(fSource.getCu().getBuffer().getContents());
-		TextEdit edit= fSource.getASTRewrite().rewriteAST(document, fSource.getCu().getJavaProject().getOptions(true));
+		TextEdit edit= fSource.getASTRewrite().rewriteAST(document, fSource.getCu().getOptions(true));
 		edit.apply(document, TextEdit.UPDATE_REGIONS);
 		for (int i= 0; i < members.length; i++) {
 			updatedMemberSources[i]= getUpdatedMember(document, members[i]);

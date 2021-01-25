@@ -35,6 +35,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -295,11 +296,11 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 	}
 
 	private int getIndentSize() {
-		return CodeFormatterUtil.getIndentWidth(null);
+		return CodeFormatterUtil.getIndentWidth((IJavaProject)null);
 	}
 
 	private int getTabDisplaySize() {
-		return CodeFormatterUtil.getTabWidth(null);
+		return CodeFormatterUtil.getTabWidth((IJavaProject)null);
 	}
 
 }

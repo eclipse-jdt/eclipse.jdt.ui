@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc, - copied to jdt.core.manipulation
  *     Microsoft Corporation - Add fFormattingOptions field - https://bugs.eclipse.org/551601
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -283,7 +284,7 @@ public class CompilationUnitRewrite {
 				clearGroupDescriptionEdits();
 				TextEdit rewriteEdit;
 				if (fRememberContent != null) {
-					rewriteEdit= fRewrite.rewriteAST(fRememberContent, fFormattingOptions == null ? fCu.getJavaProject().getOptions(true) : fFormattingOptions);
+					rewriteEdit= fRewrite.rewriteAST(fRememberContent, fFormattingOptions == null ? fCu.getOptions(true) : fFormattingOptions);
 				} else {
 					if (fFormattingOptions == null) {
 						rewriteEdit= fRewrite.rewriteAST();

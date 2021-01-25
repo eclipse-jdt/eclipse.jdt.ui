@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -62,7 +63,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class OverrideCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
 
-	private IJavaProject fJavaProject;
 	private String fMethodName;
 	private String[] fParamTypes;
 
@@ -75,8 +75,6 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 
 		fParamTypes= paramTypes;
 		fMethodName= methodName;
-
-		fJavaProject= jproject;
 
 		StringBuilder buffer= new StringBuilder();
 		buffer.append(completionProposal);
@@ -162,14 +160,14 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 				methodToOverride= Bindings.findMethodInType(node.getAST().resolveWellKnownType("java.lang.Object"), fMethodName, fParamTypes); //$NON-NLS-1$
 			}
 			if (methodToOverride != null) {
-				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
+				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fCompilationUnit);
 				MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), astNode);
 				ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 				rewriter.insertFirst(stub, null);
 
 				ITrackedNodePosition position= rewrite.track(stub);
 				try {
-					rewrite.rewriteAST(recoveredDocument, fJavaProject.getOptions(true)).apply(recoveredDocument);
+					rewrite.rewriteAST(recoveredDocument, fCompilationUnit.getOptions(true)).apply(recoveredDocument);
 
 					String generatedCode= recoveredDocument.get(position.getStartPosition(), position.getLength());
 					int generatedIndent= IndentManipulation.measureIndentUnits(getIndentAt(recoveredDocument, position.getStartPosition(), settings), settings.tabWidth, settings.indentWidth);

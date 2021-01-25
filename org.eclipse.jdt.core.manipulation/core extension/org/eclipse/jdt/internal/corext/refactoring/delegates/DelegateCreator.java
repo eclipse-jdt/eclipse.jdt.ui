@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Microsoft Corporation - copied to jdt.core.manipulation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
@@ -154,7 +155,7 @@ public abstract class DelegateCreator {
 	 */
 	public void setSourceRewrite(CompilationUnitRewrite rewrite) {
 		fOriginalRewrite= rewrite;
-		fPreferences= JavaPreferencesSettings.getCodeGenerationSettings(rewrite.getCu().getJavaProject());
+		fPreferences= JavaPreferencesSettings.getCodeGenerationSettings(rewrite.getCu());
 
 		fDelegateRewrite= new CompilationUnitRewrite(rewrite.getCu(), rewrite.getRoot());
 		fDelegateRewrite.getASTRewrite().setTargetSourceRangeComputer(rewrite.getASTRewrite().getExtendedSourceRangeComputer());
@@ -366,7 +367,7 @@ public abstract class DelegateCreator {
 	public void createEdit() throws JavaModelException {
 		try {
 			IDocument document= new Document(fDelegateRewrite.getCu().getBuffer().getContents());
-			TextEdit edit= fDelegateRewrite.getASTRewrite().rewriteAST(document, fDelegateRewrite.getCu().getJavaProject().getOptions(true));
+			TextEdit edit= fDelegateRewrite.getASTRewrite().rewriteAST(document, fDelegateRewrite.getCu().getOptions(true));
 			edit.apply(document, TextEdit.UPDATE_REGIONS);
 
 			String newSource= Strings.trimIndentation(document.get(fTrackedPosition.getStartPosition(), fTrackedPosition.getLength()),

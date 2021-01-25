@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
@@ -36,11 +37,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
-
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * A tuple used to keep source of an element and its type.
@@ -181,7 +181,7 @@ public class TypedSource {
 			ISourceReference reference= (ISourceReference) elem;
 			String source= reference.getSource();
 			if (source != null)
-				return Strings.trimIndentation(source, cu.getJavaProject(), false);
+				return Strings.trimIndentation(source, cu, false);
 		}
 		return ""; //$NON-NLS-1$
 	}

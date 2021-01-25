@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Microsoft Corporation - refactored to jdt.core.manipulation
+ *     Microsoft Corporation - read preferences from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -236,7 +237,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 				// not possible, we checked this in the constructor
 			}
 
-			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu);
 			settings.createComments= fCreateComments;
 
 			ASTNode insertion= getNodeToInsertBefore(memberRewriter);

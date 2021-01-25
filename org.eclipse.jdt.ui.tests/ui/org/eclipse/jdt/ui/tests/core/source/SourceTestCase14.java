@@ -98,7 +98,7 @@ public class SourceTestCase14 {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, constructorComment, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, constructorBody, null);
 
-		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(null);
+		fSettings= JavaPreferencesSettings.getCodeGenerationSettings((IJavaProject)null);
 		fSettings.createComments= true;
 	}
 

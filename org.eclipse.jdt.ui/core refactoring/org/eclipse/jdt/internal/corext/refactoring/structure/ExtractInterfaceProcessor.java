@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Jerome Cambon <jerome.cambon@oracle.com> - [code style] don't generate redundant modifiers "public static final abstract" for interface members - https://bugs.eclipse.org/71627
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -476,7 +477,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			final IDocument document= new Document(buffer.getDocument().get());
 			try {
-				rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
+				rewrite.rewriteAST(document, unit.getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 				targetRewrite.getListRewrite(targetDeclaration, targetDeclaration.getBodyDeclarationsProperty()).insertFirst(targetRewrite.createStringPlaceholder(normalizeText(document.get(position.getStartPosition(), position.getLength())), ASTNode.FIELD_DECLARATION), null);
 			} catch (MalformedTreeException | BadLocationException exception) {
 				JavaPlugin.log(exception);
@@ -683,7 +684,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			IDocument document= new Document(buffer.getDocument().get());
 			try {
-				rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
+				rewrite.rewriteAST(document, unit.getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 				targetRewrite.getListRewrite(targetDeclaration, targetDeclaration.getBodyDeclarationsProperty()).insertFirst(targetRewrite.createStringPlaceholder(normalizeText(document.get(position.getStartPosition(), position.getLength())), ASTNode.METHOD_DECLARATION), null);
 			} catch (MalformedTreeException | BadLocationException exception) {
 				JavaPlugin.log(exception);
@@ -897,7 +898,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 		}
 		fMembers= elements.toArray(new IMember[elements.size()]);
-		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fSubType.getJavaProject());
+		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fSubType.getCompilationUnit());
 		if (!status.isOK())
 			return status;
 		return new RefactoringStatus();
@@ -942,7 +943,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(code);
 		final String[] lines= Strings.convertIntoLines(code);
 		final IJavaProject project= fSubType.getJavaProject();
-		Strings.trimIndentation(lines, project, false);
+		Strings.trimIndentation(lines, fSubType.getCompilationUnit(), false);
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(project));
 	}
 
@@ -1038,7 +1039,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			try {
 				final IDocument document= new Document(buffer.getDocument().get());
 				try {
-					rewrite.rewriteAST(document, fSubType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
+					rewrite.rewriteAST(document, fSubType.getCompilationUnit().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 				} catch (MalformedTreeException | BadLocationException exception) {
 					JavaPlugin.log(exception);
 				}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *     Mateusz Wenus <mateusz.wenus@gmail.com> - [override method] generate in declaration order [code generation] - https://bugs.eclipse.org/bugs/show_bug.cgi?id=140971
  *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *     Red Hat Inc. - moved to jdt.core.manipulation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.corext.fix;
@@ -74,7 +75,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fTypeNode, cuRewrite.getImportRewrite());
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		ICompilationUnit unit= cuRewrite.getCu();
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit);
 
 		ListRewrite listRewrite;
 

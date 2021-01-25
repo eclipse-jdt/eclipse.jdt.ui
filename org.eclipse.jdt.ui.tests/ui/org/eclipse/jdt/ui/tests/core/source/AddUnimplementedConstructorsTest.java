@@ -131,7 +131,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, comment.toString(), null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "${body_statement}\n// TODO", null);
-		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(null);
+		fSettings= JavaPreferencesSettings.getCodeGenerationSettings((IJavaProject)null);
 		fSettings.createComments= true;
 	}
 
