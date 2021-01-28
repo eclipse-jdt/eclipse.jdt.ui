@@ -217,6 +217,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		favoritesToAdd.add("org.junit.jupiter.api.Assumptions.*"); //$NON-NLS-1$
 		favoritesToAdd.add("org.junit.jupiter.api.DynamicContainer.*"); //$NON-NLS-1$
 		favoritesToAdd.add("org.junit.jupiter.api.DynamicTest.*"); //$NON-NLS-1$
+		favoritesToAdd.add("org.mockito.Mockito.*"); //$NON-NLS-1$
 
 		// default value
 		Set<String> defaultFavorites= new LinkedHashSet<>();
