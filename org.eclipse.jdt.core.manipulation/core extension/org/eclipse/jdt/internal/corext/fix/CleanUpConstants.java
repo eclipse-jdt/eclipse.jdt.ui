@@ -1752,6 +1752,18 @@ public class CleanUpConstants {
 	public static final String ELSE_IF= "cleanup.else_if"; //$NON-NLS-1$
 
 	/**
+	 * Removes useless indentation when the opposite workflow falls through.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String REDUCE_INDENTATION= "cleanup.reduce_indentation"; //$NON-NLS-1$
+
+	/**
 	 * Controls whether long literal suffix should be rewritten in uppercase.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>

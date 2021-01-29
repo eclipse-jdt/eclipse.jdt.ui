@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.ui.fix.ExtractIncrementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SwitchCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
@@ -44,6 +45,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new SwitchCleanUp(values),
 				new AddAllCleanUp(values),
 				new ElseIfCleanUp(values),
+				new ReduceIndentationCleanUp(values),
 				new ExpressionsCleanUp(values),
 				new BitwiseConditionalExpressionCleanup(values),
 				new StandardComparisonCleanUp(values),
@@ -70,6 +72,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference elseIf= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ElseIf, CleanUpConstants.ELSE_IF, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(elseIf);
+
+		final CheckboxPreference reduceIndentationPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ReduceIndentation, CleanUpConstants.REDUCE_INDENTATION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(reduceIndentationPref);
 
 		final CheckboxPreference switchPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_Switch, CleanUpConstants.USE_SWITCH, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(switchPref);

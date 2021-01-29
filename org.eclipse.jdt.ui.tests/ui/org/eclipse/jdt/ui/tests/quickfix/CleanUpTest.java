@@ -10153,6 +10153,693 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testReduceIndentation() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Calendar;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Date conflictingName = new Date();\n" //
+				+ "\n" //
+				+ "    public int refactorThen(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            i = i + 1;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElse(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            i = i + 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithTryCatch(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            try {\n" //
+				+ "                throw new Exception();\n" //
+				+ "            } catch(Exception e) {\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIndentation(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorInTry(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            if (i > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                return 1;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                return 2;\n" //
+				+ "            }\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            e.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceIndentationFromElse(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            for (Integer integer : integers) {\n" //
+				+ "                System.out.println(\"Reading \" + integer);\n" //
+				+ "            }\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceIndentationFromIf(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            for (Integer integer : integers) {\n" //
+				+ "                System.out.println(\"Reading \" + integer);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int negateCommentedCondition(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0 /* comment */) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            for (Integer integer : integers) {\n" //
+				+ "                System.out.println(\"Reading \" + integer);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceBigIndentationFromIf(int i, List<String> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            try {\n" //
+				+ "                for (String integer : integers) {\n" //
+				+ "                    System.out.println(\"Reading \" + (Integer.parseInt(integer) + 100));\n" //
+				+ "                }\n" //
+				+ "            } catch (Exception e) {\n" //
+				+ "                e.printStackTrace();\n" //
+				+ "            }\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorThenInUnbrackettedForLoop(int[] integers) {\n" //
+				+ "        for (int integer : integers)\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                integer = integer + 1;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInUnbrackettedForLoop(double[] reals) {\n" //
+				+ "        for (double real : reals)\n" //
+				+ "            if (real > 0) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                real = real + 1;\n" //
+				+ "                System.out.println(\"New value: \" + real);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInSwitch(int discriminant, boolean isVisible) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInTry(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "            }\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"Finally\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInCatch(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            System.out.println(\"Very dangerous code\");\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInFinally(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            System.out.println(\"Very dangerous code\");\n" //
+				+ "        } finally {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithoutNameConflict(int i) {\n" //
+				+ "        System.out.println(\"Today: \" + conflictingName);\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int conflictingName = 123;\n" //
+				+ "\n" //
+				+ "            i = i + conflictingName;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithThrow(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            throw new IllegalArgumentException(\"Positive argument\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            i = i + 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithContinue(List<Integer> integers) {\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                continue;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                System.out.println(integer);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithBreak(List<Integer> integers) {\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                break;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                System.out.println(integer);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElse(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else\n" //
+				+ "            return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorUnparameterizedReturn(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "        } else {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorEmptyElse(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "            return;\n" //
+				+ "        } else {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Calendar;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Date conflictingName = new Date();\n" //
+				+ "\n" //
+				+ "    public int refactorThen(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        i = i + 1;\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElse(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        i = i + 1;\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithTryCatch(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        try {\n" //
+				+ "            throw new Exception();\n" //
+				+ "        } catch(Exception e) {\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIndentation(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorInTry(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            if (i > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                return 1;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 2;\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            e.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceIndentationFromElse(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            System.out.println(\"Reading \" + integer);\n" //
+				+ "        }\n" //
+				+ "        return 51;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceIndentationFromIf(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            System.out.println(\"Reading \" + integer);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int negateCommentedCondition(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0 /* comment */) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            System.out.println(\"Reading \" + integer);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceBigIndentationFromIf(int i, List<String> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        try {\n" //
+				+ "            for (String integer : integers) {\n" //
+				+ "                System.out.println(\"Reading \" + (Integer.parseInt(integer) + 100));\n" //
+				+ "            }\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            e.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorThenInUnbrackettedForLoop(int[] integers) {\n" //
+				+ "        for (int integer : integers) {\n" //
+				+ "            if (integer <= 0) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            integer = integer + 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInUnbrackettedForLoop(double[] reals) {\n" //
+				+ "        for (double real : reals) {\n" //
+				+ "            if (real > 0) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            real = real + 1;\n" //
+				+ "            System.out.println(\"New value: \" + real);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInSwitch(int discriminant, boolean isVisible) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInTry(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            discriminant = discriminant + 1;\n" //
+				+ "            System.out.println(\"New value: \" + discriminant);\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"Finally\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInCatch(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            System.out.println(\"Very dangerous code\");\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            discriminant = discriminant + 1;\n" //
+				+ "            System.out.println(\"New value: \" + discriminant);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInFinally(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            System.out.println(\"Very dangerous code\");\n" //
+				+ "        } finally {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            discriminant = discriminant + 1;\n" //
+				+ "            System.out.println(\"New value: \" + discriminant);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithoutNameConflict(int i) {\n" //
+				+ "        System.out.println(\"Today: \" + conflictingName);\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        int conflictingName = 123;\n" //
+				+ "\n" //
+				+ "        i = i + conflictingName;\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithThrow(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            throw new IllegalArgumentException(\"Positive argument\");\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        i = i + 1;\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithContinue(List<Integer> integers) {\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(integer);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithBreak(List<Integer> integers) {\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(integer);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElse(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorUnparameterizedReturn(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (!dates.isEmpty()) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorEmptyElse(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.REDUCE_INDENTATION);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ReduceIndentation_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotReduceIndentation() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Date;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Date conflictingName = new Date();\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithNameConflict(int i) {\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            int conflictingName = 123;\n" //
+				+ "            i = i + conflictingName;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        int conflictingName = 321;\n" //
+				+ "\n" //
+				+ "        return i + conflictingName;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithNameConfusion(int i) {\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            int conflictingName = 123;\n" //
+				+ "            i = i + conflictingName;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        System.out.println(\"Today: \" + conflictingName);\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithNameConfusion(int i, int discriminant) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "            if (i > 0) {\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                int conflictingName = 123;\n" //
+				+ "                i = i + conflictingName;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            System.out.println(\"Today: \" + conflictingName);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUCE_INDENTATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testUnnecessaryCodeBug127704_1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
