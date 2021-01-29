@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2020 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,22 +34,22 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 public class ExtractMethodTests1d8 extends ExtractMethodTests {
 
 	@Rule
-	public ExtractMethodTestSetup1d8 fgTestSetup= new ExtractMethodTestSetup1d8();
+	public ExtractMethodTestSetup1d8 fgTestSetup1d8= new ExtractMethodTestSetup1d8();
 
 	protected void defaultMethodsTest(int destination, int visibility) throws Exception {
-		performTest(fgTestSetup.getDefaultMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "defaultMethods18_out", null, null, destination, visibility);
+		performTest(fgTestSetup1d8.getDefaultMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "defaultMethods18_out", null, null, destination, visibility);
 	}
 
 	protected void staticMethodsTest(int destination, int visibility) throws Exception {
-		performTest(fgTestSetup.getStaticMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "staticMethods18_out", null, null, destination, visibility);
+		performTest(fgTestSetup1d8.getStaticMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "staticMethods18_out", null, null, destination, visibility);
 	}
 
 	protected void destinationTest(int destination, int visibility) throws Exception {
-		performTest(fgTestSetup.getDestinationPackage(), "A", COMPARE_WITH_OUTPUT, "destination18_out", null, null, destination, visibility);
+		performTest(fgTestSetup1d8.getDestinationPackage(), "A", COMPARE_WITH_OUTPUT, "destination18_out", null, null, destination, visibility);
 	}
 
 	protected void lambdaExpressionTest(int destination, int visibility) throws Exception {
-		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", COMPARE_WITH_OUTPUT, "lambdaExpression18_out", null, null, destination, visibility);
+		performTest(fgTestSetup1d8.getLambdaExpressionPackage(), "A", COMPARE_WITH_OUTPUT, "lambdaExpression18_out", null, null, destination, visibility);
 	}
 
 	//====================================================================================
@@ -249,7 +249,7 @@ public class ExtractMethodTests1d8 extends ExtractMethodTests {
 
 	@Test
 	public void test312() throws Exception {
-		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+		performTest(fgTestSetup1d8.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
 	@Test
@@ -279,7 +279,7 @@ public class ExtractMethodTests1d8 extends ExtractMethodTests {
 
 	@Test
 	public void test318() throws Exception {
-		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+		performTest(fgTestSetup1d8.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
 	@Test
@@ -289,17 +289,17 @@ public class ExtractMethodTests1d8 extends ExtractMethodTests {
 
 	@Test
 	public void test320() throws Exception {
-		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+		performTest(fgTestSetup1d8.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
 	@Test
 	public void test321() throws Exception {
-		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+		performTest(fgTestSetup1d8.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
 	@Test
 	public void test322() throws Exception {
-		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
+		performTest(fgTestSetup1d8.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
 	@Test
@@ -309,7 +309,7 @@ public class ExtractMethodTests1d8 extends ExtractMethodTests {
 
 	@Test
 	public void test324() throws Exception {
-		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", VALID_SELECTION, null);
+		performTest(fgTestSetup1d8.getLambdaExpressionPackage(), "A", VALID_SELECTION, null);
 	}
 
 	@Test

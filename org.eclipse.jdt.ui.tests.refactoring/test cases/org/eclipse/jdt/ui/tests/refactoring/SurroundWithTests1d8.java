@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2020 IBM Corporation and others.
+ * Copyright (c) 2014, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -36,11 +36,11 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 public class SurroundWithTests1d8 extends SurroundWithTests {
 
 	@Rule
-	public SurroundWithTestSetup1d8 fgTestSetup=new SurroundWithTestSetup1d8();
+	public SurroundWithTestSetup1d8 fGTestSetup1d8= new SurroundWithTestSetup1d8();
 
 	@Override
 	protected IPackageFragmentRoot getRoot() {
-		return fgTestSetup.getRoot();
+		return fGTestSetup1d8.getRoot();
 	}
 
 	@Override
@@ -50,12 +50,12 @@ public class SurroundWithTests1d8 extends SurroundWithTests {
 
 	@Override
 	protected void tryCatchInvalidTest() throws Exception {
-		performTest(fgTestSetup.getTryCatchPackage(), getName(), "trycatch18_out", INVALID_SELECTION);
+		performTest(fGTestSetup1d8.getTryCatchPackage(), getName(), "trycatch18_out", INVALID_SELECTION);
 	}
 
 	@Override
 	protected void tryCatchTest() throws Exception {
-		performTest(fgTestSetup.getTryCatchPackage(), getName(), "trycatch18_out", COMPARE_WITH_OUTPUT);
+		performTest(fGTestSetup1d8.getTryCatchPackage(), getName(), "trycatch18_out", COMPARE_WITH_OUTPUT);
 	}
 
 	@Test

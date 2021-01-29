@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -110,17 +110,17 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	}
 
 
-	private SimpleName fName;
+	private SimpleName fSimpleName;
 
 	public RemoveDeclarationCorrectionProposal(ICompilationUnit cu, SimpleName name, int relevance) {
 		super("", cu, null, relevance, PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE)); //$NON-NLS-1$
-		fName= name;
+		fSimpleName= name;
 	}
 
 	@Override
 	public String getName() {
-		IBinding binding= fName.resolveBinding();
-		String name= BasicElementLabels.getJavaElementName(fName.getIdentifier());
+		IBinding binding= fSimpleName.resolveBinding();
+		String name= BasicElementLabels.getJavaElementName(fSimpleName.getIdentifier());
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
 				return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedtype_description, name);
@@ -143,8 +143,8 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 
 	@Override
 	protected ASTRewrite getRewrite() {
-		IBinding binding= fName.resolveBinding();
-		CompilationUnit root= (CompilationUnit) fName.getRoot();
+		IBinding binding= fSimpleName.resolveBinding();
+		CompilationUnit root= (CompilationUnit) fSimpleName.getRoot();
 		ASTRewrite rewrite;
 		if (binding.getKind() == IBinding.METHOD) {
 			IMethodBinding decl= ((IMethodBinding) binding).getMethodDeclaration();
@@ -160,7 +160,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			// needs full AST
 			CompilationUnit completeRoot= SharedASTProviderCore.getAST(getCompilationUnit(), SharedASTProviderCore.WAIT_YES, null);
 
-			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
+			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fSimpleName.getStartPosition(), fSimpleName.getLength());
 
 			rewrite= ASTRewrite.create(completeRoot.getAST());
 			for (SimpleName reference : LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding())) {

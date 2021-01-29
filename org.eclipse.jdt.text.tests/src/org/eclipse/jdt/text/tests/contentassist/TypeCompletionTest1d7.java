@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 IBM Corporation and others.
+ * Copyright (c) 2011, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class TypeCompletionTest1d7 extends TypeCompletionTest {
 	@Rule
-	public Java1d7CompletionTestSetup cts= new Java1d7CompletionTestSetup();
+	public Java1d7CompletionTestSetup cts1d7= new Java1d7CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
@@ -44,7 +44,7 @@ public class TypeCompletionTest1d7 extends TypeCompletionTest {
 
 	@Override
 	protected IPackageFragment getAnonymousTestPackage() throws CoreException {
-		return cts.getAnonymousTestPackage();
+		return cts1d7.getAnonymousTestPackage();
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class TypeCompletionTest1d7 extends TypeCompletionTest {
 	@Override
 	@Test
 	public void testBug182468() throws Exception {
-		IPackageFragmentRoot src= (IPackageFragmentRoot)cts.getTestPackage().getParent();
+		IPackageFragmentRoot src= (IPackageFragmentRoot)cts1d7.getTestPackage().getParent();
 
 		IPackageFragment package1= src.createPackageFragment("package1", true, null);
 		package1.createCompilationUnit("AClass.java", "package " + package1.getElementName() + "; public class AClass {}", true, null);
