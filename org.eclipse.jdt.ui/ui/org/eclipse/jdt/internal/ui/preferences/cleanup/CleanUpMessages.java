@@ -61,7 +61,6 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_GroupName_ControlStatements;
 
 	public static String CodeStyleTabPage_GroupName_Expressions;
-	public static String CodeStyleTabPage_CheckboxName_CheckSignOfBitwiseOperation;
 	public static String CodeStyleTabPage_CheckboxName_ExtractIncrement;
 	public static String CodeStyleTabPage_CheckboxName_PullUpAssignment;
 	public static String CodeStyleTabPage_CheckboxName_ElseIf;
@@ -157,7 +156,12 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_GroupName_UnnecessaryCode;
 	public static String UnnecessaryCodeTabPage_GroupName_UnusedCode;
 
-	public static String CodeFixingTabPage_CheckboxName_StandardComparison;
+	public static String SourceFixingTabPage_warning;
+
+	public static String SourceFixingTabPage_GroupName_standardCode;
+
+	public static String SourceFixingTabPage_CheckboxName_StandardComparison;
+	public static String SourceFixingTabPage_CheckboxName_CheckSignOfBitwiseOperation;
 
 	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
 

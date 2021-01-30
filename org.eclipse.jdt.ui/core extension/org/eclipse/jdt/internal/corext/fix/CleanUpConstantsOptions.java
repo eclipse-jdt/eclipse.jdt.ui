@@ -53,7 +53,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.FALSE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
-		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 		options.setOption(EXTRACT_INCREMENT, CleanUpOptions.FALSE);
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
@@ -149,14 +148,15 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(MODERNIZE_HASH, CleanUpOptions.FALSE);
 		options.setOption(USE_OBJECTS_EQUALS, CleanUpOptions.FALSE);
 
+		// Code fixing
+		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
+		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
+
 		// Duplicate Code
 		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(CONTROLFLOW_MERGE, CleanUpOptions.FALSE);
-
-		// Code fixing
-		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
 
 		// Java Features
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
@@ -206,7 +206,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.FALSE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
-		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 		options.setOption(EXTRACT_INCREMENT, CleanUpOptions.FALSE);
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
@@ -270,9 +269,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_USELESS_CONTINUE, CleanUpOptions.FALSE);
 		options.setOption(UNLOOPED_WHILE, CleanUpOptions.FALSE);
 
-		// Code fixing
-		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
-
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
 		options.setOption(ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpOptions.TRUE);
@@ -306,6 +302,10 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(USE_OBJECTS_EQUALS, CleanUpOptions.FALSE);
 
 		options.setOption(CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, CleanUpOptions.FALSE);
+
+		// Code fixing
+		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
+		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 
 		// Duplicate Code
 		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);

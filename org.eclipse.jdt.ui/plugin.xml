@@ -7009,6 +7009,11 @@
             cleanUpKind="cleanUp">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.SourceFixingTabPage"
+            name="%CleanUpTabPage.SourceFixing.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.OptimizationTabPage"
             name="%CleanUpTabPage.Optimization.name"
             cleanUpKind="saveAction">
@@ -7098,14 +7103,9 @@
             runAfter="org.eclipse.jdt.ui.cleanup.expressions">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup"
-            id="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression"
-            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
-      </cleanUp>
-      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ExtractIncrementCleanUp"
             id="org.eclipse.jdt.ui.cleanup.extract_increment"
-            runAfter="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression">
+            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp"
@@ -7308,9 +7308,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.map_cloning">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup"
+            id="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression"
+            runAfter="org.eclipse.jdt.ui.cleanup.standard_comparison">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.TernaryOperatorCleanUp"
             id="org.eclipse.jdt.ui.cleanup.ternary_operator"
-            runAfter="org.eclipse.jdt.ui.cleanup.standard_comparison">
+            runAfter="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp"
