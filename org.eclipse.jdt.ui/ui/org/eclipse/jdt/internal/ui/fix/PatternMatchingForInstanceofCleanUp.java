@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -94,7 +93,7 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 
 		return "" //$NON-NLS-1$
 				+ "if (object instanceof Integer) {\n" //$NON-NLS-1$
-				+ "    final Integer i = (Integer) object;\n" //$NON-NLS-1$
+				+ "    Integer i = (Integer) object;\n" //$NON-NLS-1$
 				+ "    return i.intValue();\n" //$NON-NLS-1$
 				+ "}\n"; //$NON-NLS-1$
 	}
@@ -110,9 +109,9 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 
 		unit.accept(new ASTVisitor() {
 			@Override
-			public boolean visit(final Block node) {
-				InstanceofVisitor instanceofVisitor= new InstanceofVisitor(node);
-				node.accept(instanceofVisitor);
+			public boolean visit(final Block visited) {
+				InstanceofVisitor instanceofVisitor= new InstanceofVisitor(visited);
+				visited.accept(instanceofVisitor);
 				return instanceofVisitor.getResult();
 			}
 
@@ -132,20 +131,20 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 				}
 
 				@Override
-				public boolean visit(final Block node) {
-					return startNode == node;
+				public boolean visit(final Block visited) {
+					return startNode == visited;
 				}
 
 				@Override
-				public boolean visit(final InstanceofExpression node) {
-					if (node.getPatternVariable() != null
-							|| !ASTNodes.isPassive(node.getLeftOperand())
-							|| node.getRightOperand().resolveBinding() == null) {
+				public boolean visit(final InstanceofExpression visited) {
+					if (visited.getPatternVariable() != null
+							|| !ASTNodes.isPassive(visited.getLeftOperand())
+							|| visited.getRightOperand().resolveBinding() == null) {
 						return true;
 					}
 
 					boolean isPositiveCaseToAnalyze= true;
-					ASTNode currentNode= node;
+					ASTNode currentNode= visited;
 
 					while (currentNode.getParent() != null
 							&& (!(currentNode.getParent() instanceof IfStatement)
@@ -185,36 +184,36 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 					IfStatement ifStatement= (IfStatement) currentNode.getParent();
 
 					if (isPositiveCaseToAnalyze) {
-						return maybeMatchPattern(node, ifStatement.getThenStatement());
+						return maybeMatchPattern(visited, ifStatement.getThenStatement());
 					}
 
 					if (ifStatement.getElseStatement() != null) {
-						return maybeMatchPattern(node, ifStatement.getElseStatement());
+						return maybeMatchPattern(visited, ifStatement.getElseStatement());
 					}
 
 					if (ASTNodes.fallsThrough(ifStatement.getThenStatement())) {
-						return maybeMatchPattern(node, ASTNodes.getNextSibling(ifStatement));
+						return maybeMatchPattern(visited, ASTNodes.getNextSibling(ifStatement));
 					}
 
 					return true;
 				}
 
-				private boolean maybeMatchPattern(final InstanceofExpression node, final Statement expression) {
-					List<Statement> statements= ASTNodes.asList(expression);
+				private boolean maybeMatchPattern(final InstanceofExpression visited, final Statement conditionalStatements) {
+					List<Statement> statements= ASTNodes.asList(conditionalStatements);
 
 					if (!statements.isEmpty()) {
 						VariableDeclarationStatement variableDeclarationExpression= ASTNodes.as(statements.get(0), VariableDeclarationStatement.class);
 						VariableDeclarationFragment variableDeclarationFragment= ASTNodes.getUniqueFragment(variableDeclarationExpression);
 
-						if (variableDeclarationFragment != null && Modifier.isFinal(variableDeclarationExpression.getModifiers())) {
+						if (variableDeclarationFragment != null
+								&& Objects.equals(visited.getRightOperand().resolveBinding(), variableDeclarationExpression.getType().resolveBinding())) {
 							CastExpression castExpression= ASTNodes.as(variableDeclarationFragment.getInitializer(), CastExpression.class);
 
 							if (castExpression != null
-									&& Objects.equals(node.getRightOperand().resolveBinding(), variableDeclarationExpression.getType().resolveBinding())
-									&& Objects.equals(node.getRightOperand().resolveBinding(), castExpression.getType().resolveBinding())
-									&& ASTNodes.isPassive(node.getLeftOperand())
-									&& ASTNodes.match(node.getLeftOperand(), castExpression.getExpression())) {
-								rewriteOperations.add(new PatternMatchingForInstanceofOperation(node, variableDeclarationExpression, variableDeclarationFragment.getName()));
+									&& Objects.equals(visited.getRightOperand().resolveBinding(), castExpression.getType().resolveBinding())
+									&& ASTNodes.match(visited.getLeftOperand(), castExpression.getExpression())
+									&& ASTNodes.isPassive(visited.getLeftOperand())) {
+								rewriteOperations.add(new PatternMatchingForInstanceofOperation(visited, variableDeclarationExpression, variableDeclarationFragment.getName()));
 								return false;
 							}
 						}

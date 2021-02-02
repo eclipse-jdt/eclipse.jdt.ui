@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,8 +45,8 @@ public class CopyResourcesToClipboardActionTest extends GenericRefactoringTest{
 
 	private ICompilationUnit fCuA;
 	private ICompilationUnit fCuB;
-	private IPackageFragment fPackageQ;
-	private IPackageFragment fPackageQ_R;
+	private IPackageFragment fPackage_Q;
+	private IPackageFragment fPackage_Q_R;
 	private IPackageFragment fDefaultPackage;
 	private static final String CU_A_NAME= "A";
 	private static final String CU_B_NAME= "B";
@@ -63,21 +63,21 @@ public class CopyResourcesToClipboardActionTest extends GenericRefactoringTest{
 	@Before
 	public void before() throws Exception {
 		fClipboard= new MockClipboard(Display.getDefault());
-		fDefaultPackage= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("", true, null);
+		fDefaultPackage= rts.getDefaultSourceFolder().createPackageFragment("", true, null);
 
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java", "package p; class A{}");
 
-		fPackageQ= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
-		fCuB= createCU(fPackageQ, CU_B_NAME + ".java", "package q; class B{}");
+		fPackage_Q= rts.getDefaultSourceFolder().createPackageFragment("q", true, null);
+		fCuB= createCU(fPackage_Q, CU_B_NAME + ".java", "package q; class B{}");
 
-		fPackageQ_R= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
+		fPackage_Q_R= rts.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
 
 		faTxt= createFile((IFolder)getPackageP().getUnderlyingResource(), "a.txt");
 
 		assertTrue("A.java does not exist", fCuA.exists());
 		assertTrue("B.java does not exist", fCuB.exists());
-		assertTrue("q does not exist", fPackageQ.exists());
-		assertTrue("q.r does not exist", fPackageQ_R.exists());
+		assertTrue("q does not exist", fPackage_Q.exists());
+		assertTrue("q.r does not exist", fPackage_Q_R.exists());
 		assertTrue(faTxt.exists());
 	}
 
@@ -115,7 +115,7 @@ public class CopyResourcesToClipboardActionTest extends GenericRefactoringTest{
 
 	@Test
 	public void testEnabled3() throws Exception{
-		checkEnabled(new Object[]{getPackageP(), fPackageQ, fPackageQ_R});
+		checkEnabled(new Object[]{getPackageP(), fPackage_Q, fPackage_Q_R});
 	}
 
 	@Test
@@ -140,7 +140,7 @@ public class CopyResourcesToClipboardActionTest extends GenericRefactoringTest{
 
 	@Test
 	public void testDisabled2() throws Exception{
-		checkDisabled(new Object[]{getRoot().getJavaProject(), fPackageQ});
+		checkDisabled(new Object[]{getRoot().getJavaProject(), fPackage_Q});
 	}
 
 	@Test
@@ -160,7 +160,7 @@ public class CopyResourcesToClipboardActionTest extends GenericRefactoringTest{
 
 	@Test
 	public void testDisabled6() throws Exception{
-		checkDisabled(new Object[]{getRoot(), fPackageQ});
+		checkDisabled(new Object[]{getRoot(), fPackage_Q});
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class CopyResourcesToClipboardActionTest extends GenericRefactoringTest{
 
 	@Test
 	public void testDisabled9() throws Exception{
-		checkDisabled(new Object[]{RefactoringTestSetup.getProject().getPackageFragmentRoots()});
+		checkDisabled(new Object[]{rts.getProject().getPackageFragmentRoots()});
 	}
 
 	@Test

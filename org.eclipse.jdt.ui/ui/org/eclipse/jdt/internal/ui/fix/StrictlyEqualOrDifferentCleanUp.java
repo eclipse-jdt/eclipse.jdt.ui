@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -84,12 +85,16 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 		if (isEnabled(CleanUpConstants.STRICTLY_EQUAL_OR_DIFFERENT)) {
 			return "" //$NON-NLS-1$
 					+ "boolean newBoolean1 = isValid == (i > 0);\n" //$NON-NLS-1$
-					+ "boolean newBoolean2 = isValid ^ isEnabled;\n"; //$NON-NLS-1$
+					+ "boolean newBoolean2 = isValid ^ isEnabled;\n" //$NON-NLS-1$
+					+ "boolean newBoolean3 = isActive == (0 <= i);\n" //$NON-NLS-1$
+					+ "boolean newBoolean4 = isActive ^ isEnabled;\n"; //$NON-NLS-1$
 		}
 
 		return "" //$NON-NLS-1$
 				+ "boolean newBoolean1 = isValid && (i > 0) || !isValid && (i <= 0);\n" //$NON-NLS-1$
-				+ "boolean newBoolean2 = !isValid && isEnabled || isValid && !isEnabled;\n"; //$NON-NLS-1$
+				+ "boolean newBoolean2 = !isValid && isEnabled || isValid && !isEnabled;\n" //$NON-NLS-1$
+				+ "boolean newBoolean3 = isActive ? (0 <= i) : (i < 0);\n" //$NON-NLS-1$
+				+ "boolean newBoolean4 = !isActive ? isEnabled : !isEnabled;\n"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -146,15 +151,35 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 				return true;
 			}
 
+			@Override
+			public boolean visit(final ConditionalExpression visited) {
+				if (ASTNodes.hasType(visited.getThenExpression(), boolean.class.getCanonicalName())
+						&& ASTNodes.hasType(visited.getElseExpression(), boolean.class.getCanonicalName())
+						&& ASTNodes.isPassive(visited.getThenExpression())
+						&& ASTNodes.isPassive(visited.getElseExpression())
+						&& ASTSemanticMatcher.INSTANCE.matchNegative(visited.getThenExpression(), visited.getElseExpression())) {
+					AtomicBoolean isFirstExpressionPositive= new AtomicBoolean();
+					AtomicBoolean isSecondExpressionPositive= new AtomicBoolean();
+
+					Expression firstBasicExpression= getBasisExpression(visited.getExpression(), isFirstExpressionPositive);
+					Expression secondBasicExpression= getBasisExpression(visited.getThenExpression(), isSecondExpressionPositive);
+
+					rewriteOperations.add(new StrictlyEqualOrDifferentOperation(visited, firstBasicExpression, secondBasicExpression, isFirstExpressionPositive.get() == isSecondExpressionPositive.get()));
+					return false;
+				}
+
+				return true;
+			}
+
 			private Expression getBasisExpression(final Expression originalExpression, final AtomicBoolean isExpressionPositive) {
 				PrefixExpression negateExpression= ASTNodes.as(originalExpression, PrefixExpression.class);
 
 				if (ASTNodes.hasOperator(negateExpression, PrefixExpression.Operator.NOT)) {
-					isExpressionPositive.set(false);
+					isExpressionPositive.lazySet(false);
 					return negateExpression.getOperand();
 				}
 
-				isExpressionPositive.set(true);
+				isExpressionPositive.lazySet(true);
 				return originalExpression;
 			}
 		});
@@ -183,12 +208,12 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 	}
 
 	private static class StrictlyEqualOrDifferentOperation extends CompilationUnitRewriteOperation {
-		private final InfixExpression visited;
+		private final Expression visited;
 		private final Expression firstExpression;
 		private final Expression secondExpression;
 		private final boolean isEquality;
 
-		public StrictlyEqualOrDifferentOperation(final InfixExpression visited, final Expression firstExpression, final Expression secondExpression, final boolean isEquality) {
+		public StrictlyEqualOrDifferentOperation(final Expression visited, final Expression firstExpression, final Expression secondExpression, final boolean isEquality) {
 			this.visited= visited;
 			this.firstExpression= firstExpression;
 			this.secondExpression= secondExpression;

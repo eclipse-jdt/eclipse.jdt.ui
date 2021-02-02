@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
@@ -66,7 +67,8 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new RedundantSemicolonsCleanUp(values),
 				new UnnecessaryArrayCreationCleanUp(values),
 				new UselessReturnCleanUp(values),
-				new UselessContinueCleanUp(values)
+				new UselessContinueCleanUp(values),
+				new UnloopedWhileCleanUp(values)
 		};
 	}
 
@@ -145,5 +147,8 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference uselessContinue= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UselessContinue, CleanUpConstants.REMOVE_USELESS_CONTINUE, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(uselessContinue);
+
+		CheckboxPreference unloopedWhile= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnloopedWhile, CleanUpConstants.UNLOOPED_WHILE, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(unloopedWhile);
     }
 }

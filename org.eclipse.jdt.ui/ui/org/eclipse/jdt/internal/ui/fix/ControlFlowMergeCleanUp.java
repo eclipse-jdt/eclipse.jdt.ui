@@ -320,18 +320,18 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 		private final IfStatement visited;
 		private final List<ASTNode> allCases;
 		private final List<List<Statement>> allCasesStatements;
-		private final List<Statement>[] caseStmtsToRemove;
+		private final List<Statement>[] caseStatementsToPullDown;
 		private final List<Integer> casesToRefactor;
 
 		public ControlFlowMergeOperation(final IfStatement visited,
 				final List<ASTNode> allCases,
 				final List<List<Statement>> allCasesStatements,
-				final List<Statement>[] caseStmtsToRemove2,
+				final List<Statement>[] caseStatementsToPullDown,
 				final List<Integer> casesToRefactor) {
 			this.visited= visited;
 			this.allCases= allCases;
 			this.allCasesStatements= allCasesStatements;
-			this.caseStmtsToRemove= caseStmtsToRemove2;
+			this.caseStatementsToPullDown= caseStatementsToPullDown;
 			this.casesToRefactor= casesToRefactor;
 		}
 
@@ -345,18 +345,18 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 			boolean[] areCasesRemovable= new boolean[allCasesStatements.size()];
 			Arrays.fill(areCasesRemovable, false);
 			removeStmtsFromCases(rewrite, group, areCasesRemovable);
-			List<Statement> oneCaseToRemove= caseStmtsToRemove[casesToRefactor.get(0)];
+			List<Statement> oneCaseToPullDown= caseStatementsToPullDown[casesToRefactor.get(0)];
 
 			if (allRemovable(areCasesRemovable, 0)) {
 				if (ASTNodes.canHaveSiblings(visited)) {
-					insertIdenticalCode(rewrite, group, oneCaseToRemove);
+					insertIdenticalCode(rewrite, group, oneCaseToPullDown);
 
 					ASTNodes.removeButKeepComment(rewrite, visited, group);
 				} else {
-					List<Statement> orderedStatements= new ArrayList<>(oneCaseToRemove.size());
+					List<Statement> orderedStatements= new ArrayList<>(oneCaseToPullDown.size());
 
-					for (Statement stmtToRemove : oneCaseToRemove) {
-						orderedStatements.add(0, ASTNodes.createMoveTarget(rewrite, stmtToRemove));
+					for (Statement statementToPullDown : oneCaseToPullDown) {
+						orderedStatements.add(0, ASTNodes.createMoveTarget(rewrite, statementToPullDown));
 					}
 
 					Block newBlock= ast.newBlock();
@@ -389,11 +389,11 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 				}
 
 				if (ASTNodes.canHaveSiblings(visited)) {
-					insertIdenticalCode(rewrite, group, oneCaseToRemove);
+					insertIdenticalCode(rewrite, group, oneCaseToPullDown);
 				} else {
-					List<Statement> orderedStatements= new ArrayList<>(oneCaseToRemove.size() + 1);
+					List<Statement> orderedStatements= new ArrayList<>(oneCaseToPullDown.size() + 1);
 
-					for (Statement stmtToRemove : oneCaseToRemove) {
+					for (Statement stmtToRemove : oneCaseToPullDown) {
 						orderedStatements.add(0, ASTNodes.createMoveTarget(rewrite, stmtToRemove));
 					}
 
@@ -405,12 +405,17 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 			}
 		}
 
-		private void insertIdenticalCode(final ASTRewrite rewrite, final TextEditGroup group, final List<Statement> stmtsToRemove) {
-			ListRewrite listRewrite= rewrite.getListRewrite(visited.getParent(), (ChildListPropertyDescriptor) visited.getLocationInParent());
-
-			for (Statement stmtToRemove : stmtsToRemove) {
-				listRewrite.insertAfter(ASTNodes.createMoveTarget(rewrite, stmtToRemove), visited, group);
+		private void insertIdenticalCode(final ASTRewrite rewrite, final TextEditGroup group, final List<Statement> statementsToPullDown) {
+			ASTNode moveTarget;
+			if (statementsToPullDown.size() == 1) {
+				moveTarget= ASTNodes.createMoveTarget(rewrite, statementsToPullDown.get(0));
+			} else {
+				ListRewrite listRewrite= rewrite.getListRewrite(statementsToPullDown.get(0).getParent(), (ChildListPropertyDescriptor) statementsToPullDown.get(0).getLocationInParent());
+				moveTarget= listRewrite.createMoveTarget(statementsToPullDown.get(statementsToPullDown.size() - 1), statementsToPullDown.get(0));
 			}
+
+			ListRewrite targetListRewrite= rewrite.getListRewrite(visited.getParent(), (ChildListPropertyDescriptor) visited.getLocationInParent());
+			targetListRewrite.insertAfter(moveTarget, visited, group);
 		}
 
 		private boolean allRemovable(final boolean[] areCasesRemovable, final int start) {
@@ -425,7 +430,7 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 
 		private void removeStmtsFromCases(final ASTRewrite rewrite, final TextEditGroup group, final boolean[] areCasesRemovable) {
 			for (int i : casesToRefactor) {
-				List<Statement> removedStatements= caseStmtsToRemove[i];
+				List<Statement> removedStatements= caseStatementsToPullDown[i];
 				ASTNode parent= allCases.get(i);
 
 				if (removedStatements.containsAll(allCasesStatements.get(i))

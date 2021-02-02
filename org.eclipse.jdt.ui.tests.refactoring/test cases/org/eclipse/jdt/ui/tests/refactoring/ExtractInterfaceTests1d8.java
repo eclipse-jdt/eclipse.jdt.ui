@@ -20,7 +20,6 @@ import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -40,7 +39,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfacePro
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d8Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -52,8 +50,9 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class ExtractInterfaceTests1d8 extends ExtractInterfaceTests {
 	private static final String REFACTORING_PATH= "ExtractInterface18/";
 
-	@Rule
-	public RefactoringTestSetup js= new Java1d8Setup();
+	public ExtractInterfaceTests1d8() {
+		super(new Java1d8Setup());
+	}
 
 	@Override
 	protected String getRefactoringPath() {
@@ -77,7 +76,7 @@ public class ExtractInterfaceTests1d8 extends ExtractInterfaceTests {
 
 		getType(createCUfromTestFile(getPackageP(), getTopLevelTypeName(extendingInterfaceName)), extendingInterfaceName);
 
-		IPackageFragmentRoot root= RefactoringTestSetup.getDefaultSourceFolder();
+		IPackageFragmentRoot root= rts.getDefaultSourceFolder();
 		assertNotNull(root);
 		IPackageFragment p2= root.createPackageFragment("p2", true, null);
 		getType(createCUfromTestFile(p2, getTopLevelTypeName("I2")), "I2");

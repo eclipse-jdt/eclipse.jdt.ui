@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2076,29 +2076,29 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			public final ASTNode getArgumentNode(final IVariableBinding binding, final boolean last) throws JavaModelException {
 				Assert.isNotNull(binding);
 				final SingleVariableDeclaration variable= ast.newSingleVariableDeclaration();
-				final ITypeBinding type= binding.getType();
-				adjustTypeVisibility(type);
+				final ITypeBinding typeBinding= binding.getType();
+				adjustTypeVisibility(typeBinding);
 				variable.setName(ast.newSimpleName(binding.getName()));
 				variable.modifiers().addAll(ast.newModifiers(binding.getModifiers()));
 				final IMethodBinding method= binding.getDeclaringMethod();
 				if (last && method != null && method.isVarargs()) {
 					variable.setVarargs(true);
 					String name= null;
-					if (type.isArray()) {
-						name= type.getElementType().getName();
+					if (typeBinding.isArray()) {
+						name= typeBinding.getElementType().getName();
 						if (PrimitiveType.toCode(name) != null)
 							variable.setType(ast.newPrimitiveType(PrimitiveType.toCode(name)));
 						else
 							variable.setType(ast.newSimpleType(ast.newSimpleName(name)));
 					} else {
-						name= type.getName();
+						name= typeBinding.getName();
 						if (PrimitiveType.toCode(name) != null)
 							variable.setType(ast.newPrimitiveType(PrimitiveType.toCode(name)));
 						else
 							variable.setType(ast.newSimpleType(ast.newSimpleName(name)));
 					}
 				} else
-					variable.setType(rewriter.getImportRewrite().addImport(type, ast, context, TypeLocation.PARAMETER));
+					variable.setType(rewriter.getImportRewrite().addImport(typeBinding, ast, context, TypeLocation.PARAMETER));
 				return variable;
 			}
 

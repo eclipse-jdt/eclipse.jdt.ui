@@ -80,6 +80,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/structure/ExtractInterfaceProcessor.java" type="org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor">
+        <filter comment="Java 15 preview feature" id="623939596">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="ExtractInterfaceProcessor"/>
+                <message_argument value="SUPER_INTERFACE_TYPES_PROPERTY"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="internal compatibility/org/eclipse/jdt/internal/corext/SourceRange.java" type="org.eclipse.jdt.internal.corext.SourceRange">
         <filter id="574619656">
             <message_arguments>

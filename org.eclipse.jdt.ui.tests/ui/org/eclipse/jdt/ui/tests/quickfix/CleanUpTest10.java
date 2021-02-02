@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2021 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -60,7 +60,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -68,9 +68,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var number = 0;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -88,7 +87,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -96,9 +95,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var number = 0L;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -116,7 +114,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -124,9 +122,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var number = 0F;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -144,7 +141,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -152,9 +149,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var number = 0D;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -172,7 +168,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -180,9 +176,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var number = 0x0L;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -202,7 +197,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.ArrayList;\n" //
@@ -212,9 +207,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var parameterizedType = new ArrayList<String>();\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -234,7 +228,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.HashMap;\n" //
@@ -244,9 +238,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var parameterizedTypeWithDiamond = new HashMap<Integer, String>();\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -431,7 +424,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.ArrayList;\n" //
@@ -445,9 +438,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        return new ArrayList<Integer>();\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -488,7 +480,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.HashMap;\n" //
@@ -498,9 +490,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var parameterizedTypeFromCastExpression = (HashMap<Integer, String>) o;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -521,7 +512,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.Collection;\n" //
@@ -532,9 +523,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var parameterizedTypeFromMethod = m.values();\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -555,7 +545,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.Collection;\n" //
@@ -566,9 +556,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var parameterizedTypeFromMethod = super.values();\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -588,7 +577,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.HashMap;\n" //
@@ -598,9 +587,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        var parameterizedTypeFromVariable = m;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -620,7 +608,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -630,9 +618,8 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -649,6 +636,77 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotUseVarOnFromLambdaMethodReference() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    Function<String, Integer> field = String::length;\n" //
+				+ "    public void foo() {\n" //
+				+ "        Function<String, Integer> doNotUseVarOnFromLambdaMethodReference = String::length;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUseLocalVariableTypeForArrays() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(String[] array) {\n" //
+				+ "        String[] a = array;\n" //
+				+ "        String[] b = new String[] {\"a\", \"b\", \"c\"};\n" //
+				+ "        String[][] c = new String[][] { {\"a\", \"b\", \"c\"}, {\"d\", \"e\", \"f\"} };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(String[] array) {\n" //
+				+ "        var a = array;\n" //
+				+ "        var b = new String[] {\"a\", \"b\", \"c\"};\n" //
+				+ "        var c = new String[][] { {\"a\", \"b\", \"c\"}, {\"d\", \"e\", \"f\"} };\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseLocalVariableTypeForArrayInitialization() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        String[] a = {\"a\", \"b\", \"c\"};\n" //
+				+ "        String[][] b = { {\"a\", \"b\", \"c\"}, {\"d\", \"e\", \"f\"} };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 

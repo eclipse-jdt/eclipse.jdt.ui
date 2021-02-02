@@ -307,7 +307,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 				}
 
 				if ((newHash instanceof Name || newHash instanceof FieldAccess || newHash instanceof SuperFieldAccess) && data.tempValueUsed) {
-					SimpleName fieldName= getField(newHash);
+					SimpleName fieldName= ASTNodes.getField(newHash);
 
 					if (fieldName != null
 							&& !ASTNodes.isSameVariable(data.primeId, fieldName)
@@ -324,7 +324,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 					TypeDeclaration topLevelClass= ASTNodes.getTypedAncestor(innerClass, TypeDeclaration.class);
 
 					if (ASTNodes.usesGivenSignature(specificMethod, Float.class.getCanonicalName(), "floatToIntBits", float.class.getSimpleName())) { //$NON-NLS-1$
-						SimpleName fieldName= getField((Expression) specificMethod.arguments().get(0));
+						SimpleName fieldName= ASTNodes.getField((Expression) specificMethod.arguments().get(0));
 
 						if (fieldName != null
 								&& !ASTNodes.isSameVariable(fieldName, data.primeId)
@@ -341,7 +341,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 							|| ASTNodes.usesGivenSignature(specificMethod, Arrays.class.getCanonicalName(), HASH_CODE_METHOD, Object[].class.getCanonicalName())
 							|| ASTNodes.usesGivenSignature(specificMethod, Arrays.class.getCanonicalName(), HASH_CODE_METHOD, long[].class.getCanonicalName())
 							|| ASTNodes.usesGivenSignature(specificMethod, Arrays.class.getCanonicalName(), HASH_CODE_METHOD, short[].class.getCanonicalName())) {
-						SimpleName fieldName= getField((Expression) specificMethod.arguments().get(0));
+						SimpleName fieldName= ASTNodes.getField((Expression) specificMethod.arguments().get(0));
 
 						if (fieldName != null
 								&& !ASTNodes.isSameVariable(fieldName, data.primeId)
@@ -405,56 +405,6 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 				return false;
 			}
 
-			private SimpleName getField(final Expression expression) {
-				SimpleName simpleName= ASTNodes.as(expression, SimpleName.class);
-
-				if (simpleName != null) {
-					return simpleName;
-				}
-
-				FieldAccess fieldName= ASTNodes.as(expression, FieldAccess.class);
-
-				if (fieldName != null) {
-					ThisExpression thisExpression= ASTNodes.as(fieldName.getExpression(), ThisExpression.class);
-
-					if (thisExpression != null) {
-						if (thisExpression.getQualifier() == null) {
-							return fieldName.getName();
-						}
-
-						if (thisExpression.getQualifier().isSimpleName()) {
-							SimpleName qualifier= (SimpleName) thisExpression.getQualifier();
-							TypeDeclaration visitedClass= ASTNodes.getTypedAncestor(expression, TypeDeclaration.class);
-
-							if (visitedClass != null
-									&& ASTNodes.isSameVariable(visitedClass.getName(), qualifier)) {
-								return fieldName.getName();
-							}
-						}
-					}
-				}
-
-				SuperFieldAccess superFieldAccess= ASTNodes.as(expression, SuperFieldAccess.class);
-
-				if (superFieldAccess != null) {
-					if (superFieldAccess.getQualifier() == null) {
-						return superFieldAccess.getName();
-					}
-
-					if (superFieldAccess.getQualifier().isSimpleName()) {
-						SimpleName qualifier= (SimpleName) superFieldAccess.getQualifier();
-						TypeDeclaration visitedClass= ASTNodes.getTypedAncestor(expression, TypeDeclaration.class);
-
-						if (visitedClass != null
-								&& ASTNodes.isSameVariable(visitedClass.getName(), qualifier)) {
-							return superFieldAccess.getName();
-						}
-					}
-				}
-
-				return null;
-			}
-
 			private boolean isGreatNumberValid(final CollectedData data, final CastExpression newHash) {
 				OrderedInfixExpression<Expression, InfixExpression> orderedBitwise= ASTNodes.orderedInfix(newHash.getExpression(), Expression.class, InfixExpression.class);
 
@@ -462,7 +412,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 						&& orderedBitwise != null
 						&& ASTNodes.hasType(newHash.getExpression(), long.class.getSimpleName(), double.class.getSimpleName())
 						&& InfixExpression.Operator.XOR.equals(orderedBitwise.getOperator())) {
-					SimpleName field= getField(orderedBitwise.getFirstOperand());
+					SimpleName field= ASTNodes.getField(orderedBitwise.getFirstOperand());
 					InfixExpression moveExpression= orderedBitwise.getSecondOperand();
 
 					if (field != null
@@ -470,7 +420,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 							&& !ASTNodes.isSameVariable(field, data.primeId)
 							&& !ASTNodes.isSameVariable(field, data.resultId)
 							&& ASTNodes.hasOperator(moveExpression, InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED)) {
-						SimpleName againFieldName= getField(moveExpression.getLeftOperand());
+						SimpleName againFieldName= ASTNodes.getField(moveExpression.getLeftOperand());
 						Long hash= ASTNodes.getIntegerLiteral(moveExpression.getRightOperand());
 
 						if (Long.valueOf(32).equals(hash)
@@ -493,7 +443,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			}
 
 			private boolean isBooleanValid(final CollectedData data, final ConditionalExpression newHash) {
-				SimpleName booleanField= getField(newHash.getExpression());
+				SimpleName booleanField= ASTNodes.getField(newHash.getExpression());
 				Long hashForTrue= ASTNodes.getIntegerLiteral(newHash.getThenExpression());
 				Long hashForFalse= ASTNodes.getIntegerLiteral(newHash.getElseExpression());
 
@@ -516,7 +466,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 
 				if (orderedIsFieldNull != null
 						&& Arrays.asList(InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS).contains(orderedIsFieldNull.getOperator())) {
-					SimpleName field= getField(orderedIsFieldNull.getFirstOperand());
+					SimpleName field= ASTNodes.getField(orderedIsFieldNull.getFirstOperand());
 
 					if (field != null) {
 						Long zero;
@@ -535,7 +485,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 								&& hashOnField.getExpression() != null
 								&& HASH_CODE_METHOD.equals(hashOnField.getName().getIdentifier())
 								&& (hashOnField.arguments() == null || hashOnField.arguments().isEmpty())) {
-							SimpleName fieldToHash= getField(hashOnField.getExpression());
+							SimpleName fieldToHash= ASTNodes.getField(hashOnField.getExpression());
 
 							if (fieldToHash != null
 									&& ASTNodes.isSameVariable(field, fieldToHash)) {
@@ -550,7 +500,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			}
 
 			private boolean isGivenVariable(final Expression expression, final SimpleName varId) {
-				SimpleName field= getField(expression);
+				SimpleName field= ASTNodes.getField(expression);
 				return field != null && ASTNodes.isSameVariable(varId, field);
 			}
 		});

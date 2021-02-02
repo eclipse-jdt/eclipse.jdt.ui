@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2020 IBM Corporation and others.
+ * Copyright (c) 2012, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -219,6 +219,7 @@ public interface IProposalRelevance {
 	int EXTRACT_LOCAL_ALL_ERROR= 3;
 	int ASSIGN_PARAM_TO_NEW_FIELD= 3;
 	int ASSIGN_TO_LOCAL= 3;
+	int ASSIGN_IN_TRY_WITH_RESOURCES= 3;
 	int CHANGE_CAST= 3;
 	int CHANGE_TO_ATTRIBUTE= 3;
 	int CHANGE_LAMBDA_BODY_TO_BLOCK= 3;

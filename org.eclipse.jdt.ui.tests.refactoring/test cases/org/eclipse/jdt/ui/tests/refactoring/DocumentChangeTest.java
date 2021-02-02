@@ -89,7 +89,7 @@ public class DocumentChangeTest extends GenericRefactoringTest {
 
 	@Test
 	public void testDocumentChange() throws Exception {
-		IProject project= RefactoringTestSetup.getProject().getProject();
+		IProject project= rts.getProject().getProject();
 		IFile file= project.getFile("file.txt");
 		final String prolog= "This is a ";
 		final String insertion= "modified ";

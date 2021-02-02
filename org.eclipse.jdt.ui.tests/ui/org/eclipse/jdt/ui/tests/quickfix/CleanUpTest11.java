@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2021 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,29 +50,30 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
 				+ "package test1;\n" //
+				+ "\n" //
 				+ "import java.util.function.Predicate\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public void foo() {\n" //
-				+ "        Predicate<String> cc = (String s) -> { return s == null; };\n" //
+				+ "        Predicate<String> cc = (String s) -> { return s.length() > 0; };\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
+				+ "\n" //
 				+ "import java.util.function.Predicate\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public void foo() {\n" //
-				+ "        Predicate<String> cc = (var s) -> { return s == null; };\n" //
+				+ "        Predicate<String> cc = (var s) -> { return s.length() > 0; };\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
@@ -93,7 +94,7 @@ public class CleanUpTest11 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_VAR);
 
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E1 {\n" //
@@ -104,9 +105,173 @@ public class CleanUpTest11 extends CleanUpTestCase {
 				+ "        I1 i1 = (var s, var i, var b) -> { System.out.println(\"hello\"); };\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+	}
+
+	@Test
+	public void testUseLocalVariableTypeInferenceInParamCallWithLambda() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        debug((String a) -> a.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private void debug(Function<String, Object> function) {\n" //
+				+ "        System.out.println(function);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        debug((var a) -> a.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private void debug(Function<String, Object> function) {\n" //
+				+ "        System.out.println(function);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseLocalVariableTypeInferenceInWildCardParamCallWithLambda() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        debug((String a) -> a.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private void debug(Function<?, ?> function) {\n" //
+				+ "        System.out.println(function);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUseLocalVariableTypeInferenceInParamTypeDeclarationWithLambda() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Predicate;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        Predicate<String> cc = (String s) -> (s.length() > 0);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Predicate;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        Predicate<String> cc = (var s) -> (s.length() > 0);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseLocalVariableTypeInferenceInWildCardParamDeclarationWithLambda() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Predicate;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        Predicate<?> cc = (String s) -> (s.length() > 0);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUseLocalVariableTypeInferenceInParamFieldDeclarationWithLambda() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Predicate;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public Predicate<String> cc = (String s) -> (s.length() > 0);\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Predicate;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public Predicate<String> cc = (var s) -> (s.length() > 0);\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseLocalVariableTypeInferenceInWildCardParamFieldDeclarationWithLambda() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Predicate;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public Predicate<?> cc = (String s) -> (s.length() > 0);\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
 }

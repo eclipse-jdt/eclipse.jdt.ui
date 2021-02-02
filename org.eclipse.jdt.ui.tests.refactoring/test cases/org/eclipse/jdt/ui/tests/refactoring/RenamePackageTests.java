@@ -18,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -35,7 +36,10 @@ import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -94,8 +98,8 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RenamePackageTests extends GenericRefactoringTest {
-	private static final boolean BUG_PACKAGE_CANT_BE_RENAMED_TO_A_PACKAGE_THAT_ALREADY_EXISTS= true;
 	private static final boolean BUG_6054= false;
 	private static final boolean BUG_54962_71267= false;
 
@@ -709,12 +713,9 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		});
 	}
 
+	@Ignore("BUG_PACKAGE_CANT_BE_RENAMED_TO_A_PACKAGE_THAT_ALREADY_EXISTS")
 	@Test
 	public void testHierarchical02() throws Exception {
-		if (BUG_PACKAGE_CANT_BE_RENAMED_TO_A_PACKAGE_THAT_ALREADY_EXISTS) {
-			printTestDisabledMessage("package can't be renamed to a package that already exists.");
-			return;
-		}
 		fRenameSubpackages= true;
 
 		PackageRename rename= new PackageRename(new String[]{"my", "my.a", "my.b", "your"}, new String[][]{{"MyA"},{"ATest"},{"B"}, {"Y"}}, "your");
@@ -1258,10 +1259,7 @@ public class RenamePackageTests extends GenericRefactoringTest {
 
 	@Test
 	public void testReadOnly() throws Exception{
-		if (BUG_6054) {
-			printTestDisabledMessage("see bug#6054 (renaming a read-only package resets the read-only flag)");
-			return;
-		}
+		assumeFalse("see bug#6054 (renaming a read-only package resets the read-only flag)", BUG_6054);
 
 		fIsPreDeltaTest= true;
 		String[] packageNames= new String[]{"r"};

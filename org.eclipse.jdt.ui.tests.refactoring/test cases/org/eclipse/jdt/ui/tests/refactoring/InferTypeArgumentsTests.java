@@ -49,7 +49,6 @@ import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRe
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d6Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class InferTypeArgumentsTests extends GenericRefactoringTest {
 	private static final boolean DETERMINE_ELEMENT_TYPE_FROM_CAST= false;
@@ -159,10 +158,10 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 		performCuOK();
 
 		// Test the same with 1.5:
-		IJavaProject project= RefactoringTestSetup.getProject();
+		IJavaProject project= rts.getProject();
 
 		ArrayList<IClasspathEntry> classpath= new ArrayList<>(Arrays.asList(project.getRawClasspath()));
-		IClasspathEntry jreEntry= RefactoringTestSetup.getJRELibrary().getRawClasspathEntry();
+		IClasspathEntry jreEntry= rts.getJRELibrary().getRawClasspathEntry();
 		classpath.remove(jreEntry);
 		IClasspathEntry[] noRTJarCPEs= classpath.toArray(new IClasspathEntry[classpath.size()]);
 

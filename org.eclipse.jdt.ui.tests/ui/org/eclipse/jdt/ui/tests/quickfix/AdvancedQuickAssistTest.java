@@ -4611,7 +4611,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitch1() throws Exception {
+	public void testConvertIfToSwitch() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4668,7 +4668,235 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitch2() throws Exception {
+	public void testConvertIfToSwitchWithEagerOr() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        if (a == 1) {\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        } else if (a == 2 | a == 3 | a == 4 | a == 5) {\n" //
+				+ "            System.out.println(2);\n" //
+				+ "        } else if (a == 6) {\n" //
+				+ "            System.out.println(4);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(-1);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", given, false, null);
+
+		int offset= given.indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        switch (a) {\n" //
+				+ "            case 1 :\n" //
+				+ "                System.out.println(1);\n" //
+				+ "                break;\n" //
+				+ "            case 2 :\n" //
+				+ "            case 3 :\n" //
+				+ "            case 4 :\n" //
+				+ "            case 5 :\n" //
+				+ "                System.out.println(2);\n" //
+				+ "                break;\n" //
+				+ "            case 6 :\n" //
+				+ "                System.out.println(4);\n" //
+				+ "                break;\n" //
+				+ "            default :\n" //
+				+ "                System.out.println(-1);\n" //
+				+ "                break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertIfToSwitchWithXOr() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        if (a == 1) {\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        } else if (a == 2 ^ a == 3 ^ a == 4 ^ a == 5) {\n" //
+				+ "            System.out.println(2);\n" //
+				+ "        } else if (a == 6) {\n" //
+				+ "            System.out.println(4);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(-1);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", given, false, null);
+
+		int offset= given.indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        switch (a) {\n" //
+				+ "            case 1 :\n" //
+				+ "                System.out.println(1);\n" //
+				+ "                break;\n" //
+				+ "            case 2 :\n" //
+				+ "            case 3 :\n" //
+				+ "            case 4 :\n" //
+				+ "            case 5 :\n" //
+				+ "                System.out.println(2);\n" //
+				+ "                break;\n" //
+				+ "            case 6 :\n" //
+				+ "                System.out.println(4);\n" //
+				+ "                break;\n" //
+				+ "            default :\n" //
+				+ "                System.out.println(-1);\n" //
+				+ "                break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertIfToSwitchWithOperation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        if (a == 1) {\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        } else if (a == 2 || a == 3 || a == 4 || a == 2 + 3) {\n" //
+				+ "            System.out.println(1 + 1);\n" //
+				+ "        } else if (a == 6) {\n" //
+				+ "            System.out.println(4);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(-1);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", given, false, null);
+
+		int offset= given.indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        switch (a) {\n" //
+				+ "            case 1 :\n" //
+				+ "                System.out.println(1);\n" //
+				+ "                break;\n" //
+				+ "            case 2 :\n" //
+				+ "            case 3 :\n" //
+				+ "            case 4 :\n" //
+				+ "            case 2 + 3 :\n" //
+				+ "                System.out.println(1 + 1);\n" //
+				+ "                break;\n" //
+				+ "            case 6 :\n" //
+				+ "                System.out.println(4);\n" //
+				+ "                break;\n" //
+				+ "            default :\n" //
+				+ "                System.out.println(-1);\n" //
+				+ "                break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertIfToSwitchWithComments() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        if (a == 1) {\n" //
+				+ "            System.out.println(1);\n" //
+				+ "        } else if (a == 2 || a == 3 || a == 4 || a == 2 + /* Addition */ 3) {\n" //
+				+ "            System.out.println(1 + /* Addition */ 1);\n" //
+				+ "        } else if (a == 6) {\n" //
+				+ "            System.out.println(4);\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(-1);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", given, false, null);
+
+		int offset= given.indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        switch (a) {\n" //
+				+ "            case 1 :\n" //
+				+ "                System.out.println(1);\n" //
+				+ "                break;\n" //
+				+ "            case 2 :\n" //
+				+ "            case 3 :\n" //
+				+ "            case 4 :\n" //
+				+ "            case 2 + /* Addition */ 3 :\n" //
+				+ "                System.out.println(1 + /* Addition */ 1);\n" //
+				+ "                break;\n" //
+				+ "            case 6 :\n" //
+				+ "                System.out.println(4);\n" //
+				+ "                break;\n" //
+				+ "            default :\n" //
+				+ "                System.out.println(-1);\n" //
+				+ "                break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertIfToSwitchDoNotConvertStringUnderJava1d7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
@@ -4697,7 +4925,42 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitch3() throws Exception {
+	public void testConvertIfToSwitchDoNotConvertAnnoyingBreak() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        while (a-- > 0) {\n" //
+				+ "            if (a == 1) {\n" //
+				+ "                System.out.println(1);\n" //
+				+ "                break;\n" //
+				+ "            } else if (a == 2 || a == 3 || a == 4 || a == 5) {\n" //
+				+ "                System.out.println(2);\n" //
+				+ "            } else if (a == 6) {\n" //
+				+ "                System.out.println(4);\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(-1);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", given, false, null);
+
+		int offset= given.indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch);
+	}
+
+	@Test
+	public void testConvertIfToSwitchOnEnumWithEqual() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -4758,7 +5021,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitch4() throws Exception {
+	public void testConvertIfToSwitchOnEnumWithMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -4819,7 +5082,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitch5() throws Exception {
+	public void testConvertIfToSwitchUsingConstants() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -4876,7 +5139,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitch6() throws Exception {
+	public void testConvertIfToSwitchWithoutJumpStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4934,7 +5197,131 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitch7() throws Exception {
+	public void testConvertIfToSwitchWithContinueStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        while (a-- > 0) {\n" //
+				+ "            if (a == 1) {\n" //
+				+ "                System.out.println(1);\n" //
+				+ "                continue;\n" //
+				+ "            } else if (a == 2 || a == 3 || a == 4 || a == 5) {\n" //
+				+ "                System.out.println(2);\n" //
+				+ "            } else if (a == 6) {\n" //
+				+ "                System.out.println(4);\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(-1);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", given, false, null);
+
+		int offset= given.indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        while (a-- > 0) {\n" //
+				+ "            switch (a) {\n" //
+				+ "                case 1 :\n" //
+				+ "                    System.out.println(1);\n" //
+				+ "                    continue;\n" //
+				+ "                case 2 :\n" //
+				+ "                case 3 :\n" //
+				+ "                case 4 :\n" //
+				+ "                case 5 :\n" //
+				+ "                    System.out.println(2);\n" //
+				+ "                    break;\n" //
+				+ "                case 6 :\n" //
+				+ "                    System.out.println(4);\n" //
+				+ "                    break;\n" //
+				+ "                default :\n" //
+				+ "                    System.out.println(-1);\n" //
+				+ "                    break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertIfToSwitchWithLabeledBreak() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        loop: while (a-- > 0) {\n" //
+				+ "            if (a == 1) {\n" //
+				+ "                System.out.println(1);\n" //
+				+ "                break loop;\n" //
+				+ "            } else if (a == 2 || a == 3 || a == 4 || a == 5) {\n" //
+				+ "                System.out.println(2);\n" //
+				+ "            } else if (a == 6) {\n" //
+				+ "                System.out.println(4);\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(-1);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", given, false, null);
+
+		int offset= given.indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(int a) {\n" //
+				+ "        loop: while (a-- > 0) {\n" //
+				+ "            switch (a) {\n" //
+				+ "                case 1 :\n" //
+				+ "                    System.out.println(1);\n" //
+				+ "                    break loop;\n" //
+				+ "                case 2 :\n" //
+				+ "                case 3 :\n" //
+				+ "                case 4 :\n" //
+				+ "                case 5 :\n" //
+				+ "                    System.out.println(2);\n" //
+				+ "                    break;\n" //
+				+ "                case 6 :\n" //
+				+ "                    System.out.println(4);\n" //
+				+ "                    break;\n" //
+				+ "                default :\n" //
+				+ "                    System.out.println(-1);\n" //
+				+ "                    break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertIfToSwitchWithMethodAsDiscriminant() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4996,7 +5383,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitch8() throws Exception {
+	public void testConvertIfToSwitchDoNotFixOnDifferentDiscriminant() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
@@ -5031,7 +5418,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitch9() throws Exception {
+	public void testConvertIfToSwitchOnEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack;\n");

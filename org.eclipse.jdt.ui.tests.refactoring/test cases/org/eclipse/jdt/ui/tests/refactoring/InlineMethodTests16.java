@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,21 +29,21 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 public class InlineMethodTests16 extends InlineMethodTests {
 
 	@Rule
-	public InlineMethodTestSetup16 fgTestSetup= new InlineMethodTestSetup16();
+	public InlineMethodTestSetup16 fgSetup= new InlineMethodTestSetup16();
 
 	protected void performSimpleTest() throws Exception {
-		performTestInlineCall(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, fgTestSetup.getSimplePkgOutName());
+		performTestInlineCall(fgSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, fgSetup.getSimplePkgOutName());
 	}
 
 	protected void performDefaultTest() throws Exception {
-		performTestInlineCall(fgTestSetup.getDefaultPackage(), getName(), COMPARE_WITH_OUTPUT, fgTestSetup.getSimplePkgOutName());
+		performTestInlineCall(fgSetup.getDefaultPackage(), getName(), COMPARE_WITH_OUTPUT, fgSetup.getSimplePkgOutName());
 	}
 
 	@Override
 	protected String getFilePath(IPackageFragment pack, String name) {
 		IPackageFragment packToUse = pack;
-		if (pack == fgTestSetup.getDefaultPackage()) {
-			packToUse= fgTestSetup.getSimplePackage();
+		if (pack == fgSetup.getDefaultPackage()) {
+			packToUse= fgSetup.getSimplePackage();
 		}
 		return super.getFilePath(packToUse, name);
 	}

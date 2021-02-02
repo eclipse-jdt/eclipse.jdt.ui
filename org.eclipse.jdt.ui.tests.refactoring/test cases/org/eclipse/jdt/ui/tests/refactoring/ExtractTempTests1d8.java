@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -22,7 +21,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d8Setup;
-import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -30,8 +28,10 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
 public class ExtractTempTests1d8 extends ExtractTempTests {
-	@Rule
-	public RefactoringTestSetup js= new Java1d8Setup();
+
+	public ExtractTempTests1d8() {
+		super(new Java1d8Setup());
+	}
 
 	@Override
 	protected String getTestFileName(boolean canExtract, boolean input) {

@@ -122,12 +122,14 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -793,6 +795,93 @@ public class ASTNodes {
 		return null;
 	}
 
+	/**
+	 * Returns a peremptory value, if any.
+	 *
+	 * @param peremptoryExpression A possible peremptory expression
+	 * @return A peremptory value, if any
+	 */
+	public static Object peremptoryValue(final Expression peremptoryExpression) {
+		Object constantExpression= peremptoryExpression.resolveConstantExpressionValue();
+
+		if (constantExpression != null) {
+			return constantExpression;
+		}
+
+		InfixExpression infixExpression= as(peremptoryExpression, InfixExpression.class);
+
+		if (infixExpression != null
+				&& !infixExpression.hasExtendedOperands()
+				&& hasOperator(infixExpression, InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS)) {
+			if (match(infixExpression.getLeftOperand(), infixExpression.getRightOperand())) {
+				return hasOperator(infixExpression, InfixExpression.Operator.EQUALS);
+			}
+
+			if (ASTSemanticMatcher.INSTANCE.matchNegative(infixExpression.getLeftOperand(), infixExpression.getRightOperand())) {
+				return hasOperator(infixExpression, InfixExpression.Operator.NOT_EQUALS);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the field simple name.
+	 *
+	 * @param expression The expression
+	 *
+	 * @return the field simple name
+	 */
+	public static SimpleName getField(final Expression expression) {
+		SimpleName simpleName= as(expression, SimpleName.class);
+
+		if (simpleName != null) {
+			return simpleName;
+		}
+
+		FieldAccess fieldName= as(expression, FieldAccess.class);
+
+		if (fieldName != null) {
+			ThisExpression thisExpression= as(fieldName.getExpression(), ThisExpression.class);
+
+			if (thisExpression != null) {
+				if (thisExpression.getQualifier() == null) {
+					return fieldName.getName();
+				}
+
+				if (thisExpression.getQualifier().isSimpleName()) {
+					SimpleName qualifier= (SimpleName) thisExpression.getQualifier();
+					TypeDeclaration visitedClass= getTypedAncestor(expression, TypeDeclaration.class);
+
+					if (visitedClass != null
+							&& isSameVariable(visitedClass.getName(), qualifier)) {
+						return fieldName.getName();
+					}
+				}
+			}
+		}
+
+		SuperFieldAccess superFieldAccess= as(expression, SuperFieldAccess.class);
+
+		if (superFieldAccess != null) {
+			if (superFieldAccess.getQualifier() == null) {
+				return superFieldAccess.getName();
+			}
+
+			if (superFieldAccess.getQualifier().isSimpleName()) {
+				SimpleName qualifier= (SimpleName) superFieldAccess.getQualifier();
+				TypeDeclaration visitedClass= getTypedAncestor(expression, TypeDeclaration.class);
+
+				if (visitedClass != null
+						&& isSameVariable(visitedClass.getName(), qualifier)) {
+					return superFieldAccess.getName();
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public static boolean isLiteral(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.BOOLEAN_LITERAL || type == ASTNode.CHARACTER_LITERAL || type == ASTNode.NULL_LITERAL ||
@@ -1335,6 +1424,28 @@ public class ASTNodes {
 		}
 
 		return optimizedOperands;
+	}
+
+	/**
+	 * Returns true if variables are declared with the same identifier after the given statement.
+	 *
+	 * @param node The start
+	 * @param statementInBlock The statement with variables
+	 * @return true if variables are declared with the same identifier after the given statement.
+	 */
+	public static boolean hasVariableConflict(final Statement node, final Statement statementInBlock) {
+		Set<SimpleName> existingVariableNames= getLocalVariableIdentifiers(statementInBlock, false);
+
+		for (Statement statement : getNextSiblings(node)) {
+			VarConflictVisitor varOccurrenceVisitor= new VarConflictVisitor(existingVariableNames, true);
+			varOccurrenceVisitor.traverseNodeInterruptibly(statement);
+
+			if (varOccurrenceVisitor.isVarConflicting()) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -2315,14 +2426,9 @@ public class ASTNodes {
 
 		ASTNode parent= node.getParent();
 
-		if (ancestorClass.isAssignableFrom(parent.getClass())) {
+		if (ancestorClass.isAssignableFrom(parent.getClass())
+				|| instanceOf(parent, ancestorClasses)) {
 			return parent;
-		}
-
-		for (Class<? extends ASTNode> oneClass : ancestorClasses) {
-			if (oneClass.isAssignableFrom(parent.getClass())) {
-				return parent;
-			}
 		}
 
 		return getFirstAncestorOrNull(parent, ancestorClass, ancestorClasses);
@@ -2378,6 +2484,41 @@ public class ASTNodes {
 				return current;
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the highest compatible parent node only linked by a chain of accepted classes.
+	 *
+	 * @param node            the node
+	 * @param compatibleClasses the classes to include when looking for the parent
+	 *                        node
+	 * @return the last parent node of the provided classes, or the current node
+	 *         otherwise
+	 */
+	@SafeVarargs
+	public static ASTNode getHighestCompatibleNode(final ASTNode node, final Class<? extends ASTNode>... compatibleClasses) {
+		ASTNode parent= node.getParent();
+
+		if (instanceOf(parent, compatibleClasses)) {
+			return getHighestCompatibleNode(parent, compatibleClasses);
+		}
+
+		return node;
+	}
+
+	@SafeVarargs
+	private static boolean instanceOf(final ASTNode node, final Class<? extends ASTNode>... classes) {
+		if (node == null) {
+			return false;
+		}
+
+		for (Class<? extends ASTNode> clazz : classes) {
+			if (clazz.isAssignableFrom(node.getClass())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

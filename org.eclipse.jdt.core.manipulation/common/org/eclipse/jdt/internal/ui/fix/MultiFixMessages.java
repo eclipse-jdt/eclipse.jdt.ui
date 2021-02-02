@@ -68,8 +68,10 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleMultiFix_ConvertSingleStatementInControlBodyToBlock_description;
 	public static String CodeStyleCleanUp_addDefaultSerialVersionId_description;
 
+	public static String CodeStyleCleanUp_ExtractIncrement_description;
 	public static String CodeStyleCleanUp_PullUpAssignment_description;
 	public static String CodeStyleCleanUp_ElseIf_description;
+	public static String CodeStyleCleanUp_ReduceIndentation_description;
 	public static String CodeStyleCleanUp_numberSuffix_description;
 	public static String CodeStyleCleanUp_QualifyNonStaticMethod_description;
 	public static String CodeStyleCleanUp_QualifyStaticMethod_description;
@@ -122,9 +124,15 @@ public class MultiFixMessages extends NLS {
 	public static String NullAnnotationsCleanUp_add_nonnullbydefault_annotation;
 	public static String NullAnnotationsCleanUp_remove_redundant_nullness_annotation;
 
+	public static String SingleUsedFieldCleanUp_description;
+	public static String SingleUsedFieldCleanUp_description_old_field_declaration;
+	public static String SingleUsedFieldCleanUp_description_new_local_var_declaration;
+	public static String SingleUsedFieldCleanUp_description_uses_of_the_var;
 	public static String BreakLoopCleanUp_description;
+	public static String StaticInnerClassCleanUp_description;
 	public static String StringBuilderCleanUp_description;
 	public static String CodeStyleCleanUp_LazyLogical_description;
+	public static String PrimitiveParsingCleanUp_description;
 	public static String PrimitiveSerializationCleanUp_description;
 
 	public static String TypeParametersCleanUp_InsertInferredTypeArguments_description;
@@ -156,11 +164,14 @@ public class MultiFixMessages extends NLS {
 	public static String UnnecessaryArrayCreationCleanup_description;
 	public static String UselessReturnCleanUp_description;
 	public static String UselessContinueCleanUp_description;
+	public static String UnloopedWhileCleanUp_description;
 	public static String AddAllCleanup_description;
 	public static String ObjectsEqualsCleanup_description;
 
 	public static String CheckSignOfBitwiseOperation_description;
+	public static String StandardComparisonCleanUp_description;
 
+	public static String ComparingOnCriteriaCleanUp_description;
 	public static String TryWithResourceCleanup_description;
 	public static String MultiCatchCleanUp_description;
 

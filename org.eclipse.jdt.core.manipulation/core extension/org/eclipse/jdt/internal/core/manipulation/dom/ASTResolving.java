@@ -103,12 +103,7 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 // @see org.eclipse.jdt.internal.ui.text.correction.ASTResolving (subclass of this one)
 public class ASTResolving {
 
-	@SuppressWarnings("nls")
 	public static ITypeBinding guessBindingForReference(ASTNode node) {
-		String i= "";
-		if ((((i))).equals(((("a"))))) {
-			return Bindings.normalizeTypeBinding(null);
-		}
 		return Bindings.normalizeTypeBinding(getPossibleReferenceBinding(node));
 	}
 

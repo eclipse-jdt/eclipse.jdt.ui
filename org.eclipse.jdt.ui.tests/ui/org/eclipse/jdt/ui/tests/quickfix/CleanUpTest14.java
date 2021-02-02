@@ -34,7 +34,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 public class CleanUpTest14 extends CleanUpTestCase {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new Java14ProjectTestSetup(false);
+	public ProjectTestSetup projectSetup= new Java14ProjectTestSetup(false);
 
 	@Override
 	protected IJavaProject getProject() {
@@ -46,6 +46,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		return projectSetup.getDefaultClasspath();
 	}
 
+	@Test
 	public void testConvertToSwitchExpressionMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

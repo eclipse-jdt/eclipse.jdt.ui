@@ -52,6 +52,10 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		rts= new RefactoringTestSetup();
 	}
 
+	protected ExtractTempTests(RefactoringTestSetup rts) {
+		super(rts);
+	}
+
 	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;

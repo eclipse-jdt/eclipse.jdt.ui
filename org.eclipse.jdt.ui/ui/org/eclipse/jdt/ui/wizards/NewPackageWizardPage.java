@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -111,7 +111,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 
 	private static final String PAGE_NAME= "NewPackageWizardPage"; //$NON-NLS-1$
 
-	private static final String PACKAGE= "NewPackageWizardPage.package"; //$NON-NLS-1$
+	private static final String PACKAGE_NAME= "NewPackageWizardPage.package"; //$NON-NLS-1$
 
 	private final static String SETTINGS_CREATEPACKAGE_INFO_JAVA= "create_package_info_java"; //$NON-NLS-1$
 
@@ -124,7 +124,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 	/*
 	 * Status of last validation of the package field
 	 */
-	private IStatus fPackageStatus;
+	private IStatus fPackageNameStatus;
 
 	private IPackageFragment fCreatedPackageFragment;
 
@@ -151,7 +151,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 		fCreatePackageInfoJavaDialogField.setDialogFieldListener(adapter);
 		fCreatePackageInfoJavaDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageInfoJava);
 
-		fPackageStatus= new StatusInfo();
+		fPackageNameStatus= new StatusInfo();
 	}
 
 	// -------- Initialization ---------
@@ -203,7 +203,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 			}
 		}
 
-		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
+		updateStatus(new IStatus[] { fContainerStatus, fPackageNameStatus });
 		setAddComments(StubUtility.doAddComments(getJavaProject()), true); // from project or workspace
 	}
 
@@ -303,9 +303,9 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 
 		@Override
 		public void dialogFieldChanged(DialogField field) {
-			fPackageStatus= getPackageStatus(getPackageText());
+			fPackageNameStatus= getPackageStatus(getPackageText());
 			// tell all others
-			handleFieldChanged(PACKAGE);
+			handleFieldChanged(PACKAGE_NAME);
 		}
 	}
 
@@ -318,10 +318,10 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (CONTAINER.equals(fieldName)) {
-			fPackageStatus= getPackageStatus(getPackageText());
+			fPackageNameStatus= getPackageStatus(getPackageText());
 		}
 		// do status line update
-		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
+		updateStatus(new IStatus[] { fContainerStatus, fPackageNameStatus });
 	}
 
 	// ----------- validation ----------

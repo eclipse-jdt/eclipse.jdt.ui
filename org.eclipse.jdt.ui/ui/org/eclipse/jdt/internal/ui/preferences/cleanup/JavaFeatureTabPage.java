@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
@@ -45,6 +46,7 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 				new SwitchExpressionsCleanUp(values),
 				new VarCleanUp(values),
 				new LambdaExpressionsCleanUp(values),
+				new ComparingOnCriteriaCleanUp(values),
 				new JoinCleanUp(values),
 				new TryWithResourceCleanUp(values),
 				new MultiCatchCleanUp(values),
@@ -59,9 +61,10 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 
 	@Override
 	protected void doCreatePreferences(final Composite composite, final int numColumns) {
-		// Disabled as long as it is buggy
-		//CheckboxPreference patternMatchingForInstanceof= createCheckboxPref(java15Group, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PatternMatchingForInstanceof, CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpModifyDialog.FALSE_TRUE);
-		//registerPreference(patternMatchingForInstanceof);
+		Group java15Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java15);
+
+		CheckboxPreference patternMatchingForInstanceof= createCheckboxPref(java15Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_PatternMatchingForInstanceof, CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(patternMatchingForInstanceof);
 
 		Group java14Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java14);
 
@@ -81,6 +84,9 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 		RadioPreference useLambdaPref= createRadioPref(java1d8Group, 1, CleanUpMessages.JavaFeatureTabPage_RadioName_UseLambdaWherePossible, CleanUpConstants.USE_LAMBDA, CleanUpModifyDialog.FALSE_TRUE);
 		RadioPreference useAnonymousPref= createRadioPref(java1d8Group, 1, CleanUpMessages.JavaFeatureTabPage_RadioName_UseAnonymous, CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(convertFunctionalInterfaces, new RadioPreference[] { useLambdaPref, useAnonymousPref });
+
+		CheckboxPreference comparingOnCriteria= createCheckboxPref(java1d8Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ComparingOnCriteria, CleanUpConstants.COMPARING_ON_CRITERIA, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(comparingOnCriteria);
 
 		CheckboxPreference join= createCheckboxPref(java1d8Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_Join, CleanUpConstants.JOIN, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(join);

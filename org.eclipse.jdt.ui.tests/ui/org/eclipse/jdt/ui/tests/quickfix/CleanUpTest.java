@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -4669,6 +4669,292 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPrimitiveParsing() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void convertValueOfCallsToParseCallsInPrimitiveContext() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by1 = Byte.valueOf(\"0\");\n" //
+				+ "        byte by2 = Byte.valueOf(\"0\", 10);\n" //
+				+ "        boolean bo = Boolean.valueOf(\"true\");\n" //
+				+ "        int i1 = Integer.valueOf(\"42\");\n" //
+				+ "        int i2 = Integer.valueOf(\"42\", 10);\n" //
+				+ "        long l1 = Long.valueOf(\"42\");\n" //
+				+ "        long l2 = Long.valueOf(\"42\", 10);\n" //
+				+ "        short s1 = Short.valueOf(\"42\");\n" //
+				+ "        short s2 = Short.valueOf(\"42\", 10);\n" //
+				+ "        float f = Float.valueOf(\"42.42\");\n" //
+				+ "        double d = Double.valueOf(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c = Character.valueOf('&');\n" //
+				+ "        byte by = Byte.valueOf((byte) 0);\n" //
+				+ "        boolean bo = Boolean.valueOf(true);\n" //
+				+ "        int i = Integer.valueOf(42);\n" //
+				+ "        long l = Long.valueOf(42);\n" //
+				+ "        short s = Short.valueOf((short) 42);\n" //
+				+ "        float f = Float.valueOf(42.42F);\n" //
+				+ "        double d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c;\n" //
+				+ "        c = Character.valueOf('&');\n" //
+				+ "        byte by;\n" //
+				+ "        by = Byte.valueOf((byte) 0);\n" //
+				+ "        boolean bo1;\n" //
+				+ "        bo1 = Boolean.valueOf(true);\n" //
+				+ "        int i;\n" //
+				+ "        i = Integer.valueOf(42);\n" //
+				+ "        long l;\n" //
+				+ "        l = Long.valueOf(42);\n" //
+				+ "        short s;\n" //
+				+ "        s = Short.valueOf((short) 42);\n" //
+				+ "        float f;\n" //
+				+ "        f = Float.valueOf(42.42F);\n" //
+				+ "        double d;\n" //
+				+ "        d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static char removeUnnecessaryValueOfCallsInCharacterPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.valueOf('&');\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static byte removeUnnecessaryValueOfCallsInBytePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.valueOf((byte) 0);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static boolean removeUnnecessaryValueOfCallsInBooleanPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.valueOf(true);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static int removeUnnecessaryValueOfCallsInIntegerPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.valueOf(42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static long removeUnnecessaryValueOfCallsInLongPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.valueOf(42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static short removeUnnecessaryValueOfCallsInShortPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.valueOf((short) 42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static float removeUnnecessaryValueOfCallsInFloatPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.valueOf(42.42F);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static double removeUnnecessaryValueOfCallsInDoublePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        new Byte(\"0\").byteValue();\n" //
+				+ "        new Boolean(\"true\").booleanValue();\n" //
+				+ "        new Integer(\"42\").intValue();\n" //
+				+ "        new Short(\"42\").shortValue();\n" //
+				+ "        new Long(\"42\").longValue();\n" //
+				+ "        new Float(\"42.42\").floatValue();\n" //
+				+ "        new Double(\"42.42\").doubleValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCalls() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte.valueOf(\"0\").byteValue();\n" //
+				+ "        Byte.valueOf(\"0\", 8).byteValue();\n" //
+				+ "        Byte.valueOf(\"0\", 10).byteValue();\n" //
+				+ "        Boolean.valueOf(\"true\").booleanValue();\n" //
+				+ "        Integer.valueOf(\"42\").intValue();\n" //
+				+ "        Integer.valueOf(\"42\", 8).intValue();\n" //
+				+ "        Integer.valueOf(\"42\", 10).intValue();\n" //
+				+ "        Short.valueOf(\"42\").shortValue();\n" //
+				+ "        Short.valueOf(\"42\", 8).shortValue();\n" //
+				+ "        Short.valueOf(\"42\", 10).shortValue();\n" //
+				+ "        Long.valueOf(\"42\").longValue();\n" //
+				+ "        Long.valueOf(\"42\", 8).longValue();\n" //
+				+ "        Long.valueOf(\"42\", 10).longValue();\n" //
+				+ "        Float.valueOf(\"42.42\").floatValue();\n" //
+				+ "        Double.valueOf(\"42.42\").doubleValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void convertValueOfCallsToParseCallsInPrimitiveContext() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by1 = Byte.parseByte(\"0\");\n" //
+				+ "        byte by2 = Byte.parseByte(\"0\", 10);\n" //
+				+ "        boolean bo = Boolean.parseBoolean(\"true\");\n" //
+				+ "        int i1 = Integer.parseInt(\"42\");\n" //
+				+ "        int i2 = Integer.parseInt(\"42\", 10);\n" //
+				+ "        long l1 = Long.parseLong(\"42\");\n" //
+				+ "        long l2 = Long.parseLong(\"42\", 10);\n" //
+				+ "        short s1 = Short.parseShort(\"42\");\n" //
+				+ "        short s2 = Short.parseShort(\"42\", 10);\n" //
+				+ "        float f = Float.parseFloat(\"42.42\");\n" //
+				+ "        double d = Double.parseDouble(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c = '&';\n" //
+				+ "        byte by = (byte) 0;\n" //
+				+ "        boolean bo = true;\n" //
+				+ "        int i = 42;\n" //
+				+ "        long l = 42;\n" //
+				+ "        short s = (short) 42;\n" //
+				+ "        float f = 42.42F;\n" //
+				+ "        double d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c;\n" //
+				+ "        c = '&';\n" //
+				+ "        byte by;\n" //
+				+ "        by = (byte) 0;\n" //
+				+ "        boolean bo1;\n" //
+				+ "        bo1 = true;\n" //
+				+ "        int i;\n" //
+				+ "        i = 42;\n" //
+				+ "        long l;\n" //
+				+ "        l = 42;\n" //
+				+ "        short s;\n" //
+				+ "        s = (short) 42;\n" //
+				+ "        float f;\n" //
+				+ "        f = 42.42F;\n" //
+				+ "        double d;\n" //
+				+ "        d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static char removeUnnecessaryValueOfCallsInCharacterPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return '&';\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static byte removeUnnecessaryValueOfCallsInBytePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (byte) 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static boolean removeUnnecessaryValueOfCallsInBooleanPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static int removeUnnecessaryValueOfCallsInIntegerPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static long removeUnnecessaryValueOfCallsInLongPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static short removeUnnecessaryValueOfCallsInShortPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (short) 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static float removeUnnecessaryValueOfCallsInFloatPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42.42F;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static double removeUnnecessaryValueOfCallsInDoublePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte.parseByte(\"0\");\n" //
+				+ "        Boolean.parseBoolean(\"true\");\n" //
+				+ "        Integer.parseInt(\"42\");\n" //
+				+ "        Short.parseShort(\"42\");\n" //
+				+ "        Long.parseLong(\"42\");\n" //
+				+ "        Float.parseFloat(\"42.42\");\n" //
+				+ "        Double.parseDouble(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCalls() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte.parseByte(\"0\");\n" //
+				+ "        Byte.parseByte(\"0\", 8);\n" //
+				+ "        Byte.parseByte(\"0\", 10);\n" //
+				+ "        Boolean.parseBoolean(\"true\");\n" //
+				+ "        Integer.parseInt(\"42\");\n" //
+				+ "        Integer.parseInt(\"42\", 8);\n" //
+				+ "        Integer.parseInt(\"42\", 10);\n" //
+				+ "        Short.parseShort(\"42\");\n" //
+				+ "        Short.parseShort(\"42\", 8);\n" //
+				+ "        Short.parseShort(\"42\", 10);\n" //
+				+ "        Long.parseLong(\"42\");\n" //
+				+ "        Long.parseLong(\"42\", 8);\n" //
+				+ "        Long.parseLong(\"42\", 10);\n" //
+				+ "        Float.parseFloat(\"42.42\");\n" //
+				+ "        Double.parseDouble(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_PARSING);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveParsingCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveParsing() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void doNotConvertToPrimitiveWithObjectUse() {\n" //
+				+ "        Byte by1 = Byte.valueOf(\"0\");\n" //
+				+ "        Byte by2 = Byte.valueOf(\"0\", 10);\n" //
+				+ "        Boolean bo = Boolean.valueOf(\"true\");\n" //
+				+ "        Integer i1 = Integer.valueOf(\"42\");\n" //
+				+ "        Integer i2 = Integer.valueOf(\"42\", 10);\n" //
+				+ "        Long l1 = Long.valueOf(\"42\");\n" //
+				+ "        Long l2 = Long.valueOf(\"42\", 10);\n" //
+				+ "        Short s1 = Short.valueOf(\"42\");\n" //
+				+ "        Short s2 = Short.valueOf(\"42\", 10);\n" //
+				+ "        Float f = Float.valueOf(\"42.42\");\n" //
+				+ "        Double d = Double.valueOf(\"42.42\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_PARSING);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPrimitiveSerialization() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //
@@ -5710,6 +5996,14 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean1 = b1 && b2 || !b1 && b3 && b4;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void doNoUseTernaryOperatorWithSameExpressions(boolean b1, int number) {\n" //
+				+ "        boolean newBoolean1 = b1 && (number > 0) || !b1 && (0 < number);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNoUseTernaryOperatorWithNegativeExpressions(boolean b1, int number) {\n" //
+				+ "        boolean newBoolean1 = b1 && (number > 0) || !b1 && (0 >= number);\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void doNoReplaceDuplicateConditionsWithWrappers(Boolean b1, Boolean b2, Boolean b3) {\n" //
 				+ "        boolean newBoolean1 = b1 && b2 || !b1 && b3;\n" //
 				+ "        boolean newBoolean2 = b1 && !b2 || !b1 && b3;\n" //
@@ -5811,6 +6105,26 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean1 = (staticField > 0) && (staticField < 100) || (staticField <= 0) && (staticField >= 100);\n" //
 				+ "        boolean newBoolean2 = (staticField > 0) && (staticField < 100) || (staticField >= 100) && !(staticField > 0);\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithPrimitiveTypes(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 ? !b2 : b2;\n" //
+				+ "        boolean newBoolean2 = b1 ? b2 : !b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithExpressions(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) ? !(i3 == i4) : (i3 == i4);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) ? (i3 <= i4) : !(i4 >= i3);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) ? (i3 != i4) : (i3 == i4);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) ? (i3 < i4) : (i4 <= i3);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithFields() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (staticField > 0) ? (staticField < 100) : (staticField >= 100);\n" //
+				+ "        boolean newBoolean2 = (staticField > 0) ? (staticField < 100) : !(staticField < 100);\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
 
@@ -5855,6 +6169,26 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceDuplicateConditionsWithFields() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (staticField > 0) == (staticField < 100);\n" //
+				+ "        boolean newBoolean2 = (staticField > 0) == (staticField < 100);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithPrimitiveTypes(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 ^ b2;\n" //
+				+ "        boolean newBoolean2 = b1 == b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithExpressions(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) ^ (i3 == i4);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) == (i3 <= i4);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) == (i3 != i4);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) == (i3 < i4);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceTernaryWithFields() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        boolean newBoolean1 = (staticField > 0) == (staticField < 100);\n" //
 				+ "        boolean newBoolean2 = (staticField > 0) == (staticField < 100);\n" //
@@ -5917,6 +6251,22 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "                || !b1 && new SideEffect() instanceof SideEffect;\n" //
 				+ "        boolean newBoolean2 = b1 && new SideEffect() instanceof SideEffect\n" //
 				+ "                || !b1 && !(new SideEffect() instanceof SideEffect);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotReplaceNullableObjects(Boolean booleanObject1, Boolean booleanObject2) {\n" //
+				+ "        return booleanObject1 ? booleanObject2 : !booleanObject2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceTernaryWithIncrements(int i1, int i2, int i3, int i4) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) ? !(i3 == i4++) : (i3 == i4++);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) ? !(i3 == ++i4) : (i3 == ++i4);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) ? !(i3 == i4--) : (i3 == i4--);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) ? !(i3 == --i4) : (i3 == --i4);\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) ? (i3 == i4++) : !(i3 == i4++);\n" //
+				+ "        boolean newBoolean6 = (i1 == i2) ? (i3 == ++i4) : !(i3 == ++i4);\n" //
+				+ "        boolean newBoolean7 = (i1 == i2) ? (i3 == i4--) : !(i3 == i4--);\n" //
+				+ "        boolean newBoolean8 = (i1 == i2) ? (i3 == --i4) : !(i3 == --i4);\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
@@ -8384,6 +8734,226 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUnloopedWhile() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void replaceWhileByIf(boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (isValid) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileThrowingExceptions(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (isEnabled) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            throw new NullPointerException();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileByIfAndRemoveBreak(boolean isVisible) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (isVisible) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileByIfAndReplaceBreaksByBlocks(boolean isVisible, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (isVisible) {\n" //
+				+ "            if (i > 0)\n" //
+				+ "                break;\n" //
+				+ "            else\n" //
+				+ "                break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileWithComplexCode(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (b1) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            if (b2) {\n" //
+				+ "                System.out.println(\"bar\");\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new NullPointerException();\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileButOnlyRemoveBreakForTheWhileLoop(boolean b, int magicValue) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        while (b) {\n" //
+				+ "            for (int i = 0; i < 10; i++) {\n" //
+				+ "                if (i == magicValue) {\n" //
+				+ "                    System.out.println(\"Magic value! Goodbye!\");\n" //
+				+ "                    break;\n" //
+				+ "                } else {\n" //
+				+ "                    System.out.println(\"Current value: \" + i);\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void replaceWhileByIf(boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileThrowingExceptions(boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            throw new NullPointerException();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileByIfAndRemoveBreak(boolean isVisible) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isVisible) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileByIfAndReplaceBreaksByBlocks(boolean isVisible, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isVisible) {\n" //
+				+ "            if (i > 0) {\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileWithComplexCode(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b1) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            if (b2) {\n" //
+				+ "                System.out.println(\"bar\");\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new NullPointerException();\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWhileButOnlyRemoveBreakForTheWhileLoop(boolean b, int magicValue) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b) {\n" //
+				+ "            for (int i = 0; i < 10; i++) {\n" //
+				+ "                if (i == magicValue) {\n" //
+				+ "                    System.out.println(\"Magic value! Goodbye!\");\n" //
+				+ "                    break;\n" //
+				+ "                } else {\n" //
+				+ "                    System.out.println(\"Current value: \" + i);\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.UNLOOPED_WHILE);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UnloopedWhileCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testKeepUnloopedWhile() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotReplaceWhileEndedByContinue(boolean b) {\n" //
+				+ "        while (b) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            continue;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotReplaceInfiniteWhile() {\n" //
+				+ "        while (true) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotReplaceComplexInfiniteWhile() {\n" //
+				+ "        while (42 == 42) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWhileUsingContinue(boolean b1, boolean b2) {\n" //
+				+ "        while (b1) {\n" //
+				+ "            if (b2) {\n" //
+				+ "                System.out.println(\"bar\");\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWhileThatMayHaveSeveralIterations(int i) {\n" //
+				+ "        while (i-- > 0) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            if (i == 1) {\n" //
+				+ "                System.out.println(\"bar\");\n" //
+				+ "                return;\n" //
+				+ "            } else if (i == 2) {\n" //
+				+ "                throw new NullPointerException();\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWhileThatHasLabeledBreak(boolean b) {\n" //
+				+ "        doNotTrashThisSpecialBreak:while (b) {\n" //
+				+ "            System.out.println(\"foo\");\n" //
+				+ "            break doNotTrashThisSpecialBreak;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveBreakThatShortcutsCode(boolean isValid, boolean isEnabled) {\n" //
+				+ "        while (isValid) {\n" //
+				+ "            if (isEnabled) {\n" //
+				+ "                System.out.println(\"foo\");\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"bar\");\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.UNLOOPED_WHILE);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testMapMethodRatherThanKeySetMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -9578,6 +10148,693 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.ELSE_IF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testReduceIndentation() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Calendar;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Date conflictingName = new Date();\n" //
+				+ "\n" //
+				+ "    public int refactorThen(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            i = i + 1;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElse(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            i = i + 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithTryCatch(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            try {\n" //
+				+ "                throw new Exception();\n" //
+				+ "            } catch(Exception e) {\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIndentation(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorInTry(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            if (i > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                return 1;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                return 2;\n" //
+				+ "            }\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            e.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceIndentationFromElse(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            for (Integer integer : integers) {\n" //
+				+ "                System.out.println(\"Reading \" + integer);\n" //
+				+ "            }\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceIndentationFromIf(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            for (Integer integer : integers) {\n" //
+				+ "                System.out.println(\"Reading \" + integer);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int negateCommentedCondition(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0 /* comment */) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            for (Integer integer : integers) {\n" //
+				+ "                System.out.println(\"Reading \" + integer);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceBigIndentationFromIf(int i, List<String> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            try {\n" //
+				+ "                for (String integer : integers) {\n" //
+				+ "                    System.out.println(\"Reading \" + (Integer.parseInt(integer) + 100));\n" //
+				+ "                }\n" //
+				+ "            } catch (Exception e) {\n" //
+				+ "                e.printStackTrace();\n" //
+				+ "            }\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorThenInUnbrackettedForLoop(int[] integers) {\n" //
+				+ "        for (int integer : integers)\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                integer = integer + 1;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInUnbrackettedForLoop(double[] reals) {\n" //
+				+ "        for (double real : reals)\n" //
+				+ "            if (real > 0) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                real = real + 1;\n" //
+				+ "                System.out.println(\"New value: \" + real);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInSwitch(int discriminant, boolean isVisible) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInTry(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "            }\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"Finally\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInCatch(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            System.out.println(\"Very dangerous code\");\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInFinally(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            System.out.println(\"Very dangerous code\");\n" //
+				+ "        } finally {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithoutNameConflict(int i) {\n" //
+				+ "        System.out.println(\"Today: \" + conflictingName);\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int conflictingName = 123;\n" //
+				+ "\n" //
+				+ "            i = i + conflictingName;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithThrow(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            throw new IllegalArgumentException(\"Positive argument\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            i = i + 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithContinue(List<Integer> integers) {\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                continue;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                System.out.println(integer);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithBreak(List<Integer> integers) {\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                break;\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                System.out.println(integer);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElse(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else\n" //
+				+ "            return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorUnparameterizedReturn(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "        } else {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorEmptyElse(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "            return;\n" //
+				+ "        } else {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Calendar;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Date conflictingName = new Date();\n" //
+				+ "\n" //
+				+ "    public int refactorThen(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        i = i + 1;\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElse(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        i = i + 1;\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithTryCatch(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        try {\n" //
+				+ "            throw new Exception();\n" //
+				+ "        } catch(Exception e) {\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIndentation(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorInTry(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        try {\n" //
+				+ "            if (i > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                return 1;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 2;\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            e.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceIndentationFromElse(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            System.out.println(\"Reading \" + integer);\n" //
+				+ "        }\n" //
+				+ "        return 51;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceIndentationFromIf(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            System.out.println(\"Reading \" + integer);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int negateCommentedCondition(int i, List<Integer> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0 /* comment */) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            System.out.println(\"Reading \" + integer);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int reduceBigIndentationFromIf(int i, List<String> integers) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i <= 0) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            return 51;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        try {\n" //
+				+ "            for (String integer : integers) {\n" //
+				+ "                System.out.println(\"Reading \" + (Integer.parseInt(integer) + 100));\n" //
+				+ "            }\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            e.printStackTrace();\n" //
+				+ "        }\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorThenInUnbrackettedForLoop(int[] integers) {\n" //
+				+ "        for (int integer : integers) {\n" //
+				+ "            if (integer <= 0) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            integer = integer + 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInUnbrackettedForLoop(double[] reals) {\n" //
+				+ "        for (double real : reals) {\n" //
+				+ "            if (real > 0) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            real = real + 1;\n" //
+				+ "            System.out.println(\"New value: \" + real);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInSwitch(int discriminant, boolean isVisible) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                discriminant = discriminant + 1;\n" //
+				+ "                System.out.println(\"New value: \" + discriminant);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInTry(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            discriminant = discriminant + 1;\n" //
+				+ "            System.out.println(\"New value: \" + discriminant);\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"Finally\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInCatch(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            System.out.println(\"Very dangerous code\");\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            discriminant = discriminant + 1;\n" //
+				+ "            System.out.println(\"New value: \" + discriminant);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElseInFinally(int discriminant, boolean isVisible) {\n" //
+				+ "        try {\n" //
+				+ "            System.out.println(\"Very dangerous code\");\n" //
+				+ "        } finally {\n" //
+				+ "            if (isVisible) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            discriminant = discriminant + 1;\n" //
+				+ "            System.out.println(\"New value: \" + discriminant);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithoutNameConflict(int i) {\n" //
+				+ "        System.out.println(\"Today: \" + conflictingName);\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        int conflictingName = 123;\n" //
+				+ "\n" //
+				+ "        i = i + conflictingName;\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorWithThrow(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            throw new IllegalArgumentException(\"Positive argument\");\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        i = i + 1;\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithContinue(List<Integer> integers) {\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(integer);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithBreak(List<Integer> integers) {\n" //
+				+ "        for (Integer integer : integers) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (integer > 0) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(integer);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorElse(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorUnparameterizedReturn(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (!dates.isEmpty()) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorEmptyElse(List<Date> dates) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (dates.isEmpty()) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.REDUCE_INDENTATION);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ReduceIndentation_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotReduceIndentation() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Date;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Date conflictingName = new Date();\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithNameConflict(int i) {\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            int conflictingName = 123;\n" //
+				+ "            i = i + conflictingName;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        int conflictingName = 321;\n" //
+				+ "\n" //
+				+ "        return i + conflictingName;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithNameConfusion(int i) {\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            int conflictingName = 123;\n" //
+				+ "            i = i + conflictingName;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        System.out.println(\"Today: \" + conflictingName);\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithNameConfusion(int i, int discriminant) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "            if (i > 0) {\n" //
+				+ "                return 0;\n" //
+				+ "            } else {\n" //
+				+ "                int conflictingName = 123;\n" //
+				+ "                i = i + conflictingName;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            System.out.println(\"Today: \" + conflictingName);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUCE_INDENTATION);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
@@ -11482,6 +12739,435 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testSingleUsedFieldInInnerClass() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public class SubClass {\n" //
+				+ "        private int refactorField;\n" //
+				+ "\n" //
+				+ "        public void refactorFieldInSubClass() {\n" //
+				+ "            this.refactorField = 123;\n" //
+				+ "            System.out.println(refactorField);\n" //
+				+ "        }\n" //
+				+ "    }\n"
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public class SubClass {\n" //
+				+ "        public void refactorFieldInSubClass() {\n" //
+				+ "            int refactorField = 123;\n" //
+				+ "            System.out.println(refactorField);\n" //
+				+ "        }\n" //
+				+ "    }\n"
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldWithComplexUse() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private short refactorFieldWithComplexUse= 42;\n" //
+				+ "\n" //
+				+ "    public void refactorFieldWithComplexUse(boolean b, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        refactorFieldWithComplexUse = 123;\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(refactorFieldWithComplexUse);\n" //
+				+ "        } else {\n" //
+				+ "            refactorFieldWithComplexUse = 321;\n" //
+				+ "\n" //
+				+ "            for (String text : texts) {\n" //
+				+ "                System.out.println(text);\n" //
+				+ "                System.out.println(this.refactorFieldWithComplexUse);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorFieldWithComplexUse(boolean b, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short refactorFieldWithComplexUse = 123;\n" //
+				+ "        if (b) {\n" //
+				+ "            System.out.println(refactorFieldWithComplexUse);\n" //
+				+ "        } else {\n" //
+				+ "            refactorFieldWithComplexUse = 321;\n" //
+				+ "\n" //
+				+ "            for (String text : texts) {\n" //
+				+ "                System.out.println(text);\n" //
+				+ "                System.out.println(refactorFieldWithComplexUse);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldArray() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int refactorArray[];\n" //
+				+ "\n" //
+				+ "    public void refactorArray() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        this.refactorArray = new int[]{123};\n" //
+				+ "        System.out.println(refactorArray);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorArray() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int refactorArray[] = new int[]{123};\n" //
+				+ "        System.out.println(refactorArray);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldInMultiFragment() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int refactorOneFragment, severalUses;\n" //
+				+ "\n" //
+				+ "    public void refactorOneFragment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        refactorOneFragment = 123;\n" //
+				+ "        System.out.println(refactorOneFragment);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void severalUses() {\n" //
+				+ "        severalUses = 123;\n" //
+				+ "        System.out.println(severalUses);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void severalUses(int i) {\n" //
+				+ "        severalUses = i;\n" //
+				+ "        System.out.println(severalUses);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int severalUses;\n" //
+				+ "\n" //
+				+ "    public void refactorOneFragment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int refactorOneFragment = 123;\n" //
+				+ "        System.out.println(refactorOneFragment);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void severalUses() {\n" //
+				+ "        severalUses = 123;\n" //
+				+ "        System.out.println(severalUses);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void severalUses(int i) {\n" //
+				+ "        severalUses = i;\n" //
+				+ "        System.out.println(severalUses);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldStatic() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static long refactorStaticField;\n" //
+				+ "\n" //
+				+ "    public void refactorStaticField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        refactorStaticField = 123;\n" //
+				+ "        System.out.println(refactorStaticField);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorStaticField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long refactorStaticField = 123;\n" //
+				+ "        System.out.println(refactorStaticField);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldWithSameNameAsLocalVariable() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int refactorFieldWithSameNameAsLocalVariable;\n" //
+				+ "\n" //
+				+ "    public void refactorFieldWithSameNameAsLocalVariable() {\n" //
+				+ "        refactorFieldWithSameNameAsLocalVariable = 123;\n" //
+				+ "        System.out.println(test1.E.this.refactorFieldWithSameNameAsLocalVariable);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void methodWithLocalVariable() {\n" //
+				+ "        long refactorFieldWithSameNameAsLocalVariable = 123;\n" //
+				+ "        System.out.println(refactorFieldWithSameNameAsLocalVariable);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorFieldWithSameNameAsLocalVariable() {\n" //
+				+ "        int refactorFieldWithSameNameAsLocalVariable = 123;\n" //
+				+ "        System.out.println(refactorFieldWithSameNameAsLocalVariable);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void methodWithLocalVariable() {\n" //
+				+ "        long refactorFieldWithSameNameAsLocalVariable = 123;\n" //
+				+ "        System.out.println(refactorFieldWithSameNameAsLocalVariable);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testSingleUsedFieldWithSameNameAsAttribute() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int out;\n" //
+				+ "\n" //
+				+ "    public void refactorFieldWithSameNameAsAttribute() {\n" //
+				+ "        out = 123;\n" //
+				+ "        System.out.println(out);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorFieldWithSameNameAsAttribute() {\n" //
+				+ "        int out = 123;\n" //
+				+ "        System.out.println(out);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testKeepSingleUsedField() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int doNotRefactorPublicField;\n" //
+				+ "    protected int doNotRefactorProtectedField;\n" //
+				+ "    int doNotRefactorPackageField;\n" //
+				+ "    private int doNotRefactorFieldsInSeveralMethods;\n" //
+				+ "    private int doNotRefactorFieldInOtherField;\n" //
+				+ "    private int oneField = doNotRefactorFieldInOtherField;\n" //
+				+ "    private int doNotRefactorReadFieldBeforeAssignment;\n" //
+				+ "    private int doNotRefactorUnusedField;\n" //
+				+ "    private List<String> dynamicList= new ArrayList<>(Arrays.asList(\"foo\", \"bar\"));\n" //
+				+ "    private boolean doNotRefactorFieldWithActiveInitializer = dynamicList.remove(\"foo\");\n" //
+				+ "    private Runnable doNotRefactorObject;\n" //
+				+ "    @Deprecated\n" //
+				+ "    private int doNotRefactorFieldWithAnnotation;\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorPublicField() {\n" //
+				+ "        doNotRefactorPublicField = 123;\n" //
+				+ "        System.out.println(doNotRefactorPublicField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorProtectedField() {\n" //
+				+ "        doNotRefactorProtectedField = 123;\n" //
+				+ "        System.out.println(doNotRefactorProtectedField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorPackageField() {\n" //
+				+ "        doNotRefactorPackageField = 123;\n" //
+				+ "        System.out.println(doNotRefactorPackageField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldsInSeveralMethods() {\n" //
+				+ "        doNotRefactorFieldsInSeveralMethods = 123;\n" //
+				+ "        System.out.println(doNotRefactorFieldsInSeveralMethods);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldsInSeveralMethods(int i) {\n" //
+				+ "        doNotRefactorFieldsInSeveralMethods = i;\n" //
+				+ "        System.out.println(doNotRefactorFieldsInSeveralMethods);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorReadFieldBeforeAssignment() {\n" //
+				+ "        System.out.println(doNotRefactorReadFieldBeforeAssignment);\n" //
+				+ "        doNotRefactorReadFieldBeforeAssignment = 123;\n" //
+				+ "        System.out.println(doNotRefactorReadFieldBeforeAssignment);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldInOtherField() {\n" //
+				+ "        doNotRefactorFieldInOtherField = 123;\n" //
+				+ "        System.out.println(doNotRefactorFieldInOtherField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldWithActiveInitializer() {\n" //
+				+ "        doNotRefactorFieldWithActiveInitializer = true;\n" //
+				+ "        System.out.println(doNotRefactorFieldWithActiveInitializer);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorObject() {\n" //
+				+ "        doNotRefactorObject = new Runnable() {\n" //
+				+ "            @Override\n" //
+				+ "            public void run() {\n" //
+				+ "                while (true) {\n" //
+				+ "                    System.out.println(\"Don't stop me!\");\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "        doNotRefactorObject.run();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorFieldWithAnnotation() {\n" //
+				+ "        doNotRefactorFieldWithAnnotation = 123456;\n" //
+				+ "        System.out.println(doNotRefactorFieldWithAnnotation);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class SubClass {\n" //
+				+ "        private int subClassField = 42;\n" //
+				+ "\n" //
+				+ "        public void doNotRefactorFieldInSubClass() {\n" //
+				+ "            this.subClassField = 123;\n" //
+				+ "            System.out.println(subClassField);\n" //
+				+ "        }\n" //
+				+ "    }\n"
+				+ "\n" //
+				+ "    public void oneMethod() {\n" //
+				+ "        SubClass aSubClass = new SubClass();\n" //
+				+ "        System.out.println(aSubClass.subClassField);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testBreakLoop() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //
@@ -11927,6 +13613,369 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.BREAK_LOOP);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testStaticInnerClass() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import static java.lang.Integer.bitCount;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorThisInnerClassThatAccessesField {\n" //
+				+ "        File picture;\n" //
+				+ "\n" //
+				+ "        public char anotherMethod() {\n" //
+				+ "            return picture.separatorChar;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorThisInnerClassThatUsesStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorThisInnerClassThatUsesQualifiedStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return E.CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorThisInnerClassThatUsesFullyQualifiedStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return test1.E.CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassThatOnlyUsesItsFields {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return i == 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassThatUsesStaticMethod {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aStaticMethod();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public final class RefactorThisFinalInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class RefactorThisInnerClassWithoutModifier {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Deprecated\n" //
+				+ "    class RefactorThisInnerClassWithAnnotation {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassThatUsesStaticImport {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public int anotherMethod() {\n" //
+				+ "            return bitCount(0);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassThatUsesStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public char anotherMethod() {\n" //
+				+ "            return File.separatorChar;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInheritedInnerClass extends File {\n" //
+				+ "        private static final long serialVersionUID = -1124849036813595100L;\n" //
+				+ "        private int i;\n" //
+				+ "\n" //
+				+ "        public RefactorInheritedInnerClass(File arg0, String arg1) {\n" //
+				+ "            super(arg0, arg1);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorGenericInnerClass<T> {\n" //
+				+ "        T i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final String CONSTANT= \"foo\";\n" //
+				+ "\n" //
+				+ "    private String aString= \"bar\";\n" //
+				+ "\n" //
+				+ "    public static boolean aStaticMethod() {\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean aMethod() {\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import static java.lang.Integer.bitCount;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorThisInnerClassThatAccessesField {\n" //
+				+ "        File picture;\n" //
+				+ "\n" //
+				+ "        public char anotherMethod() {\n" //
+				+ "            return picture.separatorChar;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorThisInnerClassThatUsesStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorThisInnerClassThatUsesQualifiedStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return E.CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorThisInnerClassThatUsesFullyQualifiedStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return test1.E.CONSTANT != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassThatOnlyUsesItsFields {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return i == 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassThatUsesStaticMethod {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aStaticMethod();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static final class RefactorThisFinalInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    static class RefactorThisInnerClassWithoutModifier {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Deprecated\n" //
+				+ "    static\n" //
+				+ "    class RefactorThisInnerClassWithAnnotation {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassThatUsesStaticImport {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public int anotherMethod() {\n" //
+				+ "            return bitCount(0);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassThatUsesStaticField {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public char anotherMethod() {\n" //
+				+ "            return File.separatorChar;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInheritedInnerClass extends File {\n" //
+				+ "        private static final long serialVersionUID = -1124849036813595100L;\n" //
+				+ "        private int i;\n" //
+				+ "\n" //
+				+ "        public RefactorInheritedInnerClass(File arg0, String arg1) {\n" //
+				+ "            super(arg0, arg1);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorGenericInnerClass<T> {\n" //
+				+ "        T i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final String CONSTANT= \"foo\";\n" //
+				+ "\n" //
+				+ "    private String aString= \"bar\";\n" //
+				+ "\n" //
+				+ "    public static boolean aStaticMethod() {\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean aMethod() {\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.STATIC_INNER_CLASS);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StaticInnerClassCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseStaticInnerClass() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public interface DoNotRefactorInnerInterface {\n" //
+				+ "        boolean anotherMethod();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aString != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassThatUsesMethod {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aMethod();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class DoNotRefactorAlreadyStaticInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class NotStaticClass {\n" //
+				+ "        public class DoNotRefactorInnerClassInNotStaticClass {\n" //
+				+ "            int i;\n" //
+				+ "\n" //
+				+ "            public boolean anotherMethod() {\n" //
+				+ "                return true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return aMethod();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static final String CONSTANT= \"foo\";\n" //
+				+ "\n" //
+				+ "    private String aString= \"bar\";\n" //
+				+ "\n" //
+				+ "    public static boolean aStaticMethod() {\n" //
+				+ "        return false;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean aMethod() {\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.STATIC_INNER_CLASS);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
@@ -12674,6 +14723,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testControlFlowMerge() throws Exception {
+		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= "" //
 				+ "package test1;\n" //
@@ -12692,18 +14742,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this!\n" //
 				+ "        if (isValid)\n" //
 				+ "            // Keep this comment\n" //
-				+ "            i++;\n" //
+				+ "            i = 1;\n" //
 				+ "        else\n" //
-				+ "            i = i + 1;\n" //
+				+ "            i = (2 - 1) * 1;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /** Common code: i++, Remove if statement */\n" //
 				+ "    public void ifElseRemoveIf(boolean b, int number) {\n" //
 				+ "        if (b) {\n" //
 				+ "            // Keep this comment\n" //
-				+ "            number = number + 1;\n" //
+				+ "            number = 1;\n" //
 				+ "        } else {\n" //
-				+ "            number++;\n" //
+				+ "            number = 001;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -12821,19 +14871,23 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (b1) {\n" //
 				+ "            // Keep this comment\n" //
 				+ "            i++;\n" //
+				+ "\n" //
 				+ "            j++;\n" //
 				+ "        } else if (b2) {\n" //
 				+ "            i++;\n" //
 				+ "            // Keep this comment\n" //
 				+ "            i++;\n" //
+				+ "\n" //
 				+ "            j++;\n" //
 				+ "        } else if (modifiableList.remove(\"foo\")) {\n" //
 				+ "            // Keep this comment\n" //
 				+ "            i++;\n" //
+				+ "\n" //
 				+ "            j++;\n" //
 				+ "        } else {\n" //
 				+ "            // Keep this comment\n" //
 				+ "            i++;\n" //
+				+ "\n" //
 				+ "            j++;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
@@ -12847,9 +14901,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
-
-		enable(CleanUpConstants.CONTROLFLOW_MERGE);
 
 		String expected= "" //
 				+ "package test1;\n" //
@@ -12867,13 +14918,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public void ifElseRemoveIfNoBrackets(boolean isValid, int i) {\n" //
 				+ "        // Keep this!\n" //
 				+ "        // Keep this comment\n" //
-				+ "        i++;\n" //
+				+ "        i = 1;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /** Common code: i++, Remove if statement */\n" //
 				+ "    public void ifElseRemoveIf(boolean b, int number) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        number = number + 1;\n" //
+				+ "        number = 1;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    /** Common code: i++, Remove then case */\n" //
@@ -12957,6 +15008,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "        // Keep this comment\n" //
 				+ "        i++;\n" //
+				+ "\n" //
 				+ "        j++;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -12968,6 +15020,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.CONTROLFLOW_MERGE);
+
+		// Then
 		assertNotEquals("The class must be changed", given, expected);
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ControlFlowMergeCleanUp_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
@@ -13525,6 +15582,410 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.RAISE_EMBEDDED_IF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testExtractIncrement() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E extends ArrayList<String> {\n" //
+				+ "    private static final long serialVersionUID = -5909621993540999616L;\n" //
+				+ "\n" //
+				+ "    private int field= 0;\n" //
+				+ "\n" //
+				+ "    public E(int i) {\n" //
+				+ "        super(i++);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E(int doNotRefactor, boolean isEnabled) {\n" //
+				+ "        super(++doNotRefactor);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E(int i, int j) {\n" //
+				+ "        this(i++);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveIncrementBeforeIf(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (++i > 0) {\n" //
+				+ "            return \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"Negative\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveDecrementBeforeIf(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (--i > 0) {\n" //
+				+ "            return \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"Negative\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveDecrementBeforeThrow(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        throw new NullPointerException(\"++i \" + ++i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String[] texts= new String[++i];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement2(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        texts.wait(++i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement3(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int j= i++, k= ++z;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement4(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        j= i-- + 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement5(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        boolean isString= obj[++i] instanceof String;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement6(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        List<Date> dates= new ArrayList<>(--i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement7(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        long l= (long)i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement8(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int m= (i++);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement9(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        boolean isEqual= !(i++ == 10);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement10(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        theClass[i++].field--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement11(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int[] integers= {i++, 1, 2, 3};\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementOutsideStatement12(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        return ++i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean moveIncrementOutsideInfix(int i, boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean isEqual= (i++ == 10) && isEnabled;\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveIncrementOutsideSuperMethod(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return super.remove(++i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean moveIncrementOutsideEagerInfix(int i, boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean isEqual= isEnabled & (i++ == 10);\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementOutsideTernaryExpression(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int j= (i++ == 10) ? 10 : 20;\n" //
+				+ "        return j * 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementInIf(int i, boolean isEnabled) {\n" //
+				+ "        if (isEnabled)\n" //
+				+ "            return ++i;\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementInSwitch(int i, int discriminant) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "                return ++i;\n" //
+				+ "        case 1:\n" //
+				+ "                return --i;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E extends ArrayList<String> {\n" //
+				+ "    private static final long serialVersionUID = -5909621993540999616L;\n" //
+				+ "\n" //
+				+ "    private int field= 0;\n" //
+				+ "\n" //
+				+ "    public E(int i) {\n" //
+				+ "        super(i);\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E(int doNotRefactor, boolean isEnabled) {\n" //
+				+ "        super(++doNotRefactor);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E(int i, int j) {\n" //
+				+ "        this(i);\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveIncrementBeforeIf(int i) {\n" //
+				+ "        i++;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            return \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"Negative\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveDecrementBeforeIf(int i) {\n" //
+				+ "        i--;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            return \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"Negative\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveDecrementBeforeThrow(int i) {\n" //
+				+ "        i++;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        throw new NullPointerException(\"++i \" + i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i++;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String[] texts= new String[i];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement2(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i++;\n" //
+				+ "        texts.wait(i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement3(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int j= i, k= ++z;\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement4(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        j= i + 123;\n" //
+				+ "        i--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement5(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i++;\n" //
+				+ "        boolean isString= obj[i] instanceof String;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement6(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i--;\n" //
+				+ "        List<Date> dates= new ArrayList<>(i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement7(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        long l= (long)i;\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement8(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int m= i;\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement9(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        boolean isEqual= !(i == 10);\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement10(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        theClass[i].field--;\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveIncrementOutsideStatement11(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        int[] integers= {i, 1, 2, 3};\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementOutsideStatement12(int i, int z, Object[] obj, E[] theClass) throws InterruptedException {\n" //
+				+ "        i++;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean moveIncrementOutsideInfix(int i, boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean isEqual= (i == 10) && isEnabled;\n" //
+				+ "        i++;\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String moveIncrementOutsideSuperMethod(int i) {\n" //
+				+ "        i++;\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return super.remove(i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean moveIncrementOutsideEagerInfix(int i, boolean isEnabled) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean isEqual= isEnabled & (i == 10);\n" //
+				+ "        i++;\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementOutsideTernaryExpression(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int j= (i == 10) ? 10 : 20;\n" //
+				+ "        i++;\n" //
+				+ "        return j * 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementInIf(int i, boolean isEnabled) {\n" //
+				+ "        if (isEnabled) {\n" //
+				+ "            i++;\n" //
+				+ "            return i;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int moveIncrementInSwitch(int i, int discriminant) {\n" //
+				+ "        switch (discriminant) {\n" //
+				+ "        case 0:\n" //
+				+ "                i++;\n" //
+				+ "                return i;\n" //
+				+ "        case 1:\n" //
+				+ "                return --i;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.EXTRACT_INCREMENT);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ExtractIncrement_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotExtractIncrement() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public String doNotMoveIncrementAfterIf(int i) {\n" //
+				+ "        String result= null;\n" //
+				+ "\n" //
+				+ "        if (i++ > 0) {\n" //
+				+ "            result= \"Positive\";\n" //
+				+ "        } else {\n" //
+				+ "            result= \"Negative\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return result;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveDecrementAfterReturn(int i) {\n" //
+				+ "        return i--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveDecrementAfterThrow(int i) {\n" //
+				+ "        throw new NullPointerException(\"i++ \" + i++);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveIncrementAfterFallThrough(boolean isEnabled, int i) {\n" //
+				+ "        if (i-- > 0) {\n" //
+				+ "            return i++;\n" //
+				+ "        } else {\n" //
+				+ "            throw new NullPointerException(\"i++ \" + i++);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotMoveIncrementOutsideConditionalInfix(int i, boolean isEnabled) {\n" //
+				+ "        boolean isEqual= isEnabled && (i++ == 10);\n" //
+				+ "        return isEqual;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveIncrementOutsideTernaryExpression(int i) {\n" //
+				+ "        int j= (i == 10) ? i++ : 20;\n" //
+				+ "        return j * 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotMoveIncrementOnReadVariable(int i) {\n" //
+				+ "        int j= i++ + i++;\n" //
+				+ "        int k= i++ + i;\n" //
+				+ "        int l= i + i++;\n" //
+				+ "        int m= (i = 0) + i++;\n" //
+				+ "        return j + k + l + m;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorIncrementStatement(int i) {\n" //
+				+ "        i++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveIncrementOutsideWhile(int i) {\n" //
+				+ "        while (i-- > 0) {\n" //
+				+ "            System.out.println(\"Must decrement on each loop\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveIncrementOutsideDoWhile(int i) {\n" //
+				+ "        do {\n" //
+				+ "            System.out.println(\"Must decrement on each loop\");\n" //
+				+ "        } while (i-- > 0);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveIncrementOutsideFor() {\n" //
+				+ "        for (int i = 0; i < 10; i++) {\n" //
+				+ "            System.out.println(\"Must increment on each loop\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMoveIncrementOutsideElseIf(int i) {\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"I equals zero\");\n" //
+				+ "        } else if (i++ == 10) {\n" //
+				+ "            System.out.println(\"I has equaled ten\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.EXTRACT_INCREMENT);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
@@ -15185,6 +17646,175 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu= pack1.createCompilationUnit("Foo.java", original, false, null);
 
 		enable(CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testStandardComparison() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean refactorComparableComparingToZero() {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= s.compareTo(\"smaller\") == -1;\n" //
+				+ "        b &= s.compareTo(\"greater\") != -1;\n" //
+				+ "        b &= s.compareTo(\"smaller\") != 1;\n" //
+				+ "        b &= (s.compareTo(\"greater\")) == 1;\n" //
+				+ "        b &= (s.compareToIgnoreCase(\"greater\")) == 1;\n" //
+				+ "        b &= -1 == (s.compareTo(\"smaller\"));\n" //
+				+ "        b &= -1 != s.compareTo(\"greater\");\n" //
+				+ "        b &= 1 != s.compareTo(\"smaller\");\n" //
+				+ "        b &= 1 == s.compareTo(\"greater\");\n" //
+				+ "        b &= 1 == s.compareToIgnoreCase(\"greater\");\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean refactorComparatorComparingToZero(Comparator<String> comparator) {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") == -1;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") != -1;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") != 1;\n" //
+				+ "        b &= (comparator.compare(s, \"greater\")) == 1;\n" //
+				+ "        b &= -1 == (comparator.compare(s, \"smaller\"));\n" //
+				+ "        b &= -1 != comparator.compare(s, \"greater\");\n" //
+				+ "        b &= 1 != comparator.compare(s, \"smaller\");\n" //
+				+ "        b &= 1 == comparator.compare(s, \"greater\");\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean refactorComparableComparingToZero() {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= s.compareTo(\"smaller\") < 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") >= 0;\n" //
+				+ "        b &= s.compareTo(\"smaller\") <= 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") > 0;\n" //
+				+ "        b &= s.compareToIgnoreCase(\"greater\") > 0;\n" //
+				+ "        b &= s.compareTo(\"smaller\") < 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") >= 0;\n" //
+				+ "        b &= s.compareTo(\"smaller\") <= 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") > 0;\n" //
+				+ "        b &= s.compareToIgnoreCase(\"greater\") > 0;\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean refactorComparatorComparingToZero(Comparator<String> comparator) {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") < 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") >= 0;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") <= 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") > 0;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") < 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") >= 0;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") <= 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") > 0;\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.STANDARD_COMPARISON);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StandardComparisonCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseStandardComparison() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "\n" //
+				+ "public class E implements Comparator<Double> {\n" //
+				+ "    public boolean doNotRefactorValidCases() {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= s.compareTo(\"smaller\") < 0;\n" //
+				+ "        b &= s.compareTo(\"smaller\") <= 0;\n" //
+				+ "        b &= s.compareTo(\"equal\") == 0;\n" //
+				+ "        b &= s.compareTo(\"different\") != 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") >= 0;\n" //
+				+ "        b &= s.compareTo(\"greater\") > 0;\n" //
+				+ "        b &= s.compareToIgnoreCase(\"equal\") == 0;\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRefactorValidCases(Comparator<String> comparator) {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final String s = \"\";\n" //
+				+ "\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") < 0;\n" //
+				+ "        b &= comparator.compare(s, \"smaller\") <= 0;\n" //
+				+ "        b &= comparator.compare(s, \"equal\") == 0;\n" //
+				+ "        b &= comparator.compare(s, \"different\") != 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") >= 0;\n" //
+				+ "        b &= comparator.compare(s, \"greater\") > 0;\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRefactorLocalComparingToZero() {\n" //
+				+ "        boolean b = true;\n" //
+				+ "        final Double s = 123d;\n" //
+				+ "\n" //
+				+ "        b &= compare(s, 100d) < 100;\n" //
+				+ "        b &= compare(s, 100d) <= 100;\n" //
+				+ "        b &= compare(s, 123d) == 100;\n" //
+				+ "        b &= compare(s, 321d) != 100;\n" //
+				+ "        b &= compare(s, 200d) >= 100;\n" //
+				+ "        b &= compare(s, 200d) > 100;\n" //
+				+ "\n" //
+				+ "        b &= compare(s, 100d) == 99;\n" //
+				+ "        b &= compare(s, 200d) != 99;\n" //
+				+ "        b &= compare(s, 100d) != 101;\n" //
+				+ "        b &= (compare(s, 200d)) == 101;\n" //
+				+ "        b &= 99 == (compare(s, 100d));\n" //
+				+ "        b &= 99 != compare(s, 200d);\n" //
+				+ "        b &= 101 != compare(s, 100d);\n" //
+				+ "        b &= 101 == compare(s, 200d);\n" //
+				+ "\n" //
+				+ "        return b;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Override\n" //
+				+ "    public int compare(Double o1, Double o2) {\n" //
+				+ "        return Double.compare(o1, o2) + 100;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.STANDARD_COMPARISON);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}

@@ -656,12 +656,26 @@ public class CleanUpConstants {
 	public static final String USE_SWITCH= "cleanup.switch"; //$NON-NLS-1$
 
 	/**
-	 * Convert switch statements to switch expressions.IF_LOOP_VAR_USED}<br>
+	 * Convert switch statements to switch expressions.<br>
 	 * <p>
 	 * Example:
 	 *
 	 * <pre>
-	 *                   int i; switch(j) {case 1: i = 2; break; default: i = 3;}  -&gt; int i = switch(j) {case 1 -> 2; default -> 3;};
+	 *      int i;
+	 *      switch(j) {
+	 *        case 1:
+	 *          i = 2;
+	 *          break;
+	 *        default:
+	 *          i = 3;
+	 *        }
+	 *
+	 *        ->
+	 *
+	 *       int i = switch(j) {
+	 *         case 1 -> 2;
+	 *         default -> 3;
+	 *       };
 	 * </pre>
 	 *
 	 * Possible values: {TRUE, FALSE}<br>
@@ -746,6 +760,18 @@ public class CleanUpConstants {
 	 * @since 4.15
 	 */
 	public static final String USE_LAZY_LOGICAL_OPERATOR= "cleanup.lazy_logical_operator"; //$NON-NLS-1$
+
+	/**
+	 * Avoids to create primitive wrapper when parsing a string.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String PRIMITIVE_PARSING= "cleanup.primitive_parsing"; //$NON-NLS-1$
 
 	/**
 	 * Replaces a primitive boxing to serialize by a call to the static <code>toString()</code> method.
@@ -908,6 +934,18 @@ public class CleanUpConstants {
 	public static final String SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF= "cleanup.simplify_lambda_expression_and_method_ref"; //$NON-NLS-1$
 
 	/**
+	 * Replaces a plain comparator instance by a lambda expression passed to a <code>Comparator.comparing()</code> method.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String COMPARING_ON_CRITERIA= "cleanup.comparing_on_criteria"; //$NON-NLS-1$
+
+	/**
 	 * Precompiles the regular expressions.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -930,6 +968,18 @@ public class CleanUpConstants {
 	 * @since 4.18
 	 */
 	public static final String CHECK_SIGN_OF_BITWISE_OPERATION= "cleanup.bitwise_conditional_expression"; //$NON-NLS-1$
+
+	/**
+	 * Fixes <code>Comparable.compareTo()</code> usage.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String STANDARD_COMPARISON= "cleanup.standard_comparison"; //$NON-NLS-1$
 
 	/**
 	 * Removes a String instance from a String literal.
@@ -973,6 +1023,18 @@ public class CleanUpConstants {
 	public static final String VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES= "cleanup.use_arguments_for_raw_type_references"; //$NON-NLS-1$
 
 	/**
+	 * Refactors a field into a local variable if its use is only local.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String SINGLE_USED_FIELD= "cleanup.single_used_field"; //$NON-NLS-1$
+
+	/**
 	 * Add a break to avoid passive for loop iterations.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -983,6 +1045,18 @@ public class CleanUpConstants {
 	 * @since 4.18
 	 */
 	public static final String BREAK_LOOP= "cleanup.break_loop"; //$NON-NLS-1$
+
+	/**
+	 * Make inner <code>class</code> static.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String STATIC_INNER_CLASS= "cleanup.static_inner_class"; //$NON-NLS-1$
 
 	/**
 	 * Replaces String concatenation by StringBuilder when possible.
@@ -1466,6 +1540,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_USELESS_CONTINUE= "cleanup.useless_continue"; //$NON-NLS-1$
 
 	/**
+	 * Replaces a <code>while</code> loop that always terminates during the first iteration by an <code>if</code>.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String UNLOOPED_WHILE= "cleanup.unlooped_while"; //$NON-NLS-1$
+
+	/**
 	 * Replaces a loop on elements by Collection.addAll(), Collection.addAll(Arrays.asList()) or Collections.addAll().
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -1630,6 +1716,18 @@ public class CleanUpConstants {
 	public static final String ADD_MISSING_SERIAL_VERSION_ID_DEFAULT= "cleanup.add_default_serial_version_id"; //$NON-NLS-1$
 
 	/**
+	 * Moves increment or decrement outside an expression when possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String EXTRACT_INCREMENT= "cleanup.extract_increment"; //$NON-NLS-1$
+
+	/**
 	 * Moves assignments inside an if condition above the if node.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -1652,6 +1750,18 @@ public class CleanUpConstants {
 	 * @since 4.18
 	 */
 	public static final String ELSE_IF= "cleanup.else_if"; //$NON-NLS-1$
+
+	/**
+	 * Removes useless indentation when the opposite workflow falls through.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String REDUCE_INDENTATION= "cleanup.reduce_indentation"; //$NON-NLS-1$
 
 	/**
 	 * Controls whether long literal suffix should be rewritten in uppercase.<br>

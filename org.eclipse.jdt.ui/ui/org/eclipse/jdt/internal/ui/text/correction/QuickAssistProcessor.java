@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -225,6 +225,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String CONVERT_FOR_LOOP_ID= "org.eclipse.jdt.ui.correction.convertForLoop.assist"; //$NON-NLS-1$
 
 	public static final String ASSIGN_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.assignToLocal.assist"; //$NON-NLS-1$
+
+	public static final String ASSIGN_IN_TRY_WITH_RESOURCES_ID= "org.eclipse.jdt.ui.correction.assignInTryWithResources.assist"; //$NON-NLS-1$
 
 	public static final String ASSIGN_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignToField.assist"; //$NON-NLS-1$
 
@@ -2499,6 +2501,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		localProposal.setCommandId(ASSIGN_TO_LOCAL_ID);
 		resultingCollections.add(localProposal);
 
+		if (isAutoClosable(typeBinding)) {
+			AssignToVariableAssistProposal tryWithResourcesProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.TRY_WITH_RESOURCES, expressionStatement, typeBinding,
+					IProposalRelevance.ASSIGN_IN_TRY_WITH_RESOURCES);
+			tryWithResourcesProposal.setCommandId(ASSIGN_IN_TRY_WITH_RESOURCES_ID);
+			resultingCollections.add(tryWithResourcesProposal);
+		}
+
 		ASTNode type= ASTResolving.findParentType(expression);
 		if (type != null) {
 			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding,
@@ -3493,16 +3502,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				default:
 					continue;
 			}
-			if (typeBinding == null) {
-				continue;
-			}
-			for (ITypeBinding superType : Bindings.getAllSuperTypes(typeBinding)) {
-				if (superType.getQualifiedName().equals("java.lang.AutoCloseable")) { //$NON-NLS-1$
-					return true;
-				}
+			if (typeBinding != null && isAutoClosable(typeBinding)) {
+				return true;
 			}
 		}
 		return false;
+	}
+
+	private static boolean isAutoClosable(ITypeBinding typeBinding) {
+		return Bindings.findTypeInHierarchy(typeBinding, "java.lang.AutoCloseable") != null; //$NON-NLS-1$
 	}
 
 	private static Map<SimpleName, IVariableBinding> getVariableStatementBinding(ASTNode astNode) {

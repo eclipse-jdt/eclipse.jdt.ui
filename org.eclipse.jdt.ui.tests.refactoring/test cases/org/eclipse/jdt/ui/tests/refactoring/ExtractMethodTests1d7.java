@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 IBM Corporation and others.
+ * Copyright (c) 2011, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,15 +28,15 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 public class ExtractMethodTests1d7 extends ExtractMethodTests {
 
 	@Rule
-	public ExtractMethodTestSetup1d7 fgTestSetup= new ExtractMethodTestSetup1d7();
+	public ExtractMethodTestSetup1d7 fgTestSetup1d7= new ExtractMethodTestSetup1d7();
 
 	protected void try17Test() throws Exception {
-		performTest(fgTestSetup.getTry17Package(), "A", COMPARE_WITH_OUTPUT, "try17_out");
+		performTest(fgTestSetup1d7.getTry17Package(), "A", COMPARE_WITH_OUTPUT, "try17_out");
 	}
 
 	@Override
 	protected void invalidSelectionTest() throws Exception {
-		performTest(fgTestSetup.getInvalidSelectionPackage(), "A", INVALID_SELECTION, null);
+		performTest(fgTestSetup1d7.getInvalidSelectionPackage(), "A", INVALID_SELECTION, null);
 	}
 
 	//====================================================================================

@@ -45,7 +45,7 @@ public class CopyPackageChangeTest extends GenericRefactoringTest {
 	public void test0() throws Exception{
 		createCU(getPackageP(), "A.java", getFileContents(getRefactoringPath() + "A.java"));
 
-		IPackageFragmentRoot newRoot= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "newName");
+		IPackageFragmentRoot newRoot= JavaProjectHelper.addSourceContainer(rts.getProject(), "newName");
 
 		String packName= getPackageP().getElementName();
 		CopyPackageChange change= new CopyPackageChange(getPackageP(), newRoot, null);

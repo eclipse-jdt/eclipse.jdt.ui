@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -1839,6 +1840,13 @@ public class UnresolvedElementsSubProcessor {
 					ITypeBinding[] newParamTypes= new ITypeBinding[changeDesc.length];
 					for (int i= 0; i < newParamTypes.length; i++) {
 						newParamTypes[i]= changeDesc[i] == null ? declParamTypes[i] : ((EditDescription) changeDesc[i]).type;
+					}
+					if (methodDecl.isVarargs() && newParamTypes.length > 0 && !newParamTypes[newParamTypes.length - 1].isArray()) {
+						List<ITypeBinding> newArgs= new ArrayList<>();
+						newArgs.addAll(Arrays.asList(argTypes));
+						newArgs.add(paramTypes[paramTypes.length - 1]);
+						doMoreArguments(context, invocationNode, arguments, newArgs.toArray(new ITypeBinding[0]), methodBinding, proposals);
+						return;
 					}
 					boolean isVarArgs= methodDecl.isVarargs() && newParamTypes.length > 0 && newParamTypes[newParamTypes.length - 1].isArray();
 					String[] args=  new String[] { org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature(methodDecl), org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature(methodDecl.getName(), newParamTypes, isVarArgs) };
