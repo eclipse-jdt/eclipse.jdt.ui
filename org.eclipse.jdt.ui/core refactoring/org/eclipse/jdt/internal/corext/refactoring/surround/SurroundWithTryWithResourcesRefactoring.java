@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
@@ -410,19 +411,9 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 				if (typeBinding != null) {
 					IMethodBinding close= findAutocloseMethod(typeBinding);
 					if (close != null) {
-						ITypeBinding[] thrownExceptions= fAnalyzer.getThrownExceptions();
 						for (ITypeBinding exceptionType : close.getExceptionTypes()) {
 							if (!allExceptions.contains(exceptionType)) {
-								boolean isThrown= false;
-								for (ITypeBinding thrownException : thrownExceptions) {
-									if (exceptionType.isAssignmentCompatible(thrownException)) {
-										isThrown= true;
-										break;
-									}
-								}
-								if (!isThrown) {
-									allExceptions.add(exceptionType);
-								}
+								allExceptions.add(exceptionType);
 							}
 						}
 					}
@@ -470,11 +461,28 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 			}
 		}
 
-		List<ITypeBinding> filteredExceptions= filterSubtypeExceptions(allExceptions);
-		if (allExceptions.size() > 0) {
+		List<ITypeBinding> mustRethrowList= new ArrayList<>();
+		List<ITypeBinding> catchExceptions= fAnalyzer.calculateCatchesAndRethrows(ASTNodes.filterSubtypes(allExceptions), mustRethrowList);
+		List<ITypeBinding> filteredExceptions= ASTNodes.filterSubtypes(catchExceptions);
+		if (catchExceptions.size() > 0) {
+			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			int i= 0;
+			for (ITypeBinding mustThrow : mustRethrowList) {
+				CatchClause newClause= ast.newCatchClause();
+				SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
+				newDecl.setName(ast.newSimpleName(name));
+				Type importType= fImportRewrite.addImport(mustThrow, ast, context, TypeLocation.EXCEPTION);
+				newDecl.setType(importType);
+				newClause.setException(newDecl);
+				ThrowStatement newThrowStatement= ast.newThrowStatement();
+				newThrowStatement.setExpression(ast.newSimpleName(name));
+				linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(fRewriter.track(decl.getName()), false);
+				newClause.getBody().statements().add(newThrowStatement);
+				tryStatement.catchClauses().add(newClause);
+				++i;
+			}
 			UnionType unionType= getAST().newUnionType();
 			List<Type> types= unionType.types();
-			int i=0;
 			for (ITypeBinding exception : filteredExceptions) {
 				Type type= fImportRewrite.addImport(exception, getAST(), context, TypeLocation.EXCEPTION);
 				types.add(type);
@@ -549,7 +557,7 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 
 	}
 
-	private IMethodBinding findAutocloseMethod(ITypeBinding type) {
+	public static IMethodBinding findAutocloseMethod(ITypeBinding type) {
 		while (type != null) {
 			IMethodBinding[] methods= type.getDeclaredMethods();
 			for (IMethodBinding method : methods) {
@@ -581,7 +589,7 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 	}
 
 	// find all nodes (statements) that are within the start/end positions
-	private List<ASTNode> findNodesInRange(ASTNode astNode, final int start, final int end) {
+	public static List<ASTNode> findNodesInRange(ASTNode astNode, final int start, final int end) {
 		List<ASTNode> nodesInRange= new ArrayList<>();
 		astNode.accept(new ASTVisitor() {
 			int pre= start;
@@ -602,7 +610,8 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 							Statement pStatement= (Statement) statement.getParent();
 							switch (pStatement.getNodeType()) {
 								case ASTNode.BLOCK:
-									if (pStatement.getParent().getNodeType() != ASTNode.METHOD_DECLARATION) {
+									if (pStatement.getParent().getNodeType() != ASTNode.METHOD_DECLARATION &&
+									pStatement.getParent().getNodeType() != ASTNode.TRY_STATEMENT) {
 										statement= pStatement;
 										continue;
 									} else {
@@ -626,20 +635,6 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 			}
 		});
 		return nodesInRange;
-	}
-
-	private List<ITypeBinding> filterSubtypeExceptions(List<ITypeBinding> exceptions) {
-		List<ITypeBinding> filteredExceptions= new ArrayList<>(exceptions);
-		for (Iterator<ITypeBinding> subtypeIterator= filteredExceptions.iterator(); subtypeIterator.hasNext();) {
-			ITypeBinding iTypeBinding= subtypeIterator.next();
-			for (ITypeBinding superTypeBinding : filteredExceptions) {
-				if (!iTypeBinding.equals(superTypeBinding) && iTypeBinding.isSubTypeCompatible(superTypeBinding)) {
-					subtypeIterator.remove();
-					break;
-				}
-			}
-		}
-		return filteredExceptions;
 	}
 
 	private List<ASTNode> getSpecialVariableDeclarationStatements() {

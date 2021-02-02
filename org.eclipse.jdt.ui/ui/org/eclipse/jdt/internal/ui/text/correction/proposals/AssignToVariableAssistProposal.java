@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EmptyStatement;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
@@ -52,8 +54,10 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -69,11 +73,17 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -98,16 +108,20 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	private final String KEY_NAME= "name";  //$NON-NLS-1$
 	private final String KEY_TYPE= "type";  //$NON-NLS-1$
+	private final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
+	private final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
 
 	private final int  fVariableKind;
 	private final List<ASTNode> fNodesToAssign; // ExpressionStatement or SingleVariableDeclaration(s)
 	private final ITypeBinding fTypeBinding;
+	private final ICompilationUnit fCUnit;
 
 	private VariableDeclarationFragment fExistingFragment;
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 
+		fCUnit= cu;
 		fVariableKind= variableKind;
 		fNodesToAssign= new ArrayList<>();
 		fNodesToAssign.add(node);
@@ -129,6 +143,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, VariableDeclarationFragment existingFragment, ITypeBinding typeBinding, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 
+		fCUnit= cu;
 		fVariableKind= FIELD;
 		fNodesToAssign= new ArrayList<>();
 		fNodesToAssign.add(parameter);
@@ -146,6 +161,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	public AssignToVariableAssistProposal(ICompilationUnit cu, List<SingleVariableDeclaration> parameters, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 
+		fCUnit= cu;
 		fVariableKind= FIELD;
 		fNodesToAssign= new ArrayList<>();
 		fNodesToAssign.addAll(parameters);
@@ -169,14 +185,14 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	private ASTRewrite doAddLocal() {
+	private ASTRewrite doAddLocal() throws CoreException {
 		ASTNode nodeToAssign= fNodesToAssign.get(0);
 		Expression expression= ((ExpressionStatement) nodeToAssign).getExpression();
 		AST ast= nodeToAssign.getAST();
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
-		createImportRewrite((CompilationUnit) nodeToAssign.getRoot());
+		ImportRewrite importRewrite= createImportRewrite((CompilationUnit) nodeToAssign.getRoot());
 
 		String[] varNames= suggestLocalVariableNames(fTypeBinding, expression);
 		for (String varName : varNames) {
@@ -217,6 +233,69 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			EmptyStatement blankLine = (EmptyStatement) rewrite.createStringPlaceholder("", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
 			tryStatement.getBody().statements().add(blankLine);
 
+			CatchClause catchClause= ast.newCatchClause();
+			SingleVariableDeclaration decl= ast.newSingleVariableDeclaration();
+			Selection selection= Selection.createFromStartLength(expression.getStartPosition(), expression.getLength());
+			String varName= StubUtility.getExceptionVariableName(fCUnit.getJavaProject());
+			SurroundWithTryWithResourcesAnalyzer analyzer= new SurroundWithTryWithResourcesAnalyzer(fCUnit, selection);
+			expression.getRoot().accept(analyzer);
+			CodeScopeBuilder.Scope scope= CodeScopeBuilder.perform(analyzer.getEnclosingBodyDeclaration(), selection).
+					findScope(selection.getOffset(), selection.getLength());
+			scope.setCursor(selection.getOffset());
+			String name= scope.createName(varName, false);
+			decl.setName(ast.newSimpleName(name));
+			ITypeBinding[] exceptions= 	ExceptionAnalyzer.perform(expression.getParent(), selection, false);
+			List<ITypeBinding> allExceptions= new ArrayList<>(Arrays.asList(exceptions));
+			List<ITypeBinding> mustRethrowList= new ArrayList<>();
+
+			if (fTypeBinding != null) {
+				IMethodBinding close= SurroundWithTryWithResourcesRefactoring.findAutocloseMethod(fTypeBinding);
+				if (close != null) {
+					for (ITypeBinding exceptionType : close.getExceptionTypes()) {
+						if (!allExceptions.contains(exceptionType)) {
+							allExceptions.add(exceptionType);
+						}
+					}
+				}
+			}
+			List<ITypeBinding> catchExceptions= analyzer.calculateCatchesAndRethrows(ASTNodes.filterSubtypes(allExceptions), mustRethrowList);
+			if (catchExceptions.size() > 0) {
+				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(analyzer.getEnclosingBodyDeclaration(), importRewrite);
+				LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+				int i= 0;
+				for (ITypeBinding mustThrow : mustRethrowList) {
+					CatchClause newClause= ast.newCatchClause();
+					SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
+					newDecl.setName(ast.newSimpleName(name));
+					Type importType= importRewrite.addImport(mustThrow, ast, context, TypeLocation.EXCEPTION);
+					newDecl.setType(importType);
+					newClause.setException(newDecl);
+					ThrowStatement newThrowStatement= ast.newThrowStatement();
+					newThrowStatement.setExpression(ast.newSimpleName(name));
+					linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(rewrite.track(decl.getName()), false);
+					newClause.getBody().statements().add(newThrowStatement);
+					tryStatement.catchClauses().add(newClause);
+					++i;
+				}
+				List<ITypeBinding> filteredExceptions= ASTNodes.filterSubtypes(catchExceptions);
+				UnionType unionType= ast.newUnionType();
+				List<Type> types= unionType.types();
+				for (ITypeBinding exception : filteredExceptions) {
+					Type importType= importRewrite.addImport(exception, ast, context, TypeLocation.EXCEPTION);
+					types.add(importType);
+					linkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(rewrite.track(type), i == 0);
+					i++;
+				}
+				decl.setType(unionType);
+				catchClause.setException(decl);
+				linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + 0, true).addPosition(rewrite.track(decl.getName()), false);
+				Statement st= getCatchBody(rewrite, expression, "Exception", name, fCUnit.findRecommendedLineSeparator()); //$NON-NLS-1$
+				if (st != null) {
+					catchClause.getBody().statements().add(st);
+				}
+				tryStatement.catchClauses().add(catchClause);
+			}
+
 			rewrite.replace(expression, tryStatement, null);
 			setEndPosition(rewrite.track(blankLine));
 		}
@@ -225,6 +304,15 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		addLinkedPosition(rewrite.track(type), false, KEY_TYPE);
 
 		return rewrite;
+	}
+
+	private Statement getCatchBody(ASTRewrite rewrite, Expression expression, String type, String name, String lineSeparator) throws CoreException {
+		String s= StubUtility.getCatchBodyContent(fCUnit, type, name, expression, lineSeparator);
+		if (s == null) {
+			return null;
+		} else {
+			return (Statement)rewrite.createStringPlaceholder(s, ASTNode.RETURN_STATEMENT);
+		}
 	}
 
 	private boolean needsSemicolon(Expression expression) {

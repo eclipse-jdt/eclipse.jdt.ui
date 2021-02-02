@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.corext.refactoring.surround;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -34,10 +36,14 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -55,7 +61,7 @@ public class SurroundWithTryWithResourcesAnalyzer extends SurroundWithAnalyzer {
 
 	public ITypeBinding[] getExceptions(Selection selection) {
 		if (fEnclosingNode != null && !getStatus().hasFatalError()) {
-			fExceptions= ExceptionAnalyzer.perform(fEnclosingNode, selection, true);
+			fExceptions= ExceptionAnalyzer.perform(fEnclosingNode, selection, false);
 			if (fExceptions == null || fExceptions.length == 0) {
 				if (fEnclosingNode instanceof MethodReference) {
 					invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_doesNotContain);
@@ -70,6 +76,36 @@ public class SurroundWithTryWithResourcesAnalyzer extends SurroundWithAnalyzer {
 			}
 		}
 		return fExceptions;
+	}
+
+	public ITypeBinding[] getCaughtExceptions() {
+		List<ITypeBinding> exceptions= new ArrayList<>();
+		TryStatement enclosingTry= (TryStatement)ASTResolving.findAncestor(getFirstSelectedNode(), ASTNode.TRY_STATEMENT);
+		while (enclosingTry != null) {
+			List<CatchClause> catchClauses= enclosingTry.catchClauses();
+			for (CatchClause catchClause : catchClauses) {
+				SingleVariableDeclaration sdv= catchClause.getException();
+				Type type= sdv.getType();
+				if (type instanceof UnionType) {
+					UnionType unionType= (UnionType)type;
+					List<Type> types= unionType.types();
+					for (Type t : types) {
+						ITypeBinding binding= t.resolveBinding();
+						if (binding == null) {
+							break;
+						}
+						exceptions.add(binding);
+					}
+				} else {
+					ITypeBinding binding= type.resolveBinding();
+					if (binding != null) {
+						exceptions.add(binding);
+					}
+				}
+			}
+			enclosingTry= (TryStatement)ASTResolving.findAncestor(enclosingTry.getParent(), ASTNode.TRY_STATEMENT);
+		}
+		return exceptions.toArray(new ITypeBinding[0]);
 	}
 
 	public ITypeBinding[] getThrownExceptions() {
@@ -97,6 +133,49 @@ public class SurroundWithTryWithResourcesAnalyzer extends SurroundWithAnalyzer {
 			}
 		}
 		return exceptions.toArray(new ITypeBinding[0]);
+	}
+
+	public List<ITypeBinding> calculateCatchesAndRethrows(List<ITypeBinding> exceptions, List<ITypeBinding> mustRethrowList) {
+		List<ITypeBinding> exceptionList= new ArrayList<>(exceptions);
+		ITypeBinding[] caughtExceptions= getCaughtExceptions();
+		if (caughtExceptions.length > 0) {
+			for (Iterator<ITypeBinding> iter= exceptionList.iterator(); iter.hasNext();) {
+				ITypeBinding binding= iter.next();
+				for (ITypeBinding caughtException : caughtExceptions) {
+					if (binding.isAssignmentCompatible(caughtException)) {
+						iter.remove();
+						break;
+					}
+				}
+			}
+			for (ITypeBinding binding : exceptionList) {
+				for (ITypeBinding caughtException : caughtExceptions) {
+					if (caughtException.isAssignmentCompatible(binding)) {
+						mustRethrowList.add(caughtException);
+						break;
+					}
+				}
+			}
+		}
+		ITypeBinding[] thrownExceptions= getThrownExceptions();
+		for (Iterator<ITypeBinding> iter= exceptionList.iterator(); iter.hasNext();) {
+			ITypeBinding binding= iter.next();
+			for (ITypeBinding thrownException : thrownExceptions) {
+				if (binding.isAssignmentCompatible(thrownException)) {
+					iter.remove();
+					break;
+				}
+			}
+		}
+		for (ITypeBinding binding : exceptionList) {
+			for (ITypeBinding thrownException : thrownExceptions) {
+				if (thrownException.isAssignmentCompatible(binding)) {
+					mustRethrowList.add(thrownException);
+					break;
+				}
+			}
+		}
+		return exceptionList;
 	}
 
 	public ASTNode getEnclosingNode() {
