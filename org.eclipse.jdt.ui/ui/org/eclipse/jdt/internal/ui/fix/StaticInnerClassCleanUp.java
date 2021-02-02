@@ -145,7 +145,7 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 							&& binding.getKind() != IBinding.TYPE) {
 						ASTNode declaration= ((CompilationUnit) root).findDeclaringNode(binding);
 
-						if (!ASTNodes.isParent(declaration, innerClass)) {
+						if (declaration == null || !ASTNodes.isParent(declaration, innerClass)) {
 							isTopLevelClassMemberUsed= true;
 							return interruptVisit();
 						}

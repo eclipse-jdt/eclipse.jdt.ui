@@ -13918,6 +13918,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
+				+ "import java.sql.DriverPropertyInfo;\n" //
+				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public interface DoNotRefactorInnerInterface {\n" //
 				+ "        boolean anotherMethod();\n" //
@@ -13928,6 +13930,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "        public boolean anotherMethod() {\n" //
 				+ "            return aString != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorClassUsingInheritedMemberAsItSNotHandledYet extends DriverPropertyInfo {\n" //
+				+ "        private static final long serialVersionUID = 1L;\n" //
+				+ "\n" //
+				+ "        public DoNotRefactorClassUsingInheritedMemberAsItSNotHandledYet() {\n" //
+				+ "            super(\"\", \"\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        public boolean itSNotHandledYet() {\n" //
+				+ "            return choices != null;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
