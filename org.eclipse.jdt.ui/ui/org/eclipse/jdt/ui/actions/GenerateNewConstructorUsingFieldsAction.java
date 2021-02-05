@@ -134,7 +134,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation() && !type.isAnonymous();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation() && !type.isAnonymous() && !type.isRecord();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -236,20 +236,27 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}
 			Object firstElement= selection.getFirstElement();
 
+			IType typeToProcess= null;
 			if (firstElement instanceof IType) {
-				run((IType) firstElement, new IField[0], false);
+				typeToProcess= (IType)firstElement;
 			} else if (firstElement instanceof ICompilationUnit) {
-				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
-				if (type.isAnnotation()) {
+				typeToProcess= ((ICompilationUnit) firstElement).findPrimaryType();
+			}
+			if (typeToProcess != null) {
+				if (typeToProcess.isAnnotation()) {
 					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_annotation_not_applicable);
 					notifyResult(false);
 					return;
-				} else if (type.isInterface()) {
+				} else if (typeToProcess.isInterface()) {
 					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_interface_not_applicable);
 					notifyResult(false);
 					return;
+				} else if (typeToProcess.isRecord()) {
+					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_record_not_applicable);
+					notifyResult(false);
+					return;
 				} else
-					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
+					run(typeToProcess, new IField[0], false);
 			}
 		} catch (CoreException exception) {
 			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed);
@@ -273,7 +280,9 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			if (element != null) {
 				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
 				if (type != null) {
-					if (type.getFields().length > 0) {
+					if (type.isRecord()) {
+						MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_record_not_applicable);
+					} else if (type.getFields().length > 0) {
 						run(type, new IField[0], true);
 					} else {
 						MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_typeContainsNoFields_message);
