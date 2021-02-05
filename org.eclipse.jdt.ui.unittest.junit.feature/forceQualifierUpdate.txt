@@ -1,0 +1,2 @@
+# To force a version qualifier update add the bug here
+Bug 570855 - Include org.eclipse.jdt.ui.unittest.junit.feature in p2 site 
