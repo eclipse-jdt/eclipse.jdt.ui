@@ -546,7 +546,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 		}
 
 		private TypeMethodReference buildMethod(final ITypeBinding type, final MethodInvocation method, final ASTRewrite rewrite, final AST ast, final ImportRewrite importRewrite) {
-			String comparedClassNameText= importRewrite.addImport(type);
+			String comparedClassNameText= importRewrite.addImport((type.getBound() != null && !type.isUpperbound()) ? type.getBound() : type.getErasure());
 
 			TypeMethodReference typeMethodRef= ast.newTypeMethodReference();
 			typeMethodRef.setType(ast.newSimpleType(ASTNodeFactory.newName(ast, comparedClassNameText)));
