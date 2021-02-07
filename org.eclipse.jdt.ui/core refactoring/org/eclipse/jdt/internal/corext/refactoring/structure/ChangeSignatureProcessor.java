@@ -1275,7 +1275,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (info.isDeleted())
 					buffer.append("{deleted}"); //$NON-NLS-1$
 				else
-					buffer.append(info.getNewTypeName().replaceAll(" ", ""));  //$NON-NLS-1$//$NON-NLS-2$
+					buffer.append(info.getNewTypeName().replace(" ", ""));  //$NON-NLS-1$//$NON-NLS-2$
 				buffer.append(" "); //$NON-NLS-1$
 				if (info.isDeleted())
 					buffer.append("{deleted}"); //$NON-NLS-1$

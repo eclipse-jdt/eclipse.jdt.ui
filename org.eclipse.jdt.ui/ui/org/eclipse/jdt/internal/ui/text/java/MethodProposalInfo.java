@@ -218,7 +218,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	private String computeSimpleTypeName(String signature, Map<String, char[]> typeVariables) {
 		// method equality uses erased types
 		String erasure= Signature.getTypeErasure(signature);
-		erasure= erasure.replaceAll("/", ".");  //$NON-NLS-1$//$NON-NLS-2$
+		erasure= erasure.replace('/', '.');
 		String simpleName= Signature.getSimpleName(Signature.toString(erasure));
 		char[] typeVar= typeVariables.get(simpleName);
 		if (typeVar != null)

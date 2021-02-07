@@ -284,7 +284,7 @@ class ConvertStringConcatenationProposals {
 			if (operand instanceof StringLiteral) {
 				String value= ((StringLiteral) operand).getEscapedValue();
 				value= value.substring(1, value.length() - 1);
-				value= value.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
+				value= value.replace("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
 				formatString.append(value);
 			} else {
 				formatString.append("{").append(i).append("}"); //$NON-NLS-1$ //$NON-NLS-2$
