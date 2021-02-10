@@ -220,6 +220,7 @@ public final class ActionMessages extends NLS {
 	public static String GenerateConstructorUsingFieldsAction_tooltip;
 	public static String GenerateConstructorUsingFieldsAction_error_title;
 	public static String GenerateConstructorUsingFieldsAction_not_applicable;
+	public static String GenerateConstructorUsingFieldsAction_record_not_applicable;
 	public static String GenerateConstructorUsingFieldsAction_fields_selected;
 	public static String GenerateConstructorUsingFieldsAction_error_duplicate_constructor;
 	public static String GenerateConstructorUsingFieldsAction_error_nothing_found;

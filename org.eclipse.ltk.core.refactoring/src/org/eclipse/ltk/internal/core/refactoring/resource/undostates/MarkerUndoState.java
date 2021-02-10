@@ -35,7 +35,7 @@ public class MarkerUndoState {
 	protected IResource resource;
 
 	private String type;
-	private Map<String, ? extends Object> attributes;
+	private Map<String, Object> attributes;
 
 	/**
 	 *
@@ -53,31 +53,13 @@ public class MarkerUndoState {
 	}
 
 	/**
-	 * Create a {@link MarkerUndoState} from the specified marker type, attributes,
-	 * and resource.
-	 *
-	 * @param type
-	 *            the type of marker to be created.
-	 * @param attributes
-	 *            the attributes to be assigned to the marker
-	 * @param resource
-	 *            the resource on which the marker should be created
-	 */
-	public MarkerUndoState(String type, Map<String, ? extends Object> attributes, IResource resource) {
-		this.type = type;
-		this.attributes = attributes;
-		this.resource = resource;
-	}
-
-	/**
 	 * Create a marker from the marker description.
 	 *
 	 * @return the created marker
 	 * @throws CoreException if the marker could not be created
 	 */
 	public IMarker createMarker() throws CoreException {
-		IMarker marker = resource.createMarker(type);
-		marker.setAttributes(attributes);
+		IMarker marker = resource.createMarker(type, attributes);
 		return marker;
 	}
 

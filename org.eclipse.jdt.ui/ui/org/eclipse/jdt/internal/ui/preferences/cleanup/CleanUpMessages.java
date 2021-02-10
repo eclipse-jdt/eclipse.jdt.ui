@@ -61,7 +61,6 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_GroupName_ControlStatements;
 
 	public static String CodeStyleTabPage_GroupName_Expressions;
-	public static String CodeStyleTabPage_CheckboxName_CheckSignOfBitwiseOperation;
 	public static String CodeStyleTabPage_CheckboxName_ExtractIncrement;
 	public static String CodeStyleTabPage_CheckboxName_PullUpAssignment;
 	public static String CodeStyleTabPage_CheckboxName_ElseIf;
@@ -87,6 +86,7 @@ public class CleanUpMessages extends NLS {
 	public static String OptimizationTabPage_CheckboxName_StaticInnerClass;
 	public static String OptimizationTabPage_CheckboxName_StringBuilder;
 	public static String OptimizationTabPage_CheckboxName_UseLazyLogicalOperator;
+	public static String OptimizationTabPage_CheckboxName_PrimitiveComparison;
 	public static String OptimizationTabPage_CheckboxName_PrimitiveParsing;
 	public static String OptimizationTabPage_CheckboxName_PrimitiveSerialization;
 	public static String OptimizationTabPage_CheckboxName_PrecompileRegEx;
@@ -126,12 +126,14 @@ public class CleanUpMessages extends NLS {
 
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryCasts;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryNLSTags;
+	public static String UnnecessaryCodeTabPage_CheckboxName_Substring;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ArraysFill;
 	public static String UnnecessaryCodeTabPage_CheckboxName_EvaluateNullable;
 	public static String UnnecessaryCodeTabPage_CheckboxName_PushDownNegation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_DoubleNegation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ComparisonStatement;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSuperCall;
+	public static String UnnecessaryCodeTabPage_CheckboxName_UnreachableBlock;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UseDirectlyMapMethod;
 	public static String UnnecessaryCodeTabPage_CheckboxName_CollectionCloning;
 	public static String UnnecessaryCodeTabPage_CheckboxName_MapCloning;
@@ -156,7 +158,12 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_GroupName_UnnecessaryCode;
 	public static String UnnecessaryCodeTabPage_GroupName_UnusedCode;
 
-	public static String CodeFixingTabPage_CheckboxName_StandardComparison;
+	public static String SourceFixingTabPage_warning;
+
+	public static String SourceFixingTabPage_GroupName_standardCode;
+
+	public static String SourceFixingTabPage_CheckboxName_StandardComparison;
+	public static String SourceFixingTabPage_CheckboxName_CheckSignOfBitwiseOperation;
 
 	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
 

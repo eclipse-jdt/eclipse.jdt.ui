@@ -4131,6 +4131,93 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testSubstring() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private String textInInstance = \"foo\";\n" //
+				+ "\n" //
+				+ "    public String reduceSubstring(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return text.substring(2, text.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String reduceSubstringOnField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return textInInstance.substring(3, textInInstance.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String reduceSubstringOnExpression(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (textInInstance + text).substring(4, (textInInstance + text).length());\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.SUBSTRING);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private String textInInstance = \"foo\";\n" //
+				+ "\n" //
+				+ "    public String reduceSubstring(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return text.substring(2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String reduceSubstringOnField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return textInInstance.substring(3);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String reduceSubstringOnExpression(String text) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (textInInstance + text).substring(4);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SubstringCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testKeepSubstring() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public String doNotReduceSubstringOnOtherExpression(String text) {\n" //
+				+ "        return text.substring(5, text.hashCode());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotReduceSubstringOnConstant(String text) {\n" //
+				+ "        return text.substring(6, 123);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotReduceSubstringOnDifferentVariable(String text1, String text2) {\n" //
+				+ "        return text1.substring(7, text2.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotReduceSubstringOnActiveExpression(List<String> texts) {\n" //
+				+ "        return texts.remove(0).substring(7, texts.remove(0).length());\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.SUBSTRING);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testUseArraysFill() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //
@@ -4666,6 +4753,160 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_LazyLogical_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testPrimitiveComparison() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int simplifyIntegerComparison(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyDoubleComparison(double number, double anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyFloatComparison(float number, float anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyShortComparison(short number, short anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyLongComparison(long number, long anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyCharacterComparison(char number, char anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyByteComparison(byte number, byte anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyBooleanComparison(boolean number, boolean anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIntegerInstantiation(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return new Integer(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIntegerCast(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return ((Integer) number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int simplifyIntegerComparison(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyDoubleComparison(double number, double anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyFloatComparison(float number, float anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyShortComparison(short number, short anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyLongComparison(long number, long anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyCharacterComparison(char number, char anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyByteComparison(byte number, byte anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int simplifyBooleanComparison(boolean number, boolean anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIntegerInstantiation(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int refactorIntegerCast(int number, int anotherNumber) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.compare(number, anotherNumber);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_COMPARISON);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveComparisonCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveComparison() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int doNotRefactorWrapper(Integer number, int anotherNumber) {\n" //
+				+ "        return Integer.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWrapperComparator(int number, Integer anotherNumber) {\n" //
+				+ "        return Integer.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorString(String number, int anotherNumber) {\n" //
+				+ "        return Integer.valueOf(number).compareTo(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorBadMethod(int number, int anotherNumber) {\n" //
+				+ "        return Integer.valueOf(number).valueOf(anotherNumber);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_COMPARISON);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -6874,6 +7115,315 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.REDUNDANT_SUPER_CALL);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnreachableBlock() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.IOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int removeDuplicateCondition(boolean isValid, boolean isFound) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid && isFound) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (isFound && isValid) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionWithElse(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (i2 > i1) {\n" //
+				+ "            return 1;\n" //
+				+ "        } else {\n" //
+				+ "            return 2;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionWithSeveralConditions(boolean isActive, int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (isActive) {\n" //
+				+ "            return 1;\n" //
+				+ "        } else if (i2 > i1) {\n" //
+				+ "            return 2;\n" //
+				+ "        } else {\n" //
+				+ "            return 3;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionWithFollowingCode(boolean isActive, int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (isActive) {\n" //
+				+ "            return 1;\n" //
+				+ "        } else if (i2 > i1) {\n" //
+				+ "            return 2;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionWithoutFallingThrough(boolean isActive, int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (isActive) {\n" //
+				+ "            System.out.println(\"I do not fall through\");\n" //
+				+ "        } else if (i2 > i1) {\n" //
+				+ "            System.out.println(\"I do not fall through too\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionAmongOthers(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        } else if (i1 < i2 + 1) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (1 + i2 > i1) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeDuplicateConditionWithoutUnreachableCode(boolean isActive, boolean isFound) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isFound) {\n" //
+				+ "            System.out.println(\"I fall through\");\n" //
+				+ "            return;\n" //
+				+ "        } else if (isFound && isActive) {\n" //
+				+ "            System.out.println(\"I do not fall through\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeUncaughtCode(boolean b1, boolean b2) throws IOException {\n" //
+				+ "        try {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (b1 && b2) {\n" //
+				+ "                return 0;\n" //
+				+ "            } else if (b2 && b1) {\n" //
+				+ "                throw new IOException();\n" //
+				+ "            }\n" //
+				+ "        } catch (NullPointerException e) {\n" //
+				+ "            System.out.println(\"I should be reachable\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.IOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int removeDuplicateCondition(boolean isValid, boolean isFound) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid && isFound) {\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionWithElse(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else {\n" //
+				+ "            return 2;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionWithSeveralConditions(boolean isActive, int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (isActive) {\n" //
+				+ "            return 1;\n" //
+				+ "        } else {\n" //
+				+ "            return 3;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionWithFollowingCode(boolean isActive, int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (isActive) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionWithoutFallingThrough(boolean isActive, int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (isActive) {\n" //
+				+ "            System.out.println(\"I do not fall through\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeDuplicateConditionAmongOthers(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        } else if (i1 < i2 + 1) {\n" //
+				+ "            return 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeDuplicateConditionWithoutUnreachableCode(boolean isActive, boolean isFound) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isFound) {\n" //
+				+ "            System.out.println(\"I fall through\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int removeUncaughtCode(boolean b1, boolean b2) throws IOException {\n" //
+				+ "        try {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (b1 && b2) {\n" //
+				+ "                return 0;\n" //
+				+ "            }\n" //
+				+ "        } catch (NullPointerException e) {\n" //
+				+ "            System.out.println(\"I should be reachable\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.UNREACHABLE_BLOCK);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UnreachableBlockCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testKeepUnreachableBlock() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public String doNotCreateUnreachable(int i1, int i2) {\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return \"Falls through\";\n" //
+				+ "        } else if (i2 > i1) {\n" //
+				+ "            System.out.println(\"Does not fall through\");\n" //
+				+ "        } else {\n" //
+				+ "            return \"Falls through too\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return \"I should be reachable\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotCreateUnreachableOverSeveralConditions(boolean isEnabled, int i1, int i2) {\n" //
+				+ "        if (i1 < i2) {\n" //
+				+ "            return \"Falls through\";\n" //
+				+ "        } else if (isEnabled) {\n" //
+				+ "            return \"Falls through too\";\n" //
+				+ "        } else if (i2 > i1) {\n" //
+				+ "            System.out.println(\"Does not fall through\");\n" //
+				+ "        } else {\n" //
+				+ "            return \"Falls through also\";\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return \"I should be reachable\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRemoveDifferentCondition(boolean b1, boolean b2) {\n" //
+				+ "        if (b1 && b2) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (b2 || b1) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRemoveActiveCondition(List<String> myList) {\n" //
+				+ "        if (myList.remove(\"I will be removed\")) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (myList.remove(\"I will be removed\")) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRemoveConditionPrecededByActiveCondition(int number) {\n" //
+				+ "        if (number > 0) {\n" //
+				+ "            return \"Falls through\";\n" //
+				+ "        } else if (number++ == 42) {\n" //
+				+ "            return \"Active condition\";\n" //
+				+ "        } else if (number > 0) {\n" //
+				+ "            return \"Falls through too\";\n" //
+				+ "        } else {\n" //
+				+ "            return \"Falls through also\";\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRemoveCaughtCode(boolean b1, boolean b2) {\n" //
+				+ "        try {\n" //
+				+ "            if (b1 && b2) {\n" //
+				+ "                return 0;\n" //
+				+ "            } else if (b2 && b1) {\n" //
+				+ "                throw new IOException();\n" //
+				+ "            }\n" //
+				+ "        } catch (IOException e) {\n" //
+				+ "            System.out.println(\"I should be reachable\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRemoveThrowingExceptionCode(boolean isValid, int number) {\n" //
+				+ "        if (isValid || true) {\n" //
+				+ "            return 0;\n" //
+				+ "        } else if (isValid || true || ((number / 0) == 42)) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.UNREACHABLE_BLOCK);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -13918,6 +14468,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
+				+ "import java.sql.DriverPropertyInfo;\n" //
+				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public interface DoNotRefactorInnerInterface {\n" //
 				+ "        boolean anotherMethod();\n" //
@@ -13928,6 +14480,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "        public boolean anotherMethod() {\n" //
 				+ "            return aString != null;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorClassUsingInheritedMemberAsItSNotHandledYet extends DriverPropertyInfo {\n" //
+				+ "        private static final long serialVersionUID = 1L;\n" //
+				+ "\n" //
+				+ "        public DoNotRefactorClassUsingInheritedMemberAsItSNotHandledYet() {\n" //
+				+ "            super(\"\", \"\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        public boolean itSNotHandledYet() {\n" //
+				+ "            return choices != null;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //

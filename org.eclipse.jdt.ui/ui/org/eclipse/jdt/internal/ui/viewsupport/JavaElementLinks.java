@@ -758,7 +758,7 @@ public class JavaElementLinks {
 			return Strings.markJavaElementLabelLTR(buf.toString());
 		} else {
 			String label= JavaElementLabels.getElementLabel(element, flags);
-			return label.replaceAll("<", "&lt;").replaceAll(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			return label.replace("<", "&lt;").replace(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 	}
 
@@ -781,7 +781,7 @@ public class JavaElementLinks {
 			return Strings.markJavaElementLabelLTR(buf.toString());
 		} else {
 			String label= JavaElementLabels.getElementLabel(element, flags);
-			return label.replaceAll("<", "&lt;").replaceAll(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			return label.replace("<", "&lt;").replace(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 	}
 }

@@ -7009,6 +7009,11 @@
             cleanUpKind="cleanUp">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.SourceFixingTabPage"
+            name="%CleanUpTabPage.SourceFixing.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.OptimizationTabPage"
             name="%CleanUpTabPage.Optimization.name"
             cleanUpKind="saveAction">
@@ -7098,14 +7103,9 @@
             runAfter="org.eclipse.jdt.ui.cleanup.expressions">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup"
-            id="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression"
-            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
-      </cleanUp>
-      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ExtractIncrementCleanUp"
             id="org.eclipse.jdt.ui.cleanup.extract_increment"
-            runAfter="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression">
+            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp"
@@ -7143,9 +7143,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.stringbuilder">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.primitive_comparison"
+            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PrimitiveParsingCleanUp"
             id="org.eclipse.jdt.ui.cleanup.primitive_parsing"
-            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+            runAfter="org.eclipse.jdt.ui.cleanup.primitive_comparison">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp"
@@ -7248,9 +7253,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.imports">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.SubstringCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.substring"
+            runAfter="org.eclipse.jdt.ui.cleanup.format">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp"
             id="org.eclipse.jdt.ui.cleanup.arrays_fill"
-            runAfter="org.eclipse.jdt.ui.cleanup.format">
+            runAfter="org.eclipse.jdt.ui.cleanup.substring">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp"
@@ -7283,9 +7293,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.comparison_statement">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UnreachableBlockCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.unreachable_block"
+            runAfter="org.eclipse.jdt.ui.cleanup.no_super">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp"
             id="org.eclipse.jdt.ui.cleanup.use_directly_map_method"
-            runAfter="org.eclipse.jdt.ui.cleanup.no_super">
+            runAfter="org.eclipse.jdt.ui.cleanup.unreachable_block">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp"
@@ -7303,9 +7318,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.map_cloning">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup"
+            id="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression"
+            runAfter="org.eclipse.jdt.ui.cleanup.standard_comparison">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.TernaryOperatorCleanUp"
             id="org.eclipse.jdt.ui.cleanup.ternary_operator"
-            runAfter="org.eclipse.jdt.ui.cleanup.standard_comparison">
+            runAfter="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp"

@@ -434,7 +434,7 @@ public class CleanUpRegistry {
 		Arrays.sort(fPageDescriptors, (o1, o2) -> {
 			String name1= o1.getName();
 			String name2= o2.getName();
-			return Collator.getInstance().compare(name1.replaceAll("&", ""), name2.replaceAll("&", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			return Collator.getInstance().compare(name1.replace("&", ""), name2.replace("&", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		});
 	}
 

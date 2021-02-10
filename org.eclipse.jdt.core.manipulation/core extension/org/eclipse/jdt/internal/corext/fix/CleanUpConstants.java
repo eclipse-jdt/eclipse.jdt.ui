@@ -762,6 +762,18 @@ public class CleanUpConstants {
 	public static final String USE_LAZY_LOGICAL_OPERATOR= "cleanup.lazy_logical_operator"; //$NON-NLS-1$
 
 	/**
+	 * Replaces the <code>compareTo()</code> method by a comparison on primitive.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String PRIMITIVE_COMPARISON= "cleanup.primitive_comparison"; //$NON-NLS-1$
+
+	/**
 	 * Avoids to create primitive wrapper when parsing a string.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -1250,6 +1262,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_REDUNDANT_MODIFIERS= "cleanup.remove_redundant_modifiers"; //$NON-NLS-1$
 
 	/**
+	 * Removes the second <code>substring()</code> parameter if this parameter is the length of the string.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String SUBSTRING= "cleanup.substring"; //$NON-NLS-1$
+
+	/**
 	 * Replaces for loops to use String.join() where possible.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -1368,6 +1392,18 @@ public class CleanUpConstants {
 	 * @since 4.18
 	 */
 	public static final String REDUNDANT_SUPER_CALL= "cleanup.no_super"; //$NON-NLS-1$
+
+	/**
+	 * Detect two successive <code>if</code> conditions that are identical and remove the second one.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String UNREACHABLE_BLOCK= "cleanup.unreachable_block"; //$NON-NLS-1$
 
 	/**
 	 * Replaces (X && Y) || (!X && Z) by X ? Y : Z.

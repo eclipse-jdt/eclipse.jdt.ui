@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2019 IBM Corporation and others.
+ * Copyright (c) 2018, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -761,7 +761,7 @@ public final class StubUtility2Core {
 		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
 		for (IMethodBinding typeMethod : typeMethods) {
 			final int modifiers= typeMethod.getModifiers();
-			if (!typeMethod.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
+			if (!typeMethod.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !typeMethod.isSyntheticRecordMethod()) {
 				allMethods.add(typeMethod);
 			}
 		}

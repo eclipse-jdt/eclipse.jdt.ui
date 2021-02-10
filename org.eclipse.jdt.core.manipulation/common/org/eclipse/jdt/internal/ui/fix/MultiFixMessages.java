@@ -132,6 +132,7 @@ public class MultiFixMessages extends NLS {
 	public static String StaticInnerClassCleanUp_description;
 	public static String StringBuilderCleanUp_description;
 	public static String CodeStyleCleanUp_LazyLogical_description;
+	public static String PrimitiveComparisonCleanUp_description;
 	public static String PrimitiveParsingCleanUp_description;
 	public static String PrimitiveSerializationCleanUp_description;
 
@@ -140,6 +141,7 @@ public class MultiFixMessages extends NLS {
 	public static String HashCleanup_description;
 
 	public static String RedundantModifiersCleanup_description;
+	public static String SubstringCleanUp_description;
 	public static String JoinCleanup_description;
 	public static String ArraysFillCleanUp_description;
 	public static String EvaluateNullableCleanUp_description;
@@ -150,6 +152,7 @@ public class MultiFixMessages extends NLS {
 	public static String DoubleNegationCleanUp_description;
 	public static String RedundantComparisonStatementCleanup_description;
 	public static String RedundantSuperCallCleanup_description;
+	public static String UnreachableBlockCleanUp_description;
 	public static String TernaryOperatorCleanUp_description;
 	public static String StrictlyEqualOrDifferentCleanUp_description;
 	public static String MergeConditionalBlocksCleanup_description;
