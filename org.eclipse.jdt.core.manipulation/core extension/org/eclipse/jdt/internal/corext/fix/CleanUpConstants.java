@@ -1083,6 +1083,18 @@ public class CleanUpConstants {
 	public static final String STRINGBUILDER= "cleanup.stringbuilder"; //$NON-NLS-1$
 
 	/**
+	 * Replaces <code>String.replaceAll()</code> by <code>String.replace()</code>.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String PLAIN_REPLACEMENT= "cleanup.plain_replacement"; //$NON-NLS-1$
+
+	/**
 	 * Removes unused imports. <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>

@@ -78,6 +78,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
+		options.setOption(PLAIN_REPLACEMENT, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_PARSING, CleanUpOptions.FALSE);
@@ -160,6 +161,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(CONTROLFLOW_MERGE, CleanUpOptions.FALSE);
 
+		// Code fixing
+
 		// Java Features
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
@@ -233,6 +236,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
+		options.setOption(PLAIN_REPLACEMENT, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_PARSING, CleanUpOptions.FALSE);
@@ -272,6 +276,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_USELESS_RETURN, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_CONTINUE, CleanUpOptions.FALSE);
 		options.setOption(UNLOOPED_WHILE, CleanUpOptions.FALSE);
+
+		// Code fixing
 
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);

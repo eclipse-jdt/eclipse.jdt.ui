@@ -15286,6 +15286,95 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPlainReplacement() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final String CONSTANT = \"&\";\n" //
+				+ "\n" //
+				+ "    public void refactor(String text) {\n" //
+				+ "        String s1 = text.replaceAll(\"&\", \"&amp;\");\n" //
+				+ "        String s2 = text.replaceAll(\",:#\", \"/\");\n" //
+				+ "        String s3 = text.replaceAll(\"/\", \".\");\n" //
+				+ "        String s4 = text.replaceAll(CONSTANT, \"&amp;\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final String CONSTANT = \"&\";\n" //
+				+ "\n" //
+				+ "    public void refactor(String text) {\n" //
+				+ "        String s1 = text.replace(\"&\", \"&amp;\");\n" //
+				+ "        String s2 = text.replace(\",:#\", \"/\");\n" //
+				+ "        String s3 = text.replace(\"/\", \".\");\n" //
+				+ "        String s4 = text.replace(CONSTANT, \"&amp;\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PLAIN_REPLACEMENT);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUsePlainReplacement() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.regex.Matcher;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotRefactorEscapableCharacters(String text) {\n" //
+				+ "        String s1 = text.replaceAll(\"[ab]\", \"c\");\n" //
+				+ "        String s2 = text.replaceAll(\"a.b\", \"foo\");\n" //
+				+ "        String s3 = text.replaceAll(\"a?\", \"foo\");\n" //
+				+ "        String s4 = text.replaceAll(\"a+\", \"foo\");\n" //
+				+ "        String s5 = text.replaceAll(\"a*\", \"foo\");\n" //
+				+ "        String s6 = text.replaceAll(\"a{42}\", \"foo\");\n" //
+				+ "        String s7 = text.replaceAll(\"a{1,42}\", \"foo\");\n" //
+				+ "        String s8 = text.replaceAll(\"(a)\", \"foo\");\n" //
+				+ "        String s9 = text.replaceAll(\"^a\", \"foo\");\n" //
+				+ "        String s10 = text.replaceAll(\"a$\", \"foo\");\n" //
+				+ "        String s11 = text.replaceAll(\"\\\\s\", \"\");\n" //
+				+ "        String s12 = text.replaceAll(\"a|b\", \"foo\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorReplacementWithCapturedGroup(String text) {\n" //
+				+ "        return text.replaceAll(\"foo\", \"$0\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorWithEscapedReplacement(String text) {\n" //
+				+ "        return text.replaceAll(\"foo\", \"\\\\$1\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorUnknownPattern(String text, String pattern) {\n" //
+				+ "        return text.replaceAll(pattern, \"c\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorOtherMethod(Matcher matcher, String text) {\n" //
+				+ "        return matcher.replaceAll(text);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PLAIN_REPLACEMENT);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testControlFlowMerge() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);

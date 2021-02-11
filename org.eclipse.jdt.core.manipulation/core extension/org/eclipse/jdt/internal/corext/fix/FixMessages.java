@@ -131,6 +131,8 @@ public final class FixMessages extends NLS {
 	public static String VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 	public static String VariableDeclarationFix_ChangeMidifiersToFinalWherPossible_description;
 
+	public static String PlainReplacementFix_use_plain_text;
+
 	public static String NullAnnotationsFix_add_annotation_change_name;
 	public static String NullAnnotationsRewriteOperations_change_method_parameter_nullness;
 	public static String NullAnnotationsRewriteOperations_change_target_method_parameter_nullness;

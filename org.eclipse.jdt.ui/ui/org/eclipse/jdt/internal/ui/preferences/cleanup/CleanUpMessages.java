@@ -85,6 +85,7 @@ public class CleanUpMessages extends NLS {
 	public static String OptimizationTabPage_CheckboxName_BreakLoop;
 	public static String OptimizationTabPage_CheckboxName_StaticInnerClass;
 	public static String OptimizationTabPage_CheckboxName_StringBuilder;
+	public static String OptimizationTabPage_CheckboxName_PlainReplacement;
 	public static String OptimizationTabPage_CheckboxName_UseLazyLogicalOperator;
 	public static String OptimizationTabPage_CheckboxName_PrimitiveComparison;
 	public static String OptimizationTabPage_CheckboxName_PrimitiveParsing;
