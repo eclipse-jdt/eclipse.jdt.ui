@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2021 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,9 +8,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
- *     IBM Corporation - Bug 565447
+ *     IBM Corporation - Bug 565447, Bug 570690
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -35,8 +39,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -137,8 +143,7 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 
 				@Override
 				public boolean visit(final InstanceofExpression visited) {
-					if (visited.getPatternVariable() != null
-							|| !ASTNodes.isPassive(visited.getLeftOperand())
+					if (!ASTNodes.isPassive(visited.getLeftOperand())
 							|| visited.getRightOperand().resolveBinding() == null) {
 						return true;
 					}
@@ -264,10 +269,12 @@ public class PatternMatchingForInstanceofCleanUp extends AbstractMultiFix implem
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.PatternMatchingForInstanceofCleanup_description, cuRewrite);
 
-			InstanceofExpression newInstanceof= ast.newInstanceofExpression();
+			PatternInstanceofExpression newInstanceof= ast.newPatternInstanceofExpression();
 			newInstanceof.setLeftOperand(ASTNodes.createMoveTarget(rewrite, nodeToComplete.getLeftOperand()));
-			newInstanceof.setRightOperand(ASTNodes.createMoveTarget(rewrite, nodeToComplete.getRightOperand()));
-			newInstanceof.setPatternVariable(ASTNodes.createMoveTarget(rewrite, expressionToMove));
+			SingleVariableDeclaration newSVDecl= ast.newSingleVariableDeclaration();
+			newSVDecl.setName(ASTNodes.createMoveTarget(rewrite, expressionToMove));
+			newSVDecl.setType(ASTNodes.createMoveTarget(rewrite, nodeToComplete.getRightOperand()));
+			newInstanceof.setRightOperand(newSVDecl);
 
 			ASTNodes.replaceButKeepComment(rewrite, nodeToComplete, newInstanceof, group);
 

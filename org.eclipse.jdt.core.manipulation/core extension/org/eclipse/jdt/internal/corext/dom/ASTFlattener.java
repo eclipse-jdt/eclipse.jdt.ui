@@ -810,10 +810,14 @@ public class ASTFlattener extends GenericVisitor {
 		node.getLeftOperand().accept(this);
 		this.fBuffer.append(" instanceof ");//$NON-NLS-1$
 		node.getRightOperand().accept(this);
-		if (ASTHelper.isInstanceofExpressionPatternSupported(node.getAST()) && node.getPatternVariable()!= null) {
-			this.fBuffer.append(" "); //$NON-NLS-1$
-			node.getPatternVariable().accept(this);
-		}
+		return false;
+	}
+	
+	@Override
+	public boolean visit(PatternInstanceofExpression node) {
+		node.getLeftOperand().accept(this);
+		this.fBuffer.append(" instanceof ");//$NON-NLS-1$
+		node.getRightOperand().accept(this);
 		return false;
 	}
 

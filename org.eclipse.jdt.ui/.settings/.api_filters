@@ -192,6 +192,22 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/fix/PatternMatchingForInstanceofCleanUp.java" type="org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp$PatternMatchingForInstanceofOperation">
+        <filter comment="This is a Java 16 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="PatternInstanceofExpression"/>
+                <message_argument value="PatternMatchingForInstanceofOperation"/>
+                <message_argument value="setLeftOperand(Expression)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="This is a Java 16 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="PatternInstanceofExpression"/>
+                <message_argument value="PatternMatchingForInstanceofOperation"/>
+                <message_argument value="setRightOperand(SingleVariableDeclaration)"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/AddClassFileMarkerAction.java" type="org.eclipse.jdt.internal.ui.javaeditor.AddClassFileMarkerAction">
         <filter id="571473929">
             <message_arguments>
