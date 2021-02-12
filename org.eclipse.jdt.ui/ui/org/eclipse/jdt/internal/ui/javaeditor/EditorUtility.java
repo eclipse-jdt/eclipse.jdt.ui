@@ -15,8 +15,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.osgi.framework.Bundle;
@@ -311,9 +313,11 @@ public class EditorUtility {
 					protected void execute(IProgressMonitor monitor) throws CoreException {
 						IMarker marker= null;
 						try {
-							marker= ((IFileEditorInput)input).getFile().createMarker(IMarker.TEXT);
-							marker.setAttribute(IMarker.CHAR_START, offset);
-							marker.setAttribute(IMarker.CHAR_END, offset + length);
+							Map<String,Object> attributes = new HashMap<>();
+							attributes.put(IMarker.CHAR_START, Integer.valueOf(offset));
+							attributes.put(IMarker.CHAR_END, Integer.valueOf(offset + length));
+
+							marker= ((IFileEditorInput)input).getFile().createMarker(IMarker.TEXT, attributes);
 
 							gotoMarkerTarget.gotoMarker(marker);
 
