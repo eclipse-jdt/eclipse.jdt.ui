@@ -151,7 +151,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(MODERNIZE_HASH, CleanUpOptions.FALSE);
 		options.setOption(USE_OBJECTS_EQUALS, CleanUpOptions.FALSE);
 
-		// Code fixing
+		// Source fixing
+		options.setOption(INVERT_EQUALS, CleanUpOptions.FALSE);
 		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 
@@ -313,7 +314,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		options.setOption(CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, CleanUpOptions.FALSE);
 
-		// Code fixing
+		// Source fixing
+		options.setOption(INVERT_EQUALS, CleanUpOptions.FALSE);
 		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 

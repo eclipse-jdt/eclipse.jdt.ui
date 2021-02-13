@@ -18304,6 +18304,142 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testInvertEquals() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static interface Itf {\n" //
+				+ "        int primitiveConstant = 1;\n" //
+				+ "        String objConstant = \"fkjfkjf\";\n" //
+				+ "        String objNullConstant = null;\n" //
+				+ "        MyEnum enumConstant = MyEnum.NOT_NULL;\n" //
+				+ "        MyEnum enumNullConstant = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static enum MyEnum {\n" //
+				+ "        NOT_NULL\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean invertEquals(Object obj, String text1, String text2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return obj.equals(\"\")\n" //
+				+ "                && obj.equals(Itf.objConstant)\n" //
+				+ "                && obj.equals(\"\" + Itf.objConstant)\n" //
+				+ "                && obj.equals(MyEnum.NOT_NULL)\n" //
+				+ "                && obj.equals(text1 + text2)\n" //
+				+ "                && obj.equals(this);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean invertEqualsIgnoreCase(String s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return s.equalsIgnoreCase(\"\")\n" //
+				+ "                && s.equalsIgnoreCase(Itf.objConstant)\n" //
+				+ "                && s.equalsIgnoreCase(\"\" + Itf.objConstant);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static interface Itf {\n" //
+				+ "        int primitiveConstant = 1;\n" //
+				+ "        String objConstant = \"fkjfkjf\";\n" //
+				+ "        String objNullConstant = null;\n" //
+				+ "        MyEnum enumConstant = MyEnum.NOT_NULL;\n" //
+				+ "        MyEnum enumNullConstant = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static enum MyEnum {\n" //
+				+ "        NOT_NULL\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean invertEquals(Object obj, String text1, String text2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return \"\".equals(obj)\n" //
+				+ "                && Itf.objConstant.equals(obj)\n" //
+				+ "                && (\"\" + Itf.objConstant).equals(obj)\n" //
+				+ "                && MyEnum.NOT_NULL.equals(obj)\n" //
+				+ "                && (text1 + text2).equals(obj)\n" //
+				+ "                && this.equals(obj);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean invertEqualsIgnoreCase(String s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return \"\".equalsIgnoreCase(s)\n" //
+				+ "                && Itf.objConstant.equalsIgnoreCase(s)\n" //
+				+ "                && (\"\" + Itf.objConstant).equalsIgnoreCase(s);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.INVERT_EQUALS);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.InvertEqualsCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotInvertEquals() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static interface Itf {\n" //
+				+ "        int primitiveConstant = 1;\n" //
+				+ "        String objConstant = \"fkjfkjf\";\n" //
+				+ "        String objNullConstant = null;\n" //
+				+ "        MyEnum enumConstant = MyEnum.NOT_NULL;\n" //
+				+ "        MyEnum enumNullConstant = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static enum MyEnum {\n" //
+				+ "        NOT_NULL\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private int primitiveField;\n" //
+				+ "\n" //
+				+ "    public boolean doNotInvertEqualsOnInstance() {\n" //
+				+ "        return equals(\"\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotInvertEqualsOnThis() {\n" //
+				+ "        return this.equals(\"\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotInvertEqualsWhenParameterIsNull(Object obj) {\n" //
+				+ "        return obj.equals(Itf.objNullConstant) && obj.equals(Itf.enumNullConstant);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotInvertEqualsWithPrimitiveParameter(Object obj) {\n" //
+				+ "        return obj.equals(1)\n" //
+				+ "            && obj.equals(Itf.primitiveConstant)\n" //
+				+ "            && obj.equals(primitiveField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotInvertEqualsIgnoreCaseWhenParameterIsNull(String s) {\n" //
+				+ "        return s.equalsIgnoreCase(Itf.objNullConstant);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotInvertEqualsOnOperationThatIsNotConcatenation(Integer number, Integer i1, Integer i2) {\n" //
+				+ "        return number.equals(i1 + i2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.INVERT_EQUALS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testStandardComparison() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
