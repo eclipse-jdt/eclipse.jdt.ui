@@ -15349,6 +15349,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        String s10 = text.replaceAll(\"a$\", \"foo\");\n" //
 				+ "        String s11 = text.replaceAll(\"\\\\s\", \"\");\n" //
 				+ "        String s12 = text.replaceAll(\"a|b\", \"foo\");\n" //
+				+ "        String s13 = text.replaceAll(\"\\n|\\r\\n?\", \" \");\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public String doNotRefactorReplacementWithCapturedGroup(String text) {\n" //
