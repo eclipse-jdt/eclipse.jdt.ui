@@ -244,22 +244,32 @@ public class ASTResolving {
 				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 			}
 
-			if (node.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY
-					&& expression.getElseExpression().resolveTypeBinding() != null) {
-				return expression.getElseExpression().resolveTypeBinding();
+			ITypeBinding parentTypeBinding= getPossibleReferenceBinding(expression);
+
+			if (parentTypeBinding != null
+					&& !parentTypeBinding.isNullType()) {
+				return parentTypeBinding;
 			}
 
-			if (node.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY
-					&& expression.getThenExpression().resolveTypeBinding() != null) {
-				return expression.getThenExpression().resolveTypeBinding();
+			if (node.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY) {
+				ITypeBinding elseTypeBinding= expression.getElseExpression().resolveTypeBinding();
+
+				if (elseTypeBinding != null
+						&& !elseTypeBinding.isNullType()) {
+					return elseTypeBinding;
+				}
 			}
 
-			if (node.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY
-					|| node.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
-				return getPossibleReferenceBinding(expression);
+			if (node.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
+				ITypeBinding thenTypeBinding= expression.getThenExpression().resolveTypeBinding();
+
+				if (thenTypeBinding != null
+						&& !thenTypeBinding.isNullType()) {
+					return thenTypeBinding;
+				}
 			}
 
-			break;
+			return getPossibleReferenceBinding(expression);
 		case ASTNode.POSTFIX_EXPRESSION:
 			return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 		case ASTNode.PREFIX_EXPRESSION:

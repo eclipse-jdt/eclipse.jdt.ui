@@ -866,6 +866,63 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testCorrectReturnStatementInChainedConditional() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    <K1, K2, V> V foo(K1 key1, Map<K1, Map<K2, V>> aMap) {\n" //
+				+ "        Map<K2, V> newMap = aMap.get(key1);\n" //
+				+ "        return newMap == null ? null : aMap == null ? null : newMap.entrySet();\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", input, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    <K1, K2, V> V foo(K1 key1, Map<K1, Map<K2, V>> aMap) {\n" //
+				+ "        Map<K2, V> newMap = aMap.get(key1);\n" //
+				+ "        return (V) (newMap == null ? null : aMap == null ? null : newMap.entrySet());\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		String expected2= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Map.Entry;\n" //
+				+ "import java.util.Set;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    <K1, K2, V> Set<Entry<K2, V>> foo(K1 key1, Map<K1, Map<K2, V>> aMap) {\n" //
+				+ "        Map<K2, V> newMap = aMap.get(key1);\n" //
+				+ "        return newMap == null ? null : aMap == null ? null : newMap.entrySet();\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
 	public void testReturnVoid() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
