@@ -273,7 +273,12 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, true);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
 				IField field= (IField) elements[0];
-				run(field.getDeclaringType(), new IField[] { field}, false);
+				IType type= field.getDeclaringType();
+				if (type != null && type.isRecord()) {
+					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_record_not_applicable);
+				} else {
+					run(type, new IField[] { field}, false);
+				}
 				return;
 			}
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
