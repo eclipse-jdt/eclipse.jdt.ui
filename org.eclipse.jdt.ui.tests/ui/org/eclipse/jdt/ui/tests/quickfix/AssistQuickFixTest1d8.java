@@ -5543,7 +5543,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
-	public void testSurroundWithTryWithResource() throws Exception {
+	public void testSurroundWithTryWithResource_01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer bufOrg= new StringBuffer();
 		bufOrg.append("package p;\n");
@@ -5636,6 +5636,193 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+	}
+	@Test
+	public void testSurroundWithTryWithResource_02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer bufOrg= new StringBuffer();
+		bufOrg.append("package p;\n");
+		bufOrg.append("\n");
+		bufOrg.append("import java.io.FileInputStream;\n");
+		bufOrg.append("import java.io.FileNotFoundException;\n");
+		bufOrg.append("import java.io.InputStream;\n");
+		bufOrg.append("import java.net.Socket;\n");
+		bufOrg.append("\n");
+		bufOrg.append("public class E {\n");
+		bufOrg.append("    public void foo() throws FileNotFoundException {\n");
+		bufOrg.append("        /*1*/Socket s = new Socket(), s2 = new Socket();\n");
+		bufOrg.append("        /*2*/InputStream is = s.getInputStream();\n");
+		bufOrg.append("        /*3*/FileInputStream f = new FileInputStream(\"a.b\");\n");
+		bufOrg.append("        /*4*/int i = 0;\n");
+		bufOrg.append("        System.out.println(s.getInetAddress().toString());\n");
+		bufOrg.append("        System.out.println(is.markSupported());/*0*/\n");
+		bufOrg.append("    }\n");
+		bufOrg.append("}\n");
+		bufOrg.append("\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", bufOrg.toString(), false, null);
+		String strEnd= "/*0*/";
+
+		String str1= "/*1*/";
+		AssistContext context= getCorrectionContext(cu, bufOrg.toString().indexOf(str1), bufOrg.toString().indexOf(strEnd) - bufOrg.toString().indexOf(str1));
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("import java.net.Socket;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() throws FileNotFoundException {\n");
+		buf.append("        try (/*1*/Socket s = new Socket();\n");
+		buf.append("                Socket s2 = new Socket();\n");
+		buf.append("                /*2*/InputStream is = s.getInputStream();\n");
+		buf.append("                /*3*/FileInputStream f = new FileInputStream(\"a.b\")) {\n");
+		buf.append("            /*4*/int i = 0;\n");
+		buf.append("            System.out.println(s.getInetAddress().toString());\n");
+		buf.append("            System.out.println(is.markSupported());/*0*/\n");
+		buf.append("        } catch (FileNotFoundException e) {\n");
+		buf.append("            throw e;\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("            // TODO Auto-generated catch block\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		String expected1= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+
+		str1= "/*2*/";
+		context= getCorrectionContext(cu, bufOrg.toString().indexOf(str1), bufOrg.toString().indexOf(strEnd) - bufOrg.toString().indexOf(str1));
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("import java.net.Socket;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() throws FileNotFoundException {\n");
+		buf.append("        /*1*/Socket s = new Socket(), s2 = new Socket();\n");
+		buf.append("        try (/*2*/InputStream is = s.getInputStream();\n");
+		buf.append("                /*3*/FileInputStream f = new FileInputStream(\"a.b\")) {\n");
+		buf.append("            /*4*/int i = 0;\n");
+		buf.append("            System.out.println(s.getInetAddress().toString());\n");
+		buf.append("            System.out.println(is.markSupported());/*0*/\n");
+		buf.append("        } catch (FileNotFoundException e) {\n");
+		buf.append("            throw e;\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("            // TODO Auto-generated catch block\n");
+		buf.append("            e.printStackTrace();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview2 }, new String[] { expected2 });
+
+		str1= "/*4*/";
+		context= getCorrectionContext(cu, bufOrg.toString().indexOf(str1), bufOrg.toString().indexOf(strEnd) - bufOrg.toString().indexOf(str1));
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+	}
+	@Test
+	public void testSurroundWithTryWithResource_03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer bufOrg= new StringBuffer();
+		bufOrg.append("package p;\n");
+		bufOrg.append("\n");
+		bufOrg.append("import java.io.FileInputStream;\n");
+		bufOrg.append("import java.io.FileNotFoundException;\n");
+		bufOrg.append("import java.io.InputStream;\n");
+		bufOrg.append("import java.net.Socket;\n");
+		bufOrg.append("\n");
+		bufOrg.append("public class E {\n");
+		bufOrg.append("    public void foo() {\n");
+		bufOrg.append("        try {\n");
+		bufOrg.append("            /*1*/Socket s = new Socket(), s2 = new Socket();\n");
+		bufOrg.append("            /*2*/InputStream is = s.getInputStream();\n");
+		bufOrg.append("            /*3*/FileInputStream f = new FileInputStream(\"a.b\");\n");
+		bufOrg.append("            /*4*/int i = 0;\n");
+		bufOrg.append("            System.out.println(s.getInetAddress().toString());\n");
+		bufOrg.append("            System.out.println(is.markSupported());/*0*/\n");
+		bufOrg.append("        } catch (FileNotFoundException e) {\n");
+		bufOrg.append("        }\n");
+		bufOrg.append("    }\n");
+		bufOrg.append("}\n");
+		bufOrg.append("\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", bufOrg.toString(), false, null);
+		String strEnd= "/*0*/";
+
+		String str1= "/*1*/";
+		AssistContext context= getCorrectionContext(cu, bufOrg.toString().indexOf(str1), bufOrg.toString().indexOf(strEnd) - bufOrg.toString().indexOf(str1));
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("import java.net.Socket;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            try (/*1*/Socket s = new Socket();\n");
+		buf.append("                    Socket s2 = new Socket();\n");
+		buf.append("                    /*2*/InputStream is = s.getInputStream();\n");
+		buf.append("                    /*3*/FileInputStream f = new FileInputStream(\"a.b\")) {\n");
+		buf.append("                /*4*/int i = 0;\n");
+		buf.append("                System.out.println(s.getInetAddress().toString());\n");
+		buf.append("                System.out.println(is.markSupported());/*0*/\n");
+		buf.append("            } catch (FileNotFoundException e) {\n");
+		buf.append("                throw e;\n");
+		buf.append("            } catch (IOException e) {\n");
+		buf.append("                // TODO Auto-generated catch block\n");
+		buf.append("                e.printStackTrace();\n");
+		buf.append("            }\n");
+		buf.append("        } catch (FileNotFoundException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		String expected1= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 		assertCorrectLabels(proposals);
 	}
 	@Test
@@ -5765,7 +5952,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
-	public void testAssignInTryWithResources() throws Exception {
+	public void testAssignInTryWithResources_01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String src=
 				"package test1;\n" +
@@ -5803,4 +5990,106 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
+
+	@Test
+	public void testAssignInTryWithResources_02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.FileInputStream;\n" +
+				"import java.io.FileNotFoundException;\n" +
+				"\n" +
+				"class E {\n" +
+				"    void f() throws FileNotFoundException {\n" +
+				"        new FileInputStream(\"f\");\n" +
+				"    }\n" +
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", src, false, null);
+
+		int offset= src.indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 6);
+		assertCorrectLabels(proposals);
+
+		String expected=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.FileInputStream;\n" +
+				"import java.io.FileNotFoundException;\n" +
+				"import java.io.IOException;\n" +
+				"\n" +
+				"class E {\n" +
+				"    void f() throws FileNotFoundException {\n" +
+				"        try (FileInputStream fileInputStream = new FileInputStream(\"f\")) {\n" +
+				"            \n" +
+				"        } catch (FileNotFoundException e) {\n" +
+				"            throw e;\n" +
+				"        } catch (IOException e) {\n" +
+	            "            // TODO Auto-generated catch block\n" +
+				"            e.printStackTrace();\n" +
+				"        };\n" +
+				"    }\n" +
+				"}";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testAssignInTryWithResources_03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.FileInputStream;\n" +
+				"import java.io.FileNotFoundException;\n" +
+				"\n" +
+				"class E {\n" +
+				"    void f() {\n" +
+				"        try {\n" +
+				"            new FileInputStream(\"f\");\n" +
+				"        } catch (FileNotFoundException e) {\n" +
+				"            // some action\n" +
+				"        }\n" +
+				"    }\n" +
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", src, false, null);
+
+		int offset= src.indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 6);
+		assertCorrectLabels(proposals);
+
+		String expected=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.FileInputStream;\n" +
+				"import java.io.FileNotFoundException;\n" +
+				"import java.io.IOException;\n" +
+				"\n" +
+				"class E {\n" +
+				"    void f() {\n" +
+				"        try {\n" +
+				"            try (FileInputStream fileInputStream = new FileInputStream(\"f\")) {\n" +
+				"                \n" +
+				"            } catch (FileNotFoundException e) {\n" +
+				"                throw e;\n" +
+				"            } catch (IOException e) {\n" +
+	            "                // TODO Auto-generated catch block\n" +
+				"                e.printStackTrace();\n" +
+				"            };\n" +
+				"        } catch (FileNotFoundException e) {\n" +
+				"            // some action\n" +
+				"        }\n" +
+				"    }\n" +
+				"}";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
 }
+

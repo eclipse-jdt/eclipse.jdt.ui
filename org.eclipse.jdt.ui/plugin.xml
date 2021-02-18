@@ -7138,9 +7138,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.static_inner_class">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.plain_replacement"
+            runAfter="org.eclipse.jdt.ui.cleanup.stringbuilder">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp"
             id="org.eclipse.jdt.ui.cleanup.lazy_logical"
-            runAfter="org.eclipse.jdt.ui.cleanup.stringbuilder">
+            runAfter="org.eclipse.jdt.ui.cleanup.plain_replacement">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp"
@@ -7313,9 +7318,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.collection_cloning">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.invert_equals"
+            runAfter="org.eclipse.jdt.ui.cleanup.map_cloning">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp"
             id="org.eclipse.jdt.ui.cleanup.standard_comparison"
-            runAfter="org.eclipse.jdt.ui.cleanup.map_cloning">
+            runAfter="org.eclipse.jdt.ui.cleanup.invert_equals">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup"

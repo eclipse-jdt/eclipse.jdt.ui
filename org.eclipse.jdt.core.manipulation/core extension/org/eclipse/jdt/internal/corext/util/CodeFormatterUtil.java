@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - add helper methods to read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
@@ -23,6 +24,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
@@ -54,6 +56,20 @@ public class CodeFormatterUtil {
 	}
 
 	/**
+	 * Creates a string that represents the given number of indentation units.
+	 *
+	 * @param indentationUnits
+	 *        the number of indentation units to generate
+	 * @param cu
+	 *        the compilation unit from which to get the formatter settings
+	 * @return the indent string
+	 */
+	public static String createIndentString(int indentationUnits, ICompilationUnit cu) {
+		Map<String, String> options= cu != null ? cu.getOptions(true) : JavaCore.getOptions();
+		return ToolFactory.createCodeFormatter(options).createIndentationString(indentationUnits);
+	}
+
+	/**
 	 * Gets the current tab width.
 	 *
 	 * @param project
@@ -78,6 +94,29 @@ public class CodeFormatterUtil {
 	}
 
 	/**
+	 * Gets the current tab width.
+	 *
+	 * @param cu
+	 *        the compilation unit from which to get the formatter settings
+	 * @return The tab width
+	 */
+	public static int getTabWidth(ICompilationUnit cu) {
+		/*
+		 * If the tab-char is SPACE, FORMATTER_INDENTATION_SIZE is not used
+		 * by the core formatter.
+		 * We piggy back the visual tab length setting in that preference in
+		 * that case.
+		 */
+		String key;
+		if (JavaCore.SPACE.equals(getCoreOption(cu, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
+			key= DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE;
+		else
+			key= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
+
+		return getCoreOption(cu, key, 4);
+	}
+
+	/**
 	 * Returns the current indent width.
 	 *
 	 * @param project
@@ -94,6 +133,23 @@ public class CodeFormatterUtil {
 			key= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
 
 		return getCoreOption(project, key, 4);
+	}
+
+	/**
+	 * Returns the current indent width.
+	 *
+	 * @param cu
+	 *        the compilation unit from which to get the formatter settings
+	 * @return the indent width
+	 */
+	public static int getIndentWidth(ICompilationUnit cu) {
+		String key;
+		if (DefaultCodeFormatterConstants.MIXED.equals(getCoreOption(cu, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
+			key= DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE;
+		else
+			key= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
+
+		return getCoreOption(cu, key, 4);
 	}
 
 	/**
@@ -130,6 +186,20 @@ public class CodeFormatterUtil {
 	private static int getCoreOption(IJavaProject project, String key, int def) {
 		try {
 			return Integer.parseInt(getCoreOption(project, key));
+		} catch (NumberFormatException e) {
+			return def;
+		}
+	}
+
+	private static String getCoreOption(ICompilationUnit cu, String key) {
+		if (cu == null)
+			return JavaCore.getOption(key);
+		return cu.getOptions(true).get(key);
+	}
+
+	private static int getCoreOption(ICompilationUnit cu, String key, int def) {
+		try {
+			return Integer.parseInt(getCoreOption(cu, key));
 		} catch (NumberFormatException e) {
 			return def;
 		}

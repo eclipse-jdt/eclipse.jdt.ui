@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -40,7 +41,6 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -49,10 +49,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
-import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -157,13 +157,12 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 					}
 				}
 
-				final IJavaProject project= cu.getJavaProject();
 				IRegion region= document.getLineInformationOfOffset(memberStartOffset);
 
 				String line= document.get(region.getOffset(), region.getLength());
-				String indentString= Strings.getIndentString(line, project);
+				String indentString= Strings.getIndentString(line, cu);
 
-				String indentedComment= Strings.changeIndent(comment, 0, project, indentString, lineDelim);
+				String indentedComment= Strings.changeIndent(comment, 0, cu, indentString, lineDelim);
 
 				edit.addChild(new InsertEdit(memberStartOffset, indentedComment));
 

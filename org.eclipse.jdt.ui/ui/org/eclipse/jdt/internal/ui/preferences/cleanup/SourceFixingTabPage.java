@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
+import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp;
 
 public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
@@ -35,6 +36,7 @@ public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(final Map<String, String> values) {
 		return new AbstractCleanUp[] {
+				new InvertEqualsCleanUp(values),
 				new StandardComparisonCleanUp(values),
 				new BitwiseConditionalExpressionCleanup(values)
 		};
@@ -48,6 +50,9 @@ public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
 		createLabel(numColumns - 1, composite, CleanUpMessages.SourceFixingTabPage_warning);
 
 		Group standardCodeGroup= createGroup(numColumns, composite, CleanUpMessages.SourceFixingTabPage_GroupName_standardCode);
+
+		final CheckboxPreference invertEqualsPref= createCheckboxPref(standardCodeGroup, numColumns, CleanUpMessages.SourceFixingTabPage_CheckboxName_InvertEquals, CleanUpConstants.INVERT_EQUALS, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(invertEqualsPref);
 
 		final CheckboxPreference standardComparisonPref= createCheckboxPref(standardCodeGroup, numColumns, CleanUpMessages.SourceFixingTabPage_CheckboxName_StandardComparison, CleanUpConstants.STANDARD_COMPARISON, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(standardComparisonPref);

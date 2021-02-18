@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc. - copied and pared down to methods needed by jdt.core.manipulation
  *     Microsoft Corporation - copied methods needed by jdt.core.manipulation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -119,7 +120,7 @@ public final class StubUtility2Core {
 				varDecl= iterator.next();
 				invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
 			}
-			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter, formatSettings == null ? unit.getJavaProject().getOptions(true) : formatSettings);
+			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter, formatSettings == null ? unit.getOptions(true) : formatSettings);
 		}
 
 		if (todo) {
@@ -353,7 +354,7 @@ public final class StubUtility2Core {
 		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is1d8OrHigher(javaProject))) {
 			// generate a method body
 
-			Map<String, String> options= javaProject.getOptions(true);
+			Map<String, String> options= unit.getOptions(true);
 
 			Block body= ast.newBlock();
 			decl.setBody(body);

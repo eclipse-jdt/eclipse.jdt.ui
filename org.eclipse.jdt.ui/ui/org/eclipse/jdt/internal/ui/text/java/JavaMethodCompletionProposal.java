@@ -24,7 +24,14 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
@@ -133,6 +140,10 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		return fHasParameters;
 	}
 
+	public enum State {
+		NORMAL, SEEN_SLASH, IN_LINE_COMMENT, IN_BLOCK_COMMENT, SEEN_ASTERISK
+	}
+
 	/**
 	 * Returns whether we automatically complete the method with a semicolon.
 	 *
@@ -141,7 +152,112 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 * @since 3.9
 	 */
 	protected final boolean canAutomaticallyAppendSemicolon() {
-		return !fProposal.isConstructor() && CharOperation.equals(new char[] { Signature.C_VOID }, Signature.getReturnType(fProposal.getSignature()));
+		if (!fProposal.isConstructor() && CharOperation.equals(new char[] { Signature.C_VOID }, Signature.getReturnType(fProposal.getSignature()))) {
+			try {
+				// don't want to add semicolon if we are completing a method parameter
+				ICompilationUnit cu= fInvocationContext.getCompilationUnit();
+				IJavaElement element= cu.getElementAt(getReplacementOffset());
+				if (element instanceof IMember) {
+					// check if parentheses' are matched
+					return areParenthesesMatched(cu, (IMember)element);
+				} else if (element instanceof ILocalVariable) {
+					ILocalVariable localVar= (ILocalVariable)element;
+					return !localVar.isParameter();
+				}
+			} catch (JavaModelException e) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	// Simple member parser to see if we are not in matched parentheses and thus might be in a parameter list
+	private boolean areParenthesesMatched(ICompilationUnit cu, IMember element) throws JavaModelException {
+		String source= cu.getSource();
+		ISourceRange sourceRange= ((ISourceReference)element).getSourceRange();
+		int cnt= 0;
+		State state= State.NORMAL;
+		for (int i= sourceRange.getOffset(); i < getReplacementOffset(); ++i) {
+			char c= source.charAt(i);
+			switch (c) {
+				case '/':
+					switch (state) {
+						case SEEN_SLASH:
+							state= State.IN_LINE_COMMENT;
+							break;
+						case NORMAL:
+							state= State.SEEN_SLASH;
+							break;
+						case SEEN_ASTERISK:
+							state= State.NORMAL;
+							break;
+						case IN_BLOCK_COMMENT:
+						case IN_LINE_COMMENT:
+						default:
+							// no change
+							break;
+					}
+					break;
+				case '*':
+					switch (state) {
+						case SEEN_SLASH:
+							state= State.IN_BLOCK_COMMENT;
+							break;
+						case IN_BLOCK_COMMENT:
+							state= State.SEEN_ASTERISK;
+							break;
+						case SEEN_ASTERISK:
+						case NORMAL:
+						case IN_LINE_COMMENT:
+						default:
+							// no change
+							break;
+					}
+					break;
+				case '(':
+				case ')':
+					switch (state) {
+						case SEEN_SLASH:
+						case SEEN_ASTERISK:
+							state= State.NORMAL;
+							break;
+						case NORMAL:
+							if (c == '(') {
+								++cnt;
+							} else {
+								--cnt;
+							}
+							break;
+						case IN_BLOCK_COMMENT:
+						case IN_LINE_COMMENT:
+						default:
+							// no change
+							break;
+					}
+					break;
+				case '\n':
+					switch (state) {
+						case SEEN_SLASH:
+						case IN_LINE_COMMENT:
+							state= State.NORMAL;
+							break;
+						case SEEN_ASTERISK:
+							state= State.IN_BLOCK_COMMENT;
+							break;
+						case IN_BLOCK_COMMENT:
+						case NORMAL:
+						default:
+							// no change
+							break;
+					}
+					break;
+				default:
+					// do nothing
+					break;
+			}
+		}
+		return cnt == 0;
 	}
 
 	private boolean computeHasParameters() throws IllegalArgumentException {

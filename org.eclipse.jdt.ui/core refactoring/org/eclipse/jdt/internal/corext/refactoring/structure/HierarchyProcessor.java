@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -81,6 +82,8 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -101,8 +104,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -318,7 +319,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			final ASTRewrite rewriter= ASTRewrite.create(expression.getAST());
 			final ITrackedNodePosition position= rewriter.track(expression);
 			expression.accept(new TypeVariableMapper(rewriter, mapping));
-			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getOptions(true)).apply(document, TextEdit.NONE);
 			result= (Expression) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.METHOD_INVOCATION);
 		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
@@ -333,7 +334,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			ModifierRewrite.create(rewriter, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
 			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
 			final IDocument document= new Document(declaringCu.getBuffer().getText(declaringCuNode.getStartPosition(), declaringCuNode.getLength()));
-			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
+			rewriter.rewriteAST(document, declaringCu.getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 			text= document.get(position.getStartPosition(), position.getLength());
 		} catch (BadLocationException exception) {
 			text= getNewText(bodyDeclaration, declaringCu, removeIndentation);
@@ -367,7 +368,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 					return true;
 				}
 			});
-			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getOptions(true)).apply(document, TextEdit.NONE);
 			result= (BodyDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.TYPE_DECLARATION);
 		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
@@ -386,7 +387,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			final ASTRewrite rewriter= ASTRewrite.create(declaration.getAST());
 			final ITrackedNodePosition position= rewriter.track(declaration);
 			declaration.accept(new TypeVariableMapper(rewriter, mapping));
-			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getOptions(true)).apply(document, TextEdit.NONE);
 			result= (SingleVariableDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.SINGLE_VARIABLE_DECLARATION);
 		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
@@ -405,7 +406,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			final ASTRewrite rewriter= ASTRewrite.create(type.getAST());
 			final ITrackedNodePosition position= rewriter.track(type);
 			type.accept(new TypeVariableMapper(rewriter, mapping));
-			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getOptions(true)).apply(document, TextEdit.NONE);
 			result= (Type) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.SIMPLE_TYPE);
 		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
@@ -424,7 +425,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			final ASTRewrite rewriter= ASTRewrite.create(bodyDeclaration.getAST());
 			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
 			bodyDeclaration.accept(new TypeVariableMapper(rewriter, mapping));
-			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getOptions(true)).apply(document, TextEdit.NONE);
 			result= (BodyDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.TYPE_DECLARATION);
 		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
@@ -487,7 +488,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	protected static String getUnindentedText(final String text, final ICompilationUnit declaringCu) throws JavaModelException {
 		final String[] lines= Strings.convertIntoLines(text);
-		Strings.trimIndentation(lines, declaringCu.getJavaProject(), false);
+		Strings.trimIndentation(lines, declaringCu, false);
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(declaringCu));
 	}
 

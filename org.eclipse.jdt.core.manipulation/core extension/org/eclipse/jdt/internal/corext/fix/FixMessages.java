@@ -115,6 +115,8 @@ public final class FixMessages extends NLS {
 	public static String CodeStyleFix_ChangeAccessUsingDeclaring_description;
 	public static String CodeStyleFix_QualifyMethodWithDeclClass_description;
 	public static String CodeStyleFix_QualifyFieldWithDeclClass_description;
+
+	public static String InvertEqualsFix_invert;
 	public static String StandardComparisonFix_compare_to_zero;
 
 	public static String SerialVersion_group_description;
@@ -130,6 +132,8 @@ public final class FixMessages extends NLS {
 
 	public static String VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 	public static String VariableDeclarationFix_ChangeMidifiersToFinalWherPossible_description;
+
+	public static String PlainReplacementFix_use_plain_text;
 
 	public static String NullAnnotationsFix_add_annotation_change_name;
 	public static String NullAnnotationsRewriteOperations_change_method_parameter_nullness;

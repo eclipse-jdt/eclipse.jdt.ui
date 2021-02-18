@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,12 +18,14 @@
  *       o inline call a field initializer: could detect self reference
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=44417)
  *     Microsoft Corporation - copied to jdt.core.manipulation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -46,6 +48,8 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -349,7 +353,9 @@ public class SourceProvider {
 	public TextEdit getDeleteEdit() {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
 		rewriter.remove(fDeclaration, null);
-		return rewriter.rewriteAST(fDocument, fTypeRoot.getJavaProject().getOptions(true));
+		Map<String, String> options= fTypeRoot instanceof ICompilationUnit ?
+				((ICompilationUnit) fTypeRoot).getOptions(true) : fTypeRoot.getJavaProject().getOptions(true);
+		return rewriter.rewriteAST(fDocument, options);
 	}
 
 	public String[] getCodeBlocks(CallContext context, ImportRewrite importRewrite) throws CoreException {
@@ -378,7 +384,9 @@ public class SourceProvider {
 			}
 		}
 
-		final TextEdit dummy= rewriter.rewriteAST(fDocument, fTypeRoot.getJavaProject().getOptions(true));
+		Map<String, String> options= fTypeRoot instanceof ICompilationUnit ?
+				((ICompilationUnit) fTypeRoot).getOptions(true) : fTypeRoot.getJavaProject().getOptions(true);
+		final TextEdit dummy= rewriter.rewriteAST(fDocument, options);
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
@@ -693,13 +701,19 @@ public class SourceProvider {
 
 	private String[] getBlocks(RangeMarker[] markers) throws BadLocationException {
 		String[] result= new String[markers.length];
+		final ICompilationUnit cu= fTypeRoot instanceof ICompilationUnit ? (ICompilationUnit) fTypeRoot : null;
+		final IJavaProject project= fTypeRoot.getJavaProject();
 		for (int i= 0; i < markers.length; i++) {
 			RangeMarker marker= markers[i];
 			String content= fDocument.get(marker.getOffset(), marker.getLength());
 			String lines[]= Strings.convertIntoLines(content);
-			Strings.trimIndentation(lines, fTypeRoot.getJavaProject(), false);
+			if (cu != null) {
+				Strings.trimIndentation(lines, cu, false);
+			} else {
+				Strings.trimIndentation(lines, project, false);
+			}
 			if (fMarkerMode == STATEMENT_MODE && lines.length == 2 && isSingleControlStatementWithoutBlock()) {
-				lines[1]= CodeFormatterUtil.createIndentString(1, fTypeRoot.getJavaProject()) + lines[1];
+				lines[1]= cu != null ? CodeFormatterUtil.createIndentString(1, cu) + lines[1] : CodeFormatterUtil.createIndentString(1, project) + lines[1];
 			}
 			result[i]= Strings.concatenate(lines, TextUtilities.getDefaultLineDelimiter(fDocument));
 		}

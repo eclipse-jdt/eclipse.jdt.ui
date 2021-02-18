@@ -1728,6 +1728,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return listToSort;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public List<Date> replaceLambdaUsingRightType(List<Date> initialPackagesToDelete) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(initialPackagesToDelete, (Date one, Date two) -> one.toString().compareTo(two.toString()));\n" //
+				+ "\n" //
+				+ "        return initialPackagesToDelete;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public List<Date> useMethodRefNullFirst(List<Date> listToSort) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        Comparator<Date> comparator = new Comparator<Date>() {\n" //
@@ -2083,6 +2090,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        Collections.sort(listToSort, comparator);\n" //
 				+ "\n" //
 				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> replaceLambdaUsingRightType(List<Date> initialPackagesToDelete) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(initialPackagesToDelete, Comparator.comparing(Date::toString));\n" //
+				+ "\n" //
+				+ "        return initialPackagesToDelete;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public List<Date> useMethodRefNullFirst(List<Date> listToSort) {\n" //

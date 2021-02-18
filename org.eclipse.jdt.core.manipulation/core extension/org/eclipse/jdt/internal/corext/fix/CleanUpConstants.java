@@ -970,6 +970,18 @@ public class CleanUpConstants {
 	public static final String PRECOMPILE_REGEX= "cleanup.precompile_regex"; //$NON-NLS-1$
 
 	/**
+	 * Invert calls to <code>Object.equals(Object)</code> and <code>String.equalsIgnoreCase(String)</code> when it is known that the second operand is not null and the first can be null.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String INVERT_EQUALS= "cleanup.invert_equals"; //$NON-NLS-1$
+
+	/**
 	 * Check for sign of bitwise operation.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -1081,6 +1093,18 @@ public class CleanUpConstants {
 	 * @since 4.18
 	 */
 	public static final String STRINGBUILDER= "cleanup.stringbuilder"; //$NON-NLS-1$
+
+	/**
+	 * Replaces <code>String.replaceAll()</code> by <code>String.replace()</code>.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String PLAIN_REPLACEMENT= "cleanup.plain_replacement"; //$NON-NLS-1$
 
 	/**
 	 * Removes unused imports. <br>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -499,6 +500,26 @@ public class ASTNodes {
 		if (! type.isArrayType())
 			return type;
 		return ((ArrayType)type).getElementType();
+	}
+
+	/**
+	 * Filter a list of type bindings to remove any bindings that are sub-classes of others already in the list
+	 *
+	 * @param typeBindings - list of ITypeBinding to filter
+	 * @return updated list of ITypeBinding
+	 */
+	public static List<ITypeBinding> filterSubtypes(List<ITypeBinding> typeBindings) {
+		List<ITypeBinding> filteredBindings= new ArrayList<>(typeBindings);
+		for (Iterator<ITypeBinding> subtypeIterator= filteredBindings.iterator(); subtypeIterator.hasNext();) {
+			ITypeBinding iTypeBinding= subtypeIterator.next();
+			for (ITypeBinding superTypeBinding : filteredBindings) {
+				if (!iTypeBinding.equals(superTypeBinding) && iTypeBinding.isSubTypeCompatible(superTypeBinding)) {
+					subtypeIterator.remove();
+					break;
+				}
+			}
+		}
+		return filteredBindings;
 	}
 
 	public static ASTNode findDeclaration(IBinding binding, ASTNode root) {

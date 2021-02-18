@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - add helper methods to read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.manipulation.util;
 
@@ -22,6 +23,7 @@ import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
@@ -240,6 +242,18 @@ public class Strings {
 	 * are not counted.
 	 *
 	 * @param line the text line
+	 * @param cu the compilation unit from which to get the formatter preferences
+	 * @return the number of indent units
+	 */
+	public static int computeIndentUnits(String line, ICompilationUnit cu) {
+		return IndentManipulation.measureIndentUnits(line, CodeFormatterUtil.getTabWidth(cu), CodeFormatterUtil.getIndentWidth(cu));
+	}
+
+	/**
+	 * Returns the indent of the given string in indentation units. Odd spaces
+	 * are not counted.
+	 *
+	 * @param line the text line
 	 * @param tabWidth the width of the '\t' character in space equivalents
 	 * @param indentWidth the width of one indentation unit in space equivalents
 	 * @return the indent of the given string in indentation units
@@ -285,6 +299,20 @@ public class Strings {
 	 * Removes the given number of indents from the line. Asserts that the given line
 	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
 	 * the line is returned.
+	 *
+	 * @param line the line
+	 * @param indentsToRemove the indents to remove
+	 * @param cu the compilation unit from which to get the formatter preferences
+	 * @return the trimmed line
+	 */
+	public static String trimIndent(String line, int indentsToRemove, ICompilationUnit cu) {
+		return IndentManipulation.trimIndent(line, indentsToRemove, CodeFormatterUtil.getTabWidth(cu), CodeFormatterUtil.getIndentWidth(cu));
+	}
+
+	/**
+	 * Removes the given number of indents from the line. Asserts that the given line
+	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
+	 * the line is returned.
 	 * @param line the line
 	 * @param indentsToRemove the indents to remove
 	 * @param tabWidth the tab width
@@ -309,6 +337,7 @@ public class Strings {
 	public static void trimIndentation(String[] lines, IJavaProject project) {
 		trimIndentation(lines, CodeFormatterUtil.getTabWidth(project), CodeFormatterUtil.getIndentWidth(project), true);
 	}
+
 	/**
 	 * Removes the common number of indents from all lines. If a line
 	 * only consists out of white space it is ignored.
@@ -335,6 +364,19 @@ public class Strings {
 	 */
 	public static void trimIndentation(String[] lines, IJavaProject project, boolean considerFirstLine) {
 		trimIndentation(lines, CodeFormatterUtil.getTabWidth(project), CodeFormatterUtil.getIndentWidth(project), considerFirstLine);
+	}
+
+	/**
+	 * Removes the common number of indents from all lines. If a line
+	 * only consists out of white space it is ignored. If <code>
+	 * considerFirstLine</code> is false the first line will be ignored.
+	 *
+	 * @param lines the lines
+	 * @param cu the compilation unit from which to get the formatter preferences
+	 * @param considerFirstLine  If <code>considerFirstLine</code> is false the first line will be ignored.
+	 */
+	public static void trimIndentation(String[] lines, ICompilationUnit cu, boolean considerFirstLine) {
+		trimIndentation(lines, CodeFormatterUtil.getTabWidth(cu), CodeFormatterUtil.getIndentWidth(cu), considerFirstLine);
 	}
 
 	/**
@@ -399,6 +441,18 @@ public class Strings {
 	 * a multiple of indentation units.
 	 *
 	 * @param line the line to scan
+	 * @param cu the compilation unit from which to get the formatter preferences
+	 * @return the indent part of <code>line</code>, but no odd spaces
+	 */
+	public static String getIndentString(String line, ICompilationUnit cu) {
+		return IndentManipulation.extractIndentString(line, CodeFormatterUtil.getTabWidth(cu), CodeFormatterUtil.getIndentWidth(cu));
+	}
+
+	/**
+	 * Returns that part of the indentation of <code>line</code> that makes up
+	 * a multiple of indentation units.
+	 *
+	 * @param line the line to scan
 	 * @param tabWidth the size of one tab in space equivalents
 	 * @param indentWidth the size of the indent in space equivalents
 	 * @return the indent part of <code>line</code>, but no odd spaces
@@ -442,6 +496,22 @@ public class Strings {
 	}
 
 	/**
+	 * Change the indent of, possible multi-line, code range. The current indent is removed, a new indent added.
+	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
+	 * the middle of a line)
+	 *
+	 * @param code the code
+	 * @param codeIndentLevel level of indentation
+	 * @param cu the compilation unit from which to get the formatter preferences
+	 * @param newIndent new indent
+	 * @param lineDelim line delimiter
+	 * @return the changed code
+	 */
+	public static String changeIndent(String code, int codeIndentLevel, ICompilationUnit cu, String newIndent, String lineDelim) {
+		return IndentManipulation.changeIndent(code, codeIndentLevel, CodeFormatterUtil.getTabWidth(cu), CodeFormatterUtil.getIndentWidth(cu), newIndent, lineDelim);
+	}
+
+	/**
 	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
 	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
 	 * the middle of a line)
@@ -460,6 +530,10 @@ public class Strings {
 
 	public static String trimIndentation(String source, IJavaProject project, boolean considerFirstLine) {
 		return trimIndentation(source, CodeFormatterUtil.getTabWidth(project), CodeFormatterUtil.getIndentWidth(project), considerFirstLine);
+	}
+
+	public static String trimIndentation(String source, ICompilationUnit cu, boolean considerFirstLine) {
+		return trimIndentation(source, CodeFormatterUtil.getTabWidth(cu), CodeFormatterUtil.getIndentWidth(cu), considerFirstLine);
 	}
 
 	public static String trimIndentation(String source, int tabWidth, int indentWidth, boolean considerFirstLine) {

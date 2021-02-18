@@ -14,6 +14,7 @@
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Annotation error in applying move-refactoring to inherited methods - https://bugs.eclipse.org/404471
  *     Microsoft Corporation - copied to jdt.core.manipulation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -1854,7 +1855,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			}
 
 			adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
-			sourceRewrite.rewriteAST(document, fMethod.getJavaProject().getOptions(true));
+			sourceRewrite.rewriteAST(document, fMethod.getCompilationUnit().getOptions(true));
 			createMethodSignature(document, declaration, sourceRewrite, rewrites);
 			ICompilationUnit unit= null;
 			CompilationUnitRewrite rewrite= null;
@@ -2254,7 +2255,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final IRegion range= new Region(declaration.getStartPosition(), declaration.getLength());
 		final RangeMarker marker= new RangeMarker(range.getOffset(), range.getLength());
 		final IJavaProject project= fMethod.getJavaProject();
-		for (TextEdit edit : rewrite.rewriteAST(document, project.getOptions(true)).removeChildren())
+		final ICompilationUnit cu= fMethod.getCompilationUnit();
+		Map<String, String> options= cu != null ? cu.getOptions(true) : project.getOptions(true);
+		for (TextEdit edit : rewrite.rewriteAST(document, options).removeChildren())
 			marker.addChild(edit);
 		final MultiTextEdit result= new MultiTextEdit();
 		result.addChild(marker);
@@ -2262,6 +2265,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		processor.getRoot().addChild(result);
 		processor.performEdits();
 		final IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
+		if (cu != null) {
+			return Strings.changeIndent(document.get(marker.getOffset(), marker.getLength()), Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), cu), cu, "", TextUtilities.getDefaultLineDelimiter(document)); //$NON-NLS-1$
+		}
 		return Strings.changeIndent(document.get(marker.getOffset(), marker.getLength()), Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project), project, "", TextUtilities.getDefaultLineDelimiter(document)); //$NON-NLS-1$
 	}
 
@@ -2862,7 +2868,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		fMethodName= method.getElementName();
 		fTargetName= suggestTargetName();
 		if (fSettings == null)
-			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fMethod.getJavaProject());
+			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fMethod.getCompilationUnit());
 	}
 
 	private RefactoringStatus initialize(JavaRefactoringArguments extended) {

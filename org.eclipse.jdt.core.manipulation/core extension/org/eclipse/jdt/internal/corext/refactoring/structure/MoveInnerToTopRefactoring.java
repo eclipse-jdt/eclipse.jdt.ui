@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Samrat Dhillon samrat.dhillon@gmail.com - [move member type] Moving a member interface to its own file adds the host's type parameters to it - https://bugs.eclipse.org/bugs/show_bug.cgi?id=385237
  *     Microsoft Corporation - copied to jdt.core.manipulation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -1108,7 +1109,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private String getAlignedSourceBlock(final ICompilationUnit unit, final String block) {
 		Assert.isNotNull(block);
 		final String[] lines= Strings.convertIntoLines(block);
-		Strings.trimIndentation(lines, unit.getJavaProject(), false);
+		Strings.trimIndentation(lines, unit, false);
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(fType.getJavaProject()));
 	}
 

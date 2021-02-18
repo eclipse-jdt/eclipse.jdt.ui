@@ -856,4 +856,68 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			NullTestUtils.disableAnnotationBasedNullAnalysis(sourceFolder);
 		}
 	}
+
+	@Test
+	public void testBug458321() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable r = () -> {\n");
+		buf.append("        };\n");
+		buf.append("        add(o -> r.)\n");
+		buf.append("    }\n");
+		buf.append("    static void add(Consumer<Object> consumer) {}\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "r.";
+
+			int offset= contents.indexOf(str) + 2;
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal proposal= null;
+
+			for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+				if (p.getDisplayString().startsWith("run")) {
+					proposal= p;
+				}
+			}
+			assertNotNull("no proposal for run()", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.util.function.Consumer;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        Runnable r = () -> {\n");
+			buf.append("        };\n");
+			buf.append("        add(o -> r.run())\n");
+			buf.append("    }\n");
+			buf.append("    static void add(Consumer<Object> consumer) {}\n");
+			buf.append("}\n");
+			assertEquals(buf.toString(), doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
 }

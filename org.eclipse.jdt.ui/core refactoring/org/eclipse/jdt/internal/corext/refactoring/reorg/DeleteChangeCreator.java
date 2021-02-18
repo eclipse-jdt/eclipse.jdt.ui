@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
@@ -133,7 +134,7 @@ class DeleteChangeCreator {
 	private static TextChange addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 		try {
 			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
-			TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), cu.getJavaProject().getOptions(true));
+			TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), cu.getOptions(true));
 			TextChange textChange= manager.get(cu);
 			if (textChange instanceof TextFileChange) {
 				TextFileChange tfc= (TextFileChange) textChange;

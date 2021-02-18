@@ -126,6 +126,7 @@ import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -152,6 +153,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -179,6 +181,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
+import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -3307,7 +3311,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getTryWithResourceProposals(IInvocationContext context, ASTNode node, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections)
-			throws IllegalArgumentException, JavaModelException {
+			throws IllegalArgumentException, CoreException {
 
 		ASTNode parentStatement= ASTResolving.findAncestor(node, ASTNode.VARIABLE_DECLARATION_STATEMENT);
 		if (!(parentStatement instanceof VariableDeclarationStatement) &&
@@ -3334,9 +3338,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveredAutoClosableNodes.isEmpty()) {
 			return false;
 		}
-		if (isParentTryStatement(coveredAutoClosableNodes.get(0))) {
-			return false;
-		}
+
 		BodyDeclaration parentBodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
 		int start= coveredAutoClosableNodes.get(0).getStartPosition();
 		int end= start;
@@ -3347,7 +3349,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		// recursive loop to find all nodes affected by wrapping in try block
-		List<ASTNode> nodesInRange= findNodesInRange(parentBodyDeclaration, start, end);
+		List<ASTNode> nodesInRange= SurroundWithTryWithResourcesRefactoring.findNodesInRange(parentBodyDeclaration, start, end);
 		int oldEnd= end;
 		while (true) {
 			int newEnd= oldEnd;
@@ -3357,7 +3359,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			if (newEnd > oldEnd) {
 				oldEnd= newEnd;
-				nodesInRange= findNodesInRange(parentBodyDeclaration, start, newEnd);
+				nodesInRange= SurroundWithTryWithResourcesRefactoring.findNodesInRange(parentBodyDeclaration, start, newEnd);
 				continue;
 			}
 			break;
@@ -3371,6 +3373,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		TryStatement newTryStatement= ast.newTryStatement();
 		Block newTryBody= ast.newBlock();
 		newTryStatement.setBody(newTryBody);
+		ICompilationUnit icu= context.getCompilationUnit();
+		ASTNode lastNode= nodesInRange.isEmpty() ? coveredAutoClosableNodes.get(coveredAutoClosableNodes.size() - 1)
+				: nodesInRange.get(nodesInRange.size() - 1);
+		Selection selection= Selection.createFromStartLength(start, lastNode.getStartPosition() - start + lastNode.getLength());
+		SurroundWithTryWithResourcesAnalyzer analyzer= new SurroundWithTryWithResourcesAnalyzer(icu, selection);
+		cu.accept(analyzer);
+		ITypeBinding[] exceptions= analyzer.getExceptions(analyzer.getSelection());
+		List<ITypeBinding> allExceptions= new ArrayList<>(Arrays.asList(exceptions));
 		for (ASTNode coveredNode : coveredAutoClosableNodes) {
 			ASTNode findAncestor= ASTResolving.findAncestor(coveredNode, ASTNode.VARIABLE_DECLARATION_STATEMENT);
 			if (findAncestor == null) {
@@ -3384,6 +3394,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					commentToken= buffer.getText(extendedStatementStart, vds.getStartPosition() - extendedStatementStart);
 				}
 				Type type= vds.getType();
+				ITypeBinding typeBinding= type.resolveBinding();
+				if (typeBinding != null) {
+					IMethodBinding close= SurroundWithTryWithResourcesRefactoring.findAutocloseMethod(typeBinding);
+					if (close != null) {
+						for (ITypeBinding exceptionType : close.getExceptionTypes()) {
+							if (!allExceptions.contains(exceptionType)) {
+								allExceptions.add(exceptionType);
+							}
+						}
+					}
+				}
 				String typeName= buffer.getText(type.getStartPosition(), type.getLength());
 
 				for (Object object : vds.fragments()) {
@@ -3420,10 +3441,74 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_try_with_resource;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.SURROUND_WITH_TRY_CATCH, image);
+
+		ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
+
+		CatchClause catchClause= ast.newCatchClause();
+		SingleVariableDeclaration decl= ast.newSingleVariableDeclaration();
+		String varName= StubUtility.getExceptionVariableName(icu.getJavaProject());
+		parentBodyDeclaration.getRoot().accept(analyzer);
+		CodeScopeBuilder.Scope scope= CodeScopeBuilder.perform(analyzer.getEnclosingBodyDeclaration(), selection).
+				findScope(selection.getOffset(), selection.getLength());
+		scope.setCursor(selection.getOffset());
+		String name= scope.createName(varName, false);
+		decl.setName(ast.newSimpleName(name));
+
+		List<ITypeBinding> mustRethrowList= new ArrayList<>();
+		List<ITypeBinding> catchExceptions= analyzer.calculateCatchesAndRethrows(ASTNodes.filterSubtypes(allExceptions), mustRethrowList);
+		List<ITypeBinding> filteredExceptions= ASTNodes.filterSubtypes(catchExceptions);
+
+		if (catchExceptions.size() > 0) {
+			final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
+			final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
+			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+
+			int i= 0;
+			for (ITypeBinding mustThrow : mustRethrowList) {
+				CatchClause newClause= ast.newCatchClause();
+				SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
+				newDecl.setName(ast.newSimpleName(name));
+				Type importType= imports.addImport(mustThrow, ast, importRewriteContext, TypeLocation.EXCEPTION);
+				newDecl.setType(importType);
+				newClause.setException(newDecl);
+				ThrowStatement newThrowStatement= ast.newThrowStatement();
+				newThrowStatement.setExpression(ast.newSimpleName(name));
+				linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(rewrite.track(decl.getName()), false);
+				newClause.getBody().statements().add(newThrowStatement);
+				newTryStatement.catchClauses().add(newClause);
+				++i;
+			}
+			UnionType unionType= ast.newUnionType();
+			List<Type> types= unionType.types();
+			for (ITypeBinding exception : filteredExceptions) {
+				Type type= imports.addImport(exception, ast, importRewriteContext, TypeLocation.EXCEPTION);
+				types.add(type);
+				linkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(rewrite.track(type), i == 0);
+				i++;
+			}
+
+			decl.setType(unionType);
+			catchClause.setException(decl);
+			linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + 0, true).addPosition(rewrite.track(decl.getName()), false);
+			Statement st= null;
+			String s= StubUtility.getCatchBodyContent(icu, "Exception", name, coveredNodes.get(0), icu.findRecommendedLineSeparator()); //$NON-NLS-1$
+			if (s != null) {
+				st= (Statement)rewrite.createStringPlaceholder(s, ASTNode.RETURN_STATEMENT);
+			}
+			if (st != null) {
+				catchClause.getBody().statements().add(st);
+			}
+			newTryStatement.catchClauses().add(catchClause);
+		}
+
 		if (!nodesInRange.isEmpty()) {
 			ASTNode firstNode= nodesInRange.get(0);
-			MethodDeclaration methodDeclaration= ASTResolving.findParentMethodDeclaration(firstNode);
-			ListRewrite listRewrite= rewrite.getListRewrite(methodDeclaration.getBody(), Block.STATEMENTS_PROPERTY);
+			ASTNode methodDeclaration= ASTResolving.findAncestor(firstNode, ASTNode.BLOCK);
+			ListRewrite listRewrite= rewrite.getListRewrite(methodDeclaration, Block.STATEMENTS_PROPERTY);
 			ASTNode createCopyTarget= listRewrite.createMoveTarget(firstNode, nodesInRange.get(nodesInRange.size() - 1));
 			rewrite.getListRewrite(newTryBody, Block.STATEMENTS_PROPERTY).insertFirst(createCopyTarget, null);
 		}
@@ -3434,22 +3519,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite.remove(coveredAutoClosableNodes.get(i), null);
 		}
 
-		String label= CorrectionMessages.QuickAssistProcessor_convert_to_try_with_resource;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(
-				label, context.getCompilationUnit(), rewrite, IProposalRelevance.SURROUND_WITH_TRY_CATCH, image);
 		resultingCollections.add(proposal);
 		return true;
-	}
-
-	private static boolean isParentTryStatement(ASTNode astNode) {
-		while (astNode != null) {
-			if (astNode instanceof TryStatement) {
-				return true;
-			}
-			astNode= astNode.getParent();
-		}
-		return false;
 	}
 
 	private static int findEndPostion(ASTNode node) {
@@ -3533,54 +3604,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		});
 		return variableBindings;
-	}
-
-	// find all nodes (statements) that are within the start/end positions
-	private static List<ASTNode> findNodesInRange(ASTNode astNode, final int start, final int end) {
-		List<ASTNode> nodesInRange= new ArrayList<>();
-		astNode.accept(new ASTVisitor() {
-			int pre= start;
-
-			@Override
-			public void preVisit(ASTNode preNode) {
-				pre= preNode.getStartPosition();
-				super.preVisit(preNode);
-			}
-
-			@Override
-			public void postVisit(ASTNode postNode) {
-				int post= postNode.getStartPosition() + postNode.getLength();
-				if (pre >= start && post <= end) {
-					Statement statement= ASTResolving.findParentStatement(postNode);
-					loop: while (statement != null) {
-						if (statement.getParent() instanceof Statement) {
-							Statement pStatement= (Statement) statement.getParent();
-							switch (pStatement.getNodeType()) {
-								case ASTNode.BLOCK:
-									if (pStatement.getParent().getNodeType() != ASTNode.METHOD_DECLARATION) {
-										statement= pStatement;
-										continue;
-									} else {
-										break loop;
-									}
-								case ASTNode.METHOD_DECLARATION:
-									break loop;
-								default:
-									break;
-							}
-							statement= pStatement;
-						} else {
-							break;
-						}
-					}
-					if (statement != null && !nodesInRange.contains(statement)) {
-						nodesInRange.add(statement);
-					}
-				}
-				super.postVisit(postNode);
-			}
-		});
-		return nodesInRange;
 	}
 
 	private static boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {

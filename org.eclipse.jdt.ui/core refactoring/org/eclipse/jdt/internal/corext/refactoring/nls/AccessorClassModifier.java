@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - read formatting options from the compilation unit
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
@@ -133,7 +134,7 @@ public class AccessorClassModifier {
 		if (document == null)
 			document= new Document(fCU.getSource());
 
-		return fASTRewrite.rewriteAST(document, fCU.getJavaProject().getOptions(true));
+		return fASTRewrite.rewriteAST(document, fCU.getOptions(true));
 	}
 
 	public static Change create(ICompilationUnit cu, NLSSubstitution[] substitutions) throws CoreException {
