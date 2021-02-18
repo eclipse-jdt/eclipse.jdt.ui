@@ -239,11 +239,26 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 		return fRootNode.getAST();
 	}
 
+	@SuppressWarnings("null")
 	private void createTryWithResourcesStatement(org.eclipse.jdt.core.IBuffer buffer, String lineDelimiter) throws CoreException {
 		List<Statement> result= new ArrayList<>(1);
-		TryStatement tryStatement= getAST().newTryStatement();
+		boolean modifyExistingTry= false;
+		TryStatement tryStatement= null;
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions(fAnalyzer.getSelection());
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fAnalyzer.getEnclosingBodyDeclaration(), fImportRewrite);
+
+		TryStatement enclosingTry= (TryStatement)ASTResolving.findAncestor(fSelectedNodes[0], ASTNode.TRY_STATEMENT);
+		ListRewrite resourcesRewriter= null;
+		ListRewrite clausesRewriter= null;
+		ListRewrite statements= null;
+		if (enclosingTry == null || enclosingTry.getBody() == null || enclosingTry.getBody().statements().get(0) != fSelectedNodes[0]) {
+			tryStatement= getAST().newTryStatement();
+			statements= fRewriter.getListRewrite(tryStatement.getBody(), Block.STATEMENTS_PROPERTY);
+		} else {
+			modifyExistingTry= true;
+			resourcesRewriter= fRewriter.getListRewrite(enclosingTry, TryStatement.RESOURCES2_PROPERTY);
+			clausesRewriter= fRewriter.getListRewrite(enclosingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
+		}
 
 		CatchClause catchClause= getAST().newCatchClause();
 		SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();
@@ -252,141 +267,143 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 		decl.setName(getAST().newSimpleName(name));
 
 
-		List<ASTNode> variableDeclarations= getSpecialVariableDeclarationStatements();
-		ListRewrite statements= fRewriter.getListRewrite(tryStatement.getBody(), Block.STATEMENTS_PROPERTY);
 		boolean selectedNodeRemoved= false;
 		ASTNode expressionStatement= null;
-		for (ASTNode node : fSelectedNodes) {
-			if (fAutoClosableNodes.contains(node)) {
-				continue;
-			}
-			if (node instanceof VariableDeclarationStatement && variableDeclarations.contains(node)) {
-				AST ast= getAST();
-				VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
-				// Create a copy and remove the initializer
-				VariableDeclarationStatement copy= (VariableDeclarationStatement)ASTNode.copySubtree(ast, statement);
-				List<IExtendedModifier> modifiers= copy.modifiers();
-				for (Iterator<IExtendedModifier> iter= modifiers.iterator(); iter.hasNext();) {
-					IExtendedModifier modifier= iter.next();
-					if (modifier.isModifier() && Modifier.isFinal(((Modifier)modifier).getKeyword().toFlagValue())) {
-						iter.remove();
-					}
-				}
-				List<VariableDeclarationFragment> fragments= copy.fragments();
-				for (VariableDeclarationFragment fragment : fragments) {
-					fragment.setInitializer(null);
-				}
+		ASTNode replacementNode= null;
+		List<ASTNode> nodesInRange= new ArrayList<>();
 
-				// "var" type cannot have null initializer, so change to inferred type
-				if (ASTNodes.isVarType(statement, fRootNode)) {
-					ITypeBinding binding= statement.getType().resolveBinding();
-					if (binding != null) {
-						Type varType= fImportRewrite.addImport(binding, getAST(), context, TypeLocation.LOCAL_VARIABLE);
-						copy.setType(varType);
-					}
+		if (!modifyExistingTry) {
+			List<ASTNode> variableDeclarations= getSpecialVariableDeclarationStatements();
+			for (ASTNode node : fSelectedNodes) {
+				if (fAutoClosableNodes.contains(node)) {
+					continue;
 				}
-
-				CompilationUnit root= (CompilationUnit)statement.getRoot();
-				int extendedStart= root.getExtendedStartPosition(statement);
-				// we have a leading comment and the comment is covered by the selection
-				if (extendedStart != statement.getStartPosition() && extendedStart >= fSelection.getOffset()) {
-					String commentToken= buffer.getText(extendedStart, statement.getStartPosition() - extendedStart);
-					commentToken= Strings.trimTrailingTabsAndSpaces(commentToken);
-					Type type= statement.getType();
-					String typeName= buffer.getText(type.getStartPosition(), type.getLength());
-					copy.setType((Type)fRewriter.createStringPlaceholder(commentToken + typeName, type.getNodeType()));
-				}
-				result.add(copy);
-				// convert the fragments into expression statements
-				fragments= statement.fragments();
-				if (!fragments.isEmpty()) {
-					List<ExpressionStatement> newExpressionStatements= new ArrayList<>();
-					for (VariableDeclarationFragment fragment : fragments) {
-						Expression initializer= fragment.getInitializer();
-						if (initializer != null) {
-							Assignment assignment= ast.newAssignment();
-							assignment.setLeftHandSide((Expression)fRewriter.createCopyTarget(fragment.getName()));
-							assignment.setRightHandSide((Expression)fRewriter.createCopyTarget(initializer));
-							newExpressionStatements.add(ast.newExpressionStatement(assignment));
+				if (node instanceof VariableDeclarationStatement && variableDeclarations.contains(node)) {
+					AST ast= getAST();
+					VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
+					// Create a copy and remove the initializer
+					VariableDeclarationStatement copy= (VariableDeclarationStatement)ASTNode.copySubtree(ast, statement);
+					List<IExtendedModifier> modifiers= copy.modifiers();
+					for (Iterator<IExtendedModifier> iter= modifiers.iterator(); iter.hasNext();) {
+						IExtendedModifier modifier= iter.next();
+						if (modifier.isModifier() && Modifier.isFinal(((Modifier)modifier).getKeyword().toFlagValue())) {
+							iter.remove();
 						}
 					}
-					if (!newExpressionStatements.isEmpty()) {
-						if (fSelectedNodes.length == 1) {
-							expressionStatement= fRewriter.createGroupNode(newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()]));
+					List<VariableDeclarationFragment> fragments= copy.fragments();
+					for (VariableDeclarationFragment fragment : fragments) {
+						fragment.setInitializer(null);
+					}
+
+					// "var" type cannot have null initializer, so change to inferred type
+					if (ASTNodes.isVarType(statement, fRootNode)) {
+						ITypeBinding binding= statement.getType().resolveBinding();
+						if (binding != null) {
+							Type varType= fImportRewrite.addImport(binding, getAST(), context, TypeLocation.LOCAL_VARIABLE);
+							copy.setType(varType);
+						}
+					}
+
+					CompilationUnit root= (CompilationUnit)statement.getRoot();
+					int extendedStart= root.getExtendedStartPosition(statement);
+					// we have a leading comment and the comment is covered by the selection
+					if (extendedStart != statement.getStartPosition() && extendedStart >= fSelection.getOffset()) {
+						String commentToken= buffer.getText(extendedStart, statement.getStartPosition() - extendedStart);
+						commentToken= Strings.trimTrailingTabsAndSpaces(commentToken);
+						Type type= statement.getType();
+						String typeName= buffer.getText(type.getStartPosition(), type.getLength());
+						copy.setType((Type)fRewriter.createStringPlaceholder(commentToken + typeName, type.getNodeType()));
+					}
+					result.add(copy);
+					// convert the fragments into expression statements
+					fragments= statement.fragments();
+					if (!fragments.isEmpty()) {
+						List<ExpressionStatement> newExpressionStatements= new ArrayList<>();
+						for (VariableDeclarationFragment fragment : fragments) {
+							Expression initializer= fragment.getInitializer();
+							if (initializer != null) {
+								Assignment assignment= ast.newAssignment();
+								assignment.setLeftHandSide((Expression)fRewriter.createCopyTarget(fragment.getName()));
+								assignment.setRightHandSide((Expression)fRewriter.createCopyTarget(initializer));
+								newExpressionStatements.add(ast.newExpressionStatement(assignment));
+							}
+						}
+						if (!newExpressionStatements.isEmpty()) {
+							if (fSelectedNodes.length == 1) {
+								expressionStatement= fRewriter.createGroupNode(newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()]));
+							} else {
+								fRewriter.replace(
+										statement,
+										fRewriter.createGroupNode(newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()])),
+										null);
+							}
 						} else {
-							fRewriter.replace(
-								statement,
-								fRewriter.createGroupNode(newExpressionStatements.toArray(new ASTNode[newExpressionStatements.size()])),
-								null);
+							fRewriter.remove(statement, null);
+							selectedNodeRemoved= true;
 						}
 					} else {
 						fRewriter.remove(statement, null);
 						selectedNodeRemoved= true;
 					}
-				} else {
-					fRewriter.remove(statement, null);
-					selectedNodeRemoved= true;
 				}
 			}
-		}
-		result.add(tryStatement);
-		ASTNode replacementNode;
-		if (result.size() == 1) {
-			replacementNode= result.get(0);
-		} else {
-			replacementNode= fRewriter.createGroupNode(result.toArray(new ASTNode[result.size()]));
-		}
-
-		ASTNode node= fSelectedNodes[0];
-		List<ASTNode> coveredStatements= new ArrayList<>();
-		for (ASTNode coveredNode : fSelectedNodes) {
-			Statement statement= ASTResolving.findParentStatement(coveredNode);
-			if (statement == null) {
-				continue;
-			}
-			if (!coveredStatements.contains(statement)) {
-				coveredStatements.add(statement);
-			}
-		}
-
-		Selection nodesInRangeSelection= fAnalyzer.getSelection();
-		List<ASTNode> nodesInRange= new ArrayList<>();
-		if (!fAutoClosableNodes.isEmpty()) {
-			ASTNode parentBodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
-			int start= fAutoClosableNodes.get(0).getStartPosition();
-			ASTNode lastSelectedNode= fSelectedNodes[fSelectedNodes.length - 1];
-			int end= lastSelectedNode.getStartPosition() + lastSelectedNode.getLength();
-
-			for (ASTNode astNode : fAutoClosableNodes) {
-				int endPosition= findEndPosition(astNode);
-				end= Math.max(end, endPosition);
+			result.add(tryStatement);
+			if (result.size() == 1) {
+				replacementNode= result.get(0);
+			} else {
+				replacementNode= fRewriter.createGroupNode(result.toArray(new ASTNode[result.size()]));
 			}
 
-			// recursive loop to find all nodes affected by wrapping in try block
-			nodesInRange= findNodesInRange(parentBodyDeclaration, start, end);
-			int oldEnd= end;
-			int newEnd= end;
-			while (true) {
-				newEnd= oldEnd;
-				for (ASTNode astNode : nodesInRange) {
-					int endPosition= findEndPosition(astNode);
-					newEnd= Math.max(newEnd, endPosition);
-				}
-				if (newEnd > oldEnd) {
-					oldEnd= newEnd;
-					nodesInRange= findNodesInRange(parentBodyDeclaration, start, newEnd);
+			ASTNode node= fSelectedNodes[0];
+			List<ASTNode> coveredStatements= new ArrayList<>();
+			for (ASTNode coveredNode : fSelectedNodes) {
+				Statement statement= ASTResolving.findParentStatement(coveredNode);
+				if (statement == null) {
 					continue;
 				}
-				break;
+				if (!coveredStatements.contains(statement)) {
+					coveredStatements.add(statement);
+				}
 			}
-			if (nodesInRange.size() > 0) {
-				// must recalculate exceptions as additional lines are now in try statement
-				ASTNode lastNode= nodesInRange.get(nodesInRange.size() - 1);
-				nodesInRangeSelection= Selection.createFromStartEnd(start, lastNode.getStartPosition() + lastNode.getLength());
-				exceptions= fAnalyzer.getExceptions(nodesInRangeSelection);
+
+			Selection nodesInRangeSelection= fAnalyzer.getSelection();
+			if (!fAutoClosableNodes.isEmpty()) {
+				ASTNode parentBodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
+				int start= fAutoClosableNodes.get(0).getStartPosition();
+				ASTNode lastSelectedNode= fSelectedNodes[fSelectedNodes.length - 1];
+				int end= lastSelectedNode.getStartPosition() + lastSelectedNode.getLength();
+
+				for (ASTNode astNode : fAutoClosableNodes) {
+					int endPosition= findEndPosition(astNode);
+					end= Math.max(end, endPosition);
+				}
+
+				// recursive loop to find all nodes affected by wrapping in try block
+				nodesInRange= findNodesInRange(parentBodyDeclaration, start, end);
+				int oldEnd= end;
+				int newEnd= end;
+				while (true) {
+					newEnd= oldEnd;
+					for (ASTNode astNode : nodesInRange) {
+						int endPosition= findEndPosition(astNode);
+						newEnd= Math.max(newEnd, endPosition);
+					}
+					if (newEnd > oldEnd) {
+						oldEnd= newEnd;
+						nodesInRange= findNodesInRange(parentBodyDeclaration, start, newEnd);
+						continue;
+					}
+					break;
+				}
+				if (nodesInRange.size() > 0) {
+					// must recalculate exceptions as additional lines are now in try statement
+					ASTNode lastNode= nodesInRange.get(nodesInRange.size() - 1);
+					nodesInRangeSelection= Selection.createFromStartEnd(start, lastNode.getStartPosition() + lastNode.getLength());
+					exceptions= fAnalyzer.getExceptions(nodesInRangeSelection);
+				}
+				nodesInRange.removeAll(fAutoClosableNodes);
+				nodesInRange.removeAll(Arrays.asList(fSelectedNodes));
 			}
-			nodesInRange.removeAll(fAutoClosableNodes);
-			nodesInRange.removeAll(Arrays.asList(fSelectedNodes));
 		}
 
 		// add required resource statements
@@ -446,7 +463,15 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 					VariableDeclarationExpression newVariableDeclarationExpression= ast.newVariableDeclarationExpression(newVariableDeclarationFragment);
 					newVariableDeclarationExpression.setType(
 							(Type) fRewriter.createStringPlaceholder(commentToken + typeName, type.getNodeType()));
-					tryStatement.resources().add(newVariableDeclarationExpression);
+					if (modifyExistingTry) {
+						if (enclosingTry.resources().isEmpty()) {
+							resourcesRewriter.insertFirst(newVariableDeclarationExpression, null);
+						} else {
+							resourcesRewriter.insertLast(newVariableDeclarationExpression, null);
+						}
+					} else {
+						tryStatement.resources().add(newVariableDeclarationExpression);
+					}
 					commentToken= null;
 				}
 //				String commentToken2= ""; //$NON-NLS-1$
@@ -467,19 +492,21 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 		if (catchExceptions.size() > 0) {
 			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
 			int i= 0;
-			for (ITypeBinding mustThrow : mustRethrowList) {
-				CatchClause newClause= ast.newCatchClause();
-				SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
-				newDecl.setName(ast.newSimpleName(name));
-				Type importType= fImportRewrite.addImport(mustThrow, ast, context, TypeLocation.EXCEPTION);
-				newDecl.setType(importType);
-				newClause.setException(newDecl);
-				ThrowStatement newThrowStatement= ast.newThrowStatement();
-				newThrowStatement.setExpression(ast.newSimpleName(name));
-				linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(fRewriter.track(decl.getName()), false);
-				newClause.getBody().statements().add(newThrowStatement);
-				tryStatement.catchClauses().add(newClause);
-				++i;
+			if (!modifyExistingTry) {
+				for (ITypeBinding mustThrow : mustRethrowList) {
+					CatchClause newClause= ast.newCatchClause();
+					SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
+					newDecl.setName(ast.newSimpleName(name));
+					Type importType= fImportRewrite.addImport(mustThrow, ast, context, TypeLocation.EXCEPTION);
+					newDecl.setType(importType);
+					newClause.setException(newDecl);
+					ThrowStatement newThrowStatement= ast.newThrowStatement();
+					newThrowStatement.setExpression(ast.newSimpleName(name));
+					linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(fRewriter.track(decl.getName()), false);
+					newClause.getBody().statements().add(newThrowStatement);
+					tryStatement.catchClauses().add(newClause);
+					++i;
+				}
 			}
 			UnionType unionType= getAST().newUnionType();
 			List<Type> types= unionType.types();
@@ -497,7 +524,11 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 			if (st != null) {
 				catchClause.getBody().statements().add(st);
 			}
-			tryStatement.catchClauses().add(catchClause);
+			if (modifyExistingTry) {
+				clausesRewriter.insertLast(catchClause, null);
+			} else {
+				tryStatement.catchClauses().add(catchClause);
+			}
 		}
 
 
@@ -533,6 +564,11 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 					statements.insertLast(fRewriter.createMoveTarget(selectedNode), null);
 			}
 			fRewriter.replace(selectedNode, replacementNode, null);
+		} else if (modifyExistingTry) {
+			ListRewrite source= fRewriter.getListRewrite(enclosingTry.getBody(), Block.STATEMENTS_PROPERTY);
+			for (ASTNode node : fAutoClosableNodes) {
+				source.remove(node, null);
+			}
 		} else {
 			ListRewrite source= fRewriter.getListRewrite(
 					fSelectedNodes[0].getParent(),

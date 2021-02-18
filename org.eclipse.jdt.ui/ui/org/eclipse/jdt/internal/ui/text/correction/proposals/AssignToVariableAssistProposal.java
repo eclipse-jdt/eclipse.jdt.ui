@@ -65,6 +65,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -224,14 +225,30 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			}
 			setEndPosition(rewrite.track(nodeToAssign)); // set cursor after expression statement
 		} else {
-			TryStatement tryStatement= ast.newTryStatement();
+			TryStatement tryStatement= null;
+			boolean modifyExistingTry= false;
+			TryStatement enclosingTry= (TryStatement)ASTResolving.findAncestor(nodeToAssign, ASTNode.TRY_STATEMENT);
+			ListRewrite resourcesRewriter= null;
+			ListRewrite clausesRewriter= null;
+			if (enclosingTry == null || enclosingTry.getBody() == null || enclosingTry.getBody().statements().get(0) != nodeToAssign) {
+				tryStatement= ast.newTryStatement();
+			} else {
+				modifyExistingTry= true;
+				resourcesRewriter= rewrite.getListRewrite(enclosingTry, TryStatement.RESOURCES2_PROPERTY);
+				clausesRewriter= rewrite.getListRewrite(enclosingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
+			}
 
 			VariableDeclarationExpression varExpression= ast.newVariableDeclarationExpression(newDeclFrag);
 			varExpression.setType(type);
-			tryStatement.resources().add(varExpression);
+			EmptyStatement blankLine= null;
+			if (modifyExistingTry) {
+				resourcesRewriter.insertLast(varExpression, null);
+			} else {
+				tryStatement.resources().add(varExpression);
+				blankLine = (EmptyStatement) rewrite.createStringPlaceholder("", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
+				tryStatement.getBody().statements().add(blankLine);
+			}
 
-			EmptyStatement blankLine = (EmptyStatement) rewrite.createStringPlaceholder("", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
-			tryStatement.getBody().statements().add(blankLine);
 
 			CatchClause catchClause= ast.newCatchClause();
 			SingleVariableDeclaration decl= ast.newSingleVariableDeclaration();
@@ -263,19 +280,21 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(analyzer.getEnclosingBodyDeclaration(), importRewrite);
 				LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
 				int i= 0;
-				for (ITypeBinding mustThrow : mustRethrowList) {
-					CatchClause newClause= ast.newCatchClause();
-					SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
-					newDecl.setName(ast.newSimpleName(name));
-					Type importType= importRewrite.addImport(mustThrow, ast, context, TypeLocation.EXCEPTION);
-					newDecl.setType(importType);
-					newClause.setException(newDecl);
-					ThrowStatement newThrowStatement= ast.newThrowStatement();
-					newThrowStatement.setExpression(ast.newSimpleName(name));
-					linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(rewrite.track(decl.getName()), false);
-					newClause.getBody().statements().add(newThrowStatement);
-					tryStatement.catchClauses().add(newClause);
-					++i;
+				if (!modifyExistingTry) {
+					for (ITypeBinding mustThrow : mustRethrowList) {
+						CatchClause newClause= ast.newCatchClause();
+						SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
+						newDecl.setName(ast.newSimpleName(name));
+						Type importType= importRewrite.addImport(mustThrow, ast, context, TypeLocation.EXCEPTION);
+						newDecl.setType(importType);
+						newClause.setException(newDecl);
+						ThrowStatement newThrowStatement= ast.newThrowStatement();
+						newThrowStatement.setExpression(ast.newSimpleName(name));
+						linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(rewrite.track(decl.getName()), false);
+						newClause.getBody().statements().add(newThrowStatement);
+						tryStatement.catchClauses().add(newClause);
+						++i;
+					}
 				}
 				List<ITypeBinding> filteredExceptions= ASTNodes.filterSubtypes(catchExceptions);
 				UnionType unionType= ast.newUnionType();
@@ -293,11 +312,19 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 				if (st != null) {
 					catchClause.getBody().statements().add(st);
 				}
-				tryStatement.catchClauses().add(catchClause);
+				if (modifyExistingTry) {
+					clausesRewriter.insertLast(catchClause, null);
+				} else {
+					tryStatement.catchClauses().add(catchClause);
+				}
+			}
+			if (modifyExistingTry) {
+				rewrite.remove(nodeToAssign, null);
+			} else {
+				rewrite.replace(expression, tryStatement, null);
+				setEndPosition(rewrite.track(blankLine));
 			}
 
-			rewrite.replace(expression, tryStatement, null);
-			setEndPosition(rewrite.track(blankLine));
 		}
 
 		addLinkedPosition(rewrite.track(newDeclFrag.getName()), true, KEY_NAME);

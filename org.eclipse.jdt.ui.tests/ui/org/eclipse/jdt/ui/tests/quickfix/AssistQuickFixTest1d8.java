@@ -5801,21 +5801,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		buf.append("\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            try (/*1*/Socket s = new Socket();\n");
-		buf.append("                    Socket s2 = new Socket();\n");
-		buf.append("                    /*2*/InputStream is = s.getInputStream();\n");
-		buf.append("                    /*3*/FileInputStream f = new FileInputStream(\"a.b\")) {\n");
-		buf.append("                /*4*/int i = 0;\n");
-		buf.append("                System.out.println(s.getInetAddress().toString());\n");
-		buf.append("                System.out.println(is.markSupported());/*0*/\n");
-		buf.append("            } catch (FileNotFoundException e) {\n");
-		buf.append("                throw e;\n");
-		buf.append("            } catch (IOException e) {\n");
-		buf.append("                // TODO Auto-generated catch block\n");
-		buf.append("                e.printStackTrace();\n");
-		buf.append("            }\n");
+		buf.append("        try (/*1*/Socket s = new Socket();\n");
+		buf.append("                Socket s2 = new Socket();\n");
+		buf.append("                /*2*/InputStream is = s.getInputStream();\n");
+		buf.append("                /*3*/FileInputStream f = new FileInputStream(\"a.b\")) {\n");
+		buf.append("            /*4*/int i = 0;\n");
+		buf.append("            System.out.println(s.getInetAddress().toString());\n");
+		buf.append("            System.out.println(is.markSupported());/*0*/\n");
 		buf.append("        } catch (FileNotFoundException e) {\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("            // TODO Auto-generated catch block\n");
+		buf.append("            e.printStackTrace();\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -5874,21 +5870,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		buf.append("\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() throws FileNotFoundException {\n");
-		buf.append("        try {\n");
-		buf.append("            try (/*1*/Socket s = new Socket();\n");
-		buf.append("                    Socket s2 = new Socket();\n");
-		buf.append("                    /*2*/InputStream is = s.getInputStream();\n");
-		buf.append("                    /*3*/FileInputStream f = new FileInputStream(\"a.b\")) {\n");
-		buf.append("                /*4*/int i = 0;\n");
-		buf.append("                System.out.println(s.getInetAddress().toString());\n");
-		buf.append("                System.out.println(is.markSupported());/*0*/\n");
-		buf.append("            } catch (FileNotFoundException e) {\n");
-		buf.append("                throw e;\n");
-		buf.append("            } catch (IOException e) {\n");
-		buf.append("                // TODO Auto-generated catch block\n");
-		buf.append("                e.printStackTrace();\n");
-		buf.append("            }\n");
+		buf.append("        try (/*1*/Socket s = new Socket();\n");
+		buf.append("                Socket s2 = new Socket();\n");
+		buf.append("                /*2*/InputStream is = s.getInputStream();\n");
+		buf.append("                /*3*/FileInputStream f = new FileInputStream(\"a.b\")) {\n");
+		buf.append("            /*4*/int i = 0;\n");
+		buf.append("            System.out.println(s.getInetAddress().toString());\n");
+		buf.append("            System.out.println(is.markSupported());/*0*/\n");
 		buf.append("        } catch (FileNotFoundException e) {\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("            // TODO Auto-generated catch block\n");
+		buf.append("            e.printStackTrace();\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -6146,17 +6138,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				"\n" +
 				"class E {\n" +
 				"    void f() {\n" +
-				"        try {\n" +
-				"            try (FileInputStream fileInputStream = new FileInputStream(\"f\")) {\n" +
-				"                \n" +
-				"            } catch (FileNotFoundException e) {\n" +
-				"                throw e;\n" +
-				"            } catch (IOException e) {\n" +
-	            "                // TODO Auto-generated catch block\n" +
-				"                e.printStackTrace();\n" +
-				"            };\n" +
+				"        try (FileInputStream fileInputStream = new FileInputStream(\"f\")) {\n" +
 				"        } catch (FileNotFoundException e) {\n" +
 				"            // some action\n" +
+				"        } catch (IOException e) {\n" +
+	            "            // TODO Auto-generated catch block\n" +
+				"            e.printStackTrace();\n" +
 				"        }\n" +
 				"    }\n" +
 				"}";
@@ -6176,7 +6163,8 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				"class E {\n" +
 				"    void f() throws FileNotFoundException {\n" +
 				"        try {\n" +
-				"            new FileInputStream(\"f\");\n" +
+				"            String s = \"a.b\";\n" +
+				"            new FileInputStream(s);\n" +
 				"        } catch (FileNotFoundException e) {\n" +
 				"            // some action\n" +
 				"        }\n" +
@@ -6188,7 +6176,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 6);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		String expected=
@@ -6201,7 +6189,8 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				"class E {\n" +
 				"    void f() throws FileNotFoundException {\n" +
 				"        try {\n" +
-				"            try (FileInputStream fileInputStream = new FileInputStream(\"f\")) {\n" +
+				"            String s = \"a.b\";\n" +
+				"            try (FileInputStream fileInputStream = new FileInputStream(s)) {\n" +
 				"                \n" +
 				"            } catch (FileNotFoundException e) {\n" +
 				"                throw e;\n" +
