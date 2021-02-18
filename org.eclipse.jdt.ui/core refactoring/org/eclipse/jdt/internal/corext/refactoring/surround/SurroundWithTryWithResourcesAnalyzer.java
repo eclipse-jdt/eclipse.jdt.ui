@@ -170,7 +170,8 @@ public class SurroundWithTryWithResourcesAnalyzer extends SurroundWithAnalyzer {
 		for (ITypeBinding binding : exceptionList) {
 			for (ITypeBinding thrownException : thrownExceptions) {
 				if (thrownException.isAssignmentCompatible(binding)) {
-					mustRethrowList.add(thrownException);
+					if (!mustRethrowList.contains(thrownException))
+						mustRethrowList.add(thrownException);
 					break;
 				}
 			}
