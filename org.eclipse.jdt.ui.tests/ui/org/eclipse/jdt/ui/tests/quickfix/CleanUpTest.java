@@ -14309,6 +14309,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public boolean aMethod() {\n" //
 				+ "        return true;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithThisReference {\n" //
+				+ "        public RefactorInnerClassWithThisReference aMethod() {\n" //
+				+ "            return this;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithQualifiedThisReference {\n" //
+				+ "        public RefactorInnerClassWithQualifiedThisReference anotherMethod() {\n" //
+				+ "            return RefactorInnerClassWithQualifiedThisReference.this;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -14450,6 +14462,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public boolean aMethod() {\n" //
 				+ "        return true;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithThisReference {\n" //
+				+ "        public RefactorInnerClassWithThisReference aMethod() {\n" //
+				+ "            return this;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithQualifiedThisReference {\n" //
+				+ "        public RefactorInnerClassWithQualifiedThisReference anotherMethod() {\n" //
+				+ "            return RefactorInnerClassWithQualifiedThisReference.this;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		// When
@@ -14508,6 +14532,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "        public boolean anotherMethod() {\n" //
 				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassWithQualifiedThis {\n" //
+				+ "        public E anotherMethod() {\n" //
+				+ "            return E.this;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassWithFullyQualifiedThis {\n" //
+				+ "        public E anotherMethod() {\n" //
+				+ "            return test1.E.this;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //

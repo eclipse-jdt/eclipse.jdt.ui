@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -152,6 +153,17 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 					}
 
 					return true;
+				}
+
+				@Override
+				public boolean visit(final ThisExpression node) {
+					if (node.getQualifier() == null
+							|| ASTNodes.isSameVariable(innerClass.getName(), node.getQualifier())) {
+						return true;
+					}
+
+					isTopLevelClassMemberUsed= true;
+					return interruptVisit();
 				}
 			}
 
