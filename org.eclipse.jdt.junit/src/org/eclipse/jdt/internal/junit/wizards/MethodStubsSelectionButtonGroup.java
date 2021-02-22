@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
+import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageOne.JUnitVersion;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -53,18 +55,22 @@ public class MethodStubsSelectionButtonGroup {
 	/**
 	 * Creates a group without border.
 	 * @param buttonsStyle one of {@link SWT#RADIO}, {@link SWT#CHECK}, or {@link SWT#TOGGLE}
-	 * @param buttonNames names of the buttons
+	 * @param jver junit version
 	 * @param nColumns column count
 	 */
-	public MethodStubsSelectionButtonGroup(int buttonsStyle, String[] buttonNames, int nColumns) {
+	public MethodStubsSelectionButtonGroup(int buttonsStyle, JUnitVersion jver, int nColumns) {
 		fEnabled= true;
 		fLabel= null;
 		fLabelText= ""; //$NON-NLS-1$
 
 		Assert.isTrue(buttonsStyle == SWT.RADIO || buttonsStyle == SWT.CHECK || buttonsStyle == SWT.TOGGLE);
-		fButtonNames= buttonNames;
+		updateButtonText(jver);
+		initButtons(buttonsStyle, jver, nColumns);
+	}
 
-		int nButtons= buttonNames.length;
+	public void initButtons(int buttonsStyle, JUnitVersion jver, int nColumns) {
+		fButtonNames= jver.buttonNames;
+		int nButtons= fButtonNames.length;
 		fButtonsSelected= new boolean[nButtons];
 		fButtonsEnabled= new boolean[nButtons];
 		for (int i= 0; i < nButtons; i++) {
@@ -80,6 +86,18 @@ public class MethodStubsSelectionButtonGroup {
 		fGroupNumberOfColumns= (nColumns <= 0) ? nButtons : nColumns;
 
 		fButtonsStyle= buttonsStyle;
+	}
+
+	public int updateButtonText(JUnitVersion jver) {
+		fButtonNames= jver.buttonNames;
+		int nButtons= fButtonNames.length;
+		if(fButtons!=null) {
+			for (int i= 0; i < nButtons; i++) {
+				fButtons[i].setText(jver.buttonNames[i]);
+				fButtons[i].requestLayout();
+			}
+		}
+		return nButtons;
 	}
 
 	/*

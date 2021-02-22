@@ -165,7 +165,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private Link fLink;
 	private Label fImage;
 
-	private JUnitVersion fJUnitVersion;
+	private JUnitVersion fJUnitVersion=JUnitVersion.VERSION_3;
 
 	/**
 	 * Available JUnit versions.
@@ -173,7 +173,36 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	 * @since 3.11
 	 */
 	public enum JUnitVersion {
-		VERSION_3, VERSION_4, VERSION_5
+		VERSION_3(new String[] {
+				/* IDX_SETUP_CLASS */ WizardMessages.NewTestCaseWizardPageOne_methodStub_setUpBeforeClass,
+				/* IDX_TEARDOWN_CLASS */ WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDownAfterClass,
+				/* IDX_SETUP */ WizardMessages.NewTestCaseWizardPageOne_methodStub_setUp,
+				/* IDX_TEARDOWN */ WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDown,
+				/* IDX_CONSTRUCTOR */ WizardMessages.NewTestCaseWizardPageOne_methodStub_constructor
+		}),
+		VERSION_4(new String[] {
+				/* IDX_SETUP_CLASS */ WizardMessages.NewJ4TestCaseWizardPageOne_methodStub_setUpBeforeClass,
+				/* IDX_TEARDOWN_CLASS */ WizardMessages.NewJ4TestCaseWizardPageOne_methodStub_tearDownAfterClass,
+				/* IDX_SETUP */ WizardMessages.NewJ4TestCaseWizardPageOne_methodStub_setUp,
+				/* IDX_TEARDOWN */ WizardMessages.NewJ4TestCaseWizardPageOne_methodStub_tearDown,
+				/* IDX_CONSTRUCTOR */ WizardMessages.NewTestCaseWizardPageOne_methodStub_constructor
+		}),
+		VERSION_5(new String[] {
+				/* IDX_SETUP_CLASS */ WizardMessages.NewJ5TestCaseWizardPageOne_methodStub_setUpBeforeClass,
+				/* IDX_TEARDOWN_CLASS */ WizardMessages.NewJ5TestCaseWizardPageOne_methodStub_tearDownAfterClass,
+				/* IDX_SETUP */ WizardMessages.NewJ5TestCaseWizardPageOne_methodStub_setUp,
+				/* IDX_TEARDOWN */ WizardMessages.NewJ5TestCaseWizardPageOne_methodStub_tearDown,
+				/* IDX_CONSTRUCTOR */ WizardMessages.NewTestCaseWizardPageOne_methodStub_constructor
+		}
+		);
+		/**
+		 * @since 3.12
+		 */
+		public final String[] buttonNames;
+
+		JUnitVersion(String[] buttonNames){
+			this.buttonNames= buttonNames;
+		}
 	}
 
 	/**
@@ -189,16 +218,10 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		setTitle(WizardMessages.NewTestCaseWizardPageOne_title);
 		setDescription(WizardMessages.NewTestCaseWizardPageOne_description);
 
-		String[] buttonNames= new String[] {
-			/* IDX_SETUP_CLASS */ WizardMessages.NewTestCaseWizardPageOne_methodStub_setUpBeforeClass,
-			/* IDX_TEARDOWN_CLASS */ WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDownAfterClass,
-			/* IDX_SETUP */ WizardMessages.NewTestCaseWizardPageOne_methodStub_setUp,
-			/* IDX_TEARDOWN */ WizardMessages.NewTestCaseWizardPageOne_methodStub_tearDown,
-			/* IDX_CONSTRUCTOR */ WizardMessages.NewTestCaseWizardPageOne_methodStub_constructor
-		};
+
 		enableCommentControl(true);
 
-		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 2) {
+		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, fJUnitVersion, 2) {
 			@Override
 			protected void doWidgetSelected(SelectionEvent e) {
 				super.doWidgetSelected(e);
@@ -214,7 +237,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fClassUnderTestText= ""; //$NON-NLS-1$
 
 		fJUnitStatus= new JUnitStatus();
-		setJUnitVersion(JUnitVersion.VERSION_3);
+		setJUnitVersion(fJUnitVersion);
 	}
 
 	/**
@@ -392,6 +415,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private void internalSetJUnit(JUnitVersion version) {
 		fJUnitVersion= version;
+		fMethodStubsButtons.updateButtonText(version);
 		fJUnitStatus= junitStatusChanged();
 		if (isDefaultSuperClass() || "".equals(getSuperClass().trim())) //$NON-NLS-1$
 			setSuperClass(getDefaultSuperClassName(), true);
