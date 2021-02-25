@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -170,11 +171,11 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 			@Override
 			public boolean visit(final TypeDeclaration visited) {
 				if (!visited.isInterface()) {
-					TypeDeclaration parent= ASTNodes.getTypedAncestor(visited, TypeDeclaration.class);
+					ASTNode parent= ASTNodes.getFirstAncestorOrNull(visited, TypeDeclaration.class, MethodDeclaration.class);
 					TypeDeclaration topLevelClass= null;
 
-					while (parent != null) {
-						topLevelClass= parent;
+					while (parent instanceof TypeDeclaration) {
+						topLevelClass= (TypeDeclaration) parent;
 						parent= ASTNodes.getTypedAncestor(topLevelClass, TypeDeclaration.class);
 
 						if (parent != null && !Modifier.isStatic(topLevelClass.getModifiers())) {

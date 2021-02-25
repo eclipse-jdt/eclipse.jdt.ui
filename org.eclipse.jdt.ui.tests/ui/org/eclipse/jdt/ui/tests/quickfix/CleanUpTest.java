@@ -14529,6 +14529,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public boolean aMethodWithAMethodLocalInnerClass() {\n" //
+				+ "        class DoNotRefactorMethodLocalInnerClass {\n" //
+				+ "            int k;\n" //
+				+ "\n" //
+				+ "            boolean anotherMethod() {\n" //
+				+ "                return true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return new DoNotRefactorMethodLocalInnerClass().anotherMethod();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static class DoNotRefactorAlreadyStaticInnerClass {\n" //
 				+ "        int i;\n" //
 				+ "\n" //
