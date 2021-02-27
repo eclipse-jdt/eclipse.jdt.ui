@@ -4552,6 +4552,30 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return array;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] doNotRefactorIntIntoCharArray(char[] array) {\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte[] doNotRefactorIntIntoByteArray(byte[] array) {\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short[] doNotRefactorIntIntoShortArray(short[] array) {\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
