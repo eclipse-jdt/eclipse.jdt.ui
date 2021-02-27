@@ -71,15 +71,15 @@ public class PlainReplacementCleanUpCore extends AbstractCleanUpCore {
 		if (isEnabled(CleanUpConstants.PLAIN_REPLACEMENT)) {
 			return "" //$NON-NLS-1$
 					+ "String result = text.replace(\"foo\", \"bar\");\n" //$NON-NLS-1$
-					+ "String result2 = text.replace(\"&\", \"&amp;\");\n" //$NON-NLS-1$
-					+ "String result3 = text.replaceAll(\"[ab]\", \"c\");\n" //$NON-NLS-1$
-					+ "String result4 = text.replaceAll(\"\\s\". \"\");\n"; //$NON-NLS-1$
+					+ "String result2 = text.replace(\"$0.02\", \"$0.50\");\n" //$NON-NLS-1$
+					+ "String result3 = text.replace('.', '/');\n" //$NON-NLS-1$
+					+ "String result4 = text.replace(placeholder, value);\n"; //$NON-NLS-1$
 		}
 
 		return "" //$NON-NLS-1$
 				+ "String result = text.replaceAll(\"foo\", \"bar\");\n" //$NON-NLS-1$
-				+ "String result2 = text.replaceAll(\"&\", \"&amp;\");\n" //$NON-NLS-1$
-				+ "String result3 = text.replaceAll(\"[ab]\", \"c\");\n" //$NON-NLS-1$
-				+ "String result4 = text.replaceAll(\"\\s\". \"\");\n"; //$NON-NLS-1$
+				+ "String result2 = text.replaceAll(\"\\\\$0\\\\.02\", \"\\\\$0.50\");\n" //$NON-NLS-1$
+				+ "String result3 = text.replaceAll(\"\\\\.\", \"/\");\n" //$NON-NLS-1$
+				+ "String result4 = text.replaceAll(Pattern.quote(placeholder), Matcher.quoteReplacement(value));\n"; //$NON-NLS-1$
 	}
 }

@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
+ *     Holger Voormann - Handles Pattern.quote(), Matcher.quoteReplacement(), lone chars and escaped texts
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -25,9 +26,11 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
@@ -39,8 +42,6 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 public class PlainReplacementFixCore extends CompilationUnitRewriteOperationsFixCore {
 	public static final class PlainReplacementFinder extends ASTVisitor {
-		private Pattern HAS_REGEX_CHARACTER= Pattern.compile("[\\\\\\[\\]\\{\\}\\(\\)\\*\\+\\?\\.\\^\\$\\|]"); //$NON-NLS-1$
-
 		private List<PlainReplacementFixOperation> fResult;
 
 		public PlainReplacementFinder(List<PlainReplacementFixOperation> ops) {
@@ -49,21 +50,33 @@ public class PlainReplacementFixCore extends CompilationUnitRewriteOperationsFix
 
 		@Override
 		public boolean visit(final MethodInvocation visited) {
-			if (ASTNodes.usesGivenSignature(visited, String.class.getCanonicalName(), "replaceAll", String.class.getCanonicalName(), String.class.getCanonicalName())) { //$NON-NLS-1$
-				Object pattern= ((Expression) visited.arguments().get(0)).resolveConstantExpressionValue();
-				Object replacement= ((Expression) visited.arguments().get(1)).resolveConstantExpressionValue();
+			if (ASTNodes.usesGivenSignature(visited, String.class.getCanonicalName(), "replaceAll", String.class.getCanonicalName(), String.class.getCanonicalName()) //$NON-NLS-1$
+					&& isPlainStringArgument(visited, true, 0, Pattern.class, "quote") //$NON-NLS-1$
+					&& isPlainStringArgument(visited, false, 1, Matcher.class, "quoteReplacement")) { //$NON-NLS-1$
+				fResult.add(new PlainReplacementFixOperation(visited));
 
-				if (pattern instanceof String
-						&& !HAS_REGEX_CHARACTER.matcher((String) pattern).find()
-						&& replacement instanceof String
-						&& ((String) replacement).equals(Matcher.quoteReplacement((String) replacement))) {
-					fResult.add(new PlainReplacementFixOperation(visited));
-					return false;
+				if (visited.getExpression() != null) {
+					visited.getExpression().accept(this);
 				}
+
+				return false;
 			}
 
 			return true;
 		}
+
+		private boolean isPlainStringArgument(final MethodInvocation visited, final boolean isRegex, final int index, final Class<?> klass, final String methodName) {
+			Expression argument= (Expression) visited.arguments().get(index);
+
+			if (argument instanceof MethodInvocation
+					&& ASTNodes.usesGivenSignature((MethodInvocation) argument, klass.getCanonicalName(), methodName, String.class.getCanonicalName())) {
+				return true;
+			}
+
+			Object argumentResolved= argument.resolveConstantExpressionValue();
+			return argumentResolved instanceof String && toPlainString((String) argumentResolved, isRegex, argument instanceof StringLiteral) != null;
+		}
+
 	}
 
 	public static class PlainReplacementFixOperation extends CompilationUnitRewriteOperation {
@@ -90,9 +103,63 @@ public class PlainReplacementFixCore extends CompilationUnitRewriteOperationsFix
 			});
 
 			rewrite.set(visited, MethodInvocation.NAME_PROPERTY, ast.newSimpleName("replace"), group); //$NON-NLS-1$
-		}
-	}
+			String arg1= tryToSimplifyStringLiteralArgument(true, ast, rewrite, group);
+			String arg2= tryToSimplifyStringLiteralArgument(false, ast, rewrite, group);
 
+			if (arg1 != null
+					&& arg2 != null
+					&& arg1.length() == 1
+					&& arg2.length() == 1) {
+				convertStringLiteralArgumentToChar(true, arg1, ast, rewrite, group);
+				convertStringLiteralArgumentToChar(false, arg2, ast, rewrite, group);
+			} else {
+				useQuotedArgumentWhenPossible(true, rewrite, group);
+				useQuotedArgumentWhenPossible(false, rewrite, group);
+			}
+		}
+
+		private String tryToSimplifyStringLiteralArgument(boolean isRegex, final AST ast, final ASTRewrite rewrite, final TextEditGroup group) {
+			int index= isRegex ? 0 : 1;
+			Expression argument= (Expression) visited.arguments().get(index);
+
+			if (!(argument instanceof StringLiteral)) {
+				return null;
+			}
+
+			String argumentResolved= (String) argument.resolveConstantExpressionValue();
+			String asPlainString= toPlainString(argumentResolved, isRegex, true);
+
+			if (asPlainString == null) {
+				return null;
+			} else if (argumentResolved.equals(asPlainString)) {
+				return argumentResolved;
+			}
+
+			// rewrite String literal
+			StringLiteral dummyStringLiteral= ast.newStringLiteral();
+			dummyStringLiteral.setLiteralValue(asPlainString);
+			rewrite.set(((StringLiteral) visited.arguments().get(index)), StringLiteral.ESCAPED_VALUE_PROPERTY, dummyStringLiteral.getEscapedValue(), group);
+			return asPlainString;
+		}
+
+		private void convertStringLiteralArgumentToChar(final boolean isRegex, final String string, final AST ast, final ASTRewrite rewrite, final TextEditGroup group) {
+			int index= isRegex ? 0 : 1;
+			CharacterLiteral characterLiteral= ast.newCharacterLiteral();
+			characterLiteral.setCharValue(string.charAt(0));
+			ASTNodes.replaceButKeepComment(rewrite, (ASTNode) visited.arguments().get(index), characterLiteral, group);
+		}
+
+		private void useQuotedArgumentWhenPossible(final boolean isRegex, final ASTRewrite rewrite, final TextEditGroup group) {
+			int index= isRegex ? 0 : 1;
+			Expression argument= (Expression) visited.arguments().get(index);
+
+			if (argument instanceof MethodInvocation) {
+				Expression quoteExpr= (Expression) ((MethodInvocation) argument).arguments().get(0);
+				ASTNodes.replaceButKeepComment(rewrite, argument, ASTNodes.createMoveTarget(rewrite, quoteExpr), group);
+			}
+		}
+
+	}
 
 	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit) {
 		List<PlainReplacementFixOperation> operations= new ArrayList<>();
@@ -109,5 +176,91 @@ public class PlainReplacementFixCore extends CompilationUnitRewriteOperationsFix
 
 	protected PlainReplacementFixCore(final String name, final CompilationUnit compilationUnit, final CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
+	}
+
+	/**
+	 * @param regexOrReplacement the regular expression or the replacement to convert to a plain String
+	 * @param isRegex {@code true} to convert a regular expression, {@code false} to convert a replacement
+	 * @param doUnescape {@code true} if and only if removing of escaping to convert to a plain String is allowed
+	 * @return the plain String or {@code null} if the given regular expression cannot be converted to a plain String
+	 *         or when in doubt (for the sake of simplicity, e.g. {@code null} is also returned for {@code "a[b]c"}
+	 *         even if that would be {@code "abc"})
+	 */
+	private static String toPlainString(final String regexOrReplacement, final boolean isRegex, final boolean doUnescape) {
+		boolean isEscaped= false;
+		StringBuilder plainString= null;
+
+		for (int i= 0; i < regexOrReplacement.length(); i++) {
+			char c= regexOrReplacement.charAt(i);
+
+			if (Character.isSurrogate(c)) {
+				// See https://bugs.openjdk.java.net/browse/JDK-8149446
+				return null;
+			} else if (isMetaChar(c, isRegex)) {
+				if (isEscaped) {
+					if (plainString == null) {
+						if (!doUnescape) {
+							return null;
+						}
+
+						plainString= new StringBuilder();
+
+						if (i > 1) {
+							plainString.append(regexOrReplacement, 0, i - 1);
+						}
+					}
+
+					plainString.append(c);
+				} else if (c != '\\') {
+					return null;
+				}
+
+			// in regex, escaped non-meta chars might have special meaning, e.g. \s, \d, \W, etc.
+			// in replacement, escaped non-meta chars do not have a special meaning (escaping is here unnecessary and will be ignored)
+			} else if (isEscaped) {
+				if (isRegex || (!doUnescape && !isMetaChar(c, false))) {
+					return null;
+				}
+
+				if (!isMetaChar(c, false)) {
+					if (plainString == null) {
+						plainString= new StringBuilder();
+
+						if (i > 1) {
+							plainString.append(regexOrReplacement, 0, i - 1);
+						}
+					}
+
+					plainString.append(c);
+				}
+			} else if (plainString != null) {
+				plainString.append(c);
+			}
+
+			isEscaped= !isEscaped && c == '\\';
+		}
+
+		return isEscaped ? null : (plainString == null ? regexOrReplacement : plainString.toString());
+	}
+
+	private static boolean isMetaChar(char c, boolean isRegex) {
+		if (isRegex) {
+			return c == '.'
+					|| c == '$'
+					|| c == '|'
+					|| c == '('
+					|| c == ')'
+					|| c == '['
+					|| c == ']'
+					|| c == '{'
+					|| c == '}'
+					|| c == '^'
+					|| c == '?'
+					|| c == '*'
+					|| c == '+'
+					|| c == '\\';
+		}
+
+		return c == '$' || c == '\\';
 	}
 }

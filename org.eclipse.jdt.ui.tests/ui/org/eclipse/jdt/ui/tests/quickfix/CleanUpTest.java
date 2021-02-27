@@ -68,8 +68,10 @@ import org.eclipse.jdt.ui.tests.core.rules.Java13ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.AbstractCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -15328,28 +15330,108 @@ public class CleanUpTest extends CleanUpTestCase {
 		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.regex.Matcher;\n" //
+				+ "import java.util.regex.Pattern;\n" //
+				+ "\n" //
 				+ "public class E {\n" //
 				+ "    private static final String CONSTANT = \"&\";\n" //
+				+ "    private static final String CONSTANT2 = \"+\";\n" //
 				+ "\n" //
-				+ "    public void refactor(String text) {\n" //
-				+ "        String s1 = text.replaceAll(\"&\", \"&amp;\");\n" //
-				+ "        String s2 = text.replaceAll(\",:#\", \"/\");\n" //
-				+ "        String s3 = text.replaceAll(\"/\", \".\");\n" //
-				+ "        String s4 = text.replaceAll(CONSTANT, \"&amp;\");\n" //
+				+ "    public void refactorUsingString(String text, String placeholder, String value) {\n" //
+				+ "        String result1 = text.replaceAll(\"&\", \"&amp;\");\n" //
+				+ "        String result2 = text.replaceAll(\",:#\", \"/\");\n" //
+				+ "        String result3 = text.replaceAll(\"\\\\^a\", \"b\" + \"c\");\n" //
+				+ "        String result4 = text.replaceAll(CONSTANT, \"&amp;\");\n" //
+				+ "        String result5 = text.replaceAll(\"\\\\.\", \"\\r\\n\");\n" //
+				+ "        String result6 = text.replaceAll(\"-\\\\.-\", \"\\\\$\\\\.\\\\x\");\n" //
+				+ "        String result7 = text.replaceAll(\"foo\", \"\\\\\\\\-\\\\$1\\\\s\");\n" //
+				+ "        String result8 = text.replaceAll(\"foo\", \"bar\");\n" //
+				+ "        String result9 = text.replaceAll(\"\\\\$0\\\\.02\", \"\\\\$0.50\");\n" //
+				+ "        String result10 = text.replaceAll(/*Keep this comment*/\"n\"/*o*/, /*Keep this comment too*/\"\\\\$\\\\a\\\\\\\\\"/*y*/);\n" //
+				+ "        String result11 = text.replaceAll(\"a\" + \"b\", \"c\\\\$\");\n" //
+				+ "        String result12 = text.replaceAll(\"\\\\+\", CONSTANT);\n" //
+				+ "        String result13 = text.replaceAll(CONSTANT, \"\\\\$\");\n" //
+				+ "        String result14 = text.replaceAll(CONSTANT, CONSTANT2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeQuote(String text) {\n" //
+				+ "        String result = text.replaceAll(Pattern.quote(File.separator), \"/\");\n" //
+				+ "        String result2 = text.replaceAll(Pattern.quote(File.separator + \"a\"), \"\\\\.\");\n" //
+				+ "        String result3 = text.replaceAll(Pattern.quote(placeholder), Matcher.quoteReplacement(value));\n" //
+				+ "        String result4 = text.replaceAll(\"\\\\.\", Matcher.quoteReplacement(File.separator));\n" //
+				+ "        String result5 = text.replaceAll(\"/\", Matcher.quoteReplacement(File.separator + \"\\n\"));\n" //
+				+ "        String result6 = text.replaceAll(\"n\", Matcher.quoteReplacement(System.getProperty(\"java.version\")));\n" //
+				+ "        String result7 = text.replaceAll(CONSTANT, Matcher.quoteReplacement(System.getProperty(\"java.version\")));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorUsingChar(String text) {\n" //
+				+ "        String result = text.replaceAll(\"\\\\.\", \"/\");\n" //
+				+ "        String result2 = text.replaceAll(\"\\\\.\", \"/\");\n" //
+				+ "        String result3 = text.replaceAll(\"/\", \".\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorUselessEscapingInReplacement() {\n" //
+				+ "        return \"foo\".replaceAll(\"foo\", \"\\\\.\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorChained() {\n" //
+				+ "        System.out.println(\"${p1}...???\".replaceAll(\"\\\\$\", \"\\\\\\\\\\\\$\")\n" //
+				+ "            .replaceAll(\"\\\\.\", \"\\\\\\\\.\").replaceAll(\"\\\\?\", \"^\"));\n" //
 				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.regex.Matcher;\n" //
+				+ "import java.util.regex.Pattern;\n" //
+				+ "\n" //
 				+ "public class E {\n" //
 				+ "    private static final String CONSTANT = \"&\";\n" //
+				+ "    private static final String CONSTANT2 = \"+\";\n" //
 				+ "\n" //
-				+ "    public void refactor(String text) {\n" //
-				+ "        String s1 = text.replace(\"&\", \"&amp;\");\n" //
-				+ "        String s2 = text.replace(\",:#\", \"/\");\n" //
-				+ "        String s3 = text.replace(\"/\", \".\");\n" //
-				+ "        String s4 = text.replace(CONSTANT, \"&amp;\");\n" //
+				+ "    public void refactorUsingString(String text, String placeholder, String value) {\n" //
+				+ "        String result1 = text.replace(\"&\", \"&amp;\");\n" //
+				+ "        String result2 = text.replace(\",:#\", \"/\");\n" //
+				+ "        String result3 = text.replace(\"^a\", \"b\" + \"c\");\n" //
+				+ "        String result4 = text.replace(CONSTANT, \"&amp;\");\n" //
+				+ "        String result5 = text.replace(\".\", \"\\r\\n\");\n" //
+				+ "        String result6 = text.replace(\"-.-\", \"$.x\");\n" //
+				+ "        String result7 = text.replace(\"foo\", \"\\\\-$1s\");\n" //
+				+ "        String result8 = text.replace(\"foo\", \"bar\");\n" //
+				+ "        String result9 = text.replace(\"$0.02\", \"$0.50\");\n" //
+				+ "        String result10 = text.replace(/*Keep this comment*/\"n\"/*o*/, /*Keep this comment too*/\"$a\\\\\"/*y*/);\n" //
+				+ "        String result11 = text.replace(\"a\" + \"b\", \"c$\");\n" //
+				+ "        String result12 = text.replace(\"+\", CONSTANT);\n" //
+				+ "        String result13 = text.replace(CONSTANT, \"$\");\n" //
+				+ "        String result14 = text.replace(CONSTANT, CONSTANT2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeQuote(String text) {\n" //
+				+ "        String result = text.replace(File.separator, \"/\");\n" //
+				+ "        String result2 = text.replace(File.separator + \"a\", \".\");\n" //
+				+ "        String result3 = text.replace(placeholder, value);\n" //
+				+ "        String result4 = text.replace(\".\", File.separator);\n" //
+				+ "        String result5 = text.replace(\"/\", File.separator + \"\\n\");\n" //
+				+ "        String result6 = text.replace(\"n\", System.getProperty(\"java.version\"));\n" //
+				+ "        String result7 = text.replace(CONSTANT, System.getProperty(\"java.version\"));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorUsingChar(String text) {\n" //
+				+ "        String result = text.replace('.', '/');\n" //
+				+ "        String result2 = text.replace('.', '/');\n" //
+				+ "        String result3 = text.replace('/', '.');\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorUselessEscapingInReplacement() {\n" //
+				+ "        return \"foo\".replace(\"foo\", \".\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorChained() {\n" //
+				+ "        System.out.println(\"${p1}...???\".replace(\"$\", \"\\\\$\")\n" //
+				+ "            .replace(\".\", \"\\\\.\").replace('?', '^'));\n" //
 				+ "    }\n" //
 				+ "}\n";
 
@@ -15370,30 +15452,32 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.regex.Matcher;\n" //
+				+ "import java.util.regex.Pattern;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
+				+ "    private static final String CONSTANT = \"|\";\n" //
+				+ "\n" //
 				+ "    public void doNotRefactorEscapableCharacters(String text) {\n" //
-				+ "        String s1 = text.replaceAll(\"[ab]\", \"c\");\n" //
-				+ "        String s2 = text.replaceAll(\"a.b\", \"foo\");\n" //
-				+ "        String s3 = text.replaceAll(\"a?\", \"foo\");\n" //
-				+ "        String s4 = text.replaceAll(\"a+\", \"foo\");\n" //
-				+ "        String s5 = text.replaceAll(\"a*\", \"foo\");\n" //
-				+ "        String s6 = text.replaceAll(\"a{42}\", \"foo\");\n" //
-				+ "        String s7 = text.replaceAll(\"a{1,42}\", \"foo\");\n" //
-				+ "        String s8 = text.replaceAll(\"(a)\", \"foo\");\n" //
-				+ "        String s9 = text.replaceAll(\"^a\", \"foo\");\n" //
-				+ "        String s10 = text.replaceAll(\"a$\", \"foo\");\n" //
-				+ "        String s11 = text.replaceAll(\"\\\\s\", \"\");\n" //
-				+ "        String s12 = text.replaceAll(\"a|b\", \"foo\");\n" //
-				+ "        String s13 = text.replaceAll(\"\\n|\\r\\n?\", \" \");\n" //
+				+ "        String result1 = text.replaceAll(\"[ab]\", \"c\");\n" //
+				+ "        String result2 = text.replaceAll(\"d.e\", \"foo\");\n" //
+				+ "        String result3 = text.replaceAll(\"f?\", \"bar\");\n" //
+				+ "        String result4 = text.replaceAll(\"g+\", \"foo\");\n" //
+				+ "        String result5 = text.replaceAll(\"h*\", \"foo\");\n" //
+				+ "        String result6 = text.replaceAll(\"i{42}\", \"foo\");\n" //
+				+ "        String result7 = text.replaceAll(\"j{1,42}\", \"foo\");\n" //
+				+ "        String result8 = text.replaceAll(\"(k)\", \"foo\");\n" //
+				+ "        String result9 = text.replaceAll(\"^m\", \"foo\");\n" //
+				+ "        String result10 = text.replaceAll(\"n$\", \"foo\");\n" //
+				+ "        String result11 = text.replaceAll(\"\\\\s\", \"\");\n" //
+				+ "        String result12 = text.replaceAll(\"a|b\", \"foo\");\n" //
+				+ "        String result13 = text.replaceAll(\"\\r\\n|\\n\", \" \");\n" //
+				+ "        String result14 = text.replaceAll(\"\\\\\\\\$\", System.getProperty(\"java.version\"));\n" //
+				+ "        String result15 = text.replaceAll(System.getProperty(\"java.version\"), \"\");\n" //
+				+ "        String result16 = text.replaceAll(CONSTANT, \"not &amp;\");\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public String doNotRefactorReplacementWithCapturedGroup(String text) {\n" //
 				+ "        return text.replaceAll(\"foo\", \"$0\");\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public String doNotRefactorWithEscapedReplacement(String text) {\n" //
-				+ "        return text.replaceAll(\"foo\", \"\\\\$1\");\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public String doNotRefactorUnknownPattern(String text, String pattern) {\n" //
@@ -15403,12 +15487,59 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public String doNotRefactorOtherMethod(Matcher matcher, String text) {\n" //
 				+ "        return matcher.replaceAll(text);\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorSurrogates(String text, String unquoted) {\n" //
+				+ "        String result1 = text.replaceAll(\"\\ud83c\", \"\");\n" //
+				+ "        String result2 = text.replaceAll(\"\\\\ud83c\", \"\");\n" //
+				+ "        String result3 = text.replaceAll(\"\\udf09\", \"\\udf10\");\n" //
+				+ "        String result4 = text.replaceAll(Pattern.quote(unquoted), \"\\udf10\");\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.PLAIN_REPLACEMENT);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPlainReplacementPreview() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String previewHeader= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.regex.Matcher;\n" //
+				+ "import java.util.regex.Pattern;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void preview(String text, String placeholder, String value) {\n";
+		String previewFooter= "" //
+				+ "    }\n" //
+				+ "}\n";
+		AbstractCleanUpCore cleanUp= new PlainReplacementCleanUpCore() {
+			@Override
+			protected boolean isEnabled(String key) {
+				return false;
+			}
+		};
+		String given= previewHeader + cleanUp.getPreview() + previewFooter;
+		cleanUp= new PlainReplacementCleanUpCore() {
+			@Override
+			protected boolean isEnabled(String key) {
+				return true;
+			}
+		};
+		String expected= previewHeader + cleanUp.getPreview() + previewFooter;
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PLAIN_REPLACEMENT);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
 	@Test

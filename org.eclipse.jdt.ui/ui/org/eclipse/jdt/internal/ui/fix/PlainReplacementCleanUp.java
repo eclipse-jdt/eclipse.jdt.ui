@@ -25,9 +25,13 @@ import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 /**
- * A fix that replaces <code>String.replaceAll()</code> by <code>String.replace()</code> when the pattern is a plain text:
+ * A fix that replaces <code>String.replaceAll()</code> by <code>String.replace()</code> when the pattern and the
+ * replacement is a plain text not containing surrogate characters:
  * <ul>
- * <li>The pattern must be a constant.</li>
+ * <li>If the pattern is a constant, it is unescaped if needed,</li>
+ * <li>If the pattern is quoted, it is unquoted,</li>
+ * <li>If the replacement is quoted, it is unquoted,</li>
+ * <li>If the pattern and the replacement are 1-character-long, they are replaced by chars.</li>
  * </ul>
  */
 public class PlainReplacementCleanUp extends AbstractCleanUp {
