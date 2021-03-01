@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,12 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
-import java.util.Objects;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -826,6 +825,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
+		scroll.setShowFocusedControl(true);
 
 		final Composite settingsContainer= new Composite(scroll, SWT.NONE);
 		settingsContainer.setFont(sashForm.getFont());

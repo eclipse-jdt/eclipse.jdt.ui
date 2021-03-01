@@ -120,6 +120,11 @@ public class SurroundWithResourcesTests1d8 extends AbstractJunit4SelectionTestCa
 	}
 
 	@Test
+	public void testWithThrows3() throws Exception {
+		tryResourcesTest();
+	}
+
+	@Test
 	public void testInvalidStatement1() throws Exception {
 		tryResourcesInvalidTest();
 	}

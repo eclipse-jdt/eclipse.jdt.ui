@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 public class PlainReplacementFixCore extends CompilationUnitRewriteOperationsFixCore {
 	public static final class PlainReplacementFinder extends ASTVisitor {
-		private Pattern HAS_REGEX_CHARACTER= Pattern.compile(".*[\\\\\\[\\]\\{\\}\\(\\)\\*\\+\\?\\.\\^\\$\\|].*"); //$NON-NLS-1$
+		private Pattern HAS_REGEX_CHARACTER= Pattern.compile("[\\\\\\[\\]\\{\\}\\(\\)\\*\\+\\?\\.\\^\\$\\|]"); //$NON-NLS-1$
 
 		private List<PlainReplacementFixOperation> fResult;
 
@@ -54,7 +54,7 @@ public class PlainReplacementFixCore extends CompilationUnitRewriteOperationsFix
 				Object replacement= ((Expression) visited.arguments().get(1)).resolveConstantExpressionValue();
 
 				if (pattern instanceof String
-						&& !HAS_REGEX_CHARACTER.matcher((String) pattern).matches()
+						&& !HAS_REGEX_CHARACTER.matcher((String) pattern).find()
 						&& replacement instanceof String
 						&& ((String) replacement).equals(Matcher.quoteReplacement((String) replacement))) {
 					fResult.add(new PlainReplacementFixOperation(visited));
