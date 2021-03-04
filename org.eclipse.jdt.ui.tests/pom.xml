@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2012, 2020 Eclipse Foundation and others.
+  Copyright (c) 2012, 2021 Eclipse Foundation and others.
   All rights reserved. This program and the accompanying materials
   are made available under the terms of the Eclipse Distribution License v1.0
   which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@
   <properties>
     <defaultSigning-excludeInnerJars>true</defaultSigning-excludeInnerJars>
     <!-- Necessary for leakTests to succeed without raising module/classloader issues on Java 9+ -->
-    <leakTestsArgLine>--add-modules ALL-SYSTEM --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.icu.impl=ALL-UNNAMED --add-opens java.base/jdk.internal.icu.text=ALL-UNNAMED</leakTestsArgLine>
+    <leakTestsArgLine>--add-modules ALL-SYSTEM --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.icu.impl=ALL-UNNAMED --add-opens java.base/jdk.internal.icu.text=ALL-UNNAMED --illegal-access=permit</leakTestsArgLine>
   </properties>
 
   <build>
