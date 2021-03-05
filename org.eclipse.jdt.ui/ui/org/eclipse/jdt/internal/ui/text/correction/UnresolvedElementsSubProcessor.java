@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -323,7 +323,7 @@ public class UnresolvedElementsSubProcessor {
 			addNewFieldProposals(cu, astRoot, binding, declaringTypeBinding, simpleName, isWriteAccess, proposals);
 
 			// new parameters and local variables
-			if (binding == null) {
+			if (binding == null && !isParentSwitchCase(simpleName)) {
 				addNewVariableProposals(cu, node, simpleName, proposals);
 			}
 		}
@@ -380,7 +380,7 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 
-		boolean mustBeConst= ASTResolving.isInsideModifiers(simpleName);
+		boolean mustBeConst= (ASTResolving.isInsideModifiers(simpleName) || isParentSwitchCase(simpleName)) ;
 
 		addNewFieldForType(targetCU, binding, senderDeclBinding, simpleName, isWriteAccess, mustBeConst, proposals);
 
@@ -393,6 +393,13 @@ public class UnresolvedElementsSubProcessor {
 				}
 			}
 		}
+	}
+
+	private static boolean isParentSwitchCase(SimpleName simpleName) {
+		if (simpleName != null) {
+			return (simpleName.getParent() instanceof SwitchCase);
+		}
+		return false;
 	}
 
 	private static void addNewFieldForType(ICompilationUnit targetCU, ITypeBinding binding, ITypeBinding senderDeclBinding, SimpleName simpleName, boolean isWriteAccess, boolean mustBeConst, Collection<ICommandAccess> proposals) {
