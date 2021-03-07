@@ -7443,9 +7443,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.try_with_resource">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.systemproperty"
+            runAfter="org.eclipse.jdt.ui.cleanup.multi_catch">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp"
             id="org.eclipse.jdt.ui.cleanup.type_parameters"
-            runAfter="org.eclipse.jdt.ui.cleanup.multi_catch">
+            runAfter="org.eclipse.jdt.ui.cleanup.systemproperty">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.HashCleanUp"

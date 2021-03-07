@@ -215,6 +215,13 @@ public class CleanUpMessages extends NLS {
 	public static String JavaFeatureTabPage_CheckboxName_Autoboxing;
 	public static String JavaFeatureTabPage_CheckboxName_Unboxing;
 
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_FileSeparator;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_PathSeparator;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_LineSeparator;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_FileEncoding;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_BooleanProperty;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, CleanUpMessages.class);

@@ -59,8 +59,8 @@ import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUp;
@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
@@ -77,8 +78,8 @@ import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
-import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
@@ -237,6 +238,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.TRUE);
 
 		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.TRUE);
+
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.TRUE);
 
 		storeSettings(node);
 
@@ -526,6 +534,27 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new HashCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testSystemPropertiesCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new ConstantsForSystemPropertyCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}

@@ -21397,6 +21397,152 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConstantsForSystemProperty() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = System.getProperty(\"file.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+fs); //$NON-NLS-1$\n" //
+				+ "        String ps = System.getProperty(\"path.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+ps); //$NON-NLS-1$\n" //
+				+ "        String cdn = System.getProperty(\"file.encoding\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+cdn); //$NON-NLS-1$\n" //
+				+ "        String lsp = System.getProperty(\"line.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.nio.charset.Charset;\n" //
+				+ "import java.nio.file.FileSystems;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = FileSystems.getDefault().getSeparator();\n" //
+				+ "        System.out.println(\"out:\"+fs); //$NON-NLS-1$\n" //
+				+ "        String ps = File.pathSeparator;\n" //
+				+ "        System.out.println(\"out:\"+ps); //$NON-NLS-1$\n" //
+				+ "        String cdn = Charset.defaultCharset().displayName();\n" //
+				+ "        System.out.println(\"out:\"+cdn); //$NON-NLS-1$\n" //
+				+ "        String lsp = System.lineSeparator();\n" //
+				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testConstantsForSystemProperty_NLS() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = System.getProperty(\"file.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+fs); //$NON-NLS-1$\n" //
+				+ "			// Keep this comment\n" //
+				+ "			// Keep this comment\n" //
+				+ "        String ps = System.getProperty(\"path.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+ps); //$NON-NLS-1$\n" //
+				+ "        String lsp = System.getProperty(\"line.separator\"); String bla=\"ohoh\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.nio.file.FileSystems;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = FileSystems.getDefault().getSeparator();\n" //
+				+ "        System.out.println(\"out:\"+fs); //$NON-NLS-1$\n" //
+				+ "			// Keep this comment\n" //
+				+ "        // Keep this comment\n" // Here is a problem - cause might be deeper(?)
+				+ "        String ps = File.pathSeparator;\n" //
+				+ "        System.out.println(\"out:\"+ps); //$NON-NLS-1$\n" //
+				+ "        String lsp = System.lineSeparator(); String bla=\"ohoh\"; //$NON-NLS-1$ //$NON-NLS-2$\n" // Another problem, comment not removed
+				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testConstantsForSystemProperty_donttouch() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fb = System.getProperty(\"foo.bah\");//$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+fb);//$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.parseBoolean(System.getProperty(\"jdt.codeCompleteSubstringMatch\",\"true\"));//$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value);//$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+
+		// Then
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRemoveRedundantModifiers () throws Exception {
 		StringBuffer buf;
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);

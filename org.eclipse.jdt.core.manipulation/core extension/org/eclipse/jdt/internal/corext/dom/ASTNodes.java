@@ -34,9 +34,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -143,6 +145,7 @@ import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -3790,6 +3793,51 @@ public class ASTNodes {
 		rewrite.replace(node, replacement, editGroup);
 	}
 
+	/**
+	 * Should match the last NLS comment before end of the line
+	 */
+	static final Pattern comment= Pattern.compile("([ ]*\\/\\/\\$NON-NLS-[0-9]\\$) *$"); //$NON-NLS-1$
+	/**
+	 * Should match leading whitespaces - not sure why eclipse does not allow to use \h instead of [ \t]
+	 */
+	static final Pattern leadingspaces_start= Pattern.compile("^[ \t]*"); //$NON-NLS-1$
+	/**
+	 * Should match all leading whitespaces at each start of a line
+	 * We have to eat them otherwise formatting is broken
+	 */
+	static final Pattern leadingspaces= Pattern.compile("\n[ \t]*"); //$NON-NLS-1$
+
+	/**
+	 * Replaces the provided node from the AST with the provided replacement node.
+	 * Remove one NLS comment at the same time.
+	 *
+	 * @param rewrite	The AST Rewriter
+	 * @param visited	The node to remove
+	 * @param replace_with_Call	The replacement node
+	 * @param editGroup	The edit group
+	 * @param cuRewrite	The cu rewrite
+	 * @throws CoreException Exception to be thrown to allow error handling in case of problem to compute the replacement
+	 */
+	public static void replaceAndRemoveNLS(final ASTRewrite rewrite, final ASTNode visited, final ASTNode replace_with_Call, final TextEditGroup editGroup, final CompilationUnitRewrite cuRewrite) throws CoreException {
+		String original= null;
+		ASTNode replacement= null;
+		try {
+			ASTNode st=getFirstAncestorOrNull(visited, Statement.class, FieldDeclaration.class);
+			CompilationUnit cu= (CompilationUnit)st.getRoot();
+			String buffer= cuRewrite.getCu().getBuffer().getContents();
+			int origStart= cu.getExtendedStartPosition(st);
+			int origLength= cu.getExtendedLength(st);
+			original= buffer.substring(origStart, origStart + origLength);
+			original= comment.matcher(original).replaceFirst(""); //$NON-NLS-1$
+			original= leadingspaces_start.matcher(original).replaceAll(""); //$NON-NLS-1$
+			original= leadingspaces.matcher(original).replaceAll("\n"); //$NON-NLS-1$
+			String originalmodified=original.replace(visited.toString(), replace_with_Call.toString());
+			replacement= rewrite.createStringPlaceholder(originalmodified, st.getNodeType());
+			rewrite.replace(st, replacement, editGroup);
+		} catch (JavaModelException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+	}
 	/**
 	 * Returns a list of local variable names which are visible at the given node.
 	 *

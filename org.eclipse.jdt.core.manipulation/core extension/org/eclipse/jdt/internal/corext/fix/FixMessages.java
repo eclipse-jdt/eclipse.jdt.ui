@@ -170,6 +170,7 @@ public final class FixMessages extends NLS {
 
 	public static String TypeAnnotationFix_move;
 	public static String TypeAnnotationFix_remove;
+	public static String ConstantsCleanUpFix_refactor;
 
 	static {
 		// initialize resource bundle

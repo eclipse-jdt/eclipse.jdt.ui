@@ -1030,6 +1030,86 @@ public class CleanUpConstants {
 	public static final String NO_STRING_CREATION= "cleanup.no_string_creation"; //$NON-NLS-1$
 
 	/**
+	 * Refactor access to system properties to use constants or methods
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY= "cleanup.system_property"; //$NON-NLS-1$
+
+	/**
+	 * Replace
+	 * <code>System.getProperty("file.separator")</code>
+	 * by
+	 * <p>
+	 * <code>File.separator</code><br> or<br>
+	 * <code>FileSystems.getDefault().getSeparator()</code> (Java 7).
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR= "cleanup.system_property_file_separator"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>System.getProperty("file.encoding")</code> by<p>
+	 * <code>Charset.defaultCharset().displayName()</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING= "cleanup.system_property_file_encoding"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>System.getProperty("path.separator")</code> by<p>
+	 * <code>File.pathSeparator</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR= "cleanup.system_property_path_separator"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>System.getProperty("line.separator")</code> by<p>
+	 * <code>System.lineSeparator()</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR= "cleanup.system_property_line_separator"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>Boolean.parseBoolean(System.getProperty("arbitrarykey"))</code> by<p>
+	 * <code>Boolean.getBoolean("arbitrarykey")</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN= "cleanup.system_property_boolean"; //$NON-NLS-1$
+	/**
 	 * Replaces Boolean.TRUE/Boolean.FALSE by true/false when used as primitive.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
