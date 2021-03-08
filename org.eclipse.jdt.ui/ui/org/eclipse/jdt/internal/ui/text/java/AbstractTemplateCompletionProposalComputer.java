@@ -68,20 +68,20 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 			return Collections.emptyList();
 		}
 
-		fEngine= computeCompletionEngine(javaContext);
-		if (fEngine == null) {
+		TemplateEngine engine= fEngine= computeCompletionEngine(javaContext);
+		if (engine == null) {
 			return Collections.emptyList();
 		}
 
-		fEngine.reset();
+		engine.reset();
 		ITextSelection viewerSelection= context.getTextSelection();
 		if (viewerSelection == null) {
 			viewerSelection = new TextSelection(context.getDocument(), context.getInvocationOffset(), 0);
 		}
 		Point selectionAsPoint = new Point(viewerSelection.getOffset(), viewerSelection.getLength());
-		fEngine.complete(javaContext.getViewer(), selectionAsPoint, javaContext.getInvocationOffset(), unit);
+		engine.complete(javaContext.getViewer(), selectionAsPoint, javaContext.getInvocationOffset(), unit);
 
-		TemplateProposal[] templateProposals= fEngine.getResults();
+		TemplateProposal[] templateProposals= engine.getResults();
 		List<ICompletionProposal> result= new ArrayList<>(Arrays.asList(templateProposals));
 
 		IJavaCompletionProposal[] keyWordResults= javaContext.getKeywordProposals();
@@ -142,8 +142,9 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 
 	@Override
 	public void sessionEnded() {
-		if (fEngine != null) {
-			fEngine.reset();
+		TemplateEngine engine= fEngine;
+		if (engine != null) {
+			engine.reset();
 			fEngine= null;
 		}
 	}
