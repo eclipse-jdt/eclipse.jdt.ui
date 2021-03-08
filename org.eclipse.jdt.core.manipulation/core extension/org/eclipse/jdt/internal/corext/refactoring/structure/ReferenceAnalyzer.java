@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -30,8 +31,6 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 /**
  * Updates references to moved static members.
@@ -88,7 +87,7 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 	@Override
 	public boolean visit(SimpleName node) {
-		boolean isVarType= node.getAST().apiLevel() >= ASTHelper.JLS10 && node.isVar();
+		boolean isVarType= node.getAST().apiLevel() >= AST.JLS10 && node.isVar();
 		if (! node.isDeclaration() && isMovedMember(node.resolveBinding()) && ! isVarType && ! isProcessed(node))
 			rewrite(node, fTarget);
 		return false;

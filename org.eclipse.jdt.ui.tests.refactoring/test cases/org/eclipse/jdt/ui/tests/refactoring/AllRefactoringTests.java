@@ -28,7 +28,7 @@ import org.junit.runners.Suite;
 	ExtractMethodTests1d8.class,
 	InlineMethodTests.class,
 	InlineMethodTests1d8.class,
-	InlineMethodTests16.class,
+	InlineMethodTests14.class,
 	ReplaceInvocationsTests.class,
 	SefTests.class,
 	InlineTempTests.class,
@@ -47,12 +47,12 @@ import org.junit.runners.Suite;
 	IntroduceParameterTests.class,
 	IntroduceParameterTests1d7.class,
 	IntroduceFactoryTests.class,
-	IntroduceFactoryTests16.class,
+	IntroduceFactoryTests15.class,
 
 	//-- structure
 	ChangeSignatureTests.class,
 	ChangeSignatureTests1d8.class,
-	ChangeSignatureTests16.class,
+	ChangeSignatureTests15.class,
 	IntroduceParameterObjectTests.class,
 	PullUpTests.class,
 	PullUpTests1d8.class,
@@ -63,7 +63,7 @@ import org.junit.runners.Suite;
 	ExtractInterfaceTests1d8.class,
 	ExtractSupertypeTests.class,
 	MoveInnerToTopLevelTests.class,
-	MoveInnerToNewTests16.class,
+	MoveInnerToNewTests14.class,
 	UseSupertypeWherePossibleTests.class,
 	ExtractClassTests.class,
 

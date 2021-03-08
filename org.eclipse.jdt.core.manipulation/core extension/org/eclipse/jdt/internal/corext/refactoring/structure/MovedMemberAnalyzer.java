@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -27,8 +28,6 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 /**
  * Updates references in moved static members.
@@ -66,7 +65,7 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 		if (isMovedMember(binding))
 			return super.visit(node);
 
-		boolean isVarType= node.getAST().apiLevel() >= ASTHelper.JLS10 && node.isVar();
+		boolean isVarType= node.getAST().apiLevel() >= AST.JLS10 && node.isVar();
 		if (isSourceAccess(binding) && ! isVarType)
 			rewrite(node, fSource);
 		return super.visit(node);

@@ -46,7 +46,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java16Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.JavaPreviewSetup;
 
 public class RenameRecordElementsTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenameRecordElements/";
@@ -54,7 +54,7 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 	private String fPrefixPref;
 
 	public RenameRecordElementsTests() {
-		rts= new Java16Setup();
+		rts= new JavaPreviewSetup();
 	}
 
 	@Override

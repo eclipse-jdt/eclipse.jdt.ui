@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Jesper S Møller - Bug 529432 - Allow JDT UI to target Java 10
@@ -147,7 +143,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_13 = JavaCore.VERSION_13;
 	private static final String VERSION_14 = JavaCore.VERSION_14;
 	private static final String VERSION_15 = JavaCore.VERSION_15;
-	private static final String VERSION_16 = JavaCore.VERSION_16;
 	private static final String VERSION_LATEST = JavaCore.latestSupportedJavaVersion();
 	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
@@ -305,7 +300,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createComplianceTabContent(Composite folder) {
 
 		final String[] complianceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15 };
 		final String[] complianceLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -320,11 +315,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version_13,
 			PreferencesMessages.ComplianceConfigurationBlock_version_14,
 			PreferencesMessages.ComplianceConfigurationBlock_version_15,
-			PreferencesMessages.ComplianceConfigurationBlock_version_16,
 		};
 
 		String[] targetVersions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15 };
 		String[] targetLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
 				PreferencesMessages.ComplianceConfigurationBlock_version11,
@@ -342,7 +336,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version_13,
 				PreferencesMessages.ComplianceConfigurationBlock_version_14,
 				PreferencesMessages.ComplianceConfigurationBlock_version_15,
-				PreferencesMessages.ComplianceConfigurationBlock_version_16,
 		};
 		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
 			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_JSR14);
@@ -350,7 +343,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 
 		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15 };
 		String[] sourceLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_version13,
 				PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -365,7 +358,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version_13,
 				PreferencesMessages.ComplianceConfigurationBlock_version_14,
 				PreferencesMessages.ComplianceConfigurationBlock_version_15,
-				PreferencesMessages.ComplianceConfigurationBlock_version_16,
 		};
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
@@ -815,13 +807,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 
-			//TODO: Comment once Java SE 16 has been shipped:
-			String selectedCompliance= getValue(PREF_COMPLIANCE);
-			if (VERSION_16.equals(selectedCompliance)) {
-				fJRE50InfoText.setText(
-						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
-				isVisible= true;
-			}
+//			//TODO: Comment once Java SE 15 has been shipped:
+//			String selectedCompliance= getValue(PREF_COMPLIANCE);
+//			if (VERSION_15.equals(selectedCompliance)) {
+//				fJRE50InfoText.setText(
+//						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
+//				isVisible= true;
+//			}
 
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? image : null);

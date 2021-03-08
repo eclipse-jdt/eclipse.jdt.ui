@@ -246,7 +246,7 @@ public class LocalCorrectionsSubProcessor {
 		List<String> affectedLocals= new ArrayList<>();
 		SimpleName vName= null;
 		ITypeBinding vType= null;
-		if (selectedNode.getAST().apiLevel() >= ASTHelper.JLS10 && (selectedNode instanceof VariableDeclarationStatement)) {
+		if (selectedNode.getAST().apiLevel() >= AST.JLS10 && (selectedNode instanceof VariableDeclarationStatement)) {
 			for (Object o : ((VariableDeclarationStatement)selectedNode).fragments()) {
 				VariableDeclarationFragment v= ((VariableDeclarationFragment)o);
 				vName= v.getName();

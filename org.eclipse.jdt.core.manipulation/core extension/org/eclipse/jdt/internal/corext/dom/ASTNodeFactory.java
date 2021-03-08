@@ -57,8 +57,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
-
 /**
  * JDT-UI-internal helper methods to create new {@link ASTNode}s.
  * Complements <code>AST#new*(..)</code> and <code>ImportRewrite#add*(..)</code>.
@@ -432,7 +430,7 @@ public class ASTNodeFactory {
 	}
 
 	public static Type newNonVarType(AST ast, VariableDeclaration declaration, ImportRewrite importRewrite, ImportRewriteContext context) {
-		if (declaration.getAST().apiLevel() < ASTHelper.JLS10) {
+		if (declaration.getAST().apiLevel() < AST.JLS10) {
 			return newType(ast, declaration, importRewrite, context);
 		}
 

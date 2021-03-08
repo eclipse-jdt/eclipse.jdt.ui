@@ -28,7 +28,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 AddUnimplementedMethodsTest.class,
 GenerateGettersSettersTest.class,
-GenerateGettersSettersTest16.class,
+GenerateGettersSettersTest14.class,
 GenerateDelegateMethodsTest.class,
 AddUnimplementedConstructorsTest.class,
 GenerateConstructorUsingFieldsTest.class,

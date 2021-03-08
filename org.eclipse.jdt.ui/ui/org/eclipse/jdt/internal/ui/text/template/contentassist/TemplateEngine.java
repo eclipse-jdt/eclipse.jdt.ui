@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
 
 public class TemplateEngine {
@@ -212,7 +213,7 @@ public class TemplateEngine {
 			}
 			return false;
 		}
-		if (NEW_RECORD_TEMPLATE_NAME.equals(template.getName()) && JavaModelUtil.is16OrHigher(context.getJavaProject())) {
+		if (NEW_RECORD_TEMPLATE_NAME.equals(template.getName()) && PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(context.getJavaProject())) {
 			return true;
 		}
 		return true;

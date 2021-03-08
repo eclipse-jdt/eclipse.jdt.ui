@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -106,8 +107,6 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 /**
  * Implementations for {@link CodeGeneration} APIs, and other helper methods
@@ -766,7 +765,7 @@ public class StubUtility {
 	@Deprecated
 	private static String[] getExceptionNames(MethodDeclaration decl) {
 		String[] exceptionNames;
-		if (decl.getAST().apiLevel() >= ASTHelper.JLS8) {
+		if (decl.getAST().apiLevel() >= AST.JLS8) {
 			List<Type> exceptions= decl.thrownExceptionTypes();
 			exceptionNames= new String[exceptions.size()];
 			for (int i= 0; i < exceptionNames.length; i++) {
@@ -794,7 +793,7 @@ public class StubUtility {
 	@Deprecated
 	private static ASTNode getReturnType(MethodDeclaration decl) {
 		// used from API, can't eliminate
-		return decl.getAST().apiLevel() == ASTHelper.JLS2 ? decl.getReturnType() : decl.getReturnType2();
+		return decl.getAST().apiLevel() == AST.JLS2 ? decl.getReturnType() : decl.getReturnType2();
 	}
 
 

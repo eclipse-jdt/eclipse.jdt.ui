@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.IType;
  * org.eclipse.jdt.junit.internal_testKinds.
  */
 public interface ITestFinder {
-
 	ITestFinder NULL= new ITestFinder() {
 		@Override
 		public void findTestsInContainer(IJavaElement element, Set<IType> result, IProgressMonitor pm) {

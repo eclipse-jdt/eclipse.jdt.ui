@@ -20,6 +20,7 @@ import java.util.List;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -245,7 +246,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 
 	@Override
 	public boolean visit(SimpleType node) {
-		if (node.getAST().apiLevel() < ASTHelper.JLS10 || !node.isVar()) {
+		if (node.getAST().apiLevel() < AST.JLS10 || !node.isVar()) {
 			typeRefFound(node.getName());
 		}
 		visitAnnotations(node);
@@ -267,7 +268,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 
 	private void visitAnnotations(AnnotatableType node) {
-		if (node.getAST().apiLevel() >= ASTHelper.JLS8) {
+		if (node.getAST().apiLevel() >= AST.JLS8) {
 			doVisitChildren(node.annotations());
 		}
 	}
@@ -478,13 +479,13 @@ public class ImportReferencesCollector extends GenericVisitor {
 		// name not visited
 
 		int apiLevel= node.getAST().apiLevel();
-		if (apiLevel >= ASTHelper.JLS8) {
+		if (apiLevel >= AST.JLS8) {
 			doVisitNode(node.getReceiverType());
 		}
 		// receiverQualifier not visited:
 		//   Enclosing class names cannot be shadowed by an import (qualification is always redundant).
 		doVisitChildren(node.parameters());
-		if (apiLevel >= ASTHelper.JLS8) {
+		if (apiLevel >= AST.JLS8) {
 			doVisitChildren(node.extraDimensions());
 			doVisitChildren(node.thrownExceptionTypes());
 		} else {

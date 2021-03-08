@@ -26,24 +26,24 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
-public class InlineMethodTests16 extends InlineMethodTests {
+public class InlineMethodTests14 extends InlineMethodTests {
 
 	@Rule
-	public InlineMethodTestSetup16 fgSetup= new InlineMethodTestSetup16();
+	public InlineMethodTestSetup14 fgTestSetup14= new InlineMethodTestSetup14();
 
 	protected void performSimpleTest() throws Exception {
-		performTestInlineCall(fgSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, fgSetup.getSimplePkgOutName());
+		performTestInlineCall(fgTestSetup14.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, fgTestSetup14.getSimplePkgOutName());
 	}
 
 	protected void performDefaultTest() throws Exception {
-		performTestInlineCall(fgSetup.getDefaultPackage(), getName(), COMPARE_WITH_OUTPUT, fgSetup.getSimplePkgOutName());
+		performTestInlineCall(fgTestSetup14.getDefaultPackage(), getName(), COMPARE_WITH_OUTPUT, fgTestSetup14.getSimplePkgOutName());
 	}
 
 	@Override
 	protected String getFilePath(IPackageFragment pack, String name) {
 		IPackageFragment packToUse = pack;
-		if (pack == fgSetup.getDefaultPackage()) {
-			packToUse= fgSetup.getSimplePackage();
+		if (pack == fgTestSetup14.getDefaultPackage()) {
+			packToUse= fgTestSetup14.getSimplePackage();
 		}
 		return super.getFilePath(packToUse, name);
 	}

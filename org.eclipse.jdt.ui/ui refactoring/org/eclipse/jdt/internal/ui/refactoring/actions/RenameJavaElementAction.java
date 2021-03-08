@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -60,7 +61,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameLinkedMode;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class RenameJavaElementAction extends SelectionDispatchAction {
@@ -244,7 +244,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	private boolean isVarTypeSelection(ITextSelection textSelection) {
 		if (textSelection instanceof JavaTextSelection) {
 			ASTNode node= ((JavaTextSelection) textSelection).resolveCoveringNode();
-			if (node instanceof SimpleName && node.getAST().apiLevel() >= ASTHelper.JLS10 && ((SimpleName) node).isVar()) {
+			if (node instanceof SimpleName && node.getAST().apiLevel() >= AST.JLS10 && ((SimpleName) node).isVar()) {
 				return true;
 			}
 		} else if (textSelection != null) {

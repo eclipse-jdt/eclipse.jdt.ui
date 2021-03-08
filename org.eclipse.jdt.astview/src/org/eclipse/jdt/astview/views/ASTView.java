@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,10 +7,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -118,6 +114,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
@@ -135,24 +132,70 @@ import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
-
 
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 
-	static final int JLS_LATEST= ASTHelper.JLS_Latest;
-	private static final int JLS16= ASTHelper.JLS16;
-	private static final int JLS15= ASTHelper.JLS15;
-	private static final int JLS14= ASTHelper.JLS14;
-	private static final int JLS13= ASTHelper.JLS13;
-	private static final int JLS12= ASTHelper.JLS12;
-	private static final int JLS11= ASTHelper.JLS11;
-	private static final int JLS10= ASTHelper.JLS10;
-	private static final int JLS9= ASTHelper.JLS9;
-	private static final int JLS8= ASTHelper.JLS8;
-	private static final int JLS4= ASTHelper.JLS4;
-	private static final int JLS3= ASTHelper.JLS3;
-	private static final int JLS2= ASTHelper.JLS2;
+	static final int JLS_LATEST= AST.JLS15;
+
+	private static final int JLS15= AST.JLS15;
+
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS14= AST.JLS14;
+
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS13= AST.JLS13;
+
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS12= AST.JLS12;
+
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS11= AST.JLS11;
+
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS10= AST.JLS10;
+
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS9= AST.JLS9;
+
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS8= AST.JLS8;
+
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS4= AST.JLS4;
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS3= AST.JLS3;
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
+	private static final int JLS2= AST.JLS2;
 
 	private class ASTViewSelectionProvider implements ISelectionProvider {
 		ListenerList<ISelectionChangedListener> fListeners= new ListenerList<>(ListenerList.IDENTITY);
@@ -511,7 +554,6 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				case JLS13:
 				case JLS14:
 				case JLS15:
-				case JLS16:
 					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
@@ -1133,7 +1175,6 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				new ASTLevelToggle("AST Level 1&3 (13)", JLS13), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&4 (14)", JLS14), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&5 (15)", JLS15), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&6 (16)", JLS16), //$NON-NLS-1$
 		};
 
 		fAddToTrayAction= new Action() {
