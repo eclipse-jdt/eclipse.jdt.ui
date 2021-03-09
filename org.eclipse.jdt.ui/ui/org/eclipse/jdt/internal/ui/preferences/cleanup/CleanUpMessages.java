@@ -170,6 +170,7 @@ public class CleanUpMessages extends NLS {
 
 	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
 
+	public static String DuplicateCodeTabPage_CheckboxName_OperandFactorization;
 	public static String DuplicateCodeTabPage_CheckboxName_TernaryOperator;
 	public static String DuplicateCodeTabPage_CheckboxName_StrictlyEqualOrDifferent;
 	public static String DuplicateCodeTabPage_CheckboxName_MergeConditionalBlocks;

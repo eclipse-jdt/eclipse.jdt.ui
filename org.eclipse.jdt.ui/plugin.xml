@@ -7338,9 +7338,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.standard_comparison">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.OperandFactorizationCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.operand_factorization"
+            runAfter="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.TernaryOperatorCleanUp"
             id="org.eclipse.jdt.ui.cleanup.ternary_operator"
-            runAfter="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression">
+            runAfter="org.eclipse.jdt.ui.cleanup.operand_factorization">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp"

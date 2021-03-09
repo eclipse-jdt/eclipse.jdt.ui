@@ -1430,6 +1430,18 @@ public class CleanUpConstants {
 	public static final String UNREACHABLE_BLOCK= "cleanup.unreachable_block"; //$NON-NLS-1$
 
 	/**
+	 * Replaces (X && Y) || (X && Z) by (X && (Y || Z)).
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String OPERAND_FACTORIZATION= "cleanup.operand_factorization"; //$NON-NLS-1$
+
+	/**
 	 * Replaces (X && Y) || (!X && Z) by X ? Y : Z.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
