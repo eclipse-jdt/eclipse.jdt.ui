@@ -38,7 +38,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.IBindingService;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -50,6 +49,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 /**
  * Handler to be used to run a quick fix or assist by keyboard shortcut
@@ -132,7 +132,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 		ASTNode node= context.getCoveringNode();
 		if (node instanceof SimpleName) {
 			SimpleName name= (SimpleName) node;
-			if (name.getAST().apiLevel() >= AST.JLS10 && name.isVar()) {
+			if (name.getAST().apiLevel() >= ASTHelper.JLS10 && name.isVar()) {
 				return null;
 			}
 			return new LinkedNamesAssistProposal(context, name);

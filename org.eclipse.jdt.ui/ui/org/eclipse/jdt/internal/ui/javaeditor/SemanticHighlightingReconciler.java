@@ -131,7 +131,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 		@Override
 		public boolean visit(SimpleType node) {
-			if (node.getAST().apiLevel() >= AST.JLS10 && node.isVar()) {
+			if (node.getAST().apiLevel() >= ASTHelper.JLS10 && node.isVar()) {
 				int offset= node.getStartPosition();
 				int length= node.getLength();
 				if (offset > -1 && length > 0) {

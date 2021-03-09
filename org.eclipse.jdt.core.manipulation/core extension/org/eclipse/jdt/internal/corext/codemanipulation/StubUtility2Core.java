@@ -85,6 +85,8 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
+
 /**
  * Utilities for code generation based on AST rewrite.
  *
@@ -525,7 +527,7 @@ public final class StubUtility2Core {
 
 	public static void createThrownExceptions(MethodDeclaration decl, IMethodBinding method, ImportRewrite imports, ImportRewriteContext context, AST ast) {
 		ITypeBinding[] excTypes= method.getExceptionTypes();
-		if (ast.apiLevel() >= AST.JLS8) {
+		if (ast.apiLevel() >= ASTHelper.JLS8) {
 			List<Type> thrownExceptions= decl.thrownExceptionTypes();
 			for (ITypeBinding t : excTypes) {
 				Type excType= imports.addImport(t, ast, context, TypeLocation.EXCEPTION);

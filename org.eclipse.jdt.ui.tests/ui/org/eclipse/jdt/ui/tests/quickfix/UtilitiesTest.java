@@ -221,7 +221,7 @@ public class UtilitiesTest extends QuickFixTest {
 
 	@Test
 	public void testGetPossibleTypeKindsForTypes() throws Exception {
-		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();

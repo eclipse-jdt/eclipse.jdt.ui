@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java15ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java16ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
@@ -44,7 +44,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 public class JavadocQuickFixTestPreview extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java15ProjectTestSetup(true);
+    public ProjectTestSetup projectsetup = new Java16ProjectTestSetup(true);
 
 	private IJavaProject fJProject1;
 
@@ -72,7 +72,7 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, res, null);
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
 		JavaProjectHelper.addRequiredModularProject(fJProject1, projectsetup.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");

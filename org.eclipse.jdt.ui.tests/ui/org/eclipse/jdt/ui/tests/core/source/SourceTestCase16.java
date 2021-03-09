@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * @see org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation
  *
  */
-public class SourceTestCase14 {
+public class SourceTestCase16 {
 	@Rule
 	public TestName tn=new TestName();
 
@@ -106,7 +106,7 @@ public class SourceTestCase14 {
 	public void setUp() throws CoreException {
 
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
-		assertNotNull(JavaProjectHelper.addRTJar_15(fJavaProject, true));
+		assertNotNull(JavaProjectHelper.addRTJar_16(fJavaProject, false));
 
 		fRoot= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackageP= fRoot.createPackageFragment("p", true, null);

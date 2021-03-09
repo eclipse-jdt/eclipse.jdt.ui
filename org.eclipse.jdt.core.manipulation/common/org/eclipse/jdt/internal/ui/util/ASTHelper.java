@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -17,20 +21,38 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Modifier;
 
+@SuppressWarnings("deprecation")
 public class ASTHelper {
 
-	@SuppressWarnings("deprecation")
+	public static final int JLS2 = AST.JLS2;
+	public static final int JLS3 = AST.JLS3;
+	public static final int JLS4 = AST.JLS4;
+	public static final int JLS8 = AST.JLS8;
+	public static final int JLS9 = AST.JLS9;
+	public static final int JLS10 = AST.JLS10;
+	public static final int JLS11 = AST.JLS11;
+	public static final int JLS12 = AST.JLS12;
+	public static final int JLS13 = AST.JLS13;
+	public static final int JLS14 = AST.JLS14;
+	public static final int JLS15 = AST.JLS15;
+	public static final int JLS16 = AST.JLS16;
+
+	/*
+	 *  Junit4TestFinder and Junit5TestFinder use AST.JLS_Latest directly
+	 */
+	public static final int JLS_Latest = AST.JLS_Latest;
+
 	private static boolean isNodeTypeSupportedInAST(AST ast, int nodeType) {
 		switch (nodeType) {
 			case ASTNode.SWITCH_CASE:
 			case ASTNode.SWITCH_EXPRESSION:
 			case ASTNode.YIELD_STATEMENT:
-				return ast.apiLevel() >= AST.JLS14;
+				return ast.apiLevel() >= JLS14;
 			case ASTNode.TEXT_BLOCK:
-				return ast.apiLevel() >= AST.JLS15;
+				return ast.apiLevel() >= JLS15;
 			case ASTNode.RECORD_DECLARATION:
 			case ASTNode.INSTANCEOF_EXPRESSION:
-				return ast.isPreviewEnabled();
+				return ast.apiLevel() >= JLS16;
 			default:
 				break;
 		}
@@ -70,6 +92,10 @@ public class ASTHelper {
 
 	public static boolean isSealedTypeSupportedInAST(AST ast) {
 		return isModifierSupportedInAST(ast, Modifier.SEALED);
+	}
+
+	public static boolean isInstanceofExpressionPatternSupported(AST ast) {
+		return isNodeTypeSupportedInAST(ast, ASTNode.INSTANCEOF_EXPRESSION);
 	}
 
 }

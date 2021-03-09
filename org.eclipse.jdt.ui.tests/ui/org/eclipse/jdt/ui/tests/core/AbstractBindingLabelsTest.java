@@ -24,10 +24,10 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.IBinding;
 
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 public abstract class AbstractBindingLabelsTest extends CoreTests {
@@ -35,7 +35,7 @@ public abstract class AbstractBindingLabelsTest extends CoreTests {
 	protected boolean fHaveSource= true;
 
 	protected String getBindingLabel(IJavaElement elem, long flags) {
-		ASTParser parser= ASTParser.newParser(AST.JLS15);
+		ASTParser parser= ASTParser.newParser(ASTHelper.JLS_Latest);
 		parser.setResolveBindings(true);
 		parser.setProject(fJProject1);
 		IBinding binding= parser.createBindings(new IJavaElement[]{elem}, null)[0];

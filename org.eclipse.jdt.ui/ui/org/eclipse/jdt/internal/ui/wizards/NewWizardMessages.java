@@ -118,7 +118,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_warning_NotJDKCompliant2;
 	public static String NewTypeWizardPage_warning_EnumClassNotFound;
 	public static String NewTypeWizardPage_warning_RecordClassNotFound;
-	public static String NewTypeWizardPage_warning_PreviewFeatureNotEnabled;
 	public static String NewTypeWizardPage_default;
 	public static String NewTypeWizardPage_ChoosePackageDialog_title;
 	public static String NewTypeWizardPage_ChoosePackageDialog_description;

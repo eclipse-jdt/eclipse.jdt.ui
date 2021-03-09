@@ -47,7 +47,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -68,6 +67,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class AddUnimplementedMethodsTest {
 	@Rule
@@ -385,7 +386,7 @@ public class AddUnimplementedMethodsTest {
 	@Deprecated
 	@Test
 	public void jLS3() throws Exception {
-		doTestOldAstLevel(AST.JLS3);
+		doTestOldAstLevel(ASTHelper.JLS3);
 	}
 
 	/**
@@ -395,12 +396,12 @@ public class AddUnimplementedMethodsTest {
 	@Deprecated
 	@Test
 	public void jLS4() throws Exception {
-		doTestOldAstLevel(AST.JLS4);
+		doTestOldAstLevel(ASTHelper.JLS4);
 	}
 
 	@Test
 	public void jLS8() throws Exception {
-		doTestOldAstLevel(AST.JLS8);
+		doTestOldAstLevel(ASTHelper.JLS8);
 	}
 
 	/**

@@ -20,12 +20,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-public class JavaPreviewSetup extends Java16Setup {
+public class Java16Setup extends RefactoringTestSetup {
 	/*
 	 * @see org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup#addRTJar(org.eclipse.jdt.core.IJavaProject)
 	 */
 	@Override
 	protected IPackageFragmentRoot addRTJar(IJavaProject project) throws CoreException {
-		return JavaProjectHelper.addRTJar_16(project, true);
+		return JavaProjectHelper.addRTJar_16(project, false);
 	}
 }

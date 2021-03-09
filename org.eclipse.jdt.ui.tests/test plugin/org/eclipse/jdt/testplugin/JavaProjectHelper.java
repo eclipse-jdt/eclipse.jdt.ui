@@ -104,6 +104,7 @@ public class JavaProjectHelper {
 	public static final IPath RT_STUBS13= new Path("testresources/rtstubs13.jar");
 	public static final IPath RT_STUBS14= new Path("testresources/rtstubs14.jar");
 	public static final IPath RT_STUBS15= new Path("testresources/rtstubs_15.jar");
+	public static final IPath RT_STUBS16= new Path("testresources/rtstubs_16.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 
@@ -313,6 +314,23 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 15 for the given project.
+	 *
+	 * @param project the java project
+	 * @param enable_preview_feature sets enable-preview compliance project option based on the
+	 *            value specified.
+	 */
+	public static void set16CompilerOptions(IJavaProject project, boolean enable_preview_feature) {
+		Map<String, String> options= project.getOptions(false);
+		set16_CompilerOptions(options);
+		if (enable_preview_feature) {
+			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		}
+		project.setOptions(options);
+	}
+
+	/**
 	 * Sets the compiler options to 1.8 for the given project.
 	 *
 	 * @param project the java project
@@ -420,12 +438,21 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Sets the compiler options to 14.
+	 * Sets the compiler options to 15.
 	 *
 	 * @param options the compiler options to configure
 	 */
 	public static void set15_CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_15, options);
+	}
+
+	/**
+	 * Sets the compiler options to 16.
+	 *
+	 * @param options the compiler options to configure
+	 */
+	public static void set16_CompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_16, options);
 	}
 
 	/**
@@ -943,6 +970,12 @@ public class JavaProjectHelper {
 	public static IPackageFragmentRoot addRTJar_15(IJavaProject jproject, boolean enable_preview_feature) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS15);
 		set15CompilerOptions(jproject, enable_preview_feature);
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+
+	public static IPackageFragmentRoot addRTJar_16(IJavaProject jproject, boolean enable_preview_feature) throws CoreException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS16);
+		set16CompilerOptions(jproject, enable_preview_feature);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 

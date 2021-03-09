@@ -15,13 +15,13 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import org.junit.Test;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.JavaPreviewSetup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java16Setup;
 
-public class IntroduceFactoryTests15 extends IntroduceFactoryTestsBase {
+public class IntroduceFactoryTests16 extends IntroduceFactoryTestsBase {
 	private static final String REFACTORING_PATH= "IntroduceFactory/";
 
-	public IntroduceFactoryTests15() {
-		rts= new JavaPreviewSetup();
+	public IntroduceFactoryTests16() {
+		rts= new Java16Setup();
 	}
 
 	@Override
