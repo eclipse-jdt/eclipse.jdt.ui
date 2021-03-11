@@ -342,12 +342,13 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.ControlFlowMergeCleanUp_description, cuRewrite);
 
 			// Remove the nodes common to all cases
-			boolean[] areCasesRemovable= new boolean[allCasesStatements.size()];
-			Arrays.fill(areCasesRemovable, false);
-			removeStmtsFromCases(rewrite, group, areCasesRemovable);
+			boolean[] areCasesToRemove= new boolean[allCasesStatements.size()];
+			Arrays.fill(areCasesToRemove, false);
+			List<Statement> statementsToRemove= new ArrayList<>();
+			flagCasesAndStatementsToRemove(areCasesToRemove, statementsToRemove);
 			List<Statement> oneCaseToPullDown= caseStatementsToPullDown[casesToRefactor.get(0)];
 
-			if (allRemovable(areCasesRemovable, 0)) {
+			if (allRemovable(areCasesToRemove, 0)) {
 				if (ASTNodes.canHaveSiblings(visited)) {
 					insertIdenticalCode(rewrite, group, oneCaseToPullDown);
 
@@ -368,8 +369,8 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 				for (int i : casesToRefactor) {
 					ASTNode parent= allCases.get(i);
 
-					if (areCasesRemovable[i]) {
-						if (i == areCasesRemovable.length - 2 && !areCasesRemovable[i + 1]) {
+					if (areCasesToRemove[i]) {
+						if (i == areCasesToRemove.length - 2 && !areCasesToRemove[i + 1]) {
 							// Then clause is empty and there is only one else clause
 							// => revert if statement
 							IfStatement newIfStatement= ast.newIfStatement();
@@ -379,7 +380,7 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 							break;
 						}
 
-						if (allRemovable(areCasesRemovable, i)) {
+						if (allRemovable(areCasesToRemove, i)) {
 							rewrite.remove(parent, group);
 							break;
 						}
@@ -402,6 +403,10 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 					newBlock.statements().addAll(orderedStatements);
 					ASTNodes.replaceButKeepComment(rewrite, visited, newBlock, group);
 				}
+			}
+
+			for (Statement statementToRemove : statementsToRemove) {
+				rewrite.remove(statementToRemove, group);
 			}
 		}
 
@@ -428,7 +433,9 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 			return true;
 		}
 
-		private void removeStmtsFromCases(final ASTRewrite rewrite, final TextEditGroup group, final boolean[] areCasesRemovable) {
+		private void flagCasesAndStatementsToRemove(final boolean[] areCasesRemovable, final List<Statement> statementsToRemove) {
+			boolean isFirstCase= true;
+
 			for (int i : casesToRefactor) {
 				List<Statement> removedStatements= caseStatementsToPullDown[i];
 				ASTNode parent= allCases.get(i);
@@ -436,11 +443,11 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 				if (removedStatements.containsAll(allCasesStatements.get(i))
 						&& (!(parent instanceof IfStatement) || ASTNodes.isPassiveWithoutFallingThrough(((IfStatement) parent).getExpression()))) {
 					areCasesRemovable[i]= true;
-				} else {
-					for (Statement removedStatement : removedStatements) {
-						rewrite.remove(removedStatement, group);
-					}
+				} else if (/* The first case is not removed, it is moved */ !isFirstCase) {
+					statementsToRemove.addAll(removedStatements);
 				}
+
+				isFirstCase= false;
 			}
 		}
 	}

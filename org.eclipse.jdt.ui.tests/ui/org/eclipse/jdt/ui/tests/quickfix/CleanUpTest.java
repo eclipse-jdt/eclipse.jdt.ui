@@ -16465,6 +16465,38 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            o.toString();\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void pullDownSeveralNotFallingThroughLines(int number) {\n" //
+				+ "        if (number == 1) {\n" //
+				+ "            System.out.println(\"First case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        } else if (number == 2) {\n" //
+				+ "            System.out.println(\"Second case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        } else if (number == 3) {\n" //
+				+ "            throw new NullPointerException(\"I do completely other things and fall through\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Fourth case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void createBlockToPullDown(int number) {\n" //
+				+ "        if (number == 1) {\n" //
+				+ "            System.out.println(\"Completely different code\");\n" //
+				+ "        } else if (number == 2) {\n" //
+				+ "            System.out.println(\"First case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Second case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -16583,6 +16615,34 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "        o.toString();\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void pullDownSeveralNotFallingThroughLines(int number) {\n" //
+				+ "        if (number == 1) {\n" //
+				+ "            System.out.println(\"First case\");\n" //
+				+ "        } else if (number == 2) {\n" //
+				+ "            System.out.println(\"Second case\");\n" //
+				+ "        } else if (number == 3) {\n" //
+				+ "            throw new NullPointerException(\"I do completely other things and fall through\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Fourth case\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Identical\");\n" //
+				+ "        System.out.println(\"code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void createBlockToPullDown(int number) {\n" //
+				+ "        if (number == 1) {\n" //
+				+ "            System.out.println(\"Completely different code\");\n" //
+				+ "        } else {\n" //
+				+ "            if (number == 2) {\n" //
+				+ "                System.out.println(\"First case\");\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Second case\");\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		// When
@@ -16637,43 +16697,43 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public int doNotRefactorWithNameConflict(boolean isActive) {\n" //
-				+ "        int i;\n" //
+				+ "        int k;\n" //
 				+ "\n" //
 				+ "        if (isActive) {\n" //
 				+ "            int j = 1;\n" //
-				+ "            i = j + 10;\n" //
+				+ "            k = j + 10;\n" //
 				+ "        } else {\n" //
 				+ "            int j = 1;\n" //
-				+ "            i = j + 10;\n" //
+				+ "            k = j + 10;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        int j = 123;\n" //
 				+ "        System.out.println(\"Other number: \" + j);\n" //
-				+ "        return i;\n" //
+				+ "        return k;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public int doNotRefactorWithNameConflictInBlock(boolean isActive) {\n" //
-				+ "        int i;\n" //
+				+ "        int m;\n" //
 				+ "\n" //
 				+ "        if (isActive) {\n" //
 				+ "            int j = 1;\n" //
-				+ "            i = j + 10;\n" //
+				+ "            m = j + 10;\n" //
 				+ "        } else {\n" //
 				+ "            int j = 1;\n" //
-				+ "            i = j + 10;\n" //
+				+ "            m = j + 10;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        if (isActive) {\n" //
 				+ "            int j = 123;\n" //
 				+ "            System.out.println(\"Other number: \" + j);\n" //
 				+ "        }\n" //
-				+ "        return i;\n" //
+				+ "        return m;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public int doNotRefactorWithNameConfusion(boolean b) {\n" //
+				+ "    public int doNotRefactorWithNameConfusion(boolean hasError) {\n" //
 				+ "        int i;\n" //
 				+ "\n" //
-				+ "        if (b) {\n" //
+				+ "        if (hasError) {\n" //
 				+ "            int j = 1;\n" //
 				+ "            i = j + 10;\n" //
 				+ "        } else {\n" //
@@ -16685,8 +16745,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return i;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public int doNotMoveVarOutsideItsScope(boolean b) {\n" //
-				+ "        if (b) {\n" //
+				+ "    public int doNotMoveVarOutsideItsScope(boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
 				+ "            int dontMoveMeIMLocal = 1;\n" //
 				+ "            return dontMoveMeIMLocal + 10;\n" //
 				+ "        } else {\n" //
