@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -566,6 +566,12 @@ public class MoveMembersTests extends GenericRefactoringTest {
 		// Move a type which references a field in an enclosing type
 		// and a field in a sibling
 		typeHelper_passing(new String[] { "SomeInner" });
+	}
+
+	@Test
+	public void test63() throws Exception { // test for Bug 236473
+		// Move a static method to a type that has a static import for it
+		methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] });
 	}
 
 	//---
