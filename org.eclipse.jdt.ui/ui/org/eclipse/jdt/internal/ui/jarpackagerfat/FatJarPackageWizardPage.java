@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -666,7 +666,10 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			for (ILaunchConfiguration launchconfig : manager.getLaunchConfigurations(type)) {
 				if (!launchconfig.getAttribute(IDebugUIConstants.ATTR_PRIVATE, false)) {
 					String projectName= launchconfig.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
-					result.add(new ExistingLaunchConfigurationElement(launchconfig, projectName));
+					IProject proj= ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+					if (proj != null && proj.isOpen()) {
+						result.add(new ExistingLaunchConfigurationElement(launchconfig, projectName));
+					}
 				}
 			}
 		} catch (CoreException e) {
