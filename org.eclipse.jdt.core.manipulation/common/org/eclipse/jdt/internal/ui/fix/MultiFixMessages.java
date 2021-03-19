@@ -163,6 +163,8 @@ public class MultiFixMessages extends NLS {
 	public static String TernaryOperatorCleanUp_description;
 	public static String StrictlyEqualOrDifferentCleanUp_description;
 	public static String MergeConditionalBlocksCleanup_description;
+	public static String MergeConditionalBlocksCleanup_description_inner_if;
+	public static String MergeConditionalBlocksCleanup_description_if_suite;
 	public static String ControlFlowMergeCleanUp_description;
 	public static String RedundantFallingThroughBlockEndCleanup_description;
 	public static String RedundantIfConditionCleanup_description;

@@ -7938,11 +7938,12 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testMergeConditionalBlocks() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
+				+ "public class E {\n" //
 				+ "\n" //
 				+ "    /** Duplicate if and else if code, merge it */\n" //
 				+ "    public void duplicateIfAndElseIf(int i) {\n" //
@@ -8115,15 +8116,185 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            q++;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatements(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseInnerElse(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid) {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int j = 0;\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseLoneIfStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear();\n" //
+				+ "            else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseCommentedLoneIfStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear(); // Keep this comment too\n" //
+				+ "            else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithCommentedElse(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid) {\n" //
+				+ "                texts.clear();\n" //
+				+ "            } else\n" //
+				+ "                System.out.println(\"Duplicate code\"); // Keep this comment too\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseCommentedStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear(); // Keep this comment too\n" //
+				+ "            else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseLoneStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear();\n" //
+				+ "            else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseInnerLoneStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear();\n" //
+				+ "            else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        } else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithLoneElseStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid) {\n" //
+				+ "                texts.clear();\n" //
+				+ "            } else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithFourOperands(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (0 < i1 && i1 < 10) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (0 < i2 && i2 < 10) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid,\n" //
+				+ "            boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid || isEditMode) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid | isEditMode) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeLongDuplicateCode(boolean isActive, boolean isValid, int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                int j = number + 123;\n" //
+				+ "                System.out.println((j == 0) ? \"Duplicate\" : \"code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            int j = 123 + number;\n" //
+				+ "            System.out.println((0 != j) ? \"code\" : \"Duplicate\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
-
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
+				+ "public class E {\n" //
 				+ "\n" //
 				+ "    /** Duplicate if and else if code, merge it */\n" //
 				+ "    public void duplicateIfAndElseIf(int i) {\n" //
@@ -8250,18 +8421,151 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            System.out.println(\"Different\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatements(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseInnerElse(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (!isActive || isValid) {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int j = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseLoneIfStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear();\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseCommentedLoneIfStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear(); // Keep this comment too\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithCommentedElse(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            texts.clear();\n" //
+				+ "        } else\n" //
+				+ "            System.out.println(\"Duplicate code\"); // Keep this comment too\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseCommentedStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear(); // Keep this comment too\n" //
+				+ "        else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseLoneStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear();\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseInnerLoneStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear();\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithLoneElseStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            texts.clear();\n" //
+				+ "        } else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithFourOperands(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if ((0 < i1 && i1 < 10) && (0 < i2 && i2 < 10)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid,\n" //
+				+ "            boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && (isValid || isEditMode)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && (isValid | isEditMode)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeLongDuplicateCode(boolean isActive, boolean isValid, int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            int j = number + 123;\n" //
+				+ "            System.out.println((j == 0) ? \"Duplicate\" : \"code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.MergeConditionalBlocksCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu },
+				new HashSet<>(Arrays.asList(MultiFixMessages.MergeConditionalBlocksCleanup_description_if_suite, MultiFixMessages.MergeConditionalBlocksCleanup_description_inner_if)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
 	@Test
 	public void testDoNotMergeConditionalBlocks() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
+				+ "public class E {\n" //
 				+ "    /** 5 operands, not easily readable */\n" //
 				+ "    public void doNotMergeMoreThanFourOperands(int i) {\n" //
 				+ "        if ((i == 0) || (i == 1 || i == 2)) {\n" //
@@ -8297,12 +8601,59 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            System.out.println(\"Different\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotCollapseIfStatementsWithAdditionalStatement(boolean isActive, boolean isValid) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Hi!\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotCollapseWithFiveOperands(int number1, int number2) {\n" //
+				+ "        if (0 < number1 && number1 < 10) {\n" //
+				+ "            if (100 < number2 && number2 < 200 || number2 < 0) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeDifferentCode(boolean isActive, boolean isValid) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"One code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Another code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeEmptyCode(boolean isActive, boolean isValid) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
