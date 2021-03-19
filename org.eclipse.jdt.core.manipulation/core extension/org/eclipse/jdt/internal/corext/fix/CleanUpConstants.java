@@ -1576,6 +1576,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_UNNECESSARY_ARRAY_CREATION= "cleanup.remove_unnecessary_array_creation"; //$NON-NLS-1$
 
 	/**
+	 * Replace the new instance syntax by curly brackets to create an array.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String ARRAY_WITH_CURLY= "cleanup.array_with_curly"; //$NON-NLS-1$
+
+	/**
 	 * Removes useless lone return at the end of a method.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

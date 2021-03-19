@@ -8861,6 +8861,135 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testArrayWithCurly() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private double[] refactorThisDoubleArray = new double[] { 42.42 };\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private int[][] refactorThis2DimensionArray = new int[][] { { 42 } };\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private Observable[] refactorThisObserverArray = new Observable[0];\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private short[] refactorThisShortArray, andThisArrayToo = new short[0];\n" //
+				+ "\n" //
+				+ "    public void refactorArrayInstantiations() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double[] refactorLocalDoubleArray = new double[] { 42.42 };\n" //
+				+ "        char[][] refactorLocal2DimensionArray = new char[][] { { 'a' } };\n" //
+				+ "        Observable[] refactorLocalObserverArray = new Observable[0];\n" //
+				+ "        short[] refactorThisShortArray, andThisArrayToo = new short[0];\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private double[] refactorThisDoubleArray = { 42.42 };\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private int[][] refactorThis2DimensionArray = { { 42 } };\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private Observable[] refactorThisObserverArray = {};\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private short[] refactorThisShortArray, andThisArrayToo = {};\n" //
+				+ "\n" //
+				+ "    public void refactorArrayInstantiations() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double[] refactorLocalDoubleArray = { 42.42 };\n" //
+				+ "        char[][] refactorLocal2DimensionArray = { { 'a' } };\n" //
+				+ "        Observable[] refactorLocalObserverArray = {};\n" //
+				+ "        short[] refactorThisShortArray, andThisArrayToo = {};\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.ARRAY_WITH_CURLY);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ArrayWithCurlyCleanup_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseArrayWithCurly() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Byte[] doNotRefactorNotInitializedArray = new Byte[10];\n" //
+				+ "\n" //
+				+ "    private Object doNotRefactorThisObserverArray = new Observable[0];\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorArrayAssignment() {\n" //
+				+ "        char[] refactorLocalDoubleArray;\n" //
+				+ "        refactorLocalDoubleArray = new char[] { 'a', 'b' };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorArrayInstantiationsInBrackets() {\n" //
+				+ "        boolean[] refactorLocalDoubleArray = (new boolean[] { true });\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorCastedArrayInstantiations() {\n" //
+				+ "        Object refactorLocalDoubleArray = (double[]) new double[] { 42.42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] doNotRefactorReturnedArrayInstantiation() {\n" //
+				+ "        return new double[] { 42.42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorArrayInstantiationParameter() {\n" //
+				+ "        System.out.println(new double[] { 42.42 });\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorArrayInstantiationExpression() {\n" //
+				+ "        return new float[] { 42.42f }.toString();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.ARRAY_WITH_CURLY);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRemoveUselessReturn() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

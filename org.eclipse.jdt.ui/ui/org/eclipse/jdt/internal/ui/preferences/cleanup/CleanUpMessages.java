@@ -145,6 +145,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons_description;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantArrayCreation_description;
+	public static String UnnecessaryCodeTabPage_CheckboxName_ArrayWithCurly;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UselessReturn;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UselessContinue;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnloopedWhile;
@@ -164,8 +165,8 @@ public class CleanUpMessages extends NLS {
 	public static String SourceFixingTabPage_GroupName_standardCode;
 
 	public static String SourceFixingTabPage_CheckboxName_InvertEquals;
-	public static String SourceFixingTabPage_CheckboxName_StandardComparison;
 	public static String SourceFixingTabPage_CheckboxName_CheckSignOfBitwiseOperation;
+	public static String SourceFixingTabPage_CheckboxName_StandardComparison;
 
 	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
 

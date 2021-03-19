@@ -166,6 +166,7 @@ public class MultiFixMessages extends NLS {
 	public static String OverriddenAssignmentCleanUp_description;
 	public static String RedundantSemicolonsCleanup_description;
 	public static String UnnecessaryArrayCreationCleanup_description;
+	public static String ArrayWithCurlyCleanup_description;
 	public static String UselessReturnCleanUp_description;
 	public static String UselessContinueCleanUp_description;
 	public static String UnloopedWhileCleanUp_description;
