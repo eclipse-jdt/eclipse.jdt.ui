@@ -14963,6 +14963,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testStringBuilder() throws Exception {
+		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= "" //
 				+ "package test1;\n" //
@@ -15248,10 +15249,19 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment too\n" //
 				+ "        return text + (3 + 4);\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithNullableStart(String nullableString) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = nullableString + \"literal\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \" foo\";\n" //
+				+ "        text += \"bar \";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text + (3 + 4);\n" //
+				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
-
-		enable(CleanUpConstants.STRINGBUILDER);
 
 		String expected= "" //
 				+ "package test1;\n" //
@@ -15537,8 +15547,25 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment too\n" //
 				+ "        return text.append(3 + 4).toString();\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithNullableStart(String nullableString) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder().append(nullableString).append(\"literal\");\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\" foo\");\n" //
+				+ "        text.append(\"bar \");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.append(3 + 4).toString();\n" //
+				+ "    }\n" //
 				+ "}\n";
 
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.STRINGBUILDER);
+
+		// Then
 		assertNotEquals("The class must be changed", given, expected);
 		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StringBuilderCleanUp_description)));
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
