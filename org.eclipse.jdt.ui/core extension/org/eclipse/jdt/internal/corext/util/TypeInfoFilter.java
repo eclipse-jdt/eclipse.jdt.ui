@@ -29,16 +29,99 @@ import org.eclipse.jdt.internal.ui.util.PatternMatcher;
 public class TypeInfoFilter {
 
 	private final String fText;
+
 	private final IJavaSearchScope fSearchScope;
+
 	private final boolean fIsWorkspaceScope;
+
 	private final int fElementKind;
+
 	private final ITypeInfoFilterExtension fFilterExtension;
+
 	private final TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
 
 	private final PatternMatcher fPackageMatcher;
+
 	private final PatternMatcher fNameMatcher;
 
 	private static final int TYPE_MODIFIERS= Flags.AccEnum | Flags.AccAnnotation | Flags.AccInterface;
+
+	/* reduces filenames and stack traces to class name */
+	public static String simplifySearchText(String input) {
+		String s= input;
+		try {
+			int i;
+			// skip any bracket and anything behind ("[native]" from thread dump)
+			i= s.lastIndexOf('[');
+			if (i != -1) {
+				s= s.substring(0, i);
+			}
+			// skip any bracket, anything behind and the segment before (method name)
+			i= s.lastIndexOf('(');
+			if (i != -1) {
+				s= s.substring(0, i);
+				i= s.lastIndexOf('.');
+				if (i != -1) {
+					s= s.substring(0, i);
+				}
+			}
+			// skip any "$$Lambda" and anything behind (Lambda)
+			i= s.lastIndexOf("$$Lambda"); //$NON-NLS-1$
+			if (i != -1) {
+				s= s.substring(0, i);
+			}
+			// skip any backslash and the text before (windows path)
+			s= skipBefore(s, "\\"); //$NON-NLS-1$
+			// skip any slash and the text before (unix path)
+			s= skipBefore(s, "/"); //$NON-NLS-1$
+			// skip initial "at " and the text before (StackTraceElement)
+			s= skipBefore(s, "at "); //$NON-NLS-1$
+			// simplify
+			s= s.strip();
+			// skip last single ".java" and anything behind (file name)
+			s= skipEnding(s, ".java"); //$NON-NLS-1$
+			s= skipEnding(s, ".class"); //$NON-NLS-1$
+			// skip $1, $2 ... - typenames cannot start with a number
+			s= skipSynthetic(s);
+			// binary name of Inner Class to qualified name
+			s= s.replace('$', '.');
+			if (s.isEmpty()) {
+				// oversimplified
+				return input;
+			}
+		} catch (Exception e) {
+			// just in case anything bad happened:
+			return input;
+		}
+		return s;
+	}
+
+	private static String skipBefore(String s, String skip) {
+		int i= s.lastIndexOf(skip);
+		if (i != -1) {
+			s= s.substring(i + skip.length());
+		}
+		return s;
+	}
+
+	private static String skipEnding(String s, String skip) {
+		int i= s.lastIndexOf(skip);
+		int length= skip.length();
+		char nextChar= s.length() > i + length ? s.charAt(i + length) : ' ';
+		if (i != -1 && !Character.isJavaIdentifierPart(nextChar) && !(nextChar == '.')) {
+			s= s.substring(0, i);
+		}
+		return s;
+	}
+	private static String skipSynthetic(String s) {
+		int i= s.lastIndexOf('$');
+		int length= 1;
+		char nextChar= s.length() > i + length ? s.charAt(i + length) : ' ';
+		if (i != -1 && !Character.isJavaIdentifierStart(nextChar) && !(nextChar == '.')) {
+			s= s.substring(0, i);
+		}
+		return s;
+	}
 
 	public TypeInfoFilter(String text, IJavaSearchScope scope, int elementKind, ITypeInfoFilterExtension extension) {
 		fText= text;
@@ -74,7 +157,7 @@ public class TypeInfoFilter {
 					buf.append('*');
 				}
 				hasWildCard= false;
-			} else if (ch == '*' || ch =='?') {
+			} else if (ch == '*' || ch == '?') {
 				hasWildCard= true;
 			}
 			buf.append(ch);
@@ -96,18 +179,17 @@ public class TypeInfoFilter {
 	 * Checks whether <code>this</code> filter is a subFilter of the given <code>text</code>.
 	 * <p>
 	 * <i>WARNING: This is the <b>reverse</b> interpretation compared to
-	 * {@link org.eclipse.ui.dialogs.SearchPattern#isSubPattern(org.eclipse.ui.dialogs.SearchPattern)} and
-	 * {@link org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isSubFilter}.
-	 * </i>
+	 * {@link org.eclipse.ui.dialogs.SearchPattern#isSubPattern(org.eclipse.ui.dialogs.SearchPattern)}
+	 * and {@link org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isSubFilter}. </i>
 	 * </p>
 	 *
 	 * @param text another filter text
 	 * @return <code>true</code> if <code>this</code> filter is a subFilter of <code>text</code>
-	 * e.g. "List" is a subFilter of "L". In this case, the filters matches a proper subset of
-	 * the items matched by <code>text</code>.
+	 *         e.g. "List" is a subFilter of "L". In this case, the filters matches a proper subset
+	 *         of the items matched by <code>text</code>.
 	 */
 	public boolean isSubFilter(String text) {
-		if (! fText.startsWith(text))
+		if (!fText.startsWith(text))
 			return false;
 
 		return fText.indexOf('.', text.length()) == -1;
