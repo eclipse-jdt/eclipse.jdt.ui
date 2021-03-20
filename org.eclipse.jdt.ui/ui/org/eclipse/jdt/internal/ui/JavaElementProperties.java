@@ -49,7 +49,7 @@ public class JavaElementProperties implements IPropertySource {
 
 	@Override
 	public Object getPropertyValue(Object name) {
-		if (name.equals(IBasicPropertyConstants.P_TEXT)) {
+		if (IBasicPropertyConstants.P_TEXT.equals(name)) {
 			return fSource.getElementName();
 		}
 		return null;

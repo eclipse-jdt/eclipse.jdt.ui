@@ -353,7 +353,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private RefactoringStatus checkDeclaringType(){
 		IType declaringType= getDeclaringType();
 
-		if (declaringType.getFullyQualifiedName('.').equals("java.lang.Object")) //$NON-NLS-1$
+		if ("java.lang.Object".equals(declaringType.getFullyQualifiedName('.'))) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveMembersRefactoring_Object);
 
 		if (declaringType.isBinary())

@@ -53,9 +53,9 @@ public class JavaSpellingEngine extends SpellingEngine {
 					if (listener.isProblemsThresholdReached())
 						return;
 					final String type= partition.getType();
-					if (isIgnoringJavaStrings && type.equals(IJavaPartitions.JAVA_STRING))
+					if (isIgnoringJavaStrings && IJavaPartitions.JAVA_STRING.equals(type))
 						continue;
-					if (!type.equals(IDocument.DEFAULT_CONTENT_TYPE) && !type.equals(IJavaPartitions.JAVA_CHARACTER))
+					if (!IDocument.DEFAULT_CONTENT_TYPE.equals(type) && !IJavaPartitions.JAVA_CHARACTER.equals(type))
 						checker.execute(listener, new SpellCheckIterator(document, partition, checker.getLocale()));
 				}
 			}

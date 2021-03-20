@@ -258,7 +258,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			fCurrPackage= (IPackageFragment) cu.getParent();
 
-			fAllowDefaultPackageImports= cu.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true).equals(JavaCore.VERSION_1_3);
+			fAllowDefaultPackageImports= JavaCore.VERSION_1_3.equals(cu.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true));
 
 			fImportsAdded= new HashSet<>();
 			fUnresolvedTypes= new HashMap<>();

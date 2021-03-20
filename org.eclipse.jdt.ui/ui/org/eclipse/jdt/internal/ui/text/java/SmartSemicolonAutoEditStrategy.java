@@ -96,9 +96,9 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		if (command.text == null)
 			return;
 
-		if (command.text.equals(SEMICOLON))
+		if (SEMICOLON.equals(command.text))
 			fCharacter= SEMICHAR;
-		else if (command.text.equals(BRACE))
+		else if (BRACE.equals(command.text))
 			fCharacter= BRACECHAR;
 		else
 			return;
@@ -402,7 +402,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			return -1;
 
 		try {
-			if (doc.get(p - 1, 2).equals("->")) { //$NON-NLS-1$
+			if ("->".equals(doc.get(p - 1, 2))) { //$NON-NLS-1$
 				return offset;
 			}
 		} catch (BadLocationException e) {
@@ -732,7 +732,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		try {
 			// don't use getPartition2 since we're interested in the scanned character's partition
 			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position, false);
-			return region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
+			return IDocument.DEFAULT_CONTENT_TYPE.equals(region.getType());
 
 		} catch (BadLocationException e) {
 		}

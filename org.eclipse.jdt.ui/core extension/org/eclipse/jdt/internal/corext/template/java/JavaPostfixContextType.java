@@ -33,7 +33,7 @@ public class JavaPostfixContextType extends AbstractJavaContextType {
 	 */
 	@Override
 	protected void initializeContext(IJavaContext context) {
-		if (!getId().equals(JavaPostfixContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
+		if (!JavaPostfixContextType.ID_ALL.equals(getId())) { // a specific context must also allow the templates that work everywhere
 			context.addCompatibleContextType(JavaPostfixContextType.ID_ALL);
 		}
 	}

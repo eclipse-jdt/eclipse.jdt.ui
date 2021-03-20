@@ -240,7 +240,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 */
 	protected final void defaultInit(String[] args) {
 		for(int i= 0; i < args.length; i++) {
-			if(args[i].toLowerCase().equals("-classnames") || args[i].toLowerCase().equals("-classname")){ //$NON-NLS-1$ //$NON-NLS-2$
+			if("-classnames".equals(args[i].toLowerCase()) || "-classname".equals(args[i].toLowerCase())){ //$NON-NLS-1$ //$NON-NLS-2$
 				Vector<String> list= new Vector<String>();
 				for (int j= i+1; j < args.length; j++) {
 					if (args[j].startsWith("-")) //$NON-NLS-1$
@@ -249,7 +249,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				}
 				fTestClassNames= list.toArray(new String[list.size()]);
 			}
-			else if(args[i].toLowerCase().equals("-test")) { //$NON-NLS-1$
+			else if("-test".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				String testName= args[i+1];
 				int p= testName.indexOf(':');
 				if (p == -1)
@@ -258,7 +258,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				fTestClassNames= new String[]{ testName.substring(0, p)  };
 				i++;
 			}
-			else if(args[i].toLowerCase().equals("-testnamefile")) { //$NON-NLS-1$
+			else if("-testnamefile".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				String testNameFile= args[i+1];
 				try {
 					readTestNames(testNameFile);
@@ -267,7 +267,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				}
 				i++;
 
-			} else if (args[i].toLowerCase().equals("-packagenamefile")) { //$NON-NLS-1$
+			} else if ("-packagenamefile".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				String pkgNameFile= args[i+1];
 				try {
 					readPackageNames(pkgNameFile);
@@ -276,7 +276,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				}
 				i++;
 
-			} else if (args[i].toLowerCase().equals("-testfailures")) { //$NON-NLS-1$
+			} else if ("-testfailures".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				String testFailuresFile= args[i+1];
 				try {
 					readFailureNames(testFailuresFile);
@@ -285,34 +285,34 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				}
 				i++;
 
-			} else if(args[i].toLowerCase().equals("-port")) { //$NON-NLS-1$
+			} else if("-port".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				fPort= Integer.parseInt(args[i+1]);
 				i++;
 			}
-			else if(args[i].toLowerCase().equals("-host")) { //$NON-NLS-1$
+			else if("-host".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				fHost= args[i+1];
 				i++;
 			}
-			else if(args[i].toLowerCase().equals("-rerun")) { //$NON-NLS-1$
+			else if("-rerun".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				fRerunTest= args[i+1];
 				i++;
 			}
-			else if(args[i].toLowerCase().equals("-keepalive")) { //$NON-NLS-1$
+			else if("-keepalive".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				fKeepAlive= true;
 			}
-			else if(args[i].toLowerCase().equals("-debugging") || args[i].toLowerCase().equals("-debug")){ //$NON-NLS-1$ //$NON-NLS-2$
+			else if("-debugging".equals(args[i].toLowerCase()) || "-debug".equals(args[i].toLowerCase())){ //$NON-NLS-1$ //$NON-NLS-2$
 			    fDebugMode= true;
 
-			} else if (args[i].toLowerCase().equals("-junitconsole")) { //$NON-NLS-1$
+			} else if ("-junitconsole".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 			    fConsoleMode  = true;
-			} else if (args[i].toLowerCase().equals("-testloaderclass")) { //$NON-NLS-1$
+			} else if ("-testloaderclass".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				String className = args[i + 1];
 				createLoader(className);
 				i++;
-			} else if(args[i].toLowerCase().equals("-uniqueid")) { //$NON-NLS-1$
+			} else if("-uniqueid".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				fUniqueId= args[i+1];
 				i++;
-			} else if (args[i].toLowerCase().equals("--include-tag")) { //$NON-NLS-1$
+			} else if ("--include-tag".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				String[] includeTags= fIncludeExcludeTags[0];
 				if (includeTags == null) {
 					includeTags= new String[1];
@@ -325,7 +325,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				}
 				fIncludeExcludeTags[0]= includeTags;
 				i++;
-			} else if (args[i].toLowerCase().equals("--exclude-tag")) { //$NON-NLS-1$
+			} else if ("--exclude-tag".equals(args[i].toLowerCase())) { //$NON-NLS-1$
 				String[] excludeTags= fIncludeExcludeTags[1];
 				if (excludeTags == null) {
 					excludeTags= new String[1];

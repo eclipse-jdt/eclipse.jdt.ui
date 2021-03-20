@@ -57,7 +57,7 @@ public class JavaFormattingContext extends FormattingContext {
 	 */
 	@Override
 	public boolean isBooleanPreference(String key) {
-		return !key.equals(DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH);
+		return !DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH.equals(key);
 	}
 
 	/*
@@ -65,6 +65,6 @@ public class JavaFormattingContext extends FormattingContext {
 	 */
 	@Override
 	public boolean isIntegerPreference(String key) {
-		return key.equals(DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH);
+		return DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH.equals(key);
 	}
 }

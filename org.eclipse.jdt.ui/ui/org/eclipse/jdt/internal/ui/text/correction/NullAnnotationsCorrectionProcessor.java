@@ -134,7 +134,7 @@ public class NullAnnotationsCorrectionProcessor {
 
 	public static void addAddMissingDefaultNullnessProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		final CompilationUnit astRoot= context.getASTRoot();
-		if (astRoot.getJavaElement().getElementName().equals(JavaModelUtil.PACKAGE_INFO_JAVA)) {
+		if (JavaModelUtil.PACKAGE_INFO_JAVA.equals(astRoot.getJavaElement().getElementName())) {
 			NullAnnotationsFix fix= NullAnnotationsFix.createAddMissingDefaultNullnessAnnotationsFix(astRoot, problem);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new Hashtable<>();

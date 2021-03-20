@@ -330,7 +330,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 						String ext= filename.substring(filename.lastIndexOf('.') + 1);
 						if (!file.isFile()) {
 							fStyleSheetStatus.setError(JavadocExportMessages.JavadocStandardWizardPage_stylesheetnopath_error);
-						} else if (!ext.equalsIgnoreCase("css")) { //$NON-NLS-1$
+						} else if (!"css".equalsIgnoreCase(ext)) { //$NON-NLS-1$
 							fStyleSheetStatus.setError(JavadocExportMessages.JavadocStandardWizardPage_stylesheetnotcss_error);
 						}
 					}

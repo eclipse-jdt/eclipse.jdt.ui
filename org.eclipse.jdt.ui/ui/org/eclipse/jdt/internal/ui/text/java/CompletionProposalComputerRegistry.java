@@ -358,7 +358,7 @@ public final class CompletionProposalComputerRegistry {
 		for (Iterator<IConfigurationElement> iter= elements.iterator(); iter.hasNext();) {
 			IConfigurationElement element= iter.next();
 			try {
-				if (element.getName().equals("proposalCategory")) { //$NON-NLS-1$
+				if ("proposalCategory".equals(element.getName())) { //$NON-NLS-1$
 					iter.remove(); // remove from list to leave only computers
 
 					CompletionProposalCategory category= new CompletionProposalCategory(element, this);

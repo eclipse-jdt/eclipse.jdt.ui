@@ -160,7 +160,7 @@ public class Bindings {
 		if (! variableBinding.isField())
 			return variableBinding.toString();
 		if (variableBinding.getDeclaringClass() == null) {
-			Assert.isTrue(variableBinding.getName().equals("length"));//$NON-NLS-1$
+			Assert.isTrue("length".equals(variableBinding.getName()));//$NON-NLS-1$
 			return ARRAY_LENGTH_FIELD_BINDING_STRING;
 		}
 		StringBuilder result= new StringBuilder();

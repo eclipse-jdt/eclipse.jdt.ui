@@ -68,7 +68,7 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
 		try {
 			String partition= TextUtilities.getContentType(context.getDocument(), IJavaPartitions.JAVA_PARTITIONING, context.getInvocationOffset(), true);
-			if (partition.equals(IJavaPartitions.JAVA_DOC))
+			if (IJavaPartitions.JAVA_DOC.equals(partition))
 				return fJavadocTemplateEngine;
 			else {
 				CompletionContext coreContext= context.getCoreContext();

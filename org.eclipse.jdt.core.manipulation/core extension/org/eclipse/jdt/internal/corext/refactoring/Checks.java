@@ -908,7 +908,7 @@ public class Checks {
 		}
 		if (tb == null)
 			return NOT_RVALUE_MISC;
-		else if (tb.getName().equals("void")) //$NON-NLS-1$
+		else if ("void".equals(tb.getName())) //$NON-NLS-1$
 			return NOT_RVALUE_VOID;
 
 		return guessingRequired ? IS_RVALUE_GUESSED : IS_RVALUE;

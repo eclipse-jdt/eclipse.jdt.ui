@@ -92,18 +92,18 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		StringTokenizer tokenizer= new StringTokenizer(inputString, "\n\r", true); //$NON-NLS-1$
 		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken();
-			if (token.equals("\r")) { //$NON-NLS-1$
+			if ("\r".equals(token)) { //$NON-NLS-1$
 				buffer.append('\r');
 				if (tokenizer.hasMoreTokens()) {
 					token= tokenizer.nextToken();
-					if (token.equals("\n")) { //$NON-NLS-1$
+					if ("\n".equals(token)) { //$NON-NLS-1$
 						buffer.append('\n');
 						continue;
 					}
 				} else {
 					continue;
 				}
-			} else if (token.equals("\n")) { //$NON-NLS-1$
+			} else if ("\n".equals(token)) { //$NON-NLS-1$
 				buffer.append('\n');
 				continue;
 			}

@@ -649,7 +649,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				stream.close();
 			}
 
-			if (!cpElement.getNodeName().equalsIgnoreCase(TAG_ROOT)) {
+			if (!TAG_ROOT.equalsIgnoreCase(cpElement.getNodeName())) {
 				throw new IOException(PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_load_badformat);
 			}
 
@@ -682,7 +682,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					Element archiveElement= (Element) archiveNode;
 
 					String pathString= archiveElement.getAttribute(TAG_ARCHIVE_PATH);
-					IPath path= version.equals(VERSION1) ? Path.fromOSString(pathString) : Path.fromPortableString(pathString);
+					IPath path= VERSION1.equals(version) ? Path.fromOSString(pathString) : Path.fromPortableString(pathString);
 					path= path.makeAbsolute(); // only necessary for manually edited files: bug 202373
 
 					IResource resource= root.findMember(path); // support internal JARs: bug 133191
@@ -695,7 +695,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 					if (archiveElement.hasAttribute(TAG_SOURCEATTACHMENT)) {
 						String sourceAttachString= archiveElement.getAttribute(TAG_SOURCEATTACHMENT);
-						IPath sourceAttach= version.equals(VERSION1) ? Path.fromOSString(sourceAttachString) : Path.fromPortableString(sourceAttachString);
+						IPath sourceAttach= VERSION1.equals(version) ? Path.fromOSString(sourceAttachString) : Path.fromPortableString(sourceAttachString);
 						newArchive.setAttribute(CPListElement.SOURCEATTACHMENT, sourceAttach);
 					}
 					if (archiveElement.hasAttribute(TAG_SOURCE_ATTACHMENT_ENCODING)) {
@@ -985,7 +985,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				canEditEncoding= !allAttribute.isNonModifiable() && !allAttribute.isNotSupported();
 			}
 		}
-		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
+		if (CPListElement.SOURCEATTACHMENT.equals(key)) {
 			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry(), canEditEncoding);
 			if (result != null) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
@@ -993,7 +993,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				fLibraryList.refresh(parentContainer);
 				fLibraryList.update(selElement);
 			}
-		} else if (key.equals(CPListElement.ACCESSRULES)) {
+		} else if (CPListElement.ACCESSRULES.equals(key)) {
 			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, null, false);
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
@@ -1006,7 +1006,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				IClasspathAttribute result= config.performEdit(getShell(), elem.getClasspathAttributeAccess());
 				if (result != null) {
 					elem.setValue(result.getValue());
-					if(key.equals(CPListElement.TEST) || key.equals(CPListElement.WITHOUT_TEST_CODE)) {
+					if(CPListElement.TEST.equals(key) || CPListElement.WITHOUT_TEST_CODE.equals(key)) {
 						fLibraryList.refresh(elem.getParent());
 					} else {
 						fLibraryList.refresh(elem);
@@ -1158,7 +1158,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				if (attrib.isBuiltIn()) {
 					Object value= null;
 					String key= attrib.getKey();
-					if (key.equals(CPListElement.ACCESSRULES)) {
+					if (CPListElement.ACCESSRULES.equals(key)) {
 						value= new IAccessRule[0];
 					}
 					attrib.getParent().setAttribute(key, value);
@@ -1310,7 +1310,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					return false;
 				}
 				if (attrib.isBuiltIn()) {
-					if (attrib.getKey().equals(CPListElement.ACCESSRULES)) {
+					if (CPListElement.ACCESSRULES.equals(attrib.getKey())) {
 						return ((IAccessRule[]) attrib.getValue()).length > 0;
 					}
 					if (attrib.getValue() == null) {

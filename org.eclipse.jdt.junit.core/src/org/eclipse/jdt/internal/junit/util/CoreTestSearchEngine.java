@@ -193,7 +193,7 @@ public class CoreTestSearchEngine {
 		if (!Flags.isStatic(method.getFlags()) || !Flags.isPublic(method.getFlags())) {
 			return false;
 		}
-		if (!Signature.getSimpleName(Signature.toString(method.getReturnType())).equals(JUnitCorePlugin.SIMPLE_TEST_INTERFACE_NAME)) {
+		if (!JUnitCorePlugin.SIMPLE_TEST_INTERFACE_NAME.equals(Signature.getSimpleName(Signature.toString(method.getReturnType())))) {
 			return false;
 		}
 		return true;

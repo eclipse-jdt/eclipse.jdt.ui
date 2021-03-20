@@ -496,7 +496,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			ITypeBinding object= fAst.resolveWellKnownType(JAVA_LANG_OBJECT);
 			IMethodBinding objectMethod= null;
 			for (IMethodBinding objm : object.getDeclaredMethods()) {
-				if (objm.getName().equals(METHODNAME_HASH_CODE) && objm.getParameterTypes().length == 0) {
+				if (METHODNAME_HASH_CODE.equals(objm.getName()) && objm.getParameterTypes().length == 0) {
 					objectMethod= objm;
 				}
 			}
@@ -946,7 +946,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			ITypeBinding object= fAst.resolveWellKnownType(JAVA_LANG_OBJECT);
 			IMethodBinding objectMethod= null;
 			for (IMethodBinding objm : object.getDeclaredMethods()) {
-				if (objm.getName().equals(METHODNAME_EQUALS) && objm.getParameterTypes().length == 1 && objm.getParameterTypes()[0].getQualifiedName().equals(JAVA_LANG_OBJECT)) {
+				if (METHODNAME_EQUALS.equals(objm.getName()) && objm.getParameterTypes().length == 1 && JAVA_LANG_OBJECT.equals(objm.getParameterTypes()[0].getQualifiedName())) {
 					objectMethod= objm;
 				}
 			}
@@ -1186,7 +1186,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		IMethodBinding binding= Bindings.findMethodInHierarchy(typeBinding.getSuperclass(), name, parameters);
 		if (binding != null && !Modifier.isAbstract(binding.getModifiers())) {
 			ITypeBinding declaring= binding.getDeclaringClass();
-			return declaring.getQualifiedName().equals(JAVA_LANG_OBJECT);
+			return JAVA_LANG_OBJECT.equals(declaring.getQualifiedName());
 		}
 		return true;
 	}
@@ -1271,9 +1271,9 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	private boolean needsThisQualification(String name, boolean isHashCode) {
 		if (isHashCode)
-			return ( (fDoubleCount > 0 && name.equals(VARIABLE_NAME_DOUBLE_TEMPORARY)) || (name.equals(VARIABLE_NAME_PRIME)) || (name
-					.equals(VARIABLE_NAME_RESULT)));
-		return ( (name.equals(VARIABLE_NAME_EQUALS_CASTED)) || (name.equals(VARIABLE_NAME_EQUALS_PARAM)));
+			return ( (fDoubleCount > 0 && VARIABLE_NAME_DOUBLE_TEMPORARY.equals(name)) || (VARIABLE_NAME_PRIME.equals(name)) || (VARIABLE_NAME_RESULT
+					.equals(name)));
+		return ( (VARIABLE_NAME_EQUALS_CASTED.equals(name)) || (VARIABLE_NAME_EQUALS_PARAM.equals(name)));
 	}
 
 	private boolean needsDeepMethod(ITypeBinding type) {

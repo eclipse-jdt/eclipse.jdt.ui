@@ -174,7 +174,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				if (element instanceof IMethod) {
 					IMethod method = (IMethod) element;
-					return !method.getElementName().equals("<clinit>"); //$NON-NLS-1$
+					return !"<clinit>".equals(method.getElementName()); //$NON-NLS-1$
 				}
 				return true;
 			}

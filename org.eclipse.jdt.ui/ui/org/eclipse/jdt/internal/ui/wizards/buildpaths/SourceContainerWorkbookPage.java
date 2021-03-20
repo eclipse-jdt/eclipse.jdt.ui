@@ -90,7 +90,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 		@Override
 		public void propertyChange(PropertyChangeEvent event) {
-			if (event.getProperty().equals(IAction.RESULT)) {
+			if (IAction.RESULT.equals(event.getProperty())) {
 				if (event.getNewValue().equals(Boolean.TRUE)) {
 					finishWizard();
 				} else {
@@ -410,7 +410,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
-		if (key.equals(CPListElement.OUTPUT)) {
+		if (CPListElement.OUTPUT.equals(key)) {
 			CPListElement selElement=  elem.getParent();
 			OutputLocationDialog dialog= new OutputLocationDialog(getShell(), selElement, fClassPathList.getElements(), new Path(fOutputLocationField.getText()).makeAbsolute(), true);
 			if (dialog.open() == Window.OK) {
@@ -418,20 +418,20 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				fFoldersList.refresh();
 				fClassPathList.dialogFieldChanged(); // validate
 			}
-		} else if (key.equals(CPListElement.EXCLUSION) || key.equals(CPListElement.INCLUSION)) {
+		} else if (CPListElement.EXCLUSION.equals(key) || CPListElement.INCLUSION.equals(key)) {
 			EditFilterWizard wizard= newEditFilterWizard(elem.getParent(), fFoldersList.getElements(), fOutputLocationField.getText());
 			OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 			action.run();
-		} else if (key.equals(CPListElement.IGNORE_OPTIONAL_PROBLEMS)) {
+		} else if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(key)) {
 			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
 			elem.setValue(newValue);
 			fFoldersList.refresh(elem);
-		} else if (key.equals(CPListElement.TEST)) {
+		} else if (CPListElement.TEST.equals(key)) {
 			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
 			elem.setValue(newValue);
 			fFoldersList.refresh(elem.getParent());
 			fClassPathList.dialogFieldChanged(); // validate
-		} else if (key.equals(CPListElement.WITHOUT_TEST_CODE)) {
+		} else if (CPListElement.WITHOUT_TEST_CODE.equals(key)) {
 			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
 			elem.setValue(newValue);
 			fFoldersList.refresh(elem.getParent());
@@ -476,7 +476,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				String key= attrib.getKey();
 				if (attrib.isBuiltIn()) {
 					Object value= null;
-					if (key.equals(CPListElement.EXCLUSION) || key.equals(CPListElement.INCLUSION)) {
+					if (CPListElement.EXCLUSION.equals(key) || CPListElement.INCLUSION.equals(key)) {
 						value= new Path[0];
 					}
 					attrib.getParent().setAttribute(key, value);

@@ -99,7 +99,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 		AssistContext context= new AssistContext(cu, fEditor.getViewer(), fEditor, selection.getOffset(), selection.getLength());
 		Collection<IJavaCompletionProposal> proposals= new ArrayList<>(10);
 		if (isAssist) {
-			if (id.equals(LinkedNamesAssistProposal.ASSIST_ID)) {
+			if (LinkedNamesAssistProposal.ASSIST_ID.equals(id)) {
 				return getLocalRenameProposal(context); // shortcut for local rename
 			}
 			JavaCorrectionProcessor.collectAssists(context, new ProblemLocation[0], proposals);

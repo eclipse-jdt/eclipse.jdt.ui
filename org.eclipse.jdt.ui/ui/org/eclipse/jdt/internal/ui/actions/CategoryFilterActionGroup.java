@@ -365,7 +365,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		IContributionItem[] items= manager.getItems();
 		if (items != null) {
 			for (IContributionItem item : items) {
-				if (item != null && item.getId() != null && item.getId().equals(FILTER_CATEGORY_ACTION_ID)) {
+				if (item != null && item.getId() != null && FILTER_CATEGORY_ACTION_ID.equals(item.getId())) {
 					IContributionItem removed= manager.remove(item);
 					if (removed != null) {
 						item.dispose();

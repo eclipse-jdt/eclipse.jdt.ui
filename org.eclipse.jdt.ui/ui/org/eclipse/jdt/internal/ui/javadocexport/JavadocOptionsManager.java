@@ -376,7 +376,7 @@ public class JavadocOptionsManager {
 			NodeList list= element.getChildNodes();
 			for (int i= 0; i < list.getLength(); i++) {
 				Node child= list.item(i);
-				if (child.getNodeName().equals("doclet")) { //$NON-NLS-1$
+				if ("doclet".equals(child.getNodeName())) { //$NON-NLS-1$
 					fDocletpath= ((Element) child).getAttribute(PATH);
 					fDocletname= ((Element) child).getAttribute(NAME);
 					if (fDocletpath.length() != 0 || fDocletname.length() != 0) {
@@ -398,7 +398,7 @@ public class JavadocOptionsManager {
 		fHRefs= new String[children.getLength()];
 		for (int i= 0; i < fHRefs.length; i++) {
 			Node child= children.item(i);
-			if (child.getNodeName().equals("link")) { //$NON-NLS-1$
+			if ("link".equals(child.getNodeName())) { //$NON-NLS-1$
 				fHRefs[i]= ((Element) child).getAttribute(HREF);
 			}
 		}
@@ -706,7 +706,7 @@ public class JavadocOptionsManager {
 		toolArgs.add("-" + fAccess); //$NON-NLS-1$
 
 		if (fFromStandard) {
-			if (fSource.length() > 0 && !fSource.equals("-")) { //$NON-NLS-1$
+			if (fSource.length() > 0 && !"-".equals(fSource)) { //$NON-NLS-1$
 				toolArgs.add("-source"); //$NON-NLS-1$
 				toolArgs.add(fSource);
 			}

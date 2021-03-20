@@ -128,7 +128,7 @@ public final class ContentAssistHistory {
 				throw createException(e, JavaTextMessages.ContentAssistHistory_deserialize_error);
 			}
 
-			if (root == null || !root.getNodeName().equalsIgnoreCase(NODE_ROOT))
+			if (root == null || !NODE_ROOT.equalsIgnoreCase(root.getNodeName()))
 				return null;
 
 			int maxLHS= parseNaturalInt(root.getAttribute(ATTRIBUTE_MAX_LHS), DEFAULT_TRACKED_LHS);
@@ -142,7 +142,7 @@ public final class ContentAssistHistory {
 				Node lhsNode= list.item(i);
 				if (lhsNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element lhsElement= (Element) lhsNode;
-					if (lhsElement.getNodeName().equalsIgnoreCase(NODE_LHS)) {
+					if (NODE_LHS.equalsIgnoreCase(lhsElement.getNodeName())) {
 						String lhs= lhsElement.getAttribute(ATTRIBUTE_NAME);
 						if (lhs != null) {
 							Set<String> cache= history.getCache(lhs);
@@ -152,7 +152,7 @@ public final class ContentAssistHistory {
 								Node rhsNode= children.item(j);
 								if (rhsNode.getNodeType() == Node.ELEMENT_NODE) {
 									Element rhsElement= (Element) rhsNode;
-									if (rhsElement.getNodeName().equalsIgnoreCase(NODE_RHS)) {
+									if (NODE_RHS.equalsIgnoreCase(rhsElement.getNodeName())) {
 										String rhs= rhsElement.getAttribute(ATTRIBUTE_NAME);
 										if (rhs != null) {
 											cache.add(rhs);

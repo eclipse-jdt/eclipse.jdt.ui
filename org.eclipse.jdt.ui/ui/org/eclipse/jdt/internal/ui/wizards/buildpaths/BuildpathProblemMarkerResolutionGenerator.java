@@ -98,7 +98,7 @@ public class BuildpathProblemMarkerResolutionGenerator implements IMarkerResolut
 			String[] arguments= CorrectionEngine.getProblemArguments(marker);
 			final IPath path= new Path(arguments[0]);
 
-			if (path.segment(0).equals(JavaCore.USER_LIBRARY_CONTAINER_ID)) {
+			if (JavaCore.USER_LIBRARY_CONTAINER_ID.equals(path.segment(0))) {
 				String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetouserlib_label;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				resolutions.add(new UserLibraryMarkerResolution(label, image) {

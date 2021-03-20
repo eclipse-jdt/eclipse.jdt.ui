@@ -180,7 +180,7 @@ public class JUnit3TestReference implements ITestReference {
 	}
 
 	private boolean isJUnit4TestCaseAdapter(Test test) {
-		return test.getClass().getName().equals("junit.framework.JUnit4TestCaseAdapter"); //$NON-NLS-1$
+		return "junit.framework.JUnit4TestCaseAdapter".equals(test.getClass().getName()); //$NON-NLS-1$
 	}
 
 	private boolean isJUnit4TestSuiteAdapter(Test test) {

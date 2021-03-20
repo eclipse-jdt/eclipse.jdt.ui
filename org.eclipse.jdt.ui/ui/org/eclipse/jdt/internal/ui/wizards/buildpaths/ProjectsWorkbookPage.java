@@ -479,7 +479,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				if (attrib.isBuiltIn()) {
 					String key= attrib.getKey();
 					Object value= null;
-					if (key.equals(CPListElement.ACCESSRULES)) {
+					if (CPListElement.ACCESSRULES.equals(key)) {
 						value= new IAccessRule[0];
 					}
 					attrib.getParent().setAttribute(key, value);
@@ -565,7 +565,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			if (!attrib.isBuiltIn()) {
 				return canEditCustomAttribute(attrib);
 			}
-			if (hasRootNodes() && attrib.getKey().equals(IClasspathAttribute.MODULE)) {
+			if (hasRootNodes() && IClasspathAttribute.MODULE.equals(attrib.getKey())) {
 				// module info should always be enabled.
 				return true;
 			}
@@ -592,16 +592,16 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		String key= elem.getKey();
 		boolean needRefresh= false;
 		boolean wasModular= false;
-		if (key.equals(CPListElement.ACCESSRULES)) {
+		if (CPListElement.ACCESSRULES.equals(key)) {
 			showAccessRestrictionDialog(elem.getParent());
-		} else if (key.equals(CPListElement.MODULE)) {
+		} else if (CPListElement.MODULE.equals(key)) {
 			wasModular= elem.getValue() != null;
 			needRefresh= showModuleDialog(getShell(), elem);
 		} else {
 			needRefresh= editCustomAttribute(getShell(), elem);
 		}
 		if (needRefresh) {
-			if (key.equals(CPListElement.MODULE) && hasRootNodes()) {
+			if (CPListElement.MODULE.equals(key) && hasRootNodes()) {
 				// if module attribute is changed, the element may change nodes
 				CPListElement selElement= elem.getParent();
 				boolean isModular= selElement.getAttribute(CPListElement.MODULE) != null;
@@ -610,7 +610,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 					moveCPElementAcrossNode(fProjectsList, selElement, changeDirection);
 				}
 			}
-			if(key.equals(CPListElement.TEST) || key.equals(CPListElement.WITHOUT_TEST_CODE)) {
+			if(CPListElement.TEST.equals(key) || CPListElement.WITHOUT_TEST_CODE.equals(key)) {
 				fProjectsList.refresh(elem.getParent());
 			} else {
 				fProjectsList.refresh(elem);
@@ -619,7 +619,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			fProjectsList.postSetSelection(new StructuredSelection(elem));
 			// if module attribute was changed - it will switch nodes and hence parent should be
 			// selected
-			if (key.equals(CPListElement.MODULE) && hasRootNodes()) {
+			if (CPListElement.MODULE.equals(key) && hasRootNodes()) {
 				fProjectsList.postSetSelection(new StructuredSelection(elem.getParent()));
 			} else {
 				fProjectsList.postSetSelection(new StructuredSelection(elem));

@@ -561,7 +561,7 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 		while (type != null) {
 			IMethodBinding[] methods= type.getDeclaredMethods();
 			for (IMethodBinding method : methods) {
-				if (method.getName().equals("close") && method.getParameterTypes().length == 0) { //$NON-NLS-1$
+				if ("close".equals(method.getName()) && method.getParameterTypes().length == 0) { //$NON-NLS-1$
 					return method;
 				}
 			}

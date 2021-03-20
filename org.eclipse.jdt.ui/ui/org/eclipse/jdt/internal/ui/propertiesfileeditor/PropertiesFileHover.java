@@ -137,12 +137,12 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 				return null;
 
 			String type= partition.getType();
-			if (!type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)
-					&& !type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+			if (!IPropertiesFilePartitions.PROPERTY_VALUE.equals(type)
+					&& !IDocument.DEFAULT_CONTENT_TYPE.equals(type)) {
 				return null;
 			}
 			String escapedString= document.get(partition.getOffset(), partition.getLength());
-			if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
+			if (IPropertiesFilePartitions.PROPERTY_VALUE.equals(type)) {
 				escapedString= escapedString.substring(1); //see PropertiesFilePartitionScanner()
 			}
 

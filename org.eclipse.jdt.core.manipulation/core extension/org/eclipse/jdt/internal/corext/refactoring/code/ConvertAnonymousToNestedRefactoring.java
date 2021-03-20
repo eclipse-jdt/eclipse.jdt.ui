@@ -1064,7 +1064,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         if (binding == null)
             return;
 		Type newType= (Type) ASTNode.copySubtree(fAnonymousInnerClassNode.getAST(), classInstanceCreation.getType());
-		if (binding.getSuperclass().getQualifiedName().equals("java.lang.Object")) { //$NON-NLS-1$
+		if ("java.lang.Object".equals(binding.getSuperclass().getQualifiedName())) { //$NON-NLS-1$
             Assert.isTrue(binding.getInterfaces().length <= 1);
             if (binding.getInterfaces().length == 0)
                 return;

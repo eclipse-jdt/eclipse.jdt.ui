@@ -172,7 +172,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(PlatformUI.PLUGIN_ID, PL_NEW);
 		if (extensionPoint != null) {
 			for (IConfigurationElement element : extensionPoint.getConfigurationElements()) {
-				if (element.getName().equals(TAG_WIZARD) && isJavaTypeWizard(element)) {
+				if (TAG_WIZARD.equals(element.getName()) && isJavaTypeWizard(element)) {
 					containers.add(new OpenTypeWizardAction(element));
 				}
 			}

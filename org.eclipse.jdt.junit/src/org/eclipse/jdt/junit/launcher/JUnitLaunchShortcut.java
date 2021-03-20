@@ -249,7 +249,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED));
 		dialog.setElements(types);
 		dialog.setTitle(JUnitMessages.JUnitLaunchShortcut_dialog_title2);
-		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
+		if (ILaunchManager.DEBUG_MODE.equals(mode)) {
 			dialog.setMessage(JUnitMessages.JUnitLaunchShortcut_message_selectTestToDebug);
 		} else {
 			dialog.setMessage(JUnitMessages.JUnitLaunchShortcut_message_selectTestToRun);
@@ -284,7 +284,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setElements(configList.toArray());
 		dialog.setTitle(JUnitMessages.JUnitLaunchShortcut_message_selectConfiguration);
-		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
+		if (ILaunchManager.DEBUG_MODE.equals(mode)) {
 			dialog.setMessage(JUnitMessages.JUnitLaunchShortcut_message_selectDebugConfiguration);
 		} else {
 			dialog.setMessage(JUnitMessages.JUnitLaunchShortcut_message_selectRunConfiguration);

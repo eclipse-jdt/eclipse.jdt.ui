@@ -74,7 +74,7 @@ public class ExternalNullAnnotationQuickAssistProcessor implements IQuickAssistP
 	public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
 		IEditorPart part= fAssistant.getEditor();
 		IClassFile classFile= ((IClassFileEditorInput) part.getEditorInput()).getClassFile();
-		return classFile.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED);
+		return JavaCore.ENABLED.equals(classFile.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true));
 	}
 
 	@Override
@@ -134,7 +134,7 @@ public class ExternalNullAnnotationQuickAssistProcessor implements IQuickAssistP
 		ICompilationUnit cu= context.getCompilationUnit();
 		if (cu != null) {
 			IJavaProject javaProject= cu.getJavaProject();
-			return javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)
+			return JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))
 					&& ExternalNullAnnotationChangeProposals.hasAnnotationPathInWorkspace(javaProject, cu);
 		}
 		return false;

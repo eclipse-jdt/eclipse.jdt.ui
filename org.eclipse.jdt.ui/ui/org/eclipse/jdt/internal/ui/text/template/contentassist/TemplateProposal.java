@@ -384,7 +384,7 @@ public class TemplateProposal
 
 	    TemplateVariable[] variables= buffer.getVariables();
 		for (TemplateVariable variable : variables) {
-			if (variable.getType().equals(GlobalTemplateVariables.Cursor.NAME))
+			if (GlobalTemplateVariables.Cursor.NAME.equals(variable.getType()))
 				return variable.getOffsets()[0];
 		}
 

@@ -102,7 +102,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	 */
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(PreferenceConstants.EDITOR_SHOW_HOVER))
+		if (PreferenceConstants.EDITOR_SHOW_HOVER.equals(event.getProperty()))
 			update();
 	}
 }

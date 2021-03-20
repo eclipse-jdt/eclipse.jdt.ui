@@ -136,7 +136,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 		if (fIsFromSource) {
 			flags &= ~JavaElementLabels.T_FULLY_QUALIFIED;
 		}
-		boolean isInitializer= method.getName().equals(INIT_NAME);
+		boolean isInitializer= INIT_NAME.equals(method.getName());
 
 		// type parameters
 		if (getFlag(flags, JavaElementLabels.M_PRE_TYPE_PARAMETERS)) {
@@ -723,7 +723,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 							buf.append(getTypeName((ITypeBinding) declaringMember, flags));
 						} else { // field or method
 							String name= declaringMember.getName();
-							if (name.equals(INIT_NAME))
+							if (INIT_NAME.equals(name))
 								buf.append(JavaUIMessages.JavaElementLabels_initializer);
 							else
 								buf.append(name);

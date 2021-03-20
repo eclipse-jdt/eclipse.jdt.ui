@@ -1288,7 +1288,7 @@ public class TestRunnerViewPart extends ViewPart {
 		computeOrientation();
 		String scrollLock= memento.getString(TAG_SCROLL);
 		if (scrollLock != null) {
-			fScrollLockAction.setChecked(scrollLock.equals("true")); //$NON-NLS-1$
+			fScrollLockAction.setChecked("true".equals(scrollLock)); //$NON-NLS-1$
 			setAutoScroll(!fScrollLockAction.isChecked());
 		}
 
@@ -1300,17 +1300,17 @@ public class TestRunnerViewPart extends ViewPart {
 		String failuresOnly= memento.getString(TAG_FAILURES_ONLY);
 		boolean showFailuresOnly= false;
 		if (failuresOnly != null)
-			showFailuresOnly= failuresOnly.equals("true"); //$NON-NLS-1$
+			showFailuresOnly= "true".equals(failuresOnly); //$NON-NLS-1$
 
 		String ignoredOnly= memento.getString(TAG_IGNORED_ONLY);
 		boolean showIgnoredOnly= false;
 		if (ignoredOnly != null)
-			showIgnoredOnly= ignoredOnly.equals("true"); //$NON-NLS-1$
+			showIgnoredOnly= "true".equals(ignoredOnly); //$NON-NLS-1$
 
 		String time= memento.getString(TAG_SHOW_TIME);
 		boolean showTime= true;
 		if (time != null)
-			showTime= time.equals("true"); //$NON-NLS-1$
+			showTime= "true".equals(time); //$NON-NLS-1$
 
 		SortingCriterion sortingCriterion= SortingCriterion.SORT_BY_EXECUTION_ORDER;
 		Integer tagSortingCriterion= memento.getInteger(TAG_SORTING_CRITERION);

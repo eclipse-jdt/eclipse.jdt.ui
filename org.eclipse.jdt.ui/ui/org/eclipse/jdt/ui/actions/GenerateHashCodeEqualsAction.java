@@ -147,16 +147,16 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 
 		while (true) {
 			for (IMethodBinding declaredMethod : someType.getDeclaredMethods()) {
-				if (declaredMethod.getName().equals(METHODNAME_EQUALS)) {
+				if (METHODNAME_EQUALS.equals(declaredMethod.getName())) {
 					ITypeBinding[] b= declaredMethod.getParameterTypes();
-					if ((b.length == 1) && (b[0].getQualifiedName().equals("java.lang.Object"))) { //$NON-NLS-1$
+					if ((b.length == 1) && ("java.lang.Object".equals(b[0].getQualifiedName()))) { //$NON-NLS-1$
 						info.foundEquals= true;
 						if (Modifier.isFinal(declaredMethod.getModifiers())) {
 							info.foundFinalEquals= true;
 						}
 					}
 				}
-				if (declaredMethod.getName().equals(METHODNAME_HASH_CODE) && declaredMethod.getParameterTypes().length == 0) {
+				if (METHODNAME_HASH_CODE.equals(declaredMethod.getName()) && declaredMethod.getParameterTypes().length == 0) {
 					info.foundHashCode= true;
 					if (Modifier.isFinal(declaredMethod.getModifiers())) {
 						info.foundFinalHashCode= true;

@@ -113,7 +113,7 @@ public class JavadocContentAccess {
 		} catch (IOException e) {
 			return false;
 		}
-		return new String(content).trim().equals("{@inheritDoc}"); //$NON-NLS-1$
+		return "{@inheritDoc}".equals(new String(content).trim()); //$NON-NLS-1$
 
 	}
 

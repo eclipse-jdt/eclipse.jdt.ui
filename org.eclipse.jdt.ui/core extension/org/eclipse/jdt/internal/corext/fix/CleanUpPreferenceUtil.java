@@ -70,7 +70,7 @@ public class CleanUpPreferenceUtil {
 				return profile.getSettings();
 		}
 
-    	if (id.equals(CleanUpConstants.SAVE_PARTICIPANT_PROFILE))
+    	if (CleanUpConstants.SAVE_PARTICIPANT_PROFILE.equals(id))
     		return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getMap();
 
     	CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();

@@ -119,15 +119,15 @@ public class PropertiesQuickAssistProcessor {
 				return false;
 
 			String type= partition.getType();
-			if (!type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)
-					&& !type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
+			if (!IPropertiesFilePartitions.PROPERTY_VALUE.equals(type)
+					&& !IDocument.DEFAULT_CONTENT_TYPE.equals(type)) {
 				return false;
 			}
 			proposalOffset= partition.getOffset();
 			proposalLength= partition.getLength();
 			text= document.get(proposalOffset, proposalLength);
 
-			if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
+			if (IPropertiesFilePartitions.PROPERTY_VALUE.equals(type)) {
 				text= text.substring(1); //see PropertiesFilePartitionScanner()
 				proposalOffset++;
 				proposalLength--;
@@ -312,7 +312,7 @@ public class PropertiesQuickAssistProcessor {
 				return null;
 
 			String type= partition.getType();
-			if (!(type.equals(IDocument.DEFAULT_CONTENT_TYPE))) {
+			if (!(IDocument.DEFAULT_CONTENT_TYPE.equals(type))) {
 				return null;
 			}
 			String key= document.get(partition.getOffset(), partition.getLength()).trim();
@@ -334,7 +334,7 @@ public class PropertiesQuickAssistProcessor {
 				offset= partitionOffset + partitionLength;
 
 				String type= partition.getType();
-				if (!(type.equals(IDocument.DEFAULT_CONTENT_TYPE))) {
+				if (!(IDocument.DEFAULT_CONTENT_TYPE.equals(type))) {
 					continue;
 				}
 				String key= document.get(partitionOffset, partitionLength).trim();

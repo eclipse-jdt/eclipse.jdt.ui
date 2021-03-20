@@ -47,7 +47,7 @@ public class RsrcURLStreamHandler extends java.net.URLStreamHandler {
     	String file;
     	if (spec.startsWith(JIJConstants.INTERNAL_URL_PROTOCOL_WITH_COLON))
     		file = spec.substring(5);
-    	else if (url.getFile().equals(JIJConstants.CURRENT_DIR))
+    	else if (JIJConstants.CURRENT_DIR.equals(url.getFile()))
     		file = spec;
     	else if (url.getFile().endsWith(JIJConstants.PATH_SEPARATOR))
     		file = url.getFile() + spec;

@@ -103,7 +103,7 @@ public abstract class TypeSet implements ITypeSet {
 			TypeSetIntersection x= (TypeSetIntersection) s2;
 			// xsect(A,xsect(A,B)) = xsect(A,B) and
 			// xsect(B,xsect(A,B)) = xsect(A,B)
-			if (x.getLHS().equals(this) || x.getRHS().equals(this))
+			if (this.equals(x.getLHS()) || this.equals(x.getRHS()))
 				return x;
 		}
 

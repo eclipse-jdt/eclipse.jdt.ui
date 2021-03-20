@@ -133,7 +133,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		}
 		parser.setErrorHandler(new DefaultHandler());
 		Element xmlJarDesc= parser.parse(new InputSource(fInputStream)).getDocumentElement();
-		if (!xmlJarDesc.getNodeName().equals(JarPackagerUtil.DESCRIPTION_EXTENSION)) {
+		if (!JarPackagerUtil.DESCRIPTION_EXTENSION.equals(xmlJarDesc.getNodeName())) {
 			throw new IOException(JarPackagerMessages.JarPackageReader_error_badFormat);
 		}
 		NodeList topLevelElements= xmlJarDesc.getChildNodes();
@@ -154,12 +154,12 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	}
 
 	private void xmlReadJarLocation(JarPackageData jarPackage, Element element) {
-		if (element.getNodeName().equals(JarPackagerUtil.JAR_EXTENSION))
+		if (JarPackagerUtil.JAR_EXTENSION.equals(element.getNodeName()))
 			jarPackage.setJarLocation(Path.fromPortableString(element.getAttribute("path"))); //$NON-NLS-1$
 	}
 
 	private void xmlReadOptions(JarPackageData jarPackage, Element element) throws java.io.IOException {
-		if (element.getNodeName().equals("options")) { //$NON-NLS-1$
+		if ("options".equals(element.getNodeName())) { //$NON-NLS-1$
 			jarPackage.setOverwrite(getBooleanAttribute(element, "overwrite")); //$NON-NLS-1$
 			jarPackage.setCompress(getBooleanAttribute(element, "compress")); //$NON-NLS-1$
 			jarPackage.setExportErrors(getBooleanAttribute(element, "exportErrors")); //$NON-NLS-1$
@@ -174,7 +174,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	}
 
 	private void xmlReadRefactoring(JarPackageData jarPackage, Element element) throws java.io.IOException {
-		if (element.getNodeName().equals("storedRefactorings")) { //$NON-NLS-1$
+		if ("storedRefactorings".equals(element.getNodeName())) { //$NON-NLS-1$
 			jarPackage.setExportStructuralOnly(getBooleanAttribute(element, "structuralOnly", jarPackage.isExportStructuralOnly())); //$NON-NLS-1$
 			jarPackage.setDeprecationAware(getBooleanAttribute(element, "deprecationInfo", jarPackage.isDeprecationAware())); //$NON-NLS-1$
 			List<IAdaptable> elements= new ArrayList<>();
@@ -218,7 +218,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	}
 
 	private void xmlReadManifest(JarPackageData jarPackage, Element element) throws java.io.IOException {
-		if (element.getNodeName().equals("manifest")) { //$NON-NLS-1$
+		if ("manifest".equals(element.getNodeName())) { //$NON-NLS-1$
 			jarPackage.setManifestVersion(element.getAttribute("manifestVersion")); //$NON-NLS-1$
 			jarPackage.setUsesManifest(getBooleanAttribute(element, "usesManifest")); //$NON-NLS-1$
 			jarPackage.setReuseManifest(getBooleanAttribute(element, "reuseManifest")); //$NON-NLS-1$
@@ -240,7 +240,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		for (int j= 0; j < sealingElementContainer.getLength(); j++) {
 			Node sealingNode= sealingElementContainer.item(j);
 			if (sealingNode.getNodeType() == Node.ELEMENT_NODE
-				&& sealingNode.getNodeName().equals("sealing")) { //$NON-NLS-1$
+				&& "sealing".equals(sealingNode.getNodeName())) { //$NON-NLS-1$
 				// Sealing
 				Element sealingElement= (Element)sealingNode;
 				jarPackage.setSealJar(getBooleanAttribute(sealingElement, "sealJar")); //$NON-NLS-1$
@@ -251,7 +251,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	}
 
 	private void xmlReadSelectedElements(JarPackageData jarPackage, Element element) throws java.io.IOException {
-		if (element.getNodeName().equals("selectedElements")) { //$NON-NLS-1$
+		if ("selectedElements".equals(element.getNodeName())) { //$NON-NLS-1$
 			jarPackage.setExportClassFiles(getBooleanAttribute(element, "exportClassFiles")); //$NON-NLS-1$
 			jarPackage.setExportOutputFolders(getBooleanAttribute(element, "exportOutputFolder", false)); //$NON-NLS-1$
 			jarPackage.setExportJavaFiles(getBooleanAttribute(element, "exportJavaFiles")); //$NON-NLS-1$
@@ -285,7 +285,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	}
 
 	private void xmlReadSelectedProjects(JarPackageData jarPackage, Element element) throws java.io.IOException {
-		if (element.getNodeName().equals("selectedProjects")) { //$NON-NLS-1$
+		if ("selectedProjects".equals(element.getNodeName())) { //$NON-NLS-1$
 			NodeList selectedElements= element.getChildNodes();
 			Set<IAdaptable> selectedProjects= new HashSet<>(selectedElements.getLength());
 			for (int index= 0; index < selectedElements.getLength(); index++) {
@@ -293,7 +293,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 				if (node.getNodeType() != Node.ELEMENT_NODE)
 					continue;
 				Element selectedElement= (Element)node;
-				if (selectedElement.getNodeName().equals("project")) //$NON-NLS-1$
+				if ("project".equals(selectedElement.getNodeName())) //$NON-NLS-1$
 					addProject(selectedProjects ,selectedElement);
 			}
 			jarPackage.setRefactoringProjects(selectedProjects.toArray(new IProject[selectedProjects.size()]));
@@ -309,9 +309,9 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 
 	protected boolean getBooleanAttribute(Element element, String name) throws IOException {
 		String value= element.getAttribute(name);
-		if (value != null && value.equalsIgnoreCase("true")) //$NON-NLS-1$
+		if (value != null && "true".equalsIgnoreCase(value)) //$NON-NLS-1$
 			return true;
-		if (value != null && value.equalsIgnoreCase("false")) //$NON-NLS-1$
+		if (value != null && "false".equalsIgnoreCase(value)) //$NON-NLS-1$
 			return false;
 		throw new IOException(JarPackagerMessages.JarPackageReader_error_illegalValueForBooleanAttribute);
 	}
@@ -370,7 +370,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		List<IJavaElement> packages= new ArrayList<>(packageNodes.getLength());
 		for (int i= 0; i < packageNodes.getLength(); i++) {
 			Node packageNode= packageNodes.item(i);
-			if (packageNode.getNodeType() == Node.ELEMENT_NODE && packageNode.getNodeName().equals("package")) { //$NON-NLS-1$
+			if (packageNode.getNodeType() == Node.ELEMENT_NODE && "package".equals(packageNode.getNodeName())) { //$NON-NLS-1$
 				String handleId= ((Element)packageNode).getAttribute("handleIdentifier"); //$NON-NLS-1$
 				if (handleId.isEmpty())
 					throw new IOException(JarPackagerMessages.JarPackageReader_error_tagHandleIdentifierNotFoundOrEmpty);

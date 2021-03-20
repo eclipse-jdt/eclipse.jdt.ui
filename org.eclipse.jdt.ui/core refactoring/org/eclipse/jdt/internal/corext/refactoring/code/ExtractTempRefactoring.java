@@ -214,7 +214,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (parent instanceof SwitchCase)
 			return true;
 		if (node instanceof SimpleName && node.getLocationInParent() != null) {
-			return !node.getLocationInParent().getId().equals("name"); //$NON-NLS-1$
+			return !"name".equals(node.getLocationInParent().getId()); //$NON-NLS-1$
 		}
 		return true;
 	}

@@ -477,7 +477,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 				modifierString= modifierString.substring(1);
 			}
 
-			if (modifierString.equals(JavaEditorTextHoverDescriptor.NO_MODIFIER))
+			if (JavaEditorTextHoverDescriptor.NO_MODIFIER.equals(modifierString))
 				modifierString= ""; //$NON-NLS-1$
 
 			fHoverConfigs[i].fModifierString= modifierString;

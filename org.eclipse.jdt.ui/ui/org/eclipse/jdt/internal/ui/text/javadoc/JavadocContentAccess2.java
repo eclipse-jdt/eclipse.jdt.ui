@@ -513,7 +513,7 @@ public class JavadocContentAccess2 {
 			return null;
 		}
 		String sourceJavadoc= getHTMLContentFromSource(element);
-		if (sourceJavadoc == null || sourceJavadoc.length() == 0 || sourceJavadoc.trim().equals("{@inheritDoc}")) { //$NON-NLS-1$
+		if (sourceJavadoc == null || sourceJavadoc.length() == 0 || "{@inheritDoc}".equals(sourceJavadoc.trim())) { //$NON-NLS-1$
 			if (useAttachedJavadoc) {
 				if (element.getOpenable().getBuffer() == null) { // only if no source available
 					return element.getAttachedJavadoc(null);

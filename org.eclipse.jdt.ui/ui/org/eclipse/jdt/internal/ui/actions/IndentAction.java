@@ -475,7 +475,7 @@ public class IndentAction extends TextEditorAction {
 		int max= lineInfo.getOffset() + lineInfo.getLength() - 1;
 
 		int pairCount= 0;
-		while (offset < max && document.get(offset, 2).equals("//")) { //$NON-NLS-1$
+		while (offset < max && "//".equals(document.get(offset, 2))) { //$NON-NLS-1$
 			pairCount++;
 			offset= offset + 2;
 		}
@@ -890,31 +890,31 @@ public class IndentAction extends TextEditorAction {
 					newStr= CodeFormatterUtil.createIndentString(units, javaProject);
 					int newLength= IndentManipulation.measureIndentInSpaces(newStr, CodeFormatterUtil.getTabWidth(javaProject));
 					if (newLength < length) {
-						if (formatterTabValue.equals(DefaultCodeFormatterConstants.MIXED) || formatterTabValue.equals(JavaCore.SPACE)) {
+						if (DefaultCodeFormatterConstants.MIXED.equals(formatterTabValue) || JavaCore.SPACE.equals(formatterTabValue)) {
 							for (int i= newLength; i < length; i++) {
 								newStr+= IndentAction.SPACE_STR;
 							}
-						} else if (formatterTabValue.equals(JavaCore.TAB)) {
+						} else if (JavaCore.TAB.equals(formatterTabValue)) {
 							newStr+= tabString;
 						}
 					}
 				}
 				indentation= newStr;
 			} else if (textBlockIndentationOption == DefaultCodeFormatterConstants.INDENT_BY_ONE) {
-				if (formatterTabValue.equals(JavaCore.TAB)
-						|| formatterTabValue.equals(DefaultCodeFormatterConstants.MIXED)) {
+				if (JavaCore.TAB.equals(formatterTabValue)
+						|| DefaultCodeFormatterConstants.MIXED.equals(formatterTabValue)) {
 					indentation+= tabString;
-				} else if (formatterTabValue.equals(JavaCore.SPACE)) {
+				} else if (JavaCore.SPACE.equals(formatterTabValue)) {
 					indentation+= tabSpaceString;
 				}
 			} else if (textBlockIndentationOption == DefaultCodeFormatterConstants.INDENT_PRESERVE) {
 				indentation= IndentAction.EMPTY_STR;
 			} else if (textBlockIndentationOption == DefaultCodeFormatterConstants.INDENT_DEFAULT) {
 				String indentString= EMPTY_STR;
-				if (formatterTabValue.equals(JavaCore.TAB)
-						|| formatterTabValue.equals(DefaultCodeFormatterConstants.MIXED)) {
+				if (JavaCore.TAB.equals(formatterTabValue)
+						|| DefaultCodeFormatterConstants.MIXED.equals(formatterTabValue)) {
 					indentString= tabString;
-				} else if (formatterTabValue.equals(JavaCore.SPACE)) {
+				} else if (JavaCore.SPACE.equals(formatterTabValue)) {
 					indentString= tabSpaceString;
 				}
 				int count= getFormatterContinuationIndentation(javaProject);
@@ -955,31 +955,31 @@ public class IndentAction extends TextEditorAction {
 				newStr= CodeFormatterUtil.createIndentString(units, javaProject);
 				int newLength= IndentManipulation.measureIndentInSpaces(newStr, CodeFormatterUtil.getTabWidth(javaProject));
 				if (newLength < length) {
-					if (formatterTabValue.equals(DefaultCodeFormatterConstants.MIXED) || formatterTabValue.equals(JavaCore.SPACE)) {
+					if (DefaultCodeFormatterConstants.MIXED.equals(formatterTabValue) || JavaCore.SPACE.equals(formatterTabValue)) {
 						for (int i= newLength; i < length; i++) {
 							newStr+= IndentAction.SPACE_STR;
 						}
-					} else if (formatterTabValue.equals(JavaCore.TAB)) {
+					} else if (JavaCore.TAB.equals(formatterTabValue)) {
 						newStr+= tabString;
 					}
 				}
 			}
 			indentation= newStr;
 		} else if (textBlockIndentationOption == DefaultCodeFormatterConstants.INDENT_BY_ONE) {
-			if (formatterTabValue.equals(JavaCore.TAB)
-					|| formatterTabValue.equals(DefaultCodeFormatterConstants.MIXED)) {
+			if (JavaCore.TAB.equals(formatterTabValue)
+					|| DefaultCodeFormatterConstants.MIXED.equals(formatterTabValue)) {
 				indentation+= tabString;
-			} else if (formatterTabValue.equals(JavaCore.SPACE)) {
+			} else if (JavaCore.SPACE.equals(formatterTabValue)) {
 				indentation+= tabSpaceString;
 			}
 		} else if (textBlockIndentationOption == DefaultCodeFormatterConstants.INDENT_PRESERVE) {
 			indentation= IndentAction.EMPTY_STR;
 		} else if (textBlockIndentationOption == DefaultCodeFormatterConstants.INDENT_DEFAULT) {
 			String indentString= EMPTY_STR;
-			if (formatterTabValue.equals(JavaCore.TAB)
-					|| formatterTabValue.equals(DefaultCodeFormatterConstants.MIXED)) {
+			if (JavaCore.TAB.equals(formatterTabValue)
+					|| DefaultCodeFormatterConstants.MIXED.equals(formatterTabValue)) {
 				indentString= tabString;
-			} else if (formatterTabValue.equals(JavaCore.SPACE)) {
+			} else if (JavaCore.SPACE.equals(formatterTabValue)) {
 				indentString= tabSpaceString;
 			}
 			int count= getFormatterContinuationIndentation(javaProject);

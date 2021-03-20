@@ -651,7 +651,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 
 			int index= super.getLineStartPosition(document, line, length, offset);
-			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
+			if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)) {
 				if (index < length - 1 && line.charAt(index) == '*' && line.charAt(index + 1) != '/') {
 					do {
 						++index;
@@ -2452,7 +2452,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	protected boolean isActivePart() {
 		IWorkbenchPart part= getActivePart();
-		return part != null && part.equals(this);
+		return part != null && this.equals(part);
 	}
 
 	private boolean isJavaOutlinePageActive() {

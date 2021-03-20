@@ -1851,7 +1851,7 @@ public class RenameTypeTests extends GenericRefactoringTest {
 		assertEquals(newFile.getName(), newCUName);
 
 		if ((type.getParent().getElementType() == IJavaElement.COMPILATION_UNIT)
-				&& type.getCompilationUnit().getElementName().equals(type.getElementName() + ".java")) {
+				&& (type.getElementName() + ".java").equals(type.getCompilationUnit().getElementName())) {
 			assertFalse(type.getCompilationUnit().exists());
 			assertFalse(type.getResource().exists());
 		}

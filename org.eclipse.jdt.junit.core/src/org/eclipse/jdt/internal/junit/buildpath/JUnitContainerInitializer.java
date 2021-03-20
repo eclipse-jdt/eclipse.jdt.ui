@@ -175,7 +175,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 
 	@Override
 	public IStatus getAttributeStatus(IPath containerPath, IJavaProject project, String attributeKey) {
-		if (attributeKey.equals(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME)) {
+		if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(attributeKey)) {
 			return Status.OK_STATUS;
 		}
 		return NOT_SUPPORTED;
@@ -209,7 +209,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 					// preferenceStore.setValue(preferenceKey, "");
 				} else {
 					for (IClasspathAttribute attrib : extraAttributes) {
-						if (attrib.getName().equals(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME)) {
+						if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(attrib.getName())) {
 							if (preferenceKey != null) {
 								preferences.put(preferenceKey, attrib.getValue());
 							}

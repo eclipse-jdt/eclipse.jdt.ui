@@ -120,7 +120,7 @@ public class JavadocWriter {
 		xmlJavadocDesc.setAttribute(JavadocOptionsManager.DESTINATION, destination);
 		xmlJavadocDesc.setAttribute(JavadocOptionsManager.VISIBILITY, store.getAccess());
 		String source= store.getSource();
-		if (source.length() > 0 && !source.equals("-")) { //$NON-NLS-1$
+		if (source.length() > 0 && !"-".equals(source)) { //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(JavadocOptionsManager.SOURCE, store.getSource());
 		}
 		xmlJavadocDesc.setAttribute(JavadocOptionsManager.USE, booleanToString(store.getBoolean("use"))); //$NON-NLS-1$

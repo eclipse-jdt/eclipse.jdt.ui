@@ -115,14 +115,14 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 		if (!getContext().is50orHigher() && type.isPrimitive()) {
 			String nonPrimitiveType= null;
 			String typeName= type.getName();
-			if (typeName.equals("byte"))nonPrimitiveType= "java.lang.Byte"; //$NON-NLS-1$ //$NON-NLS-2$
-			if (typeName.equals("short"))nonPrimitiveType= "java.lang.Short"; //$NON-NLS-1$ //$NON-NLS-2$
-			if (typeName.equals("char"))nonPrimitiveType= "java.lang.Character"; //$NON-NLS-1$ //$NON-NLS-2$
-			if (typeName.equals("int"))nonPrimitiveType= "java.lang.Integer"; //$NON-NLS-1$ //$NON-NLS-2$
-			if (typeName.equals("long"))nonPrimitiveType= "java.lang.Long"; //$NON-NLS-1$ //$NON-NLS-2$
-			if (typeName.equals("float"))nonPrimitiveType= "java.lang.Float"; //$NON-NLS-1$ //$NON-NLS-2$
-			if (typeName.equals("double"))nonPrimitiveType= "java.lang.Double"; //$NON-NLS-1$ //$NON-NLS-2$
-			if (typeName.equals("boolean"))nonPrimitiveType= "java.lang.Boolean"; //$NON-NLS-1$ //$NON-NLS-2$
+			if ("byte".equals(typeName))nonPrimitiveType= "java.lang.Byte"; //$NON-NLS-1$ //$NON-NLS-2$
+			if ("short".equals(typeName))nonPrimitiveType= "java.lang.Short"; //$NON-NLS-1$ //$NON-NLS-2$
+			if ("char".equals(typeName))nonPrimitiveType= "java.lang.Character"; //$NON-NLS-1$ //$NON-NLS-2$
+			if ("int".equals(typeName))nonPrimitiveType= "java.lang.Integer"; //$NON-NLS-1$ //$NON-NLS-2$
+			if ("long".equals(typeName))nonPrimitiveType= "java.lang.Long"; //$NON-NLS-1$ //$NON-NLS-2$
+			if ("float".equals(typeName))nonPrimitiveType= "java.lang.Float"; //$NON-NLS-1$ //$NON-NLS-2$
+			if ("double".equals(typeName))nonPrimitiveType= "java.lang.Double"; //$NON-NLS-1$ //$NON-NLS-2$
+			if ("boolean".equals(typeName))nonPrimitiveType= "java.lang.Boolean"; //$NON-NLS-1$ //$NON-NLS-2$
 			ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
 			classInstance.setType(fAst.newSimpleType(addImport(nonPrimitiveType)));
 			classInstance.arguments().add(super.createMemberAccessExpression(member, true, true));

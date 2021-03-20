@@ -90,7 +90,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 
 	private void installPreferenceListener() {
 	    fPreferenceChangeListener= event -> {
-			if (event.getKey().equals(CleanUpConstants.SHOW_CLEAN_UP_WIZARD)) {
+			if (CleanUpConstants.SHOW_CLEAN_UP_WIZARD.equals(event.getKey())) {
 				updateActionLabel();
 			}
 		};

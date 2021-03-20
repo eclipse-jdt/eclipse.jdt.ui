@@ -377,7 +377,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 		try {
 			String contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, selection.getOffset(), true);
-			return contentType.equals(IJavaPartitions.JAVA_DOC);
+			return IJavaPartitions.JAVA_DOC.equals(contentType);
 		} catch (BadLocationException e) {
 			return false;
 		}

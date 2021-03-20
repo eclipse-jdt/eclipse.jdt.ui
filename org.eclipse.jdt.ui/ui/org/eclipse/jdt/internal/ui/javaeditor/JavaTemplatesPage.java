@@ -287,7 +287,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	private boolean isTemplateAllowed(DocumentTemplateContext context, Template template) {
 		int offset;
 		try {
-			if (template.getContextTypeId().equals(JavaDocContextType.ID)) {
+			if (JavaDocContextType.ID.equals(template.getContextTypeId())) {
 				return (offset= context.getCompletionOffset()) > 0 && Character.isWhitespace(context.getDocument().getChar(offset - 1));
 			} else {
 				return ((offset= context.getCompletionOffset()) > 0 && !isTemplateNamePart(context.getDocument().getChar(offset - 1)));
@@ -318,7 +318,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	 */
 	private DocumentTemplateContext getContext(IDocument document, Template template, final int offset, int length) {
 		DocumentTemplateContext context;
-		if (template.getContextTypeId().equals(JavaDocContextType.ID)) {
+		if (JavaDocContextType.ID.equals(template.getContextTypeId())) {
 			context= new JavaDocContext(getContextTypeRegistry().getContextType(template.getContextTypeId()), document, new Position(offset, length), (ICompilationUnit) EditorUtility
 					.getEditorInputJavaElement(fJavaEditor, true));
 		} else {
@@ -343,7 +343,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		try {
 			String partition= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 			String[] ids= new String[] { JavaContextType.ID_ALL, JavaContextType.ID_MEMBERS, JavaContextType.ID_STATEMENTS, SWTContextType.ID_ALL, SWTContextType.ID_STATEMENTS, SWTContextType.ID_MEMBERS};
-			if (partition.equals(IJavaPartitions.JAVA_DOC))
+			if (IJavaPartitions.JAVA_DOC.equals(partition))
 				ids= new String[] { JavaDocContextType.ID };
 			IJavaElement elem= EditorUtility.getEditorInputJavaElement(fJavaEditor, true);
 			if (elem != null && JavaModelUtil.MODULE_INFO_JAVA.equals(elem.getElementName())) {

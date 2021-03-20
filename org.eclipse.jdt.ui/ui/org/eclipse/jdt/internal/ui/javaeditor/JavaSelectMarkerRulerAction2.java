@@ -101,7 +101,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 	 * @return <code>true</code> if the annotation is a breakpoint annotation
 	 */
 	private boolean isBreakpoint(Annotation annotation) {
-		return annotation.getType().equals("org.eclipse.debug.core.breakpoint") || annotation.getType().equals(JavaExpandHover.NO_BREAKPOINT_ANNOTATION); //$NON-NLS-1$
+		return "org.eclipse.debug.core.breakpoint".equals(annotation.getType()) || JavaExpandHover.NO_BREAKPOINT_ANNOTATION.equals(annotation.getType()); //$NON-NLS-1$
 	}
 
 	private boolean isQuickFixTarget(Annotation a) {

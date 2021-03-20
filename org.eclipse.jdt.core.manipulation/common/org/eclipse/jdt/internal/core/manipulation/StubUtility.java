@@ -828,7 +828,7 @@ public class StubUtility {
 			}
 			buf.append("@param ").append(paramName); //$NON-NLS-1$
 		}
-		if (returnType != null && !returnType.equals("void")) { //$NON-NLS-1$
+		if (returnType != null && !"void".equals(returnType)) { //$NON-NLS-1$
 			if (buf.length() > 0) {
 				buf.append(lineDelimiter).append(lineStart);
 			}

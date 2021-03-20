@@ -169,7 +169,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 					}
 				};
 				action.addPropertyChangeListener(event -> {
-					if (event.getProperty().equals(IAction.RESULT)) {
+					if (IAction.RESULT.equals(event.getProperty())) {
 						if (event.getNewValue().equals(Boolean.TRUE)) {
 							result[0]= addFakeFolder(fJavaProject.getProject(), newElement);
 						} else {

@@ -151,7 +151,7 @@ public class JarPackagerUtilCore {
 			boolean areDirectoryEntriesIncluded, boolean isCompressed,
 			JarOutputStream jarOutputStream, Set<String> directories, MultiStatus status) {
 		// Handle META-INF/MANIFEST.MF
-		if (destinationPath.equalsIgnoreCase("META-INF/MANIFEST.MF") //$NON-NLS-1$
+		if ("META-INF/MANIFEST.MF".equalsIgnoreCase(destinationPath) //$NON-NLS-1$
 				|| (destinationPath.startsWith("META-INF/") && destinationPath.endsWith(".SF"))) { //$NON-NLS-1$//$NON-NLS-2$
 			return;
 		}

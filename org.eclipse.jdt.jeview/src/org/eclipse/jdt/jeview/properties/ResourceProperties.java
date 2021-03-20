@@ -88,35 +88,35 @@ public class ResourceProperties implements IPropertySource {
 
 	@Override
 	public Object getPropertyValue(Object name) {
-		if (name.equals(P_NAME)) {
+		if (P_NAME.equals(name)) {
 			return fResource.getName();
-		} else 	if (name.equals(P_FULL_PATH)) {
+		} else 	if (P_FULL_PATH.equals(name)) {
 			return fResource.getFullPath();
-		} else 	if (name.equals(P_LOCATION)) {
+		} else 	if (P_LOCATION.equals(name)) {
 			return fResource.getLocation();
-		} else 	if (name.equals(P_PROJECT_RELATIVE_PATH)) {
+		} else 	if (P_PROJECT_RELATIVE_PATH.equals(name)) {
 			return fResource.getProjectRelativePath();
-		} else 	if (name.equals(P_RAW_LOCATION)) {
+		} else 	if (P_RAW_LOCATION.equals(name)) {
 			return fResource.getRawLocation();
-		} else 	if (name.equals(P_LOCAL_TIME_STAMP)) {
+		} else 	if (P_LOCAL_TIME_STAMP.equals(name)) {
 			return fResource.getLocalTimeStamp();
-		} else 	if (name.equals(P_MODIFICATION_STAMP)) {
+		} else 	if (P_MODIFICATION_STAMP.equals(name)) {
 			return fResource.getModificationStamp();
-		} else 	if (name.equals(P_EXISTS)) {
+		} else 	if (P_EXISTS.equals(name)) {
 			return fResource.exists();
-		} else 	if (name.equals(P_IS_ACCESSIBLE)) {
+		} else 	if (P_IS_ACCESSIBLE.equals(name)) {
 			return fResource.isAccessible();
-		} else 	if (name.equals(P_IS_DERIVED)) {
+		} else 	if (P_IS_DERIVED.equals(name)) {
 			return fResource.isDerived();
-		} else 	if (name.equals(P_IS_HIDDEN)) {
+		} else 	if (P_IS_HIDDEN.equals(name)) {
 			return fResource.isHidden();
-		} else 	if (name.equals(P_IS_LINKED)) {
+		} else 	if (P_IS_LINKED.equals(name)) {
 			return fResource.isLinked();
-		} else 	if (name.equals(P_IS_PHANTOM)) {
+		} else 	if (P_IS_PHANTOM.equals(name)) {
 			return fResource.isPhantom();
-		} else 	if (name.equals(P_IS_TEAM_PRIVATE_MEMBER)) {
+		} else 	if (P_IS_TEAM_PRIVATE_MEMBER.equals(name)) {
 			return fResource.isTeamPrivateMember();
-		} else 	if (name.equals(P_IS_VIRTUAL)) {
+		} else 	if (P_IS_VIRTUAL.equals(name)) {
 			return fResource.isVirtual();
 		}
 

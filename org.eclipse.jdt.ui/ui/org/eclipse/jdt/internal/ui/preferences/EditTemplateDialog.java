@@ -198,7 +198,7 @@ public class EditTemplateDialog extends StatusDialog {
 		List<String[]> contexts= new ArrayList<>();
 		for (Iterator<TemplateContextType> it= registry.contextTypes(); it.hasNext();) {
 			TemplateContextType type= it.next();
-			if (type.getId().equals("javadoc")) //$NON-NLS-1$
+			if ("javadoc".equals(type.getId())) //$NON-NLS-1$
 				contexts.add(new String[] { type.getId(), type.getName(), "/**" + delim }); //$NON-NLS-1$
 			else
 				contexts.add(0, new String[] { type.getId(), type.getName(), "" }); //$NON-NLS-1$

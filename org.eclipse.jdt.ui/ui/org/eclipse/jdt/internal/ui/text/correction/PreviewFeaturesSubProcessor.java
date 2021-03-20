@@ -248,12 +248,12 @@ public class PreviewFeaturesSubProcessor {
 			boolean hasProjectSpecificOptions= OptionsConfigurationBlock.hasProjectSpecificOptions(project, keys, null);
 			if (hasProjectSpecificOptions) {
 				String option= javaProject.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, true);
-				if (option != null && option.equals(ENABLED)) {
+				if (option != null && ENABLED.equals(option)) {
 					isPreviewFeatureEnabled= true;
 				}
 			} else {
 				String option= JavaCore.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES);
-				if (option != null && option.equals(ENABLED)) {
+				if (option != null && ENABLED.equals(option)) {
 					isPreviewFeatureEnabled= true;
 				}
 			}

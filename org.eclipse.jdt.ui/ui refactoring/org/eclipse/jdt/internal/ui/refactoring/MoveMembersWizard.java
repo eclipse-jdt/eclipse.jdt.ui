@@ -301,7 +301,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 		}
 
 		private String createInitialFilter() {
-			if (! fDestinationField.getText().trim().equals("")) //$NON-NLS-1$
+			if (! "".equals(fDestinationField.getText().trim())) //$NON-NLS-1$
 				return fDestinationField.getText();
 			else
 				return getMoveProcessor().getDeclaringType().getElementName();

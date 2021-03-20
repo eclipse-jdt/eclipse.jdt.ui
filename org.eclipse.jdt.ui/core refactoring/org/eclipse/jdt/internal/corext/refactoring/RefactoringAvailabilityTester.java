@@ -1114,17 +1114,17 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isRenameProhibited(final IMethod method) throws CoreException {
-		if (method.getElementName().equals("toString") //$NON-NLS-1$
-				&& (method.getNumberOfParameters() == 0) && (method.getReturnType().equals("Ljava.lang.String;") //$NON-NLS-1$
-						|| method.getReturnType().equals("QString;") //$NON-NLS-1$
-						|| method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
+		if ("toString".equals(method.getElementName()) //$NON-NLS-1$
+				&& (method.getNumberOfParameters() == 0) && ("Ljava.lang.String;".equals(method.getReturnType()) //$NON-NLS-1$
+						|| "QString;".equals(method.getReturnType()) //$NON-NLS-1$
+						|| "Qjava.lang.String;".equals(method.getReturnType()))) //$NON-NLS-1$
 			return true;
 		else
 			return false;
 	}
 
 	public static boolean isRenameProhibited(final IType type) {
-		return type.getPackageFragment().getElementName().equals("java.lang"); //$NON-NLS-1$
+		return "java.lang".equals(type.getPackageFragment().getElementName()); //$NON-NLS-1$
 	}
 
 	public static boolean isRenameVirtualMethodAvailable(final IMethod method) throws CoreException {

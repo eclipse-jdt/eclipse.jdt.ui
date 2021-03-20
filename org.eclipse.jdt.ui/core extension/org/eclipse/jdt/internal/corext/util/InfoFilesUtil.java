@@ -83,7 +83,7 @@ public class InfoFilesUtil {
 			String originalContent= buffer.getText(sourceRange.getOffset(), sourceRange.getLength());
 
 			int kind= CodeFormatter.K_COMPILATION_UNIT;
-			if (fileName.equals(JavaModelUtil.MODULE_INFO_JAVA)) {
+			if (JavaModelUtil.MODULE_INFO_JAVA.equals(fileName)) {
 				kind= CodeFormatter.K_MODULE_INFO;
 			}
 			String formattedContent= CodeFormatterUtil.format(kind, originalContent, 0, lineDelimiter, FormatterProfileManager.getProjectSettings(pack.getJavaProject()));

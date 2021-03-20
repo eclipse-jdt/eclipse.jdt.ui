@@ -160,13 +160,13 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			res= JUNIT5;
 		} else if (s.startsWith("org.junit.")) { //$NON-NLS-1$
 			res= JUNIT4;
-		} else if (s.equals("TestCase") || s.equals("TestSuite") || s.startsWith("junit.")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		} else if ("TestCase".equals(s) || "TestSuite".equals(s) || s.startsWith("junit.")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			res= JUNIT3;
-		} else if (s.equals("Test")) { //$NON-NLS-1$
+		} else if ("Test".equals(s)) { //$NON-NLS-1$
 			res= JUNIT3 | JUNIT4 | JUNIT5;
-		} else if (s.equals("TestFactory") || s.equals("Testable") || s.equals("TestTemplate") || s.equals("ParameterizedTest") || s.equals("RepeatedTest")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		} else if ("TestFactory".equals(s) || "Testable".equals(s) || "TestTemplate".equals(s) || "ParameterizedTest".equals(s) || "RepeatedTest".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			res= JUNIT5;
-		} else if (s.equals("RunWith")) { //$NON-NLS-1$
+		} else if ("RunWith".equals(s)) { //$NON-NLS-1$
 			res= JUNIT4;
 		}
 		if (res != 0) {

@@ -120,7 +120,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			String contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 
 			String contextId;
-			if (contentType.equals(IJavaPartitions.JAVA_DOC)) {
+			if (IJavaPartitions.JAVA_DOC.equals(contentType)) {
 				contextId= JavaDocContextType.ID;
 			} else {
 				// TODO: Should compute location: member/statement
@@ -131,7 +131,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			int startLine= document.getLineOfOffset(offset);
 			int endLine= document.getLineOfOffset(offset + length);
 
-			if (contextId.equals(JavaContextType.ID_ALL)) {
+			if (JavaContextType.ID_ALL.equals(contextId)) {
 				IRegion endLineRegion= document.getLineInformation(endLine);
 				//if end position is at start of line, set it back to the previous line's end
 				if (endLine > startLine && endLineRegion.getOffset() == offset + length) {

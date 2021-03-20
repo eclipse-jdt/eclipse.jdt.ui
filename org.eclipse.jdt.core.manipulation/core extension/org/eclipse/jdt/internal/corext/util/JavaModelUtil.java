@@ -463,7 +463,7 @@ public final class JavaModelUtil {
 	 * @throws JavaModelException thrown when the field can not be accessed
 	 */
 	public static boolean isBoolean(IField field) throws JavaModelException{
-		return field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
+		return Signature.SIG_BOOLEAN.equals(field.getTypeSignature());
 	}
 
 	/**

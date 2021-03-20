@@ -68,7 +68,7 @@ public class FatJarManifestProvider implements IManifestProvider {
 						Enumeration<? extends ZipEntry> entries= zip.entries();
 						while (entries.hasMoreElements()) {
 							ZipEntry entry= entries.nextElement();
-							if (entry.getName().equalsIgnoreCase("META-INF/MANIFEST.MF")) { //$NON-NLS-1$
+							if ("META-INF/MANIFEST.MF".equalsIgnoreCase(entry.getName())) { //$NON-NLS-1$
 								InputStream inputStream= null;
 								try {
 									inputStream= zip.getInputStream(entry);

@@ -204,11 +204,11 @@ public class JUnitStubUtility {
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
 			if (!settings.callSuper) {
-				if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
+				if (retTypeSig != null && !Signature.SIG_VOID.equals(retTypeSig)) {
 					buf.append('\t');
 					if (!isBuiltInType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
 						buf.append("return null;\n\t"); //$NON-NLS-1$
-					} else if (retTypeSig.equals(Signature.SIG_BOOLEAN)) {
+					} else if (Signature.SIG_BOOLEAN.equals(retTypeSig)) {
 						buf.append("return false;\n\t"); //$NON-NLS-1$
 					} else {
 						buf.append("return 0;\n\t"); //$NON-NLS-1$

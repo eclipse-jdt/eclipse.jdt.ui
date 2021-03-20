@@ -229,7 +229,7 @@ public class SurroundWithTryWithResourcesAnalyzer extends SurroundWithAnalyzer {
 				continue;
 			}
 			for (ITypeBinding superType : Bindings.getAllSuperTypes(typeBinding)) {
-				if (superType.getQualifiedName().equals("java.lang.AutoCloseable")) { //$NON-NLS-1$
+				if ("java.lang.AutoCloseable".equals(superType.getQualifiedName())) { //$NON-NLS-1$
 					return true;
 				}
 			}

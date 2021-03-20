@@ -33,7 +33,7 @@ public class DefaultClassifier implements IClassifiesThrowables {
 	public boolean isComparisonFailure(Throwable throwable) {
 		// avoid reference to comparison failure to avoid a dependency on 3.8.1 or 4.x
 		String classname= throwable.getClass().getName();
-		return classname.equals("junit.framework.ComparisonFailure") //$NON-NLS-1$
-				|| classname.equals("org.junit.ComparisonFailure"); //$NON-NLS-1$
+		return "junit.framework.ComparisonFailure".equals(classname) //$NON-NLS-1$
+				|| "org.junit.ComparisonFailure".equals(classname); //$NON-NLS-1$
 	}
 }

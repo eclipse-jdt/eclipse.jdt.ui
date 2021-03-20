@@ -96,7 +96,7 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 
 		public ToStringInfo(ITypeBinding typeBinding) {
 			for (IMethodBinding declaredMethod : typeBinding.getDeclaredMethods()) {
-				if (declaredMethod.getName().equals(METHODNAME_TO_STRING) && declaredMethod.getParameterTypes().length == 0) {
+				if (METHODNAME_TO_STRING.equals(declaredMethod.getName()) && declaredMethod.getParameterTypes().length == 0) {
 					this.foundToString= true;
 					if (Modifier.isFinal(declaredMethod.getModifiers())) {
 						this.foundFinalToString= true;
@@ -214,7 +214,7 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 
 		HashMap<IJavaElement, IMethodBinding> methodsToBindings= new HashMap<>();
 		for (IMethodBinding candidateMethod : fTypeBinding.getDeclaredMethods()) {
-			if (!Modifier.isStatic(candidateMethod.getModifiers()) && candidateMethod.getParameterTypes().length == 0 && !candidateMethod.getReturnType().getName().equals("void") && !candidateMethod.getName().equals("toString") && !candidateMethod.getName().equals("clone")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (!Modifier.isStatic(candidateMethod.getModifiers()) && candidateMethod.getParameterTypes().length == 0 && !"void".equals(candidateMethod.getReturnType().getName()) && !"toString".equals(candidateMethod.getName()) && !"clone".equals(candidateMethod.getName())) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				methodsToBindings.put(candidateMethod.getJavaElement(), candidateMethod);
 			}
 		}
@@ -234,7 +234,7 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 			populateMembers(fInheritedFields, type.getFields(), fieldsToBindings);
 
 			for (IMethodBinding candidateMethod : typeBinding.getDeclaredMethods()) {
-				if (!Modifier.isPrivate(candidateMethod.getModifiers()) && !Modifier.isStatic(candidateMethod.getModifiers()) && candidateMethod.getParameterTypes().length == 0 && !candidateMethod.getReturnType().getName().equals("void") && !contains(fMethods, candidateMethod) && !contains(fInheritedMethods, candidateMethod) && !candidateMethod.getName().equals("clone")) { //$NON-NLS-1$ //$NON-NLS-2$
+				if (!Modifier.isPrivate(candidateMethod.getModifiers()) && !Modifier.isStatic(candidateMethod.getModifiers()) && candidateMethod.getParameterTypes().length == 0 && !"void".equals(candidateMethod.getReturnType().getName()) && !contains(fMethods, candidateMethod) && !contains(fInheritedMethods, candidateMethod) && !"clone".equals(candidateMethod.getName())) { //$NON-NLS-1$ //$NON-NLS-2$
 					methodsToBindings.put(candidateMethod.getJavaElement(), candidateMethod);
 				}
 			}

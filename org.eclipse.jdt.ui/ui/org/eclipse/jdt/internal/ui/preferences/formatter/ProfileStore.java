@@ -117,7 +117,7 @@ public class ProfileStore {
 
 		@Override
 		public void endElement(String uri, String localName, String qName) {
-			if (qName.equals(XML_NODE_PROFILE)) {
+			if (XML_NODE_PROFILE.equals(qName)) {
 				fProfiles.add(new CustomProfile(fName, fSettings, fVersion, fKind));
 				fName= null;
 				fSettings= null;

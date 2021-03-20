@@ -188,7 +188,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {
 		// check for multiple cursor variables
 		for (TemplateVariable var : variables) {
-			if (var.getType().equals(GlobalTemplateVariables.Cursor.NAME)) {
+			if (GlobalTemplateVariables.Cursor.NAME.equals(var.getType())) {
 				if (var.getOffsets().length > 1) {
 					throw new TemplateException(JavaTemplateMessages.ContextType_error_multiple_cursor_variables);
 				}
