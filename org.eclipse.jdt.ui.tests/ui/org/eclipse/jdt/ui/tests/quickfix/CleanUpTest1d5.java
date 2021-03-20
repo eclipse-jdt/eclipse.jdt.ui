@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3266,6 +3266,75 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572131_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    void doError(String a, Object b) {}\n" //
+				+ "    private void doError(String a, Object b, Object c) {}\n" //
+				+ "    public void doError(String a, Object b, Object c, Object d) {}\n" //
+				+ "    public void doError(String a, Object ...objects) {}\n" //
+				+ "    public void foo() {\n" //
+				+ "        doError(\"a\", new Object[] {\"b\"});\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\"});\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\", \"d\"});\n" //
+	    		+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572131_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "private class B {\n" //
+				+ "    void doError(String a, Object b) {}\n" //
+				+ "    private void doError(String a, Object b, Object c) {}\n" //
+				+ "    protected void doError(String a, Object b, Object c, Object d) {};\n" //
+				+ "}\n"
+				+ "public class A extends B {\n" //
+				+ "    public void doError(String a, Object ...objects);\n" //
+				+ "    public void foo() {\n" //
+				+ "        doError(\"a\", new Object[] {\"b\"});\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\"});\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\", \"d\"});\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "private class B {\n" //
+				+ "    void doError(String a, Object b) {}\n" //
+				+ "    private void doError(String a, Object b, Object c) {}\n" //
+				+ "    protected void doError(String a, Object b, Object c, Object d) {};\n" //
+				+ "}\n"
+				+ "public class A extends B {\n" //
+				+ "    public void doError(String a, Object ...objects);\n" //
+				+ "    public void foo() {\n" //
+				+ "        doError(\"a\", new Object[] {\"b\"});\n" //
+				+ "        doError(\"a\", \"b\", \"c\");\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\", \"d\"});\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected= sample;
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
 	}
 
 	@Test
