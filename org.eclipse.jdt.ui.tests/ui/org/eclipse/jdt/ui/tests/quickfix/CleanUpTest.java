@@ -14381,6 +14381,48 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return isFound ? \"The result has been found\" : (\"The result has not been found\");\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public boolean doNotShortcutReturn(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 43) {\n" //
+				+ "                return false;\n" //
+				+ "            }\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        return isFound;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotShortcutThrow(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 43) {\n" //
+				+ "                throw null;\n" //
+				+ "            }\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        return isFound;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotShortcutLabelledBreak(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "        doNotForgetMe: for (int j = 0; j < 10; j++) {\n" //
+				+ "            for (int i = 0; i < number; i++) {\n" //
+				+ "                if (i == 43) {\n" //
+				+ "                    break doNotForgetMe;\n" //
+				+ "                }\n" //
+				+ "                if (i == 42) {\n" //
+				+ "                    isFound = true;\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "            isFound = false;\n" //
+				+ "        }\n" //
+				+ "        return isFound;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public String doNotBreakWithExternalIterator(int number) {\n" //
 				+ "        boolean isFound = false;\n" //
 				+ "        int i;\n" //

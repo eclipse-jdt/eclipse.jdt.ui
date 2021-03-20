@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -131,22 +133,22 @@ public class BreakLoopCleanUp extends AbstractMultiFix {
 		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
-			final class SideEffectVisitor extends InterruptibleVisitor {
+			final class DisturbingEffectVisitor extends InterruptibleVisitor {
 				private final Set<SimpleName> localVariableNames;
-				private boolean hasSideEffect;
+				private boolean hasDisturbingEffect;
 
-				private SideEffectVisitor(final Set<SimpleName> localVariableNames) {
+				private DisturbingEffectVisitor(final Set<SimpleName> localVariableNames) {
 					this.localVariableNames= localVariableNames;
 				}
 
-				private boolean hasSideEffect() {
-					return hasSideEffect;
+				private boolean hasDisturbingEffect() {
+					return hasDisturbingEffect;
 				}
 
 				@Override
 				public boolean visit(final Assignment node) {
 					if (!ASTNodes.hasOperator(node, Assignment.Operator.ASSIGN)) {
-						hasSideEffect= true;
+						hasDisturbingEffect= true;
 						return interruptVisit();
 					}
 
@@ -155,7 +157,7 @@ public class BreakLoopCleanUp extends AbstractMultiFix {
 
 				private boolean visitVar(final Expression modifiedVar) {
 					if (!(modifiedVar instanceof SimpleName)) {
-						hasSideEffect= true;
+						hasDisturbingEffect= true;
 						return interruptVisit();
 					}
 
@@ -169,7 +171,7 @@ public class BreakLoopCleanUp extends AbstractMultiFix {
 					}
 
 					if (!isFound) {
-						hasSideEffect= true;
+						hasDisturbingEffect= true;
 						return interruptVisit();
 					}
 
@@ -196,7 +198,7 @@ public class BreakLoopCleanUp extends AbstractMultiFix {
 							&& (mayCallImplicitToString(node.getLeftOperand())
 									|| mayCallImplicitToString(node.getRightOperand())
 									|| mayCallImplicitToString(node.extendedOperands()))) {
-						hasSideEffect= true;
+						hasDisturbingEffect= true;
 						return interruptVisit();
 					}
 
@@ -224,45 +226,64 @@ public class BreakLoopCleanUp extends AbstractMultiFix {
 
 				@Override
 				public boolean visit(final SuperMethodInvocation node) {
-					hasSideEffect= true;
+					hasDisturbingEffect= true;
 					return interruptVisit();
 				}
 
 				@Override
 				public boolean visit(final MethodInvocation node) {
-					hasSideEffect= true;
+					hasDisturbingEffect= true;
 					return interruptVisit();
 				}
 
 				@Override
 				public boolean visit(final ClassInstanceCreation node) {
-					hasSideEffect= true;
+					hasDisturbingEffect= true;
 					return interruptVisit();
 				}
 
 				@Override
 				public boolean visit(final ThrowStatement node) {
-					hasSideEffect= true;
+					hasDisturbingEffect= true;
 					return interruptVisit();
+				}
+
+				@Override
+				public boolean visit(final ReturnStatement node) {
+					hasDisturbingEffect= true;
+					return interruptVisit();
+				}
+
+				@Override
+				public boolean visit(final BreakStatement node) {
+					if (node.getLabel() != null) {
+						hasDisturbingEffect= true;
+						return interruptVisit();
+					}
+
+					return true;
 				}
 			}
 
 			@Override
 			public boolean visit(final ForStatement node) {
 				Set<SimpleName> vars= new HashSet<>();
+				List<Expression> initializers= node.initializers();
 
-				for (Expression initializer : (List<Expression>) node.initializers()) {
+				for (Expression initializer : initializers) {
 					vars.addAll(ASTNodes.getLocalVariableIdentifiers(initializer, true));
 				}
 
 				if (node.getExpression() == null
-						|| hasSideEffect(node.getExpression(), vars)
+						|| hasDisturbingEffect(node.getExpression(), vars)
 						|| node.updaters().isEmpty()) {
 					return true;
 				}
 
-				for (Expression updater : (List<Expression>) node.updaters()) {
-					if (hasSideEffect(updater, vars)) {
+				List<Expression> updaters= node.updaters();
+
+				for (Expression updater : updaters) {
+					if (hasDisturbingEffect(updater, vars)) {
 						return true;
 					}
 				}
@@ -270,10 +291,10 @@ public class BreakLoopCleanUp extends AbstractMultiFix {
 				return visitLoopBody(node.getBody(), vars);
 			}
 
-			private boolean hasSideEffect(final ASTNode node, final Set<SimpleName> allowedVars) {
-				SideEffectVisitor variableUseVisitor= new SideEffectVisitor(allowedVars);
+			private boolean hasDisturbingEffect(final ASTNode node, final Set<SimpleName> allowedVars) {
+				DisturbingEffectVisitor variableUseVisitor= new DisturbingEffectVisitor(allowedVars);
 				variableUseVisitor.traverseNodeInterruptibly(node);
-				return variableUseVisitor.hasSideEffect();
+				return variableUseVisitor.hasDisturbingEffect();
 			}
 
 			@Override
@@ -298,14 +319,14 @@ public class BreakLoopCleanUp extends AbstractMultiFix {
 					Statement statement= statements.get(i);
 					allowedVars.addAll(ASTNodes.getLocalVariableIdentifiers(statement, true));
 
-					if (hasSideEffect(statement, allowedVars)) {
+					if (hasDisturbingEffect(statement, allowedVars)) {
 						return true;
 					}
 				}
 
 				IfStatement ifStatement= ASTNodes.as(statements.get(statements.size() - 1), IfStatement.class);
 
-				if (ifStatement != null && ifStatement.getElseStatement() == null && !hasSideEffect(ifStatement.getExpression(), allowedVars)) {
+				if (ifStatement != null && ifStatement.getElseStatement() == null && !hasDisturbingEffect(ifStatement.getExpression(), allowedVars)) {
 					List<Statement> assignments= ASTNodes.asList(ifStatement.getThenStatement());
 
 					if (areAssignmentsValid(allowedVars, assignments)) {
