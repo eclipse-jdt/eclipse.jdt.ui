@@ -762,6 +762,18 @@ public class CleanUpConstants {
 	public static final String USE_LAZY_LOGICAL_OPERATOR= "cleanup.lazy_logical_operator"; //$NON-NLS-1$
 
 	/**
+	 * Replace unnecessary primitive wrappers instance creations by using static factory <code>valueOf()</code> method.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String VALUEOF_RATHER_THAN_INSTANTIATION= "cleanup.valueof_rather_than_instantiation"; //$NON-NLS-1$
+
+	/**
 	 * Replaces the <code>compareTo()</code> method by a comparison on primitive.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

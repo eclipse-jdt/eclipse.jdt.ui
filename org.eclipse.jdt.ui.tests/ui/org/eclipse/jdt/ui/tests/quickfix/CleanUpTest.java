@@ -4758,6 +4758,226 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testValueOfRatherThanInstantiation() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void replaceWrapperConstructorsWithValueOf() {\n" //
+				+ "        // Replace all calls to wrapper constructors with calls to .valueOf() methods\n" //
+				+ "        byte byPrimitive = 4;\n" //
+				+ "        boolean boPrimitive = true;\n" //
+				+ "        char cPrimitive = 'c';\n" //
+				+ "        double dPrimitive = 1;\n" //
+				+ "        Double dObject = Double.valueOf(1d);\n" //
+				+ "        float fPrimitive = 1f;\n" //
+				+ "        long lPrimitive = 1;\n" //
+				+ "        short shPrimitive = 1;\n" //
+				+ "        int iPrimitive = 1;\n" //
+				+ "\n" //
+				+ "        // Primitive literals\n" //
+				+ "        Byte by = new Byte((byte) 4);\n" //
+				+ "        Boolean bo = new Boolean(true);\n" //
+				+ "        Character c = new Character('c');\n" //
+				+ "        Double d = new Double(1);\n" //
+				+ "        Float f1 = new Float(1f);\n" //
+				+ "        Float f2 = new Float(1d);\n" //
+				+ "        Long l = new Long(1);\n" //
+				+ "        Short s = new Short((short) 1);\n" //
+				+ "        Integer i = new Integer(1);\n" //
+				+ "\n" //
+				+ "        // Primitive variables\n" //
+				+ "        by = new Byte(byPrimitive);\n" //
+				+ "        bo = new Boolean(boPrimitive);\n" //
+				+ "        c = new Character(cPrimitive);\n" //
+				+ "        d = new Double(dPrimitive);\n" //
+				+ "        f1 = new Float(fPrimitive);\n" //
+				+ "        f2 = new Float(dPrimitive);\n" //
+				+ "        l = new Long(lPrimitive);\n" //
+				+ "        s = new Short(shPrimitive);\n" //
+				+ "        i = new Integer(iPrimitive);\n" //
+				+ "\n" //
+				+ "        // Implicit object narrowing\n" //
+				+ "        Float f3 = new Float(dObject);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        new Byte(\"0\").byteValue();\n" //
+				+ "        new Boolean(\"true\").booleanValue();\n" //
+				+ "        new Integer(\"42\").intValue();\n" //
+				+ "        new Short(\"42\").shortValue();\n" //
+				+ "        new Long(\"42\").longValue();\n" //
+				+ "        new Float(\"42.42\").floatValue();\n" //
+				+ "        new Double(\"42.42\").doubleValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryConstructorInvocationsInPrimitiveContext() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by = new Byte((byte) 0);\n" //
+				+ "        boolean bo = new Boolean(true);\n" //
+				+ "        int i = new Integer(42);\n" //
+				+ "        long l = new Long(42);\n" //
+				+ "        short s = new Short((short) 42);\n" //
+				+ "        float f = new Float(42.42F);\n" //
+				+ "        double d = new Double(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryConstructorInvocationsInSwitch() {\n" //
+				+ "        byte by = (byte) 4;\n" //
+				+ "        char c = 'c';\n" //
+				+ "        short s = (short) 1;\n" //
+				+ "        int i = 1;\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        switch (new Byte(by)) {\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (new Character(c)) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (new Short(s)) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (new Integer(i)) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String removeUnnecessaryConstructorInvocationsInArrayAccess(String[] strings, int i) {\n" //
+				+ "        return strings[new Integer(i)];\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void replaceWrapperConstructorsWithValueOf() {\n" //
+				+ "        // Replace all calls to wrapper constructors with calls to .valueOf() methods\n" //
+				+ "        byte byPrimitive = 4;\n" //
+				+ "        boolean boPrimitive = true;\n" //
+				+ "        char cPrimitive = 'c';\n" //
+				+ "        double dPrimitive = 1;\n" //
+				+ "        Double dObject = Double.valueOf(1d);\n" //
+				+ "        float fPrimitive = 1f;\n" //
+				+ "        long lPrimitive = 1;\n" //
+				+ "        short shPrimitive = 1;\n" //
+				+ "        int iPrimitive = 1;\n" //
+				+ "\n" //
+				+ "        // Primitive literals\n" //
+				+ "        Byte by = Byte.valueOf((byte) 4);\n" //
+				+ "        Boolean bo = Boolean.valueOf(true);\n" //
+				+ "        Character c = Character.valueOf('c');\n" //
+				+ "        Double d = Double.valueOf(1);\n" //
+				+ "        Float f1 = Float.valueOf(1f);\n" //
+				+ "        Float f2 = Float.valueOf((float) 1d);\n" //
+				+ "        Long l = Long.valueOf(1);\n" //
+				+ "        Short s = Short.valueOf((short) 1);\n" //
+				+ "        Integer i = Integer.valueOf(1);\n" //
+				+ "\n" //
+				+ "        // Primitive variables\n" //
+				+ "        by = Byte.valueOf(byPrimitive);\n" //
+				+ "        bo = Boolean.valueOf(boPrimitive);\n" //
+				+ "        c = Character.valueOf(cPrimitive);\n" //
+				+ "        d = Double.valueOf(dPrimitive);\n" //
+				+ "        f1 = Float.valueOf(fPrimitive);\n" //
+				+ "        f2 = Float.valueOf((float) dPrimitive);\n" //
+				+ "        l = Long.valueOf(lPrimitive);\n" //
+				+ "        s = Short.valueOf(shPrimitive);\n" //
+				+ "        i = Integer.valueOf(iPrimitive);\n" //
+				+ "\n" //
+				+ "        // Implicit object narrowing\n" //
+				+ "        Float f3 = dObject.floatValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte.valueOf(\"0\").byteValue();\n" //
+				+ "        Boolean.valueOf(\"true\").booleanValue();\n" //
+				+ "        Integer.valueOf(\"42\").intValue();\n" //
+				+ "        Short.valueOf(\"42\").shortValue();\n" //
+				+ "        Long.valueOf(\"42\").longValue();\n" //
+				+ "        Float.valueOf(\"42.42\").floatValue();\n" //
+				+ "        Double.valueOf(\"42.42\").doubleValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryConstructorInvocationsInPrimitiveContext() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by = (byte) 0;\n" //
+				+ "        boolean bo = true;\n" //
+				+ "        int i = 42;\n" //
+				+ "        long l = 42;\n" //
+				+ "        short s = (short) 42;\n" //
+				+ "        float f = 42.42F;\n" //
+				+ "        double d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryConstructorInvocationsInSwitch() {\n" //
+				+ "        byte by = (byte) 4;\n" //
+				+ "        char c = 'c';\n" //
+				+ "        short s = (short) 1;\n" //
+				+ "        int i = 1;\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        switch (by) {\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (c) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (s) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (i) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String removeUnnecessaryConstructorInvocationsInArrayAccess(String[] strings, int i) {\n" //
+				+ "        return strings[i];\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.VALUEOF_RATHER_THAN_INSTANTIATION);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu },new HashSet<>(Arrays.asList(
+				MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_float_with_valueof,
+				MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_float_with_float_value,
+				MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_single_argument,
+				MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_valueof)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUseValueOfRatherThanInstantiation() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.math.BigInteger;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void doNotRefactorBigInteger() {\n" //
+				+ "        BigInteger bi = new BigInteger(\"42\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.VALUEOF_RATHER_THAN_INSTANTIATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPrimitiveComparison() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);

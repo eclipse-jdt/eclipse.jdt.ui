@@ -134,6 +134,11 @@ public class MultiFixMessages extends NLS {
 	public static String StringBuilderCleanUp_description;
 	public static String PlainReplacementCleanUp_description;
 	public static String CodeStyleCleanUp_LazyLogical_description;
+	public static String ValueOfRatherThanInstantiationCleanup_description;
+	public static String ValueOfRatherThanInstantiationCleanup_description_float_with_valueof;
+	public static String ValueOfRatherThanInstantiationCleanup_description_float_with_float_value;
+	public static String ValueOfRatherThanInstantiationCleanup_description_single_argument;
+	public static String ValueOfRatherThanInstantiationCleanup_description_valueof;
 	public static String PrimitiveComparisonCleanUp_description;
 	public static String PrimitiveParsingCleanUp_description;
 	public static String PrimitiveSerializationCleanUp_description;

@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringBuilderCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp;
 
 public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.optimization"; //$NON-NLS-1$
@@ -46,6 +47,7 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 				new StringBuilderCleanUp(values),
 				new PlainReplacementCleanUp(values),
 				new LazyLogicalCleanUp(values),
+				new ValueOfRatherThanInstantiationCleanUp(values),
 				new PrimitiveComparisonCleanUp(values),
 				new PrimitiveParsingCleanUp(values),
 				new PrimitiveSerializationCleanUp(values),
@@ -77,6 +79,9 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 		final CheckboxPreference useLazyLogicalPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_UseLazyLogicalOperator,
 				CleanUpConstants.USE_LAZY_LOGICAL_OPERATOR, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(useLazyLogicalPref);
+
+		final CheckboxPreference valueOfRatherThanInstantiationPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_ValueOfRatherThanInstantiation, CleanUpConstants.VALUEOF_RATHER_THAN_INSTANTIATION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(valueOfRatherThanInstantiationPref);
 
 		final CheckboxPreference primitiveComparisonPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_PrimitiveComparison, CleanUpConstants.PRIMITIVE_COMPARISON, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(primitiveComparisonPref);

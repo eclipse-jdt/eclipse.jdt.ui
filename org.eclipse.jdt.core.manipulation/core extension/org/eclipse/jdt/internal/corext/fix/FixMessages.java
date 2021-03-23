@@ -104,6 +104,8 @@ public final class FixMessages extends NLS {
 	public static String StringFix_AddNonNls_description;
 	public static String StringFix_RemoveNonNls_description;
 
+	public static String ValueOfRatherThanInstantiationFix_description;
+
 	public static String CodeStyleFix_ChangeAccessToStatic_description;
 	public static String CodeStyleFix_QualifyWithThis_description;
 	public static String CodeStyleFix_ChangeAccessToStaticUsingInstanceType_description;

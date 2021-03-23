@@ -7153,9 +7153,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.plain_replacement">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.valueof_rather_than_instantiation"
+            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp"
             id="org.eclipse.jdt.ui.cleanup.primitive_comparison"
-            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+            runAfter="org.eclipse.jdt.ui.cleanup.valueof_rather_than_instantiation">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PrimitiveParsingCleanUp"
