@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
@@ -170,20 +171,20 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 
 			@Override
 			public boolean visit(final TypeDeclaration visited) {
-				if (!visited.isInterface()) {
-					ASTNode parent= ASTNodes.getFirstAncestorOrNull(visited, TypeDeclaration.class, MethodDeclaration.class);
+				if (!visited.isInterface() && !Modifier.isStatic(visited.getModifiers())) {
+					ASTNode enclosingType= ASTNodes.getFirstAncestorOrNull(visited, TypeDeclaration.class, MethodDeclaration.class);
 					TypeDeclaration topLevelClass= null;
 
-					while (parent instanceof TypeDeclaration) {
-						topLevelClass= (TypeDeclaration) parent;
-						parent= ASTNodes.getTypedAncestor(topLevelClass, TypeDeclaration.class);
+					while (enclosingType instanceof TypeDeclaration) {
+						topLevelClass= (TypeDeclaration) enclosingType;
+						enclosingType= ASTNodes.getTypedAncestor(topLevelClass, TypeDeclaration.class);
 
-						if (parent != null && !Modifier.isStatic(topLevelClass.getModifiers())) {
+						if (enclosingType != null && !Modifier.isStatic(topLevelClass.getModifiers())) {
 							return true;
 						}
 					}
 
-					if (topLevelClass != null && !Modifier.isStatic(visited.getModifiers())) {
+					if (topLevelClass != null && !hasInnerDynamicMotherType(visited)) {
 						TopLevelClassMemberVisitor topLevelClassMemberVisitor= new TopLevelClassMemberVisitor(visited);
 						topLevelClassMemberVisitor.traverseNodeInterruptibly(visited);
 
@@ -195,6 +196,24 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 				}
 
 				return true;
+			}
+
+			private boolean hasInnerDynamicMotherType(final TypeDeclaration visited) {
+				if (visited.resolveBinding() == null) {
+					return true;
+				}
+
+				ITypeBinding motherType= visited.resolveBinding().getSuperclass();
+
+				while (motherType != null) {
+					if (motherType.getDeclaringClass() != null && !Modifier.isStatic(motherType.getModifiers())) {
+						return true;
+					}
+
+					motherType= motherType.getSuperclass();
+				}
+
+				return false;
 			}
 		});
 
@@ -230,13 +249,13 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.StaticInnerClassCleanUp_description, cuRewrite);
 
-			List<?> modifiers= visited.modifiers();
+			List<IExtendedModifier> modifiers= visited.modifiers();
 			Modifier static0= ast.newModifier(ModifierKeyword.STATIC_KEYWORD);
 
 			if (modifiers.isEmpty()) {
 				listRewrite.insertFirst(static0, group);
 			} else {
-				IExtendedModifier lastModifier= (IExtendedModifier) modifiers.get(modifiers.size() - 1);
+				IExtendedModifier lastModifier= modifiers.get(modifiers.size() - 1);
 
 				if (lastModifier.isModifier() && ((Modifier) lastModifier).isFinal()) {
 					listRewrite.insertBefore(static0, (ASTNode) lastModifier, group);

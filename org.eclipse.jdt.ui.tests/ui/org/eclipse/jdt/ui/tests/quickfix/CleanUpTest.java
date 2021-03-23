@@ -14809,9 +14809,32 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Date;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class StaticInnerClass {\n" //
+				+ "        public boolean motherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassInheritingStaticClass extends StaticInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassInheritingTopLevelClass extends Date {\n" //
 				+ "        int i;\n" //
 				+ "\n" //
 				+ "        public boolean anotherMethod() {\n" //
@@ -14961,9 +14984,32 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Date;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public static class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class StaticInnerClass {\n" //
+				+ "        public boolean motherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassInheritingStaticClass extends StaticInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassInheritingTopLevelClass extends Date {\n" //
 				+ "        int i;\n" //
 				+ "\n" //
 				+ "        public boolean anotherMethod() {\n" //
@@ -15201,6 +15247,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "        public boolean anotherMethod() {\n" //
 				+ "            return aMethod();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassInheritingADynamicClass extends NotStaticClass {\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
