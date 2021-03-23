@@ -119,7 +119,7 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 			if (removeNLSTag && problem.getProblemId() == IProblem.UnnecessaryNLSTag) {
 				IBuffer buffer= cu.getBuffer();
 				if (buffer != null) {
-					TextEdit edit= StringFix.getReplace(problem.getOffset(), problem.getLength(), buffer, false);
+					TextEdit edit= StringFix.getReplace(problem.getOffset(), problem.getLength(), buffer, true);
 					if (edit != null) {
 						String label= FixMessages.StringFix_RemoveNonNls_description;
 						result.add(new CategorizedTextEditGroup(label, edit, new GroupCategorySet(new GroupCategory(label, label, label))));
@@ -159,6 +159,9 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 			char ch= buffer.getChar(next);
 			if (IndentManipulation.isIndentChar(ch)) {
 				next++; // remove all whitespace
+				if (buffer.getContents().substring(next).startsWith("//$NON-NLS-")){ //$NON-NLS-1$
+					break;
+				}
 			} else if (IndentManipulation.isLineDelimiterChar(ch)) {
 				length= next - offset;
 				break;

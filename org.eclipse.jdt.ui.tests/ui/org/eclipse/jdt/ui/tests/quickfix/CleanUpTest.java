@@ -242,39 +242,65 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 
-		sample= "" //
+		String expected1= "" //
 				+ "package test1;\n" //
 				+ "public class E1 {\n" //
 				+ "    public void foo() {\n" //
-				+ "        String s= null; \n" //
+				+ "        String s= null;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		sample= "" //
+		String expected2= "" //
 				+ "package test1;\n" //
 				+ "public class E2 {\n" //
-				+ "    public String s1 = null; \n" //
+				+ "    public String s1 = null;\n" //
 				+ "    public void foo() {\n" //
-				+ "        String s2 = null; \n" //
-				+ "        String s3 = s2 + s2; \n" //
+				+ "        String s2 = null;\n" //
+				+ "        String s3 = s2 + s2;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected2= sample;
 
-		sample= "" //
+		String expected3= "" //
 				+ "package test2;\n" //
 				+ "import test1.E2;\n" //
 				+ "public class E3 extends E2 {\n" //
-				+ "    public static final String s= null; \n" //
+				+ "    public static final String s= null;\n" //
 				+ "    public static String bar(String s1, String s2) {\n" //
-				+ "        bar(s2, s1); \n" //
-				+ "        return s1; \n" //
+				+ "        bar(s2, s1);\n" //
+				+ "        return s1;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected3= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+	}
+
+	@Test
+	public void testRemoveNLSTagWhitespace() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static String bar(String s1, String s2) {\n" //
+				+ "        bar(s2, s1); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        return s1;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
+
+		String expected1= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static String bar(String s1, String s2) {\n" //
+				+ "        bar(s2, s1);\n" //
+				+ "        return s1;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
 	@Test
@@ -2665,7 +2691,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (true) {\n" //
 				+ "            this.fNb++;\n" //
 				+ "        }\n" //
-				+ "        String s; \n" //
+				+ "        String s;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		String expected1= sample;
