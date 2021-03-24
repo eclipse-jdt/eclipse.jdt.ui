@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -118,7 +118,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	/**
 	 * Queue of rerun requests.
 	 */
-	private Vector<RerunRequest> fRerunRequests= new Vector<RerunRequest>(10);
+	private Vector<RerunRequest> fRerunRequests= new Vector<>(10);
 	/**
 	 * Thread reading from the socket
 	 */
@@ -241,7 +241,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	protected final void defaultInit(String[] args) {
 		for(int i= 0; i < args.length; i++) {
 			if("-classnames".equals(args[i].toLowerCase()) || "-classname".equals(args[i].toLowerCase())){ //$NON-NLS-1$ //$NON-NLS-2$
-				Vector<String> list= new Vector<String>();
+				Vector<String> list= new Vector<>();
 				for (int j= i+1; j < args.length; j++) {
 					if (args[j].startsWith("-")) //$NON-NLS-1$
 						break;
@@ -386,17 +386,13 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readPackageNames(String pkgNameFile) throws IOException {
-		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(pkgNameFile)), "UTF-8")); //$NON-NLS-1$
-		try {
+		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(pkgNameFile)), "UTF-8"))) { //$NON-NLS-1$
 			String line;
-			Vector<String> list= new Vector<String>();
+			Vector<String> list= new Vector<>();
 			while ((line= br.readLine()) != null) {
 				list.add(line);
 			}
 			fPackageNames= list.toArray(new String[list.size()]);
-		}
-		finally {
-			br.close();
 		}
 		if (fDebugMode) {
 			System.out.println("Packages:"); //$NON-NLS-1$
@@ -407,17 +403,13 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readTestNames(String testNameFile) throws IOException {
-		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testNameFile)), "UTF-8")); //$NON-NLS-1$
-		try {
+		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testNameFile)), "UTF-8"))) { //$NON-NLS-1$
 			String line;
-			Vector<String> list= new Vector<String>();
+			Vector<String> list= new Vector<>();
 			while ((line= br.readLine()) != null) {
 				list.add(line);
 			}
 			fTestClassNames= list.toArray(new String[list.size()]);
-		}
-		finally {
-			br.close();
 		}
 		if (fDebugMode) {
 			System.out.println("Tests:"); //$NON-NLS-1$
@@ -428,17 +420,13 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readFailureNames(String testFailureFile) throws IOException {
-		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testFailureFile)), "UTF-8")); //$NON-NLS-1$
-		try {
+		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testFailureFile)), "UTF-8"))) { //$NON-NLS-1$
 			String line;
-			Vector<String> list= new Vector<String>();
+			Vector<String> list= new Vector<>();
 			while ((line= br.readLine()) != null) {
 				list.add(line);
 			}
 			fFailureNames= list.toArray(new String[list.size()]);
-		}
-		finally {
-			br.close();
 		}
 		if (fDebugMode) {
 			System.out.println("Failures:"); //$NON-NLS-1$
@@ -497,7 +485,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	protected Class<?>[] loadClasses(String[] testClassNames) {
-		Vector<Class<?>> classes= new Vector<Class<?>>();
+		Vector<Class<?>> classes= new Vector<>();
 		for (String name : testClassNames) {
 			Class<?> clazz = loadClass(name, this);
 			if (clazz != null) {
@@ -587,6 +575,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		return new DefaultClassifier();
 	}
 
+	@Override
 	public void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isDynamicTest, String parentId) {
 		String treeEntry= getTestId(identifier) + ',' + escapeText(identifier.getName()) + ',' + hasChildren + ',' + testCount
 				+ ',' + isDynamicTest + ',' + parentId + ',' + escapeText(identifier.getDisplayName()) + ',' + escapeText(identifier.getParameterTypes())
@@ -718,9 +707,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.junit.runner.MessageSender#sendMessage(java.lang.String)
-	 */
+	@Override
 	public void sendMessage(String msg) {
 		if(fWriter == null)
 			return;
@@ -760,6 +747,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 	}
 
+	@Override
 	public void flush() {
 	    fWriter.flush();
 	}

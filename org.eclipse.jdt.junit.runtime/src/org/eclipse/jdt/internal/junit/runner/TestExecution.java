@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2019 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,7 +25,7 @@ public class TestExecution {
 
 	private IClassifiesThrowables fClassifier;
 
-	private ArrayList<IStopListener> fStopListeners = new ArrayList<IStopListener>();
+	private ArrayList<IStopListener> fStopListeners = new ArrayList<>();
 
 	public TestExecution(IListensToTestExecutions listener,
 			IClassifiesThrowables classifier) {

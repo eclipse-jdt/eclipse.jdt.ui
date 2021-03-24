@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2019 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,10 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.internal.junit.runner.FailuresFirstPrioritizer;
 import org.eclipse.jdt.internal.junit.runner.ITestLoader;
 import org.eclipse.jdt.internal.junit.runner.ITestPrioritizer;
@@ -33,12 +29,17 @@ import org.eclipse.jdt.internal.junit.runner.JUnitMessages;
 import org.eclipse.jdt.internal.junit.runner.NullPrioritizer;
 import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 public class JUnit3TestLoader implements ITestLoader {
 	private static final String SUITE_METHODNAME= "suite"; //$NON-NLS-1$
 	public static final String SET_UP_TEST_METHOD_NAME = "setUpTest"; //$NON-NLS-1$
 
 	// WANT: give test loaders a schema
 
+	@Override
 	public ITestReference[] loadTests(Class<?>[] testClasses, String testName, String[] failureNames, String[] packages, String[][] includeExcludeTags, String uniqueId, RemoteTestRunner listener) {
 		// instantiate all tests
 		ITestReference[] suites= new ITestReference[testClasses.length];
@@ -77,10 +78,15 @@ public class JUnit3TestLoader implements ITestLoader {
 			if (test != null)
 				return test;
 		} catch (InstantiationException e) {
+			// do nothing
 		} catch (IllegalAccessException e) {
+			// do nothing
 		} catch (InvocationTargetException e) {
+			// do nothing
 		} catch (NoSuchMethodException e) {
+			// do nothing
 		} catch (ClassCastException e) {
+			// do nothing
 		}
 		return error(testName, "Could not create test \'" + testName + "\' "); //$NON-NLS-1$ //$NON-NLS-2$
 	}

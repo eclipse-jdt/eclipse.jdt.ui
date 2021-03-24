@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2019 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -64,6 +64,7 @@ public class JUnit3TestReference implements ITestReference {
 		this.fTest= test;
 	}
 
+	@Override
 	public int countTestCases() {
 		return fTest.countTestCases();
 	}
@@ -112,10 +113,12 @@ public class JUnit3TestReference implements ITestReference {
 		return fTest;
 	}
 
+	@Override
 	public void run(TestExecution execution) {
 		final TestResult testResult= new TestResult();
 		testResult.addListener(new JUnit3Listener(execution));
 		execution.addStopListener(new IStopListener() {
+			@Override
 			public void stop() {
 				testResult.stop();
 			}
@@ -125,6 +128,7 @@ public class JUnit3TestReference implements ITestReference {
 		fTest.run(tr);
 	}
 
+	@Override
 	public void sendTree(IVisitsTestTrees notified) {
 		if (fTest instanceof TestDecorator) {
 			TestDecorator decorator= (TestDecorator) fTest;
@@ -192,6 +196,7 @@ public class JUnit3TestReference implements ITestReference {
 		new JUnit3TestReference(test).sendTree(notified);
 	}
 
+	@Override
 	public ITestIdentifier getIdentifier() {
 		return new JUnit3Identifier(this);
 	}

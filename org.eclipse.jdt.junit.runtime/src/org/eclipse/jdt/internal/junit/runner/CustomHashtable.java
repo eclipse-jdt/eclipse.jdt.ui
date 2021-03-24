@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -64,10 +64,12 @@ import java.util.NoSuchElementException;
 
 	private static final class EmptyEnumerator implements Enumeration<Object> {
 
+		@Override
 		public boolean hasMoreElements() {
 			return false;
 		}
 
+		@Override
 		public Object nextElement() {
 			throw new NoSuchElementException();
 		}
@@ -86,6 +88,7 @@ import java.util.NoSuchElementException;
 			start= firstSlot;
 		}
 
+		@Override
 		public boolean hasMoreElements() {
 			if (entry != null)
 				return true;
@@ -97,6 +100,7 @@ import java.util.NoSuchElementException;
 			return false;
 		}
 
+		@Override
 		public Object nextElement() {
 			if (hasMoreElements()) {
 				Object result= key ? entry.key : entry.value;
