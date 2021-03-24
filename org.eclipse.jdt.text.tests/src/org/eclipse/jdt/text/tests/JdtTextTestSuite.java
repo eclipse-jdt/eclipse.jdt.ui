@@ -65,6 +65,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 	ArrayWithTempVarForLoopJavaContextTest.class,
 	JavaDoubleClickSelectorTest.class,
 	BreakContinueTargetFinderTest.class,
+	EnumConstructorTargetFinderTest.class,
 	ContentAssistTestSuite.class,
 	IndentActionTest.class,
 	TemplatesTestSuite.class,
