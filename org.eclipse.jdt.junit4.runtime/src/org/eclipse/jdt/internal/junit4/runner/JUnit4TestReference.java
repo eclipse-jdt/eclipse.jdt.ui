@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,7 @@ public class JUnit4TestReference implements ITestReference {
 		fRoot= root;
 	}
 
+	@Override
 	public int countTestCases() {
 		return countTestCases(fRoot);
 	}
@@ -63,6 +64,7 @@ public class JUnit4TestReference implements ITestReference {
 		return (ref.fRoot.equals(fRoot));
 	}
 
+	@Override
 	public ITestIdentifier getIdentifier() {
 		return new JUnit4Identifier(fRoot);
 	}
@@ -72,10 +74,12 @@ public class JUnit4TestReference implements ITestReference {
 		return fRoot.hashCode();
 	}
 
+	@Override
 	public void run(TestExecution execution) {
 		final RunNotifier notifier= new RunNotifier();
 		notifier.addListener(new JUnit4TestListener(execution.getListener()));
 		execution.addStopListener(new IStopListener() {
+			@Override
 			public void stop() {
 				notifier.pleaseStop();
 			}
@@ -95,6 +99,7 @@ public class JUnit4TestReference implements ITestReference {
 		}
 	}
 
+	@Override
 	public void sendTree(IVisitsTestTrees notified) {
 		sendTree(notified, fRoot);
 	}

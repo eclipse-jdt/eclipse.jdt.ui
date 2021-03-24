@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Moritz Eysholdt and others.
+ * Copyright (c) 2014, 2021 Moritz Eysholdt and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -136,7 +136,7 @@ public abstract class DescriptionMatcher {
 	 */
 	public static DescriptionMatcher create(Class<?> clazz, String matchString) {
 		String className= clazz.getName();
-		List<DescriptionMatcher> matchers= new ArrayList<DescriptionMatcher>();
+		List<DescriptionMatcher> matchers= new ArrayList<>();
 		matchers.add(new ExactMatcher(matchString));
 		Matcher parsed= METHOD_AND_CLASS_NAME_PATTERN.matcher(matchString);
 		if (parsed.matches()) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2019 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-import junit.framework.Test;
-
 import org.junit.runner.Description;
 import org.junit.runner.Request;
 import org.junit.runner.Runner;
@@ -31,9 +29,11 @@ import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 import org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader;
 import org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestReference;
 
+import junit.framework.Test;
 
 public class JUnit4TestLoader implements ITestLoader {
 
+	@Override
 	public ITestReference[] loadTests(
 			Class<?>[] testClasses,
 			String testName,
