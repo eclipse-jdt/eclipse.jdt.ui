@@ -267,7 +267,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			}
 		} else {
 			final String accessModifier= fSettings.get(ACCESS_MODIFIER);
-			int visibility= accessModifier != null ? Integer.valueOf(accessModifier) : fRefactoring.getVisibility();
+			int visibility= accessModifier != null ? Integer.parseInt(accessModifier) : fRefactoring.getVisibility();
 			fRefactoring.setVisibility(visibility);
 			for (Control radioButton : radioButtons) {
 				radioButton.setEnabled(true);
