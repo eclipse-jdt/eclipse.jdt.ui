@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
  */
 public class RemoteTestRunnerClient {
 
-	public abstract class ListenerSafeRunnable implements ISafeRunnable {
+	public abstract static class ListenerSafeRunnable implements ISafeRunnable {
 		@Override
 		public void handleException(Throwable exception) {
 			JUnitCorePlugin.log(exception);
@@ -48,7 +48,7 @@ public class RemoteTestRunnerClient {
 	/**
 	 * A simple state machine to process requests from the RemoteTestRunner
 	 */
-	abstract class ProcessingState {
+	abstract static class ProcessingState {
 	    abstract ProcessingState readMessage(String message);
 	}
 
