@@ -3144,7 +3144,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		IJavaElement javaElement= binding.getJavaElement();
-		if (javaElement == null || !RefactoringAvailabilityTester.isRenameElementAvailable(javaElement)) {
+		if (javaElement == null ? !isRecordComponentAccessorMethod(binding) : !RefactoringAvailabilityTester.isRenameElementAvailable(javaElement)) {
 			return false;
 		}
 
@@ -3162,6 +3162,27 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static boolean isRecordComponentAccessorMethod(IBinding binding) {
+		boolean isAccessor = false;
+		if (binding instanceof IMethodBinding && ((IMethodBinding)binding).isSyntheticRecordMethod()) {
+			IMethodBinding mBinding= (IMethodBinding) binding;
+			ITypeBinding tBinding= mBinding.getDeclaringClass();
+			if (tBinding.isRecord() && mBinding.getParameterTypes().length == 0) {
+				IVariableBinding[] bindings= tBinding.getDeclaredFields();
+				if (bindings != null && bindings.length > 0) {
+					for (IVariableBinding varBinding : bindings) {
+						int modifiers= varBinding.getModifiers();
+						if (!Flags.isStatic(modifiers) && varBinding.getName().equals(mBinding.getName())) {
+							isAccessor= true;
+							break;
+						}
+					}
+				}
+			}
+		}
+		return isAccessor;
 	}
 
 	private static boolean containsQuickFixableRenameLocal(IProblemLocation[] locations) {
