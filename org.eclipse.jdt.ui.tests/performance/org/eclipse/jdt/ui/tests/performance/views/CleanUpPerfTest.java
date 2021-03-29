@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp;
@@ -797,6 +798,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new PrimitiveComparisonCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testRedundantComparatorCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.REDUNDANT_COMPARATOR, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new RedundantComparatorCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}

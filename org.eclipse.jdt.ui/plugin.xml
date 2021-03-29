@@ -7238,9 +7238,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.embedded_if">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.redundant_comparator"
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp"
             id="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation"
-            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
+            runAfter="org.eclipse.jdt.ui.cleanup.redundant_comparator">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUp"

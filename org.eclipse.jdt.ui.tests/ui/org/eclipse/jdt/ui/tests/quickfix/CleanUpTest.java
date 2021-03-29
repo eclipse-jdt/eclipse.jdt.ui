@@ -9720,6 +9720,351 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testRedundantComparator() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.math.BigDecimal;\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class RedundantComparatorSample {\n" //
+				+ "    public List<Date> removeComparatorClass(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date removeComparatorOnMax(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Collections.max(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date removeComparatorOnMin(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Collections.min(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Long> removeLambdaExpression(List<Long> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, (Long o1, Long o2) -> o1.compareTo(o2));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> removeLambdaBody(List<String> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, (String o1, String o2) -> {\n" //
+				+ "            return o1.compareTo(o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Double> removeUntypedLambda(List<Double> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, (o1, o2) -> {\n" //
+				+ "            return o1.compareTo(o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Integer> removeComparatorOnPrimitive(List<Integer> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, (o1, o2) -> {\n" //
+				+ "            return Integer.compare(o1, o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeIdentityFunction(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing(Function.identity()));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeComparingLambda(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing((Date d) -> d));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeComparingBody(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing((Date d) -> {\n" //
+				+ "            return d;\n" //
+				+ "        }));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeUntypedParameter(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing(d -> {\n" //
+				+ "            return d;\n" //
+				+ "        }));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeNaturalOrder(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.naturalOrder());\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeNullComparator(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, null);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<BigDecimal> removeOpposedComparatorClass(List<BigDecimal> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, new Comparator<BigDecimal>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(BigDecimal o1, BigDecimal o2) {\n" //
+				+ "                return -o2.compareTo(o1);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeTwiceReversedComparatorClass(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o2.compareTo(o1);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        }.reversed());\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> refactoreSortedList(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        listToSort.sort(new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o2.compareTo(o1);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        }.reversed());\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.math.BigDecimal;\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class RedundantComparatorSample {\n" //
+				+ "    public List<Date> removeComparatorClass(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date removeComparatorOnMax(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Collections.max(listToSort);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date removeComparatorOnMin(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Collections.min(listToSort);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Long> removeLambdaExpression(List<Long> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> removeLambdaBody(List<String> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Double> removeUntypedLambda(List<Double> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Integer> removeComparatorOnPrimitive(List<Integer> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeIdentityFunction(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeComparingLambda(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeComparingBody(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeUntypedParameter(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeNaturalOrder(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeNullComparator(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<BigDecimal> removeOpposedComparatorClass(List<BigDecimal> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeTwiceReversedComparatorClass(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> refactoreSortedList(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.REDUNDANT_COMPARATOR);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparatorCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testKeepRedundantComparator() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public List<String> doNotRemoveComparatorWithoutCompareToMethod(List<String> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<String>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(String o1, String o2) {\n" //
+				+ "                return o1.compareToIgnoreCase(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> doNotRemoveComparatorWithOtherStatement(List<String> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<String>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(String o1, String o2) {\n" //
+				+ "                System.out.println(\"Don't lose me!\");\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_COMPARATOR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testArrayWithCurly() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);

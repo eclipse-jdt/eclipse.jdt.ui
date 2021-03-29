@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
 import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
@@ -70,6 +71,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new RedundantModifiersCleanUp(values),
 				new EmbeddedIfCleanUp(values),
 				new RedundantSemicolonsCleanUp(values),
+				new RedundantComparatorCleanUp(values),
 				new UnnecessaryArrayCreationCleanUp(values),
 				new ArrayWithCurlyCleanUp(values),
 				new UselessReturnCleanUp(values),
@@ -150,6 +152,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference semicolons= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons, CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(semicolons);
+
+		CheckboxPreference redundantComparator= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantComparator, CleanUpConstants.REDUNDANT_COMPARATOR, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(redundantComparator);
 
 		CheckboxPreference arrayCreation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnnecessaryVarargsArrayCreation, CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(arrayCreation);

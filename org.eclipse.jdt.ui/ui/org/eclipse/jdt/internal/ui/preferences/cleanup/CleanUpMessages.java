@@ -146,6 +146,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_EmbeddedIf;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons_description;
+	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantComparator;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantArrayCreation_description;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ArrayWithCurly;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UselessReturn;

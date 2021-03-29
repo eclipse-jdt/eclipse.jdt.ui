@@ -1588,6 +1588,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_REDUNDANT_SEMICOLONS= "cleanup.remove_redundant_semicolons"; //$NON-NLS-1$
 
 	/**
+	 * Remove the comparator declaration if it is the default one.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String REDUNDANT_COMPARATOR= "cleanup.redundant_comparator"; //$NON-NLS-1$
+
+	/**
 	 * Removes unnecessary array creation for varargs.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
