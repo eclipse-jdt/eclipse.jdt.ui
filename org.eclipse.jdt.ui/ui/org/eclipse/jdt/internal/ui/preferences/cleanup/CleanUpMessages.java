@@ -180,7 +180,7 @@ public class CleanUpMessages extends NLS {
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd;
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantIfCondition;
 
-	public static String JavaFeatureTabPage_GroupName_Java15;
+	public static String JavaFeatureTabPage_GroupName_Java16;
 	public static String JavaFeatureTabPage_CheckboxName_PatternMatchingForInstanceof;
 
 	public static String JavaFeatureTabPage_GroupName_Java14;
