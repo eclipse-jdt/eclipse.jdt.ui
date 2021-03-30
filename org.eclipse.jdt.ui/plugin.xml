@@ -6973,6 +6973,16 @@
             cleanUpKind="cleanUp">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.JavaFeatureTabPage"
+            name="%CleanUpTabPage.JavaFeature.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.SourceFixingTabPage"
+            name="%CleanUpTabPage.SourceFixing.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.OptimizationTabPage"
             name="%CleanUpTabPage.Optimization.name"
             cleanUpKind="cleanUp">
@@ -6997,6 +7007,11 @@
             name="%CleanUpTabPage.CodeOrganizing.name"
             cleanUpKind="cleanUp">
       </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.DuplicateCodeTabPage"
+            name="%CleanUpTabPage.DuplicateCode.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
 
       <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage"
@@ -7006,12 +7021,12 @@
       <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.JavaFeatureTabPage"
             name="%CleanUpTabPage.JavaFeature.name"
-            cleanUpKind="cleanUp">
+            cleanUpKind="saveAction">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.SourceFixingTabPage"
             name="%CleanUpTabPage.SourceFixing.name"
-            cleanUpKind="cleanUp">
+            cleanUpKind="saveAction">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.OptimizationTabPage"
@@ -7031,7 +7046,7 @@
       <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.DuplicateCodeTabPage"
             name="%CleanUpTabPage.DuplicateCode.name"
-            cleanUpKind="cleanUp">
+            cleanUpKind="saveAction">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage"
