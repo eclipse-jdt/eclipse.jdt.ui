@@ -15207,6 +15207,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import static java.lang.Integer.bitCount;\n" //
+				+ "import static java.lang.Integer.valueOf;\n" //
 				+ "\n" //
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
@@ -15383,12 +15384,19 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            return texts.size();\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithStaticMethodCallFromInteger {\n" //
+				+ "        public int methodWithStaticMethodCall(List<String> texts) {\n" //
+				+ "            return Integer.valueOf(\"1\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import static java.lang.Integer.bitCount;\n" //
+				+ "import static java.lang.Integer.valueOf;\n" //
 				+ "\n" //
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
@@ -15564,6 +15572,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public static class RefactorInnerClassWithMethodCall {\n" //
 				+ "        public int methodWithStaticMethodCall(List<String> texts) {\n" //
 				+ "            return texts.size();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithStaticMethodCallFromInteger {\n" //
+				+ "        public int methodWithStaticMethodCall(List<String> texts) {\n" //
+				+ "            return Integer.valueOf(\"1\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
