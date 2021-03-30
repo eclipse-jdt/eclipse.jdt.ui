@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -130,6 +131,15 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 							|| node.getLocationInParent() == FieldAccess.NAME_PROPERTY
 							|| node.getLocationInParent() == SuperFieldAccess.NAME_PROPERTY) {
 						return true;
+					}
+
+					if (node.getLocationInParent() == MethodInvocation.NAME_PROPERTY) {
+						MethodInvocation methodInvocation= (MethodInvocation) node.getParent();
+
+						if (methodInvocation.getExpression() != null) {
+							// The expression will be evaluated instead
+							return true;
+						}
 					}
 
 					IBinding binding= node.resolveBinding();

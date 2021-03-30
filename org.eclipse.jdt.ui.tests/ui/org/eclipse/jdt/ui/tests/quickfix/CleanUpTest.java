@@ -15211,6 +15211,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
 				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public class RefactorThisInnerClass {\n" //
@@ -15376,6 +15377,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            return RefactorInnerClassWithQualifiedThisReference.this;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithMethodCall {\n" //
+				+ "        public int methodWithStaticMethodCall(List<String> texts) {\n" //
+				+ "            return texts.size();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -15386,6 +15393,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
 				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public static class RefactorThisInnerClass {\n" //
@@ -15550,6 +15558,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public static class RefactorInnerClassWithQualifiedThisReference {\n" //
 				+ "        public RefactorInnerClassWithQualifiedThisReference anotherMethod() {\n" //
 				+ "            return RefactorInnerClassWithQualifiedThisReference.this;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithMethodCall {\n" //
+				+ "        public int methodWithStaticMethodCall(List<String> texts) {\n" //
+				+ "            return texts.size();\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
