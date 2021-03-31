@@ -10056,6 +10056,105 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return listToSort;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> doNotRemoveLambdaWithOtherStatement(List<String> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (String o1, String o2) -> {\n" //
+				+ "            System.out.println(\"Don't lose me!\");\n" //
+				+ "            return o1.compareTo(o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedComparatorClass(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o2.compareTo(o1);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedComparatorOnMethod(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.toString().compareTo(o2.toString());\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedLambdaExpression(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (Date o1, Date o2) -> o2.compareTo(o1));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedLambdaBody(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (Date o1, Date o2) -> {\n" //
+				+ "            return o2.compareTo(o1);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedUntypedLambda(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (o1, o2) -> {\n" //
+				+ "            return o2.compareTo(o1);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveComparatorOnSpecialMethod(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing(Date::toString));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedIdentityFunction(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, Comparator.<Date, Date>comparing(Function.identity()).reversed());\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class NonComparable {\n" //
+				+ "        public int compareTo(Object anotherObject) {\n" //
+				+ "            return 42;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<NonComparable> doNotRemoveComparatorOnNonComparable(List<NonComparable> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<NonComparable>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(NonComparable o1, NonComparable o2) {\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<NonComparable> doNotRemoveLambdaOnNonComparable(List<NonComparable> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (NonComparable o1, NonComparable o2) -> {\n" //
+				+ "            return o1.compareTo(o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<NonComparable> doNotRemoveMethodRefOnNonComparable(List<NonComparable> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, NonComparable::compareTo);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
