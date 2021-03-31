@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -173,57 +174,67 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 					if (node.parameters().size() == arguments.size()) {
 						if (areSameIdentifiers(node, arguments)) {
-
 							IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+							ITypeBinding calledType= null;
 
-							if (Boolean.TRUE.equals(ASTNodes.isStatic(methodInvocation))) {
+							if (methodBinding != null) {
+								calledType= methodBinding.getDeclaringClass();
+							} else {
+								// For an unknown reason, MethodInvocation.resolveMethodBinding() seems to fail when the method is defined in the class we are
+								ASTNode declaration= ((CompilationUnit) node.getRoot()).findDeclaringNode(methodBinding);
+
+								if (declaration instanceof AbstractTypeDeclaration) {
+									calledType= ((AbstractTypeDeclaration) declaration).resolveBinding();
+								}
+							}
+
+							if (Boolean.TRUE.equals(ASTNodes.isStatic(methodInvocation))
+									&& calledType != null) {
 								boolean valid= true;
 
-								if (methodBinding != null && methodBinding.getDeclaringClass() != null) {
-									ITypeBinding calledType= methodBinding.getDeclaringClass();
+								if (!arguments.isEmpty()
+										&& arguments.get(0).resolveTypeBinding() != null
+										&& arguments.get(0).resolveTypeBinding().isSubTypeCompatible(calledType)) {
+									String[] remainingParams= new String[arguments.size() - 1];
 
-									if (!arguments.isEmpty()) {
-										String[] remainingParams= new String[arguments.size() - 1];
+									for (int i= 0; i < arguments.size() - 1; i++) {
+										ITypeBinding resolveTypeBinding= arguments.get(i + 1).resolveTypeBinding();
 
-										for (int i= 0; i < arguments.size() - 1; i++) {
-											ITypeBinding resolveTypeBinding= arguments.get(i + 1).resolveTypeBinding();
-
-											if (resolveTypeBinding == null) {
-												valid= false;
-												break;
-											}
-
-											remainingParams[i]= resolveTypeBinding.getQualifiedName();
+										if (resolveTypeBinding == null) {
+											valid= false;
+											break;
 										}
 
-										if (valid) {
-											for (IMethodBinding declaredMethodBinding : calledType.getDeclaredMethods()) {
-												if ((declaredMethodBinding.getModifiers() & Modifier.STATIC) == 0 && ASTNodes.usesGivenSignature(declaredMethodBinding,
-														calledType.getQualifiedName(), methodInvocation.getName().getIdentifier(), remainingParams)) {
-													valid= false;
-													break;
-												}
-											}
-										}
+										remainingParams[i]= resolveTypeBinding.getQualifiedName();
 									}
 
 									if (valid) {
-										actionType= ActionType.TYPE_REF;
-										classBinding= calledType;
+										for (IMethodBinding declaredMethodBinding : calledType.getDeclaredMethods()) {
+											if (!Modifier.isStatic(declaredMethodBinding.getModifiers())
+													&& ASTNodes.usesGivenSignature(declaredMethodBinding, calledType.getQualifiedName(), methodInvocation.getName().getIdentifier(), remainingParams)) {
+												valid= false;
+												break;
+											}
+										}
 									}
+								}
+
+								if (valid) {
+									actionType= ActionType.TYPE_REF;
+									classBinding= calledType;
 								}
 							}
 
 							if (calledExpression == null) {
-								if (methodBinding != null) {
-									ITypeBinding calledType= methodBinding.getDeclaringClass();
+								if (calledType != null) {
 									ITypeBinding enclosingType= Bindings.getBindingOfParentType(node);
 
-									if (calledType != null && Bindings.isSuperType(calledType, enclosingType)) {
+									if (Bindings.isSuperType(calledType, enclosingType)) {
 										actionType= ActionType.METHOD_REF;
 									}
 								}
-							} else if (calledExpression instanceof StringLiteral || calledExpression instanceof NumberLiteral
+							} else if (calledExpression instanceof StringLiteral
+									|| calledExpression instanceof NumberLiteral
 									|| calledExpression instanceof ThisExpression) {
 								actionType= ActionType.METHOD_REF;
 							} else if (calledExpression instanceof FieldAccess) {
@@ -256,17 +267,17 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 							}
 
 							if (valid) {
-								ITypeBinding clazz= null;
+								ITypeBinding klass= null;
 
 								if (calledExpression.resolveTypeBinding() != null) {
-									clazz= calledExpression.resolveTypeBinding();
+									klass= calledExpression.resolveTypeBinding();
 								} else if (methodInvocation.resolveMethodBinding() != null && methodInvocation.resolveMethodBinding().getDeclaringClass() != null) {
-									clazz= methodInvocation.resolveMethodBinding().getDeclaringClass();
+									klass= methodInvocation.resolveMethodBinding().getDeclaringClass();
 								}
 
-								if (clazz != null) {
+								if (klass != null) {
 									String[] cumulativeParams= new String[arguments.size() + 1];
-									cumulativeParams[0]= clazz.getQualifiedName();
+									cumulativeParams[0]= klass.getQualifiedName();
 
 									for (int i= 0; i < arguments.size(); i++) {
 										ITypeBinding resolveTypeBinding= arguments.get(i).resolveTypeBinding();
@@ -280,9 +291,9 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 									}
 
 									if (valid) {
-										for (IMethodBinding declaredMethodBinding : clazz.getDeclaredMethods()) {
-											if ((declaredMethodBinding.getModifiers() & Modifier.STATIC) > 0 && ASTNodes.usesGivenSignature(declaredMethodBinding,
-													clazz.getQualifiedName(), methodInvocation.getName().getIdentifier(), cumulativeParams)) {
+										for (IMethodBinding declaredMethodBinding : klass.getDeclaredMethods()) {
+											if (Modifier.isStatic(declaredMethodBinding.getModifiers())
+													&& ASTNodes.usesGivenSignature(declaredMethodBinding, klass.getQualifiedName(), methodInvocation.getName().getIdentifier(), cumulativeParams)) {
 												valid= false;
 												break;
 											}
@@ -291,7 +302,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 									if (valid) {
 										actionType= ActionType.TYPE_REF;
-										classBinding= clazz;
+										classBinding= klass;
 									}
 								}
 							}
@@ -308,12 +319,9 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 			}
 
 			private boolean hasToRemoveParamParentheses(final LambdaExpression node) {
-				if (node.hasParentheses() && node.parameters().size() == 1
-						&& node.parameters().get(0) instanceof VariableDeclarationFragment) {
-					return true;
-				}
-
-				return false;
+				return node.hasParentheses()
+						&& node.parameters().size() == 1
+						&& node.parameters().get(0) instanceof VariableDeclarationFragment;
 			}
 
 			/**

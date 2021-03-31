@@ -975,7 +975,7 @@ public class ASTNodes {
 		Expression calledType= method.getExpression();
 
 		if (method.resolveMethodBinding() != null) {
-			return (method.resolveMethodBinding().getModifiers() & Modifier.STATIC) != 0;
+			return Modifier.isStatic(method.resolveMethodBinding().getModifiers());
 		}
 
 		if ((calledType instanceof Name)
