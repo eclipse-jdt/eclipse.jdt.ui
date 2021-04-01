@@ -252,7 +252,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * Internal implementation class for a change listener.
 	 * @since 3.0
 	 */
-	protected abstract class AbstractSelectionChangedListener implements ISelectionChangedListener  {
+	protected abstract static class AbstractSelectionChangedListener implements ISelectionChangedListener  {
 
 		/**
 		 * Installs this selection changed listener with the given selection provider. If

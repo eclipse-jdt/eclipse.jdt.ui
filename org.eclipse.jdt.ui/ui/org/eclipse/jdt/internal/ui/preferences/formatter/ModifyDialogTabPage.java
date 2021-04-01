@@ -79,7 +79,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * around one or more SWT widgets and handles the input of values for some key.
 	 * On each change, the new value is written to the map and the listeners are notified.
 	 */
-	protected abstract class Preference extends Observable {
+	protected abstract static class Preference extends Observable {
 	    private final Map<String, String> fPreferences;
 	    private boolean fEnabled;
 	    private String fKey;

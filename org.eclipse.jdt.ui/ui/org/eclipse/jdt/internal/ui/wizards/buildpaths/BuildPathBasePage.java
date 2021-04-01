@@ -353,7 +353,7 @@ public abstract class BuildPathBasePage {
 		}
 	}
 
-	protected abstract class CPListAdapter implements IDialogFieldListener, ITreeListAdapter<CPListElement> {
+	protected abstract static class CPListAdapter implements IDialogFieldListener, ITreeListAdapter<CPListElement> {
 		private final Object[] EMPTY_ARR= new Object[0];
 
 		@Override

@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 	public static final class SwitchStatementsFinder extends ASTVisitor {
-		final class Variable {
+		static final class Variable {
 			private final Expression name;
 			private final List<Expression> constantValues;
 
