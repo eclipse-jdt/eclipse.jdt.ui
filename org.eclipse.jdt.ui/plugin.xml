@@ -7253,9 +7253,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.return_expression"
+            runAfter="org.eclipse.jdt.ui.cleanup.array_with_curly">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UselessReturnCleanUp"
             id="org.eclipse.jdt.ui.cleanup.useless_return"
-            runAfter="org.eclipse.jdt.ui.cleanup.array_with_curly">
+            runAfter="org.eclipse.jdt.ui.cleanup.return_expression">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UselessContinueCleanUp"

@@ -10293,6 +10293,337 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testReturnExpression() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private double[] arrayField = new double[] { 42.42 };\n" //
+				+ "\n" //
+				+ "    public int inlineLocalVariableDeclaration() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineLocalVariableAssignment(int i) {\n" //
+				+ "        i = 0;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * No need to check for array variable assignments.\n" //
+				+ "     * <p>\n" //
+				+ "     * Trying to use it reports compile error \"Array constants can only be used in initializers\"\n" //
+				+ "     * <p>\n" //
+				+ "     */\n" //
+				+ "    public String[] inlineStringArrayConstants() {\n" //
+				+ "        String[] array = { \"test\" };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[][] inlineStringArray2Constants() {\n" //
+				+ "        String[][] array = { { \"test\" } };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public String[] inlineCStyleStringArrayConstants() {\n" //
+				+ "        String array[] = { \"test\" };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[][] inlineCStyleStringArray2Constants() {\n" //
+				+ "        String array[][] = { { \"test\" } };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public String[][] inlineMixedStyleStringArrayConstantsNotSupportedYet() {\n" //
+				+ "        String[] array[] = { { \"mixtest\" } };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public boolean[] inlineBooleanArrayConstants() {\n" //
+				+ "        boolean[] array = { true };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] inlineCharArrayConstants() {\n" //
+				+ "        char[] array = { 'a' };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte[] inlineByteArrayConstants() {\n" //
+				+ "        byte[] array = { 42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short[] inlineShortArrayConstants() {\n" //
+				+ "        short[] array = { 42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] inlineIntArrayConstants() {\n" //
+				+ "        int[] array = { 42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long[] inlineLongArrayConstants() {\n" //
+				+ "        long[] array = { 42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float[] inlineFloatArrayConstants() {\n" //
+				+ "        float[] array = { 42.42f };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayConstants() {\n" //
+				+ "        double[] array = { 42.42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayCreation() {\n" //
+				+ "        double[] array = new double[]{ 42.42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayVariableDeclaration() {\n" //
+				+ "        double[] array = arrayField;\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayAssignment() {\n" //
+				+ "        double[] array = null;\n" //
+				+ "        array = arrayField;\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Throwable[] inlineStatementWithEmptyArray() {\n" //
+				+ "        Throwable[] t = {};\n" //
+				+ "        return t;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Throwable[] inlineExpressionWithEmptyArray(Throwable[] t) {\n" //
+				+ "        t = new Throwable[]{};\n" //
+				+ "        return t;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] refactorMethodCall(String s) {\n" //
+				+ "        char[] res = s.toCharArray();\n" //
+				+ "        return res;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineSeveralReturns(int i1, int i2) {\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            i1 = 10;\n" //
+				+ "            return i1;\n" //
+				+ "        } else {\n" //
+				+ "            i2 = 11;\n" //
+				+ "            return i2;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineUnusedVariableInFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            i = 1;\n" //
+				+ "            return i;\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"Finished\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private double[] arrayField = new double[] { 42.42 };\n" //
+				+ "\n" //
+				+ "    public int inlineLocalVariableDeclaration() {\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineLocalVariableAssignment(int i) {\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * No need to check for array variable assignments.\n" //
+				+ "     * <p>\n" //
+				+ "     * Trying to use it reports compile error \"Array constants can only be used in initializers\"\n" //
+				+ "     * <p>\n" //
+				+ "     */\n" //
+				+ "    public String[] inlineStringArrayConstants() {\n" //
+				+ "        return new String[]{ \"test\" };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[][] inlineStringArray2Constants() {\n" //
+				+ "        return new String[][]{ { \"test\" } };\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public String[] inlineCStyleStringArrayConstants() {\n" //
+				+ "        return new String[]{ \"test\" };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[][] inlineCStyleStringArray2Constants() {\n" //
+				+ "        return new String[][]{ { \"test\" } };\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public String[][] inlineMixedStyleStringArrayConstantsNotSupportedYet() {\n" //
+				+ "        String[] array[] = { { \"mixtest\" } };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public boolean[] inlineBooleanArrayConstants() {\n" //
+				+ "        return new boolean[]{ true };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] inlineCharArrayConstants() {\n" //
+				+ "        return new char[]{ 'a' };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte[] inlineByteArrayConstants() {\n" //
+				+ "        return new byte[]{ 42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short[] inlineShortArrayConstants() {\n" //
+				+ "        return new short[]{ 42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] inlineIntArrayConstants() {\n" //
+				+ "        return new int[]{ 42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long[] inlineLongArrayConstants() {\n" //
+				+ "        return new long[]{ 42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float[] inlineFloatArrayConstants() {\n" //
+				+ "        return new float[]{ 42.42f };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayConstants() {\n" //
+				+ "        return new double[]{ 42.42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayCreation() {\n" //
+				+ "        return new double[]{ 42.42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayVariableDeclaration() {\n" //
+				+ "        return arrayField;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayAssignment() {\n" //
+				+ "        double[] array = null;\n" //
+				+ "        return arrayField;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Throwable[] inlineStatementWithEmptyArray() {\n" //
+				+ "        return new Throwable[]{};\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Throwable[] inlineExpressionWithEmptyArray(Throwable[] t) {\n" //
+				+ "        return new Throwable[]{};\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] refactorMethodCall(String s) {\n" //
+				+ "        return s.toCharArray();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineSeveralReturns(int i1, int i2) {\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            return 10;\n" //
+				+ "        } else {\n" //
+				+ "            return 11;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineUnusedVariableInFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            return 1;\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"Finished\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.RETURN_EXPRESSION);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ReturnExpressionCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotReturnExpression() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int i;\n" //
+				+ "\n" //
+				+ "    public int doNotInlineFieldAssignment1() {\n" //
+				+ "        i = 0;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotInlineFieldAssignment2() {\n" //
+				+ "        this.i = 0;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotInlineVariableInFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            i = 1;\n" //
+				+ "            return i;\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotInlineCatchVariableInFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            return 1;\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            i = 1;\n" //
+				+ "            return 2;\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotInlineVariableInFarAwayFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            try {\n" //
+				+ "                i = 1;\n" //
+				+ "                return i;\n" //
+				+ "            } finally {\n" //
+				+ "                System.out.println(\"Finished\");\n" //
+				+ "            }\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.RETURN_EXPRESSION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRemoveUselessReturn() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

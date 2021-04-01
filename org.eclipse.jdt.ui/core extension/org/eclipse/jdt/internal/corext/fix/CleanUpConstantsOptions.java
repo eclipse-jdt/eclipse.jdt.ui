@@ -119,6 +119,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REDUNDANT_COMPARATOR, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.FALSE);
 		options.setOption(ARRAY_WITH_CURLY, CleanUpOptions.FALSE);
+		options.setOption(RETURN_EXPRESSION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_RETURN, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_CONTINUE, CleanUpOptions.FALSE);
 		options.setOption(UNLOOPED_WHILE, CleanUpOptions.FALSE);
@@ -287,6 +288,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REDUNDANT_COMPARATOR, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.FALSE);
 		options.setOption(ARRAY_WITH_CURLY, CleanUpOptions.FALSE);
+		options.setOption(RETURN_EXPRESSION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_RETURN, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_CONTINUE, CleanUpOptions.FALSE);
 		options.setOption(UNLOOPED_WHILE, CleanUpOptions.FALSE);

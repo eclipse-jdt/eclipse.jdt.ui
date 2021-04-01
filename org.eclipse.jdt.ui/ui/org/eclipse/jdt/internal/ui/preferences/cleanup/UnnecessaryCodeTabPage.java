@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SubstringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
@@ -74,6 +75,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new RedundantComparatorCleanUp(values),
 				new UnnecessaryArrayCreationCleanUp(values),
 				new ArrayWithCurlyCleanUp(values),
+				new ReturnExpressionCleanUp(values),
 				new UselessReturnCleanUp(values),
 				new UselessContinueCleanUp(values),
 				new UnloopedWhileCleanUp(values)
@@ -161,6 +163,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference arrayWithCurlyPref= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ArrayWithCurly, CleanUpConstants.ARRAY_WITH_CURLY, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(arrayWithCurlyPref);
+
+		CheckboxPreference returnExpression= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ReturnExpression, CleanUpConstants.RETURN_EXPRESSION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(returnExpression);
 
 		CheckboxPreference uselessReturn= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UselessReturn, CleanUpConstants.REMOVE_USELESS_RETURN, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(uselessReturn);
