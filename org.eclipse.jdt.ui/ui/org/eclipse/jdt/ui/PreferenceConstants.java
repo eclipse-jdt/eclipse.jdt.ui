@@ -17,6 +17,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -4202,7 +4203,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
 
 		// Note: For backwards compatibility we must use the property and not the workspace default
-		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING, System.getProperty("file.encoding")); //$NON-NLS-1$
+				store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING, Charset.defaultCharset().displayName());
 
 		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
 		store.setDefault(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, 1000);

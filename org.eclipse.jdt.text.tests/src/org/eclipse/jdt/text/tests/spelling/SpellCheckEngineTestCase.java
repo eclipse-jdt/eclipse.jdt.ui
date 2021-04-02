@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
@@ -200,7 +201,7 @@ public class SpellCheckEngineTestCase {
 		final ISpellChecker checker= fEngine.getSpellChecker();
 		assertNotNull(checker);
 
-		System.out.println(System.getProperty("file.encoding"));
+		System.out.println(Charset.defaultCharset().displayName());
 
 		assertEquals(Locale.US, checker.getLocale());
 

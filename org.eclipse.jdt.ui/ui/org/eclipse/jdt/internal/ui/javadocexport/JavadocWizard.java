@@ -385,7 +385,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				break;
 			}
 		}
-		return System.getProperty("file.encoding"); //$NON-NLS-1$
+		return Charset.defaultCharset().displayName();
 
 	}
 
