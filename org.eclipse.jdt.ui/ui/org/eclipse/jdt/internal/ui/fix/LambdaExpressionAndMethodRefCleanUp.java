@@ -133,30 +133,30 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 		unit.accept(new ASTVisitor() {
 			@Override
-			public boolean visit(final LambdaExpression node) {
+			public boolean visit(final LambdaExpression visited) {
 				ActionType actionType= ActionType.DO_NOTHING;
 				ITypeBinding classBinding= null;
 
-				boolean removeParamParentheses= hasToRemoveParamParentheses(node);
+				boolean removeParamParentheses= hasToRemoveParamParentheses(visited);
 				Expression bodyExpression= null;
 
-				if (node.getBody() instanceof Block) {
-					ReturnStatement returnStatement= ASTNodes.as((Block) node.getBody(), ReturnStatement.class);
+				if (visited.getBody() instanceof Block) {
+					ReturnStatement returnStatement= ASTNodes.as((Block) visited.getBody(), ReturnStatement.class);
 
 					if (returnStatement != null) {
 						bodyExpression= returnStatement.getExpression();
 						actionType= ActionType.REMOVE_RETURN;
 					}
-				} else if (node.getBody() instanceof Expression) {
-					bodyExpression= (Expression) node.getBody();
+				} else if (visited.getBody() instanceof Expression) {
+					bodyExpression= (Expression) visited.getBody();
 				}
 
 				if (bodyExpression instanceof ClassInstanceCreation) {
 					ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) bodyExpression;
 					List<Expression> arguments= classInstanceCreation.arguments();
 
-					if (node.parameters().size() == arguments.size()
-							&& areSameIdentifiers(node, arguments)
+					if (visited.parameters().size() == arguments.size()
+							&& areSameIdentifiers(visited, arguments)
 							&& classInstanceCreation.getAnonymousClassDeclaration() == null) {
 						actionType= ActionType.CLASS_INSTANCE_REF;
 					}
@@ -164,7 +164,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 					SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) bodyExpression;
 					List<Expression> arguments= superMethodInvocation.arguments();
 
-					if (node.parameters().size() == arguments.size() && areSameIdentifiers(node, arguments)) {
+					if (visited.parameters().size() == arguments.size() && areSameIdentifiers(visited, arguments)) {
 						actionType= ActionType.SUPER_METHOD_REF;
 					}
 				} else if (bodyExpression instanceof MethodInvocation) {
@@ -172,8 +172,8 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 					Expression calledExpression= methodInvocation.getExpression();
 					List<Expression> arguments= methodInvocation.arguments();
 
-					if (node.parameters().size() == arguments.size()) {
-						if (areSameIdentifiers(node, arguments)) {
+					if (visited.parameters().size() == arguments.size()) {
+						if (areSameIdentifiers(visited, arguments)) {
 							IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
 							ITypeBinding calledType= null;
 
@@ -181,7 +181,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 								calledType= methodBinding.getDeclaringClass();
 							} else {
 								// For an unknown reason, MethodInvocation.resolveMethodBinding() seems to fail when the method is defined in the class we are
-								ASTNode declaration= ((CompilationUnit) node.getRoot()).findDeclaringNode(methodBinding);
+								ASTNode declaration= ((CompilationUnit) visited.getRoot()).findDeclaringNode(methodBinding);
 
 								if (declaration instanceof AbstractTypeDeclaration) {
 									calledType= ((AbstractTypeDeclaration) declaration).resolveBinding();
@@ -225,42 +225,44 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 								}
 							}
 
-							if (calledExpression == null) {
-								if (calledType != null) {
-									ITypeBinding enclosingType= Bindings.getBindingOfParentType(node);
+							if (actionType != ActionType.TYPE_REF) {
+								if (calledExpression == null) {
+									if (calledType != null) {
+										ITypeBinding enclosingType= Bindings.getBindingOfParentType(visited);
 
-									if (Bindings.isSuperType(calledType, enclosingType)) {
+										if (enclosingType != null && Bindings.isSuperType(calledType, enclosingType)) {
+											actionType= ActionType.METHOD_REF;
+										}
+									}
+								} else if (calledExpression instanceof StringLiteral
+										|| calledExpression instanceof NumberLiteral
+										|| calledExpression instanceof ThisExpression) {
+									actionType= ActionType.METHOD_REF;
+								} else if (calledExpression instanceof FieldAccess) {
+									FieldAccess fieldAccess= (FieldAccess) calledExpression;
+
+									if (fieldAccess.resolveFieldBinding() != null && fieldAccess.resolveFieldBinding().isEffectivelyFinal()) {
+										actionType= ActionType.METHOD_REF;
+									}
+								} else if (calledExpression instanceof SuperFieldAccess) {
+									SuperFieldAccess fieldAccess= (SuperFieldAccess) calledExpression;
+
+									if (fieldAccess.resolveFieldBinding() != null && fieldAccess.resolveFieldBinding().isEffectivelyFinal()) {
 										actionType= ActionType.METHOD_REF;
 									}
 								}
-							} else if (calledExpression instanceof StringLiteral
-									|| calledExpression instanceof NumberLiteral
-									|| calledExpression instanceof ThisExpression) {
-								actionType= ActionType.METHOD_REF;
-							} else if (calledExpression instanceof FieldAccess) {
-								FieldAccess fieldAccess= (FieldAccess) calledExpression;
-
-								if (fieldAccess.resolveFieldBinding() != null && fieldAccess.resolveFieldBinding().isEffectivelyFinal()) {
-									actionType= ActionType.METHOD_REF;
-								}
-							} else if (calledExpression instanceof SuperFieldAccess) {
-								SuperFieldAccess fieldAccess= (SuperFieldAccess) calledExpression;
-
-								if (fieldAccess.resolveFieldBinding() != null && fieldAccess.resolveFieldBinding().isEffectivelyFinal()) {
-									actionType= ActionType.METHOD_REF;
-								}
 							}
 						}
-					} else if (calledExpression instanceof SimpleName && node.parameters().size() == arguments.size() + 1) {
+					} else if (calledExpression instanceof SimpleName && visited.parameters().size() == arguments.size() + 1) {
 						SimpleName calledObject= (SimpleName) calledExpression;
 
-						if (isSameIdentifier(node, 0, calledObject)) {
+						if (isSameIdentifier(visited, 0, calledObject)) {
 							boolean valid= true;
 
 							for (int i= 0; i < arguments.size(); i++) {
 								ASTNode expression= ASTNodes.getUnparenthesedExpression(arguments.get(i));
 
-								if (!(expression instanceof SimpleName) || !isSameIdentifier(node, i + 1, (SimpleName) expression)) {
+								if (!(expression instanceof SimpleName) || !isSameIdentifier(visited, i + 1, (SimpleName) expression)) {
 									valid= false;
 									break;
 								}
@@ -311,7 +313,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 				}
 
 				if (removeParamParentheses || actionType != ActionType.DO_NOTHING) {
-					rewriteOperations.add(new ReplaceLambdaOperation(node, removeParamParentheses, actionType, bodyExpression, classBinding));
+					rewriteOperations.add(new ReplaceLambdaOperation(visited, removeParamParentheses, actionType, bodyExpression, classBinding));
 					return false;
 				}
 
@@ -375,14 +377,14 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 	}
 
 	private static class ReplaceLambdaOperation extends CompilationUnitRewriteOperation {
-		private final LambdaExpression node;
+		private final LambdaExpression visited;
 		private final boolean removeParentheses;
 		private final ActionType action;
 		private final Expression bodyExpression;
 		private final ITypeBinding classBinding;
 
-		public ReplaceLambdaOperation(final LambdaExpression node, final boolean removeParentheses, final ActionType action, final Expression bodyExpression, final ITypeBinding classBinding) {
-			this.node= node;
+		public ReplaceLambdaOperation(final LambdaExpression visited, final boolean removeParentheses, final ActionType action, final Expression bodyExpression, final ITypeBinding classBinding) {
+			this.visited= visited;
 			this.removeParentheses= removeParentheses;
 			this.action= action;
 			this.bodyExpression= bodyExpression;
@@ -398,14 +400,14 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 			switch (action) {
 				case REMOVE_RETURN:
 					LambdaExpression copyOfLambdaExpression2= ast.newLambdaExpression();
-					copyParameters(rewrite, node, copyOfLambdaExpression2);
+					copyParameters(rewrite, visited, copyOfLambdaExpression2);
 
 					if (removeParentheses) {
 						copyOfLambdaExpression2.setParentheses(false);
 					}
 
 					copyOfLambdaExpression2.setBody(ASTNodeFactory.parenthesizeIfNeeded(ast, ASTNodes.createMoveTarget(rewrite, bodyExpression)));
-					ASTNodes.replaceButKeepComment(rewrite, node, copyOfLambdaExpression2, group);
+					ASTNodes.replaceButKeepComment(rewrite, visited, copyOfLambdaExpression2, group);
 					break;
 
 				case TYPE_REF:
@@ -414,7 +416,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 					typeMethodRef.setType(copyType(cuRewrite, ast, typeMethodInvocation, classBinding));
 					typeMethodRef.setName(ASTNodes.createMoveTarget(rewrite, typeMethodInvocation.getName()));
-					ASTNodes.replaceButKeepComment(rewrite, node, typeMethodRef, group);
+					ASTNodes.replaceButKeepComment(rewrite, visited, typeMethodRef, group);
 					break;
 
 				case METHOD_REF:
@@ -428,7 +430,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 					}
 
 					methodRef.setName(ASTNodes.createMoveTarget(rewrite, methodInvocation.getName()));
-					ASTNodes.replaceButKeepComment(rewrite, node, methodRef, group);
+					ASTNodes.replaceButKeepComment(rewrite, visited, methodRef, group);
 					break;
 
 				case SUPER_METHOD_REF:
@@ -436,7 +438,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 					SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) bodyExpression;
 
 					superMethodRef.setName(ASTNodes.createMoveTarget(rewrite, superMethodInvocation.getName()));
-					ASTNodes.replaceButKeepComment(rewrite, node, superMethodRef, group);
+					ASTNodes.replaceButKeepComment(rewrite, visited, superMethodRef, group);
 					break;
 
 				case CLASS_INSTANCE_REF:
@@ -444,20 +446,20 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 					ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) bodyExpression;
 
 					creationRef.setType(copyType(cuRewrite, ast, classInstanceCreation, classInstanceCreation.resolveTypeBinding()));
-					ASTNodes.replaceButKeepComment(rewrite, node, creationRef, group);
+					ASTNodes.replaceButKeepComment(rewrite, visited, creationRef, group);
 					break;
 
 				case DO_NOTHING:
 				default:
 					LambdaExpression copyOfLambdaExpression= ast.newLambdaExpression();
-					copyParameters(rewrite, node, copyOfLambdaExpression);
+					copyParameters(rewrite, visited, copyOfLambdaExpression);
 
 					if (removeParentheses) {
 						copyOfLambdaExpression.setParentheses(false);
 					}
 
-					copyOfLambdaExpression.setBody(rewrite.createMoveTarget(node.getBody()));
-					ASTNodes.replaceButKeepComment(rewrite, node, copyOfLambdaExpression, group);
+					copyOfLambdaExpression.setBody(rewrite.createMoveTarget(visited.getBody()));
+					ASTNodes.replaceButKeepComment(rewrite, visited, copyOfLambdaExpression, group);
 					break;
 
 			}

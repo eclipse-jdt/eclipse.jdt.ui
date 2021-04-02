@@ -1274,14 +1274,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return numberInText -> test1.E.dummy(numberInText);\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public static Function<String, Integer> useTypeReferenceOnLocalType() {\n" //
+				+ "        return numberInText -> dummy(numberInText);\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    // TODO This method should be refactored but it fails\n" //
 				+ "    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {\n" //
 				+ "        return instant -> java.sql.Date.from(instant);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    // TODO This code should be fixed by Bug 572334\n" //
-				+ "    public Function<String, Integer> useTypeReferenceOnLocalType() {\n" //
-				+ "        return numberInText -> dummy(numberInText);\n" //
 				+ "    }\n" //
 				+ "}\n";
 
@@ -1381,14 +1380,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return E::dummy;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public static Function<String, Integer> useTypeReferenceOnLocalType() {\n" //
+				+ "        return E::dummy;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    // TODO This method should be refactored but it fails\n" //
 				+ "    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {\n" //
 				+ "        return instant -> java.sql.Date.from(instant);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    // TODO This code should be fixed by Bug 572334\n" //
-				+ "    public Function<String, Integer> useTypeReferenceOnLocalType() {\n" //
-				+ "        return this::dummy;\n" //
 				+ "    }\n" //
 				+ "}\n";
 
