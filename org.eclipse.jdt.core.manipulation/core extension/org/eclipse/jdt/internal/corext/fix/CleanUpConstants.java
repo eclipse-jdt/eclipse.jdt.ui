@@ -810,6 +810,18 @@ public class CleanUpConstants {
 	public static final String PRIMITIVE_SERIALIZATION= "cleanup.primitive_serialization"; //$NON-NLS-1$
 
 	/**
+	 * Replace wrapper object by primitive type when an object is not necessary.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String PRIMITIVE_RATHER_THAN_WRAPPER= "cleanup.primitive_rather_than_wrapper"; //$NON-NLS-1$
+
+	/**
 	 * Controls the usage of 'final' modifier for variable declarations. For detailed settings
 	 * use:<br>
 	 * {@link #VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES}<br>

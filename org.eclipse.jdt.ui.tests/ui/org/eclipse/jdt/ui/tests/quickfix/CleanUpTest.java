@@ -5615,6 +5615,222 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPrimitiveIntRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int intField;\n" //
+				+ "\n" //
+				+ "    public Integer wrapperField;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer plusVar = i1 + i2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceLessWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer lessVar = i1 - i2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceTimesWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer timesVar = i1 * i2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceDivideWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer divideVar = i1 / i2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceAndMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer divideVar = i1 & i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceOrMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer divideVar = i1 | i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int intField;\n" //
+				+ "\n" //
+				+ "    public Integer wrapperField;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int plusVar = i1 + i2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceLessWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int lessVar = i1 - i2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceTimesWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int timesVar = i1 * i2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceDivideWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int divideVar = i1 / i2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceAndMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int divideVar = i1 & i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceOrMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int divideVar = i1 | i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveIntRatherThanWrapperCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveIntRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Integer doNotRefactorFields = Integer.MIN_VALUE;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Integer returnedObject = Integer.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Integer reassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        reassignedInteger = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Integer, Observable> obsByInteger) {\n" //
+				+ "        Integer reassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        obsByInteger.get(reassignedInteger).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        objectField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        Integer anotherInteger = assignedInteger;\n" //
+				+ "        Integer yetAnotherInteger = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Integer doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        Integer anotherInteger = assignedInteger;\n" //
+				+ "        return assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Integer returnedObject = Integer.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Integer doNotReplaceAssignedAndReturnedWrapper(Integer i) {\n" //
+				+ "        Integer returnedObject = Integer.MIN_VALUE;\n" //
+				+ "        returnedObject = i;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testEvaluateNullable() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //

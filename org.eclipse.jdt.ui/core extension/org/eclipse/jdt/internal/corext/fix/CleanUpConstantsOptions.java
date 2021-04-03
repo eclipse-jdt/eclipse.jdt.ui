@@ -85,6 +85,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_PARSING, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
+		options.setOption(PRIMITIVE_RATHER_THAN_WRAPPER, CleanUpOptions.TRUE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
@@ -254,6 +255,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_PARSING, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
+		options.setOption(PRIMITIVE_RATHER_THAN_WRAPPER, CleanUpOptions.FALSE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.FALSE);

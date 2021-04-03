@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveIntRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveParsingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
@@ -51,6 +52,7 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 				new PrimitiveComparisonCleanUp(values),
 				new PrimitiveParsingCleanUp(values),
 				new PrimitiveSerializationCleanUp(values),
+				new PrimitiveIntRatherThanWrapperCleanUp(values),
 				new PatternCleanUp(values),
 				new NoStringCreationCleanUp(values),
 				new BooleanLiteralCleanUp(values)
@@ -91,6 +93,9 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference primitiveSerializationPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_PrimitiveSerialization, CleanUpConstants.PRIMITIVE_SERIALIZATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(primitiveSerializationPref);
+
+		final CheckboxPreference primitiveRatherThanWrapperPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_PrimitiveRatherThanWrapper, CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(primitiveRatherThanWrapperPref);
 
 		final CheckboxPreference precompileRegExPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_PrecompileRegEx, CleanUpConstants.PRECOMPILE_REGEX,
 				CleanUpModifyDialog.FALSE_TRUE);
