@@ -2301,6 +2301,17 @@ public class ASTNodes {
 		return null;
 	}
 
+	/**
+	 * Returns the previous statements in the same block if it exists.
+	 *
+	 * @param startNode the start node
+	 * @return the previous statements in the same block if it exists, empty list
+	 *         otherwise
+	 */
+	public static List<Statement> getPreviousSiblings(final Statement startNode) {
+		return getSiblings(startNode, false);
+	}
+
 	private static List<Statement> getSiblings(final Statement startNode, final boolean isForward) {
 		Statement statementAtLevel= statementAtLevel(startNode);
 

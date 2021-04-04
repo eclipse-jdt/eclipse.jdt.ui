@@ -165,6 +165,7 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
+import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
@@ -201,6 +202,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.DoWhileRatherThanWhileCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
@@ -320,6 +322,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getJUnitTestCaseProposal(context, coveringNode, null)
 					|| getNewImplementationProposal(context, coveringNode, null)
 					|| getAddStaticImportProposals(context, coveringNode, null)
+					|| getDoWhileRatherThanWhileProposal(context, coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null);
 		}
 		return false;
@@ -389,6 +392,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, resultingCollections);
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
+				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -4355,6 +4359,32 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_UNNECESSARY_ARRAY_CREATION, image, context);
 		proposal.setCommandId(REMOVE_UNNECESSARY_ARRAY_CREATION_ID);
 
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean getDoWhileRatherThanWhileProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+		WhileStatement whileStatement= null;
+		if (node instanceof WhileStatement) {
+			whileStatement= (WhileStatement) node;
+		} else if (node.getParent() instanceof WhileStatement) {
+			whileStatement= (WhileStatement) node.getParent();
+		}
+		if (whileStatement == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		IProposableFix fix= DoWhileRatherThanWhileFix.createDoWhileFix(whileStatement);
+		if (fix == null)
+			return false;
+
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Map<String, String> options= new HashMap<>();
+		options.put(CleanUpConstants.DO_WHILE_RATHER_THAN_WHILE, CleanUpOptions.TRUE);
+		ICleanUp cleanUp= new DoWhileRatherThanWhileCleanUp(options);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.DO_WHILE_RATHER_THAN_WHILE, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}

@@ -1175,6 +1175,18 @@ public class CleanUpConstants {
 	public static final String BREAK_LOOP= "cleanup.break_loop"; //$NON-NLS-1$
 
 	/**
+	 * Replace <code>while</code> by <code>do</code>/<code>while</code>.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String DO_WHILE_RATHER_THAN_WHILE= "cleanup.do_while_rather_than_while"; //$NON-NLS-1$
+
+	/**
 	 * Make inner <code>class</code> static.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

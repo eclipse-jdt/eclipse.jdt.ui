@@ -130,6 +130,7 @@ public class MultiFixMessages extends NLS {
 	public static String SingleUsedFieldCleanUp_description_new_local_var_declaration;
 	public static String SingleUsedFieldCleanUp_description_uses_of_the_var;
 	public static String BreakLoopCleanUp_description;
+	public static String DoWhileRatherThanWhileCleanUp_description;
 	public static String StaticInnerClassCleanUp_description;
 	public static String StringBuilderCleanUp_description;
 	public static String PlainReplacementCleanUp_description;
