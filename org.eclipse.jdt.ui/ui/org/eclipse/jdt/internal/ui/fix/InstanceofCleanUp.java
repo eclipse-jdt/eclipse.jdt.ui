@@ -78,10 +78,10 @@ public class InstanceofCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.INSTANCEOF)) {
-			return "String isRightType = (o instanceof String);\n"; //$NON-NLS-1$
+			return "boolean isRightType = (o instanceof String);\n"; //$NON-NLS-1$
 		}
 
-		return "String isRightType = String.class.isInstance(o);\n"; //$NON-NLS-1$
+		return "boolean isRightType = String.class.isInstance(o);\n"; //$NON-NLS-1$
 	}
 
 	@Override
