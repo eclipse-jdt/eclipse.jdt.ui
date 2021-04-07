@@ -15402,6 +15402,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    private Runnable doNotRefactorObject;\n" //
 				+ "    @Deprecated\n" //
 				+ "    private int doNotRefactorFieldWithAnnotation;\n" //
+				+ "    private int doNotRefactorFieldsInLambda;\n" //
+				+ "    private int doNotRefactorFieldsInAnnonymousClass;\n" //
 				+ "\n" //
 				+ "    public void doNotRefactorPublicField() {\n" //
 				+ "        doNotRefactorPublicField = 123;\n" //
@@ -15473,6 +15475,21 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public void oneMethod() {\n" //
 				+ "        SubClass aSubClass = new SubClass();\n" //
 				+ "        System.out.println(aSubClass.subClassField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Runnable doNotRefactorFieldsInLambda() {\n" //
+				+ "        doNotRefactorFieldsInLambda = 123;\n" //
+				+ "        return () -> doNotRefactorFieldsInLambda++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Runnable doNotRefactorFieldsInAnnonymousClass() {\n" //
+				+ "        doNotRefactorFieldsInAnnonymousClass = 123;\n" //
+				+ "        return new Runnable() {\n" //
+				+ "            @Override\n" //
+				+ "            public void run() {\n" //
+				+ "                doNotRefactorFieldsInAnnonymousClass++;\n" //
+				+ "            }\n" //
+				+ "        };\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);

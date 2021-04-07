@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Dimension;
@@ -35,6 +36,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -249,7 +251,13 @@ public class SingleUsedFieldCleanUp extends AbstractMultiFix {
 			private boolean isReassignmentForAll(final SimpleName reassignment, final Set<SimpleName> occurrences) {
 				for (SimpleName occurrence : occurrences) {
 					if (reassignment != occurrence) {
-						Statement statement= ASTNodes.getTypedAncestor(occurrence, Statement.class);
+						ASTNode astNode= ASTNodes.getFirstAncestorOrNull(occurrence, Statement.class, LambdaExpression.class, AnonymousClassDeclaration.class);
+
+						if (!(astNode instanceof Statement)) {
+							return false;
+						}
+
+						Statement statement= (Statement) astNode;
 						boolean isReassigned= false;
 
 						while (statement != null) {
