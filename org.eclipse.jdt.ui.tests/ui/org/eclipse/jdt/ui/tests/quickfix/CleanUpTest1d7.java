@@ -85,7 +85,7 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -252,8 +252,8 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 				+ "                Arrays.hashCode(texts), anotherDouble);\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.HashCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.HashCleanup_description)));
 	}
 
 	@Test
@@ -396,7 +396,7 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -559,8 +559,8 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.TryWithResourceCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.TryWithResourceCleanup_description)));
 	}
 
 	@Test
@@ -947,8 +947,8 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.MultiCatchCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.MultiCatchCleanUp_description)));
 	}
 
 	@Test
@@ -1136,7 +1136,7 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1177,8 +1177,7 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
-
 }

@@ -201,7 +201,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -271,7 +271,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -300,7 +300,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -357,7 +357,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -422,7 +422,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -484,7 +484,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -543,7 +543,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -599,7 +599,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -678,7 +678,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -707,7 +707,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -733,7 +733,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -764,7 +764,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -797,7 +797,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -847,7 +847,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -875,7 +875,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -894,7 +894,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E1 {}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -920,7 +920,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -951,7 +951,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -979,7 +979,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1011,7 +1011,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1041,7 +1041,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1069,7 +1069,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1097,7 +1097,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1124,7 +1124,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1184,7 +1184,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -1244,7 +1244,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -1302,7 +1302,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -1365,7 +1365,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2}, null);
 	}
 
 	@Test
@@ -1503,7 +1503,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -1623,7 +1623,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -1665,7 +1665,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {cu1.getBuffer().getContents(), expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {cu1.getBuffer().getContents(), expected1}, null);
 	}
 
 	@Test
@@ -1745,7 +1745,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -1825,7 +1825,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 
 	}
 
@@ -1893,7 +1893,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), cu2.getBuffer().getContents(), expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), cu2.getBuffer().getContents(), expected1}, null);
 	}
 
 	@Test
@@ -2116,7 +2116,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 
 	}
 
@@ -2155,7 +2155,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2195,7 +2195,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2235,7 +2235,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2275,7 +2275,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2348,7 +2348,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2}, null);
 
 	}
 
@@ -2415,7 +2415,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2461,7 +2461,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2516,7 +2516,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2571,7 +2571,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2629,7 +2629,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2696,7 +2696,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2730,7 +2730,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2778,7 +2778,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2807,7 +2807,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2836,7 +2836,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2867,7 +2867,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2897,7 +2897,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2935,7 +2935,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2973,7 +2973,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3011,7 +3011,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3046,7 +3046,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3079,7 +3079,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3121,7 +3121,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3156,7 +3156,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3199,7 +3199,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3236,7 +3236,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3273,7 +3273,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3312,7 +3312,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3348,7 +3348,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3408,7 +3408,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3441,7 +3441,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3474,7 +3474,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3561,7 +3561,7 @@ public class CleanUpTest extends CleanUpTestCase {
 					+ "}\n";
 			String expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { cu1.getBuffer().getContents(), expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { cu1.getBuffer().getContents(), expected1 }, null);
 		} finally {
 			JavaProjectHelper.delete(project);
 		}
@@ -3640,7 +3640,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3691,7 +3691,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3744,7 +3744,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3780,7 +3780,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3823,7 +3823,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3860,7 +3860,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3888,7 +3888,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 		String expected= sample;
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -3925,7 +3925,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3967,7 +3967,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -4008,7 +4008,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -4041,7 +4041,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -4077,7 +4077,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -4118,7 +4118,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -4154,8 +4154,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
 	}
 
 	@Test
@@ -4209,8 +4209,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SubstringCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SubstringCleanUp_description)));
 	}
 
 	@Test
@@ -4455,7 +4455,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { output }, null);
 	}
 
 	@Test
@@ -4803,8 +4803,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = b1 | new SideEffect() instanceof SideEffect;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_LazyLogical_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_LazyLogical_description)));
 	}
 
 	@Test
@@ -4999,12 +4999,12 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu },new HashSet<>(Arrays.asList(
-				MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_float_with_valueof,
-				MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_float_with_float_value,
-				MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_single_argument,
-				MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_valueof)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(
+						MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_float_with_valueof,
+						MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_float_with_float_value,
+						MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_single_argument,
+						MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_valueof)));
 	}
 
 	@Test
@@ -5147,8 +5147,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveComparisonCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveComparisonCleanUp_description)));
 	}
 
 	@Test
@@ -5435,8 +5435,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveParsingCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveParsingCleanUp_description)));
 	}
 
 	@Test
@@ -5584,8 +5584,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveSerializationCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveSerializationCleanUp_description)));
 	}
 
 	@Test
@@ -5955,8 +5955,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.EvaluateNullableCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.EvaluateNullableCleanUp_description)));
 	}
 
 	@Test
@@ -6051,7 +6051,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6078,8 +6078,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.PushDownNegationCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PushDownNegationCleanup_description)));
 	}
 
 	@Test
@@ -6106,7 +6106,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6133,7 +6133,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6160,7 +6160,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6187,7 +6187,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6214,7 +6214,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6241,7 +6241,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6268,7 +6268,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6295,7 +6295,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6322,7 +6322,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6349,7 +6349,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6376,7 +6376,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6403,7 +6403,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6430,7 +6430,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6457,7 +6457,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6484,7 +6484,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6511,7 +6511,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6538,7 +6538,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6686,8 +6686,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.OperandFactorizationCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OperandFactorizationCleanUp_description)));
 	}
 
 	@Test
@@ -6944,8 +6944,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.TernaryOperatorCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.TernaryOperatorCleanUp_description)));
 	}
 
 	@Test
@@ -7163,8 +7163,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StrictlyEqualOrDifferentCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StrictlyEqualOrDifferentCleanUp_description)));
 	}
 
 	@Test
@@ -7286,8 +7286,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.DoubleNegationCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.DoubleNegationCleanUp_description)));
 	}
 
 	@Test
@@ -7649,8 +7649,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparisonStatementCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparisonStatementCleanup_description)));
 	}
 
 	@Test
@@ -7814,8 +7814,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
 	}
 
 	@Test
@@ -8049,8 +8049,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UnreachableBlockCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UnreachableBlockCleanUp_description)));
 	}
 
 	@Test
@@ -8770,9 +8770,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu },
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(MultiFixMessages.MergeConditionalBlocksCleanup_description_if_suite, MultiFixMessages.MergeConditionalBlocksCleanup_description_inner_if)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
 	@Test
@@ -9488,8 +9487,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantFallingThroughBlockEndCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantFallingThroughBlockEndCleanup_description)));
 	}
 
 	@Test
@@ -9843,8 +9842,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return i;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantIfConditionCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantIfConditionCleanup_description)));
 	}
 
 	@Test
@@ -10231,8 +10230,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparatorCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparatorCleanUp_description)));
 	}
 
 	@Test
@@ -10459,8 +10458,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ArrayWithCurlyCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ArrayWithCurlyCleanup_description)));
 	}
 
 	@Test
@@ -10773,8 +10772,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ReturnExpressionCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ReturnExpressionCleanUp_description)));
 	}
 
 	@Test
@@ -10970,8 +10969,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.UselessReturnCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UselessReturnCleanUp_description)));
 	}
 
 	@Test
@@ -11194,8 +11193,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UselessContinueCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UselessContinueCleanUp_description)));
 	}
 
 	@Test
@@ -11404,8 +11403,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UnloopedWhileCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UnloopedWhileCleanUp_description)));
 	}
 
 	@Test
@@ -11552,7 +11551,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -11621,8 +11620,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.UseDirectlyMapMethodCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UseDirectlyMapMethodCleanup_description)));
 	}
 
 	@Test
@@ -11762,8 +11761,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.CollectionCloningCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CollectionCloningCleanUp_description)));
 	}
 
 	@Test
@@ -11907,8 +11906,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.MapCloningCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, new HashSet<>(Arrays.asList(MultiFixMessages.MapCloningCleanUp_description)));
 	}
 
 	@Test
@@ -12035,8 +12033,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
 	}
 
 	@Test
@@ -12188,7 +12186,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -12226,7 +12224,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -12282,7 +12280,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12323,7 +12321,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12364,7 +12362,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12405,7 +12403,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12438,7 +12436,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12493,7 +12491,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12533,7 +12531,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12568,7 +12566,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12603,7 +12601,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12645,8 +12643,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ElseIf_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ElseIf_description)));
 	}
 
 	@Test
@@ -13306,8 +13304,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ReduceIndentation_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ReduceIndentation_description)));
 	}
 
 	@Test
@@ -13394,7 +13392,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -13423,7 +13421,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -13473,7 +13471,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -13506,7 +13504,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13556,7 +13554,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -13596,7 +13594,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -13628,7 +13626,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -13694,7 +13692,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -13721,7 +13719,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -13750,7 +13748,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -13781,7 +13779,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -13808,7 +13806,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -13843,7 +13841,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -13881,7 +13879,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13911,7 +13909,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13941,7 +13939,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13971,7 +13969,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14005,7 +14003,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14033,7 +14031,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14069,7 +14067,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14097,7 +14095,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14125,7 +14123,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14153,7 +14151,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14181,7 +14179,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14209,7 +14207,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14237,7 +14235,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14265,7 +14263,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14299,7 +14297,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14335,7 +14333,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14369,7 +14367,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14401,7 +14399,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14431,7 +14429,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14481,7 +14479,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14574,7 +14572,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14597,7 +14595,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14644,7 +14642,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14679,7 +14677,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -14745,7 +14743,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -14992,7 +14990,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -15042,7 +15040,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -15139,7 +15137,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -15197,7 +15195,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -15266,7 +15264,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -15305,9 +15303,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -15366,9 +15364,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -15405,9 +15403,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -15466,9 +15464,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -15505,9 +15503,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -15552,9 +15550,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -15589,9 +15587,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -15988,8 +15986,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.BreakLoopCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.BreakLoopCleanUp_description)));
 	}
 
 	@Test
@@ -16622,8 +16620,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StaticInnerClassCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StaticInnerClassCleanUp_description)));
 	}
 
 	@Test
@@ -17350,8 +17348,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StringBuilderCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StringBuilderCleanUp_description)));
 	}
 
 	@Test
@@ -17630,8 +17628,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
 	}
 
 	@Test
@@ -17727,8 +17725,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
 	}
 
 	@Test
@@ -18096,8 +18094,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ControlFlowMergeCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ControlFlowMergeCleanUp_description)));
 	}
 
 	@Test
@@ -18310,7 +18308,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -18449,7 +18447,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -18600,8 +18598,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.EmbeddedIfCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.EmbeddedIfCleanup_description)));
 	}
 
 	@Test
@@ -18966,8 +18964,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ExtractIncrement_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ExtractIncrement_description)));
 	}
 
 	@Test
@@ -19382,8 +19380,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_PullUpAssignment_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_PullUpAssignment_description)));
 	}
 
 	@Test
@@ -19508,8 +19506,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_Instanceof_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_Instanceof_description)));
 	}
 
 	@Test
@@ -19568,8 +19566,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.CodeStyleFix_removeThis_groupDescription)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1},
+				new HashSet<>(Arrays.asList(FixMessages.CodeStyleFix_removeThis_groupDescription)));
 	}
 
 	@Test
@@ -19608,7 +19606,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -19649,7 +19647,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -19678,7 +19676,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -19715,7 +19713,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -19750,7 +19748,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -19789,7 +19787,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19828,7 +19826,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19855,7 +19853,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19889,8 +19887,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1},
+				new HashSet<>(Arrays.asList(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description)));
 	}
 
 	@Test
@@ -19919,7 +19917,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -19960,7 +19958,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -20001,7 +19999,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -20034,7 +20032,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -20071,7 +20069,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -20124,7 +20122,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	//Changed test due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=220124
@@ -20186,7 +20184,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -20220,7 +20218,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -20353,7 +20351,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -20384,7 +20382,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -20416,7 +20414,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -20450,7 +20448,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -20485,7 +20483,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -20522,7 +20520,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -20567,7 +20565,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -20611,7 +20609,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -20722,7 +20720,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -20777,8 +20775,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION);
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CheckSignOfBitwiseOperation_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CheckSignOfBitwiseOperation_description)));
 	}
 
 	@Test
@@ -20882,8 +20880,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.InvertEqualsCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.InvertEqualsCleanUp_description)));
 	}
 
 	@Test
@@ -21032,8 +21030,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StandardComparisonCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StandardComparisonCleanUp_description)));
 	}
 
 	@Test
@@ -21165,7 +21163,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -21189,7 +21187,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -21212,7 +21210,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -21250,7 +21248,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -21279,7 +21277,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -21307,7 +21305,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -21339,7 +21337,7 @@ public class CleanUpTest extends CleanUpTestCase {
 					+ "}\n";
 			String expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 		} finally {
 			JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER, false);
 		}
@@ -21370,7 +21368,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -21400,7 +21398,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -21452,7 +21450,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -21486,7 +21484,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -21528,7 +21526,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
@@ -21550,7 +21548,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -21592,7 +21590,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 			String expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 			enable(CleanUpConstants.SORT_MEMBERS);
 			enable(CleanUpConstants.SORT_MEMBERS_ALL);
@@ -21612,7 +21610,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 			expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 		} finally {
 			JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
 		}
@@ -21708,7 +21706,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -21736,7 +21734,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -21796,7 +21794,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -21824,7 +21822,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -21855,7 +21853,7 @@ public class CleanUpTest extends CleanUpTestCase {
 					+ "}\n";
 			String expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 		} finally {
 			project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
 		}
@@ -21942,7 +21940,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 }, null);
 	}
 
 	@Test
@@ -21989,7 +21987,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 }, null);
 	}
 
 	@Test
@@ -22048,8 +22046,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
 	}
 
 	@Test
@@ -22105,8 +22103,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
 	}
 
 	@Test
@@ -22257,7 +22255,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu7= pack1.createCompilationUnit("NestedEnumExample.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5, cu6, cu7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5, cu6, cu7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 }, null);
 
 	}
 
@@ -22368,7 +22366,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1 = sample;
 
 		enable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 	}
 
@@ -22412,9 +22410,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(new String[] {
-				Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
-		})));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1},
+				new HashSet<>(Arrays.asList(new String[] {
+						Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
+				})));
 	}
 }

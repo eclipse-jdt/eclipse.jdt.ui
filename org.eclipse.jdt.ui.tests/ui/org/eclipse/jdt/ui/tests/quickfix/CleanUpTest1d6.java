@@ -110,7 +110,7 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 		String expected= bld.toString();
 
 		assertNotEquals("The class must be changed", expected, given);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -160,7 +160,7 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", expected, given);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected}, null);
 	}
 
 	@Test
@@ -206,7 +206,7 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", expected, given);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected}, null);
 	}
 
 	@Test
@@ -263,8 +263,8 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
 	}
 
 }

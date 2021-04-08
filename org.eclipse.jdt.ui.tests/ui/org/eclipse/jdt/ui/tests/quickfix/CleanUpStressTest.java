@@ -5297,7 +5297,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		enable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
 
 		ICompilationUnit[] units= cus.toArray(new ICompilationUnit[cus.size()]);
-		performRefactoring(units);
+		performRefactoring(units, null);
 
 
 //		generateTable(units);

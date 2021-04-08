@@ -90,13 +90,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original },
+				new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation)));
 	}
 
 	@Test
@@ -140,14 +140,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression)));
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original },
+				new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation)));
 	}
 
 	@Test
@@ -183,12 +183,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -232,8 +232,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression)));
 	}
 
 	@Test
@@ -274,12 +274,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c5
@@ -424,12 +424,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c5
@@ -572,12 +572,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c2
@@ -642,12 +642,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "@FunctionalInterface interface ZV { void zoo(); }\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -759,7 +759,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -800,7 +800,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "@interface A {}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -856,12 +856,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -900,12 +900,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -945,12 +945,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -994,12 +994,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		disable(CleanUpConstants.USE_LAMBDA);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -1083,7 +1083,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    final String s = \"abc\";\n"
 				+ "    Runnable run1 = () -> System.out.println(s);\n"
 				+ "}\n";
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1127,7 +1127,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return \"\";\n"
 				+ "    }\n"
 				+ "}\n";
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -1171,7 +1171,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return \"\";\n"
 				+ "    }\n"
 				+ "}\n";
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -1396,8 +1396,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
 	}
 
 	@Test
@@ -1539,7 +1539,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return a + 8;\n" //
 				+ "    };\n" //
 				+ "}\n"; //
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -2201,8 +2201,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ComparingOnCriteriaCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ComparingOnCriteriaCleanUp_description)));
 	}
 
 	@Test
@@ -3113,8 +3113,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.JoinCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.JoinCleanup_description)));
 	}
 
 	@Test
