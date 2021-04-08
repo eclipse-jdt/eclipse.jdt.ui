@@ -15987,6 +15987,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
 				+ "import java.util.Date;\n" //
+				+ "import java.util.jar.Attributes.Name;\n" //
 				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -16165,6 +16166,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            return Integer.valueOf(\"1\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithTopLevelInstanciation {\n" //
+				+ "        public Date methodWithTopLevelInstanciation() {\n" //
+				+ "            return new Date();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithStaticInnerInstanciation {\n" //
+				+ "        public Name methodWithStaticInnerInstanciation() {\n" //
+				+ "            return new Name(\"foo\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -16176,6 +16189,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
 				+ "import java.util.Date;\n" //
+				+ "import java.util.jar.Attributes.Name;\n" //
 				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -16355,6 +16369,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            return Integer.valueOf(\"1\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithTopLevelInstanciation {\n" //
+				+ "        public Date methodWithTopLevelInstanciation() {\n" //
+				+ "            return new Date();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithStaticInnerInstanciation {\n" //
+				+ "        public Name methodWithStaticInnerInstanciation() {\n" //
+				+ "            return new Name(\"foo\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		// When
@@ -16457,6 +16483,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public class DoNotRefactorInnerClassInheritingADynamicClass extends NotStaticClass {\n" //
 				+ "        public boolean anotherMethod() {\n" //
 				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassThatInstanciateAnInnerDynamicClass {\n" //
+				+ "        public NotStaticClass anotherMethod() {\n" //
+				+ "            return new NotStaticClass();\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //

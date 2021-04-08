@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -171,6 +172,24 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 				public boolean visit(final ThisExpression node) {
 					if (node.getQualifier() == null
 							|| ASTNodes.isSameVariable(innerClass.getName(), node.getQualifier())) {
+						return true;
+					}
+
+					isTopLevelClassMemberUsed= true;
+					return interruptVisit();
+				}
+
+				@Override
+				public boolean visit(final ClassInstanceCreation node) {
+					if (node.getExpression() != null) {
+						// The expression will be evaluated instead
+						return true;
+					}
+
+					ITypeBinding type= node.resolveTypeBinding();
+
+					if (type != null
+							&& (type.isTopLevel() || Modifier.isStatic(type.getModifiers()))) {
 						return true;
 					}
 
