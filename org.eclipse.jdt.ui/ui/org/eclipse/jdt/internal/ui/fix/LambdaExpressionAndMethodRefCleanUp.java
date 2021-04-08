@@ -179,12 +179,36 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 							if (methodBinding != null) {
 								calledType= methodBinding.getDeclaringClass();
+							} else if (calledExpression != null) {
+								calledType= calledExpression.resolveTypeBinding();
 							} else {
 								// For an unknown reason, MethodInvocation.resolveMethodBinding() seems to fail when the method is defined in the class we are
-								ASTNode declaration= ((CompilationUnit) visited.getRoot()).findDeclaringNode(methodBinding);
+								AbstractTypeDeclaration enclosingType= ASTNodes.getTypedAncestor(visited, AbstractTypeDeclaration.class);
 
-								if (declaration instanceof AbstractTypeDeclaration) {
-									calledType= ((AbstractTypeDeclaration) declaration).resolveBinding();
+								if (enclosingType != null) {
+									ITypeBinding enclosingTypeBinding= enclosingType.resolveBinding();
+
+									if (enclosingTypeBinding != null) {
+										List<Type> argumentTypes= methodInvocation.typeArguments();
+										String[] parameterTypeNames= new String[methodInvocation.arguments().size()];
+
+										for (int i= 0; i < argumentTypes.size(); i++) {
+											Type argumentType= argumentTypes.get(i);
+
+											if (argumentType.resolveBinding() == null) {
+												return true;
+											}
+
+											parameterTypeNames[i]= argumentType.resolveBinding().getQualifiedName();
+										}
+
+										for (IMethodBinding declaredMethods : enclosingTypeBinding.getDeclaredMethods()) {
+											if (ASTNodes.usesGivenSignature(declaredMethods, enclosingTypeBinding.getQualifiedName(), methodInvocation.getName().getIdentifier(), parameterTypeNames)) {
+												calledType= enclosingTypeBinding;
+												break;
+											}
+										}
+									}
 								}
 							}
 

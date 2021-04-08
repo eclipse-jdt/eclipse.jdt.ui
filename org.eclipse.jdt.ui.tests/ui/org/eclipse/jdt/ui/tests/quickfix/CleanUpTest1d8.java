@@ -1278,7 +1278,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return numberInText -> dummy(numberInText);\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    // TODO This method should be refactored but it fails\n" //
 				+ "    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {\n" //
 				+ "        return instant -> java.sql.Date.from(instant);\n" //
 				+ "    }\n" //
@@ -1384,9 +1383,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return E::dummy;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    // TODO This method should be refactored but it fails\n" //
 				+ "    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {\n" //
-				+ "        return instant -> java.sql.Date.from(instant);\n" //
+				+ "        return java.sql.Date::from;\n" //
 				+ "    }\n" //
 				+ "}\n";
 
