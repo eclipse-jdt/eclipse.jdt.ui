@@ -27,7 +27,7 @@ import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.LINE_SEPARATOR;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.PATH_SEPARATOR;
 import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_description;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -113,10 +113,12 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUpCore
 
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<>();
+		List<String> result;
 
 		if (isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY)) {
-			result.add(Messages.format(ConstantsCleanUp_description,String.join(",", computeFixSet().stream().map(e->e.toString()).collect(Collectors.toList())))); //$NON-NLS-1$
+			result= computeFixSet().stream().map(e->(Messages.format(ConstantsCleanUp_description,e.toString()))).collect(Collectors.toList());
+		} else {
+			result= Collections.emptyList();
 		}
 
 		return result.toArray(new String[0]);

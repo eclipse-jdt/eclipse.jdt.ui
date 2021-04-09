@@ -23,6 +23,7 @@ import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_GET_PR
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_GET_SEPARATOR;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_LINE_SEPARATOR;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_PARSEBOOLEAN;
+import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_description;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -49,8 +50,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public enum UpdateProperty {
 	/**
@@ -228,7 +228,7 @@ public enum UpdateProperty {
 		return new CompilationUnitRewriteOperation() {
 			@Override
 			public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
-				TextEditGroup group= createTextEditGroup(MultiFixMessages.ConstantsCleanUp_description, cuRewrite);
+				TextEditGroup group= createTextEditGroup(Messages.format(ConstantsCleanUp_description,UpdateProperty.this.toString()), cuRewrite);
 				cuRewrite.getASTRewrite().setTargetSourceRangeComputer(computer);
 				myrewriter.computeRewriter(UpdateProperty.this, visited, propertykey, expression, cuRewrite, group);
 			}
