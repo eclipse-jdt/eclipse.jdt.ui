@@ -16631,7 +16631,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "import java.sql.DriverPropertyInfo;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
+				+ "public class E<T> {\n" //
 				+ "    public interface DoNotRefactorInnerInterface {\n" //
 				+ "        boolean anotherMethod();\n" //
 				+ "    }\n" //
@@ -16732,6 +16732,10 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public boolean aMethod() {\n" //
 				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassThatUsesTheTopLevelGenericity {\n" //
+				+ "        public T aGenericField= null;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);

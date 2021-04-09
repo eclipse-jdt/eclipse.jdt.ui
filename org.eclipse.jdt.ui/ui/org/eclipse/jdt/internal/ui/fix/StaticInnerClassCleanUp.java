@@ -15,8 +15,10 @@ package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -38,6 +40,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -115,10 +118,12 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 		unit.accept(new ASTVisitor() {
 			class TopLevelClassMemberVisitor extends InterruptibleVisitor {
 				private final TypeDeclaration innerClass;
+				private final Set<ITypeBinding> genericityTypes;
 				private boolean isTopLevelClassMemberUsed;
 
-				public TopLevelClassMemberVisitor(final TypeDeclaration innerClass) {
+				public TopLevelClassMemberVisitor(final TypeDeclaration innerClass, final Set<ITypeBinding> genericityTypes) {
 					this.innerClass= innerClass;
+					this.genericityTypes= genericityTypes;
 				}
 
 				public boolean isTopLevelClassMemberUsed() {
@@ -196,11 +201,22 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 					isTopLevelClassMemberUsed= true;
 					return interruptVisit();
 				}
+
+				@Override
+				public boolean visit(final SimpleType node) {
+					if (node.resolveBinding() == null || genericityTypes.contains(node.resolveBinding())) {
+						isTopLevelClassMemberUsed= true;
+						return interruptVisit();
+					}
+
+					return true;
+				}
 			}
 
 			@Override
 			public boolean visit(final TypeDeclaration visited) {
 				if (!visited.isInterface() && !Modifier.isStatic(visited.getModifiers())) {
+					Set<ITypeBinding> genericityTypes= new HashSet<>();
 					ASTNode enclosingType= ASTNodes.getFirstAncestorOrNull(visited, TypeDeclaration.class, MethodDeclaration.class);
 
 					if (enclosingType instanceof TypeDeclaration && ((TypeDeclaration) enclosingType).isInterface()) {
@@ -212,6 +228,13 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 
 					while (enclosingType instanceof TypeDeclaration) {
 						topLevelClass= (TypeDeclaration) enclosingType;
+						ITypeBinding topLevelClassBinding= topLevelClass.resolveBinding();
+
+						if (topLevelClassBinding == null) {
+							return true;
+						}
+
+						Collections.addAll(genericityTypes, topLevelClassBinding.getTypeParameters());
 						enclosingType= ASTNodes.getTypedAncestor(topLevelClass, TypeDeclaration.class);
 
 						if (enclosingType != null && !Modifier.isStatic(topLevelClass.getModifiers())) {
@@ -220,7 +243,7 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 					}
 
 					if (topLevelClass != null && !hasInnerDynamicMotherType(visited)) {
-						TopLevelClassMemberVisitor topLevelClassMemberVisitor= new TopLevelClassMemberVisitor(visited);
+						TopLevelClassMemberVisitor topLevelClassMemberVisitor= new TopLevelClassMemberVisitor(visited, genericityTypes);
 						topLevelClassMemberVisitor.traverseNodeInterruptibly(visited);
 
 						if (!topLevelClassMemberVisitor.isTopLevelClassMemberUsed()) {
