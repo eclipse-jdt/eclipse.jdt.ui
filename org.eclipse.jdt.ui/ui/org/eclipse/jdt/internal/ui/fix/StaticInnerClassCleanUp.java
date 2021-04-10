@@ -202,6 +202,12 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 			public boolean visit(final TypeDeclaration visited) {
 				if (!visited.isInterface() && !Modifier.isStatic(visited.getModifiers())) {
 					ASTNode enclosingType= ASTNodes.getFirstAncestorOrNull(visited, TypeDeclaration.class, MethodDeclaration.class);
+
+					if (enclosingType instanceof TypeDeclaration && ((TypeDeclaration) enclosingType).isInterface()) {
+						// An inner class in an interface is static by default so the keyword is redundant
+						return true;
+					}
+
 					TypeDeclaration topLevelClass= null;
 
 					while (enclosingType instanceof TypeDeclaration) {

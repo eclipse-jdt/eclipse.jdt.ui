@@ -16742,6 +16742,24 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoNotUseStaticInnerClassOnInterface() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public interface E {\n" //
+				+ "    public class DoNotRefactorInnerClassInInterface {\n" //
+				+ "        public int i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.STATIC_INNER_CLASS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testStringBuilder() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
