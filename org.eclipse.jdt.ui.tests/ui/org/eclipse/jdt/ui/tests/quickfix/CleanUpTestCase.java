@@ -214,6 +214,10 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 		}
 	}
 
+	protected RefactoringStatus assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws CoreException {
+		return assertRefactoringResultAsExpected(cus, expected, null);
+	}
+
 	protected RefactoringStatus assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected, Set<String> setOfExpectedGroupCategories) throws CoreException {
 		RefactoringStatus status= performRefactoring(cus, setOfExpectedGroupCategories);
 
