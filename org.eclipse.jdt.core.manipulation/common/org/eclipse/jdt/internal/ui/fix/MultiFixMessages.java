@@ -144,6 +144,7 @@ public class MultiFixMessages extends NLS {
 	public static String PrimitiveSerializationCleanUp_description;
 	public static String PrimitiveRatherThanWrapperCleanUp_description;
 	public static String PrimitiveIntRatherThanWrapperCleanUp_description;
+	public static String PrimitiveLongRatherThanWrapperCleanUp_description;
 
 	public static String TypeParametersCleanUp_InsertInferredTypeArguments_description;
 	public static String TypeParametersCleanUp_RemoveUnnecessaryTypeArguments_description;

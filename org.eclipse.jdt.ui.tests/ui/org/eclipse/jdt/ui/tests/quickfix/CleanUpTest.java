@@ -5685,6 +5685,84 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        Integer divideVar = i1 | i2;\n" //
 				+ "        return divideVar++;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceShiftMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer divideVar = i1 ^ i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceMinusWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer minusVar = -i;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer preDecrementVar = --i;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer preDecrementVar = ++i;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer postDecrementVar = i--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostIncrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer postIncrementVar = i++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperFromValueOf(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer varFromValueOf = Integer.valueOf(i1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceParentherizedWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer parentherizedVar = (i1 + i2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceComplexExprWrapper(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer complexVar = i1 + i2 / (i3 - i4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceCastWrapper(Integer i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer castVar = (int) i;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -5754,6 +5832,84 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        int divideVar = i1 | i2;\n" //
 				+ "        return divideVar++;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceShiftMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int divideVar = i1 ^ i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceMinusWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int minusVar = -i;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int preDecrementVar = --i;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int preDecrementVar = ++i;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int postDecrementVar = i--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostIncrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int postIncrementVar = i++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperFromValueOf(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int varFromValueOf = Integer.valueOf(i1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceParentherizedWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int parentherizedVar = (i1 + i2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceComplexExprWrapper(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int complexVar = i1 + i2 / (i3 - i4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceCastWrapper(Integer i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int castVar = (int) i;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		// When
@@ -5819,6 +5975,531 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public Integer doNotReplaceAssignedAndReturnedWrapper(Integer i) {\n" //
 				+ "        Integer returnedObject = Integer.MIN_VALUE;\n" //
 				+ "        returnedObject = i;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveLongRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Long doNotRefactorFields = Long.MIN_VALUE;\n" //
+				+ "\n" //
+				+ "    public long longField;\n" //
+				+ "\n" //
+				+ "    public Long wrapperField;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long plusVar = l1 + l2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceLessWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long lessVar = l1 - l2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceTimesWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long timesVar = l1 * l2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceDivideWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long divideVar = l1 / l2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceAndMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long divideVar = l1 & l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceOrMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long divideVar = l1 | l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceShiftMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long divideVar = l1 ^ l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceMinusWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long minusVar = -l;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePreDecrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long preDecrementVar = --l;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePreIncrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long preDecrementVar = ++l;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePostDecrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long postDecrementVar = l--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePostIncrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long postIncrementVar = l++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperFromValueOf(long l1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long varFromValueOf = Long.valueOf(l1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceParentherizedWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long parentherizedVar = (l1 + l2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceComplexExprWrapper(long l1, long l2, long l3, long l4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long complexVar = l1 + l2 / (l3 - l4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceCastWrapper(Long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long castVar = (long) l;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long longInPreIncrement = Long.MIN_VALUE;\n" //
+				+ "        return ++longInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long longInPreDecrement = Long.MIN_VALUE;\n" //
+				+ "        return --longInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long longInPostDecrement = Long.MIN_VALUE;\n" //
+				+ "        return longInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long longInPostIncrement = Long.MIN_VALUE;\n" //
+				+ "        return longInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        return returnedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceMultiReturnedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        if (l > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Long replaceReturnedAutoBoxedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        if (l > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long reassignedLong = Long.MIN_VALUE;\n" //
+				+ "        reassignedLong = 123L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long multiReassignedLong = Long.MIN_VALUE;\n" //
+				+ "        multiReassignedLong = 123L;\n" //
+				+ "        multiReassignedLong = 456L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        Long anotherLong = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnLongField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        longField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Long aLong, Long anotherLong,\n" //
+				+ "            Long yetAnotherLong) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        aLong &= assignedLong;\n" //
+				+ "        anotherLong += assignedLong;\n" //
+				+ "        yetAnotherLong ^= assignedLong;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Long doNotRefactorFields = Long.MIN_VALUE;\n" //
+				+ "\n" //
+				+ "    public long longField;\n" //
+				+ "\n" //
+				+ "    public Long wrapperField;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long plusVar = l1 + l2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceLessWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long lessVar = l1 - l2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceTimesWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long timesVar = l1 * l2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceDivideWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long divideVar = l1 / l2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceAndMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long divideVar = l1 & l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceOrMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long divideVar = l1 | l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceShiftMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long divideVar = l1 ^ l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceMinusWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long minusVar = -l;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePreDecrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long preDecrementVar = --l;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePreIncrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long preDecrementVar = ++l;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePostDecrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long postDecrementVar = l--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePostIncrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long postIncrementVar = l++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperFromValueOf(long l1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long varFromValueOf = Long.valueOf(l1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceParentherizedWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long parentherizedVar = (l1 + l2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceComplexExprWrapper(long l1, long l2, long l3, long l4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long complexVar = l1 + l2 / (l3 - l4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceCastWrapper(Long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long castVar = (long) l;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long longInPreIncrement = Long.MIN_VALUE;\n" //
+				+ "        return ++longInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long longInPreDecrement = Long.MIN_VALUE;\n" //
+				+ "        return --longInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long longInPostDecrement = Long.MIN_VALUE;\n" //
+				+ "        return longInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long longInPostIncrement = Long.MIN_VALUE;\n" //
+				+ "        return longInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        return returnedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceMultiReturnedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        if (l > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Long replaceReturnedAutoBoxedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        if (l > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long reassignedLong = Long.MIN_VALUE;\n" //
+				+ "        reassignedLong = 123L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long multiReassignedLong = Long.MIN_VALUE;\n" //
+				+ "        multiReassignedLong = 123L;\n" //
+				+ "        multiReassignedLong = 456L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        Long anotherLong = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnLongField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        longField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Long aLong, Long anotherLong,\n" //
+				+ "            Long yetAnotherLong) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        aLong &= assignedLong;\n" //
+				+ "        anotherLong += assignedLong;\n" //
+				+ "        yetAnotherLong ^= assignedLong;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveLongRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveLongRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Long returnedObject = Long.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Long reassignedLong = Long.MIN_VALUE;\n" //
+				+ "        reassignedLong = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Long, Observable> obsByLong) {\n" //
+				+ "        Long reassignedLong = Long.MIN_VALUE;\n" //
+				+ "        obsByLong.get(reassignedLong).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        objectField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        Long anotherLong = assignedLong;\n" //
+				+ "        Long yetAnotherLong = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Long doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        Long anotherLong = assignedLong;\n" //
+				+ "        return assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Long returnedObject = Long.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Long doNotReplaceAssignedAndReturnedWrapper(Long l) {\n" //
+				+ "        Long returnedObject = Long.MIN_VALUE;\n" //
+				+ "        returnedObject = l;\n" //
 				+ "        return returnedObject;\n" //
 				+ "    }\n" //
 				+ "}\n";
