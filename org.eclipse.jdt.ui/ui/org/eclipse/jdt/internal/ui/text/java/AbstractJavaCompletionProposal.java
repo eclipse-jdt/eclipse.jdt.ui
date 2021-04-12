@@ -1336,6 +1336,9 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		IDocument document = fInvocationContext.getDocument();
 		try {
 			String documentString = document.get(getReplacementOffset(), getReplacementLength());
+			if(documentString == null) {
+				return false;
+			}
 			String replacementString = getReplacementString();
 			return replacementString.startsWith(documentString);
 		} catch (BadLocationException e) {
