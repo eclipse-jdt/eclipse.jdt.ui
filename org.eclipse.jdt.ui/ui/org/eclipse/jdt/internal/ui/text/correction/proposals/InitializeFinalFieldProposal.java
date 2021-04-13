@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -41,12 +42,11 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -145,17 +145,17 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 			declaration.setType(ast.newSimpleType(ast.newName(variableTypeName)));
 			expression= ast.newStringLiteral();
 		} else {
+			Type newType= null;
 			if (type.isParameterizedType()) {
-				Type newType= createParameterizedType(ast, type);
-				declaration.setType(newType);
+				newType= createParameterizedType(ast, type);
 			} else {
-				SimpleType newSimpleType= ast.newSimpleType(ast.newName(variableTypeName));
-				declaration.setType(newSimpleType);
+				newType= ast.newSimpleType(ast.newName(variableTypeName));
 			}
+			declaration.setType(newType);
 
 			if (hasDefaultConstructor()) {
 				ClassInstanceCreation cic= ast.newClassInstanceCreation();
-				cic.setType(ast.newSimpleType(ast.newName(variableTypeName)));
+				cic.setType((Type) ASTNode.copySubtree(ast, newType));
 				expression= cic;
 			} else {
 				expression= ast.newNullLiteral();
@@ -182,10 +182,8 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 		} else {
 			if (!typeBinding.isTypeVariable()) {
 				if (typeBinding.isWildcardType()) {
-					String newName= typeBinding.getBound().getName();
-					WildcardType newWildcardType= ast.newWildcardType();
-					newWildcardType.setBound(ast.newSimpleType(ast.newSimpleName(newName)), typeBinding.isUpperbound());
-					return newWildcardType;
+					ImportRewrite importRewrite= createImportRewrite((CompilationUnit) fAstNode.getRoot());
+					return importRewrite.addImport(typeBinding, ast);
 				}
 				return ast.newSimpleType(ASTNodeFactory.newName(ast, typeBinding.getErasure().getName()));
 			}
@@ -463,7 +461,7 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 					ASTNode assignNode= ASTNodes.getFirstAncestorOrNull(node, Assignment.class);
 					if (assignNode != null) {
 						IBinding resolveBinding= node.resolveBinding();
-						if (resolveBinding != null
+						if (resolveBinding instanceof IVariableBinding
 								&& ((IVariableBinding) resolveBinding).isField()
 								&& resolveBinding.getKind() == IBinding.VARIABLE
 								&& finalFieldList.contains(node.getIdentifier())) {
