@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
+import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp;
 import org.eclipse.jdt.internal.ui.fix.OperandFactorizationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp;
@@ -40,6 +41,7 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 				new StrictlyEqualOrDifferentCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
 				new ControlFlowMergeCleanUp(values),
+				new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
 				new RedundantIfConditionCleanUp(values)
 		};
@@ -63,6 +65,9 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference controlFlowMerge= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_ControlFlowMerge, CleanUpConstants.CONTROLFLOW_MERGE, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(controlFlowMerge);
+
+		final CheckboxPreference oneIfRatherThanDuplicateBlocksThatFallThrough= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_OneIfRatherThanDuplicateBlocksThatFallThrough, CleanUpConstants.ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(oneIfRatherThanDuplicateBlocksThatFallThrough);
 
 		final CheckboxPreference redundantFallingThroughBlockEnd= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd, CleanUpConstants.REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(redundantFallingThroughBlockEnd);

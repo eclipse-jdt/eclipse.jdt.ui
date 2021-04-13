@@ -18258,6 +18258,327 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testOneIfRatherThanDuplicateBlocksThatFallThrough() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void mergeConditionsWithReturn(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithThrow(int i1) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            i1--;\n" //
+				+ "            throw new Exception();\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            --i1;\n" //
+				+ "            throw new Exception();\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithContinue() {\n" //
+				+ "        for (int i1 = 0; i1 < 10; i1++) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i1 == 0) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                i1++;\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (i1 == 1) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                ++i1;\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Next code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Another code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithBreak() {\n" //
+				+ "        for (int i1 = 0; i1 < 10; i1++) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i1 == 0) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                i1++;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (i1 == 1) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                i1 = i1 + 1;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Next code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Another code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithReturnAndThrow(int i1, int i2) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new Exception(\"Error #\" + i1++);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new Exception(\"Error #\" + i1++);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeSeveralConditions(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 2) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 3) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeORConditions(boolean isValid, boolean isActive, boolean isEnabled, boolean isFound) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid || isActive) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (isEnabled || isFound) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void mergeConditionsWithReturn(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithThrow(int i1) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            --i1;\n" //
+				+ "            throw new Exception();\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithContinue() {\n" //
+				+ "        for (int i1 = 0; i1 < 10; i1++) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                ++i1;\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Next code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Another code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithBreak() {\n" //
+				+ "        for (int i1 = 0; i1 < 10; i1++) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                i1 = i1 + 1;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Next code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Another code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithReturnAndThrow(int i1, int i2) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new Exception(\"Error #\" + i1++);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeSeveralConditions(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((i1 == 0) || (i1 == 1) || (i1 == 2)\n" //
+				+ "                || (i1 == 3)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeORConditions(boolean isValid, boolean isActive, boolean isEnabled, boolean isFound) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid || isActive || isEnabled || isFound) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUseOneIfRatherThanDuplicateBlocksThatFallThrough() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotMergeConditionsWithConditionalReturn(int i1, int i2) {\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeMoreThanFourOperands(int i1) {\n" //
+				+ "        if ((i1 == 0) || (i1 == 1) || (i1 == 2) || (i1 == 3)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 4) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeConditionsWithoutJump(int i) {\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "        }\n" //
+				+ "        if (i == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeDifferentBlocks(int i) {\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"A code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i == 1) {\n" //
+				+ "            System.out.println(\"Another code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeConditionsWithElse(int i1, int counter) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The count is: \" + counter++);\n" //
+				+ "            return;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"The count is: \" + ++counter);\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The count is: \" + counter++);\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeConditionsWithAnotherElse(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Another code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRegExPrecompilationInLambda() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

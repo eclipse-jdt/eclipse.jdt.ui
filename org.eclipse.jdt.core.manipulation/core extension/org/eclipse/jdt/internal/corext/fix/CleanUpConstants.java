@@ -1596,6 +1596,18 @@ public class CleanUpConstants {
 	public static final String CONTROLFLOW_MERGE= "cleanup.controlflow_merge"; //$NON-NLS-1$
 
 	/**
+	 * Merge consecutive <code>if</code> statements with same code block that end with a jump statement.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH= "cleanup.one_if_rather_than_duplicate_blocks_that_fall_through"; //$NON-NLS-1$
+
+	/**
 	 * Merges blocks that end with a jump statement into the following same code.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

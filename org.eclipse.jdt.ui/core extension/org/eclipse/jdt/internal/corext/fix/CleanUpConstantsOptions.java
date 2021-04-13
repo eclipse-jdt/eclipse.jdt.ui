@@ -168,6 +168,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(CONTROLFLOW_MERGE, CleanUpOptions.FALSE);
+		options.setOption(ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH, CleanUpOptions.TRUE);
 
 		// Java Features
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
@@ -340,6 +341,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(CONTROLFLOW_MERGE, CleanUpOptions.FALSE);
+		options.setOption(ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH, CleanUpOptions.FALSE);
 
 		// Java Features
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
