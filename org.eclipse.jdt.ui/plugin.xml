@@ -7328,9 +7328,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.evaluate_nullable">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUp"
+            id="org.eclipse.jdt.ui.boolean_value_rather_than_comparison"
+            runAfter="org.eclipse.jdt.ui.cleanup.push_down_negation">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp"
             id="org.eclipse.jdt.ui.cleanup.double_negation"
-            runAfter="org.eclipse.jdt.ui.cleanup.push_down_negation">
+            runAfter="org.eclipse.jdt.ui.boolean_value_rather_than_comparison">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp"

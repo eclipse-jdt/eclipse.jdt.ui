@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
@@ -61,6 +62,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new ArraysFillCleanUp(values),
 				new EvaluateNullableCleanUp(values),
 				new PushDownNegationCleanUp(values),
+				new BooleanValueRatherThanComparisonCleanUp(values),
 				new DoubleNegationCleanUp(values),
 				new RedundantComparisonStatementCleanUp(values),
 				new RedundantSuperCallCleanUp(values),
@@ -120,6 +122,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		CheckboxPreference pushDownNegation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PushDownNegation, CleanUpConstants.PUSH_DOWN_NEGATION,
 				CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(pushDownNegation);
+
+		CheckboxPreference booleanValueRatherThanComparison= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_BooleanValueRatherThanComparison, CleanUpConstants.BOOLEAN_VALUE_RATHER_THAN_COMPARISON, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(booleanValueRatherThanComparison);
 
 		CheckboxPreference doubleNegation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_DoubleNegation, CleanUpConstants.DOUBLE_NEGATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(doubleNegation);

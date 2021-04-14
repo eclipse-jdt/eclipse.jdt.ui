@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
@@ -671,6 +672,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new CollectionCloningCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testBooleanValueRatherThanComparisonCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.BOOLEAN_VALUE_RATHER_THAN_COMPARISON, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new BooleanValueRatherThanComparisonCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}

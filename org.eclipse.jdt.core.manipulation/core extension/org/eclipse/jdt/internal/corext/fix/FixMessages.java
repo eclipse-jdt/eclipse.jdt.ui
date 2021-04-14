@@ -167,6 +167,7 @@ public final class FixMessages extends NLS {
 	public static String TypeParametersFix_insert_inferred_type_arguments_name;
 	public static String TypeParametersFix_remove_redundant_type_arguments_description;
 	public static String TypeParametersFix_remove_redundant_type_arguments_name;
+	public static String BooleanValueRatherThanComparisonFix_description;
 	public static String RedundantComparatorFix_remove_comparator;
 	public static String ArrayWithCurlyFix_description;
 	public static String ReturnExpressionFix_description;

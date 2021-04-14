@@ -104,6 +104,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
 		options.setOption(EVALUATE_NULLABLE, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
+		options.setOption(BOOLEAN_VALUE_RATHER_THAN_COMPARISON, CleanUpOptions.TRUE);
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
@@ -275,6 +276,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
 		options.setOption(EVALUATE_NULLABLE, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
+		options.setOption(BOOLEAN_VALUE_RATHER_THAN_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);

@@ -1486,6 +1486,18 @@ public class CleanUpConstants {
 	public static final String PUSH_DOWN_NEGATION= "cleanup.push_down_negation"; //$NON-NLS-1$
 
 	/**
+	 * Directly checks boolean values instead of comparing them with <code>true</code>/<code>false</code>.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String BOOLEAN_VALUE_RATHER_THAN_COMPARISON= "cleanup.boolean_value_rather_than_comparison"; //$NON-NLS-1$
+
+	/**
 	 * Reduces double negation in boolean expression.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

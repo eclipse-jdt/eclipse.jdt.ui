@@ -7924,6 +7924,311 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testBooleanValueRatherThanComparison() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void removeMethodCall(boolean isValid, int number) {\n" //
+				+ "        if (Boolean.TRUE.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (Boolean.FALSE.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (Boolean.TRUE.equals(number > 0) && isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (Boolean.FALSE.equals(number > 0) && isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeMethodCallOnObject(Boolean isValid) {\n" //
+				+ "        return isValid.equals(Boolean.TRUE);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean removeMethodCallOnNegativeExpression(Boolean isValid) {\n" //
+				+ "        return isValid.equals(Boolean.FALSE);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void simplifyPrimitiveBooleanExpression(boolean isValid) {\n" //
+				+ "        if (isValid == true) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != false) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == false) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != true) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == Boolean.TRUE) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != Boolean.FALSE) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == Boolean.FALSE) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != Boolean.TRUE) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeParenthesis(boolean isValid, boolean isActive) {\n" //
+				+ "        if ((isValid == true) == isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive == (isValid == true)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((isValid == true) != isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive != (isValid == true)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((isValid == false) == isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive == (isValid == false)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((isValid == false) != isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive != (isValid == false)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void simplifyBooleanWrapperExpression(Boolean isValid) {\n" //
+				+ "        if (isValid == true) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != false) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == false) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != true) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void removeMethodCall(boolean isValid, int number) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((number > 0) && isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((number <= 0) && isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeMethodCallOnObject(Boolean isValid) {\n" //
+				+ "        return isValid;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean removeMethodCallOnNegativeExpression(Boolean isValid) {\n" //
+				+ "        return !isValid;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void simplifyPrimitiveBooleanExpression(boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeParenthesis(boolean isValid, boolean isActive) {\n" //
+				+ "        if (isValid == isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive == isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive != isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid == isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive == !isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid != isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive != !isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void simplifyBooleanWrapperExpression(Boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.BOOLEAN_VALUE_RATHER_THAN_COMPARISON);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.BooleanValueRatherThanComparisonCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUseBooleanValueRatherThanComparison() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotRemoveMethodCallOnObjectParameter(Boolean isValid) {\n" //
+				+ "        if (Boolean.TRUE.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (Boolean.FALSE.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveMethodCallOnObjectParameter(boolean isValid, Boolean isActive) {\n" //
+				+ "        if (isActive.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean doNotAvoidNPESkippingExpression(Boolean isValid) {\n" //
+				+ "        return isValid == true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean doNotAvoidNPESkippingMethod(Boolean isValid) {\n" //
+				+ "        return isValid.equals(Boolean.TRUE);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotSimplifyBooleanWrapperExpression(Boolean isValid) {\n" //
+				+ "        if (isValid == Boolean.TRUE) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != Boolean.FALSE) {\n" //
+				+ "            return 2;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == Boolean.FALSE) {\n" //
+				+ "            return 3;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != Boolean.TRUE) {\n" //
+				+ "            return 4;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.BOOLEAN_VALUE_RATHER_THAN_COMPARISON);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testDoubleNegation() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //
