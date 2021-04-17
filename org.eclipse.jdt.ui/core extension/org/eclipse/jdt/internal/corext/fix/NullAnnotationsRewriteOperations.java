@@ -427,7 +427,14 @@ public class NullAnnotationsRewriteOperations {
 					if (annotationType.isBinary()) {
 						if (annotation.getElementName().equals(Target.class.getName())) {
 							for (IMemberValuePair valuePair : annotation.getMemberValuePairs()) {
-								if (TYPE_USE_NAME.equals(valuePair.getValue())) {
+								Object value= valuePair.getValue();
+								if (value instanceof Object[]) {
+									for (Object val : (Object[]) value) {
+										if (TYPE_USE_NAME.equals(val)) {
+											return true;
+										}
+									}
+								} else if (TYPE_USE_NAME.equals(value)) {
 									return true;
 								}
 							}
