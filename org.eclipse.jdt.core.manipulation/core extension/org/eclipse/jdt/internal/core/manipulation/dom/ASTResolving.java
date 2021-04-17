@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -277,6 +278,16 @@ public class ASTResolving {
 				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 			}
 			return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+		case ASTNode.ENHANCED_FOR_STATEMENT:
+			if (node.getLocationInParent() == EnhancedForStatement.EXPRESSION_PROPERTY) {
+				EnhancedForStatement enhancedForStatement= (EnhancedForStatement) parent;
+				ITypeBinding parameterTypeBinding= enhancedForStatement.getParameter().getType().resolveBinding();
+
+				if (parameterTypeBinding != null) {
+					return parameterTypeBinding.createArrayType(1);
+				}
+			}
+			break;
 		case ASTNode.IF_STATEMENT:
 		case ASTNode.WHILE_STATEMENT:
 		case ASTNode.DO_STATEMENT:
