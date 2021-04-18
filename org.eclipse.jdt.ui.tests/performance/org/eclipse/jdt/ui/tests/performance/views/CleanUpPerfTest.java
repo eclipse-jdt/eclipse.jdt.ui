@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveIntRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveLongRatherThanWrapperCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveShortRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUp;
@@ -864,6 +865,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new PrimitiveComparisonCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testPrimitiveShortRatherThanWrappernCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new PrimitiveShortRatherThanWrapperCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}

@@ -5615,6 +5615,455 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPrimitiveShortRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public short shortField;\n" //
+				+ "    public Short wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePreDecrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short preDecrementVar = --s;\n" //
+				+ "        if (preDecrementVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePreIncrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short preDecrementVar = ++s;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePostDecrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short postDecrementVar = s--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePostIncrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short postIncrementVar = s++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperFromValueOf(short s1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short varFromValueOf = Short.valueOf(s1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceParentherizedWrapper(short s1, short s2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short parentherizedVar = ((short)(s1 + s2));\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceCastWrapper(Short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short castVar = (short) s;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInPreIncrement = Short.MIN_VALUE;\n" //
+				+ "        return ++shortInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInPreDecrement = Short.MIN_VALUE;\n" //
+				+ "        return --shortInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInPostDecrement = Short.MIN_VALUE;\n" //
+				+ "        return shortInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInPostIncrement = Short.MIN_VALUE;\n" //
+				+ "        return shortInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInSwitch = Short.MIN_VALUE;\n" //
+				+ "        switch (shortInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInArrayAccess = Short.MAX_VALUE;\n" //
+				+ "        return strings[shortInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        return returnedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceMultiReturnedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        if (s > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Short replaceReturnedAutoBoxedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        if (s > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short reassignedShort = Short.MIN_VALUE;\n" //
+				+ "        reassignedShort = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short multiReassignedShort = Short.MIN_VALUE;\n" //
+				+ "        multiReassignedShort = 123;\n" //
+				+ "        multiReassignedShort = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        Short anotherShort = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnShortField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        shortField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Integer anInteger, Integer anotherInteger,\n" //
+				+ "            Integer yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        anInteger |= assignedShort;\n" //
+				+ "        anotherInteger += assignedShort;\n" //
+				+ "        yetAnotherInteger ^= assignedShort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public short shortField;\n" //
+				+ "    public Short wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePreDecrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short preDecrementVar = --s;\n" //
+				+ "        if (preDecrementVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePreIncrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short preDecrementVar = ++s;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePostDecrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short postDecrementVar = s--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePostIncrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short postIncrementVar = s++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperFromValueOf(short s1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short varFromValueOf = Short.valueOf(s1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceParentherizedWrapper(short s1, short s2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short parentherizedVar = ((short)(s1 + s2));\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceCastWrapper(Short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short castVar = (short) s;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInPreIncrement = Short.MIN_VALUE;\n" //
+				+ "        return ++shortInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInPreDecrement = Short.MIN_VALUE;\n" //
+				+ "        return --shortInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInPostDecrement = Short.MIN_VALUE;\n" //
+				+ "        return shortInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInPostIncrement = Short.MIN_VALUE;\n" //
+				+ "        return shortInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInSwitch = Short.MIN_VALUE;\n" //
+				+ "        switch (shortInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInArrayAccess = Short.MAX_VALUE;\n" //
+				+ "        return strings[shortInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        return returnedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceMultiReturnedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        if (s > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Short replaceReturnedAutoBoxedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        if (s > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short reassignedShort = Short.MIN_VALUE;\n" //
+				+ "        reassignedShort = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short multiReassignedShort = Short.MIN_VALUE;\n" //
+				+ "        multiReassignedShort = 123;\n" //
+				+ "        multiReassignedShort = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        Short anotherShort = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnShortField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        shortField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Integer anInteger, Integer anotherInteger,\n" //
+				+ "            Integer yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        anInteger |= assignedShort;\n" //
+				+ "        anotherInteger += assignedShort;\n" //
+				+ "        yetAnotherInteger ^= assignedShort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveShortRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveShortRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Short doNotRefactorFields = Short.MIN_VALUE;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Short returnedObject = Short.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Short reassignedShort = Short.MIN_VALUE;\n" //
+				+ "        reassignedShort = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Short, Observable> obsByShort) {\n" //
+				+ "        Short reassignedShort = Short.MIN_VALUE;\n" //
+				+ "        obsByShort.get(reassignedShort).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        objectField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        Short anotherShort = assignedShort;\n" //
+				+ "        Short yetAnotherShort = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Short doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        Short anotherShort = assignedShort;\n" //
+				+ "        return assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Short returnedObject = Short.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Short doNotReplaceAssignedAndReturnedWrapper(Short s) {\n" //
+				+ "        Short returnedObject = Short.MIN_VALUE;\n" //
+				+ "        returnedObject = s;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPrimitiveIntRatherThanWrapper() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -5763,6 +6212,105 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
 				+ "        return alwaysInitializedVar--;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer intInSwitch = Integer.MIN_VALUE;\n" //
+				+ "        switch (intInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer intInArrayAccess = Integer.MIN_VALUE;\n" //
+				+ "        return strings[intInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        return returnedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceMultiReturnedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Integer replaceReturnedAutoBoxedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer reassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        reassignedInteger = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer multiReassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        multiReassignedInteger = 123;\n" //
+				+ "        multiReassignedInteger = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        Integer anotherInteger = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnIntegerField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        intField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Integer aInteger, Integer anotherInteger,\n" //
+				+ "            Integer yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        aInteger &= assignedInteger;\n" //
+				+ "        anotherInteger += assignedInteger;\n" //
+				+ "        yetAnotherInteger ^= assignedInteger;\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -5909,6 +6457,105 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
 				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int intInSwitch = Integer.MIN_VALUE;\n" //
+				+ "        switch (intInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int intInArrayAccess = Integer.MIN_VALUE;\n" //
+				+ "        return strings[intInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        return returnedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceMultiReturnedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Integer replaceReturnedAutoBoxedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int reassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        reassignedInteger = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int multiReassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        multiReassignedInteger = 123;\n" //
+				+ "        multiReassignedInteger = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        Integer anotherInteger = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnIntegerField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        intField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Integer aInteger, Integer anotherInteger,\n" //
+				+ "            Integer yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        aInteger &= assignedInteger;\n" //
+				+ "        anotherInteger += assignedInteger;\n" //
+				+ "        yetAnotherInteger ^= assignedInteger;\n" //
 				+ "    }\n" //
 				+ "}\n";
 

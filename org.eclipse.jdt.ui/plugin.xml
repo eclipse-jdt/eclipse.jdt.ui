@@ -7188,9 +7188,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.primitive_parsing">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PrimitiveShortRatherThanWrapperCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.primitive_short_rather_than_wrapper"
+            runAfter="org.eclipse.jdt.ui.cleanup.primitive_serialization">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PrimitiveIntRatherThanWrapperCleanUp"
             id="org.eclipse.jdt.ui.cleanup.primitive_int_rather_than_wrapper"
-            runAfter="org.eclipse.jdt.ui.cleanup.primitive_serialization">
+            runAfter="org.eclipse.jdt.ui.cleanup.primitive_short_rather_than_wrapper">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PrimitiveLongRatherThanWrapperCleanUp"

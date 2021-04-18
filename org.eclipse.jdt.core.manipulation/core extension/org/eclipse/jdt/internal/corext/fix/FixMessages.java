@@ -59,6 +59,7 @@ public final class FixMessages extends NLS {
 	public static String ExpressionsFix_add_parentheses_change_name;
 	public static String ExpressionsFix_remove_parentheses_change_name;
 	public static String PrimitiveComparisonFix_convert_compareTo_to_primitive_comparison;
+	public static String PrimitiveShortRatherThanWrapperFix_description;
 	public static String PrimitiveIntRatherThanWrapperFix_description;
 	public static String PrimitiveLongRatherThanWrapperFix_description;
 	public static String ImportsFix_OrganizeImports_Description;

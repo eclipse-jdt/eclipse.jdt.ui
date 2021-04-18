@@ -143,6 +143,7 @@ public class MultiFixMessages extends NLS {
 	public static String PrimitiveParsingCleanUp_description;
 	public static String PrimitiveSerializationCleanUp_description;
 	public static String PrimitiveRatherThanWrapperCleanUp_description;
+	public static String PrimitiveShortRatherThanWrapperCleanUp_description;
 	public static String PrimitiveIntRatherThanWrapperCleanUp_description;
 	public static String PrimitiveLongRatherThanWrapperCleanUp_description;
 
