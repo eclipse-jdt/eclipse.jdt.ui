@@ -1139,8 +1139,4 @@ public class BuildPathsBlock {
 	public void setFocus() {
 		fSourceContainerPage.setFocus();
     }
-
-	public BuildPathBasePage getSourceContainerPage() {
-		return fSourceContainerPage;
-	}
 }

@@ -670,6 +670,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 			updateEnableState();
 			fDetectGroup.handlePossibleJVMChange();
+			fModuleGroup.handlePossibleJVMChange();
 			if (field == fJRECombo) {
 				if (fUseProjectJRE.isSelected()) {
 					storeSelectionValue(fJRECombo, LAST_SELECTED_JRE_SETTINGS_KEY);
@@ -797,6 +798,70 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		public IWorkingSet[] getSelectedWorkingSets() {
 			return fWorkingSetBlock.getSelectedWorkingSets();
+		}
+	}
+
+	private final class ModuleGroup implements IDialogFieldListener{
+
+		private final String LAST_SELECTED_CREATE_MODULEINFO_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.create.moduleinfo"; //$NON-NLS-1$
+		private final SelectionButtonDialogField fCreateModuleInfo;
+		private boolean savePreference;
+
+		public ModuleGroup() {
+			fCreateModuleInfo= new SelectionButtonDialogField(SWT.CHECK);
+			fCreateModuleInfo.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_Create_ModuleInfoFile_name);
+			fCreateModuleInfo.setDialogFieldListener(this);
+			fCreateModuleInfo.setEnabled(false);
+			savePreference= false;
+		}
+
+		public String getCompliance() {
+			String compilerCompliance= fJREGroup.getSelectedCompilerCompliance();
+			if (compilerCompliance == null) {
+				compilerCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) JavaRuntime.getDefaultVMInstall(), JavaCore.VERSION_1_4);
+			}
+			return compilerCompliance;
+		}
+
+		public Control createControl(Composite composite) {
+			Group moduleGroup= new Group(composite, SWT.NONE);
+			moduleGroup.setFont(composite.getFont());
+			moduleGroup.setText(NewWizardMessages.NewJavaProjectWizardPageOne_Module_group);
+			moduleGroup.setLayout(new GridLayout(1, false));
+
+			fCreateModuleInfo.doFillIntoGrid(moduleGroup, 1);
+			return moduleGroup;
+		}
+
+		public void handlePossibleJVMChange() {
+			boolean enable= false;
+			boolean oldValEnabled= fCreateModuleInfo.isEnabled();
+			String compliance= getCompliance();
+			if (compliance != null && JavaModelUtil.is9OrHigher(compliance)) {
+				enable= true;
+			}
+			fCreateModuleInfo.setEnabled(enable);
+			savePreference= false;
+			if (!enable) {
+				fCreateModuleInfo.setSelection(false);
+			} else if(oldValEnabled != enable) {
+				String setting=JavaPlugin.getDefault().getDialogSettings().get(LAST_SELECTED_CREATE_MODULEINFO_SETTINGS_KEY);
+				fCreateModuleInfo.setSelection((setting == null) ? true : Boolean.parseBoolean(setting));
+			}
+			savePreference= true;
+		}
+
+		public boolean getCreateModuleInfoFile() {
+			return fCreateModuleInfo.isSelected();
+		}
+
+
+		@Override
+		public void dialogFieldChanged(DialogField field) {
+			// TODO Auto-generated method stub
+			if (field == fCreateModuleInfo && savePreference) {
+				JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_CREATE_MODULEINFO_SETTINGS_KEY, fCreateModuleInfo.isSelected());
+			}
 		}
 	}
 
@@ -1073,6 +1138,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	private final DetectGroup fDetectGroup;
 	private final Validator fValidator;
 	private final WorkingSetGroup fWorkingSetGroup;
+	private final ModuleGroup fModuleGroup;
 
 	/**
 	 * Creates a new {@link NewJavaProjectWizardPageOne}.
@@ -1089,6 +1155,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		fLayoutGroup= new LayoutGroup();
 		fWorkingSetGroup= new WorkingSetGroup();
 		fDetectGroup= new DetectGroup();
+		fModuleGroup= new ModuleGroup();
 
 		// establish connections
 		fNameGroup.addObserver(fLocationGroup);
@@ -1152,6 +1219,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		Control workingSetControl= createWorkingSetControl(composite);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		Control moduleControl= createModuleControl(composite);
+		moduleControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Control infoControl= createInfoControl(composite);
 		infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -1230,6 +1300,17 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	}
 
 	/**
+	 * Creates the controls for the module section.
+	 *
+	 * @param composite the parent composite
+	 * @return the created control
+	 * @since 3.23
+	 */
+	protected Control createModuleControl(Composite composite) {
+		return fModuleGroup.createControl(composite);
+	}
+
+	/**
 	 * Gets a project name for the new project.
 	 *
 	 * @return the new project resource handle
@@ -1282,6 +1363,16 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	 */
 	public String getCompilerCompliance() {
 		return fJREGroup.getSelectedCompilerCompliance();
+	}
+
+	/**
+	 * Returns if the module-info creation dialog needs to be shown or not.
+	 *
+	 * @return 'create module-info.java file' has been checked or not.
+	 * @since 3.23
+	 */
+	public boolean getCreateModuleInfoFile() {
+		return fModuleGroup.getCreateModuleInfoFile();
 	}
 
 	/**

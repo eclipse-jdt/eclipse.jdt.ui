@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.layout.PixelConverter;
@@ -51,7 +50,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
@@ -76,9 +74,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     private HintTextGroup fHintTextGroup;
     private DialogPackageExplorer fPackageExplorer;
     private SelectionButtonDialogField fUseFolderOutputs;
-    private SelectionButtonDialogField fCreateModuleInfoFileButton;
-    private boolean fCreateModuleInfoFile;
-    private String fCompilerCompliance;
     private final StringDialogField fOutputLocationField;
 	private DialogPackageExplorerActionGroup fActionGroup;
 
@@ -110,11 +105,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         fUseFolderOutputs.setSelection(false);
         fUseFolderOutputs.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_check);
 
-
-		fCreateModuleInfoFileButton= new SelectionButtonDialogField(SWT.CHECK);
-		fCreateModuleInfoFileButton.setSelection(true);
-		fCreateModuleInfoFile= true;
-		fCreateModuleInfoFileButton.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_create_moduleinfo_check);
 
 		fPackageExplorer= new DialogPackageExplorer();
 		fHintTextGroup= new HintTextGroup();
@@ -159,22 +149,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 		fUseFolderOutputs.setSelection(useFolderOutputs);
     }
 
-	public void setCompilerCompliance(String compilerCompliance) {
-		if (compilerCompliance != null) {
-			fCompilerCompliance= compilerCompliance;
-			try {
-				setCreateModuleInfoFile(false);
-			} catch (JavaModelException e) {
-				//do nothing
-			}
-		}
-	}
-
-	public boolean isCreateModuleInfoFile() {
-		return fCreateModuleInfoFile;
-	}
-
-    public void dispose() {
+	public void dispose() {
     	if (fActionGroup != null) {
     		fActionGroup.removeBuildpathModifierListener(this);
     		fActionGroup= null;
@@ -235,12 +210,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         excomposite.setClient(fHintTextGroup.createControl(excomposite));
         fUseFolderOutputs.doFillIntoGrid(body, 1);
 
-		fCreateModuleInfoFileButton.doFillIntoGrid(body, 1);
-
-		fCreateModuleInfoFileButton.setDialogFieldListener(field -> fCreateModuleInfoFile= fCreateModuleInfoFileButton.isSelected());
-
-
-        fActionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, fContext, fPackageExplorer, this);
+		fActionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, fContext, fPackageExplorer, this);
 		fActionGroup.addBuildpathModifierListener(this);
 
 
@@ -414,45 +384,10 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 
         try {
 	        fOutputLocationField.setText(fJavaProject.getOutputLocation().makeRelative().toString());
-			setCreateModuleInfoFile(true);
         } catch (JavaModelException e) {
 	        JavaPlugin.log(e);
         }
     }
-
-	private void setCreateModuleInfoFile(boolean buildpathChanged) throws JavaModelException {
-		boolean selection= fCreateModuleInfoFileButton.isSelected();
-		boolean enabled= fCreateModuleInfoFileButton.isEnabled();
-		boolean setEnabled= true;
-		boolean setSelection= true;
-		if (JavaModelUtil.is9OrHigher(fCompilerCompliance)) {
-			IPackageFragmentRoot[] packageFragmentRoots= fJavaProject.getPackageFragmentRoots();
-			List<IPackageFragmentRoot> packageFragmentRootsAsList= new ArrayList<>(Arrays.asList(packageFragmentRoots));
-			for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
-				IResource res= packageFragmentRoot.getCorrespondingResource();
-				if (res == null || res.getType() != IResource.FOLDER || packageFragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE) {
-					packageFragmentRootsAsList.remove(packageFragmentRoot);
-				}
-			}
-
-			if (packageFragmentRootsAsList.isEmpty()) {
-				setSelection= false;
-				setEnabled= false;
-			} else {
-				if (buildpathChanged) {
-					setSelection= true;
-					setEnabled= true;
-				} else {
-					setSelection= !enabled ? true : selection;
-				}
-			}
-		} else {
-			setEnabled= false;
-			setSelection= false;
-		}
-		fCreateModuleInfoFileButton.setEnabled(setEnabled);
-		fCreateModuleInfoFileButton.setSelection(setSelection);
-	}
 
 	public void commitDefaultOutputFolder() {
 		if (!fBuildPathsBlock.isOKStatus())
