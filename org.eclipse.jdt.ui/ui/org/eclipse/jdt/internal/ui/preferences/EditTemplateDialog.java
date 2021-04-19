@@ -75,6 +75,7 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.ui.ActiveShellExpression;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 
@@ -497,26 +498,32 @@ public class EditTemplateDialog extends StatusDialog {
 
 
 		TextViewerAction action= new TextViewerAction(fPatternEditor, ITextOperationTarget.UNDO);
+		action.setActionDefinitionId(ActionFactory.UNDO.getCommandId());
 		action.setText(PreferencesMessages.EditTemplateDialog_undo);
 		fGlobalActions.put(ITextEditorActionConstants.UNDO, action);
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.REDO);
+		action.setActionDefinitionId(ActionFactory.REDO.getCommandId());
 		action.setText(PreferencesMessages.EditTemplateDialog_redo);
 		fGlobalActions.put(ITextEditorActionConstants.REDO, action);
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.CUT);
+		action.setActionDefinitionId(ActionFactory.CUT.getCommandId());
 		action.setText(PreferencesMessages.EditTemplateDialog_cut);
 		fGlobalActions.put(ITextEditorActionConstants.CUT, action);
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.COPY);
+		action.setActionDefinitionId(ActionFactory.COPY.getCommandId());
 		action.setText(PreferencesMessages.EditTemplateDialog_copy);
 		fGlobalActions.put(ITextEditorActionConstants.COPY, action);
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.PASTE);
+		action.setActionDefinitionId(ActionFactory.PASTE.getCommandId());
 		action.setText(PreferencesMessages.EditTemplateDialog_paste);
 		fGlobalActions.put(ITextEditorActionConstants.PASTE, action);
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.SELECT_ALL);
+		action.setActionDefinitionId(ActionFactory.SELECT_ALL.getCommandId());
 		action.setText(PreferencesMessages.EditTemplateDialog_select_all);
 		fGlobalActions.put(ITextEditorActionConstants.SELECT_ALL, action);
 
