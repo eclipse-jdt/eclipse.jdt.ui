@@ -592,7 +592,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 				return;
 			}
 			String moduleName= mod.getElementName();
-			if (moduleName.equals("java.base")) { //$NON-NLS-1$
+			if ("java.base".equals(moduleName)) { //$NON-NLS-1$
 				MessageDialog.openError(getShell(), NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title,
 						MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_removeModule_error_with_hint, moduleName, "")); //$NON-NLS-1$
 				return;

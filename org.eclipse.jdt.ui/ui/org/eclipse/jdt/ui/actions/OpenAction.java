@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -69,9 +69,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * This action opens a Java editor on a Java element or file.
  * <p>
- * The action is applicable to selections containing elements of
- * type <code>ICompilationUnit</code>, <code>IMember</code>
- * or <code>IFile</code>.
+ * The action is applicable to selections containing elements of type <code>ICompilationUnit</code>,
+ * <code>IMember</code> or <code>IFile</code>.
  *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -86,8 +85,8 @@ public class OpenAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;
 
 	/**
-	 * Creates a new <code>OpenAction</code>. The action requires
-	 * that the selection provided by the site's selection provider is of type <code>
+	 * Creates a new <code>OpenAction</code>. The action requires that the selection provided by the
+	 * site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 *
 	 * @param site the site providing context information for this action
@@ -102,6 +101,7 @@ public class OpenAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 *
 	 * @param editor the Java editor
 	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
@@ -145,7 +145,12 @@ public class OpenAction extends SelectionDispatchAction {
 			return;
 		}
 		IRegion region= new Region(selection.getOffset(), selection.getLength());
-		OccurrenceLocation location= JavaElementHyperlinkDetector.findBreakOrContinueTarget(input, region);
+		OccurrenceLocation location= JavaElementHyperlinkDetector.findEnumConstructorTarget(input, region);
+		if (location != null) {
+			fEditor.selectAndReveal(location.getOffset(), location.getLength());
+			return;
+		}
+		location= JavaElementHyperlinkDetector.findBreakOrContinueTarget(input, region);
 		if (location != null) {
 			fEditor.selectAndReveal(location.getOffset(), location.getLength());
 			return;
@@ -174,7 +179,7 @@ public class OpenAction extends SelectionDispatchAction {
 				}
 			}
 
-			run(new Object[] {element} );
+			run(new Object[] { element });
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message);
 		} catch (InterruptedException e) {
@@ -285,10 +290,12 @@ public class OpenAction extends SelectionDispatchAction {
 						JavaUI.revealInEditor(part, (IJavaElement) javaElement);
 				}
 			} catch (PartInitException e) {
-				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT), e.getStatus().getMessage() });
+				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor,
+						new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT), e.getStatus().getMessage() });
 				status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 			} catch (CoreException e) {
-				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT), e.getStatus().getMessage() });
+				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor,
+						new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT), e.getStatus().getMessage() });
 				status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 				JavaPlugin.log(e);
 			}

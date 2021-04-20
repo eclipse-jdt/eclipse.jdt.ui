@@ -124,7 +124,7 @@ public final class RefactoringSearchEngine2 {
 		}
 	}
 
-	private abstract class RefactoringSearchCollector extends SearchRequestor {
+	private abstract static class RefactoringSearchCollector extends SearchRequestor {
 
 		protected IResource fLastResource= null;
 

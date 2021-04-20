@@ -123,13 +123,22 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 						&& ASTNodes.isPassive(assignment.getRightHandSide())) {
 					ArrayAccess arrayAccess= ASTNodes.as(assignment.getLeftHandSide(), ArrayAccess.class);
 
-					if (arrayAccess != null && isSameVariable(loopContent, arrayAccess)) {
+					if (arrayAccess != null
+							&& isSameVariable(loopContent, arrayAccess)
+							&& areTypesCompatible(loopContent, assignment)) {
 						rewriteOperations.add(new ArraysFillOperation(node, assignment, arrayAccess));
 						return false;
 					}
 				}
 
 				return true;
+			}
+
+			private boolean areTypesCompatible(final ForLoopContent loopContent, final Assignment assignment) {
+				return loopContent.getContainerVariable().resolveTypeBinding() != null
+						&& loopContent.getContainerVariable().resolveTypeBinding().getElementType() != null
+						&& (!ASTNodes.hasType(loopContent.getContainerVariable(), char[].class.getCanonicalName(), byte[].class.getCanonicalName(), short[].class.getCanonicalName())
+								|| loopContent.getContainerVariable().resolveTypeBinding().getElementType().equals(assignment.getRightHandSide().resolveTypeBinding()));
 			}
 
 			private boolean isUnchangedValue(final ForStatement node, final Expression expression) {

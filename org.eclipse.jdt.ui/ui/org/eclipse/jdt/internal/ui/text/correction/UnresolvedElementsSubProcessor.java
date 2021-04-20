@@ -652,7 +652,7 @@ public class UnresolvedElementsSubProcessor {
 				String[] args= problem.getProblemArguments();
 				if (args != null && args.length > 0) {
 					String name= args[0];
-					if (name.equals("var")) { //$NON-NLS-1$
+					if ("var".equals(name)) { //$NON-NLS-1$
 						isVarTypeProblem= true;
 					}
 				}

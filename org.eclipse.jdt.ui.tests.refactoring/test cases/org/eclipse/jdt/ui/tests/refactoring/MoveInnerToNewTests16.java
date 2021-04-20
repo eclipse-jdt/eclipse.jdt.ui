@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -62,9 +63,6 @@ public class MoveInnerToNewTests16 extends GenericRefactoringTest {
 		return createCU(pack, cuName, getFileContents(getRefactoringPath() + cuPath));
 	}
 
-	// Move static initializer in same package and ensure imports are brought along
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=108147
-	@SuppressWarnings("null")
 	@Test
 	public void moveInnerRecord() throws Exception{
 		ParticipantTesting.reset();
@@ -79,6 +77,7 @@ public class MoveInnerToNewTests16 extends GenericRefactoringTest {
 
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isMoveInnerAvailable(barType));
 		MoveInnerToTopRefactoring ref= ((RefactoringAvailabilityTester.isMoveInnerAvailable(barType)) ? new MoveInnerToTopRefactoring(barType, JavaPreferencesSettings.getCodeGenerationSettings(barType.getJavaProject())) : null);
+		assertNotNull("MoveInnerToTopRefactoring should not be null", ref);
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 

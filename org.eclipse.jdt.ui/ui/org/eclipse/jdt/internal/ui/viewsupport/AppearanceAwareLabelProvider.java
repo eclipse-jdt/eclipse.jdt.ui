@@ -84,13 +84,13 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
-		if (property.equals(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)
-				|| property.equals(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS)
-				|| property.equals(PreferenceConstants.APPEARANCE_CATEGORY)
-				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW)
-				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)
-				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW)
-				|| property.equals(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES)) {
+		if (PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE.equals(property)
+				|| PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS.equals(property)
+				|| PreferenceConstants.APPEARANCE_CATEGORY.equals(property)
+				|| PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW.equals(property)
+				|| PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES.equals(property)
+				|| PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW.equals(property)
+				|| PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES.equals(property)) {
 			initMasks();
 			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(this, null); // refresh all
 			fireLabelProviderChanged(lpEvent);

@@ -1699,7 +1699,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		if (page == null)
 			return false;
 		IEditorPart activeEditor= page.getActiveEditor();
-		return activeEditor != null && activeEditor.equals(this);
+		return activeEditor != null && this.equals(activeEditor);
 	}
 
 	/**

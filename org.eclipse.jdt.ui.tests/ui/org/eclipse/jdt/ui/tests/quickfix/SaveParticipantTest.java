@@ -46,7 +46,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class SaveParticipantTest extends CleanUpTestCase {
-
 	@Rule
     public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
@@ -78,265 +77,294 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 	@Test
 	public void testFormatAll01() throws Exception {
+		// Given
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo( Object o ) {\n");
-		buf.append("        String s= (String)o;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo( Object o ) {\n" //
+				+ "        String s= (String)o;\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo( Object o ) {\n" //
+				+ "        String s    = (String)o;\n" //
+				+ "    }\n" //
+				+ "}";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(Object o) {\n" //
+				+ "        String s = (String) o;\n" //
+				+ "    }\n" //
+				+ "}";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo( Object o ) {\n");
-		buf.append("        String s    = (String)o;\n");
-		buf.append("    }\n");
-		buf.append("}");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo(Object o) {\n");
-		buf.append("        String s = (String) o;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testFormatChanges01() throws Exception {
+		// Given
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo( Object o ) {\n");
-		buf.append("        String s= (String)o;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo( Object o ) {\n" //
+				+ "        String s= (String)o;\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo( Object o ) {\n" //
+				+ "        String s    = (String)o;\n" //
+				+ "    }\n" //
+				+ "}";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo( Object o ) {\n" //
+				+ "        String s = (String) o;\n" //
+				+ "    }\n" //
+				+ "}";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo( Object o ) {\n");
-		buf.append("        String s    = (String)o;\n");
-		buf.append("    }\n");
-		buf.append("}");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo( Object o ) {\n");
-		buf.append("        String s = (String) o;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testFormatChanges02() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo( Object o ) {\n");
-		buf.append("        Object s= (String)o;\n");
-		buf.append("}}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo( Object o ) {\n" //
+				+ "        Object s= (String)o;\n" //
+				+ "}}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo( Object o ) {\n" //
+				+ "        Object s       = (String)o;\n" //
+				+ "}}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo( Object o ) {\n" //
+				+ "        Object s = o;\n" //
+				+ "}}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo( Object o ) {\n");
-		buf.append("        Object s       = (String)o;\n");
-		buf.append("}}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void foo( Object o ) {\n");
-		buf.append("        Object s = o;\n");
-		buf.append("}}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testFormatChangesBug205177() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    int        a= 1;\n");
-		buf.append("    int        b= 2;\n");
-		buf.append("    int        c= 3;\n");
-		buf.append("    int        d= 4;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    int        a= 1;\n" //
+				+ "    int        b= 2;\n" //
+				+ "    int        c= 3;\n" //
+				+ "    int        d= 4;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    int        a= 1;\n" //
+				+ "    int        b= 2;//\n" //
+				+ "    int        c= 3;\n" //
+				+ "    int        d= 4;\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    int        a= 1;\n" //
+				+ "    int b = 2;//\n" //
+				+ "    int        c= 3;\n" //
+				+ "    int        d= 4;\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    int        a= 1;\n");
-		buf.append("    int        b= 2;//\n");
-		buf.append("    int        c= 3;\n");
-		buf.append("    int        d= 4;\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    int        a= 1;\n");
-		buf.append("    int b = 2;//\n");
-		buf.append("    int        c= 3;\n");
-		buf.append("    int        d= 4;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testFormatChangesBug205308() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    int        a= 1;\n");
-		buf.append("    int        b= 2;\n");
-		buf.append("    int        c= 3;\n");
-		buf.append("    int        d= 4;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    int        a= 1;\n" //
+				+ "    int        b= 2;\n" //
+				+ "    int        c= 3;\n" //
+				+ "    int        d= 4;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    int         a= 1;\n" //
+				+ "    int        b= 2;\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    int a = 1;\n" //
+				+ "    int        b= 2;\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    int         a= 1;\n");
-		buf.append("    int        b= 2;\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    int a = 1;\n");
-		buf.append("    int        b= 2;\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testFormatChangesBug205301() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * adsfdas\n");
-		buf.append("     * dafs\n");
-		buf.append("     */\n");
-		buf.append("    int a = 2;\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * adsfasd \n");
-		buf.append("     * asd\n");
-		buf.append("     */\n");
-		buf.append("    int b = 2;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * adsfdas\n" //
+				+ "     * dafs\n" //
+				+ "     */\n" //
+				+ "    int a = 2;\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * adsfasd \n" //
+				+ "     * asd\n" //
+				+ "     */\n" //
+				+ "    int b = 2;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * adsfdas\n" //
+				+ "     * dafs \n" //
+				+ "     */\n" //
+				+ "    int a = 2;\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * adsfasd \n" //
+				+ "     * asd\n" //
+				+ "     */\n" //
+				+ "    int b = 2;\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    /**\n" //
+				+ "     * adsfdas dafs\n" //
+				+ "     */\n" //
+				+ "    int a = 2;\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * adsfasd \n" //
+				+ "     * asd\n" //
+				+ "     */\n" //
+				+ "    int b = 2;\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * adsfdas\n");
-		buf.append("     * dafs \n");
-		buf.append("     */\n");
-		buf.append("    int a = 2;\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * adsfasd \n");
-		buf.append("     * asd\n");
-		buf.append("     */\n");
-		buf.append("    int b = 2;\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * adsfdas dafs\n");
-		buf.append("     */\n");
-		buf.append("    int a = 2;\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * adsfasd \n");
-		buf.append("     * asd\n");
-		buf.append("     */\n");
-		buf.append("    int b = 2;\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testFormatChangesBug207965() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("       protected String foo(String string) {  \n");
-		buf.append("          int i = 10;\n");
-		buf.append("          return (\"\" + string + \"\") + \"\";  \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "       protected String foo(String string) {  \n" //
+				+ "          int i = 10;\n" //
+				+ "          return (\"\" + string + \"\") + \"\";  \n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "       protected String foo(String string) {  \n" //
+				+ "          int i = 10;\n" //
+				+ "          return  (\"\" + string + \"\") + \"\";  \n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    protected String foo(String string) {\n" //
+				+ "        int i = 10;\n" //
+				+ "        return (\"\" + string + \"\") + \"\";\n" //
+				+ "    }\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
@@ -344,439 +372,470 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
 		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("       protected String foo(String string) {  \n");
-		buf.append("          int i = 10;\n");
-		buf.append("          return  (\"\" + string + \"\") + \"\";  \n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    protected String foo(String string) {\n");
-		buf.append("        int i = 10;\n");
-		buf.append("        return (\"\" + string + \"\") + \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testFormatChangesBug207965_2() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int i = 10;\n");
-		buf.append("    \n");
-		buf.append("    public int j = 10;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int i = 10;\n" //
+				+ "    \n" //
+				+ "    public int j = 10;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int i= 10;\n" //
+				+ "    \n" //
+				+ "    public int j= 10;\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int i = 10;\n" //
+				+ "\n" //
+				+ "    public int j = 10;\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int i= 10;\n");
-		buf.append("    \n");
-		buf.append("    public int j= 10;\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int i = 10;\n");
-		buf.append("\n");
-		buf.append("    public int j = 10;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testFormatChangesBug208568() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int i = 10;    \n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int i = 10;    \n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public  int i= 10;    \n" //
+				+ "\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int i = 10;\n" //
+				+ "\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public  int i= 10;    \n");
-		buf.append("\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public int i = 10;\n");
-		buf.append("\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testBug213248_1() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ " \n" //
+				+ "    public int field;\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append(" \n");
-		buf.append("    public int field;\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testBug213248_2() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ " \n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ "\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append(" \n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append("\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testBug213248_3() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ " \n" //
+				+ "    public int field;\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append(" \n");
-		buf.append("    public int field;\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testBug213248_4() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ " \n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public int field;\n" //
+				+ "\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append(" \n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    public int field;\n");
-		buf.append("\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testBug228659() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package a;\n");
-		buf.append("public class Test {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s1 = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package a;\n" //
+				+ "public class Test {\n" //
+				+ "    /**\n" //
+				+ "     */\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s1 = \"\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package a;\n" //
+				+ "public class Test {\n" //
+				+ "    /**\n" //
+				+ "     */\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s1  = \"\";\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package a;\n" //
+				+ "public class Test {\n" //
+				+ "    /**\n" //
+				+ "     */\n" //
+				+ "    public void foo() {\n" //
+				+ "        String s1 = \"\";\n" //
+				+ "    }\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 
-		buf= new StringBuffer();
-		buf.append("package a;\n");
-		buf.append("public class Test {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s1  = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package a;\n");
-		buf.append("public class Test {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s1 = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testBug232768_1() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * A Java comment on\n");
-		buf.append("     * two lines\n");
-		buf.append("     */\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * A Java comment on\n" //
+				+ "     * two lines\n" //
+				+ "     */\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * A Java comment on\n" //
+				+ "     *  two lines\n" //
+				+ "     */\n" //
+				+ "\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * A Java comment on two lines\n" //
+				+ "     */\n" //
+				+ "\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * A Java comment on\n");
-		buf.append("     *  two lines\n");
-		buf.append("     */\n");
-		buf.append("\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * A Java comment on two lines\n");
-		buf.append("     */\n");
-		buf.append("\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testBug232768_2() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    /*\n");
-		buf.append("     * A block comment on\n");
-		buf.append("     * two lines\n");
-		buf.append("     */\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    /*\n" //
+				+ "     * A block comment on\n" //
+				+ "     * two lines\n" //
+				+ "     */\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    /*\n" //
+				+ "     * A block comment on\n" //
+				+ "     *  two lines\n" //
+				+ "     */\n" //
+				+ "\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    /*\n" //
+				+ "     * A block comment on two lines\n" //
+				+ "     */\n" //
+				+ "\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    /*\n");
-		buf.append("     * A block comment on\n");
-		buf.append("     *  two lines\n");
-		buf.append("     */\n");
-		buf.append("\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    /*\n");
-		buf.append("     * A block comment on two lines\n");
-		buf.append("     */\n");
-		buf.append("\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testBug232768_3() throws Exception {
+		// Given
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    //long long long long long long long long long long long long long long long long\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    //long long long long long long long long long long long long long long long long\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    // long long long long long long long long long long long long long long long long\n" //
+				+ "\n" //
+				+ "}\n";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    // long long long long long long long long long long long long long long\n" //
+				+ "    // long long\n" //
+				+ "\n" //
+				+ "}\n";
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    // long long long long long long long long long long long long long long long long\n");
-		buf.append("\n");
-		buf.append("}\n");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("\n");
-		buf.append("    // long long long long long long long long long long long long long long\n");
-		buf.append("    // long long\n");
-		buf.append("\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
 	@Test
 	public void testFormatChangeBug488229_1() throws Exception {
-
 		Hashtable<String, String> oldOptions= JavaCore.getOptions();
 
 		try {
+			// Given
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    /**\n");
-			buf.append("     * Method foo\n");
-			buf.append("     * @param a - integer input\n");
-			buf.append("     * @return integer\n");
-			buf.append("     */\n");
-			buf.append("    public int foo( int a ) {\n");
-			buf.append("        return 0;\n");
-			buf.append("    }\n");
-			buf.append("}");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String fileOnDisk= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    /**\n" //
+					+ "     * Method foo\n" //
+					+ "     * @param a - integer input\n" //
+					+ "     * @return integer\n" //
+					+ "     */\n" //
+					+ "    public int foo( int a ) {\n" //
+					+ "        return 0;\n" //
+					+ "    }\n" //
+					+ "}";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+			String fileOnEditor= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    /**\n" //
+					+ "     * Method foo  \n" //
+					+ "     * @param a - integer input  \n" //
+					+ "     * @return integer  \n" //
+					+ "     */\n" //
+					+ "    public int foo( int a ) {\n" //
+					+ "        return 0;\n" //
+					+ "    }\n" //
+					+ "}";
+
+			String expected1= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "	/**\n" //
+					+ "	 * Method foo\n" //
+					+ "	 *\n" //
+					+ "	 * @param a\n" //
+					+ "	 *            - integer input\n" //
+					+ "	 * @return integer\n" //
+					+ "	 */\n" //
+					+ "	public int foo(int a) {\n" //
+					+ "		return 0;\n" //
+					+ "	}\n" //
+					+ "}";
 
 			enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
@@ -786,37 +845,10 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
 			JavaCore.setOptions(coreOptions);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    /**\n");
-			buf.append("     * Method foo  \n");
-			buf.append("     * @param a - integer input  \n");
-			buf.append("     * @return integer  \n");
-			buf.append("     */\n");
-			buf.append("    public int foo( int a ) {\n");
-			buf.append("        return 0;\n");
-			buf.append("    }\n");
-			buf.append("}");
+			// When
+			editCUInEditor(cu1, fileOnEditor);
 
-			editCUInEditor(cu1, buf.toString());
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("	/**\n");
-			buf.append("	 * Method foo\n");
-			buf.append("	 *\n");
-			buf.append("	 * @param a\n");
-			buf.append("	 *            - integer input\n");
-			buf.append("	 * @return integer\n");
-			buf.append("	 */\n");
-			buf.append("	public int foo(int a) {\n");
-			buf.append("		return 0;\n");
-			buf.append("	}\n");
-			buf.append("}");
-			String expected1= buf.toString();
-
+			// Then
 			assertEquals(expected1, cu1.getBuffer().getContents());
 		} finally {
 			JavaCore.setOptions(oldOptions);
@@ -828,20 +860,50 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		Hashtable<String,String> oldOptions= JavaCore.getOptions();
 
 		try {
+			// Given
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    /**\n");
-			buf.append("     * Method foo\n");
-			buf.append("     * @param a - integer input\n");
-			buf.append("     * @return integer\n");
-			buf.append("     */\n");
-			buf.append("    public int foo( int a ) {\n");
-			buf.append("        return 0;\n");
-			buf.append("    }\n");
-			buf.append("}");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String fileOnDisk= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    /**\n" //
+					+ "     * Method foo\n" //
+					+ "     * @param a - integer input\n" //
+					+ "     * @return integer\n" //
+					+ "     */\n" //
+					+ "    public int foo( int a ) {\n" //
+					+ "        return 0;\n" //
+					+ "    }\n" //
+					+ "}";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+			String fileOnEditor= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    /**\n" //
+					+ "     * Method foo  \n" //
+					+ "     * @param a - integer input  \n" //
+					+ "     * @return integer  \n" //
+					+ "     */\n" //
+					+ "    public int foo( int a ) {\n" //
+					+ "        return 0;\n" //
+					+ "    }\n" //
+					+ "}";
+
+			String expected1= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "	/**\n" //
+					+ "	 * Method foo\n" //
+					+ "	 *\n" //
+					+ "	 * @param a\n" //
+					+ "	 *            - integer input\n" //
+					+ "	 *\n" //
+					+ "	 * @return integer\n" //
+					+ "	 */\n" //
+					+ "	public int foo(int a) {\n" //
+					+ "		return 0;\n" //
+					+ "	}\n" //
+					+ "}";
 
 			enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
@@ -852,38 +914,10 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
 			JavaCore.setOptions(coreOptions);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    /**\n");
-			buf.append("     * Method foo  \n");
-			buf.append("     * @param a - integer input  \n");
-			buf.append("     * @return integer  \n");
-			buf.append("     */\n");
-			buf.append("    public int foo( int a ) {\n");
-			buf.append("        return 0;\n");
-			buf.append("    }\n");
-			buf.append("}");
+			// When
+			editCUInEditor(cu1, fileOnEditor);
 
-			editCUInEditor(cu1, buf.toString());
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("	/**\n");
-			buf.append("	 * Method foo\n");
-			buf.append("	 *\n");
-			buf.append("	 * @param a\n");
-			buf.append("	 *            - integer input\n");
-			buf.append("	 *\n");
-			buf.append("	 * @return integer\n");
-			buf.append("	 */\n");
-			buf.append("	public int foo(int a) {\n");
-			buf.append("		return 0;\n");
-			buf.append("	}\n");
-			buf.append("}");
-			String expected1= buf.toString();
-
+			// Then
 			assertEquals(expected1, cu1.getBuffer().getContents());
 		} finally {
 			JavaCore.setOptions(oldOptions);
@@ -895,20 +929,50 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		Hashtable<String,String> oldOptions= JavaCore.getOptions();
 
 		try {
+			// Given
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    /**\n");
-			buf.append("     * Method foo\n");
-			buf.append("     *\t          @param a - integer input\n");
-			buf.append("     * @return integer\n");
-			buf.append("     */\n");
-			buf.append("    public int foo( int a ) {\n");
-			buf.append("        return 0;\n");
-			buf.append("    }\n");
-			buf.append("}");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String fileOnDisk= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    /**\n" //
+					+ "     * Method foo\n" //
+					+ "     *\t          @param a - integer input\n" //
+					+ "     * @return integer\n" //
+					+ "     */\n" //
+					+ "    public int foo( int a ) {\n" //
+					+ "        return 0;\n" //
+					+ "    }\n" //
+					+ "}";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+			String fileOnEditor= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    /**\n" //
+					+ "     * Method foo  \n" //
+					+ "     *\t          @param a - integer input  \n" //
+					+ "     * @return integer  \n" //
+					+ "     */\n" //
+					+ "    public int foo( int a ) {\n" //
+					+ "        return 0;\n" //
+					+ "    }\n" //
+					+ "}";
+
+			String expected1= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "	/**\n" //
+					+ "	 * Method foo\n" //
+					+ "	 *\n" //
+					+ "	 * @param a\n" //
+					+ "	 *            - integer input\n" //
+					+ "	 *\n" //
+					+ "	 * @return integer\n" //
+					+ "	 */\n" //
+					+ "	public int foo(int a) {\n" //
+					+ "		return 0;\n" //
+					+ "	}\n" //
+					+ "}";
 
 			enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
@@ -919,38 +983,10 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
 			JavaCore.setOptions(coreOptions);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    /**\n");
-			buf.append("     * Method foo  \n");
-			buf.append("     *\t          @param a - integer input  \n");
-			buf.append("     * @return integer  \n");
-			buf.append("     */\n");
-			buf.append("    public int foo( int a ) {\n");
-			buf.append("        return 0;\n");
-			buf.append("    }\n");
-			buf.append("}");
+			// When
+			editCUInEditor(cu1, fileOnEditor);
 
-			editCUInEditor(cu1, buf.toString());
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("	/**\n");
-			buf.append("	 * Method foo\n");
-			buf.append("	 *\n");
-			buf.append("	 * @param a\n");
-			buf.append("	 *            - integer input\n");
-			buf.append("	 *\n");
-			buf.append("	 * @return integer\n");
-			buf.append("	 */\n");
-			buf.append("	public int foo(int a) {\n");
-			buf.append("		return 0;\n");
-			buf.append("	}\n");
-			buf.append("}");
-			String expected1= buf.toString();
-
+			// Then
 			assertEquals(expected1, cu1.getBuffer().getContents());
 		} finally {
 			JavaCore.setOptions(oldOptions);
@@ -962,20 +998,51 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		Hashtable<String, String> oldOptions= JavaCore.getOptions();
 
 		try {
+			// Given
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    /**\n");
-			buf.append("     * Method foo with a really long description that will wrap lines on save operation\n");
-			buf.append("     *\t          @param a - integer input\n");
-			buf.append("     * @return integer\n");
-			buf.append("     */\n");
-			buf.append("    public int foo( int a ) {\n");
-			buf.append("        return 0;\n");
-			buf.append("    }\n");
-			buf.append("}");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String fileOnDisk= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    /**\n" //
+					+ "     * Method foo with a really long description that will wrap lines on save operation\n" //
+					+ "     *\t          @param a - integer input\n" //
+					+ "     * @return integer\n" //
+					+ "     */\n" //
+					+ "    public int foo( int a ) {\n" //
+					+ "        return 0;\n" //
+					+ "    }\n" //
+					+ "}";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+			String fileOnEditor= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "    /**\n" //
+					+ "     * Method foo with a really long description that will wrap lines on save operation  \n" //
+					+ "     *\t          @param a - integer input  \n" //
+					+ "     * @return integer  \n" //
+					+ "     */\n" //
+					+ "    public int foo( int a ) {\n" //
+					+ "        return 0;\n" //
+					+ "    }\n" //
+					+ "}";
+
+			String expected1= "" //
+					+ "package test1;\n" //
+					+ "public class E1 {\n" //
+					+ "	/**\n" //
+					+ "	 * Method foo with a really long description that will wrap lines on save\n" //
+					+ "	 * operation\n" //
+					+ "	 *\n" //
+					+ "	 * @param a\n" //
+					+ "	 *            - integer input\n" //
+					+ "	 *\n" //
+					+ "	 * @return integer\n" //
+					+ "	 */\n" //
+					+ "	public int foo(int a) {\n" //
+					+ "		return 0;\n" //
+					+ "	}\n" //
+					+ "}";
 
 			enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
@@ -986,39 +1053,10 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
 			JavaCore.setOptions(coreOptions);
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("    /**\n");
-			buf.append("     * Method foo with a really long description that will wrap lines on save operation  \n");
-			buf.append("     *\t          @param a - integer input  \n");
-			buf.append("     * @return integer  \n");
-			buf.append("     */\n");
-			buf.append("    public int foo( int a ) {\n");
-			buf.append("        return 0;\n");
-			buf.append("    }\n");
-			buf.append("}");
+			// When
+			editCUInEditor(cu1, fileOnEditor);
 
-			editCUInEditor(cu1, buf.toString());
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("	/**\n");
-			buf.append("	 * Method foo with a really long description that will wrap lines on save\n");
-			buf.append("	 * operation\n");
-			buf.append("	 *\n");
-			buf.append("	 * @param a\n");
-			buf.append("	 *            - integer input\n");
-			buf.append("	 *\n");
-			buf.append("	 * @return integer\n");
-			buf.append("	 */\n");
-			buf.append("	public int foo(int a) {\n");
-			buf.append("		return 0;\n");
-			buf.append("	}\n");
-			buf.append("}");
-			String expected1= buf.toString();
-
+			// Then
 			assertEquals(expected1, cu1.getBuffer().getContents());
 		} finally {
 			JavaCore.setOptions(oldOptions);
@@ -1027,62 +1065,62 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 	@Test
 	public void testFormatChangeBug560429() throws Exception {
+		// Given
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\r\n");
-		buf.append("import java.util.ArrayList;\r\n");
-		buf.append("import java.util.Iterator;\r\n");
-		buf.append("import java.util.List;\r\n");
-		buf.append("public class A {\r\n");
-		buf.append("	public A() {\r\n");
-		buf.append("		List<List<Integer>> mylistlist=new ArrayList<>();\r\n");
-		buf.append("		for (Iterator<List<Integer>> mylistlistiterator= mylistlist.iterator(); mylistlistiterator.hasNext(); ) {\r\n");
-		buf.append("			for (Iterator<Integer> mylistiterator= mylistlistiterator.next().iterator(); mylistiterator.hasNext(); ) {\r\n");
-		buf.append("				int foo= mylistiterator.next().intValue();\r\n");
-		buf.append("			}\r\n");
-		buf.append("		}\r\n");
-		buf.append("	}\r\n");
-		buf.append("}");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String fileOnDisk= "" //
+				+ "package test;\r\n" //
+				+ "import java.util.ArrayList;\r\n" //
+				+ "import java.util.Iterator;\r\n" //
+				+ "import java.util.List;\r\n" //
+				+ "public class A {\r\n" //
+				+ "	public A() {\r\n" //
+				+ "		List<List<Integer>> mylistlist=new ArrayList<>();\r\n" //
+				+ "		for (Iterator<List<Integer>> mylistlistiterator= mylistlist.iterator(); mylistlistiterator.hasNext(); ) {\r\n" //
+				+ "			for (Iterator<Integer> mylistiterator= mylistlistiterator.next().iterator(); mylistiterator.hasNext(); ) {\r\n" //
+				+ "				int foo= mylistiterator.next().intValue();\r\n" //
+				+ "			}\r\n" //
+				+ "		}\r\n" //
+				+ "	}\r\n" //
+				+ "}";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test;\r\n" //
+				+ "import java.util.ArrayList;\r\n" //
+				+ "import java.util.Iterator;\r\n" //
+				+ "import java.util.List;\r\n" //
+				+ "public class A {\r\n" //
+				+ "	public A() {\r\n" //
+				+ "		List<List<Integer>> mylistlist=new ArrayList<>();\r\n" //
+				+ "		for (Iterator<List<Integer>> mylistlistiterator= mylistlist.iterator(); mylistlistiterator.hasNext(); ) {\r\n" //
+				+ "			for (Iterator<Integer> mylistiterator= mylistlistiterator.next().iterator(); mylistiterator.hasNext(); ) {\r\n" //
+				+ "				int foo= mylistiterator.next().intValue();\r\n" //
+				+ "			}\r\n" //
+				+ "		}\r\n" //
+				+ "	}\r\n" //
+				+ "}";
+
+		String expected1= "" //
+				+ "package test;\r\n" //
+				+ "import java.util.ArrayList;\r\n" //
+				+ "import java.util.List;\r\n" //
+				+ "public class A {\r\n" //
+				+ "	public A() {\r\n" //
+				+ "		List<List<Integer>> mylistlist=new ArrayList<>();\r\n" //
+				+ "		for (List<Integer> list : mylistlist) {\r\n" //
+				+ "			for (Integer integer : list) {\r\n" //
+				+ "				int foo= integer.intValue();\r\n" //
+				+ "			}\r\n" //
+				+ "		}\r\n" //
+				+ "	}\r\n" //
+				+ "}";
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		buf= new StringBuffer();
-		buf.append("package test;\r\n");
-		buf.append("import java.util.ArrayList;\r\n");
-		buf.append("import java.util.Iterator;\r\n");
-		buf.append("import java.util.List;\r\n");
-		buf.append("public class A {\r\n");
-		buf.append("	public A() {\r\n");
-		buf.append("		List<List<Integer>> mylistlist=new ArrayList<>();\r\n");
-		buf.append("		for (Iterator<List<Integer>> mylistlistiterator= mylistlist.iterator(); mylistlistiterator.hasNext(); ) {\r\n");
-		buf.append("			for (Iterator<Integer> mylistiterator= mylistlistiterator.next().iterator(); mylistiterator.hasNext(); ) {\r\n");
-		buf.append("				int foo= mylistiterator.next().intValue();\r\n");
-		buf.append("			}\r\n");
-		buf.append("		}\r\n");
-		buf.append("	}\r\n");
-		buf.append("}");
+		// When
+		editCUInEditor(cu1, fileOnEditor);
 
-		editCUInEditor(cu1, buf.toString());
-
-		buf= new StringBuffer();
-		buf.append("package test;\r\n");
-		buf.append("import java.util.ArrayList;\r\n");
-		buf.append("import java.util.List;\r\n");
-		buf.append("public class A {\r\n");
-		buf.append("	public A() {\r\n");
-		buf.append("		List<List<Integer>> mylistlist=new ArrayList<>();\r\n");
-		buf.append("		for (List<Integer> list : mylistlist) {\r\n");
-		buf.append("			for (Integer integer : list) {\r\n");
-		buf.append("				int foo= integer.intValue();\r\n");
-		buf.append("			}\r\n");
-		buf.append("		}\r\n");
-		buf.append("	}\r\n");
-		buf.append("}");
-
-		String expected1= buf.toString();
-
+		// Then
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
-
 }

@@ -587,7 +587,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			IJavaProject project= fSubType.getJavaProject();
 			boolean annotations= fAnnotations && !JavaModelUtil.isVersionLessThan(project.getOption(JavaCore.COMPILER_SOURCE, true), JavaCore.VERSION_1_6);
 			boolean inheritNullAnnotations= JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, true));
-			boolean javadoc= project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true).equals(JavaCore.ENABLED);
+			boolean javadoc= JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true));
 			for (IMember member : fMembers) {
 				if (member instanceof IMethod) {
 					MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, sourceRewrite.getRoot());
@@ -659,7 +659,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			} else if (extended.isAnnotation()) {
 				annotation= (Annotation) extended;
 				ITypeBinding binding= annotation.resolveTypeBinding();
-				if (binding != null && binding.getQualifiedName().equals("java.lang.Override") || ! Bindings.isAnyNullAnnotation(binding, sourceProject)) //$NON-NLS-1$
+				if (binding != null && "java.lang.Override".equals(binding.getQualifiedName()) || ! Bindings.isAnyNullAnnotation(binding, sourceProject)) //$NON-NLS-1$
 					list.remove(annotation, null);
 			}
 		}

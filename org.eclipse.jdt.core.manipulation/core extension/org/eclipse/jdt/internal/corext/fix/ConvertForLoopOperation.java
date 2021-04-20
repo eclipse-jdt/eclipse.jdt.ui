@@ -537,7 +537,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 								if (!fIsCollection
 										|| !GET_QUERY.equals(method.getName().getFullyQualifiedName())
 										|| parms.length != 1
-										|| !parms[0].getName().equals("int") //$NON-NLS-1$
+										|| !"int".equals(parms[0].getName()) //$NON-NLS-1$
 										|| !areTypeBindingEqual(fSizeMethodBinding.getDeclaringClass(), methodBinding.getDeclaringClass())
 										|| fSizeMethodAccess.getExpression() == null
 										|| !fSizeMethodAccess.getExpression().subtreeMatch(new ASTMatcher(), method.getExpression()))
@@ -620,7 +620,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 					}
 					ITypeBinding[] args= nodeBinding.getParameterTypes();
 					if (GET_QUERY.equals(nodeBinding.getName()) && args.length == 1 &&
-							args[0].getName().equals("int") && //$NON-NLS-1$
+							"int".equals(args[0].getName()) && //$NON-NLS-1$
 							areTypeBindingEqual(nodeBinding.getDeclaringClass(), fSizeMethodBinding.getDeclaringClass())) {
 						IBinding index= getBinding((Expression)node.arguments().get(0));
 						if (fIndexBinding.equals(index)) {

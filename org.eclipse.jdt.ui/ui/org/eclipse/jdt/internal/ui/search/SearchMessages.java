@@ -261,6 +261,7 @@ public final class SearchMessages extends NLS {
 	public static String BreakContinueTargetFinder_job_label;
 	public static String BreakContinueTargetFinder_no_break_or_continue_selected;
 	public static String BreakContinueTargetFinder_occurrence_description;
+	public static String EnumConstructorTargetFinder_description;
 	public static String TextSearchLabelProvider_matchCountFormat;
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SearchMessages.class);

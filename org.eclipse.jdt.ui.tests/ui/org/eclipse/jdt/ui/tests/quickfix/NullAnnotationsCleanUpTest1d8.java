@@ -125,7 +125,7 @@ public class NullAnnotationsCleanUpTest1d8 extends CleanUpTestCase {
 		String expected1= buf.toString();
 
 		ICleanUp[] cleanUps= { new NullAnnotationsCleanUp(new HashMap<>(), IProblem.TypeAnnotationAtQualifiedName) };
-		performRefactoring(new CleanUpRefactoring(), new ICompilationUnit[] { cu1 }, cleanUps);
+		performRefactoring(new CleanUpRefactoring(), new ICompilationUnit[] { cu1 }, cleanUps, null);
 
 		assertEqualStringsIgnoreOrder(new String[] { cu1.getBuffer().getContents() }, new String[] { expected1 });
 	}
@@ -177,7 +177,7 @@ public class NullAnnotationsCleanUpTest1d8 extends CleanUpTestCase {
 		String expected1= buf.toString();
 
 		ICleanUp[] cleanUps= { new NullAnnotationsCleanUp(new HashMap<>(), IProblem.RequiredNonNullButProvidedNull) };
-		performRefactoring(new CleanUpRefactoring(), new ICompilationUnit[] { cu1 }, cleanUps);
+		performRefactoring(new CleanUpRefactoring(), new ICompilationUnit[] { cu1 }, cleanUps, null);
 
 		assertEqualStringsIgnoreOrder(new String[] { cu1.getBuffer().getContents() }, new String[] { expected1 });
 	}

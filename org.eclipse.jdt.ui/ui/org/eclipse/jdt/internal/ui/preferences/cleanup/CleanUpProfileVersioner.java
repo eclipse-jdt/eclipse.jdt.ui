@@ -59,11 +59,12 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
 				updateFrom1To2(oldSettings);
 				//$FALL-THROUGH$
 			default:
-				for (String key : oldSettings.keySet()) {
+				for (Map.Entry<String, String> entry : oldSettings.entrySet()) {
+					String key = entry.getKey();
 					if (!newSettings.containsKey(key))
 						continue;
 
-					final String value= oldSettings.get(key);
+					final String value= entry.getValue();
 					if (value != null) {
 						newSettings.put(key, value);
 					}

@@ -724,7 +724,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	@Override
 	protected RefactoringStatus checkDeclaringType(final IProgressMonitor monitor) throws JavaModelException {
 		final RefactoringStatus status= super.checkDeclaringType(monitor);
-		if (getDeclaringType().getFullyQualifiedName('.').equals("java.lang.Object")) //$NON-NLS-1$
+		if ("java.lang.Object".equals(getDeclaringType().getFullyQualifiedName('.'))) //$NON-NLS-1$
 			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PullUpRefactoring_no_java_lang_Object));
 		status.merge(checkDeclaringSuperTypes(monitor));
 		return status;
@@ -1527,7 +1527,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				}
 			}
 		}
-		if (superTypes.length == 1 && superTypes[0].getFullyQualifiedName().equals("java.lang.Object")) //$NON-NLS-1$
+		if (superTypes.length == 1 && "java.lang.Object".equals(superTypes[0].getFullyQualifiedName())) //$NON-NLS-1$
 			status.addFatalError(RefactoringCoreMessages.PullUPRefactoring_not_java_lang_object);
 		else if (superTypes.length == binary)
 			status.addFatalError(RefactoringCoreMessages.PullUPRefactoring_no_all_binary);

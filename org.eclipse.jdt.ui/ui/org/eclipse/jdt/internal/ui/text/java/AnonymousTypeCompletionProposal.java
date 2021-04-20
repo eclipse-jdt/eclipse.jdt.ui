@@ -240,7 +240,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				methodsToOverride= result.toArray(new IMethodBinding[result.size()]);
 			}
 			ASTNode focusNode; // used to find @NonNullByDefault effective
-			if (fCompilationUnit.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)) {
+			if (JavaCore.ENABLED.equals(fCompilationUnit.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))) {
 				focusNode= NodeFinder.perform(astRoot, getReplacementOffset()+dummyClassContent.length(), 0);
 			} else {
 				focusNode= null;

@@ -155,7 +155,7 @@ public class QuickAssistLightBulbUpdater {
 	}
 
 	protected void doPropertyChanged(String property) {
-		if (property.equals(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB)) {
+		if (PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB.equals(property)) {
 			if (isSetInPreferences()) {
 				ICompilationUnit cu= getCompilationUnit();
 				if (cu != null) {

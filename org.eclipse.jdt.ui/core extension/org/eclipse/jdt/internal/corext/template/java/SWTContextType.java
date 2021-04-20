@@ -45,7 +45,7 @@ public class SWTContextType extends AbstractJavaContextType {
 
 	@Override
 	protected void initializeContext(IJavaContext context) {
-		if (!getId().equals(SWTContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
+		if (!SWTContextType.ID_ALL.equals(getId())) { // a specific context must also allow the templates that work everywhere
 			context.addCompatibleContextType(SWTContextType.ID_ALL);
 		}
 	}

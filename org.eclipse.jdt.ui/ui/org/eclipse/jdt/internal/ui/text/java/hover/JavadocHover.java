@@ -451,8 +451,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		public void propertyChange(PropertyChangeEvent event) {
 			String property= event.getProperty();
 			if (iControl != null &&
-					(property.equals("org.eclipse.jdt.ui.Javadoc.foregroundColor") //$NON-NLS-1$
-							|| property.equals("org.eclipse.jdt.ui.Javadoc.backgroundColor"))) { //$NON-NLS-1$
+					("org.eclipse.jdt.ui.Javadoc.foregroundColor".equals(property) //$NON-NLS-1$
+							|| "org.eclipse.jdt.ui.Javadoc.backgroundColor".equals(property))) { //$NON-NLS-1$
 				setHoverColors();
 			}
 		}
@@ -907,7 +907,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 */
 	public static IBinding getHoverBinding(IJavaElement element, ASTNode node) {
 
-		if (element.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)) {
+		if (JavaCore.ENABLED.equals(element.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))) {
 			if (node == null) {
 				if (element instanceof ISourceReference) {
 					ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);

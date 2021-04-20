@@ -61,11 +61,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.launching.IVMInstall2;
-import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -76,9 +72,6 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.NewSourceContainerWorkbookPage;
 
 /**
  * The second page of the New Java project wizard. It allows to configure the build path and output location.
@@ -146,13 +139,6 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		super.setVisible(visible);
 		if (isShownFirstTime) {
 			setFocus();
-		}
-		if (visible) {
-			String compilerCompliance= fFirstPage.getCompilerCompliance();
-			if (compilerCompliance == null) {
-				compilerCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) JavaRuntime.getDefaultVMInstall(), JavaCore.VERSION_1_4);
-			}
-			setCompilerCompliance(compilerCompliance);
 		}
 	}
 
@@ -566,42 +552,14 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		super.dispose();
 	}
 
-	private void setCompilerCompliance(String compilerCompliance) {
-		BuildPathsBlock buildPathsBlock= getBuildPathsBlock();
-		if (buildPathsBlock != null) {
-			BuildPathBasePage sourceContainerPage= buildPathsBlock.getSourceContainerPage();
-			if (sourceContainerPage instanceof NewSourceContainerWorkbookPage) {
-				((NewSourceContainerWorkbookPage) sourceContainerPage).setCompilerCompliance(compilerCompliance);
-			}
-		}
-	}
-
 	private void createJavaProjectModuleInfoFile() {
-		String compilerCompliance= fFirstPage.getCompilerCompliance();
-		if (compilerCompliance == null) {
-			compilerCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) JavaRuntime.getDefaultVMInstall(), JavaCore.VERSION_1_4);
+		boolean createModuleInfoFile= fFirstPage.getCreateModuleInfoFile();
+		if (createModuleInfoFile) {
+			Display.getDefault().asyncExec(() -> {
+				CreateModuleInfoAction action= new CreateModuleInfoAction();
+				action.selectionChanged(null, new StructuredSelection(getJavaProject()));
+				action.run(null);
+			});
 		}
-		if (compilerCompliance!= null && JavaModelUtil.is9OrHigher(compilerCompliance)) {
-			boolean createModuleInfoFile= isCreateModuleInfoFile();
-			if (createModuleInfoFile) {
-				Display.getDefault().asyncExec(() -> {
-					CreateModuleInfoAction action= new CreateModuleInfoAction();
-					action.selectionChanged(null, new StructuredSelection(getJavaProject()));
-					action.run(null);
-				});
-
-			}
-		}
-	}
-
-	boolean isCreateModuleInfoFile() {
-		BuildPathsBlock buildPathsBlock= getBuildPathsBlock();
-		if (buildPathsBlock != null) {
-			BuildPathBasePage sourceContainerPage= buildPathsBlock.getSourceContainerPage();
-			if (sourceContainerPage instanceof NewSourceContainerWorkbookPage) {
-				return ((NewSourceContainerWorkbookPage) sourceContainerPage).isCreateModuleInfoFile();
-			}
-		}
-		return false;
 	}
 }

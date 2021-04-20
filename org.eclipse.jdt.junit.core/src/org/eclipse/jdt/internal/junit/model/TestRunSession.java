@@ -487,7 +487,7 @@ public class TestRunSession implements ITestRunSession {
 		String testName= testNameBuffer.toString().trim();
 
 		int index2= treeEntry.indexOf(',', index1 + 1);
-		boolean isSuite= treeEntry.substring(index1 + 1, index2).equals("true"); //$NON-NLS-1$
+		boolean isSuite= "true".equals(treeEntry.substring(index1 + 1, index2)); //$NON-NLS-1$
 
 		int testCount;
 		boolean isDynamicTest;
@@ -510,11 +510,11 @@ public class TestRunSession implements ITestRunSession {
 			testCount= Integer.parseInt(treeEntry.substring(index2 + 1, index3));
 
 			int index4= treeEntry.indexOf(',', index3 + 1);
-			isDynamicTest= treeEntry.substring(index3 + 1, index4).equals("true"); //$NON-NLS-1$
+			isDynamicTest= "true".equals(treeEntry.substring(index3 + 1, index4)); //$NON-NLS-1$
 
 			int index5= treeEntry.indexOf(',', index4 + 1);
 			parentId= treeEntry.substring(index4 + 1, index5);
-			if (parentId.equals("-1")) { //$NON-NLS-1$
+			if ("-1".equals(parentId)) { //$NON-NLS-1$
 				parentId= null;
 			}
 

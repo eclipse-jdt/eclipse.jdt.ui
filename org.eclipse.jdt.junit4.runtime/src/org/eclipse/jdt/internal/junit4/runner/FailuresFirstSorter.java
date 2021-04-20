@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 SpringSource and others.
+ * Copyright (c) 2009, 2021 SpringSource and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,7 @@ public class FailuresFirstSorter implements Comparator<Description> {
 	 * @param failuresList list of failed tests based on the description's display string
 	 */
 	public FailuresFirstSorter(String[] failuresList) {
-		this.failuresList = new HashSet<String>(Arrays.asList(failuresList));
+		this.failuresList = new HashSet<>(Arrays.asList(failuresList));
 	}
 
 	/**
@@ -49,6 +49,7 @@ public class FailuresFirstSorter implements Comparator<Description> {
 	 * @param d2 the second Description to compare with
 	 * @return -1 if only d1 has failures, 1 if only d2 has failures, 0 otherwise
 	 */
+	@Override
 	public int compare(Description d1, Description d2) {
 		boolean d1HasFailures = hasFailures(d1);
 		boolean d2HasFailures = hasFailures(d2);

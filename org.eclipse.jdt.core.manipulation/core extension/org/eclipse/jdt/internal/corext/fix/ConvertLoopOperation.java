@@ -201,10 +201,11 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 				}
 			}
 		}
-		for(String suffix : IRREG_NOUNS.keySet()) {
+		for(Map.Entry<String, String> entry : IRREG_NOUNS.entrySet()) {
+			String suffix = entry.getKey();
 			if(name.toLowerCase().endsWith(suffix.toLowerCase())) {
 				String firstPart= name.substring(0, name.length() - suffix.length());
-				return firstPart + IRREG_NOUNS.get(suffix);
+				return firstPart + entry.getValue();
 			}
 		}
 		for(String varname : NO_BASE_TYPES) {

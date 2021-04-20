@@ -353,7 +353,7 @@ public abstract class BuildPathBasePage {
 		}
 	}
 
-	protected abstract class CPListAdapter implements IDialogFieldListener, ITreeListAdapter<CPListElement> {
+	protected abstract static class CPListAdapter implements IDialogFieldListener, ITreeListAdapter<CPListElement> {
 		private final Object[] EMPTY_ARR= new Object[0];
 
 		@Override
@@ -407,8 +407,8 @@ public abstract class BuildPathBasePage {
 	}
 
 	protected void checkAttributeEffect(String key, IJavaProject javaProject) {
-		if (key.equals(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH)) {
-			if (javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.DISABLED)) {
+		if (IClasspathAttribute.EXTERNAL_ANNOTATION_PATH.equals(key)) {
+			if (JavaCore.DISABLED.equals(javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))) {
 				MessageDialog messageDialog= new MessageDialog(getShell(),
 						NewWizardMessages.LibrariesWorkbookPage_externalAnnotationNeedsNullAnnotationEnabled_title,
 						null,

@@ -81,7 +81,7 @@ public class JUnit5TestLoader implements ITestLoader {
 			return null;
 		}
 		String pattern;
-		if (pkg.equals("<default>")) { //$NON-NLS-1$
+		if ("<default>".equals(pkg)) { //$NON-NLS-1$
 			pkg= ""; //$NON-NLS-1$
 			pattern= "^[^.]+$"; //$NON-NLS-1$
 		} else {

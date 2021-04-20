@@ -143,12 +143,12 @@ public class NLSHintHelper {
 
 				Expression firstArgument= args.get(0);
 				ITypeBinding argumentBinding= firstArgument.resolveTypeBinding();
-				if (argumentBinding == null || !argumentBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+				if (argumentBinding == null || !"java.lang.String".equals(argumentBinding.getQualifiedName())) { //$NON-NLS-1$
 					return null;
 				}
 
 				ITypeBinding typeBinding= methodInvocation.resolveTypeBinding();
-				if (typeBinding == null || !typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+				if (typeBinding == null || !"java.lang.String".equals(typeBinding.getQualifiedName())) { //$NON-NLS-1$
 					return null;
 				}
 
@@ -313,7 +313,7 @@ public class NLSHintHelper {
 				continue;
 			IBinding binding= (IBinding)o;
 			fieldName= binding.getName();
-			if (fieldName.equals("BUNDLE_NAME") || fieldName.equals("RESOURCE_BUNDLE") || fieldName.equals("bundleName")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if ("BUNDLE_NAME".equals(fieldName) || "RESOURCE_BUNDLE".equals(fieldName) || "bundleName".equals(fieldName)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				result= (String)resultCollector.get(binding);
 				if (result != null)
 					return result;

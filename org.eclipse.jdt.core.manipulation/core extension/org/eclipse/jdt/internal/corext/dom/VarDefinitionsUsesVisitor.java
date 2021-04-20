@@ -11,7 +11,7 @@
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.fix;
+package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +26,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 /** Visitor collecting all definitions and uses of a local variable. */
 public final class VarDefinitionsUsesVisitor extends ASTVisitor {

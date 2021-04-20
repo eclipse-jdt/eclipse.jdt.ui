@@ -167,7 +167,7 @@ public class ClasspathModifier {
 		if (lastSegment == null)
 			return result;
 
-		if (lastSegment.equals(".settings") && outputPath.segmentCount() - projectPath.segmentCount() == 1) { //$NON-NLS-1$
+		if (".settings".equals(lastSegment) && outputPath.segmentCount() - projectPath.segmentCount() == 1) { //$NON-NLS-1$
 
 			StatusInfo statusInfo= new StatusInfo(IStatus.WARNING, NewWizardMessages.OutputLocation_SettingsAsLocation);
 			if (result.isOK()) {

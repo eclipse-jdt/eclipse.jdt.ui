@@ -208,9 +208,9 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	@Override
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
-		if (fieldName.equals(PACKAGE) || fieldName.equals(CONTAINER) || fieldName.equals(JUNIT4TOGGLE)) {
+		if (PACKAGE.equals(fieldName) || CONTAINER.equals(fieldName) || JUNIT4TOGGLE.equals(fieldName)) {
 			updateClassesInSuiteTable();
-		} else if (fieldName.equals(CLASSES_IN_SUITE)) {
+		} else if (CLASSES_IN_SUITE.equals(fieldName)) {
 			fClassesInSuiteStatus= classesInSuiteChanged();
 			fTypeNameStatus= typeNameChanged(); //must check this one too
 			updateSelectedClassesLabel();

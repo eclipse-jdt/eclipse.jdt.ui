@@ -59,15 +59,18 @@ import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
@@ -76,24 +79,30 @@ import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
-import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
+import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveIntRatherThanWrapperCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveLongRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
@@ -234,6 +243,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.TRUE);
 
 		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.TRUE);
+
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.TRUE);
 
 		storeSettings(node);
 
@@ -528,6 +544,27 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
+	public void testSystemPropertiesCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new ConstantsForSystemPropertyCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
 	public void testArraysFillCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -640,6 +677,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
+	public void testBooleanValueRatherThanComparisonCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.BOOLEAN_VALUE_RATHER_THAN_COMPARISON, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new BooleanValueRatherThanComparisonCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
 	public void testDoubleNegationCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -720,6 +773,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
+	public void testOneIfRatherThanDuplicateBlocksThatFallThroughCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
 	public void testComparingOnCriteriaCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -768,6 +837,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
+	public void testValueOfRatherThanInstantiationCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.VALUEOF_RATHER_THAN_INSTANTIATION, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new ValueOfRatherThanInstantiationCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
 	public void testPrimitiveComparisonCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -779,6 +864,86 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new PrimitiveComparisonCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testPrimitiveIntRatherThanWrappernCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new PrimitiveIntRatherThanWrapperCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testPrimitiveLongRatherThanWrappernCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new PrimitiveLongRatherThanWrapperCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testRedundantComparatorCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.REDUNDANT_COMPARATOR, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new RedundantComparatorCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testArrayWithCurlyCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.ARRAY_WITH_CURLY, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new ArrayWithCurlyCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testReturnExpressionCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.RETURN_EXPRESSION, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new ReturnExpressionCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}

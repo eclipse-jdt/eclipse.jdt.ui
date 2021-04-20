@@ -23,6 +23,8 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
+import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp;
+import org.eclipse.jdt.internal.ui.fix.OperandFactorizationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp;
@@ -34,10 +36,12 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
+				new OperandFactorizationCleanUp(values),
 				new TernaryOperatorCleanUp(values),
 				new StrictlyEqualOrDifferentCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
 				new ControlFlowMergeCleanUp(values),
+				new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
 				new RedundantIfConditionCleanUp(values)
 		};
@@ -46,6 +50,9 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		Group duplicateGroup= createGroup(numColumns, composite, CleanUpMessages.DuplicateCodeTabPage_GroupName_DuplicateCode);
+
+		final CheckboxPreference operandFactorization= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_OperandFactorization, CleanUpConstants.OPERAND_FACTORIZATION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(operandFactorization);
 
 		final CheckboxPreference ternaryOperator= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_TernaryOperator, CleanUpConstants.TERNARY_OPERATOR, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(ternaryOperator);
@@ -58,6 +65,9 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference controlFlowMerge= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_ControlFlowMerge, CleanUpConstants.CONTROLFLOW_MERGE, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(controlFlowMerge);
+
+		final CheckboxPreference oneIfRatherThanDuplicateBlocksThatFallThrough= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_OneIfRatherThanDuplicateBlocksThatFallThrough, CleanUpConstants.ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(oneIfRatherThanDuplicateBlocksThatFallThrough);
 
 		final CheckboxPreference redundantFallingThroughBlockEnd= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd, CleanUpConstants.REDUNDANT_FALLING_THROUGH_BLOCK_END, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(redundantFallingThroughBlockEnd);

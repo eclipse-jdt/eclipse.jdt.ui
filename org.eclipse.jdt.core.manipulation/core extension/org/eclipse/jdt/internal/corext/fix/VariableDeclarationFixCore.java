@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -543,6 +543,9 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 			return false;
 
 		if (varbinding.isField() && !Modifier.isPrivate(modifiers))
+			return false;
+
+		if (varbinding.isRecordComponent())
 			return false;
 
 		if (varbinding.isParameter()) {

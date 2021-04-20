@@ -31,9 +31,9 @@ public class RerunExecutionListener extends FirstRunExecutionListener {
 		sendFailure(failure, MessageIds.RTRACE_START, MessageIds.RTRACE_END);
 
 		String status = failure.getStatus();
-		if (status.equals(MessageIds.TEST_FAILED))
+		if (MessageIds.TEST_FAILED.equals(status))
 			fStatus = RemoteTestRunner.RERAN_FAILURE;
-		else if (status.equals(MessageIds.TEST_ERROR))
+		else if (MessageIds.TEST_ERROR.equals(status))
 			fStatus = RemoteTestRunner.RERAN_ERROR;
 		else
 			throw new IllegalArgumentException(status);

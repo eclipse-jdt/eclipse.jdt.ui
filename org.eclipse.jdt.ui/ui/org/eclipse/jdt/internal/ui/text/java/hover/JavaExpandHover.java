@@ -199,6 +199,6 @@ public class JavaExpandHover extends AnnotationExpandHover {
 
 	private boolean isBreakpointAnnotation(Annotation a) {
 		// HACK to get breakpoints to show up first
-		return a.getType().equals("org.eclipse.debug.core.breakpoint"); //$NON-NLS-1$
+		return "org.eclipse.debug.core.breakpoint".equals(a.getType()); //$NON-NLS-1$
 	}
 }

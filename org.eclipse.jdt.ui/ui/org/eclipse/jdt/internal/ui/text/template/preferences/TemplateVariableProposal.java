@@ -67,7 +67,7 @@ public class TemplateVariableProposal implements ICompletionProposal {
 		try {
 			String variable;
 			String type= fResolver.getType();
-			if (type.equals("dollar")) //$NON-NLS-1$
+			if ("dollar".equals(type)) //$NON-NLS-1$
 				variable= "$$"; //$NON-NLS-1$
 			else if (fIncludeBrace)
 				variable= "${" + type + '}'; //$NON-NLS-1$

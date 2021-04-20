@@ -138,7 +138,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 	public String getCPListElementAttributeText(CPListElementAttribute attrib) {
 		String notAvailable= NewWizardMessages.CPListLabelProvider_none;
 		String key= attrib.getKey();
-		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
+		if (CPListElement.SOURCEATTACHMENT.equals(key)) {
 			String arg;
 			IPath path= (IPath) attrib.getValue();
 			if (path != null && !path.isEmpty()) {
@@ -151,7 +151,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 				arg= notAvailable;
 			}
 			return Messages.format(NewWizardMessages.CPListLabelProvider_source_attachment_label, new String[] { arg });
-		} else if (key.equals(CPListElement.OUTPUT)) {
+		} else if (CPListElement.OUTPUT.equals(key)) {
 			String arg= null;
 			IPath path= (IPath) attrib.getValue();
 			if (path != null) {
@@ -160,7 +160,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 				arg= NewWizardMessages.CPListLabelProvider_default_output_folder_label;
 			}
 			return Messages.format(NewWizardMessages.CPListLabelProvider_output_folder_label, new String[] { arg });
-		} else if (key.equals(CPListElement.EXCLUSION)) {
+		} else if (CPListElement.EXCLUSION.equals(key)) {
 			String arg= null;
 			IPath[] patterns= (IPath[]) attrib.getValue();
 			if (patterns != null && patterns.length > 0) {
@@ -185,7 +185,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 				arg= notAvailable;
 			}
 			return Messages.format(NewWizardMessages.CPListLabelProvider_exclusion_filter_label, new String[] { arg });
-		} else if (key.equals(CPListElement.INCLUSION)) {
+		} else if (CPListElement.INCLUSION.equals(key)) {
 			String arg= null;
 			IPath[] patterns= (IPath[]) attrib.getValue();
 			if (patterns != null && patterns.length > 0) {
@@ -210,7 +210,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 				arg= NewWizardMessages.CPListLabelProvider_all;
 			}
 			return Messages.format(NewWizardMessages.CPListLabelProvider_inclusion_filter_label, new String[] { arg });
-		} else if (key.equals(CPListElement.ACCESSRULES)) {
+		} else if (CPListElement.ACCESSRULES.equals(key)) {
 			IAccessRule[] rules= (IAccessRule[]) attrib.getValue();
 			int nRules= rules != null ? rules.length : 0;
 
@@ -251,7 +251,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 					return NewWizardMessages.CPListLabelProvider_access_rules_disabled;
 				}
 			}
-		} else if (key.equals(CPListElement.IGNORE_OPTIONAL_PROBLEMS)) {
+		} else if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(key)) {
 			String arg;
 			if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
 				arg= NewWizardMessages.CPListLabelProvider_ignore_optional_problems_yes;
@@ -259,7 +259,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 				arg= NewWizardMessages.CPListLabelProvider_ignore_optional_problems_no;
 			}
 			return Messages.format(NewWizardMessages.CPListLabelProvider_ignore_optional_problems_label, arg);
-		} else if (key.equals(CPListElement.MODULE)) {
+		} else if (CPListElement.MODULE.equals(key)) {
 			Object value= attrib.getValue();
 			if (value instanceof ModuleEncapsulationDetail[]) {
 				boolean limitModules= false;
@@ -282,7 +282,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 			} else {
 				return NewWizardMessages.CPListLabelProvider_not_modular_label;
 			}
-		} else if (key.equals(CPListElement.TEST)) {
+		} else if (CPListElement.TEST.equals(key)) {
 			String arg;
 			if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
 				arg= NewWizardMessages.CPListLabelProvider_test_yes;
@@ -292,7 +292,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 			return Messages.format(attrib.getParent().getEntryKind() == IClasspathEntry.CPE_SOURCE
 					? NewWizardMessages.CPListLabelProvider_test_sources_label
 					: NewWizardMessages.CPListLabelProvider_test_dependency_label, arg);
-		} else if (key.equals(CPListElement.WITHOUT_TEST_CODE)) {
+		} else if (CPListElement.WITHOUT_TEST_CODE.equals(key)) {
 			String arg;
 			if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
 				arg= NewWizardMessages.CPListLabelProvider_test_yes;
@@ -520,17 +520,17 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 		} else if (element instanceof CPListElementAttribute) {
 			CPListElementAttribute attribute= (CPListElementAttribute) element;
 			String key= (attribute).getKey();
-			if (key.equals(CPListElement.SOURCEATTACHMENT)) {
+			if (CPListElement.SOURCEATTACHMENT.equals(key)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_SOURCE_ATTACH_ATTRIB);
-			} else if (key.equals(CPListElement.OUTPUT)) {
+			} else if (CPListElement.OUTPUT.equals(key)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB);
-			} else if (key.equals(CPListElement.EXCLUSION)) {
+			} else if (CPListElement.EXCLUSION.equals(key)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB);
-			} else if (key.equals(CPListElement.INCLUSION)) {
+			} else if (CPListElement.INCLUSION.equals(key)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB);
-			} else if (key.equals(CPListElement.ACCESSRULES)) {
+			} else if (CPListElement.ACCESSRULES.equals(key)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_ACCESSRULES_ATTRIB);
-			} else if (key.equals(CPListElement.IGNORE_OPTIONAL_PROBLEMS)) {
+			} else if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(key)) {
 				Image image= fRegistry.get(getCPListElementBaseImage(attribute.getParent(), false));
 				if (image != null) {
 					ImageDescriptor overlay= JavaPluginImages.DESC_OVR_IGNORE_OPTIONAL_PROBLEMS;

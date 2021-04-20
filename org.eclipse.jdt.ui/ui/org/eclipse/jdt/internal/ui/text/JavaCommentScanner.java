@@ -266,7 +266,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	 */
 	@Override
 	public boolean affectsBehavior(PropertyChangeEvent event) {
-		return event.getProperty().equals(COMPILER_TASK_TAGS) || event.getProperty().equals(COMPILER_TASK_CASE_SENSITIVE) || super.affectsBehavior(event);
+		return COMPILER_TASK_TAGS.equals(event.getProperty()) || COMPILER_TASK_CASE_SENSITIVE.equals(event.getProperty()) || super.affectsBehavior(event);
 	}
 
 	/*
@@ -274,7 +274,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	 */
 	@Override
 	public void adaptToPreferenceChange(PropertyChangeEvent event) {
-		if (fTaskTagMatcher != null && event.getProperty().equals(COMPILER_TASK_TAGS)) {
+		if (fTaskTagMatcher != null && COMPILER_TASK_TAGS.equals(event.getProperty())) {
 			Object value= event.getNewValue();
 			if (value instanceof String) {
 				synchronized (fTaskTagMatcher) {
@@ -282,7 +282,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 					fTaskTagMatcher.addTaskTags((String) value);
 				}
 			}
-		} else if (fTaskTagMatcher != null && event.getProperty().equals(COMPILER_TASK_CASE_SENSITIVE)) {
+		} else if (fTaskTagMatcher != null && COMPILER_TASK_CASE_SENSITIVE.equals(event.getProperty())) {
 			Object value= event.getNewValue();
 			if (value instanceof String)
 				fTaskTagMatcher.setCaseSensitive(ENABLED.equals(value));

@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -63,6 +64,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
@@ -612,9 +614,9 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 			ClassInstanceCreation newClassInstanceCreation= ast.newClassInstanceCreation();
 			newClassInstanceCreation.setType(ast.newSimpleType(ASTNodeFactory.newName(ast, builder.getSimpleName())));
 			Expression initialization= newClassInstanceCreation;
-			Object emptyString= initializer.resolveConstantExpressionValue();
+			Object initialValue= initializer.resolveConstantExpressionValue();
 
-			if (!IndentAction.EMPTY_STR.equals(emptyString)) {
+			if (!IndentAction.EMPTY_STR.equals(initialValue)) {
 				InfixExpression concatenation= asStringConcatenation(initializer);
 
 				List<Expression> operands;
@@ -626,7 +628,8 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 
 				Expression firstOperand= operands.get(0);
 
-				if (operands.size() == 1 || ASTNodes.hasType(firstOperand, String.class.getCanonicalName())) {
+				if ((firstOperand.resolveConstantExpressionValue() != null || ASTNodes.is(firstOperand, StringLiteral.class))
+						&& (operands.size() == 1 || ASTNodes.hasType(firstOperand, String.class.getCanonicalName()))) {
 					newClassInstanceCreation.arguments().add(ASTNodes.createMoveTarget(rewrite, firstOperand));
 					operands.remove(0);
 				}

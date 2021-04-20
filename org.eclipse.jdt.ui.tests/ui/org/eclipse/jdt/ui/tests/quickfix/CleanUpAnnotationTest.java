@@ -127,7 +127,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 			cu1
 		}, new String[] {
 			expected1
-		});
+		}, null);
 
 		assertTrue(status.hasWarning());
 	}
@@ -166,7 +166,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 			cu1
 		}, new String[] {
 			expected1
-		});
+		}, null);
 
 		assertTrue(status.hasWarning());
 	}
@@ -205,7 +205,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 			cu1
 		}, new String[] {
 			expected1
-		});
+		}, null);
 
 		assertTrue(status.hasWarning());
 	}
@@ -249,7 +249,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 			cu1
 		}, new String[] {
 			expected1
-		});
+		}, null);
 
 		assertTrue(status.toString(), status.isOK());
 	}

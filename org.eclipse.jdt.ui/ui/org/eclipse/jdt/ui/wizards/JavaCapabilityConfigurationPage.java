@@ -87,8 +87,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
         setDescription(NewWizardMessages.JavaCapabilityConfigurationPage_description);
 	}
 
-	/* not to be used externally*/
-    BuildPathsBlock getBuildPathsBlock() {
+	private BuildPathsBlock getBuildPathsBlock() {
         if (fBuildPathsBlock == null) {
             IStatusChangeListener listener= this::updateStatus;
             fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0, useNewSourcePage(), null);

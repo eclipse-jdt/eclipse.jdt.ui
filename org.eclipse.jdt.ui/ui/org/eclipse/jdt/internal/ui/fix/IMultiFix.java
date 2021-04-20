@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public interface IMultiFix extends ICleanUp {
 
-	public class MultiFixContext extends CleanUpContext {
+	public static class MultiFixContext extends CleanUpContext {
 
 		private final IProblemLocation[] fLocations;
 

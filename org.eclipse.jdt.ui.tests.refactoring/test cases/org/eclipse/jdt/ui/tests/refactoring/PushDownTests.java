@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -898,6 +898,42 @@ public class PushDownTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test37() throws Exception {
+		String[] selectedMethodNames= { "m" };
+		String[][] selectedMethodSignatures= { new String[0] };
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		helper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	@Test
+	public void test38() throws Exception {
+		String[] selectedMethodNames= { "m" };
+		String[][] selectedMethodSignatures= { new String[0] };
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		helper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	@Test
 	public void testFail0() throws Exception {
 		String[] selectedMethodNames= {"f"};
 		String[][] selectedMethodSignatures= {new String[0]};
@@ -1111,6 +1147,63 @@ public class PushDownTests extends GenericRefactoringTest {
 		String[] selectedMethodNames= {};
 		String[][] selectedMethodSignatures= {};
 		String[] selectedFieldNames= {"bar"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		failInputHelper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+				RefactoringStatus.ERROR);
+	}
+
+	@Test
+	public void testFail13() throws Exception {
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= { new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		failInputHelper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+				RefactoringStatus.ERROR);
+	}
+
+	@Test
+	public void testFail14() throws Exception {
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= { new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		failInputHelper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+				RefactoringStatus.ERROR);
+	}
+
+	@Test
+	public void testFail15() throws Exception {
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= { new String[0]};
+		String[] selectedFieldNames= {};
 		String[] namesOfMethodsToPushDown= {};
 		String[][] signaturesOfMethodsToPushDown= {};
 		String[] namesOfFieldsToPushDown= selectedFieldNames;

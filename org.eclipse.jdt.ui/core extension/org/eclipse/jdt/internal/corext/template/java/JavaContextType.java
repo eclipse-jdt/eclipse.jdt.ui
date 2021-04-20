@@ -55,10 +55,10 @@ public class JavaContextType extends AbstractJavaContextType {
 	@Override
 	protected void initializeContext(IJavaContext context) {
 		// Separate 'module' context type from 'java' context type
-		if (getId().equals(ID_MODULE) || getId().equals(ID_EMPTY)) {
+		if (ID_MODULE.equals(getId()) || ID_EMPTY.equals(getId())) {
 			return;
 		}
-		if (!getId().equals(JavaContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
+		if (!JavaContextType.ID_ALL.equals(getId())) { // a specific context must also allow the templates that work everywhere
 			context.addCompatibleContextType(JavaContextType.ID_ALL);
 		}
 	}

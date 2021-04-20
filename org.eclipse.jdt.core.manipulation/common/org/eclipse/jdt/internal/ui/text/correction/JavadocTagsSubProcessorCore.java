@@ -149,7 +149,7 @@ public class JavadocTagsSubProcessorCore {
 	};
 
 	private static int getTagRanking(String tagName) {
-		if (tagName.equals(TagElement.TAG_EXCEPTION)) {
+		if (TagElement.TAG_EXCEPTION.equals(tagName)) {
 			tagName= TagElement.TAG_THROWS;
 		}
 		for (int i= 0; i < TAG_ORDER.length; i++) {

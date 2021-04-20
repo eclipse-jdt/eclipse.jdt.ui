@@ -131,7 +131,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		}
 
 		try {
-			if (mode.equals(JUnitLaunchConfigurationConstants.MODE_RUN_QUIETLY_MODE)) {
+			if (JUnitLaunchConfigurationConstants.MODE_RUN_QUIETLY_MODE.equals(mode)) {
 				launch.setAttribute(JUnitLaunchConfigurationConstants.ATTR_NO_DISPLAY, "true"); //$NON-NLS-1$
 				mode = ILaunchManager.RUN_MODE;
 			}
@@ -152,7 +152,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				return null;
 			}
 
-			fKeepAlive= mode.equals(ILaunchManager.DEBUG_MODE) && configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
+			fKeepAlive= ILaunchManager.DEBUG_MODE.equals(mode) && configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
 			fPort= evaluatePort();
 			launch.setAttribute(JUnitLaunchConfigurationConstants.ATTR_PORT, String.valueOf(fPort));
 
@@ -512,7 +512,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) type.getPackageFragment().getParent();
 			IClasspathEntry resolvedClasspathEntry= packageFragmentRoot.getResolvedClasspathEntry();
 			return Arrays.stream(resolvedClasspathEntry.getExtraAttributes())
-					.anyMatch(p -> p.getName().equals(IClasspathAttribute.MODULE) && p.getValue().equals("true")); //$NON-NLS-1$
+					.anyMatch(p -> IClasspathAttribute.MODULE.equals(p.getName()) && "true".equals(p.getValue())); //$NON-NLS-1$
 		} catch (JavaModelException e) {
 			// if anything goes wrong, assume true (in the worst case, user get a warning because of a redundant add-opens)
 			return true;

@@ -189,11 +189,11 @@ public class JUnitLaunchIncludeExcludeTagsDialog extends StatusDialog {
 	}
 
 	private IStatus getValidationStatus() {
-		if (fHasIncludeTags != null && fHasIncludeTags.isSelected() && fIncludeTags.getText().trim().equals(EMPTY_STRING)) {
+		if (fHasIncludeTags != null && fHasIncludeTags.isSelected() && EMPTY_STRING.equals(fIncludeTags.getText().trim())) {
 			return new StatusInfo(IStatus.ERROR, JUnitMessages.JUnitLaunchConfigurationTab_includetag_empty_error);
 		}
 
-		if (fHasExcludeTags != null && fHasExcludeTags.isSelected() && fExcludeTags.getText().trim().equals(EMPTY_STRING))
+		if (fHasExcludeTags != null && fHasExcludeTags.isSelected() && EMPTY_STRING.equals(fExcludeTags.getText().trim()))
 			return new StatusInfo(IStatus.ERROR, JUnitMessages.JUnitLaunchConfigurationTab_excludetag_empty_error);
 
 		return new StatusInfo();

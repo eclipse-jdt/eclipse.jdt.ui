@@ -176,7 +176,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 					setReplacementString(IndentManipulation.changeIndent(generatedCode, generatedIndent, settings.tabWidth, settings.indentWidth, indent, TextUtilities.getDefaultLineDelimiter(document)));
 
 					int replacementLength= getReplacementLength();
-					if (document.get(getReplacementOffset() + replacementLength, 1).equals(")")) { //$NON-NLS-1$
+					if (")".equals(document.get(getReplacementOffset() + replacementLength, 1))) { //$NON-NLS-1$
 						setReplacementLength(replacementLength + 1);
 					}
 

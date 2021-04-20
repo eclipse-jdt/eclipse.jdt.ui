@@ -90,7 +90,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -272,8 +272,8 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PatternMatchingForInstanceofCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PatternMatchingForInstanceofCleanup_description)));
 	}
 
 	@Test
@@ -389,6 +389,22 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF);
 
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testDoNotAddFinalForRecordComponent() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public record E (String abc) {\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 }

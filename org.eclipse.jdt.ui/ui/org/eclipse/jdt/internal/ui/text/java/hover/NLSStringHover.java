@@ -178,7 +178,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 					return null;
 				String varName= ((SimpleName)node).getIdentifier();
 				IField field= parentType.getField(varName);
-				if (!Signature.getSignatureSimpleName(field.getTypeSignature()).equals("String")) //$NON-NLS-1$
+				if (!"String".equals(Signature.getSignatureSimpleName(field.getTypeSignature()))) //$NON-NLS-1$
 					return null;
 				Object obj= field.getConstant();
 				identifier= obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : null;

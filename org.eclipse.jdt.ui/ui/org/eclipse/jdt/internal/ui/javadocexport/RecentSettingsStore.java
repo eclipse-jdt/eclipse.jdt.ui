@@ -207,7 +207,7 @@ public class RecentSettingsStore {
 		if (project != null) {
 			URL url= JavaUI.getProjectJavadocLocation(project);
 			//uses default if source is has http protocol
-			if (url == null || !url.getProtocol().equals("file")) { //$NON-NLS-1$
+			if (url == null || !"file".equals(url.getProtocol())) { //$NON-NLS-1$
 				// Since Javadoc.exe is a local tool its output is local.
 				// So if the project isn't local then the default location
 				// can't be local to a project. So use #getLocation() to

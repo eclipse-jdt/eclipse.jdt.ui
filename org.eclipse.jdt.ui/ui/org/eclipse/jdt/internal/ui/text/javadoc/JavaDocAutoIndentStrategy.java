@@ -131,7 +131,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 									String string= createJavaDocTags(d, c, indentation, lineDelimiter, unit);
 									buf.append(restOfLine);
 									// only add tags if they are non-empty - the empty line has already been added above.
-									if (string != null && !string.trim().equals("*")) //$NON-NLS-1$
+									if (string != null && !"*".equals(string.trim())) //$NON-NLS-1$
 										buf.append(string);
 								} catch (CoreException e) {
 									// ignore
@@ -295,7 +295,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 			boolean javadocComment= comment.startsWith("/**"); //$NON-NLS-1$
 			if (!isFirstComment(document, command, method, javadocComment))
 				return null;
-			boolean isJavaDoc= partition.getLength() >= 3 && document.get(partition.getOffset(), 3).equals("/**"); //$NON-NLS-1$
+			boolean isJavaDoc= partition.getLength() >= 3 && "/**".equals(document.get(partition.getOffset(), 3)); //$NON-NLS-1$
 			if (javadocComment == isJavaDoc) {
 				return prepareTemplateComment(comment, indentation, method.getJavaProject(), lineDelimiter);
 			}
@@ -498,7 +498,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 				}
 			}
 
-			if (command.text.equals("/")) { //$NON-NLS-1$
+			if ("/".equals(command.text)) { //$NON-NLS-1$
 				indentAfterCommentEnd(document, command);
 				return;
 			}

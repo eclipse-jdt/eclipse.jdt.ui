@@ -472,7 +472,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 */
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		if (part.equals(this))
+		if (this.equals(part))
 			return;
 
 		fLastSelectionProvider= part;

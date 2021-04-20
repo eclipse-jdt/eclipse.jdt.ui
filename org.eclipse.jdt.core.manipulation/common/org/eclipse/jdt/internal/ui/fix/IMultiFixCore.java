@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 public interface IMultiFixCore extends ICleanUpCore {
 
-	public class MultiFixContext extends CleanUpContextCore {
+	public static class MultiFixContext extends CleanUpContextCore {
 
 		private final IProblemLocationCore[] fLocations;
 

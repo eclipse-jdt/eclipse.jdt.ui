@@ -369,22 +369,22 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 */
 	@Override
 	public final void propertyChange(final PropertyChangeEvent event) {
-		if (event.getProperty().equals(PreferenceConstants.SPELLING_LOCALE)) {
+		if (PreferenceConstants.SPELLING_LOCALE.equals(event.getProperty())) {
 			resetSpellChecker();
 			return;
 		}
 
-		if (event.getProperty().equals(PreferenceConstants.SPELLING_USER_DICTIONARY)) {
+		if (PreferenceConstants.SPELLING_USER_DICTIONARY.equals(event.getProperty())) {
 			resetUserDictionary();
 			return;
 		}
 
-		if (event.getProperty().equals(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING)) {
+		if (PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING.equals(event.getProperty())) {
 			resetUserDictionary();
 			return;
 		}
 
-		if (event.getProperty().equals(SpellingService.PREFERENCE_SPELLING_ENABLED) && !EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
+		if (SpellingService.PREFERENCE_SPELLING_ENABLED.equals(event.getProperty()) && !EditorsUI.getPreferenceStore().getBoolean(SpellingService.PREFERENCE_SPELLING_ENABLED)) {
 			if (this == fgEngine)
 				SpellCheckEngine.shutdownInstance();
 			else

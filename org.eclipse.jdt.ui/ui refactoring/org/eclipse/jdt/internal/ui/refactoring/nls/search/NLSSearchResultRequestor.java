@@ -301,7 +301,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 					String identifier= source.substring(tokenStart, tokenEnd + 1);
 					for (IField field : parentClass.getFields()) {
 						if (field.getElementName().equals(identifier)) {
-							if (!Signature.getSignatureSimpleName(field.getTypeSignature()).equals("String")) { //$NON-NLS-1$
+							if (!"String".equals(Signature.getSignatureSimpleName(field.getTypeSignature()))) { //$NON-NLS-1$
 								return null;
 							}
 							Object obj= field.getConstant();

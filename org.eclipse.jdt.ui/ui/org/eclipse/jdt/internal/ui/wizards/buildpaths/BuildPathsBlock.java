@@ -678,7 +678,7 @@ public class BuildPathsBlock {
 		String pathStr= fBuildPathDialogField.getText();
 		Path outputPath= (new Path(pathStr));
 		pathStr= outputPath.lastSegment();
-		if (pathStr.equals(".settings") && outputPath.segmentCount() == 2) { //$NON-NLS-1$
+		if (".settings".equals(pathStr) && outputPath.segmentCount() == 2) { //$NON-NLS-1$
 			fOutputFolderStatus.setWarning(NewWizardMessages.OutputLocation_SettingsAsLocation);
 		}
 
@@ -1139,8 +1139,4 @@ public class BuildPathsBlock {
 	public void setFocus() {
 		fSourceContainerPage.setFocus();
     }
-
-	public BuildPathBasePage getSourceContainerPage() {
-		return fSourceContainerPage;
-	}
 }

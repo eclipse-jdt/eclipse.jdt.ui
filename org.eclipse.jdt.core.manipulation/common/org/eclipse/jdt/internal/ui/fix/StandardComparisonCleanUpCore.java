@@ -69,9 +69,9 @@ public class StandardComparisonCleanUpCore extends AbstractCleanUpCore {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.STANDARD_COMPARISON)) {
-			return "boolean isSmaller = text.compareTo(\"smaller\") < 0;"; //$NON-NLS-1$
+			return "boolean isSmaller = text.compareTo(\"smaller\") < 0;\n"; //$NON-NLS-1$
 		}
 
-		return "boolean isSmaller = text.compareTo(\"smaller\") == -1;"; //$NON-NLS-1$
+		return "boolean isSmaller = text.compareTo(\"smaller\") == -1;\n"; //$NON-NLS-1$
 	}
 }

@@ -156,7 +156,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	 */
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(PreferenceConstants.EDITOR_SHOW_SEGMENTS))
+		if (PreferenceConstants.EDITOR_SHOW_SEGMENTS.equals(event.getProperty()))
 			synchronizeWithPreference(getTextEditor());
 	}
 }

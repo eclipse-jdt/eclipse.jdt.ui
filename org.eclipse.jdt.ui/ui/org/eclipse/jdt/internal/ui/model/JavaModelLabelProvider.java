@@ -94,7 +94,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 			final IFolder folder= (IFolder) element;
 			if (!isInJavaProject(folder))
 				return null;
-			if (folder.getName().equals(NAME_SETTINGS_FOLDER)) {
+			if (NAME_SETTINGS_FOLDER.equals(folder.getName())) {
 				if (fSettingsImage == null || fSettingsImage.isDisposed())
 					fSettingsImage= JavaPluginImages.DESC_OBJS_PROJECT_SETTINGS.createImage();
 				return decorateImage(fSettingsImage, element);
@@ -117,7 +117,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 			final IFolder folder= (IFolder) element;
 			if (!isInJavaProject(folder))
 				return null;
-			if (folder.getName().equals(NAME_SETTINGS_FOLDER))
+			if (NAME_SETTINGS_FOLDER.equals(folder.getName()))
 				return decorateText(fPreferencesLabel, element);
 		}
 		String text= super.getText(element);

@@ -125,7 +125,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			}
 		}
 
-		private abstract class ParameterInfoLabelProvider extends CellLabelProvider {
+		private abstract static class ParameterInfoLabelProvider extends CellLabelProvider {
 			@Override
 			public void update(ViewerCell cell) {
 				ParameterInfo pi= (ParameterInfo) cell.getElement();

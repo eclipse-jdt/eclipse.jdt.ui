@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2019 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ class JUnit3Identifier implements ITestIdentifier {
 		this.ref = ref;
 	}
 
+	@Override
 	public String getName() {
 		return ref.getName();
 	}
@@ -43,14 +44,17 @@ class JUnit3Identifier implements ITestIdentifier {
 		return ref.hashCode();
 	}
 
+	@Override
 	public String getDisplayName() {
 		return getName();
 	}
 
+	@Override
 	public String getParameterTypes() {
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getUniqueId() {
 		return ""; //$NON-NLS-1$
 	}

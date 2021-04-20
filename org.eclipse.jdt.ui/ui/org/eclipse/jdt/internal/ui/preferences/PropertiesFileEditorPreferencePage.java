@@ -103,7 +103,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 			Assert.isNotNull(configuration);
 			Assert.isNotNull(preferenceStore);
 			final IPropertyChangeListener fontChangeListener= event -> {
-				if (event.getProperty().equals(PreferenceConstants.PROPERTIES_FILE_EDITOR_TEXT_FONT)) {
+				if (PreferenceConstants.PROPERTIES_FILE_EDITOR_TEXT_FONT.equals(event.getProperty())) {
 					Font font= JFaceResources.getFont(PreferenceConstants.PROPERTIES_FILE_EDITOR_TEXT_FONT);
 					viewer.getTextWidget().setFont(font);
 				}

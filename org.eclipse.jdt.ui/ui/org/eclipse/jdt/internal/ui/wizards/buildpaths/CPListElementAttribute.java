@@ -80,7 +80,7 @@ public class CPListElementAttribute {
 			return true;
 		}
 		if (fBuiltIn) {
-			if (this.fKey.equals(IClasspathAttribute.MODULE)) {
+			if (IClasspathAttribute.MODULE.equals(this.fKey)) {
 				IJavaProject javaProject= fParent.getJavaProject();
 				if (!JavaModelUtil.is9OrHigher(javaProject)) {
 					return true; // cannot set "module=true" in 1.8- project

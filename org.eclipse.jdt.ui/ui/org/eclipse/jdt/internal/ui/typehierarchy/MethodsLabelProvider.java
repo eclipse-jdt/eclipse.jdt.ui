@@ -50,7 +50,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		fShowDefiningType= false;
 		fMethodsViewer= methodsViewer;
 		fColorRegistryListener= event -> {
-			if (event.getProperty().equals(ColoredViewersManager.INHERITED_COLOR_NAME)) {
+			if (ColoredViewersManager.INHERITED_COLOR_NAME.equals(event.getProperty())) {
 				fireLabelProviderChanged(new LabelProviderChangedEvent(MethodsLabelProvider.this, null));
 			}
 		};

@@ -305,7 +305,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 	protected boolean isNonProjectSpecificContainer(IPath containerPath) {
 		if (containerPath.segmentCount() > 0) {
 			String id= containerPath.segment(0);
-			if (id.equals(JavaCore.USER_LIBRARY_CONTAINER_ID) || id.equals(JavaRuntime.JRE_CONTAINER)) {
+			if (JavaCore.USER_LIBRARY_CONTAINER_ID.equals(id) || id.equals(JavaRuntime.JRE_CONTAINER)) {
 				return true;
 			}
 		}

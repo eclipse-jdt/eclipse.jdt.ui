@@ -60,13 +60,13 @@ public class JarEntryResourceProperties implements IPropertySource {
 
 	@Override
 	public Object getPropertyValue(Object name) {
-		if (name.equals(P_NAME)) {
+		if (P_NAME.equals(name)) {
 			return fJarEntryResource.getName();
-		} else 	if (name.equals(P_FULL_PATH)) {
+		} else 	if (P_FULL_PATH.equals(name)) {
 			return fJarEntryResource.getFullPath();
-		} else 	if (name.equals(P_IS_FILE)) {
+		} else 	if (P_IS_FILE.equals(name)) {
 			return fJarEntryResource.isFile();
-		} else 	if (name.equals(P_IS_READ_ONLY)) {
+		} else 	if (P_IS_READ_ONLY.equals(name)) {
 			return fJarEntryResource.isReadOnly();
 		}
 

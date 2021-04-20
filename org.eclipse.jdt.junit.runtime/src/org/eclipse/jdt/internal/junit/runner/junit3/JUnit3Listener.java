@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,15 +16,15 @@
 
 package org.eclipse.jdt.internal.junit.runner.junit3;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestListener;
-
 import org.eclipse.jdt.internal.junit.runner.IClassifiesThrowables;
 import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.runner.TestExecution;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestListener;
 
 public class JUnit3Listener implements TestListener {
 	private final IListensToTestExecutions fNotified;
@@ -36,18 +36,22 @@ public class JUnit3Listener implements TestListener {
 		fClassifier= execution.getClassifier();
 	}
 
+	@Override
 	public void startTest(Test test) {
 		fNotified.notifyTestStarted(id(test));
 	}
 
+	@Override
 	public void addError(Test test, Throwable throwable) {
 		newReference(test).sendFailure(throwable, fClassifier, MessageIds.TEST_ERROR, fNotified);
 	}
 
+	@Override
 	public void addFailure(Test test, AssertionFailedError assertionFailedError) {
 		newReference(test).sendFailure(assertionFailedError, fClassifier, MessageIds.TEST_FAILED, fNotified);
 	}
 
+	@Override
 	public void endTest(Test test) {
 		fNotified.notifyTestEnded(id(test));
 	}

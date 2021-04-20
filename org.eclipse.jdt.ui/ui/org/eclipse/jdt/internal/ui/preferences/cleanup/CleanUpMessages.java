@@ -65,6 +65,7 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_CheckboxName_PullUpAssignment;
 	public static String CodeStyleTabPage_CheckboxName_ElseIf;
 	public static String CodeStyleTabPage_CheckboxName_ReduceIndentation;
+	public static String CodeStyleTabPage_CheckboxName_Instanceof;
 
 	public static String CodeStyleTabPage_GroupName_NumberLiteral;
 	public static String CodeStyleTabPage_CheckboxName_NumberSuffix;
@@ -87,9 +88,11 @@ public class CleanUpMessages extends NLS {
 	public static String OptimizationTabPage_CheckboxName_StringBuilder;
 	public static String OptimizationTabPage_CheckboxName_PlainReplacement;
 	public static String OptimizationTabPage_CheckboxName_UseLazyLogicalOperator;
+	public static String OptimizationTabPage_CheckboxName_ValueOfRatherThanInstantiation;
 	public static String OptimizationTabPage_CheckboxName_PrimitiveComparison;
 	public static String OptimizationTabPage_CheckboxName_PrimitiveParsing;
 	public static String OptimizationTabPage_CheckboxName_PrimitiveSerialization;
+	public static String OptimizationTabPage_CheckboxName_PrimitiveRatherThanWrapper;
 	public static String OptimizationTabPage_CheckboxName_PrecompileRegEx;
 	public static String OptimizationTabPage_CheckboxName_NoStringCreation;
 	public static String OptimizationTabPage_CheckboxName_BooleanLiteral;
@@ -131,6 +134,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_ArraysFill;
 	public static String UnnecessaryCodeTabPage_CheckboxName_EvaluateNullable;
 	public static String UnnecessaryCodeTabPage_CheckboxName_PushDownNegation;
+	public static String UnnecessaryCodeTabPage_CheckboxName_BooleanValueRatherThanComparison;
 	public static String UnnecessaryCodeTabPage_CheckboxName_DoubleNegation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ComparisonStatement;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSuperCall;
@@ -144,7 +148,10 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_EmbeddedIf;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons_description;
+	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantComparator;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantArrayCreation_description;
+	public static String UnnecessaryCodeTabPage_CheckboxName_ArrayWithCurly;
+	public static String UnnecessaryCodeTabPage_CheckboxName_ReturnExpression;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UselessReturn;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UselessContinue;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnloopedWhile;
@@ -164,19 +171,21 @@ public class CleanUpMessages extends NLS {
 	public static String SourceFixingTabPage_GroupName_standardCode;
 
 	public static String SourceFixingTabPage_CheckboxName_InvertEquals;
-	public static String SourceFixingTabPage_CheckboxName_StandardComparison;
 	public static String SourceFixingTabPage_CheckboxName_CheckSignOfBitwiseOperation;
+	public static String SourceFixingTabPage_CheckboxName_StandardComparison;
 
 	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
 
+	public static String DuplicateCodeTabPage_CheckboxName_OperandFactorization;
 	public static String DuplicateCodeTabPage_CheckboxName_TernaryOperator;
 	public static String DuplicateCodeTabPage_CheckboxName_StrictlyEqualOrDifferent;
 	public static String DuplicateCodeTabPage_CheckboxName_MergeConditionalBlocks;
 	public static String DuplicateCodeTabPage_CheckboxName_ControlFlowMerge;
+	public static String DuplicateCodeTabPage_CheckboxName_OneIfRatherThanDuplicateBlocksThatFallThrough;
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd;
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantIfCondition;
 
-	public static String JavaFeatureTabPage_GroupName_Java15;
+	public static String JavaFeatureTabPage_GroupName_Java16;
 	public static String JavaFeatureTabPage_CheckboxName_PatternMatchingForInstanceof;
 
 	public static String JavaFeatureTabPage_GroupName_Java14;
@@ -209,6 +218,13 @@ public class CleanUpMessages extends NLS {
 	public static String JavaFeatureTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed;
 	public static String JavaFeatureTabPage_CheckboxName_Autoboxing;
 	public static String JavaFeatureTabPage_CheckboxName_Unboxing;
+
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_FileSeparator;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_PathSeparator;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_LineSeparator;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_FileEncoding;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_BooleanProperty;
 
 	static {
 		// initialize resource bundle

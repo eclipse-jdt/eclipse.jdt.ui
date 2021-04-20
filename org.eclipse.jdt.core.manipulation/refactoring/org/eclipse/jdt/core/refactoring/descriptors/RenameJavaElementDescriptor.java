@@ -194,7 +194,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 		super(id, project, description, comment, arguments, flags);
 		Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); //$NON-NLS-1$
 		fName= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_NAME);
-		if (getID().equals(IJavaRefactorings.RENAME_TYPE_PARAMETER)) {
+		if (IJavaRefactorings.RENAME_TYPE_PARAMETER.equals(getID())) {
 			fJavaElement= JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_INPUT, getProject());
 			String parameterName= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_PARAMETER);
 			if (fJavaElement instanceof IType) {
@@ -298,7 +298,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_NAME, fName);
-		if (getID().equals(IJavaRefactorings.RENAME_TYPE_PARAMETER)) {
+		if (IJavaRefactorings.RENAME_TYPE_PARAMETER.equals(getID())) {
 			final ITypeParameter parameter= (ITypeParameter) fJavaElement;
 			JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, getProject(), parameter.getDeclaringMember());
 			JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_PARAMETER, parameter.getElementName());

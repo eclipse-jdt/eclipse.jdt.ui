@@ -399,7 +399,7 @@ public class JavaStructureCreator extends StructureCreator {
 				// (non-empty) argument list
 				String argList= jn.extractArgumentList();
 				RewriteInfo argInfo= null;
-				if (argList != null && !argList.equals("()")) { //$NON-NLS-1$
+				if (argList != null && !"()".equals(argList)) { //$NON-NLS-1$
 					argInfo= map.get(argList);
 					if (argInfo == null) {
 						argInfo= new RewriteInfo();

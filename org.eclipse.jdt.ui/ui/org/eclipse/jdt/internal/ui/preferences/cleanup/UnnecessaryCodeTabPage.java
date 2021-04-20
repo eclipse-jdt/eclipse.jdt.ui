@@ -22,7 +22,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
@@ -31,10 +33,12 @@ import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
 import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SubstringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
@@ -58,6 +62,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new ArraysFillCleanUp(values),
 				new EvaluateNullableCleanUp(values),
 				new PushDownNegationCleanUp(values),
+				new BooleanValueRatherThanComparisonCleanUp(values),
 				new DoubleNegationCleanUp(values),
 				new RedundantComparisonStatementCleanUp(values),
 				new RedundantSuperCallCleanUp(values),
@@ -69,7 +74,10 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new RedundantModifiersCleanUp(values),
 				new EmbeddedIfCleanUp(values),
 				new RedundantSemicolonsCleanUp(values),
+				new RedundantComparatorCleanUp(values),
 				new UnnecessaryArrayCreationCleanUp(values),
+				new ArrayWithCurlyCleanUp(values),
+				new ReturnExpressionCleanUp(values),
 				new UselessReturnCleanUp(values),
 				new UselessContinueCleanUp(values),
 				new UnloopedWhileCleanUp(values)
@@ -115,6 +123,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(pushDownNegation);
 
+		CheckboxPreference booleanValueRatherThanComparison= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_BooleanValueRatherThanComparison, CleanUpConstants.BOOLEAN_VALUE_RATHER_THAN_COMPARISON, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(booleanValueRatherThanComparison);
+
 		CheckboxPreference doubleNegation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_DoubleNegation, CleanUpConstants.DOUBLE_NEGATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(doubleNegation);
 
@@ -149,8 +160,17 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		CheckboxPreference semicolons= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons, CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(semicolons);
 
+		CheckboxPreference redundantComparator= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantComparator, CleanUpConstants.REDUNDANT_COMPARATOR, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(redundantComparator);
+
 		CheckboxPreference arrayCreation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnnecessaryVarargsArrayCreation, CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(arrayCreation);
+
+		CheckboxPreference arrayWithCurlyPref= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ArrayWithCurly, CleanUpConstants.ARRAY_WITH_CURLY, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(arrayWithCurlyPref);
+
+		CheckboxPreference returnExpression= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_ReturnExpression, CleanUpConstants.RETURN_EXPRESSION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(returnExpression);
 
 		CheckboxPreference uselessReturn= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UselessReturn, CleanUpConstants.REMOVE_USELESS_RETURN, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(uselessReturn);

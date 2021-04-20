@@ -237,7 +237,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 			if (first instanceof ITypeBinding && second instanceof ITypeBinding) {
 				final ITypeBinding left= (ITypeBinding) first;
 				final ITypeBinding right= (ITypeBinding) second;
-				if (right.getQualifiedName().equals("java.lang.Object")) //$NON-NLS-1$
+				if ("java.lang.Object".equals(right.getQualifiedName())) //$NON-NLS-1$
 					return -1;
 				if (left.isEqualTo(right))
 					return 0;
@@ -328,7 +328,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 			ITypeBinding cloneable= getSuperType(binding, "java.lang.Cloneable"); //$NON-NLS-1$
 			if (cloneable != null) {
 				for (IMethodBinding method : fUnit.getAST().resolveWellKnownType("java.lang.Object").getDeclaredMethods()) { //$NON-NLS-1$
-					if (method.getName().equals("clone") && method.getParameterTypes().length == 0) //$NON-NLS-1$
+					if ("clone".equals(method.getName()) && method.getParameterTypes().length == 0) //$NON-NLS-1$
 						toImplement.add(method);
 				}
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -79,10 +79,20 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 
 		private int getDepth(ITypeHierarchy hierarchy, IType input) {
 			int count= 0;
-			IType superType= hierarchy.getSuperclass(input);
-			while (superType != null) {
-				count++;
-				superType= hierarchy.getSuperclass(superType);
+			if (Flags.isInterface(hierarchy.getCachedFlags(input))) {
+				IType[] superInterfaces= hierarchy.getSuperInterfaces(input);
+				while (superInterfaces != null && superInterfaces.length > 0) {
+					count++;
+					IType superInterface= hierarchy.getSuperInterfaces(input)[0];
+					superInterfaces= hierarchy.getSuperInterfaces(superInterface);
+				}
+
+			} else {
+				IType superType= hierarchy.getSuperclass(input);
+				while (superType != null) {
+					count++;
+					superType= hierarchy.getSuperclass(superType);
+				}
 			}
 			return count;
 		}
@@ -99,7 +109,8 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 					res.addAll(Arrays.asList(interfaces));
 				} else {
 					if (Flags.isInterface(hierarchy.getCachedFlags(input))) {
-						res.add(input);
+						IType[] roots= hierarchy.getRootInterfaces();
+						res.addAll(Arrays.asList(roots));
 					} else if (isAnonymousFromInterface(input)) {
 						res.add(hierarchy.getSuperInterfaces(input)[0]);
 					} else {
@@ -151,6 +162,13 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		protected IType getParentType(IType type) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
+				if (Flags.isInterface(hierarchy.getCachedFlags(type))) {
+					IType[] superInterfaces= hierarchy.getSuperInterfaces(type);
+					if (superInterfaces != null && superInterfaces.length > 0) {
+						return hierarchy.getSuperInterfaces(type)[0];
+					}
+					return null;
+				}
 				return hierarchy.getSuperclass(type);
 				// don't handle interfaces
 			}

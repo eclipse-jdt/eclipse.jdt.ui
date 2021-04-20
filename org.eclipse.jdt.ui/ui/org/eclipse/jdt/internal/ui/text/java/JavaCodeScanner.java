@@ -549,13 +549,13 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 	@Override
 	public boolean affectsBehavior(PropertyChangeEvent event) {
-		return event.getProperty().equals(SOURCE_VERSION) || super.affectsBehavior(event);
+		return SOURCE_VERSION.equals(event.getProperty()) || super.affectsBehavior(event);
 	}
 
 	@Override
 	public void adaptToPreferenceChange(PropertyChangeEvent event) {
 
-		if (event.getProperty().equals(SOURCE_VERSION)) {
+		if (SOURCE_VERSION.equals(event.getProperty())) {
 			Object value= event.getNewValue();
 
 			if (value instanceof String) {

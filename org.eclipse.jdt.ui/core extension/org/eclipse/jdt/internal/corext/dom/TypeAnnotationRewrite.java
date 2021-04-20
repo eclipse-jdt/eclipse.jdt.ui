@@ -99,7 +99,7 @@ public class TypeAnnotationRewrite {
 		boolean typeUseSeen= false;
 		boolean otherSeen= false;
 		for (final IMemberValuePairBinding pair : binding.getAllMemberValuePairs()) {
-			if (pair.getKey() == null || pair.getKey().equals("value")) { //$NON-NLS-1$
+			if (pair.getKey() == null || "value".equals(pair.getKey())) { //$NON-NLS-1$
 				Object value= pair.getValue();
 				if (value instanceof Object[]) {
 					for (Object v : (Object[]) value) {

@@ -90,13 +90,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original },
+				new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation)));
 	}
 
 	@Test
@@ -140,14 +140,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression)));
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original },
+				new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation)));
 	}
 
 	@Test
@@ -183,12 +183,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -232,8 +232,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression)));
 	}
 
 	@Test
@@ -274,12 +274,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c5
@@ -424,12 +424,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c5
@@ -572,12 +572,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c2
@@ -642,12 +642,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "@FunctionalInterface interface ZV { void zoo(); }\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -759,7 +759,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -800,7 +800,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "@interface A {}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -856,12 +856,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -900,12 +900,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -945,12 +945,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -994,12 +994,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		disable(CleanUpConstants.USE_LAMBDA);
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
 	}
 
 	@Test
@@ -1083,7 +1083,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    final String s = \"abc\";\n"
 				+ "    Runnable run1 = () -> System.out.println(s);\n"
 				+ "}\n";
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1127,7 +1127,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return \"\";\n"
 				+ "    }\n"
 				+ "}\n";
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -1171,39 +1171,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return \"\";\n"
 				+ "    }\n"
 				+ "}\n";
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
-	}
-
-	@Test
-	public void testDoNotRefactorWithAnonymousInstantiation() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Date;\n" //
-				+ "import java.util.function.Supplier;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public Supplier<Date> doNotRefactorWithAnonymousBody() {\n" //
-				+ "        return () -> new Date() {\n" //
-				+ "            @Override\n" //
-				+ "            public String toString() {\n" //
-				+ "                return \"foo\";\n" //
-				+ "            }\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
-
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, null);
 	}
 
 	@Test
 	public void testSimplifyLambdaExpression() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String input= "" //
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import static java.util.Calendar.getInstance;\n" //
@@ -1226,29 +1201,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return (someString) -> someString.trim().toLowerCase();\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<String, String> doNotRemoveParenthesesWithSingleVariableDeclaration() {\n" //
-				+ "        return (String someString) -> someString.trim().toLowerCase();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<String, String, Integer> doNotRemoveParenthesesWithTwoParameters() {\n" //
-				+ "        return (someString, anotherString) -> someString.trim().compareTo(anotherString.trim());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Supplier<Boolean> doNotRemoveParenthesesWithNoParameter() {\n" //
-				+ "        return () -> {System.out.println(\"foo\");return true;};\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public Function<String, String> removeReturnAndBrackets() {\n" //
 				+ "        return someString -> {return someString.trim().toLowerCase();};\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<String, String> removeReturnAndBracketsWithParentheses() {\n" //
 				+ "        return (someString) -> {return someString.trim().toLowerCase() + \"bar\";};\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> doNotRemoveReturnWithSeveralStatements() {\n" //
-				+ "        return someString -> {String trimmed = someString.trim();\n" //
-				+ "        return trimmed.toLowerCase();};\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Supplier<ArrayList<String>> useCreationReference() {\n" //
@@ -1264,16 +1222,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return (Integer capacity) -> new ArrayList<>(capacity);\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<Integer, ArrayList<String>> doNotRefactorWithExpressions() {\n" //
-				+ "        return capacity -> new ArrayList<>(capacity + 1);\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public BiFunction<Integer, Integer, Vector<String>> useCreationReferenceWithParameters() {\n" //
 				+ "        return (initialCapacity, capacityIncrement) -> new Vector<>(initialCapacity, capacityIncrement);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Integer, Integer, Vector<String>> doNotRefactorShuffledParams() {\n" //
-				+ "        return (initialCapacity, capacityIncrement) -> new Vector<>(capacityIncrement, initialCapacity);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<Date, Long> useMethodReference() {\n" //
@@ -1284,12 +1234,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return (date, anotherDate) -> date.compareTo(anotherDate);\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<String, Long> useTypeReference() {\n" //
+				+ "    public static Function<String, Long> useTypeReference() {\n" //
 				+ "        return (numberInText) -> { return Long.getLong(numberInText); };\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public static Function<Instant, Date> useTypeReferenceOnClassMethod() {\n" //
-				+ "        return instant -> Date.from(instant);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static Function<Locale, Calendar> useTypeReferenceOnImportedMethod() {\n" //
@@ -1304,18 +1250,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return textToSearch -> \"AutoRefactor\".indexOf(textToSearch);\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<String, Integer> doNotUseExpressionMethodReferenceOnVariable() {\n" //
-				+ "        return textToSearch -> this.changeableText.indexOf(textToSearch);\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public Function<Date, Integer> useThisMethodReference() {\n" //
 				+ "        return anotherDate -> compareTo(anotherDate);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public class InnerClass {\n" //
-				+ "        public Function<Date, Integer> doNotUseThisMethodReferenceOnTopLevelClassMethod() {\n" //
-				+ "            return anotherDate -> compareTo(anotherDate);\n" //
-				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<Date, Integer> useThisMethodReferenceAddThis() {\n" //
@@ -1326,19 +1262,28 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return anotherDate -> super.compareTo(anotherDate);\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<Integer, String> doNotUseConflictingMethodReference() {\n" //
-				+ "        return numberToPrint -> numberToPrint.toString();\n" //
+				+ "    public static Integer dummy(String arg) {\n" //
+				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<Integer, String> doNotUseConflictingStaticMethodReference() {\n" //
-				+ "        return numberToPrint -> Integer.toString(numberToPrint);\n" //
+				+ "    public static Function<String, Integer> useTypeReferenceQualifyingLocalType() {\n" //
+				+ "        return numberInText -> E.dummy(numberInText);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Function<String, Integer> useTypeReferenceFullyQualifyingLocalType() {\n" //
+				+ "        return numberInText -> test1.E.dummy(numberInText);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Function<String, Integer> useTypeReferenceOnLocalType() {\n" //
+				+ "        return numberInText -> dummy(numberInText);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {\n" //
+				+ "        return instant -> java.sql.Date.from(instant);\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", input, false, null);
 
-		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
-
-		String output= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import static java.util.Calendar.getInstance;\n" //
@@ -1361,29 +1306,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return someString -> someString.trim().toLowerCase();\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<String, String> doNotRemoveParenthesesWithSingleVariableDeclaration() {\n" //
-				+ "        return (String someString) -> someString.trim().toLowerCase();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<String, String, Integer> doNotRemoveParenthesesWithTwoParameters() {\n" //
-				+ "        return (someString, anotherString) -> someString.trim().compareTo(anotherString.trim());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Supplier<Boolean> doNotRemoveParenthesesWithNoParameter() {\n" //
-				+ "        return () -> {System.out.println(\"foo\");return true;};\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public Function<String, String> removeReturnAndBrackets() {\n" //
 				+ "        return someString -> someString.trim().toLowerCase();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<String, String> removeReturnAndBracketsWithParentheses() {\n" //
 				+ "        return someString -> (someString.trim().toLowerCase() + \"bar\");\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> doNotRemoveReturnWithSeveralStatements() {\n" //
-				+ "        return someString -> {String trimmed = someString.trim();\n" //
-				+ "        return trimmed.toLowerCase();};\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Supplier<ArrayList<String>> useCreationReference() {\n" //
@@ -1399,16 +1327,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return (Integer capacity) -> new ArrayList<>(capacity);\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<Integer, ArrayList<String>> doNotRefactorWithExpressions() {\n" //
-				+ "        return capacity -> new ArrayList<>(capacity + 1);\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public BiFunction<Integer, Integer, Vector<String>> useCreationReferenceWithParameters() {\n" //
 				+ "        return Vector::new;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Integer, Integer, Vector<String>> doNotRefactorShuffledParams() {\n" //
-				+ "        return (initialCapacity, capacityIncrement) -> new Vector<>(capacityIncrement, initialCapacity);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<Date, Long> useMethodReference() {\n" //
@@ -1419,12 +1339,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return Date::compareTo;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<String, Long> useTypeReference() {\n" //
+				+ "    public static Function<String, Long> useTypeReference() {\n" //
 				+ "        return Long::getLong;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public static Function<Instant, Date> useTypeReferenceOnClassMethod() {\n" //
-				+ "        return instant -> Date.from(instant);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static Function<Locale, Calendar> useTypeReferenceOnImportedMethod() {\n" //
@@ -1439,18 +1355,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return \"AutoRefactor\"::indexOf;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public Function<String, Integer> doNotUseExpressionMethodReferenceOnVariable() {\n" //
-				+ "        return textToSearch -> this.changeableText.indexOf(textToSearch);\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public Function<Date, Integer> useThisMethodReference() {\n" //
 				+ "        return this::compareTo;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public class InnerClass {\n" //
-				+ "        public Function<Date, Integer> doNotUseThisMethodReferenceOnTopLevelClassMethod() {\n" //
-				+ "            return anotherDate -> compareTo(anotherDate);\n" //
-				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Function<Date, Integer> useThisMethodReferenceAddThis() {\n" //
@@ -1461,6 +1367,97 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return super::compareTo;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public static Integer dummy(String arg) {\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Function<String, Integer> useTypeReferenceQualifyingLocalType() {\n" //
+				+ "        return E::dummy;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Function<String, Integer> useTypeReferenceFullyQualifyingLocalType() {\n" //
+				+ "        return E::dummy;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Function<String, Integer> useTypeReferenceOnLocalType() {\n" //
+				+ "        return E::dummy;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {\n" //
+				+ "        return java.sql.Date::from;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotSimplifyLambdaExpression() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.Vector;\n" //
+				+ "import java.util.function.BiFunction;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E extends Date {\n" //
+				+ "    public String changeableText = \"foo\";\n" //
+				+ "\n" //
+				+ "    public Supplier<Date> doNotRefactorWithAnonymousBody() {\n" //
+				+ "        return () -> new Date() {\n" //
+				+ "            @Override\n" //
+				+ "            public String toString() {\n" //
+				+ "                return \"foo\";\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Function<String, String> doNotRemoveParenthesesWithSingleVariableDeclaration() {\n" //
+				+ "        return (String someString) -> someString.trim().toLowerCase();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public BiFunction<String, String, Integer> doNotRemoveParenthesesWithTwoParameters() {\n" //
+				+ "        return (someString, anotherString) -> someString.trim().compareTo(anotherString.trim());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Supplier<Boolean> doNotRemoveParenthesesWithNoParameter() {\n" //
+				+ "        return () -> {System.out.println(\"foo\");return true;};\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Function<String, String> doNotRemoveReturnWithSeveralStatements() {\n" //
+				+ "        return someString -> {String trimmed = someString.trim();\n" //
+				+ "        return trimmed.toLowerCase();};\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Function<Integer, ArrayList<String>> doNotRefactorWithExpressions() {\n" //
+				+ "        return capacity -> new ArrayList<>(capacity + 1);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public BiFunction<Integer, Integer, Vector<String>> doNotRefactorShuffledParams() {\n" //
+				+ "        return (initialCapacity, capacityIncrement) -> new Vector<>(capacityIncrement, initialCapacity);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Function<String, Integer> doNotUseExpressionMethodReferenceOnVariable() {\n" //
+				+ "        return textToSearch -> this.changeableText.indexOf(textToSearch);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class InnerClass {\n" //
+				+ "        public Function<Date, Integer> doNotUseThisMethodReferenceOnTopLevelClassMethod() {\n" //
+				+ "            return anotherDate -> compareTo(anotherDate);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public Function<Integer, String> doNotUseConflictingMethodReference() {\n" //
 				+ "        return numberToPrint -> numberToPrint.toString();\n" //
 				+ "    }\n" //
@@ -1469,10 +1466,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return numberToPrint -> Integer.toString(numberToPrint);\n" //
 				+ "    }\n" //
 				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
 
-		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -1539,7 +1537,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return a + 8;\n" //
 				+ "    };\n" //
 				+ "}\n"; //
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -2201,8 +2199,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ComparingOnCriteriaCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ComparingOnCriteriaCleanUp_description)));
 	}
 
 	@Test
@@ -3113,8 +3111,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.JoinCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.JoinCleanup_description)));
 	}
 
 	@Test

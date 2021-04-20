@@ -470,8 +470,9 @@ public final class PushDownWizard extends RefactoringWizard {
 			final int commonActionCode= getCommonActionCodeForSelectedInfos();
 			if (commonActionCode == -1)
 				return 0;
-			for (String key : mapping.keySet()) {
-				final int action= mapping.get(key);
+			for (Map.Entry<String, Integer> entry : mapping.entrySet()) {
+				String key = entry.getKey();
+				final int action= entry.getValue();
 				if (commonActionCode == action) {
 					for (int index= 0; index < keys.length; index++) {
 						if (key.equals(keys[index]))

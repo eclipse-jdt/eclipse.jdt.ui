@@ -144,7 +144,7 @@ public class TestKindRegistry {
 				if (runWithAnnotation.exists()) {
 					IMemberValuePair[] memberValuePairs= runWithAnnotation.getMemberValuePairs();
 					for (IMemberValuePair memberValuePair : memberValuePairs) {
-						if (memberValuePair.getMemberName().equals("value") && memberValuePair.getValue().equals("JUnitPlatform")) { //$NON-NLS-1$ //$NON-NLS-2$
+						if ("value".equals(memberValuePair.getMemberName()) && "JUnitPlatform".equals(memberValuePair.getValue())) { //$NON-NLS-1$ //$NON-NLS-2$
 							return true;
 						}
 					}

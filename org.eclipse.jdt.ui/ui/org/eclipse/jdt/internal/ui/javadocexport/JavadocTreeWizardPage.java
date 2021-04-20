@@ -276,19 +276,19 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	protected void setVisibilitySettings() {
 		fVisibilitySelection= fStore.getAccess();
-		fPrivateVisibility.setSelection(fVisibilitySelection.equals(JavadocOptionsManager.PRIVATE));
+		fPrivateVisibility.setSelection(JavadocOptionsManager.PRIVATE.equals(fVisibilitySelection));
 		if (fPrivateVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_privatevisibilitydescription_label);
 
-		fProtectedVisibility.setSelection(fVisibilitySelection.equals(JavadocOptionsManager.PROTECTED));
+		fProtectedVisibility.setSelection(JavadocOptionsManager.PROTECTED.equals(fVisibilitySelection));
 		if (fProtectedVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_protectedvisibilitydescription_label);
 
-		fPackageVisibility.setSelection(fVisibilitySelection.equals(JavadocOptionsManager.PACKAGE));
+		fPackageVisibility.setSelection(JavadocOptionsManager.PACKAGE.equals(fVisibilitySelection));
 		if (fPackageVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_packagevisibledescription_label);
 
-		fPublicVisibility.setSelection(fVisibilitySelection.equals(JavadocOptionsManager.PUBLIC));
+		fPublicVisibility.setSelection(JavadocOptionsManager.PUBLIC.equals(fVisibilitySelection));
 		if (fPublicVisibility.getSelection())
 			fDescriptionLabel.setText(JavadocExportMessages.JavadocTreeWizardPage_publicvisibilitydescription_label);
 	}

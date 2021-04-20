@@ -762,6 +762,18 @@ public class CleanUpConstants {
 	public static final String USE_LAZY_LOGICAL_OPERATOR= "cleanup.lazy_logical_operator"; //$NON-NLS-1$
 
 	/**
+	 * Replace unnecessary primitive wrappers instance creations by using static factory <code>valueOf()</code> method.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String VALUEOF_RATHER_THAN_INSTANTIATION= "cleanup.valueof_rather_than_instantiation"; //$NON-NLS-1$
+
+	/**
 	 * Replaces the <code>compareTo()</code> method by a comparison on primitive.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -796,6 +808,18 @@ public class CleanUpConstants {
 	 * @since 4.18
 	 */
 	public static final String PRIMITIVE_SERIALIZATION= "cleanup.primitive_serialization"; //$NON-NLS-1$
+
+	/**
+	 * Replace wrapper object by primitive type when an object is not necessary.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String PRIMITIVE_RATHER_THAN_WRAPPER= "cleanup.primitive_rather_than_wrapper"; //$NON-NLS-1$
 
 	/**
 	 * Controls the usage of 'final' modifier for variable declarations. For detailed settings
@@ -1017,6 +1041,86 @@ public class CleanUpConstants {
 	 */
 	public static final String NO_STRING_CREATION= "cleanup.no_string_creation"; //$NON-NLS-1$
 
+	/**
+	 * Refactor access to system properties to use constants or methods
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY= "cleanup.system_property"; //$NON-NLS-1$
+
+	/**
+	 * Replace
+	 * <code>System.getProperty("file.separator")</code>
+	 * by
+	 * <p>
+	 * <code>File.separator</code><br> or<br>
+	 * <code>FileSystems.getDefault().getSeparator()</code> (Java 7).
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR= "cleanup.system_property_file_separator"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>System.getProperty("file.encoding")</code> by<p>
+	 * <code>Charset.defaultCharset().displayName()</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING= "cleanup.system_property_file_encoding"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>System.getProperty("path.separator")</code> by<p>
+	 * <code>File.pathSeparator</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR= "cleanup.system_property_path_separator"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>System.getProperty("line.separator")</code> by<p>
+	 * <code>System.lineSeparator()</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR= "cleanup.system_property_line_separator"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>Boolean.parseBoolean(System.getProperty("arbitrarykey"))</code> by<p>
+	 * <code>Boolean.getBoolean("arbitrarykey")</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN= "cleanup.system_property_boolean"; //$NON-NLS-1$
 	/**
 	 * Replaces Boolean.TRUE/Boolean.FALSE by true/false when used as primitive.
 	 * <p>
@@ -1382,6 +1486,18 @@ public class CleanUpConstants {
 	public static final String PUSH_DOWN_NEGATION= "cleanup.push_down_negation"; //$NON-NLS-1$
 
 	/**
+	 * Directly checks boolean values instead of comparing them with <code>true</code>/<code>false</code>.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String BOOLEAN_VALUE_RATHER_THAN_COMPARISON= "cleanup.boolean_value_rather_than_comparison"; //$NON-NLS-1$
+
+	/**
 	 * Reduces double negation in boolean expression.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -1428,6 +1544,18 @@ public class CleanUpConstants {
 	 * @since 4.19
 	 */
 	public static final String UNREACHABLE_BLOCK= "cleanup.unreachable_block"; //$NON-NLS-1$
+
+	/**
+	 * Replaces (X && Y) || (X && Z) by (X && (Y || Z)).
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String OPERAND_FACTORIZATION= "cleanup.operand_factorization"; //$NON-NLS-1$
 
 	/**
 	 * Replaces (X && Y) || (!X && Z) by X ? Y : Z.
@@ -1478,6 +1606,18 @@ public class CleanUpConstants {
 	 * @since 4.19
 	 */
 	public static final String CONTROLFLOW_MERGE= "cleanup.controlflow_merge"; //$NON-NLS-1$
+
+	/**
+	 * Merge consecutive <code>if</code> statements with same code block that end with a jump statement.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH= "cleanup.one_if_rather_than_duplicate_blocks_that_fall_through"; //$NON-NLS-1$
 
 	/**
 	 * Merges blocks that end with a jump statement into the following same code.
@@ -1564,6 +1704,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_REDUNDANT_SEMICOLONS= "cleanup.remove_redundant_semicolons"; //$NON-NLS-1$
 
 	/**
+	 * Remove the comparator declaration if it is the default one.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String REDUNDANT_COMPARATOR= "cleanup.redundant_comparator"; //$NON-NLS-1$
+
+	/**
 	 * Removes unnecessary array creation for varargs.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -1574,6 +1726,30 @@ public class CleanUpConstants {
 	 * @since 3.19
 	 */
 	public static final String REMOVE_UNNECESSARY_ARRAY_CREATION= "cleanup.remove_unnecessary_array_creation"; //$NON-NLS-1$
+
+	/**
+	 * Replace the new instance syntax by curly brackets to create an array.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String ARRAY_WITH_CURLY= "cleanup.array_with_curly"; //$NON-NLS-1$
+
+	/**
+	 * Removes unnecessary local variable declaration or unnecessary variable assignment before a return statement.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String RETURN_EXPRESSION= "cleanup.return_expression"; //$NON-NLS-1$
 
 	/**
 	 * Removes useless lone return at the end of a method.
@@ -1822,6 +1998,18 @@ public class CleanUpConstants {
 	 * @since 4.19
 	 */
 	public static final String REDUCE_INDENTATION= "cleanup.reduce_indentation"; //$NON-NLS-1$
+
+	/**
+	 * Uses an <code>instanceof</code> expression to check an object against a hardcoded class.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.19
+	 */
+	public static final String INSTANCEOF= "cleanup.instanceof_keyword"; //$NON-NLS-1$
 
 	/**
 	 * Controls whether long literal suffix should be rewritten in uppercase.<br>

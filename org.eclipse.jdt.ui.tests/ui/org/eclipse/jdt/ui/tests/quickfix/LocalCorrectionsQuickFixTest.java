@@ -2887,6 +2887,76 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testUninitializedField_12() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=572571
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    final Class<Integer> i1;\n");
+		buf.append("    final Class<? extends Class<Integer>> i2;\n");
+		buf.append("    final E<String> e;\n");
+		buf.append("    final E<T> et;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+
+		List<ICompletionProposal> proposals= collectAllCorrections(cu, astRoot, problems.length);
+		assertNumberOfProposals(proposals, problems.length);
+		assertCorrectLabels(proposals);
+
+		String[] previews = new String[proposals.size()];
+		for (int i= 0; i < proposals.size(); i++) {
+			previews[i] =  getPreviewContent((CUCorrectionProposal)proposals.get(i));
+		}
+		String[] expected = new String[previews.length];
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    final Class<Integer> i1 = new Class<Integer>();\n");
+		buf.append("    final Class<? extends Class<Integer>> i2;\n");
+		buf.append("    final E<String> e;\n");
+		buf.append("    final E<T> et;\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    final Class<Integer> i1;\n");
+		buf.append("    final Class<? extends Class<Integer>> i2 = new Class<? extends Class<Integer>>();\n");
+		buf.append("    final E<String> e;\n");
+		buf.append("    final E<T> et;\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    final Class<Integer> i1;\n");
+		buf.append("    final Class<? extends Class<Integer>> i2;\n");
+		buf.append("    final E<String> e = new E<String>();\n");
+		buf.append("    final E<T> et;\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    final Class<Integer> i1;\n");
+		buf.append("    final Class<? extends Class<Integer>> i2;\n");
+		buf.append("    final E<String> e;\n");
+		buf.append("    final E<T> et = new E<T>();\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+
+		assertEqualStringsIgnoreOrder(previews, expected);
+	}
+
+	@Test
 	public void testUnimplementedMethods() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		StringBuffer buf= new StringBuffer();

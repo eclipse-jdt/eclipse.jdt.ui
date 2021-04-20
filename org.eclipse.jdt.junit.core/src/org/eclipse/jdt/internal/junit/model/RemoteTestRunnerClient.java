@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
  */
 public class RemoteTestRunnerClient {
 
-	public abstract class ListenerSafeRunnable implements ISafeRunnable {
+	public abstract static class ListenerSafeRunnable implements ISafeRunnable {
 		@Override
 		public void handleException(Throwable exception) {
 			JUnitCorePlugin.log(exception);
@@ -48,7 +48,7 @@ public class RemoteTestRunnerClient {
 	/**
 	 * A simple state machine to process requests from the RemoteTestRunner
 	 */
-	abstract class ProcessingState {
+	abstract static class ProcessingState {
 	    abstract ProcessingState readMessage(String message);
 	}
 
@@ -415,9 +415,9 @@ public class RemoteTestRunnerClient {
 
 	private void notifyTestReran(String testId, String className, String testName, String status) {
 		int statusCode= ITestRunListener2.STATUS_OK;
-		if (status.equals("FAILURE")) //$NON-NLS-1$
+		if ("FAILURE".equals(status)) //$NON-NLS-1$
 			statusCode= ITestRunListener2.STATUS_FAILURE;
-		else if (status.equals("ERROR")) //$NON-NLS-1$
+		else if ("ERROR".equals(status)) //$NON-NLS-1$
 			statusCode= ITestRunListener2.STATUS_ERROR;
 
 		String trace= ""; //$NON-NLS-1$
@@ -454,7 +454,7 @@ public class RemoteTestRunnerClient {
 	private boolean hasTestId() {
 		if (fVersion == null) // TODO fix me
 			return true;
-		return fVersion.equals("v2"); //$NON-NLS-1$
+		return "v2".equals(fVersion); //$NON-NLS-1$
 	}
 
 	private void notifyTestReran(final String testId, final String className, final String testName, final int statusCode, final String trace) {

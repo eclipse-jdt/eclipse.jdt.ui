@@ -223,7 +223,7 @@ public class StubCreator {
 						if (method.isConstructor())
 							continue;
 					}
-					boolean skip= !stub || name.equals("<clinit>"); //$NON-NLS-1$
+					boolean skip= !stub || "<clinit>".equals(name); //$NON-NLS-1$
 					if (method.isConstructor())
 						skip= false;
 					skip= skip || Flags.isSynthetic(flags) || Flags.isBridge(flags);

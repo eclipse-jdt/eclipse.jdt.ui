@@ -316,7 +316,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 				return false;
 			}
 			String fileExtension= fJarPackage.getDescriptionLocation().getFileExtension();
-			if (fileExtension == null || !fileExtension.equals(JarPackagerUtil.DESCRIPTION_EXTENSION)) {
+			if (fileExtension == null || !JarPackagerUtil.DESCRIPTION_EXTENSION.equals(fileExtension)) {
 				setErrorMessage(Messages.format(JarPackagerMessages.JarOptionsPage_error_invalidDescriptionExtension, JarPackagerUtil.DESCRIPTION_EXTENSION));
 				return false;
 			}

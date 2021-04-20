@@ -458,7 +458,7 @@ public class JavaDocLocations {
 			// => Always use the Javadoc location as base:
 			URL baseURL= JavaUI.getJavadocLocation(element, false);
 			if (baseURL != null) {
-				if (baseURL.getProtocol().equals(JAR_PROTOCOL)) {
+				if (JAR_PROTOCOL.equals(baseURL.getProtocol())) {
 					// It's a JarURLConnection, which is not known to the browser widget.
 					// Let's start the help web server:
 					URL baseURL2= PlatformUI.getWorkbench().getHelpSystem().resolve(baseURL.toExternalForm(), true);

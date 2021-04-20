@@ -96,7 +96,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -145,7 +145,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -198,7 +198,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -258,7 +258,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test

@@ -55,21 +55,28 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
@@ -89,7 +96,9 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -292,18 +301,79 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 	private static IJavaElement[] getReferencingElementsFromSameClass(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(member);
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member,
+				IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 		engine.setFiltering(true, true);
-		engine.setScope(SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getDeclaringType() }));
+		IType declaringType= member.getDeclaringType();
+		engine.setScope(SearchEngine.createJavaSearchScope(new IJavaElement[] { declaringType }));
 		engine.setStatus(status);
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
 		Set<IJavaElement> result= new HashSet<>(3);
+		ICompilationUnit cu= member.getCompilationUnit();
+		String source= cu.getSource();
+		CompilationUnit cuRoot= null;
 		for (SearchResultGroup group : (SearchResultGroup[]) engine.getResults()) {
+			outer:
 			for (SearchMatch searchResult : group.getSearchResults()) {
+				if (source.charAt(searchResult.getOffset() - 1) == '.') {
+					if (cuRoot == null) {
+						cuRoot= getCompilationUnitRoot(cu, source);
+					}
+					if (cuRoot != null) {
+						ASTNode node= NodeFinder.perform(cuRoot, searchResult.getOffset(), searchResult.getLength());
+						if (node != null && node instanceof MethodInvocation) {
+							MethodInvocation methodInvocation= (MethodInvocation)node;
+							Expression expression= methodInvocation.getExpression();
+							if (expression != null && !(expression instanceof ThisExpression)) {
+								if (expression instanceof ClassInstanceCreation) {
+									ClassInstanceCreation cic= (ClassInstanceCreation)expression;
+									Type t= cic.getType();
+									if (t.isSimpleType() && !((SimpleType)t).getName().getFullyQualifiedName().equals(declaringType.getElementName())) {
+										continue;
+									}
+								} else if (expression instanceof SimpleName) {
+									String referenceName= ((SimpleName)expression).getFullyQualifiedName();
+									final TypeDeclaration thisType= (TypeDeclaration)ASTNodes.getFirstAncestorOrNull(methodInvocation, TypeDeclaration.class);
+									if (thisType != null) {
+										final String thisTypeName= thisType.getName().getFullyQualifiedName();
+										for (FieldDeclaration fieldDeclaration : thisType.getFields()) {
+											List<VariableDeclarationFragment> fragments= fieldDeclaration.fragments();
+											for (VariableDeclarationFragment fragment : fragments) {
+												SimpleName name= fragment.getName();
+												if (name.getFullyQualifiedName().equals(referenceName)) {
+													Type fieldType= fieldDeclaration.getType();
+													if (!fieldType.isSimpleType()) {
+														continue outer;
+													}
+													SimpleType simpleType= (SimpleType)fieldType;
+													if (!simpleType.getName().getFullyQualifiedName().equals(thisTypeName)) {
+														continue outer;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 				result.add(SearchUtils.getEnclosingJavaElement(searchResult));
 			}
 		}
 		return result.toArray(new IJavaElement[result.size()]);
+	}
+
+	private static CompilationUnit getCompilationUnitRoot(ICompilationUnit cu, String source) {
+		Map<String, String> options = cu.getJavaProject().getOptions(true);
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(false);
+		parser.setSource(source.toCharArray());
+		parser.setCompilerOptions(options);
+		parser.setProject(cu.getJavaProject());
+		CompilationUnit selectionCURoot= (CompilationUnit) parser.createAST(null);
+		return selectionCURoot;
 	}
 
 	private ITypeHierarchy fCachedClassHierarchy;

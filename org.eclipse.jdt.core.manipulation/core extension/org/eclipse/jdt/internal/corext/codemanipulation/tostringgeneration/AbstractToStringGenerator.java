@@ -225,7 +225,7 @@ public abstract class AbstractToStringGenerator {
 		ITypeBinding object= fAst.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 		IMethodBinding objectMethod= null;
 		for (IMethodBinding objm : object.getDeclaredMethods()) {
-			if (objm.getName().equals(METHODNAME_TO_STRING) && objm.getParameterTypes().length == 0) {
+			if (METHODNAME_TO_STRING.equals(objm.getName()) && objm.getParameterTypes().length == 0) {
 				objectMethod= objm;
 			}
 		}
@@ -371,15 +371,15 @@ public abstract class AbstractToStringGenerator {
 				//if (array instanceof int[]) {
 				String typeName= typeBinding.getName();
 				PrimitiveType.Code code= null;
-				if (typeName.equals("byte")) code= PrimitiveType.BYTE; //$NON-NLS-1$
-				if (typeName.equals("short")) code= PrimitiveType.SHORT; //$NON-NLS-1$
-				if (typeName.equals("char")) code= PrimitiveType.CHAR; //$NON-NLS-1$
-				if (typeName.equals("int")) code= PrimitiveType.INT; //$NON-NLS-1$
-				if (typeName.equals("long")) code= PrimitiveType.LONG; //$NON-NLS-1$
-				if (typeName.equals("float")) code= PrimitiveType.FLOAT; //$NON-NLS-1$
-				if (typeName.equals("double")) code= PrimitiveType.DOUBLE; //$NON-NLS-1$
-				if (typeName.equals("boolean")) code= PrimitiveType.BOOLEAN; //$NON-NLS-1$
-				if (code == null && !typeName.equals("Object"))continue; //$NON-NLS-1$
+				if ("byte".equals(typeName)) code= PrimitiveType.BYTE; //$NON-NLS-1$
+				if ("short".equals(typeName)) code= PrimitiveType.SHORT; //$NON-NLS-1$
+				if ("char".equals(typeName)) code= PrimitiveType.CHAR; //$NON-NLS-1$
+				if ("int".equals(typeName)) code= PrimitiveType.INT; //$NON-NLS-1$
+				if ("long".equals(typeName)) code= PrimitiveType.LONG; //$NON-NLS-1$
+				if ("float".equals(typeName)) code= PrimitiveType.FLOAT; //$NON-NLS-1$
+				if ("double".equals(typeName)) code= PrimitiveType.DOUBLE; //$NON-NLS-1$
+				if ("boolean".equals(typeName)) code= PrimitiveType.BOOLEAN; //$NON-NLS-1$
+				if (code == null && !"Object".equals(typeName))continue; //$NON-NLS-1$
 				InstanceofExpression instanceOf= fAst.newInstanceofExpression();
 				instanceOf.setLeftOperand(fAst.newSimpleName(paramName));
 				instanceOf.setRightOperand(fAst.newArrayType(code != null ? (Type)fAst.newPrimitiveType(code) : fAst.newSimpleType(addImport("java.lang.Object")))); //$NON-NLS-1$
@@ -806,7 +806,7 @@ public abstract class AbstractToStringGenerator {
 			return fAst.newSimpleName(((IVariableBinding)member).getName());
 		}
 		if (member instanceof IMethodBinding) {
-			if (((IMethodBinding)member).getName().equals(METHODNAME_TO_STRING)) {
+			if (METHODNAME_TO_STRING.equals(((IMethodBinding)member).getName())) {
 				SuperMethodInvocation invocation= fAst.newSuperMethodInvocation();
 				invocation.setName(fAst.newSimpleName(((IMethodBinding)member).getName()));
 				return invocation;

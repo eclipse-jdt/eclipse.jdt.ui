@@ -57,9 +57,9 @@ public class MemberValuePairProperties implements IPropertySource {
 
 	@Override
 	public Object getPropertyValue(Object name) {
-		if (name.equals(P_MEMBER_NAME)) {
+		if (P_MEMBER_NAME.equals(name)) {
 			return fMemberValuePair.getMemberName();
-		} else 	if (name.equals(P_VALUE_KIND)) {
+		} else 	if (P_VALUE_KIND.equals(name)) {
 			return getValueKindName(fMemberValuePair.getValueKind());
 		}
 

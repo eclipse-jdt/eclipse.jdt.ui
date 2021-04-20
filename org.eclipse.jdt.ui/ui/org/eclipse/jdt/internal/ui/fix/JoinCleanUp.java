@@ -61,6 +61,7 @@ import org.eclipse.jdt.internal.corext.dom.ForLoops.ContainerType;
 import org.eclipse.jdt.internal.corext.dom.ForLoops.ForLoopContent;
 import org.eclipse.jdt.internal.corext.dom.ForLoops.IterationType;
 import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
+import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;

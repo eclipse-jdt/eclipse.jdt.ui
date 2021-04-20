@@ -443,7 +443,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			private String fixLineBreaks(String input) {
 				String systemLineDelimiter= Text.DELIMITER;
 				final String javaLineDelimiter= "\n"; //$NON-NLS-1$
-				if (!systemLineDelimiter.equals(javaLineDelimiter)) {
+				if (!javaLineDelimiter.equals(systemLineDelimiter)) {
 					StringBuilder outputBuffer= new StringBuilder(input);
 					int pos= outputBuffer.indexOf(systemLineDelimiter);
 					while (pos >= 0) {

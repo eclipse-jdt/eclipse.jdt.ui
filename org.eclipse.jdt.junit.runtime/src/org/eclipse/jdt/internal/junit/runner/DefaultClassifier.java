@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import java.io.StringWriter;
 
 public class DefaultClassifier implements IClassifiesThrowables {
 
+	@Override
 	public String getTrace(Throwable t) {
 		StringWriter stringWriter= new StringWriter();
 		PrintWriter writer= new PrintWriter(stringWriter);
@@ -30,10 +31,11 @@ public class DefaultClassifier implements IClassifiesThrowables {
 		return buffer.toString();
 	}
 
+	@Override
 	public boolean isComparisonFailure(Throwable throwable) {
 		// avoid reference to comparison failure to avoid a dependency on 3.8.1 or 4.x
 		String classname= throwable.getClass().getName();
-		return classname.equals("junit.framework.ComparisonFailure") //$NON-NLS-1$
-				|| classname.equals("org.junit.ComparisonFailure"); //$NON-NLS-1$
+		return "junit.framework.ComparisonFailure".equals(classname) //$NON-NLS-1$
+				|| "org.junit.ComparisonFailure".equals(classname); //$NON-NLS-1$
 	}
 }

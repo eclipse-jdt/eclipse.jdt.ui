@@ -187,7 +187,7 @@ public final class IndentUtil {
 
 		// go behind line comments
 		if (!commentlines[relative]) {
-			while (insert < endOffset - 2 && document.get(insert, 2).equals(SLASHES))
+			while (insert < endOffset - 2 && SLASHES.equals(document.get(insert, 2)))
 				insert += 2;
 		}
 
@@ -211,7 +211,7 @@ public final class IndentUtil {
 		int endOffset= region.getOffset() + region.getLength();
 
 		// go behind line comments
-		while (from < endOffset - 2 && document.get(from, 2).equals(SLASHES))
+		while (from < endOffset - 2 && SLASHES.equals(document.get(from, 2)))
 			from += 2;
 
 		int to= from;
@@ -226,7 +226,7 @@ public final class IndentUtil {
 				break;
 		}
 
-		if (endOffset > to + 1 && document.get(to, 2).equals(SLASHES))
+		if (endOffset > to + 1 && SLASHES.equals(document.get(to, 2)))
 			commentLines[relative]= true;
 
 		document.replace(from, to - from, null);
@@ -309,7 +309,7 @@ public final class IndentUtil {
 
 		// go behind line comments
 		int to= from;
-		while (to < endOffset - 2 && document.get(to, 2).equals(SLASHES))
+		while (to < endOffset - 2 && SLASHES.equals(document.get(to, 2)))
 			to += 2;
 
 		while (to < endOffset) {
@@ -320,9 +320,9 @@ public final class IndentUtil {
 		}
 
 		// don't count the space before javadoc like, asterix-style comment lines
-		if (to > from && to < endOffset - 1 && document.get(to - 1, 2).equals(" *")) { //$NON-NLS-1$
+		if (to > from && to < endOffset - 1 && " *".equals(document.get(to - 1, 2))) { //$NON-NLS-1$
 			String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to, true);
-			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
+			if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type))
 				to--;
 		}
 
@@ -382,9 +382,9 @@ public final class IndentUtil {
 			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 			ITypedRegion startingPartition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, false);
 			String type= partition.getType();
-			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
+			if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)) {
 				indent= computeJavadocIndent(document, line, scanner, startingPartition);
-			} else if (!commentLines[lineIndex] && startingPartition.getOffset() == offset && startingPartition.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+			} else if (!commentLines[lineIndex] && startingPartition.getOffset() == offset && IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(startingPartition.getType())) {
 				return false;
 			}
 		}

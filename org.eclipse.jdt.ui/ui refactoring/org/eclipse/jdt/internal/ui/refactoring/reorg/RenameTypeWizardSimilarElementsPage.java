@@ -648,8 +648,9 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 	}
 
 	private void restoreSelectionAndNames(final Map<IJavaElement, Boolean> selection) {
-		for (IJavaElement element : selection.keySet()) {
-			boolean isSelected= selection.get(element);
+		for (Map.Entry<IJavaElement, Boolean> entry : selection.entrySet()) {
+			IJavaElement element = entry.getKey();
+			boolean isSelected= entry.getValue();
 			fTreeViewer.setChecked(element, isSelected);
 			fTreeViewer.update(element, null);
 		}

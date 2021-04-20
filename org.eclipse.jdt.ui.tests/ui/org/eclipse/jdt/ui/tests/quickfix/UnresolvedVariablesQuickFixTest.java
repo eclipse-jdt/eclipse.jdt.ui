@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1933,7 +1934,95 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testVarMultipleOccurances1() throws Exception {
+	public void testUndeclaredPrimitiveVariable() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (int number : numbers) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal localProposal= null;
+		for (IJavaCompletionProposal curr : proposals) {
+			if (curr instanceof NewVariableCorrectionProposal && ((NewVariableCorrectionProposal) curr).getVariableKind() == NewVariableCorrectionProposal.LOCAL) {
+				localProposal= (CUCorrectionProposal) curr;
+			}
+		}
+
+		assertNotNull(localProposal);
+
+		String preview= getPreviewContent(localProposal);
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int[] numbers;\n" //
+				+ "        for (int number : numbers) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertEqualString(preview, expected);
+	}
+
+	@Test
+	public void testUndeclaredObjectVariable() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (Integer number : numbers) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal localProposal= null;
+		for (IJavaCompletionProposal curr : proposals) {
+			if (curr instanceof NewVariableCorrectionProposal && ((NewVariableCorrectionProposal) curr).getVariableKind() == NewVariableCorrectionProposal.LOCAL) {
+				localProposal= (CUCorrectionProposal) curr;
+			}
+		}
+
+		assertNotNull(localProposal);
+
+		String preview= getPreviewContent(localProposal);
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        Integer[] numbers;\n" //
+				+ "        for (Integer number : numbers) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertEqualString(preview, expected);
+	}
+
+	@Test
+	public void testVarMultipleOccurences1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1973,7 +2062,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testVarMultipleOccurances2() throws Exception {
+	public void testVarMultipleOccurences2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2015,7 +2104,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testVarMultipleOccurances3() throws Exception {
+	public void testVarMultipleOccurences3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");

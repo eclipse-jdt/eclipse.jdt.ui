@@ -234,7 +234,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 	 */
 	@Override
 	protected void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(SMART))
+		if (SMART.equals(event.getProperty()))
 			diff();
 		else
 			super.propertyChange(event);

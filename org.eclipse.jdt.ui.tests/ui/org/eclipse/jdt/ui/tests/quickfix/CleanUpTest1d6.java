@@ -15,6 +15,9 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertNotEquals;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -30,6 +33,8 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java1d6ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 /**
  * Tests the cleanup features related to Java 6 (i.e. Mustang).
@@ -105,7 +110,7 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 		String expected= bld.toString();
 
 		assertNotEquals("The class must be changed", expected, given);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -155,7 +160,7 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", expected, given);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected}, null);
 	}
 
 	@Test
@@ -201,6 +206,65 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", expected, given);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected}, null);
 	}
+
+	@Test
+	public void testConstantsForSystemProperty() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = System.getProperty(\"file.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+fs);//$NON-NLS-1$\n" //
+				+ "        String ps = System.getProperty(\"path.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+ps);//$NON-NLS-1$\n" //
+				+ "        String cdn = System.getProperty(\"file.encoding\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+cdn);//$NON-NLS-1$\n" //
+				+ "        String lsp = System.getProperty(\"line.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+lsp);//$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value);//$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = File.separator;\n" //
+				+ "        System.out.println(\"out:\"+fs);//$NON-NLS-1$\n" //
+				+ "        String ps = File.pathSeparator;\n" //
+				+ "        System.out.println(\"out:\"+ps);//$NON-NLS-1$\n" //
+				+ "        String cdn = System.getProperty(\"file.encoding\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+cdn);//$NON-NLS-1$\n" //
+				+ "        String lsp = System.getProperty(\"line.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+lsp);//$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value);//$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
+	}
+
 }

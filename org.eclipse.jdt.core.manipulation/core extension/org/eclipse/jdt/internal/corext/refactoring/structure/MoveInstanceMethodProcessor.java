@@ -2182,7 +2182,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					name= element.getTagName();
 					fragments= element.fragments();
 					if (name != null) {
-						if (name.equals(TagElement.TAG_PARAM) && !fragments.isEmpty() && fragments.get(0) instanceof SimpleName) {
+						if (TagElement.TAG_PARAM.equals(name) && !fragments.isEmpty() && fragments.get(0) instanceof SimpleName) {
 							final SimpleName simple= (SimpleName) fragments.get(0);
 							if (binding.getName().equals(simple.getIdentifier())) {
 								elements.put(binding.getKey(), element);
@@ -2198,7 +2198,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					element= iterator.next();
 					name= element.getTagName();
 					fragments= element.fragments();
-					if (name != null && !name.equals(TagElement.TAG_PARAM))
+					if (name != null && !TagElement.TAG_PARAM.equals(name))
 						reference= element;
 				}
 			}
@@ -2331,7 +2331,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				if (modifier.isAnnotation()) {
 					Annotation annotation= (Annotation) modifier;
 					ITypeBinding typeBinding= annotation.resolveTypeBinding();
-					if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.Override")) { //$NON-NLS-1$
+					if (typeBinding != null && "java.lang.Override".equals(typeBinding.getQualifiedName())) { //$NON-NLS-1$
 						rewrite.remove(annotation, null);
 					}
 				}

@@ -750,7 +750,7 @@ public class ModuleDialog extends StatusDialog {
 		IClasspathAttribute[] newAttributes= new IClasspathAttribute[oldAttributes.length];
 		int count= 0;
 		for (IClasspathAttribute oldAttribute : oldAttributes) {
-			if (!oldAttribute.getName().equals(IClasspathAttribute.MODULE)) {
+			if (!IClasspathAttribute.MODULE.equals(oldAttribute.getName())) {
 				newAttributes[count++]= oldAttribute;
 			}
 		}

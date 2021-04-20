@@ -104,12 +104,29 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 
 		unit.accept(new ASTVisitor() {
 			@Override
-			public boolean visit(final IfStatement node) {
-				if (node.getElseStatement() != null) {
+			public boolean visit(final IfStatement visited) {
+				if (visited.getElseStatement() != null) {
+					IfStatement innerIf= ASTNodes.as(visited.getThenStatement(), IfStatement.class);
+
+					if (innerIf != null
+							&& innerIf.getElseStatement() != null
+							&& !ASTNodes.asList(visited.getElseStatement()).isEmpty()
+							&& ASTNodes.getNbOperands(visited.getExpression()) + ASTNodes.getNbOperands(innerIf.getExpression()) < ASTNodes.EXCESSIVE_OPERAND_NUMBER) {
+						if (ASTNodes.match(visited.getElseStatement(), innerIf.getElseStatement())) {
+							rewriteOperations.add(new InnerIfOperation(visited, innerIf, true));
+							return false;
+						}
+
+						if (ASTNodes.match(visited.getElseStatement(), innerIf.getThenStatement())) {
+							rewriteOperations.add(new InnerIfOperation(visited, innerIf, false));
+							return false;
+						}
+					}
+
 					List<IfStatement> duplicateIfBlocks= new ArrayList<>(4);
 					List<Boolean> isThenStatement= new ArrayList<>(4);
-					AtomicInteger operandCount= new AtomicInteger(ASTNodes.getNbOperands(node.getExpression()));
-					duplicateIfBlocks.add(node);
+					AtomicInteger operandCount= new AtomicInteger(ASTNodes.getNbOperands(visited.getExpression()));
+					duplicateIfBlocks.add(visited);
 					isThenStatement.add(Boolean.TRUE);
 
 					while (addOneMoreIf(duplicateIfBlocks, isThenStatement, operandCount)) {
@@ -174,6 +191,44 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
+	private static class InnerIfOperation extends CompilationUnitRewriteOperation {
+		private final IfStatement visited;
+		private final IfStatement innerIf;
+		private final boolean isInnerMainFirst;
+
+		public InnerIfOperation(final IfStatement visited, final IfStatement innerIf,
+				final boolean isInnerMainFirst) {
+			this.visited= visited;
+			this.innerIf= innerIf;
+			this.isInnerMainFirst= isInnerMainFirst;
+		}
+
+		@Override
+		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.MergeConditionalBlocksCleanup_description_inner_if, cuRewrite);
+
+			InfixExpression newInfixExpression= ast.newInfixExpression();
+
+			Expression outerCondition;
+			if (isInnerMainFirst) {
+				outerCondition= ASTNodes.createMoveTarget(rewrite, visited.getExpression());
+			} else {
+				outerCondition= ASTNodeFactory.negate(ast, rewrite, visited.getExpression(), true);
+			}
+
+			newInfixExpression.setLeftOperand(ASTNodeFactory.parenthesizeIfNeeded(ast, outerCondition));
+			newInfixExpression.setOperator(isInnerMainFirst ? InfixExpression.Operator.CONDITIONAL_AND
+					: InfixExpression.Operator.CONDITIONAL_OR);
+			newInfixExpression.setRightOperand(ASTNodeFactory.parenthesizeIfNeeded(ast,
+					ASTNodes.createMoveTarget(rewrite, innerIf.getExpression())));
+
+			ASTNodes.replaceButKeepComment(rewrite, innerIf.getExpression(), newInfixExpression, group);
+			ASTNodes.replaceButKeepComment(rewrite, visited, ASTNodes.createMoveTarget(rewrite, innerIf), group);
+		}
+	}
+
 	private static class MergeConditionalBlocksOperation extends CompilationUnitRewriteOperation {
 		private final List<IfStatement> duplicateIfBlocks;
 		private final List<Boolean> isThenStatement;
@@ -187,7 +242,7 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.MergeConditionalBlocksCleanup_description, cuRewrite);
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.MergeConditionalBlocksCleanup_description_if_suite, cuRewrite);
 
 			List<Expression> newConditions= new ArrayList<>(duplicateIfBlocks.size());
 

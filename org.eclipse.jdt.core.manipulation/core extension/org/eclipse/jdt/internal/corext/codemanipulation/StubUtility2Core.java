@@ -264,7 +264,7 @@ public final class StubUtility2Core {
 			invocation.setExpression(access);
 		} else
 			invocation.setExpression(ast.newSimpleName(delegatingField.getName()));
-		if (delegate.getReturnType().isPrimitive() && delegate.getReturnType().getName().equals("void")) {//$NON-NLS-1$
+		if (delegate.getReturnType().isPrimitive() && "void".equals(delegate.getReturnType().getName())) {//$NON-NLS-1$
 			statement= ast.newExpressionStatement(invocation);
 		} else {
 			ReturnStatement returnStatement= ast.newReturnStatement();

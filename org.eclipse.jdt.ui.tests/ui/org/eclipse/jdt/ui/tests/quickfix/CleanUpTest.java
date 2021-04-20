@@ -201,7 +201,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -242,39 +242,65 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 
-		sample= "" //
+		String expected1= "" //
 				+ "package test1;\n" //
 				+ "public class E1 {\n" //
 				+ "    public void foo() {\n" //
-				+ "        String s= null; \n" //
+				+ "        String s= null;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		sample= "" //
+		String expected2= "" //
 				+ "package test1;\n" //
 				+ "public class E2 {\n" //
-				+ "    public String s1 = null; \n" //
+				+ "    public String s1 = null;\n" //
 				+ "    public void foo() {\n" //
-				+ "        String s2 = null; \n" //
-				+ "        String s3 = s2 + s2; \n" //
+				+ "        String s2 = null;\n" //
+				+ "        String s3 = s2 + s2;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected2= sample;
 
-		sample= "" //
+		String expected3= "" //
 				+ "package test2;\n" //
 				+ "import test1.E2;\n" //
 				+ "public class E3 extends E2 {\n" //
-				+ "    public static final String s= null; \n" //
+				+ "    public static final String s= null;\n" //
 				+ "    public static String bar(String s1, String s2) {\n" //
-				+ "        bar(s2, s1); \n" //
-				+ "        return s1; \n" //
+				+ "        bar(s2, s1);\n" //
+				+ "        return s1;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
+	}
+
+	@Test
+	public void testRemoveNLSTagWhitespace() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static String bar(String s1, String s2) {\n" //
+				+ "        bar(s2, s1); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        return s1;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
+
+		String expected1= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 extends E2 {\n" //
+				+ "    public static String bar(String s1, String s2) {\n" //
+				+ "        bar(s2, s1);\n" //
+				+ "        return s1;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -331,7 +357,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -396,7 +422,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -458,7 +484,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -517,7 +543,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -573,7 +599,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -652,7 +678,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -681,7 +707,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -707,7 +733,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -738,7 +764,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -771,7 +797,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -821,7 +847,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -849,7 +875,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -868,7 +894,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E1 {}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -894,7 +920,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -925,7 +951,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -953,7 +979,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -985,7 +1011,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1015,7 +1041,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1043,7 +1069,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1071,7 +1097,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1098,7 +1124,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1158,7 +1184,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -1218,7 +1244,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -1276,7 +1302,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -1339,7 +1365,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2}, null);
 	}
 
 	@Test
@@ -1477,7 +1503,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -1597,7 +1623,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
 	}
 
 	@Test
@@ -1639,7 +1665,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {cu1.getBuffer().getContents(), expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {cu1.getBuffer().getContents(), expected1}, null);
 	}
 
 	@Test
@@ -1719,7 +1745,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 	}
 
 	@Test
@@ -1799,7 +1825,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 
 	}
 
@@ -1867,7 +1893,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), cu2.getBuffer().getContents(), expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), cu2.getBuffer().getContents(), expected1}, null);
 	}
 
 	@Test
@@ -2090,7 +2116,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected3= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
 
 	}
 
@@ -2129,7 +2155,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2169,7 +2195,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2209,7 +2235,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2249,7 +2275,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2322,7 +2348,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {cu1.getBuffer().getContents(), expected1, expected2}, null);
 
 	}
 
@@ -2389,7 +2415,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2435,7 +2461,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2490,7 +2516,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2545,7 +2571,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2603,7 +2629,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2665,12 +2691,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (true) {\n" //
 				+ "            this.fNb++;\n" //
 				+ "        }\n" //
-				+ "        String s; \n" //
+				+ "        String s;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2704,7 +2730,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2752,7 +2778,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2781,7 +2807,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2810,7 +2836,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2841,7 +2867,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2871,7 +2897,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2909,7 +2935,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2947,7 +2973,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -2985,7 +3011,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3020,7 +3046,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3053,7 +3079,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3095,7 +3121,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3130,7 +3156,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3173,7 +3199,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3210,7 +3236,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3247,7 +3273,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3286,7 +3312,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3322,7 +3348,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3382,7 +3408,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3415,7 +3441,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3448,7 +3474,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3535,7 +3561,7 @@ public class CleanUpTest extends CleanUpTestCase {
 					+ "}\n";
 			String expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { cu1.getBuffer().getContents(), expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { cu1.getBuffer().getContents(), expected1 }, null);
 		} finally {
 			JavaProjectHelper.delete(project);
 		}
@@ -3614,7 +3640,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3665,7 +3691,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3718,7 +3744,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3754,7 +3780,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3797,7 +3823,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3834,7 +3860,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3862,7 +3888,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 		String expected= sample;
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -3899,7 +3925,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3941,7 +3967,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -3982,7 +4008,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -4015,7 +4041,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -4051,7 +4077,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -4092,7 +4118,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -4128,8 +4154,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
 	}
 
 	@Test
@@ -4183,8 +4209,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SubstringCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SubstringCleanUp_description)));
 	}
 
 	@Test
@@ -4429,7 +4455,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { output }, null);
 	}
 
 	@Test
@@ -4548,6 +4574,30 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public int[] doNotRefactorSpecialAssignment(int[] array) {\n" //
 				+ "        for (int i = 0; i < array.length; i++) {\n" //
 				+ "            array[i] += 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] doNotRefactorIntIntoCharArray(char[] array) {\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte[] doNotRefactorIntIntoByteArray(byte[] array) {\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = 123;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short[] doNotRefactorIntIntoShortArray(short[] array) {\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            array[i] = 123;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        return array;\n" //
@@ -4753,8 +4803,228 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = b1 | new SideEffect() instanceof SideEffect;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_LazyLogical_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_LazyLogical_description)));
+	}
+
+	@Test
+	public void testValueOfRatherThanInstantiation() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void replaceWrapperConstructorsWithValueOf() {\n" //
+				+ "        // Replace all calls to wrapper constructors with calls to .valueOf() methods\n" //
+				+ "        byte byPrimitive = 4;\n" //
+				+ "        boolean boPrimitive = true;\n" //
+				+ "        char cPrimitive = 'c';\n" //
+				+ "        double dPrimitive = 1;\n" //
+				+ "        Double dObject = Double.valueOf(1d);\n" //
+				+ "        float fPrimitive = 1f;\n" //
+				+ "        long lPrimitive = 1;\n" //
+				+ "        short shPrimitive = 1;\n" //
+				+ "        int iPrimitive = 1;\n" //
+				+ "\n" //
+				+ "        // Primitive literals\n" //
+				+ "        Byte by = new Byte((byte) 4);\n" //
+				+ "        Boolean bo = new Boolean(true);\n" //
+				+ "        Character c = new Character('c');\n" //
+				+ "        Double d = new Double(1);\n" //
+				+ "        Float f1 = new Float(1f);\n" //
+				+ "        Float f2 = new Float(1d);\n" //
+				+ "        Long l = new Long(1);\n" //
+				+ "        Short s = new Short((short) 1);\n" //
+				+ "        Integer i = new Integer(1);\n" //
+				+ "\n" //
+				+ "        // Primitive variables\n" //
+				+ "        by = new Byte(byPrimitive);\n" //
+				+ "        bo = new Boolean(boPrimitive);\n" //
+				+ "        c = new Character(cPrimitive);\n" //
+				+ "        d = new Double(dPrimitive);\n" //
+				+ "        f1 = new Float(fPrimitive);\n" //
+				+ "        f2 = new Float(dPrimitive);\n" //
+				+ "        l = new Long(lPrimitive);\n" //
+				+ "        s = new Short(shPrimitive);\n" //
+				+ "        i = new Integer(iPrimitive);\n" //
+				+ "\n" //
+				+ "        // Implicit object narrowing\n" //
+				+ "        Float f3 = new Float(dObject);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        new Byte(\"0\").byteValue();\n" //
+				+ "        new Boolean(\"true\").booleanValue();\n" //
+				+ "        new Integer(\"42\").intValue();\n" //
+				+ "        new Short(\"42\").shortValue();\n" //
+				+ "        new Long(\"42\").longValue();\n" //
+				+ "        new Float(\"42.42\").floatValue();\n" //
+				+ "        new Double(\"42.42\").doubleValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryConstructorInvocationsInPrimitiveContext() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by = new Byte((byte) 0);\n" //
+				+ "        boolean bo = new Boolean(true);\n" //
+				+ "        int i = new Integer(42);\n" //
+				+ "        long l = new Long(42);\n" //
+				+ "        short s = new Short((short) 42);\n" //
+				+ "        float f = new Float(42.42F);\n" //
+				+ "        double d = new Double(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryConstructorInvocationsInSwitch() {\n" //
+				+ "        byte by = (byte) 4;\n" //
+				+ "        char c = 'c';\n" //
+				+ "        short s = (short) 1;\n" //
+				+ "        int i = 1;\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        switch (new Byte(by)) {\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (new Character(c)) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (new Short(s)) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (new Integer(i)) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String removeUnnecessaryConstructorInvocationsInArrayAccess(String[] strings, int i) {\n" //
+				+ "        return strings[new Integer(i)];\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void replaceWrapperConstructorsWithValueOf() {\n" //
+				+ "        // Replace all calls to wrapper constructors with calls to .valueOf() methods\n" //
+				+ "        byte byPrimitive = 4;\n" //
+				+ "        boolean boPrimitive = true;\n" //
+				+ "        char cPrimitive = 'c';\n" //
+				+ "        double dPrimitive = 1;\n" //
+				+ "        Double dObject = Double.valueOf(1d);\n" //
+				+ "        float fPrimitive = 1f;\n" //
+				+ "        long lPrimitive = 1;\n" //
+				+ "        short shPrimitive = 1;\n" //
+				+ "        int iPrimitive = 1;\n" //
+				+ "\n" //
+				+ "        // Primitive literals\n" //
+				+ "        Byte by = Byte.valueOf((byte) 4);\n" //
+				+ "        Boolean bo = Boolean.valueOf(true);\n" //
+				+ "        Character c = Character.valueOf('c');\n" //
+				+ "        Double d = Double.valueOf(1);\n" //
+				+ "        Float f1 = Float.valueOf(1f);\n" //
+				+ "        Float f2 = Float.valueOf((float) 1d);\n" //
+				+ "        Long l = Long.valueOf(1);\n" //
+				+ "        Short s = Short.valueOf((short) 1);\n" //
+				+ "        Integer i = Integer.valueOf(1);\n" //
+				+ "\n" //
+				+ "        // Primitive variables\n" //
+				+ "        by = Byte.valueOf(byPrimitive);\n" //
+				+ "        bo = Boolean.valueOf(boPrimitive);\n" //
+				+ "        c = Character.valueOf(cPrimitive);\n" //
+				+ "        d = Double.valueOf(dPrimitive);\n" //
+				+ "        f1 = Float.valueOf(fPrimitive);\n" //
+				+ "        f2 = Float.valueOf((float) dPrimitive);\n" //
+				+ "        l = Long.valueOf(lPrimitive);\n" //
+				+ "        s = Short.valueOf(shPrimitive);\n" //
+				+ "        i = Integer.valueOf(iPrimitive);\n" //
+				+ "\n" //
+				+ "        // Implicit object narrowing\n" //
+				+ "        Float f3 = dObject.floatValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte.valueOf(\"0\").byteValue();\n" //
+				+ "        Boolean.valueOf(\"true\").booleanValue();\n" //
+				+ "        Integer.valueOf(\"42\").intValue();\n" //
+				+ "        Short.valueOf(\"42\").shortValue();\n" //
+				+ "        Long.valueOf(\"42\").longValue();\n" //
+				+ "        Float.valueOf(\"42.42\").floatValue();\n" //
+				+ "        Double.valueOf(\"42.42\").doubleValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryConstructorInvocationsInPrimitiveContext() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by = (byte) 0;\n" //
+				+ "        boolean bo = true;\n" //
+				+ "        int i = 42;\n" //
+				+ "        long l = 42;\n" //
+				+ "        short s = (short) 42;\n" //
+				+ "        float f = 42.42F;\n" //
+				+ "        double d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryConstructorInvocationsInSwitch() {\n" //
+				+ "        byte by = (byte) 4;\n" //
+				+ "        char c = 'c';\n" //
+				+ "        short s = (short) 1;\n" //
+				+ "        int i = 1;\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        switch (by) {\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (c) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (s) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "        switch (i) {\n" //
+				+ "        default:\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String removeUnnecessaryConstructorInvocationsInArrayAccess(String[] strings, int i) {\n" //
+				+ "        return strings[i];\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.VALUEOF_RATHER_THAN_INSTANTIATION);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(
+						MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_float_with_valueof,
+						MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_float_with_float_value,
+						MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_single_argument,
+						MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_valueof)));
+	}
+
+	@Test
+	public void testDoNotUseValueOfRatherThanInstantiation() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.math.BigInteger;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void doNotRefactorBigInteger() {\n" //
+				+ "        BigInteger bi = new BigInteger(\"42\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.VALUEOF_RATHER_THAN_INSTANTIATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -4877,8 +5147,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveComparisonCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveComparisonCleanUp_description)));
 	}
 
 	@Test
@@ -5165,8 +5435,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveParsingCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveParsingCleanUp_description)));
 	}
 
 	@Test
@@ -5314,8 +5584,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveSerializationCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveSerializationCleanUp_description)));
 	}
 
 	@Test
@@ -5340,6 +5610,902 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.PRIMITIVE_SERIALIZATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveIntRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int intField;\n" //
+				+ "\n" //
+				+ "    public Integer wrapperField;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer plusVar = i1 + i2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceLessWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer lessVar = i1 - i2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceTimesWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer timesVar = i1 * i2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceDivideWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer divideVar = i1 / i2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceAndMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer divideVar = i1 & i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceOrMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer divideVar = i1 | i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceShiftMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer divideVar = i1 ^ i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceMinusWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer minusVar = -i;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer preDecrementVar = --i;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer preDecrementVar = ++i;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer postDecrementVar = i--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostIncrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer postIncrementVar = i++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperFromValueOf(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer varFromValueOf = Integer.valueOf(i1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceParentherizedWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer parentherizedVar = (i1 + i2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceComplexExprWrapper(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer complexVar = i1 + i2 / (i3 - i4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceCastWrapper(Integer i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer castVar = (int) i;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int intField;\n" //
+				+ "\n" //
+				+ "    public Integer wrapperField;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int plusVar = i1 + i2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceLessWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int lessVar = i1 - i2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceTimesWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int timesVar = i1 * i2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceDivideWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int divideVar = i1 / i2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceAndMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int divideVar = i1 & i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceOrMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int divideVar = i1 | i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceShiftMaskWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int divideVar = i1 ^ i2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceMinusWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int minusVar = -i;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int preDecrementVar = --i;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int preDecrementVar = ++i;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int postDecrementVar = i--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostIncrementWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int postIncrementVar = i++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperFromValueOf(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int varFromValueOf = Integer.valueOf(i1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceParentherizedWrapper(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int parentherizedVar = (i1 + i2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceComplexExprWrapper(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int complexVar = i1 + i2 / (i3 - i4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceCastWrapper(Integer i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int castVar = (int) i;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveIntRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveIntRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Integer doNotRefactorFields = Integer.MIN_VALUE;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Integer returnedObject = Integer.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Integer reassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        reassignedInteger = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Integer, Observable> obsByInteger) {\n" //
+				+ "        Integer reassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        obsByInteger.get(reassignedInteger).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        objectField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        Integer anotherInteger = assignedInteger;\n" //
+				+ "        Integer yetAnotherInteger = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Integer doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        Integer anotherInteger = assignedInteger;\n" //
+				+ "        return assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Integer returnedObject = Integer.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Integer doNotReplaceAssignedAndReturnedWrapper(Integer i) {\n" //
+				+ "        Integer returnedObject = Integer.MIN_VALUE;\n" //
+				+ "        returnedObject = i;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveLongRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Long doNotRefactorFields = Long.MIN_VALUE;\n" //
+				+ "\n" //
+				+ "    public long longField;\n" //
+				+ "\n" //
+				+ "    public Long wrapperField;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long plusVar = l1 + l2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceLessWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long lessVar = l1 - l2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceTimesWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long timesVar = l1 * l2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceDivideWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long divideVar = l1 / l2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceAndMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long divideVar = l1 & l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceOrMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long divideVar = l1 | l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceShiftMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long divideVar = l1 ^ l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceMinusWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long minusVar = -l;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePreDecrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long preDecrementVar = --l;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePreIncrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long preDecrementVar = ++l;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePostDecrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long postDecrementVar = l--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePostIncrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long postIncrementVar = l++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperFromValueOf(long l1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long varFromValueOf = Long.valueOf(l1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceParentherizedWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long parentherizedVar = (l1 + l2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceComplexExprWrapper(long l1, long l2, long l3, long l4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long complexVar = l1 + l2 / (l3 - l4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceCastWrapper(Long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long castVar = (long) l;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long longInPreIncrement = Long.MIN_VALUE;\n" //
+				+ "        return ++longInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long longInPreDecrement = Long.MIN_VALUE;\n" //
+				+ "        return --longInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long longInPostDecrement = Long.MIN_VALUE;\n" //
+				+ "        return longInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long longInPostIncrement = Long.MIN_VALUE;\n" //
+				+ "        return longInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        return returnedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceMultiReturnedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        if (l > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Long replaceReturnedAutoBoxedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        if (l > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long reassignedLong = Long.MIN_VALUE;\n" //
+				+ "        reassignedLong = 123L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long multiReassignedLong = Long.MIN_VALUE;\n" //
+				+ "        multiReassignedLong = 123L;\n" //
+				+ "        multiReassignedLong = 456L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        Long anotherLong = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnLongField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        longField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Long aLong, Long anotherLong,\n" //
+				+ "            Long yetAnotherLong) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        aLong &= assignedLong;\n" //
+				+ "        anotherLong += assignedLong;\n" //
+				+ "        yetAnotherLong ^= assignedLong;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Long doNotRefactorFields = Long.MIN_VALUE;\n" //
+				+ "\n" //
+				+ "    public long longField;\n" //
+				+ "\n" //
+				+ "    public Long wrapperField;\n" //
+				+ "\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long plusVar = l1 + l2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceLessWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long lessVar = l1 - l2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceTimesWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long timesVar = l1 * l2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceDivideWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long divideVar = l1 / l2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceAndMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long divideVar = l1 & l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceOrMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long divideVar = l1 | l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceShiftMaskWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long divideVar = l1 ^ l2;\n" //
+				+ "        return divideVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceMinusWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long minusVar = -l;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePreDecrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long preDecrementVar = --l;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePreIncrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long preDecrementVar = ++l;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePostDecrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long postDecrementVar = l--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replacePostIncrementWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long postIncrementVar = l++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperFromValueOf(long l1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long varFromValueOf = Long.valueOf(l1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceParentherizedWrapper(long l1, long l2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long parentherizedVar = (l1 + l2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceComplexExprWrapper(long l1, long l2, long l3, long l4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long complexVar = l1 + l2 / (l3 - l4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceCastWrapper(Long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long castVar = (long) l;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long longInPreIncrement = Long.MIN_VALUE;\n" //
+				+ "        return ++longInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long longInPreDecrement = Long.MIN_VALUE;\n" //
+				+ "        return --longInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long longInPostDecrement = Long.MIN_VALUE;\n" //
+				+ "        return longInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long longInPostIncrement = Long.MIN_VALUE;\n" //
+				+ "        return longInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        return returnedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceMultiReturnedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        if (l > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Long replaceReturnedAutoBoxedWrapper(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long returnedLong = Long.MIN_VALUE;\n" //
+				+ "        if (l > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedLong;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long reassignedLong = Long.MIN_VALUE;\n" //
+				+ "        reassignedLong = 123L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long multiReassignedLong = Long.MIN_VALUE;\n" //
+				+ "        multiReassignedLong = 123L;\n" //
+				+ "        multiReassignedLong = 456L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        Long anotherLong = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnLongField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        longField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Long aLong, Long anotherLong,\n" //
+				+ "            Long yetAnotherLong) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        aLong &= assignedLong;\n" //
+				+ "        anotherLong += assignedLong;\n" //
+				+ "        yetAnotherLong ^= assignedLong;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveLongRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveLongRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Long returnedObject = Long.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Long reassignedLong = Long.MIN_VALUE;\n" //
+				+ "        reassignedLong = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Long, Observable> obsByLong) {\n" //
+				+ "        Long reassignedLong = Long.MIN_VALUE;\n" //
+				+ "        obsByLong.get(reassignedLong).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        objectField = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        Long anotherLong = assignedLong;\n" //
+				+ "        Long yetAnotherLong = assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Long doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Long assignedLong = Long.MIN_VALUE;\n" //
+				+ "        Long anotherLong = assignedLong;\n" //
+				+ "        return assignedLong;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Long returnedObject = Long.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Long doNotReplaceAssignedAndReturnedWrapper(Long l) {\n" //
+				+ "        Long returnedObject = Long.MIN_VALUE;\n" //
+				+ "        returnedObject = l;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
@@ -5469,8 +6635,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.EvaluateNullableCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.EvaluateNullableCleanUp_description)));
 	}
 
 	@Test
@@ -5565,7 +6731,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5592,8 +6758,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.PushDownNegationCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PushDownNegationCleanup_description)));
 	}
 
 	@Test
@@ -5620,7 +6786,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5647,7 +6813,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5674,7 +6840,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5701,7 +6867,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5728,7 +6894,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5755,7 +6921,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5782,7 +6948,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5809,7 +6975,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5836,7 +7002,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5863,7 +7029,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5890,7 +7056,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5917,7 +7083,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5944,7 +7110,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5971,7 +7137,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -5998,7 +7164,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6025,7 +7191,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -6052,7 +7218,245 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
+	}
+
+	@Test
+	public void testOperandFactorization() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean repeatedBoolean, boolean isValid, boolean isActive) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = repeatedBoolean && isValid || repeatedBoolean && isActive;\n" //
+				+ "        boolean newBoolean2 = repeatedBoolean && !isValid || repeatedBoolean && isActive;\n" //
+				+ "        boolean newBoolean3 = repeatedBoolean && isValid || repeatedBoolean && !isActive;\n" //
+				+ "        boolean newBoolean4 = repeatedBoolean && !isValid || repeatedBoolean && !isActive;\n" //
+				+ "        boolean newBoolean5 = !repeatedBoolean && isValid || !repeatedBoolean && isActive;\n" //
+				+ "        boolean newBoolean6 = !repeatedBoolean && !isValid || !repeatedBoolean && isActive;\n" //
+				+ "        boolean newBoolean7 = !repeatedBoolean && isValid || !repeatedBoolean && !isActive;\n" //
+				+ "        boolean newBoolean8 = !repeatedBoolean && !isValid || !repeatedBoolean && !isActive;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean repeatedBoolean, boolean isValid, boolean isEnable) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = repeatedBoolean & isValid | repeatedBoolean & isEnable;\n" //
+				+ "        boolean newBoolean2 = repeatedBoolean & !isValid | repeatedBoolean & isEnable;\n" //
+				+ "        boolean newBoolean3 = repeatedBoolean & isValid | repeatedBoolean & !isEnable;\n" //
+				+ "        boolean newBoolean4 = repeatedBoolean & !isValid | repeatedBoolean & !isEnable;\n" //
+				+ "        boolean newBoolean5 = !repeatedBoolean & isValid | !repeatedBoolean & isEnable;\n" //
+				+ "        boolean newBoolean6 = !repeatedBoolean & !isValid | !repeatedBoolean & isEnable;\n" //
+				+ "        boolean newBoolean7 = !repeatedBoolean & isValid | !repeatedBoolean & !isEnable;\n" //
+				+ "        boolean newBoolean8 = !repeatedBoolean & !isValid | !repeatedBoolean & !isEnable;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean repeatedBoolean, boolean isValid, boolean isActive) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = repeatedBoolean && isValid || isActive && repeatedBoolean;\n" //
+				+ "        boolean newBoolean2 = repeatedBoolean && !isValid || isActive && repeatedBoolean;\n" //
+				+ "        boolean newBoolean3 = repeatedBoolean && isValid || !isActive && repeatedBoolean;\n" //
+				+ "        boolean newBoolean4 = repeatedBoolean && !isValid || !isActive && repeatedBoolean;\n" //
+				+ "        boolean newBoolean5 = !repeatedBoolean && isValid || isActive && !repeatedBoolean;\n" //
+				+ "        boolean newBoolean6 = !repeatedBoolean && !isValid || isActive && !repeatedBoolean;\n" //
+				+ "        boolean newBoolean7 = !repeatedBoolean && isValid || !isActive && !repeatedBoolean;\n" //
+				+ "        boolean newBoolean8 = !repeatedBoolean && !isValid || !isActive && !repeatedBoolean;\n" //
+				+ "\n" //
+				+ "        newBoolean1 = isValid && repeatedBoolean || repeatedBoolean && isActive;\n" //
+				+ "        newBoolean2 = !isValid && repeatedBoolean || repeatedBoolean && isActive;\n" //
+				+ "        newBoolean3 = isValid && repeatedBoolean || repeatedBoolean && !isActive;\n" //
+				+ "        newBoolean4 = !isValid && repeatedBoolean || repeatedBoolean && !isActive;\n" //
+				+ "        newBoolean5 = !repeatedBoolean && isValid || !repeatedBoolean && isActive;\n" //
+				+ "        newBoolean6 = !repeatedBoolean && !isValid || !repeatedBoolean && isActive;\n" //
+				+ "        newBoolean7 = !repeatedBoolean && isValid || !repeatedBoolean && !isActive;\n" //
+				+ "        newBoolean8 = !repeatedBoolean && !isValid || !repeatedBoolean && !isActive;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2 * 2) && !(i3 == i4) || (i1 == 2 * i2 * 1) && (i5 == i6);\n" //
+				+ "        boolean newBoolean2 = (i1 + 1 + 0 == i2) && (i3 == i4) || (1 + i1 == i2) && !(i5 == i6);\n" //
+				+ "        boolean newBoolean3 = (i1 < i2) && (i3 == i4) || !(i1 >= i2) && !(i5 == i6);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceBitwiseOperation(int i1, int i2, int i3) {\n" //
+				+ "        return i1 & i2 | i1 & i3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceCharBitwiseOperation(char c1, char c2, char c3) {\n" //
+				+ "        return c1 & c2 | c1 & c3;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.OPERAND_FACTORIZATION);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean repeatedBoolean, boolean isValid, boolean isActive) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (repeatedBoolean && (isValid || isActive));\n" //
+				+ "        boolean newBoolean2 = (repeatedBoolean && (!isValid || isActive));\n" //
+				+ "        boolean newBoolean3 = (repeatedBoolean && (isValid || !isActive));\n" //
+				+ "        boolean newBoolean4 = (repeatedBoolean && (!isValid || !isActive));\n" //
+				+ "        boolean newBoolean5 = (!repeatedBoolean && (isValid || isActive));\n" //
+				+ "        boolean newBoolean6 = (!repeatedBoolean && (!isValid || isActive));\n" //
+				+ "        boolean newBoolean7 = (!repeatedBoolean && (isValid || !isActive));\n" //
+				+ "        boolean newBoolean8 = (!repeatedBoolean && (!isValid || !isActive));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean repeatedBoolean, boolean isValid, boolean isEnable) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (repeatedBoolean & (isValid | isEnable));\n" //
+				+ "        boolean newBoolean2 = (repeatedBoolean & (!isValid | isEnable));\n" //
+				+ "        boolean newBoolean3 = (repeatedBoolean & (isValid | !isEnable));\n" //
+				+ "        boolean newBoolean4 = (repeatedBoolean & (!isValid | !isEnable));\n" //
+				+ "        boolean newBoolean5 = (!repeatedBoolean & (isValid | isEnable));\n" //
+				+ "        boolean newBoolean6 = (!repeatedBoolean & (!isValid | isEnable));\n" //
+				+ "        boolean newBoolean7 = (!repeatedBoolean & (isValid | !isEnable));\n" //
+				+ "        boolean newBoolean8 = (!repeatedBoolean & (!isValid | !isEnable));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean repeatedBoolean, boolean isValid, boolean isActive) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (repeatedBoolean && (isValid || isActive));\n" //
+				+ "        boolean newBoolean2 = (repeatedBoolean && (!isValid || isActive));\n" //
+				+ "        boolean newBoolean3 = (repeatedBoolean && (isValid || !isActive));\n" //
+				+ "        boolean newBoolean4 = (repeatedBoolean && (!isValid || !isActive));\n" //
+				+ "        boolean newBoolean5 = (!repeatedBoolean && (isValid || isActive));\n" //
+				+ "        boolean newBoolean6 = (!repeatedBoolean && (!isValid || isActive));\n" //
+				+ "        boolean newBoolean7 = (!repeatedBoolean && (isValid || !isActive));\n" //
+				+ "        boolean newBoolean8 = (!repeatedBoolean && (!isValid || !isActive));\n" //
+				+ "\n" //
+				+ "        newBoolean1 = (repeatedBoolean && (isValid || isActive));\n" //
+				+ "        newBoolean2 = (repeatedBoolean && (!isValid || isActive));\n" //
+				+ "        newBoolean3 = (repeatedBoolean && (isValid || !isActive));\n" //
+				+ "        newBoolean4 = (repeatedBoolean && (!isValid || !isActive));\n" //
+				+ "        newBoolean5 = (!repeatedBoolean && (isValid || isActive));\n" //
+				+ "        newBoolean6 = (!repeatedBoolean && (!isValid || isActive));\n" //
+				+ "        newBoolean7 = (!repeatedBoolean && (isValid || !isActive));\n" //
+				+ "        newBoolean8 = (!repeatedBoolean && (!isValid || !isActive));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = ((i1 == i2 * 2) && (!(i3 == i4) || (i5 == i6)));\n" //
+				+ "        boolean newBoolean2 = ((i1 + 1 + 0 == i2) && ((i3 == i4) || !(i5 == i6)));\n" //
+				+ "        boolean newBoolean3 = ((i1 < i2) && ((i3 == i4) || !(i5 == i6)));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceBitwiseOperation(int i1, int i2, int i3) {\n" //
+				+ "        return (i1 & (i2 | i3));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceCharBitwiseOperation(char c1, char c2, char c3) {\n" //
+				+ "        return (c1 & (c2 | c3));\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OperandFactorizationCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUseOperandFactorization() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public boolean doNoRefactorFailingCode(boolean b1, boolean[] b2, boolean b3) {\n" //
+				+ "        return b2[-1] && b1 || b3 && b1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNoReplaceDuplicateConditionsWithOtherCondition(boolean b1, boolean b2, boolean b3, boolean b4) {\n" //
+				+ "        return b1 && b2 || b1 && b3 && b4;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNoReplaceDuplicateConditionsWithOtherOperandBefore(boolean b1, boolean b2, boolean b3, boolean unrelevantCondition) {\n" //
+				+ "        boolean newBoolean1 = unrelevantCondition || (b1 && b2) || (!b1 && b3);\n" //
+				+ "        boolean newBoolean2 = unrelevantCondition || (b1 && !b2) || (b3 && !b1);\n" //
+				+ "        boolean newBoolean3 = unrelevantCondition || (b1 && b2) || (!b3 && !b1);\n" //
+				+ "        boolean newBoolean4 = unrelevantCondition || (b1 && !b2) || (!b3 && !b1);\n" //
+				+ "        boolean newBoolean5 = unrelevantCondition || (!b1 && b2) || (b3 && b1);\n" //
+				+ "        boolean newBoolean6 = unrelevantCondition || (!b1 && !b2) || (b3 && b1);\n" //
+				+ "        boolean newBoolean7 = unrelevantCondition || (!b1 && b2) || (!b3 && b1);\n" //
+				+ "        boolean newBoolean8 = unrelevantCondition || (!b1 && !b2) || (!b3 && b1);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNoReplaceDuplicateConditionsWithOtherOperandAfter(boolean b1, boolean b2, boolean b3, boolean unrelevantCondition) {\n" //
+				+ "        boolean newBoolean1 = (b1 && b2) || (!b1 && b3) || unrelevantCondition;\n" //
+				+ "        boolean newBoolean2 = (b1 && !b2) || (b3 && !b1) || unrelevantCondition;\n" //
+				+ "        boolean newBoolean3 = (b1 && b2) || (!b3 && !b1) || unrelevantCondition;\n" //
+				+ "        boolean newBoolean4 = (b1 && !b2) || (!b3 && !b1) || unrelevantCondition;\n" //
+				+ "        boolean newBoolean5 = (!b1 && b2) || (b3 && b1) || unrelevantCondition;\n" //
+				+ "        boolean newBoolean6 = (!b1 && !b2) || (b3 && b1) || unrelevantCondition;\n" //
+				+ "        boolean newBoolean7 = (!b1 && b2) || (!b3 && b1) || unrelevantCondition;\n" //
+				+ "        boolean newBoolean8 = (!b1 && !b2) || (!b3 && b1) || unrelevantCondition;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNoReplaceDuplicateConditionsWithWrappers(Boolean b1, Boolean b2, Boolean b3) {\n" //
+				+ "        return b1 && b2 || b1 && b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithMethods(List<String> myList) {\n" //
+				+ "        boolean newBoolean1 = myList.remove(\"lorem\") && !myList.remove(\"foo\") || myList.remove(\"lorem\")\n" //
+				+ "                && myList.remove(\"ipsum\");\n" //
+				+ "        boolean newBoolean2 = myList.remove(\"lorem\") && myList.remove(\"bar\") || myList.remove(\"lorem\")\n" //
+				+ "                && !myList.remove(\"ipsum\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithIncrements(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && !(i3 == i4++) || (i1 == i2) && (i5 == i6++);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) && !(i3 == ++i4) || (i1 == i2) && (i5 == ++i6);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) && !(i3 == i4--) || (i1 == i2) && (i5 == i6--);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) && !(i3 == --i4) || (i1 == i2) && (i5 == --i6);\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) && (i3 == i4++) || (i1 == i2) && !(i5 == i6++);\n" //
+				+ "        boolean newBoolean6 = (i1 == i2) && (i3 == ++i4) || (i1 == i2) && !(i5 == ++i6);\n" //
+				+ "        boolean newBoolean7 = (i1 == i2) && (i3 == i4--) || (i1 == i2) && !(i5 == i6--);\n" //
+				+ "        boolean newBoolean8 = (i1 == i2) && (i3 == --i4) || (i1 == i2) && !(i5 == --i6);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithAssignments(int i1, int i2, boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && !(b1 = b2) || (i1 == i2) && (b1 = b3);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) && (b1 = b2) || (i1 == i2) && !(b1 = b3);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class SideEffect {\n" //
+				+ "        private SideEffect() {\n" //
+				+ "            staticField++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceDuplicateConditionsWithInstanciations(Boolean b1) {\n" //
+				+ "        boolean newBoolean1 = b1 && !(new SideEffect() instanceof SideEffect)\n" //
+				+ "                || b1 && new SideEffect() instanceof Object;\n" //
+				+ "        boolean newBoolean2 = b1 && new SideEffect() instanceof SideEffect\n" //
+				+ "                || b1 && !(new SideEffect() instanceof Object);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.OPERAND_FACTORIZATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -6220,8 +7624,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.TernaryOperatorCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.TernaryOperatorCleanUp_description)));
 	}
 
 	@Test
@@ -6439,8 +7843,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StrictlyEqualOrDifferentCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StrictlyEqualOrDifferentCleanUp_description)));
 	}
 
 	@Test
@@ -6520,6 +7924,311 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testBooleanValueRatherThanComparison() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void removeMethodCall(boolean isValid, int number) {\n" //
+				+ "        if (Boolean.TRUE.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (Boolean.FALSE.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (Boolean.TRUE.equals(number > 0) && isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (Boolean.FALSE.equals(number > 0) && isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeMethodCallOnObject(Boolean isValid) {\n" //
+				+ "        return isValid.equals(Boolean.TRUE);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean removeMethodCallOnNegativeExpression(Boolean isValid) {\n" //
+				+ "        return isValid.equals(Boolean.FALSE);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void simplifyPrimitiveBooleanExpression(boolean isValid) {\n" //
+				+ "        if (isValid == true) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != false) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == false) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != true) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == Boolean.TRUE) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != Boolean.FALSE) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == Boolean.FALSE) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != Boolean.TRUE) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeParenthesis(boolean isValid, boolean isActive) {\n" //
+				+ "        if ((isValid == true) == isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive == (isValid == true)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((isValid == true) != isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive != (isValid == true)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((isValid == false) == isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive == (isValid == false)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((isValid == false) != isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive != (isValid == false)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void simplifyBooleanWrapperExpression(Boolean isValid) {\n" //
+				+ "        if (isValid == true) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != false) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == false) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != true) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void removeMethodCall(boolean isValid, int number) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((number > 0) && isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if ((number <= 0) && isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removeMethodCallOnObject(Boolean isValid) {\n" //
+				+ "        return isValid;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean removeMethodCallOnNegativeExpression(Boolean isValid) {\n" //
+				+ "        return !isValid;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void simplifyPrimitiveBooleanExpression(boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void removeParenthesis(boolean isValid, boolean isActive) {\n" //
+				+ "        if (isValid == isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive == isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive != isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid == isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive == !isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid != isActive) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isActive != !isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void simplifyBooleanWrapperExpression(Boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (!isValid) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.BOOLEAN_VALUE_RATHER_THAN_COMPARISON);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.BooleanValueRatherThanComparisonCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUseBooleanValueRatherThanComparison() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotRemoveMethodCallOnObjectParameter(Boolean isValid) {\n" //
+				+ "        if (Boolean.TRUE.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (Boolean.FALSE.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRemoveMethodCallOnObjectParameter(boolean isValid, Boolean isActive) {\n" //
+				+ "        if (isActive.equals(isValid)) {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean doNotAvoidNPESkippingExpression(Boolean isValid) {\n" //
+				+ "        return isValid == true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean doNotAvoidNPESkippingMethod(Boolean isValid) {\n" //
+				+ "        return isValid.equals(Boolean.TRUE);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotSimplifyBooleanWrapperExpression(Boolean isValid) {\n" //
+				+ "        if (isValid == Boolean.TRUE) {\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != Boolean.FALSE) {\n" //
+				+ "            return 2;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid == Boolean.FALSE) {\n" //
+				+ "            return 3;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (isValid != Boolean.TRUE) {\n" //
+				+ "            return 4;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.BOOLEAN_VALUE_RATHER_THAN_COMPARISON);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testDoubleNegation() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= "" //
@@ -6562,8 +8271,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.DoubleNegationCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.DoubleNegationCleanUp_description)));
 	}
 
 	@Test
@@ -6925,8 +8634,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparisonStatementCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparisonStatementCleanup_description)));
 	}
 
 	@Test
@@ -7090,8 +8799,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantSuperCallCleanup_description)));
 	}
 
 	@Test
@@ -7325,8 +9034,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UnreachableBlockCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UnreachableBlockCleanUp_description)));
 	}
 
 	@Test
@@ -7430,11 +9139,12 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testMergeConditionalBlocks() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
+				+ "public class E {\n" //
 				+ "\n" //
 				+ "    /** Duplicate if and else if code, merge it */\n" //
 				+ "    public void duplicateIfAndElseIf(int i) {\n" //
@@ -7607,15 +9317,185 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            q++;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatements(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseInnerElse(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid) {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int j = 0;\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseLoneIfStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear();\n" //
+				+ "            else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseCommentedLoneIfStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear(); // Keep this comment too\n" //
+				+ "            else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithCommentedElse(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid) {\n" //
+				+ "                texts.clear();\n" //
+				+ "            } else\n" //
+				+ "                System.out.println(\"Duplicate code\"); // Keep this comment too\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseCommentedStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear(); // Keep this comment too\n" //
+				+ "            else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseLoneStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear();\n" //
+				+ "            else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseInnerLoneStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid)\n" //
+				+ "                texts.clear();\n" //
+				+ "            else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        } else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithLoneElseStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive)\n" //
+				+ "            if (isValid) {\n" //
+				+ "                texts.clear();\n" //
+				+ "            } else\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "        else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithFourOperands(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (0 < i1 && i1 < 10) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (0 < i2 && i2 < 10) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid,\n" //
+				+ "            boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid || isEditMode) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid | isEditMode) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeLongDuplicateCode(boolean isActive, boolean isValid, int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                int j = number + 123;\n" //
+				+ "                System.out.println((j == 0) ? \"Duplicate\" : \"code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            int j = 123 + number;\n" //
+				+ "            System.out.println((0 != j) ? \"code\" : \"Duplicate\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
-
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
+				+ "public class E {\n" //
 				+ "\n" //
 				+ "    /** Duplicate if and else if code, merge it */\n" //
 				+ "    public void duplicateIfAndElseIf(int i) {\n" //
@@ -7742,18 +9622,150 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            System.out.println(\"Different\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatements(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseInnerElse(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (!isActive || isValid) {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int j = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseLoneIfStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear();\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseCommentedLoneIfStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear(); // Keep this comment too\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithCommentedElse(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            texts.clear();\n" //
+				+ "        } else\n" //
+				+ "            System.out.println(\"Duplicate code\"); // Keep this comment too\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseCommentedStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear(); // Keep this comment too\n" //
+				+ "        else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseLoneStatements(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear();\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseInnerLoneStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid)\n" //
+				+ "            texts.clear();\n" //
+				+ "        else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithLoneElseStatement(boolean isActive, boolean isValid, List<String> texts) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            texts.clear();\n" //
+				+ "        } else\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithFourOperands(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if ((0 < i1 && i1 < 10) && (0 < i2 && i2 < 10)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid,\n" //
+				+ "            boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && (isValid || isEditMode)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && (isValid | isEditMode)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeLongDuplicateCode(boolean isActive, boolean isValid, int number) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        } else {\n" //
+				+ "            int j = number + 123;\n" //
+				+ "            System.out.println((j == 0) ? \"Duplicate\" : \"code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.MergeConditionalBlocksCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.MergeConditionalBlocksCleanup_description_if_suite, MultiFixMessages.MergeConditionalBlocksCleanup_description_inner_if)));
 	}
 
 	@Test
 	public void testDoNotMergeConditionalBlocks() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E1 {\n" //
+				+ "public class E {\n" //
 				+ "    /** 5 operands, not easily readable */\n" //
 				+ "    public void doNotMergeMoreThanFourOperands(int i) {\n" //
 				+ "        if ((i == 0) || (i == 1 || i == 2)) {\n" //
@@ -7789,12 +9801,59 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            System.out.println(\"Different\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotCollapseIfStatementsWithAdditionalStatement(boolean isActive, boolean isValid) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Hi!\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotCollapseWithFiveOperands(int number1, int number2) {\n" //
+				+ "        if (0 < number1 && number1 < 10) {\n" //
+				+ "            if (100 < number2 && number2 < 200 || number2 < 0) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Duplicate code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Duplicate code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeDifferentCode(boolean isActive, boolean isValid) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"One code\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Another code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeEmptyCode(boolean isActive, boolean isValid) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -8413,8 +10472,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantFallingThroughBlockEndCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantFallingThroughBlockEndCleanup_description)));
 	}
 
 	@Test
@@ -8768,8 +10827,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return i;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.RedundantIfConditionCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantIfConditionCleanup_description)));
 	}
 
 	@Test
@@ -8858,6 +10917,910 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.REDUNDANT_IF_CONDITION);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testRedundantComparator() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.math.BigDecimal;\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class RedundantComparatorSample {\n" //
+				+ "    public List<Date> removeComparatorClass(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date removeComparatorOnMax(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Collections.max(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date removeComparatorOnMin(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Collections.min(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Long> removeLambdaExpression(List<Long> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, (Long o1, Long o2) -> o1.compareTo(o2));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> removeLambdaBody(List<String> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, (String o1, String o2) -> {\n" //
+				+ "            return o1.compareTo(o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Double> removeUntypedLambda(List<Double> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, (o1, o2) -> {\n" //
+				+ "            return o1.compareTo(o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Integer> removeComparatorOnPrimitive(List<Integer> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, (o1, o2) -> {\n" //
+				+ "            return Integer.compare(o1, o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeIdentityFunction(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing(Function.identity()));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeComparingLambda(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing((Date d) -> d));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeComparingBody(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing((Date d) -> {\n" //
+				+ "            return d;\n" //
+				+ "        }));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeUntypedParameter(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing(d -> {\n" //
+				+ "            return d;\n" //
+				+ "        }));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeNaturalOrder(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, Comparator.naturalOrder());\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeNullComparator(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, null);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<BigDecimal> removeOpposedComparatorClass(List<BigDecimal> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, new Comparator<BigDecimal>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(BigDecimal o1, BigDecimal o2) {\n" //
+				+ "                return -o2.compareTo(o1);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeTwiceReversedComparatorClass(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o2.compareTo(o1);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        }.reversed());\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> refactoreSortedList(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        listToSort.sort(new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o2.compareTo(o1);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        }.reversed());\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.math.BigDecimal;\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class RedundantComparatorSample {\n" //
+				+ "    public List<Date> removeComparatorClass(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date removeComparatorOnMax(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Collections.max(listToSort);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Date removeComparatorOnMin(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Collections.min(listToSort);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Long> removeLambdaExpression(List<Long> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> removeLambdaBody(List<String> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Double> removeUntypedLambda(List<Double> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Integer> removeComparatorOnPrimitive(List<Integer> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeIdentityFunction(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeComparingLambda(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeComparingBody(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeUntypedParameter(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeNaturalOrder(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeNullComparator(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<BigDecimal> removeOpposedComparatorClass(List<BigDecimal> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> removeTwiceReversedComparatorClass(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> refactoreSortedList(List<Date> listToSort) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Collections.sort(listToSort);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.REDUNDANT_COMPARATOR);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.RedundantComparatorCleanUp_description)));
+	}
+
+	@Test
+	public void testKeepRedundantComparator() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.Comparator;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public List<String> doNotRemoveComparatorWithoutCompareToMethod(List<String> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<String>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(String o1, String o2) {\n" //
+				+ "                return o1.compareToIgnoreCase(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> doNotRemoveComparatorWithOtherStatement(List<String> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<String>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(String o1, String o2) {\n" //
+				+ "                System.out.println(\"Don't lose me!\");\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> doNotRemoveLambdaWithOtherStatement(List<String> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (String o1, String o2) -> {\n" //
+				+ "            System.out.println(\"Don't lose me!\");\n" //
+				+ "            return o1.compareTo(o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedComparatorClass(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o2.compareTo(o1);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedComparatorOnMethod(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<Date>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(Date o1, Date o2) {\n" //
+				+ "                return o1.toString().compareTo(o2.toString());\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedLambdaExpression(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (Date o1, Date o2) -> o2.compareTo(o1));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedLambdaBody(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (Date o1, Date o2) -> {\n" //
+				+ "            return o2.compareTo(o1);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedUntypedLambda(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (o1, o2) -> {\n" //
+				+ "            return o2.compareTo(o1);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveComparatorOnSpecialMethod(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, Comparator.comparing(Date::toString));\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> doNotRemoveReservedIdentityFunction(List<Date> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, Comparator.<Date, Date>comparing(Function.identity()).reversed());\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class NonComparable {\n" //
+				+ "        public int compareTo(Object anotherObject) {\n" //
+				+ "            return 42;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<NonComparable> doNotRemoveComparatorOnNonComparable(List<NonComparable> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, new Comparator<NonComparable>() {\n" //
+				+ "            @Override\n" //
+				+ "            public int compare(NonComparable o1, NonComparable o2) {\n" //
+				+ "                return o1.compareTo(o2);\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<NonComparable> doNotRemoveLambdaOnNonComparable(List<NonComparable> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, (NonComparable o1, NonComparable o2) -> {\n" //
+				+ "            return o1.compareTo(o2);\n" //
+				+ "        });\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<NonComparable> doNotRemoveMethodRefOnNonComparable(List<NonComparable> listToSort) {\n" //
+				+ "        Collections.sort(listToSort, NonComparable::compareTo);\n" //
+				+ "\n" //
+				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_COMPARATOR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testArrayWithCurly() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private double[] refactorThisDoubleArray = new double[] { 42.42 };\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private int[][] refactorThis2DimensionArray = new int[][] { { 42 } };\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private Observable[] refactorThisObserverArray = new Observable[0];\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private short[] refactorThisShortArray, andThisArrayToo = new short[0];\n" //
+				+ "\n" //
+				+ "    public void refactorArrayInstantiations() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double[] refactorLocalDoubleArray = new double[] { 42.42 };\n" //
+				+ "        char[][] refactorLocal2DimensionArray = new char[][] { { 'a' } };\n" //
+				+ "        Observable[] refactorLocalObserverArray = new Observable[0];\n" //
+				+ "        short[] refactorThisShortArray, andThisArrayToo = new short[0];\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private double[] refactorThisDoubleArray = { 42.42 };\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private int[][] refactorThis2DimensionArray = { { 42 } };\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private Observable[] refactorThisObserverArray = {};\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * Keep this comment.\n" //
+				+ "     */\n" //
+				+ "    private short[] refactorThisShortArray, andThisArrayToo = {};\n" //
+				+ "\n" //
+				+ "    public void refactorArrayInstantiations() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double[] refactorLocalDoubleArray = { 42.42 };\n" //
+				+ "        char[][] refactorLocal2DimensionArray = { { 'a' } };\n" //
+				+ "        Observable[] refactorLocalObserverArray = {};\n" //
+				+ "        short[] refactorThisShortArray, andThisArrayToo = {};\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.ARRAY_WITH_CURLY);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ArrayWithCurlyCleanup_description)));
+	}
+
+	@Test
+	public void testDoNotUseArrayWithCurly() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private Byte[] doNotRefactorNotInitializedArray = new Byte[10];\n" //
+				+ "\n" //
+				+ "    private Object doNotRefactorThisObserverArray = new Observable[0];\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorArrayAssignment() {\n" //
+				+ "        char[] refactorLocalDoubleArray;\n" //
+				+ "        refactorLocalDoubleArray = new char[] { 'a', 'b' };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorArrayInstantiationsInBrackets() {\n" //
+				+ "        boolean[] refactorLocalDoubleArray = (new boolean[] { true });\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorCastedArrayInstantiations() {\n" //
+				+ "        Object refactorLocalDoubleArray = (double[]) new double[] { 42.42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] doNotRefactorReturnedArrayInstantiation() {\n" //
+				+ "        return new double[] { 42.42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorArrayInstantiationParameter() {\n" //
+				+ "        System.out.println(new double[] { 42.42 });\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotRefactorArrayInstantiationExpression() {\n" //
+				+ "        return new float[] { 42.42f }.toString();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.ARRAY_WITH_CURLY);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testReturnExpression() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private double[] arrayField = new double[] { 42.42 };\n" //
+				+ "\n" //
+				+ "    public int inlineLocalVariableDeclaration() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineLocalVariableAssignment(int i) {\n" //
+				+ "        i = 0;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * No need to check for array variable assignments.\n" //
+				+ "     * <p>\n" //
+				+ "     * Trying to use it reports compile error \"Array constants can only be used in initializers\"\n" //
+				+ "     * <p>\n" //
+				+ "     */\n" //
+				+ "    public String[] inlineStringArrayConstants() {\n" //
+				+ "        String[] array = { \"test\" };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[][] inlineStringArray2Constants() {\n" //
+				+ "        String[][] array = { { \"test\" } };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public String[] inlineCStyleStringArrayConstants() {\n" //
+				+ "        String array[] = { \"test\" };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[][] inlineCStyleStringArray2Constants() {\n" //
+				+ "        String array[][] = { { \"test\" } };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public String[][] inlineMixedStyleStringArrayConstantsNotSupportedYet() {\n" //
+				+ "        String[] array[] = { { \"mixtest\" } };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public boolean[] inlineBooleanArrayConstants() {\n" //
+				+ "        boolean[] array = { true };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] inlineCharArrayConstants() {\n" //
+				+ "        char[] array = { 'a' };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte[] inlineByteArrayConstants() {\n" //
+				+ "        byte[] array = { 42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short[] inlineShortArrayConstants() {\n" //
+				+ "        short[] array = { 42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] inlineIntArrayConstants() {\n" //
+				+ "        int[] array = { 42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long[] inlineLongArrayConstants() {\n" //
+				+ "        long[] array = { 42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float[] inlineFloatArrayConstants() {\n" //
+				+ "        float[] array = { 42.42f };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayConstants() {\n" //
+				+ "        double[] array = { 42.42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayCreation() {\n" //
+				+ "        double[] array = new double[]{ 42.42 };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayVariableDeclaration() {\n" //
+				+ "        double[] array = arrayField;\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayAssignment() {\n" //
+				+ "        double[] array = null;\n" //
+				+ "        array = arrayField;\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Throwable[] inlineStatementWithEmptyArray() {\n" //
+				+ "        Throwable[] t = {};\n" //
+				+ "        return t;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Throwable[] inlineExpressionWithEmptyArray(Throwable[] t) {\n" //
+				+ "        t = new Throwable[]{};\n" //
+				+ "        return t;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] refactorMethodCall(String s) {\n" //
+				+ "        char[] res = s.toCharArray();\n" //
+				+ "        return res;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineSeveralReturns(int i1, int i2) {\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            i1 = 10;\n" //
+				+ "            return i1;\n" //
+				+ "        } else {\n" //
+				+ "            i2 = 11;\n" //
+				+ "            return i2;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineUnusedVariableInFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            i = 1;\n" //
+				+ "            return i;\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"Finished\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private double[] arrayField = new double[] { 42.42 };\n" //
+				+ "\n" //
+				+ "    public int inlineLocalVariableDeclaration() {\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineLocalVariableAssignment(int i) {\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * No need to check for array variable assignments.\n" //
+				+ "     * <p>\n" //
+				+ "     * Trying to use it reports compile error \"Array constants can only be used in initializers\"\n" //
+				+ "     * <p>\n" //
+				+ "     */\n" //
+				+ "    public String[] inlineStringArrayConstants() {\n" //
+				+ "        return new String[]{ \"test\" };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[][] inlineStringArray2Constants() {\n" //
+				+ "        return new String[][]{ { \"test\" } };\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public String[] inlineCStyleStringArrayConstants() {\n" //
+				+ "        return new String[]{ \"test\" };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String[][] inlineCStyleStringArray2Constants() {\n" //
+				+ "        return new String[][]{ { \"test\" } };\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public String[][] inlineMixedStyleStringArrayConstantsNotSupportedYet() {\n" //
+				+ "        String[] array[] = { { \"mixtest\" } };\n" //
+				+ "        return array;\n" //
+				+ "    }\n" //
+				+ "    \n" //
+				+ "    public boolean[] inlineBooleanArrayConstants() {\n" //
+				+ "        return new boolean[]{ true };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] inlineCharArrayConstants() {\n" //
+				+ "        return new char[]{ 'a' };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte[] inlineByteArrayConstants() {\n" //
+				+ "        return new byte[]{ 42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short[] inlineShortArrayConstants() {\n" //
+				+ "        return new short[]{ 42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int[] inlineIntArrayConstants() {\n" //
+				+ "        return new int[]{ 42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long[] inlineLongArrayConstants() {\n" //
+				+ "        return new long[]{ 42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float[] inlineFloatArrayConstants() {\n" //
+				+ "        return new float[]{ 42.42f };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayConstants() {\n" //
+				+ "        return new double[]{ 42.42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayCreation() {\n" //
+				+ "        return new double[]{ 42.42 };\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayVariableDeclaration() {\n" //
+				+ "        return arrayField;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double[] inlineDoubleArrayAssignment() {\n" //
+				+ "        double[] array = null;\n" //
+				+ "        return arrayField;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Throwable[] inlineStatementWithEmptyArray() {\n" //
+				+ "        return new Throwable[]{};\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Throwable[] inlineExpressionWithEmptyArray(Throwable[] t) {\n" //
+				+ "        return new Throwable[]{};\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char[] refactorMethodCall(String s) {\n" //
+				+ "        return s.toCharArray();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineSeveralReturns(int i1, int i2) {\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            return 10;\n" //
+				+ "        } else {\n" //
+				+ "            return 11;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int inlineUnusedVariableInFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            return 1;\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(\"Finished\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.RETURN_EXPRESSION);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ReturnExpressionCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotReturnExpression() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private int i;\n" //
+				+ "\n" //
+				+ "    public int doNotInlineFieldAssignment1() {\n" //
+				+ "        i = 0;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotInlineFieldAssignment2() {\n" //
+				+ "        this.i = 0;\n" //
+				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotInlineVariableInFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            i = 1;\n" //
+				+ "            return i;\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotInlineCatchVariableInFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            return 1;\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            i = 1;\n" //
+				+ "            return 2;\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotInlineVariableInFarAwayFinally() {\n" //
+				+ "        int i = 0;\n" //
+				+ "        try {\n" //
+				+ "            try {\n" //
+				+ "                i = 1;\n" //
+				+ "                return i;\n" //
+				+ "            } finally {\n" //
+				+ "                System.out.println(\"Finished\");\n" //
+				+ "            }\n" //
+				+ "        } finally {\n" //
+				+ "            System.out.println(i);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.RETURN_EXPRESSION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -8991,8 +11954,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.UselessReturnCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UselessReturnCleanUp_description)));
 	}
 
 	@Test
@@ -9215,8 +12178,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UselessContinueCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UselessContinueCleanUp_description)));
 	}
 
 	@Test
@@ -9425,8 +12388,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.UnloopedWhileCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UnloopedWhileCleanUp_description)));
 	}
 
 	@Test
@@ -9573,7 +12536,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -9642,8 +12605,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.UseDirectlyMapMethodCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UseDirectlyMapMethodCleanup_description)));
 	}
 
 	@Test
@@ -9783,8 +12746,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.CollectionCloningCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CollectionCloningCleanUp_description)));
 	}
 
 	@Test
@@ -9928,8 +12891,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(MultiFixMessages.MapCloningCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, new HashSet<>(Arrays.asList(MultiFixMessages.MapCloningCleanUp_description)));
 	}
 
 	@Test
@@ -10056,8 +13018,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
 	}
 
 	@Test
@@ -10209,7 +13171,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -10247,7 +13209,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -10303,7 +13265,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -10344,7 +13306,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -10385,7 +13347,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -10426,7 +13388,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -10459,7 +13421,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -10514,7 +13476,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -10554,7 +13516,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -10589,7 +13551,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -10624,7 +13586,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -10666,8 +13628,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ElseIf_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ElseIf_description)));
 	}
 
 	@Test
@@ -11327,8 +14289,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ReduceIndentation_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ReduceIndentation_description)));
 	}
 
 	@Test
@@ -11415,7 +14377,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -11444,7 +14406,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -11494,7 +14456,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -11527,7 +14489,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -11577,7 +14539,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -11617,7 +14579,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -11649,7 +14611,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -11715,7 +14677,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -11742,7 +14704,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -11771,7 +14733,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -11802,7 +14764,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -11829,7 +14791,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -11864,7 +14826,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -11902,7 +14864,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -11932,7 +14894,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -11962,7 +14924,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -11992,7 +14954,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12026,7 +14988,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12054,7 +15016,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12090,7 +15052,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12118,7 +15080,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12146,7 +15108,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12174,7 +15136,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12202,7 +15164,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12230,7 +15192,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12258,7 +15220,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12286,7 +15248,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12320,7 +15282,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12356,7 +15318,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12390,7 +15352,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12422,7 +15384,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12452,7 +15414,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12502,7 +15464,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12595,7 +15557,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12618,7 +15580,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12665,7 +15627,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -12700,7 +15662,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -12766,7 +15728,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13013,7 +15975,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13063,7 +16025,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13160,7 +16122,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13218,7 +16180,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13287,7 +16249,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -13326,9 +16288,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -13387,9 +16349,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -13426,9 +16388,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -13487,9 +16449,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -13526,9 +16488,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -13573,9 +16535,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -13610,9 +16572,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
-				MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
 	}
 
 	@Test
@@ -13639,6 +16601,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    private Runnable doNotRefactorObject;\n" //
 				+ "    @Deprecated\n" //
 				+ "    private int doNotRefactorFieldWithAnnotation;\n" //
+				+ "    private int doNotRefactorFieldsInLambda;\n" //
+				+ "    private int doNotRefactorFieldsInAnnonymousClass;\n" //
 				+ "\n" //
 				+ "    public void doNotRefactorPublicField() {\n" //
 				+ "        doNotRefactorPublicField = 123;\n" //
@@ -13710,6 +16674,21 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public void oneMethod() {\n" //
 				+ "        SubClass aSubClass = new SubClass();\n" //
 				+ "        System.out.println(aSubClass.subClassField);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Runnable doNotRefactorFieldsInLambda() {\n" //
+				+ "        doNotRefactorFieldsInLambda = 123;\n" //
+				+ "        return () -> doNotRefactorFieldsInLambda++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Runnable doNotRefactorFieldsInAnnonymousClass() {\n" //
+				+ "        doNotRefactorFieldsInAnnonymousClass = 123;\n" //
+				+ "        return new Runnable() {\n" //
+				+ "            @Override\n" //
+				+ "            public void run() {\n" //
+				+ "                doNotRefactorFieldsInAnnonymousClass++;\n" //
+				+ "            }\n" //
+				+ "        };\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
@@ -13992,8 +16971,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", input, output);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.BreakLoopCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.BreakLoopCleanUp_description)));
 	}
 
 	@Test
@@ -14012,6 +16991,48 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            }\n" //
 				+ "        }\n" //
 				+ "        return isFound ? \"The result has been found\" : (\"The result has not been found\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotShortcutReturn(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 43) {\n" //
+				+ "                return false;\n" //
+				+ "            }\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        return isFound;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotShortcutThrow(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "        for (int i = 0; i < number; i++) {\n" //
+				+ "            if (i == 43) {\n" //
+				+ "                throw null;\n" //
+				+ "            }\n" //
+				+ "            if (i == 42) {\n" //
+				+ "                isFound = true;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        return isFound;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotShortcutLabelledBreak(int number) {\n" //
+				+ "        boolean isFound = false;\n" //
+				+ "        doNotForgetMe: for (int j = 0; j < 10; j++) {\n" //
+				+ "            for (int i = 0; i < number; i++) {\n" //
+				+ "                if (i == 43) {\n" //
+				+ "                    break doNotForgetMe;\n" //
+				+ "                }\n" //
+				+ "                if (i == 42) {\n" //
+				+ "                    isFound = true;\n" //
+				+ "                }\n" //
+				+ "            }\n" //
+				+ "            isFound = false;\n" //
+				+ "        }\n" //
+				+ "        return isFound;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public String doNotBreakWithExternalIterator(int number) {\n" //
@@ -14177,12 +17198,38 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import static java.lang.Integer.bitCount;\n" //
+				+ "import static java.lang.Integer.valueOf;\n" //
 				+ "\n" //
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.jar.Attributes.Name;\n" //
+				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class StaticInnerClass {\n" //
+				+ "        public boolean motherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassInheritingStaticClass extends StaticInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassInheritingTopLevelClass extends Date {\n" //
 				+ "        int i;\n" //
 				+ "\n" //
 				+ "        public boolean anotherMethod() {\n" //
@@ -14323,18 +17370,68 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            return RefactorInnerClassWithQualifiedThisReference.this;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithMethodCall {\n" //
+				+ "        public int methodWithStaticMethodCall(List<String> texts) {\n" //
+				+ "            return texts.size();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithStaticMethodCallFromInteger {\n" //
+				+ "        public int methodWithStaticMethodCall(List<String> texts) {\n" //
+				+ "            return Integer.valueOf(\"1\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithTopLevelInstanciation {\n" //
+				+ "        public Date methodWithTopLevelInstanciation() {\n" //
+				+ "            return new Date();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class RefactorInnerClassWithStaticInnerInstanciation {\n" //
+				+ "        public Name methodWithStaticInnerInstanciation() {\n" //
+				+ "            return new Name(\"foo\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import static java.lang.Integer.bitCount;\n" //
+				+ "import static java.lang.Integer.valueOf;\n" //
 				+ "\n" //
 				+ "import java.io.File;\n" //
 				+ "import java.util.Arrays;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.jar.Attributes.Name;\n" //
+				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public static class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class StaticInnerClass {\n" //
+				+ "        public boolean motherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassInheritingStaticClass extends StaticInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassInheritingTopLevelClass extends Date {\n" //
 				+ "        int i;\n" //
 				+ "\n" //
 				+ "        public boolean anotherMethod() {\n" //
@@ -14476,6 +17573,30 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            return RefactorInnerClassWithQualifiedThisReference.this;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithMethodCall {\n" //
+				+ "        public int methodWithStaticMethodCall(List<String> texts) {\n" //
+				+ "            return texts.size();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithStaticMethodCallFromInteger {\n" //
+				+ "        public int methodWithStaticMethodCall(List<String> texts) {\n" //
+				+ "            return Integer.valueOf(\"1\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithTopLevelInstanciation {\n" //
+				+ "        public Date methodWithTopLevelInstanciation() {\n" //
+				+ "            return new Date();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static class RefactorInnerClassWithStaticInnerInstanciation {\n" //
+				+ "        public Name methodWithStaticInnerInstanciation() {\n" //
+				+ "            return new Name(\"foo\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		// When
@@ -14484,8 +17605,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StaticInnerClassCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StaticInnerClassCleanUp_description)));
 	}
 
 	@Test
@@ -14496,7 +17617,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "import java.sql.DriverPropertyInfo;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
+				+ "public class E<T> {\n" //
 				+ "    public interface DoNotRefactorInnerInterface {\n" //
 				+ "        boolean anotherMethod();\n" //
 				+ "    }\n" //
@@ -14575,6 +17696,18 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassInheritingADynamicClass extends NotStaticClass {\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassThatInstanciateAnInnerDynamicClass {\n" //
+				+ "        public NotStaticClass anotherMethod() {\n" //
+				+ "            return new NotStaticClass();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    private static final String CONSTANT= \"foo\";\n" //
 				+ "\n" //
 				+ "    private String aString= \"bar\";\n" //
@@ -14586,6 +17719,28 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public boolean aMethod() {\n" //
 				+ "        return true;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public class DoNotRefactorInnerClassThatUsesTheTopLevelGenericity {\n" //
+				+ "        public T aGenericField= null;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.STATIC_INNER_CLASS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testDoNotUseStaticInnerClassOnInterface() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public interface E {\n" //
+				+ "    public class DoNotRefactorInnerClassInInterface {\n" //
+				+ "        public int i;\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
@@ -14596,6 +17751,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testStringBuilder() throws Exception {
+		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= "" //
 				+ "package test1;\n" //
@@ -14881,10 +18037,19 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment too\n" //
 				+ "        return text + (3 + 4);\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithNullableStart(String nullableString) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String text = nullableString + \"literal\";\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text += \" foo\";\n" //
+				+ "        text += \"bar \";\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text + (3 + 4);\n" //
+				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
-
-		enable(CleanUpConstants.STRINGBUILDER);
 
 		String expected= "" //
 				+ "package test1;\n" //
@@ -15170,11 +18335,28 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment too\n" //
 				+ "        return text.append(3 + 4).toString();\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useStringBuilderWithNullableStart(String nullableString) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        StringBuilder text = new StringBuilder().append(nullableString).append(\"literal\");\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        text.append(\" foo\");\n" //
+				+ "        text.append(\"bar \");\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return text.append(3 + 4).toString();\n" //
+				+ "    }\n" //
 				+ "}\n";
 
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.STRINGBUILDER);
+
+		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StringBuilderCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StringBuilderCleanUp_description)));
 	}
 
 	@Test
@@ -15453,8 +18635,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
 	}
 
 	@Test
@@ -15550,8 +18732,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PlainReplacementCleanUp_description)));
 	}
 
 	@Test
@@ -15733,6 +18915,38 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "            o.toString();\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void pullDownSeveralNotFallingThroughLines(int number) {\n" //
+				+ "        if (number == 1) {\n" //
+				+ "            System.out.println(\"First case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        } else if (number == 2) {\n" //
+				+ "            System.out.println(\"Second case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        } else if (number == 3) {\n" //
+				+ "            throw new NullPointerException(\"I do completely other things and fall through\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Fourth case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void createBlockToPullDown(int number) {\n" //
+				+ "        if (number == 1) {\n" //
+				+ "            System.out.println(\"Completely different code\");\n" //
+				+ "        } else if (number == 2) {\n" //
+				+ "            System.out.println(\"First case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Second case\");\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -15851,6 +19065,34 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "        o.toString();\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void pullDownSeveralNotFallingThroughLines(int number) {\n" //
+				+ "        if (number == 1) {\n" //
+				+ "            System.out.println(\"First case\");\n" //
+				+ "        } else if (number == 2) {\n" //
+				+ "            System.out.println(\"Second case\");\n" //
+				+ "        } else if (number == 3) {\n" //
+				+ "            throw new NullPointerException(\"I do completely other things and fall through\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Fourth case\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Identical\");\n" //
+				+ "        System.out.println(\"code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void createBlockToPullDown(int number) {\n" //
+				+ "        if (number == 1) {\n" //
+				+ "            System.out.println(\"Completely different code\");\n" //
+				+ "        } else {\n" //
+				+ "            if (number == 2) {\n" //
+				+ "                System.out.println(\"First case\");\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"Second case\");\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Identical\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		// When
@@ -15859,8 +19101,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.ControlFlowMergeCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ControlFlowMergeCleanUp_description)));
 	}
 
 	@Test
@@ -15905,43 +19147,43 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public int doNotRefactorWithNameConflict(boolean isActive) {\n" //
-				+ "        int i;\n" //
+				+ "        int k;\n" //
 				+ "\n" //
 				+ "        if (isActive) {\n" //
 				+ "            int j = 1;\n" //
-				+ "            i = j + 10;\n" //
+				+ "            k = j + 10;\n" //
 				+ "        } else {\n" //
 				+ "            int j = 1;\n" //
-				+ "            i = j + 10;\n" //
+				+ "            k = j + 10;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        int j = 123;\n" //
 				+ "        System.out.println(\"Other number: \" + j);\n" //
-				+ "        return i;\n" //
+				+ "        return k;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public int doNotRefactorWithNameConflictInBlock(boolean isActive) {\n" //
-				+ "        int i;\n" //
+				+ "        int m;\n" //
 				+ "\n" //
 				+ "        if (isActive) {\n" //
 				+ "            int j = 1;\n" //
-				+ "            i = j + 10;\n" //
+				+ "            m = j + 10;\n" //
 				+ "        } else {\n" //
 				+ "            int j = 1;\n" //
-				+ "            i = j + 10;\n" //
+				+ "            m = j + 10;\n" //
 				+ "        }\n" //
 				+ "\n" //
 				+ "        if (isActive) {\n" //
 				+ "            int j = 123;\n" //
 				+ "            System.out.println(\"Other number: \" + j);\n" //
 				+ "        }\n" //
-				+ "        return i;\n" //
+				+ "        return m;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public int doNotRefactorWithNameConfusion(boolean b) {\n" //
+				+ "    public int doNotRefactorWithNameConfusion(boolean hasError) {\n" //
 				+ "        int i;\n" //
 				+ "\n" //
-				+ "        if (b) {\n" //
+				+ "        if (hasError) {\n" //
 				+ "            int j = 1;\n" //
 				+ "            i = j + 10;\n" //
 				+ "        } else {\n" //
@@ -15953,8 +19195,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return i;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public int doNotMoveVarOutsideItsScope(boolean b) {\n" //
-				+ "        if (b) {\n" //
+				+ "    public int doNotMoveVarOutsideItsScope(boolean isValid) {\n" //
+				+ "        if (isValid) {\n" //
 				+ "            int dontMoveMeIMLocal = 1;\n" //
 				+ "            return dontMoveMeIMLocal + 10;\n" //
 				+ "        } else {\n" //
@@ -15997,6 +19239,327 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROLFLOW_MERGE);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testOneIfRatherThanDuplicateBlocksThatFallThrough() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void mergeConditionsWithReturn(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithThrow(int i1) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            i1--;\n" //
+				+ "            throw new Exception();\n" //
+				+ "        }\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            --i1;\n" //
+				+ "            throw new Exception();\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithContinue() {\n" //
+				+ "        for (int i1 = 0; i1 < 10; i1++) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i1 == 0) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                i1++;\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (i1 == 1) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                ++i1;\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Next code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Another code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithBreak() {\n" //
+				+ "        for (int i1 = 0; i1 < 10; i1++) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            if (i1 == 0) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                i1++;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (i1 == 1) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                i1 = i1 + 1;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Next code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Another code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithReturnAndThrow(int i1, int i2) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new Exception(\"Error #\" + i1++);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new Exception(\"Error #\" + i1++);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeSeveralConditions(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 2) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 3) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeORConditions(boolean isValid, boolean isActive, boolean isEnabled, boolean isFound) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid || isActive) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (isEnabled || isFound) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void mergeConditionsWithReturn(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithThrow(int i1) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            --i1;\n" //
+				+ "            throw new Exception();\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithContinue() {\n" //
+				+ "        for (int i1 = 0; i1 < 10; i1++) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                ++i1;\n" //
+				+ "                continue;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Next code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Another code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithBreak() {\n" //
+				+ "        for (int i1 = 0; i1 < 10; i1++) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "                System.out.println(\"The same code\");\n" //
+				+ "                i1 = i1 + 1;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            System.out.println(\"Next code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Another code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeConditionsWithReturnAndThrow(int i1, int i2) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((i1 == 0) || (i1 == 1)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            } else {\n" //
+				+ "                throw new Exception(\"Error #\" + i1++);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeSeveralConditions(int i1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((i1 == 0) || (i1 == 1) || (i1 == 2)\n" //
+				+ "                || (i1 == 3)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void mergeORConditions(boolean isValid, boolean isActive, boolean isEnabled, boolean isFound) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isValid || isActive || isEnabled || isFound) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUseOneIfRatherThanDuplicateBlocksThatFallThrough() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotMergeConditionsWithConditionalReturn(int i1, int i2) {\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                return;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeMoreThanFourOperands(int i1) {\n" //
+				+ "        if ((i1 == 0) || (i1 == 1) || (i1 == 2) || (i1 == 3)) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 4) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeConditionsWithoutJump(int i) {\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "        }\n" //
+				+ "        if (i == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeDifferentBlocks(int i) {\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"A code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i == 1) {\n" //
+				+ "            System.out.println(\"Another code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeConditionsWithElse(int i1, int counter) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            System.out.println(\"The count is: \" + counter++);\n" //
+				+ "            return;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"The count is: \" + ++counter);\n" //
+				+ "        }\n" //
+				+ "        if (i1 == 1) {\n" //
+				+ "            System.out.println(\"The count is: \" + counter++);\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMergeConditionsWithAnotherElse(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        if (i == 1) {\n" //
+				+ "            System.out.println(\"The same code\");\n" //
+				+ "            return;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Another code\");\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"Next code\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
@@ -16073,7 +19636,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -16212,7 +19775,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -16363,8 +19926,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.EmbeddedIfCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { sample },
+				new HashSet<>(Arrays.asList(MultiFixMessages.EmbeddedIfCleanup_description)));
 	}
 
 	@Test
@@ -16729,8 +20292,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ExtractIncrement_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_ExtractIncrement_description)));
 	}
 
 	@Test
@@ -17145,8 +20708,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_PullUpAssignment_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_PullUpAssignment_description)));
 	}
 
 	@Test
@@ -17222,6 +20785,90 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testInstanceof() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean useInstanceof(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return String.class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean useInstanceofOnComplexType(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return String[].class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean useInstanceofOnQualifiedType(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return java.util.Date.class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean useInstanceof(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (o instanceof String);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean useInstanceofOnComplexType(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (o instanceof String[]);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean useInstanceofOnQualifiedType(Object o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (o instanceof java.util.Date);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.INSTANCEOF);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_Instanceof_description)));
+	}
+
+	@Test
+	public void testDoNotUseInstanceof() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean doNotUseInstanceofOnPrimitive(Object o) {\n" //
+				+ "        return int.class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUseInstanceofOnDynamicClass(Object o, Class<?> clazz) {\n" //
+				+ "        return clazz.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUseInstanceofOnOtherMethod(Object o) {\n" //
+				+ "        return String.class.equals(o);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUseInstanceofOnIncompatibleTypes(Integer o) {\n" //
+				+ "        return String.class.isInstance(o);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.INSTANCEOF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRemoveQualifier02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -17247,8 +20894,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.CodeStyleFix_removeThis_groupDescription)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1},
+				new HashSet<>(Arrays.asList(FixMessages.CodeStyleFix_removeThis_groupDescription)));
 	}
 
 	@Test
@@ -17287,7 +20934,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17328,7 +20975,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17357,7 +21004,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17394,7 +21041,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17429,7 +21076,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17468,7 +21115,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -17507,7 +21154,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -17534,7 +21181,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -17568,8 +21215,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1},
+				new HashSet<>(Arrays.asList(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description)));
 	}
 
 	@Test
@@ -17598,7 +21245,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17639,7 +21286,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17680,7 +21327,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17713,7 +21360,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17750,7 +21397,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -17803,7 +21450,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	//Changed test due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=220124
@@ -17865,7 +21512,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -17899,7 +21546,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -18032,7 +21679,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -18063,7 +21710,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -18095,7 +21742,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -18129,7 +21776,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -18164,7 +21811,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -18201,7 +21848,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -18246,7 +21893,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {sample}, null);
 	}
 
 	@Test
@@ -18290,7 +21937,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -18401,7 +22048,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample }, null);
 	}
 
 	@Test
@@ -18456,8 +22103,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION);
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.CheckSignOfBitwiseOperation_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CheckSignOfBitwiseOperation_description)));
 	}
 
 	@Test
@@ -18561,8 +22208,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.InvertEqualsCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.InvertEqualsCleanUp_description)));
 	}
 
 	@Test
@@ -18711,8 +22358,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.StandardComparisonCleanUp_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StandardComparisonCleanUp_description)));
 	}
 
 	@Test
@@ -18844,7 +22491,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -18868,7 +22515,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -18891,7 +22538,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -18929,7 +22576,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -18958,7 +22605,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -18986,7 +22633,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -19018,7 +22665,7 @@ public class CleanUpTest extends CleanUpTestCase {
 					+ "}\n";
 			String expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 		} finally {
 			JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER, false);
 		}
@@ -19049,7 +22696,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19079,7 +22726,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19131,7 +22778,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19165,7 +22812,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19207,7 +22854,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
@@ -19229,7 +22876,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19271,7 +22918,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 			String expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 			enable(CleanUpConstants.SORT_MEMBERS);
 			enable(CleanUpConstants.SORT_MEMBERS_ALL);
@@ -19291,7 +22938,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 			expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 		} finally {
 			JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
 		}
@@ -19387,7 +23034,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19415,7 +23062,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19475,7 +23122,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -19503,7 +23150,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -19534,7 +23181,7 @@ public class CleanUpTest extends CleanUpTestCase {
 					+ "}\n";
 			String expected1= sample;
 
-			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 		} finally {
 			project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
 		}
@@ -19621,7 +23268,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 }, null);
 	}
 
 	@Test
@@ -19668,7 +23315,153 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 		String expected2= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 }, null);
+	}
+
+	@Test
+	public void testConstantsForSystemProperty() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = System.getProperty(\"file.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+fs); //$NON-NLS-1$\n" //
+				+ "        String ps = System.getProperty(\"path.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+ps); //$NON-NLS-1$\n" //
+				+ "        String cdn = System.getProperty(\"file.encoding\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+cdn); //$NON-NLS-1$\n" //
+				+ "        String lsp = System.getProperty(\"line.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.nio.charset.Charset;\n" //
+				+ "import java.nio.file.FileSystems;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = FileSystems.getDefault().getSeparator();\n" //
+				+ "        System.out.println(\"out:\"+fs); //$NON-NLS-1$\n" //
+				+ "        String ps = File.pathSeparator;\n" //
+				+ "        System.out.println(\"out:\"+ps); //$NON-NLS-1$\n" //
+				+ "        String cdn = Charset.defaultCharset().displayName();\n" //
+				+ "        System.out.println(\"out:\"+cdn); //$NON-NLS-1$\n" //
+				+ "        String lsp = System.lineSeparator();\n" //
+				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
+	}
+
+	@Test
+	public void testConstantsForSystemProperty_NLS() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = System.getProperty(\"file.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+fs); //$NON-NLS-1$\n" //
+				+ "			// Keep this comment\n" //
+				+ "			// Keep this comment\n" //
+				+ "        String ps = System.getProperty(\"path.separator\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+ps); //$NON-NLS-1$\n" //
+				+ "        String lsp = System.getProperty(\"line.separator\"); String bla=\"ohoh\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.nio.file.FileSystems;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fs = FileSystems.getDefault().getSeparator();\n" //
+				+ "        System.out.println(\"out:\"+fs); //$NON-NLS-1$\n" //
+				+ "			// Keep this comment\n" //
+				+ "        // Keep this comment\n" // Here is a problem - cause might be deeper(?)
+				+ "        String ps = File.pathSeparator;\n" //
+				+ "        System.out.println(\"out:\"+ps); //$NON-NLS-1$\n" //
+				+ "        String lsp = System.lineSeparator(); String bla=\"ohoh\"; //$NON-NLS-1$ //$NON-NLS-2$\n" // Another problem, comment not removed
+				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
+	}
+
+	@Test
+	public void testConstantsForSystemProperty_donttouch() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void simpleCase() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String fb = System.getProperty(\"foo.bah\");//$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+fb);//$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.parseBoolean(System.getProperty(\"jdt.codeCompleteSubstringMatch\",\"true\"));//$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value);//$NON-NLS-1$\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+
+		// Then
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -19790,7 +23583,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu7= pack1.createCompilationUnit("NestedEnumExample.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5, cu6, cu7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5, cu6, cu7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 }, null);
 
 	}
 
@@ -19901,7 +23694,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1 = sample;
 
 		enable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 
 	}
 
@@ -19945,9 +23738,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new HashSet<>(Arrays.asList(new String[] {
-				Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
-		})));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1},
+				new HashSet<>(Arrays.asList(new String[] {
+						Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
+				})));
 	}
 }

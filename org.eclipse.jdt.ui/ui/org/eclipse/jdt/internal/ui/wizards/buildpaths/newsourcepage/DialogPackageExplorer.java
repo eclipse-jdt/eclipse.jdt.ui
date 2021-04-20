@@ -274,7 +274,7 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
             try {
                 if (element instanceof IFile) {
                     IFile file= (IFile) element;
-                    if (file.getName().equals(".classpath") || file.getName().equals(".project")) //$NON-NLS-1$//$NON-NLS-2$
+                    if (".classpath".equals(file.getName()) || ".project".equals(file.getName())) //$NON-NLS-1$//$NON-NLS-2$
                         return false;
                 } else if (element instanceof IPackageFragmentRoot) {
                     IClasspathEntry cpe= ((IPackageFragmentRoot)element).getRawClasspathEntry();
@@ -349,7 +349,7 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
 		    } else {
 		    	if (element instanceof CPListElementAttribute) {
 					CPListElementAttribute attribute= (CPListElementAttribute)element;
-		    		if (attribute.getKey().equals(CPListElement.OUTPUT)) {
+		    		if (CPListElement.OUTPUT.equals(attribute.getKey())) {
 		    			fActionGroup.getEditOutputFolderAction().run();
 		    		}
 		    	}

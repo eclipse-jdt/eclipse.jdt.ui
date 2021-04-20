@@ -252,7 +252,7 @@ public class SearchUtil {
 		char first= fieldType.charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_ARRAY)
 			|| ((first == Signature.C_RESOLVED || first == Signature.C_UNRESOLVED) && fieldType.substring(1, fieldType.length() - 1).equals(String.class.getName())
-			|| (first == Signature.C_UNRESOLVED && fieldType.substring(1, fieldType.length() - 1).equals("String"))); //$NON-NLS-1$
+			|| (first == Signature.C_UNRESOLVED && "String".equals(fieldType.substring(1, fieldType.length() - 1)))); //$NON-NLS-1$
 	}
 
 	private SearchUtil() {

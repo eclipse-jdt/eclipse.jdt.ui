@@ -183,7 +183,7 @@ public class JavadocHelpContext implements IContext2 {
 	}
 
 	private boolean doesNotExist(URL url) {
-		if (url.getProtocol().equals("file")) { //$NON-NLS-1$
+		if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
 			File file= new File(url.getFile());
 			return !file.exists();
 		}

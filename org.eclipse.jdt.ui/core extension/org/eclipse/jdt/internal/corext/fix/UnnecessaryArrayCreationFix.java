@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2021 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,11 +28,13 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -41,6 +43,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperationsFix {
+
 	public final static class UnnecessaryArrayCreationFinder extends GenericVisitor {
 		private final List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> fResult;
 		private final boolean fRemoveUnnecessaryArrayCreation;
@@ -67,7 +70,7 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 				NullLiteral nullLiteral= ASTNodes.as(singleElement, NullLiteral.class);
 
 				if (nullLiteral != null
-						|| (singleElement.resolveTypeBinding() != null && singleElement.resolveTypeBinding().isArray())) {
+						|| singleElement.resolveTypeBinding() == null || singleElement.resolveTypeBinding().isArray()) {
 					return true;
 				}
 			}
@@ -113,19 +116,35 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 
 		private boolean hasEquivalentMethod(ArrayCreation node, List<Expression> arguments, IMethodBinding binding) {
 			ITypeBinding type= binding.getDeclaringClass();
+			TypeDeclaration typeDeclaration= (TypeDeclaration)ASTNodes.getFirstAncestorOrNull(node, TypeDeclaration.class);
+			ITypeBinding callerBinding= null;
+			boolean inSameClass= false;
+			boolean inSamePackage= false;
+			if (typeDeclaration != null) {
+				callerBinding= typeDeclaration.resolveBinding();
+			}
+			if (callerBinding == null || type.isEqualTo(callerBinding)) {
+				inSameClass= true;
+			}
+
 			while (type != null) {
-				if (hasEquivalentMethodForType(node, arguments, binding, type)) {
+				IPackageBinding packageBinding= type.getPackage();
+				inSamePackage= callerBinding == null || packageBinding.isEqualTo(callerBinding.getPackage());
+				if (hasEquivalentMethodForType(node, arguments, binding, type, inSameClass, inSamePackage)) {
 					return true;
 				}
 				type= type.getSuperclass();
+				inSameClass= false;
 			}
 			return false;
 		}
 
-		private boolean hasEquivalentMethodForType(ArrayCreation node, List<Expression> arguments, IMethodBinding binding, ITypeBinding type) {
+		private boolean hasEquivalentMethodForType(ArrayCreation node, List<Expression> arguments, IMethodBinding binding,
+				ITypeBinding type, boolean inSameClass, boolean inSamePackage) {
 			for (IMethodBinding method : type.getDeclaredMethods()) {
 				if (!binding.isEqualTo(method) && binding.getName().equals(method.getName()) &&
-						(method.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0) {
+						((inSameClass || (method.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0)
+						|| (inSamePackage && (method.getModifiers() & Modifier.PRIVATE) == 0))) {
 					ITypeBinding[] typeArguments= method.getParameterTypes();
 					ArrayInitializer initializer= node.getInitializer();
 

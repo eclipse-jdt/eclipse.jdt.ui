@@ -118,7 +118,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 	protected JarPackageData readJarPackage(IFile description, MultiStatus readStatus) {
 		Assert.isLegal(description.isAccessible());
 		Assert.isNotNull(description.getFileExtension());
-		Assert.isLegal(description.getFileExtension().equals(JarPackagerUtil.DESCRIPTION_EXTENSION));
+		Assert.isLegal(JarPackagerUtil.DESCRIPTION_EXTENSION.equals(description.getFileExtension()));
 		JarPackageData jarPackage= new JarPackageData();
 		IJarDescriptionReader reader= null;
 		try {

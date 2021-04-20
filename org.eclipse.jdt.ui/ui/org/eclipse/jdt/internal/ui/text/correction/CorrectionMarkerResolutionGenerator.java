@@ -218,7 +218,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				final List<IMarker> result= new ArrayList<>();
 				for (IMarker marker : markers) {
 					int id= marker.getAttribute(IJavaModelMarker.ID, -1);
-					if(marker.getResource().getName().equals(JavaModelUtil.PACKAGE_INFO_JAVA)) {
+					if(JavaModelUtil.PACKAGE_INFO_JAVA.equals(marker.getResource().getName())) {
 						// if marker is on package-info.java, no need to create it (another quickfix offers just to add @NonNullByDefault)
 						continue;
 					}

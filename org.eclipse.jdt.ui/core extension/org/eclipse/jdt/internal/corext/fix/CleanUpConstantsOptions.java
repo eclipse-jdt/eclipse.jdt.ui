@@ -58,6 +58,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
 		options.setOption(REDUCE_INDENTATION, CleanUpOptions.FALSE);
+		options.setOption(INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations
@@ -80,9 +81,11 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(PLAIN_REPLACEMENT, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
+		options.setOption(VALUEOF_RATHER_THAN_INSTANTIATION, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_PARSING, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
+		options.setOption(PRIMITIVE_RATHER_THAN_WRAPPER, CleanUpOptions.TRUE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
@@ -101,6 +104,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
 		options.setOption(EVALUATE_NULLABLE, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
+		options.setOption(BOOLEAN_VALUE_RATHER_THAN_COMPARISON, CleanUpOptions.TRUE);
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
@@ -114,7 +118,10 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(RAISE_EMBEDDED_IF, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.FALSE);
+		options.setOption(REDUNDANT_COMPARATOR, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.FALSE);
+		options.setOption(ARRAY_WITH_CURLY, CleanUpOptions.FALSE);
+		options.setOption(RETURN_EXPRESSION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_RETURN, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_CONTINUE, CleanUpOptions.FALSE);
 		options.setOption(UNLOOPED_WHILE, CleanUpOptions.FALSE);
@@ -157,12 +164,12 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 
 		// Duplicate Code
+		options.setOption(OPERAND_FACTORIZATION, CleanUpOptions.FALSE);
 		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(CONTROLFLOW_MERGE, CleanUpOptions.FALSE);
-
-		// Code fixing
+		options.setOption(ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH, CleanUpOptions.TRUE);
 
 		// Java Features
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
@@ -177,6 +184,12 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.FALSE);
 
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);
@@ -217,6 +230,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
 		options.setOption(REDUCE_INDENTATION, CleanUpOptions.FALSE);
+		options.setOption(INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations
@@ -239,9 +253,11 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(PLAIN_REPLACEMENT, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
+		options.setOption(VALUEOF_RATHER_THAN_INSTANTIATION, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_PARSING, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_SERIALIZATION, CleanUpOptions.FALSE);
+		options.setOption(PRIMITIVE_RATHER_THAN_WRAPPER, CleanUpOptions.FALSE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.FALSE);
@@ -260,6 +276,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(ARRAYS_FILL, CleanUpOptions.FALSE);
 		options.setOption(EVALUATE_NULLABLE, CleanUpOptions.FALSE);
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
+		options.setOption(BOOLEAN_VALUE_RATHER_THAN_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(DOUBLE_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_COMPARISON_STATEMENT, CleanUpOptions.FALSE);
 		options.setOption(REDUNDANT_SUPER_CALL, CleanUpOptions.FALSE);
@@ -273,12 +290,13 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(RAISE_EMBEDDED_IF, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.FALSE);
+		options.setOption(REDUNDANT_COMPARATOR, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.FALSE);
+		options.setOption(ARRAY_WITH_CURLY, CleanUpOptions.FALSE);
+		options.setOption(RETURN_EXPRESSION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_RETURN, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_USELESS_CONTINUE, CleanUpOptions.FALSE);
 		options.setOption(UNLOOPED_WHILE, CleanUpOptions.FALSE);
-
-		// Code fixing
 
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
@@ -320,10 +338,12 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 
 		// Duplicate Code
+		options.setOption(OPERAND_FACTORIZATION, CleanUpOptions.FALSE);
 		options.setOption(TERNARY_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(STRICTLY_EQUAL_OR_DIFFERENT, CleanUpOptions.FALSE);
 		options.setOption(MERGE_CONDITIONAL_BLOCKS, CleanUpOptions.FALSE);
 		options.setOption(CONTROLFLOW_MERGE, CleanUpOptions.FALSE);
+		options.setOption(ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH, CleanUpOptions.FALSE);
 
 		// Java Features
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
@@ -338,6 +358,12 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.FALSE);
 
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);

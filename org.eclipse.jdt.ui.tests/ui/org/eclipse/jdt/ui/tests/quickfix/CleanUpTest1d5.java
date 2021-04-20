@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -91,7 +91,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected});
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected}, null);
 	}
 
 	@Test
@@ -441,8 +441,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new HashSet<>(Arrays.asList(MultiFixMessages.AddAllCleanup_description)));
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.AddAllCleanup_description)));
 	}
 
 	@Test
@@ -635,7 +635,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -683,7 +683,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -721,7 +721,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -767,7 +767,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -871,7 +871,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -929,7 +929,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -961,7 +961,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1039,7 +1039,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1073,7 +1073,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1101,7 +1101,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1135,7 +1135,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1173,7 +1173,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1260,7 +1260,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1317,7 +1317,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1368,7 +1368,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1411,7 +1411,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1454,7 +1454,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1488,7 +1488,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1544,7 +1544,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1578,7 +1578,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1608,7 +1608,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1642,7 +1642,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1672,7 +1672,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1706,7 +1706,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1750,7 +1750,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1784,7 +1784,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1823,7 +1823,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1882,7 +1882,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1915,7 +1915,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1948,7 +1948,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1981,9 +1981,11 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 	@Test
 	public void testAutoboxing() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
 				+ "package test1;\n" //
+				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public static void bar() {\n" //
 				+ "        // Keep this comment\n" //
@@ -1997,39 +1999,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        Float f = Float.valueOf(42.42F);\n" //
 				+ "        Double d = Double.valueOf(42.42);\n" //
 				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_AUTOBOXING);
-
-		sample= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
-				+ "    public static void bar() {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        Character c = '*';\n" //
-				+ "        Byte by = (byte) 0;\n" //
-				+ "        Boolean bo = true;\n" //
-				+ "        Integer i = 42;\n" //
-				+ "        Long l1 = 42L;\n" //
-				+ "        Long l2 = (long) 42;\n" //
-				+ "        Short s = (short) 42;\n" //
-				+ "        Float f = 42.42F;\n" //
-				+ "        Double d = 42.42;\n" //
-				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.AutoboxingCleanup_description });
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testAutoboxingSpecialCases() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
+				+ "\n" //
 				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {\n" //
 				+ "        char c = Character.valueOf('*');\n" //
 				+ "        byte by = Byte.valueOf((byte) 0);\n" //
@@ -2040,18 +2010,6 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        short s = Short.valueOf((short) 42);\n" //
 				+ "        float f = Float.valueOf(42.42F);\n" //
 				+ "        double d = Double.valueOf(42.42);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public static void doNotUseAutoboxingWithObjectDeclaration() {\n" //
-				+ "        Object c = Character.valueOf('*');\n" //
-				+ "        Object by = Byte.valueOf((byte) 0);\n" //
-				+ "        Object bo = Boolean.valueOf(true);\n" //
-				+ "        Object i = Integer.valueOf(42);\n" //
-				+ "        Object l1 = Long.valueOf(42L);\n" //
-				+ "        Object l2 = Long.valueOf(42);\n" //
-				+ "        Object s = Short.valueOf((short) 42);\n" //
-				+ "        Object f = Float.valueOf(42.42F);\n" //
-				+ "        Object d = Double.valueOf(42.42);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static void directlyReturnWrapperParameter(Character c, Byte by, Boolean bo, Integer i, Long l, Short s,\n" //
@@ -2113,27 +2071,6 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        d = Double.valueOf(42.42);\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public static void doNotUseAutoboxingWithObjectAssignment() {\n" //
-				+ "        Object c;\n" //
-				+ "        c = Character.valueOf('*');\n" //
-				+ "        Object by;\n" //
-				+ "        by = Byte.valueOf((byte) 0);\n" //
-				+ "        Object bo1;\n" //
-				+ "        bo1 = Boolean.valueOf(true);\n" //
-				+ "        Object i;\n" //
-				+ "        i = Integer.valueOf(42);\n" //
-				+ "        Object l1;\n" //
-				+ "        l1 = Long.valueOf(42L);\n" //
-				+ "        Object l2;\n" //
-				+ "        l2 = Long.valueOf(42);\n" //
-				+ "        Object s;\n" //
-				+ "        s = Short.valueOf((short) 42);\n" //
-				+ "        Object f;\n" //
-				+ "        f = Float.valueOf(42.42F);\n" //
-				+ "        Object d;\n" //
-				+ "        d = Double.valueOf(42.42);\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public static Character removeUnnecessaryValueOfCallsInCharacterWrapper() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return Character.valueOf('*');\n" //
@@ -2218,13 +2155,24 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return Character.valueOf('a');\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
-		enable(CleanUpConstants.USE_AUTOBOXING);
-
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
+				+ "\n" //
 				+ "public class E {\n" //
+				+ "    public static void bar() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character c = '*';\n" //
+				+ "        Byte by = (byte) 0;\n" //
+				+ "        Boolean bo = true;\n" //
+				+ "        Integer i = 42;\n" //
+				+ "        Long l1 = 42L;\n" //
+				+ "        Long l2 = (long) 42;\n" //
+				+ "        Short s = (short) 42;\n" //
+				+ "        Float f = 42.42F;\n" //
+				+ "        Double d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {\n" //
 				+ "        char c = '*';\n" //
 				+ "        byte by = (byte) 0;\n" //
@@ -2235,18 +2183,6 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        short s = (short) 42;\n" //
 				+ "        float f = 42.42F;\n" //
 				+ "        double d = 42.42;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public static void doNotUseAutoboxingWithObjectDeclaration() {\n" //
-				+ "        Object c = Character.valueOf('*');\n" //
-				+ "        Object by = Byte.valueOf((byte) 0);\n" //
-				+ "        Object bo = Boolean.valueOf(true);\n" //
-				+ "        Object i = Integer.valueOf(42);\n" //
-				+ "        Object l1 = Long.valueOf(42L);\n" //
-				+ "        Object l2 = Long.valueOf(42);\n" //
-				+ "        Object s = Short.valueOf((short) 42);\n" //
-				+ "        Object f = Float.valueOf(42.42F);\n" //
-				+ "        Object d = Double.valueOf(42.42);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static void directlyReturnWrapperParameter(Character c, Byte by, Boolean bo, Integer i, Long l, Short s,\n" //
@@ -2308,27 +2244,6 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        d = 42.42;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public static void doNotUseAutoboxingWithObjectAssignment() {\n" //
-				+ "        Object c;\n" //
-				+ "        c = Character.valueOf('*');\n" //
-				+ "        Object by;\n" //
-				+ "        by = Byte.valueOf((byte) 0);\n" //
-				+ "        Object bo1;\n" //
-				+ "        bo1 = Boolean.valueOf(true);\n" //
-				+ "        Object i;\n" //
-				+ "        i = Integer.valueOf(42);\n" //
-				+ "        Object l1;\n" //
-				+ "        l1 = Long.valueOf(42L);\n" //
-				+ "        Object l2;\n" //
-				+ "        l2 = Long.valueOf(42);\n" //
-				+ "        Object s;\n" //
-				+ "        s = Short.valueOf((short) 42);\n" //
-				+ "        Object f;\n" //
-				+ "        f = Float.valueOf(42.42F);\n" //
-				+ "        Object d;\n" //
-				+ "        d = Double.valueOf(42.42);\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public static Character removeUnnecessaryValueOfCallsInCharacterWrapper() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return '*';\n" //
@@ -2413,9 +2328,15 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return Character.valueOf('a');\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.USE_AUTOBOXING);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.AutoboxingCleanup_description)));
 	}
 
 	@Test
@@ -2432,6 +2353,39 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        Float f = Float.valueOf(\"1\");\n" //
 				+ "        Double d = Double.valueOf(\"1\");\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotUseAutoboxingWithObjectDeclaration() {\n" //
+				+ "        Object c = Character.valueOf('*');\n" //
+				+ "        Object by = Byte.valueOf((byte) 0);\n" //
+				+ "        Object bo = Boolean.valueOf(true);\n" //
+				+ "        Object i = Integer.valueOf(42);\n" //
+				+ "        Object l1 = Long.valueOf(42L);\n" //
+				+ "        Object l2 = Long.valueOf(42);\n" //
+				+ "        Object s = Short.valueOf((short) 42);\n" //
+				+ "        Object f = Float.valueOf(42.42F);\n" //
+				+ "        Object d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotUseAutoboxingWithObjectAssignment() {\n" //
+				+ "        Object c;\n" //
+				+ "        c = Character.valueOf('*');\n" //
+				+ "        Object by;\n" //
+				+ "        by = Byte.valueOf((byte) 0);\n" //
+				+ "        Object bo1;\n" //
+				+ "        bo1 = Boolean.valueOf(true);\n" //
+				+ "        Object i;\n" //
+				+ "        i = Integer.valueOf(42);\n" //
+				+ "        Object l1;\n" //
+				+ "        l1 = Long.valueOf(42L);\n" //
+				+ "        Object l2;\n" //
+				+ "        l2 = Long.valueOf(42);\n" //
+				+ "        Object s;\n" //
+				+ "        s = Short.valueOf((short) 42);\n" //
+				+ "        Object f;\n" //
+				+ "        f = Float.valueOf(42.42F);\n" //
+				+ "        Object d;\n" //
+				+ "        d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
@@ -2441,10 +2395,12 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testUseUnboxingOnPrimitiveDeclaration() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
+	public void testUseUnboxing() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
 				+ "package test1;\n" //
+				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public static void useUnboxingOnPrimitiveDeclaration(Character cObject, Byte byObject, Boolean boObject,\n" //
 				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
@@ -2458,83 +2414,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        float f = fObject.floatValue();\n" //
 				+ "        double d = dObject.doubleValue();\n" //
 				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-
-		sample= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
-				+ "    public static void useUnboxingOnPrimitiveDeclaration(Character cObject, Byte byObject, Boolean boObject,\n" //
-				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        char c = cObject;\n" //
-				+ "        byte by = byObject;\n" //
-				+ "        boolean bo = boObject;\n" //
-				+ "        int i = iObject;\n" //
-				+ "        short s = sObject;\n" //
-				+ "        long l = lObject;\n" //
-				+ "        float f = fObject;\n" //
-				+ "        double d = dObject;\n" //
-				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testDoNotUseUnboxingOnNarrowingType() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "public class E1 {\n" //
-				+ "    public static void doNotUseUnboxingOnNarrowingType(Character cObject, Byte byObject,\n" //
-				+ "            Integer iObject, Short sObject, Float fObject) {\n" //
-				+ "        int c = cObject.charValue();\n" //
-				+ "        int by = byObject.byteValue();\n" //
-				+ "        long i = iObject.intValue();\n" //
-				+ "        int s = sObject.shortValue();\n" //
-				+ "        double f = fObject.floatValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
-	}
-
-	@Test
-	public void testDoNotUseUnboxingWhenTypesDontMatch() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "public class E1 {\n" //
-				+ "    public static void doNotUseUnboxingWhenTypesDontMatch(Byte byObject,\n" //
-				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
-				+ "        short by = byObject.shortValue();\n" //
-				+ "        short i = iObject.shortValue();\n" //
-				+ "        byte s = sObject.byteValue();\n" //
-				+ "        short l = lObject.shortValue();\n" //
-				+ "        short f = fObject.shortValue();\n" //
-				+ "        short d = dObject.shortValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
-	}
-
-	@Test
-	public void testUnboxing2() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
+				+ "\n" //
 				+ "    public static void reuseWrapper(Character cObject, Byte byObject, Boolean boObject,\n" //
 				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
 				+ "        // Keep this comment\n" //
@@ -2547,39 +2427,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        Float f = fObject.floatValue();\n" //
 				+ "        Double d = dObject.doubleValue();\n" //
 				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-
-		sample= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
-				+ "    public static void reuseWrapper(Character cObject, Byte byObject, Boolean boObject,\n" //
-				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        Character c = cObject;\n" //
-				+ "        Byte by = byObject;\n" //
-				+ "        Boolean bo = boObject;\n" //
-				+ "        Integer i = iObject;\n" //
-				+ "        Short s = sObject;\n" //
-				+ "        Long l = lObject;\n" //
-				+ "        Float f = fObject;\n" //
-				+ "        Double d = dObject;\n" //
-				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxing3() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static void useUnboxingOnPrimitiveAssignment(Character cObject, Byte byObject, Boolean boObject,\n" //
 				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
 				+ "        // Keep this comment\n" //
@@ -2600,14 +2448,83 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        double d;\n" //
 				+ "        d = dObject.doubleValue();\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public static char useUnboxingOnPrimitiveReturn(Character cObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return cObject.charValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static byte useUnboxingOnPrimitiveReturn(Byte byObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return byObject.byteValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static boolean useUnboxingOnPrimitiveReturn(Boolean boObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return boObject.booleanValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static int useUnboxingOnPrimitiveReturn(Integer iObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return iObject.intValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static short useUnboxingOnPrimitiveReturn(Short sObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return sObject.shortValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static long useUnboxingOnPrimitiveReturn(Long lObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return lObject.longValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static float useUnboxingOnPrimitiveReturn(Float fObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return fObject.floatValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static double useUnboxingOnPrimitiveReturn(Double dObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return dObject.doubleValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static String useUnboxingOnArrayAccess(String[] strings, Integer i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return strings[i.intValue()];\n" //
+				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
+		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
+				+ "    public static void useUnboxingOnPrimitiveDeclaration(Character cObject, Byte byObject, Boolean boObject,\n" //
+				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c = cObject;\n" //
+				+ "        byte by = byObject;\n" //
+				+ "        boolean bo = boObject;\n" //
+				+ "        int i = iObject;\n" //
+				+ "        short s = sObject;\n" //
+				+ "        long l = lObject;\n" //
+				+ "        float f = fObject;\n" //
+				+ "        double d = dObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void reuseWrapper(Character cObject, Byte byObject, Boolean boObject,\n" //
+				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character c = cObject;\n" //
+				+ "        Byte by = byObject;\n" //
+				+ "        Boolean bo = boObject;\n" //
+				+ "        Integer i = iObject;\n" //
+				+ "        Short s = sObject;\n" //
+				+ "        Long l = lObject;\n" //
+				+ "        Float f = fObject;\n" //
+				+ "        Double d = dObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static void useUnboxingOnPrimitiveAssignment(Character cObject, Byte byObject, Boolean boObject,\n" //
 				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
 				+ "        // Keep this comment\n" //
@@ -2628,271 +2545,94 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        double d;\n" //
 				+ "        d = dObject;\n" //
 				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxing4() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static char useUnboxingOnPrimitiveReturn(Character cObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return cObject.charValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static char useUnboxingOnPrimitiveReturn(Character cObject) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return cObject;\n" //
 				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxing5() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static byte useUnboxingOnPrimitiveReturn(Byte byObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return byObject.byteValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static byte useUnboxingOnPrimitiveReturn(Byte byObject) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return byObject;\n" //
 				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxing6() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static boolean useUnboxingOnPrimitiveReturn(Boolean boObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return boObject.booleanValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static boolean useUnboxingOnPrimitiveReturn(Boolean boObject) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return boObject;\n" //
 				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxing7() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static int useUnboxingOnPrimitiveReturn(Integer iObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return iObject.intValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static int useUnboxingOnPrimitiveReturn(Integer iObject) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return iObject;\n" //
 				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxing8() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static short useUnboxingOnPrimitiveReturn(Short sObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return sObject.shortValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static short useUnboxingOnPrimitiveReturn(Short sObject) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return sObject;\n" //
 				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxing9() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static long useUnboxingOnPrimitiveReturn(Long lObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return lObject.longValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static long useUnboxingOnPrimitiveReturn(Long lObject) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return lObject;\n" //
 				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxing10() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static float useUnboxingOnPrimitiveReturn(Float fObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return fObject.floatValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static float useUnboxingOnPrimitiveReturn(Float fObject) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return fObject;\n" //
 				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxing11() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static double useUnboxingOnPrimitiveReturn(Double dObject) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return dObject.doubleValue();\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static double useUnboxingOnPrimitiveReturn(Double dObject) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return dObject;\n" //
 				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-	}
-
-	@Test
-	public void testUnboxingInArrayAccess() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static String useUnboxingOnArrayAccess(String[] strings, Integer i) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return strings[i.intValue()];\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_UNBOXING);
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
 				+ "    public static String useUnboxingOnArrayAccess(String[] strings, Integer i) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        return strings[i];\n" //
 				+ "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.USE_UNBOXING);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.UnboxingCleanup_description)));
+	}
+
+	@Test
+	public void testDoNotUseUnboxing() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void doNotUseUnboxingOnNarrowingType(Character cObject, Byte byObject,\n" //
+				+ "            Integer iObject, Short sObject, Float fObject) {\n" //
+				+ "        int c = cObject.charValue();\n" //
+				+ "        int by = byObject.byteValue();\n" //
+				+ "        long i = iObject.intValue();\n" //
+				+ "        int s = sObject.shortValue();\n" //
+				+ "        double f = fObject.floatValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotUseUnboxingWhenTypesDontMatch(Byte byObject,\n" //
+				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
+				+ "        short by = byObject.shortValue();\n" //
+				+ "        short i = iObject.shortValue();\n" //
+				+ "        byte s = sObject.byteValue();\n" //
+				+ "        short l = lObject.shortValue();\n" //
+				+ "        short f = fObject.shortValue();\n" //
+				+ "        short d = dObject.shortValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_UNBOXING);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
 	@Test
@@ -2932,8 +2672,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        return bo1 && bo2;\n" //
 				+ "    }\n" //
 				+ "}\n";
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { MultiFixMessages.BooleanLiteralCleanup_description });
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.BooleanLiteralCleanup_description)));
 	}
 
 	@Test
@@ -3038,7 +2778,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		String expected2= sample;
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 }, null);
 	}
 
 	@Test
@@ -3113,8 +2853,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
 	}
 
 	@Test
@@ -3157,7 +2897,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		String expected1= sample;
 
 //		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -3191,8 +2931,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected= sample;
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
 	}
 
 	@Test
@@ -3219,11 +2959,34 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public class B {\n" //
+				+ "        public void foo(Object elementsOrTreePaths, Integer obj, Integer obj2) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public class C extends B {\n" //
+				+ "        public void foo(Object... elementsOrTreePaths) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        public void foo(Object elementsOrTreePaths, Integer obj) {\n" //
+				+ "            foo(new Object[] {elementsOrTreePaths, obj});\n" //
+				+ "            foo(elementsOrTreePaths, elementsOrTreePaths);\n" //
+				+ "            foo(new Object[] {elementsOrTreePaths, obj, obj});\n" //
+				+ "            foo(elementsOrTreePaths, obj, elementsOrTreePaths);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
 	}
 
 	@Test
@@ -3266,6 +3029,75 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572131_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    void doError(String a, Object b) {}\n" //
+				+ "    private void doError(String a, Object b, Object c) {}\n" //
+				+ "    public void doError(String a, Object b, Object c, Object d) {}\n" //
+				+ "    public void doError(String a, Object ...objects) {}\n" //
+				+ "    public void foo() {\n" //
+				+ "        doError(\"a\", new Object[] {\"b\"});\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\"});\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\", \"d\"});\n" //
+	    		+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572131_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "private class B {\n" //
+				+ "    void doError(String a, Object b) {}\n" //
+				+ "    private void doError(String a, Object b, Object c) {}\n" //
+				+ "    protected void doError(String a, Object b, Object c, Object d) {};\n" //
+				+ "}\n"
+				+ "public class A extends B {\n" //
+				+ "    public void doError(String a, Object ...objects);\n" //
+				+ "    public void foo() {\n" //
+				+ "        doError(\"a\", new Object[] {\"b\"});\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\"});\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\", \"d\"});\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "private class B {\n" //
+				+ "    void doError(String a, Object b) {}\n" //
+				+ "    private void doError(String a, Object b, Object c) {}\n" //
+				+ "    protected void doError(String a, Object b, Object c, Object d) {};\n" //
+				+ "}\n"
+				+ "public class A extends B {\n" //
+				+ "    public void doError(String a, Object ...objects);\n" //
+				+ "    public void foo() {\n" //
+				+ "        doError(\"a\", new Object[] {\"b\"});\n" //
+				+ "        doError(\"a\", \"b\", \"c\");\n" //
+				+ "        doError(\"a\", new Object[] {\"b\", \"c\", \"d\"});\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
 	}
 
 	@Test

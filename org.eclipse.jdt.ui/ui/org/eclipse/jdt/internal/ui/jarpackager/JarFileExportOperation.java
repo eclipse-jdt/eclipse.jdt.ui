@@ -377,7 +377,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
 				boolean isOnBuildPath;
 				isOnBuildPath= jProject.isOnClasspath(resource);
-				if (!isOnBuildPath || (mustUseSourceFolderHierarchy() && !pkgRoot.getElementName().equals(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH)))
+				if (!isOnBuildPath || (mustUseSourceFolderHierarchy() && !IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH.equals(pkgRoot.getElementName())))
 					leadSegmentsToRemove--;
 			}
 
@@ -545,7 +545,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private void exportResource(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath) {
 
 		// Handle case where META-INF/MANIFEST.MF is part of the exported files
-		if (fJarPackage.areClassFilesExported() && destinationPath.toString().equals("META-INF/MANIFEST.MF")) {//$NON-NLS-1$
+		if (fJarPackage.areClassFilesExported() && "META-INF/MANIFEST.MF".equals(destinationPath.toString())) {//$NON-NLS-1$
 			if (fJarPackage.isManifestGenerated())
 				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_didNotAddManifestToJar, BasicElementLabels.getPathLabel(resource.getFullPath(), false)), null);
 			return;
@@ -832,7 +832,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		return file != null
 			&& file.getType() == IResource.FILE
 			&& file.getFileExtension() != null
-			&& file.getFileExtension().equalsIgnoreCase("class"); //$NON-NLS-1$
+			&& "class".equalsIgnoreCase(file.getFileExtension()); //$NON-NLS-1$
 	}
 
 	/*

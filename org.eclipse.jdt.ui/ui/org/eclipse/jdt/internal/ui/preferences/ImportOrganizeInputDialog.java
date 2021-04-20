@@ -219,7 +219,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		if (newText.length() == 0) {
 			status.setError(""); //$NON-NLS-1$
 		} else {
-			if (newText.equals("*")) { //$NON-NLS-1$
+			if ("*".equals(newText)) { //$NON-NLS-1$
 				if (doesExist("", fIsStatic)) { //$NON-NLS-1$
 					status.setError(PreferencesMessages.ImportOrganizeInputDialog_error_entryExists);
 				}

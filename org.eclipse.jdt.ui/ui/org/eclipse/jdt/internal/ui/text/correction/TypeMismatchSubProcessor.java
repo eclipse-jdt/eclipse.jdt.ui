@@ -160,7 +160,7 @@ public class TypeMismatchSubProcessor {
 
 		if (!(nodeToCast instanceof ArrayInitializer)) {
 			String castTypeName= castTypeBinding.getErasure().getQualifiedName();
-			if (castTypeName.equals("java.util.Optional") && ast.apiLevel() >= ASTHelper.JLS8) { //$NON-NLS-1$
+			if ("java.util.Optional".equals(castTypeName) && ast.apiLevel() >= ASTHelper.JLS8) { //$NON-NLS-1$
 				ITypeBinding nodeToCastTypeBinding= nodeToCast.resolveTypeBinding();
 				String label0= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changetooptionalempty_description, nodeToCast.toString());
 				proposals.add(new OptionalCorrectionProposal(label0, cu, nodeToCast, IProposalRelevance.CREATE_EMPTY_OPTIONAL, OptionalCorrectionProposal.OPTIONAL_EMPTY));

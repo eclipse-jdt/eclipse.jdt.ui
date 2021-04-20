@@ -524,7 +524,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 		try {
 			ITypedRegion region= TextUtilities.getPartition(document, partitioning, position, false);
-			return region.getType().equals(IDocument.DEFAULT_CONTENT_TYPE);
+			return IDocument.DEFAULT_CONTENT_TYPE.equals(region.getType());
 
 		} catch (BadLocationException e) {
 		}
@@ -788,7 +788,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 		// go behind line comments
 		int to= from;
-		while (to < endOffset - 2 && document.get(to, 2).equals(LINE_COMMENT))
+		while (to < endOffset - 2 && LINE_COMMENT.equals(document.get(to, 2)))
 			to += 2;
 
 		while (to < endOffset) {
@@ -799,9 +799,9 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		}
 
 		// don't count the space before javadoc like, asterisk-style comment lines
-		if (to > from && to < endOffset - 1 && document.get(to - 1, 2).equals(" *")) { //$NON-NLS-1$
+		if (to > from && to < endOffset - 1 && " *".equals(document.get(to - 1, 2))) { //$NON-NLS-1$
 			String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to, true);
-			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
+			if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type))
 				to--;
 		}
 
@@ -855,7 +855,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 		// Compute insert after all leading line comment markers
 		int newInsert= insert;
-		while (newInsert < endOffset - 2 && document.get(newInsert, 2).equals(LINE_COMMENT))
+		while (newInsert < endOffset - 2 && LINE_COMMENT.equals(document.get(newInsert, 2)))
 			newInsert += 2;
 
 		// Heuristic to check whether it is commented code or just a comment
@@ -895,7 +895,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		int endOffset= region.getOffset() + region.getLength();
 
 		// go behind line comments
-		while (from < endOffset - 2 && document.get(from, 2).equals(LINE_COMMENT))
+		while (from < endOffset - 2 && LINE_COMMENT.equals(document.get(from, 2)))
 			from += 2;
 
 		int to= from;
@@ -1143,7 +1143,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 		try {
 			String content= d.get(c.offset - 3, 3);
-			if (content.equals("els")) { //$NON-NLS-1$
+			if ("els".equals(content)) { //$NON-NLS-1$
 				JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
 				int p= c.offset - 3;
 
@@ -1181,7 +1181,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				return;
 			}
 
-			if (content.equals("cas")) { //$NON-NLS-1$
+			if ("cas".equals(content)) { //$NON-NLS-1$
 				JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
 				int p= c.offset - 3;
 

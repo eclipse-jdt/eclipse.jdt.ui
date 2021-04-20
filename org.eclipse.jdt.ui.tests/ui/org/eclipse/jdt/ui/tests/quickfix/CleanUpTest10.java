@@ -69,7 +69,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -123,7 +123,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -150,7 +150,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -177,7 +177,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -208,7 +208,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -239,7 +239,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -439,7 +439,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -491,7 +491,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -524,7 +524,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -557,7 +557,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -588,7 +588,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -619,7 +619,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test
@@ -691,7 +691,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 
 	@Test

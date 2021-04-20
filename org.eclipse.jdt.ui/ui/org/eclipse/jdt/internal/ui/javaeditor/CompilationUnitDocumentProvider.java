@@ -658,7 +658,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			synchronized(getLockObject()) {
 				-- fStateCount;
 				stateCount= fStateCount;
-				fProblemRequestorState.set(null);
+				fProblemRequestorState.remove();
 			}
 
 			if (stateCount == 0)

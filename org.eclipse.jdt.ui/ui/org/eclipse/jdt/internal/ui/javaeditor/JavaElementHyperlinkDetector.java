@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -68,8 +69,11 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 	/* cache for the last result from codeSelect(..) */
 	private static ITypeRoot fLastInput;
+
 	private static long fLastModStamp;
+
 	private static IRegion fLastWordRegion;
+
 	private static IJavaElement[] fLastElements;
 
 	/*
@@ -103,10 +107,14 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 				return null;
 
 			if (JavaElementHyperlinkDetector.class == getClass() && findBreakOrContinueTarget(input, region) != null)
-				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction)openAction, null, false) };
+				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction) openAction, null, false) };
 
 			if (JavaElementHyperlinkDetector.class == getClass() && findSwitchCaseTarget(input, region) != null)
 				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction) openAction, null, false) };
+
+			if (JavaElementHyperlinkDetector.class == getClass() && findEnumConstructorTarget(input, region) != null) {
+				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction) openAction, null, false) };
+			}
 
 			IJavaElement[] elements;
 			long modStamp= documentProvider.getModificationStamp(editorInput);
@@ -125,7 +133,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 			ArrayList<IHyperlink> links= new ArrayList<>(elements.length);
 			for (IJavaElement element : elements) {
-				addHyperlinks(links, wordRegion, (SelectionDispatchAction)openAction, element, elements.length > 1, (JavaEditor)textEditor);
+				addHyperlinks(links, wordRegion, (SelectionDispatchAction) openAction, element, elements.length > 1, (JavaEditor) textEditor);
 			}
 			if (links.isEmpty())
 				return null;
@@ -279,4 +287,33 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 		return new OccurrenceLocation(switchNode.getStartPosition(), 6, 0, description); // '6' is the length of 'switch'
 	}
 
+	/**
+	 * Finds the optional enum constructor target for ENUM_CONSTANT_DECLARATION node.
+	 *
+	 * @param input the editor input
+	 * @param region the region
+	 * @return the ENUM_CONSTANT_DECLARATION target location or <code>null</code> if none
+	 * @since 3.22
+	 */
+	public static OccurrenceLocation findEnumConstructorTarget(ITypeRoot input, IRegion region) {
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(input, SharedASTProviderCore.WAIT_YES, null);
+		if (astRoot == null) {
+			return null;
+		}
+
+		ASTNode node= NodeFinder.perform(astRoot, region.getOffset(), region.getLength());
+		if (node == null || node.getParent().getNodeType() != ASTNode.ENUM_CONSTANT_DECLARATION) {
+			return null;
+		}
+		EnumConstantDeclaration enumNode= (EnumConstantDeclaration) node.getParent();
+		EnumConstructorTargetFinder finder= new EnumConstructorTargetFinder();
+		if (finder.initialize(astRoot, enumNode)) {
+			OccurrenceLocation location= finder.getOccurrence();
+			if (location != null) {
+				return location;
+			}
+		}
+		String description= Messages.format(SearchMessages.EnumConstructorTargetFinder_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(node)));
+		return new OccurrenceLocation(enumNode.getStartPosition(), node.getLength(), 0, description);
+	}
 }

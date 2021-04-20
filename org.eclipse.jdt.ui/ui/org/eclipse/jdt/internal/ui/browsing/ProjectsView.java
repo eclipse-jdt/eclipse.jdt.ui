@@ -166,7 +166,7 @@ public class ProjectsView extends JavaBrowsingPart {
 			case IJavaElement.JAVA_PROJECT:
 				return je;
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				if (je.getElementName().equals(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH))
+				if (IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH.equals(je.getElementName()))
 					return je.getParent();
 				else
 					return je;

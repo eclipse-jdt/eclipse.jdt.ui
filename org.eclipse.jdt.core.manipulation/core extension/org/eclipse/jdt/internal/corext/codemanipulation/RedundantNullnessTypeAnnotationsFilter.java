@@ -129,10 +129,10 @@ public class RedundantNullnessTypeAnnotationsFilter {
 					for (IAnnotationBinding nestedBinding : annotationAnnotations) {
 						ITypeBinding nestedAnnotationType= nestedBinding.getAnnotationType();
 						if (nestedAnnotationType != null) {
-							if (nestedAnnotationType.getName().equals("TypeQualifierDefault")) { //$NON-NLS-1$
+							if ("TypeQualifierDefault".equals(nestedAnnotationType.getName())) { //$NON-NLS-1$
 								foundTypeQualifierDefault= true;
 								for (final IMemberValuePairBinding pair : nestedBinding.getAllMemberValuePairs()) {
-									if (pair.getKey() == null || pair.getKey().equals("value")) { //$NON-NLS-1$
+									if (pair.getKey() == null || "value".equals(pair.getKey())) { //$NON-NLS-1$
 										Object value= pair.getValue();
 										if (value instanceof Object[]) {
 											Object[] values= (Object[]) value;
@@ -155,7 +155,7 @@ public class RedundantNullnessTypeAnnotationsFilter {
 				}
 			} else {
 				for (final IMemberValuePairBinding pair : pairs) {
-					if (pair.getKey() == null || pair.getKey().equals("value")) { //$NON-NLS-1$
+					if (pair.getKey() == null || "value".equals(pair.getKey())) { //$NON-NLS-1$
 						Object value= pair.getValue();
 						if (value instanceof Object[]) {
 							Object[] values= (Object[]) value;
