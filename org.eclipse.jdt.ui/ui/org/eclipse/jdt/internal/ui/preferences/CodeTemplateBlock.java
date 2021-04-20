@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
@@ -39,28 +40,37 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
 
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.text.templates.TemplatePersistenceData;
 import org.eclipse.text.templates.TemplateReaderWriter;
 
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.ProjectTemplateStore;
@@ -73,6 +83,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.preferences.EditTemplateDialog.TextViewerAction;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -300,6 +311,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 	private PixelConverter fPixelConverter;
 	private SourceViewer fPatternViewer;
+	private TextViewerAction fPatternViewerCopyAction;
+	private TextViewerAction fPatternViewerSelectAllAction;
 
 	private TemplateVariableProcessor fTemplateProcessor;
 
@@ -390,6 +403,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		LayoutUtil.setHorizontalGrabbing(fCodeTemplateTree.getTreeControl(null));
 
 		fPatternViewer= createViewer(composite, 2);
+		addActionsToPatternViewer(fPatternViewer);
 
 		fGenerateComments.doFillIntoGrid(composite, 2);
 
@@ -436,6 +450,41 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		control.setLayoutData(data);
 
 		return viewer;
+	}
+
+	private void addActionsToPatternViewer(SourceViewer viewer) {
+		// create actions
+		fPatternViewerCopyAction = new TextViewerAction(viewer, ITextOperationTarget.COPY);
+		fPatternViewerCopyAction.setActionDefinitionId(ActionFactory.COPY.getCommandId());
+		fPatternViewerCopyAction.setText(PreferencesMessages.EditTemplateDialog_copy);
+
+		fPatternViewerSelectAllAction = new TextViewerAction(viewer, ITextOperationTarget.SELECT_ALL);
+		fPatternViewerSelectAllAction.setActionDefinitionId(ActionFactory.SELECT_ALL.getCommandId());
+		fPatternViewerSelectAllAction.setText(PreferencesMessages.EditTemplateDialog_select_all);
+
+		viewer.addSelectionChangedListener(this::updateCopyAction);
+		// create context menu
+		MenuManager manager = new MenuManager(null, null);
+		manager.setRemoveAllWhenShown(true);
+		manager.addMenuListener(this::fillPatternViewerContextMenu);
+
+		StyledText text = viewer.getTextWidget();
+		Menu menu = manager.createContextMenu(text);
+		text.setMenu(menu);
+	}
+
+	private void fillPatternViewerContextMenu(IMenuManager menu) {
+		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, fPatternViewerCopyAction);
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, fPatternViewerSelectAllAction);
+	}
+
+	/**
+	 * @param event The event
+	 */
+	private void updateCopyAction(SelectionChangedEvent event) {
+		if (fPatternViewerCopyAction != null)
+			fPatternViewerCopyAction.update();
 	}
 
 	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment) {
