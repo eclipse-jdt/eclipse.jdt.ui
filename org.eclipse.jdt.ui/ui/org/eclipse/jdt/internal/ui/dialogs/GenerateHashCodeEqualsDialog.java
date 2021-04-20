@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -152,7 +152,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 
 		fUseInstanceOf= asBoolean(getDialogSettings().get(SETTINGS_INSTANCEOF), false);
 		fUseBlocks= asBoolean(getDialogSettings().get(SETTINGS_BLOCKS), false);
-		fUseJ7HashEquals= asBoolean(getDialogSettings().get(SETTINGS_J7_HASH_EQUALS), false);
+		fUseJ7HashEquals= asBoolean(getDialogSettings().get(SETTINGS_J7_HASH_EQUALS), JavaModelUtil.is1d7OrHigher(this.fProject));
 
 	}
 
@@ -160,7 +160,8 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 	public boolean close() {
 		getDialogSettings().put(SETTINGS_INSTANCEOF, fUseInstanceOf);
 		getDialogSettings().put(SETTINGS_BLOCKS, fUseBlocks);
-		getDialogSettings().put(SETTINGS_J7_HASH_EQUALS, fUseJ7HashEquals);
+		if (JavaModelUtil.is1d7OrHigher(this.fProject))
+			getDialogSettings().put(SETTINGS_J7_HASH_EQUALS, fUseJ7HashEquals);
 		return super.close();
 	}
 
