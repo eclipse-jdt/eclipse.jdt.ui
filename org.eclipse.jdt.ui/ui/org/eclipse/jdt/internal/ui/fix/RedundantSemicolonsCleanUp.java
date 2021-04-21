@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 itemis AG (http://www.itemis.eu) and others.
+ * Copyright (c) 2018, 2021 itemis AG (http://www.itemis.eu) and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
@@ -160,6 +161,12 @@ public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICle
 
 			@Override
 			public boolean visit(TypeDeclaration node) {
+				searchNode(node, contents, label, textedits);
+				return true;
+			}
+
+			@Override
+			public boolean visit(RecordDeclaration node) {
 				searchNode(node, contents, label, textedits);
 				return true;
 			}
