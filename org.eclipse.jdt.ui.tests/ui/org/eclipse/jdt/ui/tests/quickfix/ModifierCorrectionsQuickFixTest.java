@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -142,11 +142,11 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String[] previews= getAllPreviewContent(proposals);
+		String[] expected = new String[previews.length];
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -157,7 +157,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        E.xoo();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expected[0] = buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void xoo() {\n");
+		buf.append("    }\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("        E e = new E();\n");
+		buf.append("        e.xoo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1] = buf.toString();
+
+		assertEqualStringsIgnoreOrder(previews, expected);
 	}
 
 	@Test
@@ -217,11 +231,11 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		String[] previews= getAllPreviewContent(proposals);
+		String[] expected = new String[previews.length];
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -229,7 +243,19 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    public static void xoo() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expected[0] = buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("         X x = new X();\n");
+		buf.append("        x.xoo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1] = buf.toString();
+
+		assertEqualStringsIgnoreOrder(previews, expected);
 	}
 
 	@Test

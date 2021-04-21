@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12237,4 +12237,818 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
+	public void testCreateNewObjectProposal_1() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f = new F();\n");
+		buf.append("        f.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewObjectProposal_2() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public F(int i, String s) {\n");
+		buf.append("    }\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public E() {\n");
+		buf.append("        super(0, \"\");\n");
+		buf.append("    }\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public E() {\n");
+		buf.append("        super(0, \"\");\n");
+		buf.append("    }\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f = new F(0, null);\n");
+		buf.append("        f.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public F(int i, String s) {\n");
+		buf.append("    }\n");
+		buf.append("    public static void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewObjectProposal_3() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public F(int i, String s) {\n");
+		buf.append("    }\n");
+		buf.append("    public String s;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public E() {\n");
+		buf.append("        super(0, \"\");\n");
+		buf.append("    }\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String s1 = F.s;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public E() {\n");
+		buf.append("        super(0, \"\");\n");
+		buf.append("    }\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String s1 = new String();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public F(int i, String s) {\n");
+		buf.append("    }\n");
+		buf.append("    public static String s;\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public E() {\n");
+		buf.append("        super(0, \"\");\n");
+		buf.append("    }\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f = new F(0, null);\n");
+		buf.append("        String s1 = f.s;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewObjectProposal_4() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public F(int i, String s) {\n");
+		buf.append("    }\n");
+		buf.append("    public F f;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public E() {\n");
+		buf.append("        super(0, \"\");\n");
+		buf.append("    }\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f1 = F.f;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public E() {\n");
+		buf.append("        super(0, \"\");\n");
+		buf.append("    }\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f1 = new F(0, null);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public F(int i, String s) {\n");
+		buf.append("    }\n");
+		buf.append("    public static F f;\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public E() {\n");
+		buf.append("        super(0, \"\");\n");
+		buf.append("    }\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = new F(0, null);\n");
+		buf.append("        F f1 = f2.f;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewObjectProposal_5() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public E<String> e;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        E<String> e1 = E.e;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public E<String> e;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        E<String> e1 = new E<String>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public static E<String> e;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        E<String> e1 = E.e;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public E<String> e;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        E e2 = new E();\n");
+		buf.append("        E<String> e1 = e2.e;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewObjectProposal_6() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public E<String> e;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        E<String> e1 = E.e;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public E<String> e;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        E<String> e1 = new E<String>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public static E<String> e;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        E<String> e1 = E.e;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    public E<String> e;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        E e2 = new E();\n");
+		buf.append("        E<String> e1 = e2.e;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewObjectReferenceProposal_1() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = new F();\n");
+		buf.append("        F.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = new F();\n");
+		buf.append("        f2.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = new F();\n");
+		buf.append("        F f = new F();\n");
+		buf.append("        f.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewObjectReferenceProposal_2() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static F f2 = new F();\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static F f2 = new F();\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        f2.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static F f2 = new F();\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f = new F();\n");
+		buf.append("        f.foo(\"\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewObjectReferenceProposal_3() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public String fld;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = new F();\n");
+		buf.append("        String x = F.fld;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[4];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = new F();\n");
+		buf.append("        String x = f2.fld;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = new F();\n");
+		buf.append("        F f = new F();\n");
+		buf.append("        String x = f.fld;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = new F();\n");
+		buf.append("        String x = new String();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static String fld;\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewObjectReferenceProposal_4() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public String fld;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static F f2 = new F();\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String x = F.fld;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[4];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static F f2 = new F();\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String x = f2.fld;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static F f2 = new F();\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f = new F();\n");
+		buf.append("        String x = f.fld;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static F f2 = new F();\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String x = new String();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static String fld;\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewVariableReferenceProposal_1() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public String s;\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static String s2;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String s = F.s;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[4];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static String s2;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String s = s2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static String s2;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String s = new String();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static String s;\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static String s2;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f = new F();\n");
+		buf.append("        String s = f.s;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateNewVariableReferenceProposal_2() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public String s;\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static String s2;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String s1;\n");
+		buf.append("        String s = F.s;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[4];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static String s2;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String s1;\n");
+		buf.append("        String s = s1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static String s2;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String s1;\n");
+		buf.append("        String s = new String();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static String s;\n");
+		buf.append("    public void foo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    static String s2;\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        String s1;\n");
+		buf.append("        F f = new F();\n");
+		buf.append("        String s = f.s;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+
+	@Test
+	public void testCreateNewVariableReferenceProposal_3() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395216
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public F f1;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = null, f3 = F.f1, f4 = null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[4];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = null, f3 = f2, f4 = null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f2 = null, f3 = new F(), f4 = null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static F f1;\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        F f = new F();\n");
+		buf.append("        F f2 = null, f3 = f.f1, f4 = null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 }
