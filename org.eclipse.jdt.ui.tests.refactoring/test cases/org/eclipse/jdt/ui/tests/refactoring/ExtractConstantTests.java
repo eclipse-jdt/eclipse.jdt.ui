@@ -17,10 +17,10 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 
 import java.util.Hashtable;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -46,9 +46,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ExtractConstantTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH = "ExtractConstant/";
-
-	private static final boolean BUG_86113_ImportRewrite= true;
-	private static final boolean BUG_405780= true; //XXX: [1.8][compiler] Bad syntax error 'insert ":: IdentifierOrNew"' for missing semicolon
 
 	private String fCompactPref;
 	private boolean fAddComments;
@@ -292,12 +289,9 @@ public class ExtractConstantTests extends GenericRefactoringTest {
 		helper1(14, 12, 14, 15, true, false, "COLOR", "RED2");
 	}
 
+	@Ignore("BUG_86113_ImportRewrite")
 	@Test
 	public void test24() throws Exception {
-		if (BUG_86113_ImportRewrite) {
-			printTestDisabledMessage("BUG_86113_ImportRewrite");
-			return;
-		}
 		helper1(9, 28, 9, 36, true, false, "NUM", "ENUM");
 	}
 
@@ -346,9 +340,9 @@ public class ExtractConstantTests extends GenericRefactoringTest {
 		helper1(7, 20, 7, 35, true, false, "STRING", "STRING");
 	}
 
+	@Ignore("BUG 405780 [1.8][compiler] Bad syntax error 'insert \":: IdentifierOrNew\"' for missing semicolon")
 	@Test
 	public void test34() throws Exception { // syntax error
-		assumeFalse(BUG_405780);
 		helper1(7, 20, 7, 35, true, false, "STRING", "STRING");
 	}
 

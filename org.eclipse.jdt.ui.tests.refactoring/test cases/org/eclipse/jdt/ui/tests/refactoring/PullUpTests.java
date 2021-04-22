@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -54,8 +55,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class PullUpTests extends GenericRefactoringTest {
-	private static final boolean BUG_91542= true;
-
 	private static final String REFACTORING_PATH= "PullUp/";
 
 	public PullUpTests() {
@@ -534,27 +533,27 @@ public class PullUpTests extends GenericRefactoringTest {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Ignore("must fix - incorrect error")
 	@Test
 	public void test15() throws Exception {
-		printTestDisabledMessage("must fix - incorrect error");
 //		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
+	@Ignore("must fix - incorrect error")
 	@Test
 	public void test16() throws Exception {
-		printTestDisabledMessage("must fix - incorrect error");
 //		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
+	@Ignore("must fix - incorrect error with static method access")
 	@Test
 	public void test17() throws Exception {
-		printTestDisabledMessage("must fix - incorrect error with static method access");
 //		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
+	@Ignore("must fix - incorrect error with static field access")
 	@Test
 	public void test18() throws Exception {
-		printTestDisabledMessage("must fix - incorrect error with static field access");
 //		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
@@ -1207,9 +1206,9 @@ public class PullUpTests extends GenericRefactoringTest {
 		helper2(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Ignore("overloading - current limitation")
 	@Test
 	public void testFail1() throws Exception {
-		printTestDisabledMessage("overloading - current limitation");
 //		helper2(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
@@ -1286,9 +1285,9 @@ public class PullUpTests extends GenericRefactoringTest {
 		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0, true);
 	}
 
+	@Ignore("overloading - current limitation")
 	@Test
 	public void testFail12() throws Exception {
-		printTestDisabledMessage("overloading - current limitation");
 //		String[] methodNames= new String[]{"m"};
 //		String[][] signatures= new String[][]{new String[0]};
 //		boolean deleteAllInSourceType= true;
@@ -1328,24 +1327,24 @@ public class PullUpTests extends GenericRefactoringTest {
 		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 1);
 	}
 
+	@Ignore("unimplemented test - see bug 29522")
 	@Test
 	public void testFail17() throws Exception {
-		printTestDisabledMessage("unimplemented test - see bug 29522");
-//		String[] methodNames= new String[]{"m"};
-//		String[][] signatures= new String[][]{new String[0]};
-//		boolean deleteAllInSourceType= true;
-//		boolean deleteAllMatchingMethods= false;
-//		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 1);
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		boolean deleteAllInSourceType= true;
+		boolean deleteAllMatchingMethods= false;
+		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 1);
 	}
 
+	@Ignore("unimplemented test - see bug 29522")
 	@Test
 	public void testFail18() throws Exception {
-		printTestDisabledMessage("unimplemented test - see bug 29522");
-//		String[] methodNames= new String[]{"m"};
-//		String[][] signatures= new String[][]{new String[0]};
-//		boolean deleteAllInSourceType= true;
-//		boolean deleteAllMatchingMethods= false;
-//		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0);
+		String[] methodNames= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		boolean deleteAllInSourceType= true;
+		boolean deleteAllMatchingMethods= false;
+		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0);
 	}
 
 	@Test
@@ -2026,9 +2025,9 @@ public class PullUpTests extends GenericRefactoringTest {
 		helper1(new String[] { "mmm", "n" }, new String[][] { new String[] { "QT;" }, new String[0] }, true, true, 0);
 	}
 
+	@Ignore("see bug 75642")
 	@Test
 	public void testGenerics4() throws Exception {
-		printTestDisabledMessage("see bug 75642");
 
 //		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 //		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
@@ -2082,12 +2081,10 @@ public class PullUpTests extends GenericRefactoringTest {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Ignore("Disabled because of bug 91542")
 	@Test
 	public void testGenerics7() throws Exception {
-		printTestDisabledMessage("Disabled because of bug ");
-
-		if (!BUG_91542)
-			helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
+		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
 	@Test
@@ -2095,12 +2092,10 @@ public class PullUpTests extends GenericRefactoringTest {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Ignore("Disabled because of bug 91542")
 	@Test
 	public void testGenerics9() throws Exception {
-		printTestDisabledMessage("Disabled because of bug ");
-
-		if (!BUG_91542)
-			helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
+		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
 	@Test

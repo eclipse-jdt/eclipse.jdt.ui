@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -420,16 +421,16 @@ public class InlineTempTests extends GenericRefactoringTest {
 
 	//------
 
+	@Ignore("compile errors are ok now")
 	@Test
 	public void testFail0() throws Exception{
-		printTestDisabledMessage("compile errors are ok now");
-//		helper2();
+		helper2();
 	}
 
+	@Ignore("compile errors are ok now")
 	@Test
 	public void testFail1() throws Exception{
-		printTestDisabledMessage("compile errors are ok now");
-//		helper2();
+			helper2();
 	}
 
 	@Test
@@ -485,23 +486,22 @@ public class InlineTempTests extends GenericRefactoringTest {
 		helper2(8, 14, 8, 18);
 	}
 
+	@Ignore("compile errors are ok now")
 	@Test
 	public void testFail12() throws Exception{
-		printTestDisabledMessage("compile errors are ok now");
 		//test for 19851
-//		helper2(10, 16, 10, 19);
+		helper2(10, 16, 10, 19);
 	}
 
-
+	@Ignore("12106")
 	@Test
 	public void testFail13() throws Exception{
-//		printTestDisabledMessage("12106");
 		helper2(4, 18, 4, 19);
 	}
 
+	@Ignore("https://bugs.eclipse.org/bugs/show_bug.cgi?id=93850")
 	@Test
 	public void testFail14() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=93850
 		helper2(5, 17, 5, 18);
 	}
 

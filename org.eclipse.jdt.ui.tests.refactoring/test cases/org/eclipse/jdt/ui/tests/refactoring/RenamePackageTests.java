@@ -18,7 +18,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -100,9 +99,6 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RenamePackageTests extends GenericRefactoringTest {
-	private static final boolean BUG_6054= false;
-	private static final boolean BUG_54962_71267= false;
-
 	private static final String REFACTORING_PATH= "RenamePackage/";
 
 	private boolean fUpdateReferences;
@@ -1029,10 +1025,10 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		helper1(new String[]{"r"}, new String[][]{{"A"}}, "9");
 	}
 
+	@Ignore("needs revisiting")
 	@Test
 	public void testFail1() throws Exception{
-		printTestDisabledMessage("needs revisiting");
-		//helper1(new String[]{"r.p1"}, new String[][]{{"A"}}, "r");
+		helper1(new String[]{"r.p1"}, new String[][]{{"A"}}, "r");
 	}
 
 	@Test
@@ -1055,24 +1051,24 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		helper1();
 	}
 
+	@Ignore("corner case - name obscuring")
 	@Test
 	public void testFail7() throws Exception{
 		//printTestDisabledMessage("1GK90H4: ITPJCORE:WIN2000 - search: missing package reference");
-		printTestDisabledMessage("corner case - name obscuring");
-//		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 
+	@Ignore("corner case - name obscuring")
 	@Test
 	public void testFail8() throws Exception{
-		printTestDisabledMessage("corner case - name obscuring");
-//		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 
 	//native method used r.A as a parameter
+	@Ignore("corner case - qualified name used  as a parameter of a native method")
 	@Test
 	public void testFail9() throws Exception{
-		printTestDisabledMessage("corner case - qualified name used  as a parameter of a native method");
-		//helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
+		helper1(new String[]{"r", "p1"}, new String[][]{{"A"}, {"A"}}, "fred");
 	}
 
 	@Test
@@ -1081,12 +1077,9 @@ public class RenamePackageTests extends GenericRefactoringTest {
 	}
 
 	//-------
+//	@Ignore("bugs 54962, 71267")
 	@Test
 	public void test0() throws Exception{
-		if (BUG_54962_71267) {
-			printTestDisabledMessage("bugs 54962, 71267");
-			return;
-		}
 		fIsPreDeltaTest= true;
 	}
 
@@ -1257,9 +1250,9 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		});
 	}
 
+//	@Ignore("see bug#6054 (renaming a read-only package resets the read-only flag)")
 	@Test
 	public void testReadOnly() throws Exception{
-		assumeFalse("see bug#6054 (renaming a read-only package resets the read-only flag)", BUG_6054);
 
 		fIsPreDeltaTest= true;
 		String[] packageNames= new String[]{"r"};

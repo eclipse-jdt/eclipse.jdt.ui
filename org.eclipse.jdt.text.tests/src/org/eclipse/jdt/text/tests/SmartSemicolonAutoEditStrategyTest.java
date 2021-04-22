@@ -15,6 +15,7 @@ package org.eclipse.jdt.text.tests;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -35,9 +36,6 @@ import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
  * @since 3.0
  */
 public class SmartSemicolonAutoEditStrategyTest {
-	private static final boolean BUG_EXISTING_CHARACTERS_HANDLED_BY_FRAMEWORK= true;
-
-	private static final boolean BUG_UNWANTED_FUNCTIONALITY= true;
 
 	/**
 	 * Testclass exposing the method to be tested
@@ -98,12 +96,9 @@ public class SmartSemicolonAutoEditStrategyTest {
 		verifySemicolonPosition(5, 20);
 	}
 
+	@Ignore("testGoToExisting disabled - unwanted functionality")
 	@Test
 	public void testGoToExisting() throws BadLocationException {
-		if (BUG_UNWANTED_FUNCTIONALITY) {
-			System.out.println("testGoToExisting disabled - unwanted functionality");
-			return;
-		}
 		fDocument.set("public void; foobar()");
 		verifySemicolonPosition(5, 11);
 	}
@@ -126,12 +121,9 @@ public class SmartSemicolonAutoEditStrategyTest {
 		verifySemicolonPosition(12, 21);
 	}
 
+	@Ignore("testWithExistingAtInsertPosition disabled - existing characters handled by framework")
 	@Test
 	public void testWithExistingAtInsertPosition() throws BadLocationException {
-		if (BUG_EXISTING_CHARACTERS_HANDLED_BY_FRAMEWORK) {
-			System.out.println("testWithExistingAtInsertPosition disabled - existing characters handled by framework");
-			return;
-		}
 		fDocument.set("public void foobar(); // comment\r\n");
 		verifySemicolonPosition(12, 12);
 	}

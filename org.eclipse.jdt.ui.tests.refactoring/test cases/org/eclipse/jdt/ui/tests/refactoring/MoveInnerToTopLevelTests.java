@@ -19,13 +19,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 
 import java.io.IOException;
 import java.util.Hashtable;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -51,7 +51,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
-	private static final boolean BUG_304827= true; // too many imports, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304827
 
 	private static final String FIELD_COMMENT= "/** Comment */";
 	private static final String REFACTORING_PATH= "MoveInnerToTopLevel/";
@@ -294,10 +293,10 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null, false, false);
 	}
 
+	@Ignore("bug 23078")
 	@Test
 	public void test19() throws Exception{
-		printTestDisabledMessage("bug 23078");
-//		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null, false, false);
+		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null, false, false);
 	}
 
 	@Test
@@ -345,10 +344,10 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
 
+	@Ignore("disabled due to missing support for statically imported methods")
 	@Test
 	public void test31() throws Exception{
-		printTestDisabledMessage("disabled due to missing support for statically imported methods");
-		// validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
+		 validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
 
 	// ---- Visibility issues with the moved member itself and its parents
@@ -565,10 +564,10 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 //		printTestDisabledMessage("test for bug 23725");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Ignore("test for bug 23724")
 	@Test
 	public void test_nonstatic_29() throws Exception{
-		printTestDisabledMessage("test for bug 23724");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
 	@Test
 	public void test_nonstatic_30() throws Exception{
@@ -640,10 +639,10 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
+	@Ignore("disabled due to missing support for statically imported methods")
 	@Test
 	public void test_nonstatic_42() throws Exception{
-		printTestDisabledMessage("disabled due to missing support for statically imported methods");
-//		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
+		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
 	// Using member of enclosing type, non-static edition
@@ -727,9 +726,9 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Ignore("BUG_304827")
 	@Test
 	public void test_secondary_2() throws Exception {
-		assumeFalse(BUG_304827);
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
@@ -738,21 +737,21 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A", "S" }, new String[] { "p", "q" }, null, false, false, false, false);
 	}
 
+	@Ignore("too many imports, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304827")
 	@Test
 	public void test_secondary_4() throws Exception {
-		assumeFalse(BUG_304827);
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Ignore("too many imports, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304827")
 	@Test
 	public void test_secondary_5() throws Exception {
-		assumeFalse(BUG_304827);
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Ignore("too many imports, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304827")
 	@Test
 	public void test_secondary_6() throws Exception {
-		assumeFalse(BUG_304827);
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 

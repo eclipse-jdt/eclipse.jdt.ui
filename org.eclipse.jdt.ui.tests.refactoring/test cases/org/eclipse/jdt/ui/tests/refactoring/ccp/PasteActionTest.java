@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.swt.SWTError;
@@ -60,7 +61,6 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 
 public class PasteActionTest extends GenericRefactoringTest {
-	private static final boolean BUG_NOT_IMPLEMENTED_YET= true;
 	private Clipboard fClipboard;
 	private static final String REFACTORING_PATH= "Paste/";
 
@@ -146,12 +146,9 @@ public class PasteActionTest extends GenericRefactoringTest {
 		assertEqualLines(cuName, getFileContents(getOutputTestFileName(cuName)), getPackageP().getCompilationUnit(cuName + ".java").getSource());
 	}
 
+	@Ignore("not implemented yet")
 	@Test
 	public void test0() throws Exception {
-		if (BUG_NOT_IMPLEMENTED_YET) {
-			printTestDisabledMessage("not implemented yet");
-			return;
-		}
 
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");

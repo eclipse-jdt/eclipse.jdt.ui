@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -840,25 +841,25 @@ public class PushDownTests extends GenericRefactoringTest {
 				new String[]{"B", "C"}, new String[]{"p", "p"});
 	}
 
+	@Ignore("disabled due to missing support for statically imported methods")
 	@Test
 	public void test34() throws Exception{
-		printTestDisabledMessage("disabled due to missing support for statically imported methods");
 
-//		String[] selectedMethodNames= {"f", "m"};
-//		String[][] selectedMethodSignatures= {new String[0], new String[0]};
-//		String[] selectedFieldNames= {"i"};
-//		String[] namesOfMethodsToPushDown= {"f", "m"};
-//		String[][] signaturesOfMethodsToPushDown= {new String[0], new String[0]};
-//		String[] namesOfFieldsToPushDown= {"i"};
-//		String[] namesOfMethodsToDeclareAbstract= {};
-//		String[][] signaturesOfMethodsToDeclareAbstract= {};
-//
-//		helper(selectedMethodNames, selectedMethodSignatures,
-//			   selectedFieldNames,
-//			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
-//			   namesOfFieldsToPushDown,
-//			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
-//			   new String[]{"B", "C"}, new String[]{"p", "p"});
+		String[] selectedMethodNames= {"f", "m"};
+		String[][] selectedMethodSignatures= {new String[0], new String[0]};
+		String[] selectedFieldNames= {"i"};
+		String[] namesOfMethodsToPushDown= {"f", "m"};
+		String[][] signaturesOfMethodsToPushDown= {new String[0], new String[0]};
+		String[] namesOfFieldsToPushDown= {"i"};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		helper(selectedMethodNames, selectedMethodSignatures,
+			   selectedFieldNames,
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+			   namesOfFieldsToPushDown,
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+			   new String[]{"B", "C"}, new String[]{"p", "p"});
 	}
 
 	@Test

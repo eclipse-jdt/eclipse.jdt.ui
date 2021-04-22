@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -101,7 +101,6 @@ import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposalComputer;
 //predictable order for https://bugs.eclipse.org/bugs/show_bug.cgi?id=423416
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CodeCompletionTest extends AbstractCompletionTest {
-	private final static boolean BUG_80782= true;
 
 	private IJavaProject fJProject1;
 
@@ -1682,9 +1681,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Ignore("BUG_80782")
 	@Test
 	public void testOverrideCompletion5() throws Exception {
-		assumeFalse(BUG_80782);
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

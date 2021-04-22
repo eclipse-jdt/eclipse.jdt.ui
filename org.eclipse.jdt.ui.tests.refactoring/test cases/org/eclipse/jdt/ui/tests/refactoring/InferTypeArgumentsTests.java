@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.zip.ZipInputStream;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -51,8 +52,6 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d6Setup;
 
 public class InferTypeArgumentsTests extends GenericRefactoringTest {
-	private static final boolean DETERMINE_ELEMENT_TYPE_FROM_CAST= false;
-	private static final boolean BUG_map_entrySet_iterator= true;
 
 	private static final String REFACTORING_PATH= "InferTypeArguments/";
 
@@ -391,10 +390,10 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 		performCuOK();
 	}
 
+	@Ignore("currently, we don't follow flow through variables of type Object")
 	@Test
 	public void testCuAddStringInteger() throws Exception {
-		printTestDisabledMessage("currently, we don't follow flow through variables of type Object");
-//		performCuOK(); //TODO
+		performCuOK(); //TODO
 	}
 
 	@Test
@@ -402,10 +401,10 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 		performCuOK();
 	}
 
+	@Ignore("not implemented yet")
 	@Test
 	public void testCuInferFromCast() throws Exception {
-		printTestDisabledMessage("not implemented yet");
-//		performCuOK(); //TODO
+		performCuOK(); //TODO
 	}
 
 	@Test
@@ -418,16 +417,16 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 		performCuOK();
 	}
 
+	@Ignore("not implemented yet")
 	@Test
 	public void testCuCannotStringDouble() throws Exception {
-		printTestDisabledMessage("not implemented yet");
-//		performCuOK();
+		performCuOK();
 	}
 
+	@Ignore("not implemented yet")
 	@Test
 	public void testCuRippleMethods3() throws Exception {
-		printTestDisabledMessage("not implemented yet");
-//		performCuOK();
+		performCuOK();
 	}
 
 	@Test
@@ -455,12 +454,9 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 		performCuOK();
 	}
 
+	@Ignore("DETERMINE_ELEMENT_TYPE_FROM_CAST")
 	@Test
 	public void testCuArrays05() throws Exception {
-		if (! DETERMINE_ELEMENT_TYPE_FROM_CAST) {
-			printTestDisabledMessage("DETERMINE_ELEMENT_TYPE_FROM_CAST");
-			return;
-		}
 		performCuOK();
 	}
 
@@ -484,12 +480,9 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 		performCuOK();
 	}
 
+	@Ignore("BUG_map_entrySet_iterator")
 	@Test
 	public void testCuMapEntry01() throws Exception {
-		if (BUG_map_entrySet_iterator) {
-			printTestDisabledMessage("BUG_map_entrySet_iterator");
-			return;
-		}
 		performCuOK();
 	}
 

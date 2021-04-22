@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -168,10 +169,10 @@ public class RenameParametersTests extends GenericRefactoringTest{
 		helper1(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("revisit in the context of anonymous types in type hierarchies")
 	@Test
 	public void test11() throws Exception{
-		printTestDisabledMessage("revisit in the context of anonymous types in type hierarchies");
-		// helper1(new String[]{"j"}, new String[]{"I"});
+		 helper1(new String[]{"j"}, new String[]{"I"});
 	}
 
 	@Test
@@ -244,10 +245,10 @@ public class RenameParametersTests extends GenericRefactoringTest{
 		helper1(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("revisit in the context of anonymous types in type hierarchies")
 	@Test
 	public void test26() throws Exception{
-		printTestDisabledMessage("revisit in the context of anonymous types in type hierarchies");
-		//helper1(new String[]{"j"}, new String[]{"I"});
+		helper1(new String[]{"j"}, new String[]{"I"});
 	}
 
 //removed - see testFail21
@@ -275,14 +276,14 @@ public class RenameParametersTests extends GenericRefactoringTest{
 		helper1(new String[]{"kk", "j"}, new String[]{"I", "I"});
 	}
 
+	@Ignore("must do - constructor params")
 	@Test
 	public void test32() throws Exception{
-		printTestDisabledMessage("must do - constructor params");
 	}
 
+	@Ignore("revisit - removed the 'no ref update' option")
 	@Test
 	public void test33() throws Exception{
-		printTestDisabledMessage("revisit - removed the 'no ref update' option");
 //		helper1(new String[]{"b"}, new String[]{"QA;"}, false);
 	}
 
@@ -292,10 +293,10 @@ public class RenameParametersTests extends GenericRefactoringTest{
 		helper1(new String[]{"test2"}, new String[]{"Z"});
 	}
 
+	@Ignore("regression test for bug#6224")
 	@Test
 	public void test35() throws Exception{
-		printTestDisabledMessage("regression test for bug#6224");
-//		helper1(new String[]{"j"}, new String[]{"I"});
+		helper1(new String[]{"j"}, new String[]{"I"});
 	}
 
 	@Test
@@ -306,10 +307,10 @@ public class RenameParametersTests extends GenericRefactoringTest{
 
 	// -----
 
+	@Ignore("must fix - name collision with an instance var")
 	@Test
 	public void testFail0() throws Exception{
-		printTestDisabledMessage("must fix - name collision with an instance var");
-//		helper2(new String[]{"j"}, new String[]{"I"});
+		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
 	@Test
@@ -337,28 +338,28 @@ public class RenameParametersTests extends GenericRefactoringTest{
 		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("must fix - name collision with an instance var")
 	@Test
 	public void testFail6() throws Exception{
-		printTestDisabledMessage("must fix - name collision with an instance var");
-//		helper2(new String[]{"j"}, new String[]{"I"});
+		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("waiting for better conflict detection story from DB")
 	@Test
 	public void testFail7() throws Exception{
-		printTestDisabledMessage("waiting for better conflict detection story from DB");
-//		helper2(new String[]{"j"}, new String[]{"I"});
+		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("waiting for better conflict detection story from DB")
 	@Test
 	public void testFail8() throws Exception{
-		printTestDisabledMessage("waiting for better conflict detection story from DB");
-//		helper2(new String[]{"j"}, new String[]{"I"});
+		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("waiting for better conflict detection story from DB")
 	@Test
 	public void testFail9() throws Exception{
-		printTestDisabledMessage("waiting for better conflict detection story from DB");
-//		helper2(new String[]{"j"}, new String[]{"I"});
+		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
 	@Test
@@ -371,22 +372,22 @@ public class RenameParametersTests extends GenericRefactoringTest{
 		helper2(new String[]{"j", "j"}, new String[]{"I", "I"});
 	}
 
+	@Ignore("waiting for better conflict detection story from DB")
 	@Test
 	public void testFail12() throws Exception{
-		printTestDisabledMessage("waiting for better conflict detection story from DB");
-		//		helper2(new String[]{"j"}, new String[]{"I"});
+		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("waiting for better conflict detection story from DB")
 	@Test
 	public void testFail13() throws Exception{
-		printTestDisabledMessage("waiting for better conflict detection story from DB");
-//		helper2(new String[]{"j"}, new String[]{"I"});
+		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("waiting for better conflict detection story from DB")
 	@Test
 	public void testFail14() throws Exception{
-		printTestDisabledMessage("waiting for better conflict detection story from DB");
-//		helper2(new String[]{"j"}, new String[]{"QA;"});
+		helper2(new String[]{"j"}, new String[]{"QA;"});
 	}
 
 	@Test
@@ -409,21 +410,21 @@ public class RenameParametersTests extends GenericRefactoringTest{
 		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("waiting for better conflict detection story from DB")
 	@Test
 	public void testFail19() throws Exception{
-		printTestDisabledMessage("waiting for better conflict detection story from DB");
-//		helper2(new String[]{"j"}, new String[]{"I"});
+		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("waiting for better conflict detection story from DB")
 	@Test
 	public void testFail20() throws Exception{
-		printTestDisabledMessage("waiting for better conflict detection story from DB");
-//		helper2(new String[]{"j"}, new String[]{"I"});
+		helper2(new String[]{"j"}, new String[]{"I"});
 	}
 
+	@Ignore("Disabled since 1.4 compliance level doesn't produce error message")
 	@Test
 	public void testFail21() throws Exception{
-		printTestDisabledMessage("Disabled since 1.4 compliance level doesn't produce error message");
-		// helper2(new String[]{"j"}, new String[]{"I"});
+		 helper2(new String[]{"j"}, new String[]{"I"});
 	}
 }
