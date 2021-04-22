@@ -121,12 +121,4 @@ public class SourceTestCase {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
-	protected void printTestDisabledMessage(String explanation) {
-		System.out.println("\n" + getClass().getName() + "::" + getName() + " disabled (" + explanation + ")");
-	}
-
-	private String getName() {
-		return tn.getMethodName();
-	}
-
 }

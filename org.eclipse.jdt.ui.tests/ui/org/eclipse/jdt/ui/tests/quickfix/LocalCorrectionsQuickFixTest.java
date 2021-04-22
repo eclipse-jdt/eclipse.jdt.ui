@@ -31,6 +31,7 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -70,11 +71,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	@Rule
 	public ProjectTestSetup projectSetup= new ProjectTestSetup();
-
-	/**
-	 * Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.
-	 */
-	public static final boolean BUG_434188= true;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -11941,10 +11937,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 *
 	 * @throws Exception
 	 */
+	@Ignore("Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.")
 	@Test
 	public void testLoopOverAddedToFixesForVariable() throws Exception {
-		if (BUG_434188)
-			return;
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -12006,11 +12001,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 *
 	 * @throws Exception
 	 */
+	@Ignore("Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.")
 	@Test
 	public void testLoopOverAddedToFixesForMethodInvocation() throws Exception {
-		if (BUG_434188)
-			return;
-
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -12072,10 +12065,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 *
 	 * @throws Exception
 	 */
+	@Ignore("Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.")
 	@Test
 	public void testGenerateForeachNotAddedForLowVersion() throws Exception {
-		if (BUG_434188)
-			return;
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

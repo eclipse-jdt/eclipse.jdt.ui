@@ -15,6 +15,7 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -27,7 +28,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * @since 3.2
  */
 public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTest {
-	private static final boolean BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION= true;
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
@@ -53,14 +53,9 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 		assertMethodBodyProposal("h", "hashCode(", "hashCode ( )");
 	}
 
+	@Ignore("BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION disabled due to formatter - context info interation")
 	@Test
 	public void testMethodWithParam() throws Exception {
-		if (BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION) {
-			// FIXME
-			System.out.println("disabled due to formatter - context info interation");
-			return;
-		}
-
 		assertMethodBodyProposal("e", "equals(", "equals ( |)");
 	}
 
@@ -76,14 +71,9 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 		assertMethodBodyProposal("h|foobar", "hashCode(", "hashCode ( )|foobar");
 	}
 
+	@Ignore("BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION disabled due to formatter - context info interation")
 	@Test
 	public void testInsertMethodWithParam() throws Exception {
-		if (BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION) {
-			// FIXME
-			System.out.println("disabled due to formatter - context info interation");
-			return;
-		}
-
 		assertMethodBodyProposal("e|foobar", "equals(", "equals ( |)foobar");
 	}
 
