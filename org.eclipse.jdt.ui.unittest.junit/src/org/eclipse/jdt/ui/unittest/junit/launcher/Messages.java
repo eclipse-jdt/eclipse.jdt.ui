@@ -17,7 +17,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class Messages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.unittest.ui.Messages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.jdt.ui.unittest.junit.launcher.Messages";//$NON-NLS-1$
 
 	public static String JUnitLaunchConfigurationTab_error_invalidProjectName;
 
