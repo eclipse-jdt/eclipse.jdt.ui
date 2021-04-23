@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveDoubleRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveIntRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveLongRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveParsingCleanUp;
@@ -57,6 +58,7 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 				new PrimitiveShortRatherThanWrapperCleanUp(values),
 				new PrimitiveIntRatherThanWrapperCleanUp(values),
 				new PrimitiveLongRatherThanWrapperCleanUp(values),
+				new PrimitiveDoubleRatherThanWrapperCleanUp(values),
 				new PatternCleanUp(values),
 				new NoStringCreationCleanUp(values),
 				new BooleanLiteralCleanUp(values)

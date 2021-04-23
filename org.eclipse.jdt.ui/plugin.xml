@@ -7203,9 +7203,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.primitive_int_rather_than_wrapper">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PrimitiveDoubleRatherThanWrapperCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.primitive_double_rather_than_wrapper"
+            runAfter="org.eclipse.jdt.ui.cleanup.primitive_long_rather_than_wrapper">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PatternCleanUp"
             id="org.eclipse.jdt.ui.cleanup.precompile_regex"
-            runAfter="org.eclipse.jdt.ui.cleanup.primitive_long_rather_than_wrapper">
+            runAfter="org.eclipse.jdt.ui.cleanup.primitive_double_rather_than_wrapper">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp"

@@ -62,6 +62,7 @@ public final class FixMessages extends NLS {
 	public static String PrimitiveShortRatherThanWrapperFix_description;
 	public static String PrimitiveIntRatherThanWrapperFix_description;
 	public static String PrimitiveLongRatherThanWrapperFix_description;
+	public static String PrimitiveDoubleRatherThanWrapperFix_description;
 	public static String ImportsFix_OrganizeImports_Description;
 	public static String Java50Fix_add_annotations_change_name;
 	public static String Java50Fix_add_type_parameters_change_name;
