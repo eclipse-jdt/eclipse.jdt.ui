@@ -209,8 +209,8 @@ public class AccessorClassCreator {
 				result.append(constructor);
 				result.append(method);
 			} else {
-				result.append(constructor);
 				result.append(method);
+				result.append(constructor);
 			}
 
 			result.append(lineDelim).append('}').append(lineDelim);
