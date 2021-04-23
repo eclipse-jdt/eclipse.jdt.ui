@@ -637,7 +637,6 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		// use the resolved link target name
 		String resolvedLinkTarget= resolvedPath.toOSString();
 
-		path= new Path(resolvedLinkTarget);
 		File linkTargetFile= new Path(resolvedLinkTarget).toFile();
 		if (linkTargetFile.exists()) {
 			if (!linkTargetFile.isDirectory())
