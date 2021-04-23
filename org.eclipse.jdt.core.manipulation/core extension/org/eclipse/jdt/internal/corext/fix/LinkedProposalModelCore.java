@@ -17,6 +17,7 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
@@ -57,7 +58,7 @@ public class LinkedProposalModelCore {
 				@Override
 				public boolean hasNext() {return false;}
 				@Override
-				public LinkedProposalPositionGroupCore next() {return null;}
+				public LinkedProposalPositionGroupCore next() {throw new NoSuchElementException();}
 				@Override
 				public void remove() {throw new UnsupportedOperationException();}
 			};
