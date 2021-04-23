@@ -214,7 +214,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 			try {
 				String id= fCurrContext.getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_PROFILE, null);
 				if (id == null)
-					fProfileManager.getDefaultProfile().getID();
+					id= fProfileManager.getDefaultProfile().getID();
 
 				List<Profile> oldProfiles= fProfileManager.getSortedProfiles();
 				Profile[] oldProfilesArray= oldProfiles.toArray(new Profile[oldProfiles.size()]);
