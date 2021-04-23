@@ -65,7 +65,6 @@ public class NameResolver extends TemplateVariableResolver {
 			MultiVariable refVar= (MultiVariable) ref;
 			jc.addDependency(refVar, mv);
 
-			refVar.getAllChoices();
 			Object[] types= flatten(refVar.getAllChoices());
 			for (Object type : types) {
 				String[] names= jc.suggestVariableNames(mv.toString(type));
