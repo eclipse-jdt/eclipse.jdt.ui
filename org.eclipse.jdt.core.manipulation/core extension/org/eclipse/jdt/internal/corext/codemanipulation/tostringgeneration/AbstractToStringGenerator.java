@@ -186,7 +186,6 @@ public abstract class AbstractToStringGenerator {
 			addElement(processElement(element, null));
 		}
 
-		fContext.getTemplateParser().getBody();
 		Object[] members= fContext.getSelectedMembers();
 		for (int i= 0; i < members.length; i++) {
 			if (!fContext.isSkipNulls() || getMemberType(members[i]).isPrimitive())
