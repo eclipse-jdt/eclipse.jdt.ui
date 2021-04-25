@@ -99,7 +99,7 @@ public class PrimitiveDoubleRatherThanWrapperFixCore extends CompilationUnitRewr
 
 		@Override
 		public void refactorWrapper(VariableDeclarationStatement node) {
-			fResult.add(new PrimitiveRatherThanWrapperOperation(node, MultiFixMessages.PrimitiveDoubleRatherThanWrapperCleanUp_description, PrimitiveType.DOUBLE));
+			fResult.add(new PrimitiveRatherThanWrapperOperation(node, MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description, PrimitiveType.DOUBLE));
 		}
 	}
 
@@ -113,7 +113,7 @@ public class PrimitiveDoubleRatherThanWrapperFixCore extends CompilationUnitRewr
 		}
 
 		CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperation[0]);
-		return new PrimitiveDoubleRatherThanWrapperFixCore(FixMessages.PrimitiveDoubleRatherThanWrapperFix_description, compilationUnit, ops);
+		return new PrimitiveDoubleRatherThanWrapperFixCore(FixMessages.PrimitiveRatherThanWrapperFix_description, compilationUnit, ops);
 	}
 
 	protected PrimitiveDoubleRatherThanWrapperFixCore(final String name, final CompilationUnit compilationUnit, final CompilationUnitRewriteOperation[] fixRewriteOperations) {

@@ -23,14 +23,14 @@ import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.PrimitiveIntRatherThanWrapperFixCore;
+import org.eclipse.jdt.internal.corext.fix.PrimitiveRatherThanWrapperFixCore;
 
-public class PrimitiveIntRatherThanWrapperCleanUpCore extends AbstractCleanUpCore {
-	public PrimitiveIntRatherThanWrapperCleanUpCore(final Map<String, String> options) {
+public class PrimitiveRatherThanWrapperCleanUpCore extends AbstractCleanUpCore {
+	public PrimitiveRatherThanWrapperCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}
 
-	public PrimitiveIntRatherThanWrapperCleanUpCore() {
+	public PrimitiveRatherThanWrapperCleanUpCore() {
 	}
 
 	@Override
@@ -50,13 +50,13 @@ public class PrimitiveIntRatherThanWrapperCleanUpCore extends AbstractCleanUpCor
 			return null;
 		}
 
-		return PrimitiveIntRatherThanWrapperFixCore.createCleanUp(compilationUnit);
+		return PrimitiveRatherThanWrapperFixCore.createCleanUp(compilationUnit);
 	}
 
 	@Override
 	public String[] getStepDescriptions() {
 		if (isEnabled(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER)) {
-			return new String[] {MultiFixMessages.PrimitiveIntRatherThanWrapperCleanUp_description};
+			return new String[] {MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description};
 		}
 
 		return new String[0];
@@ -67,12 +67,52 @@ public class PrimitiveIntRatherThanWrapperCleanUpCore extends AbstractCleanUpCor
 		StringBuilder bld= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER)) {
+			bld.append("boolean aBoolean = Boolean.TRUE;\n"); //$NON-NLS-1$
+		} else {
+			bld.append("Boolean aBoolean = Boolean.TRUE;\n"); //$NON-NLS-1$
+		}
+
+		bld.append("if (aBoolean) {\n"); //$NON-NLS-1$
+		bld.append("    System.out.println(\"True!\");\n"); //$NON-NLS-1$
+		bld.append("}\n"); //$NON-NLS-1$
+
+		if (isEnabled(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER)) {
+			bld.append("short aShort = Short.MIN_VALUE;\n"); //$NON-NLS-1$
+		} else {
+			bld.append("Short aShort = Short.MIN_VALUE;\n"); //$NON-NLS-1$
+		}
+
+		bld.append("if (aShort > i) {\n"); //$NON-NLS-1$
+		bld.append("    System.out.println(\"True!\");\n"); //$NON-NLS-1$
+		bld.append("}\n"); //$NON-NLS-1$
+
+		if (isEnabled(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER)) {
 			bld.append("int anInteger = Integer.MIN_VALUE;\n"); //$NON-NLS-1$
 		} else {
 			bld.append("Integer anInteger = Integer.MIN_VALUE;\n"); //$NON-NLS-1$
 		}
 
 		bld.append("if (anInteger > i) {\n"); //$NON-NLS-1$
+		bld.append("    System.out.println(\"True!\");\n"); //$NON-NLS-1$
+		bld.append("}\n"); //$NON-NLS-1$
+
+		if (isEnabled(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER)) {
+			bld.append("long aLong = Long.MIN_VALUE;\n"); //$NON-NLS-1$
+		} else {
+			bld.append("Long aLong = Long.MIN_VALUE;\n"); //$NON-NLS-1$
+		}
+
+		bld.append("if (aLong > i) {\n"); //$NON-NLS-1$
+		bld.append("    System.out.println(\"True!\");\n"); //$NON-NLS-1$
+		bld.append("}\n"); //$NON-NLS-1$
+
+		if (isEnabled(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER)) {
+			bld.append("double aDouble = Double.MIN_VALUE;\n"); //$NON-NLS-1$
+		} else {
+			bld.append("Double aDouble = Double.MIN_VALUE;\n"); //$NON-NLS-1$
+		}
+
+		bld.append("if (aDouble > 0.0) {\n"); //$NON-NLS-1$
 		bld.append("    System.out.println(\"True!\");\n"); //$NON-NLS-1$
 		bld.append("}\n"); //$NON-NLS-1$
 

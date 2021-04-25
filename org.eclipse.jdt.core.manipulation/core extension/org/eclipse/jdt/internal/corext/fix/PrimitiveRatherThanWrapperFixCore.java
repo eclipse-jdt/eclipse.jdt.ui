@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
-public class PrimitiveIntRatherThanWrapperFixCore extends CompilationUnitRewriteOperationsFixCore {
+public class PrimitiveRatherThanWrapperFixCore extends CompilationUnitRewriteOperationsFixCore {
 	public static final class PrimitiveIntRatherThanWrapperFinder extends AbstractPrimitiveRatherThanWrapperFinder {
 		public PrimitiveIntRatherThanWrapperFinder(List<CompilationUnitRewriteOperation> ops) {
 			fResult= ops;
@@ -119,13 +119,21 @@ public class PrimitiveIntRatherThanWrapperFixCore extends CompilationUnitRewrite
 
 		@Override
 		public void refactorWrapper(VariableDeclarationStatement node) {
-			fResult.add(new PrimitiveRatherThanWrapperOperation(node, MultiFixMessages.PrimitiveIntRatherThanWrapperCleanUp_description, PrimitiveType.INT));
+			fResult.add(new PrimitiveRatherThanWrapperOperation(node, MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description, PrimitiveType.INT));
 		}
 	}
 
 	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit) {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
-		PrimitiveIntRatherThanWrapperFinder finder= new PrimitiveIntRatherThanWrapperFinder(operations);
+		AbstractPrimitiveRatherThanWrapperFinder finder= new PrimitiveBooleanRatherThanWrapperFinder(operations);
+		compilationUnit.accept(finder);
+		finder= new PrimitiveShortRatherThanWrapperFixCore.PrimitiveShortRatherThanWrapperFinder(operations);
+		compilationUnit.accept(finder);
+		finder= new PrimitiveIntRatherThanWrapperFinder(operations);
+		compilationUnit.accept(finder);
+		finder= new PrimitiveLongRatherThanWrapperFixCore.PrimitiveLongRatherThanWrapperFinder(operations);
+		compilationUnit.accept(finder);
+		finder= new PrimitiveDoubleRatherThanWrapperFixCore.PrimitiveDoubleRatherThanWrapperFinder(operations);
 		compilationUnit.accept(finder);
 
 		if (operations.isEmpty()) {
@@ -133,10 +141,10 @@ public class PrimitiveIntRatherThanWrapperFixCore extends CompilationUnitRewrite
 		}
 
 		CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperation[0]);
-		return new PrimitiveIntRatherThanWrapperFixCore(FixMessages.PrimitiveIntRatherThanWrapperFix_description, compilationUnit, ops);
+		return new PrimitiveRatherThanWrapperFixCore(FixMessages.PrimitiveRatherThanWrapperFix_description, compilationUnit, ops);
 	}
 
-	protected PrimitiveIntRatherThanWrapperFixCore(final String name, final CompilationUnit compilationUnit, final CompilationUnitRewriteOperation[] fixRewriteOperations) {
+	protected PrimitiveRatherThanWrapperFixCore(final String name, final CompilationUnit compilationUnit, final CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 }

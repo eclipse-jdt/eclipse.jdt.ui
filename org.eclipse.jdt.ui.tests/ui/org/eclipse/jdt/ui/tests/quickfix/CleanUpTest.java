@@ -5617,6 +5617,539 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPrimitiveBooleanRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Boolean doNotRefactorFields = Boolean.TRUE;\n" //
+				+ "    public boolean booleanField;\n" //
+				+ "    public Boolean wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ Boolean /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Boolean.TRUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInCast() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if ((boolean) alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInParenthesis() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if ((alwaysInitializedVar)) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceGreaterWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean greaterVar = i > 0;\n" //
+				+ "        if (greaterVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceLesserWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean lesserVar = i < 0;\n" //
+				+ "        if (lesserVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAndWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean andVar = b1 && b2;\n" //
+				+ "        if (andVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOrWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean orVar = b1 || b2;\n" //
+				+ "        if (orVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOppositeWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean oppositeVar = !b;\n" //
+				+ "        if (oppositeVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperFromValueOf(boolean b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean varFromValueOf = Boolean.valueOf(b1);\n" //
+				+ "        if (varFromValueOf) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceParentherizedWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean parentherizedVar = (b1 || b2);\n" //
+				+ "        if (parentherizedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceComplexExprWrapper(boolean b1, boolean b2, boolean b3, boolean b4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean complexVar = b1 ? !b2 : (b3 || b4);\n" //
+				+ "        if (complexVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceCastWrapper(Boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean castVar = (boolean) b;\n" //
+				+ "        if (castVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInPrefixExpression() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        if (!alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInIf() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInWhile() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = true;\n" //
+				+ "        while (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInDoWhile() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = false;\n" //
+				+ "        do {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        } while (alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInConditionalExpression() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        return alwaysInitializedVar ? \"foo\" : \"bar\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        return returnedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceMultiReturnedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean replaceReturnedAutoBoxedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean returnedBoolean = Boolean.FALSE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        reassignedBoolean = Boolean.FALSE;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "        multiReassignedBoolean = Boolean.FALSE;\n" //
+				+ "        multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnBooleanField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        booleanField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        wrapperField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Boolean aBoolean, Boolean anotherBoolean,\n" //
+				+ "            Boolean yetAnotherBoolean) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        aBoolean &= assignedBoolean;\n" //
+				+ "        anotherBoolean |= assignedBoolean;\n" //
+				+ "        yetAnotherBoolean ^= assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Boolean doNotRefactorFields = Boolean.TRUE;\n" //
+				+ "    public boolean booleanField;\n" //
+				+ "    public Boolean wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ boolean /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Boolean.TRUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInCast() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if ((boolean) alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInParenthesis() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if ((alwaysInitializedVar)) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceGreaterWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean greaterVar = i > 0;\n" //
+				+ "        if (greaterVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceLesserWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean lesserVar = i < 0;\n" //
+				+ "        if (lesserVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAndWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean andVar = b1 && b2;\n" //
+				+ "        if (andVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOrWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean orVar = b1 || b2;\n" //
+				+ "        if (orVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOppositeWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean oppositeVar = !b;\n" //
+				+ "        if (oppositeVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperFromValueOf(boolean b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean varFromValueOf = Boolean.valueOf(b1);\n" //
+				+ "        if (varFromValueOf) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceParentherizedWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean parentherizedVar = (b1 || b2);\n" //
+				+ "        if (parentherizedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceComplexExprWrapper(boolean b1, boolean b2, boolean b3, boolean b4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean complexVar = b1 ? !b2 : (b3 || b4);\n" //
+				+ "        if (complexVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceCastWrapper(Boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean castVar = (boolean) b;\n" //
+				+ "        if (castVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInPrefixExpression() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        if (!alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInIf() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInWhile() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = true;\n" //
+				+ "        while (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInDoWhile() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = false;\n" //
+				+ "        do {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        } while (alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInConditionalExpression() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        return alwaysInitializedVar ? \"foo\" : \"bar\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        return returnedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceMultiReturnedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean replaceReturnedAutoBoxedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean returnedBoolean = Boolean.FALSE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        reassignedBoolean = Boolean.FALSE;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "        multiReassignedBoolean = Boolean.FALSE;\n" //
+				+ "        multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnBooleanField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        booleanField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        wrapperField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Boolean aBoolean, Boolean anotherBoolean,\n" //
+				+ "            Boolean yetAnotherBoolean) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        aBoolean &= assignedBoolean;\n" //
+				+ "        anotherBoolean |= assignedBoolean;\n" //
+				+ "        yetAnotherBoolean ^= assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveBooleanRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Boolean returnedObject = Boolean.TRUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        reassignedBoolean = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Boolean, Observable> obsByBoolean) {\n" //
+				+ "        Boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        obsByBoolean.get(reassignedBoolean).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        objectField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
+				+ "        Boolean yetAnotherBoolean = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
+				+ "        return assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Boolean returnedObject = Boolean.TRUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceRessignedWrapper(Boolean b) {\n" //
+				+ "        Boolean returnedObject = Boolean.TRUE;\n" //
+				+ "        try {\n" //
+				+ "            returnedObject = b;\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            System.out.println(\"Error!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean doNotReplaceAssignedAndReturnedWrapper(Boolean b) {\n" //
+				+ "        Boolean returnedObject = Boolean.FALSE;\n" //
+				+ "        returnedObject = b;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorMultiDeclaration(boolean isValid) {\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.TRUE, otherVar;\n" //
+				+ "        if (alwaysInitializedVar && isValid) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPrimitiveShortRatherThanWrapper() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -5998,7 +6531,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveShortRatherThanWrapperCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
 	}
 
 	@Test
@@ -6555,7 +7088,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveIntRatherThanWrapperCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
 	}
 
 	@Test
@@ -7066,7 +7599,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveLongRatherThanWrapperCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
 	}
 
 	@Test
@@ -7567,7 +8100,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveDoubleRatherThanWrapperCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
 	}
 
 	@Test

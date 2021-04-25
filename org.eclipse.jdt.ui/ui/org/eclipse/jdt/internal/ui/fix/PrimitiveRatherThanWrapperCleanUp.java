@@ -25,20 +25,20 @@ import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 /**
- * A fix that replaces <code>java.lang.Short</code> wrapper object by <code>short</code> primitive type when an object is not necessary:
+ * A fix that replaces a primitive wrapper object by the primitive type when an object is not necessary:
  * <ul>
  * <li>The variable must be not null,</li>
  * <li>The result should not make more autoboxing/unboxing than the original code.</li>
  * </ul>
  */
-public class PrimitiveShortRatherThanWrapperCleanUp extends AbstractCleanUp {
-	private PrimitiveShortRatherThanWrapperCleanUpCore coreCleanUp= new PrimitiveShortRatherThanWrapperCleanUpCore();
+public class PrimitiveRatherThanWrapperCleanUp extends AbstractCleanUp {
+	private PrimitiveRatherThanWrapperCleanUpCore coreCleanUp= new PrimitiveRatherThanWrapperCleanUpCore();
 
-	public PrimitiveShortRatherThanWrapperCleanUp(final Map<String, String> options) {
+	public PrimitiveRatherThanWrapperCleanUp(final Map<String, String> options) {
 		setOptions(options);
 	}
 
-	public PrimitiveShortRatherThanWrapperCleanUp() {
+	public PrimitiveRatherThanWrapperCleanUp() {
 	}
 
 	@Override
