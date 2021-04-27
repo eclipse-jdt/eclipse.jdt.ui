@@ -21,6 +21,7 @@ import java.util.StringTokenizer;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.search.ui.text.MatchFilter;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -108,6 +109,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 	private static final JavaMatchFilter MAINCODE_FILTER= new MainCodeFilter();
 	private static final JavaMatchFilter POTENTIAL_FILTER= new PotentialFilter();
 	private static final JavaMatchFilter IMPORT_FILTER= new ImportFilter();
+	private static final JavaMatchFilter STATIC_IMPORT_FILTER= new StaticImportFilter();
 	private static final JavaMatchFilter JAVADOC_FILTER= new JavadocFilter();
 	private static final JavaMatchFilter READ_FILTER= new ReadFilter();
 	private static final JavaMatchFilter WRITE_FILTER= new WriteFilter();
@@ -127,6 +129,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 			MAINCODE_FILTER,
 			POTENTIAL_FILTER,
 			IMPORT_FILTER,
+			STATIC_IMPORT_FILTER,
 			JAVADOC_FILTER,
 			READ_FILTER,
 			WRITE_FILTER,
@@ -281,7 +284,22 @@ class TestCodeFilter extends MainOrTestFilter {
 class ImportFilter extends JavaMatchFilter {
 	@Override
 	public boolean filters(JavaElementMatch match) {
-		return match.getElement() instanceof IImportDeclaration;
+
+		Object element= match.getElement();
+		if (element instanceof IImportDeclaration) {
+			return !isStaticImport((IImportDeclaration)element);
+		}
+
+		return false;
+	}
+
+	protected boolean isStaticImport(IImportDeclaration importElement) {
+		try {
+			return Flags.isStatic(importElement.getFlags());
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return false;
 	}
 
 	@Override
@@ -327,6 +345,40 @@ class ImportFilter extends JavaMatchFilter {
 	@Override
 	public String getID() {
 		return "filter_imports"; //$NON-NLS-1$
+	}
+}
+
+class StaticImportFilter extends ImportFilter {
+
+	@Override
+	public boolean filters(JavaElementMatch match) {
+
+		Object element= match.getElement();
+		if (element instanceof IImportDeclaration) {
+			return isStaticImport((IImportDeclaration)element);
+		}
+
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return SearchMessages.MatchFilter_StaticImportFilter_name;
+	}
+
+	@Override
+	public String getActionLabel() {
+		return SearchMessages.MatchFilter_StaticImportFilter_actionLabel;
+	}
+
+	@Override
+	public String getDescription() {
+		return SearchMessages.MatchFilter_StaticImportFilter_description;
+	}
+
+	@Override
+	public String getID() {
+		return "filter_static_imports"; //$NON-NLS-1$
 	}
 }
 

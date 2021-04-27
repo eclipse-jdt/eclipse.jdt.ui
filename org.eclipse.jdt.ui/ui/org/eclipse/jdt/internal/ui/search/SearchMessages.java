@@ -228,6 +228,9 @@ public final class SearchMessages extends NLS {
 	public static String MatchFilter_ImportFilter_name;
 	public static String MatchFilter_ImportFilter_actionLabel;
 	public static String MatchFilter_ImportFilter_description;
+	public static String MatchFilter_StaticImportFilter_name;
+	public static String MatchFilter_StaticImportFilter_actionLabel;
+	public static String MatchFilter_StaticImportFilter_description;
 	public static String MatchFilter_WriteFilter_name;
 	public static String MatchFilter_WriteFilter_actionLabel;
 	public static String MatchFilter_WriteFilter_description;
