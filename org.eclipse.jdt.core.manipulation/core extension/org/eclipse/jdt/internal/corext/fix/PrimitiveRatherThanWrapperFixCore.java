@@ -125,16 +125,12 @@ public class PrimitiveRatherThanWrapperFixCore extends CompilationUnitRewriteOpe
 
 	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit) {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
-		AbstractPrimitiveRatherThanWrapperFinder finder= new PrimitiveBooleanRatherThanWrapperFinder(operations);
-		compilationUnit.accept(finder);
-		finder= new PrimitiveShortRatherThanWrapperFixCore.PrimitiveShortRatherThanWrapperFinder(operations);
-		compilationUnit.accept(finder);
-		finder= new PrimitiveIntRatherThanWrapperFinder(operations);
-		compilationUnit.accept(finder);
-		finder= new PrimitiveLongRatherThanWrapperFixCore.PrimitiveLongRatherThanWrapperFinder(operations);
-		compilationUnit.accept(finder);
-		finder= new PrimitiveDoubleRatherThanWrapperFixCore.PrimitiveDoubleRatherThanWrapperFinder(operations);
-		compilationUnit.accept(finder);
+		compilationUnit.accept(new PrimitiveBooleanRatherThanWrapperFinder(operations));
+		compilationUnit.accept(new PrimitiveShortRatherThanWrapperFinder(operations));
+		compilationUnit.accept(new PrimitiveIntRatherThanWrapperFinder(operations));
+		compilationUnit.accept(new PrimitiveLongRatherThanWrapperFinder(operations));
+		compilationUnit.accept(new PrimitiveFloatRatherThanWrapperFinder(operations));
+		compilationUnit.accept(new PrimitiveDoubleRatherThanWrapperFinder(operations));
 
 		if (operations.isEmpty()) {
 			return null;

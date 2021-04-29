@@ -5624,7 +5624,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    public Boolean doNotRefactorFields = Boolean.TRUE;\n" //
 				+ "    public boolean booleanField;\n" //
 				+ "    public Boolean wrapperField;\n" //
 				+ "\n" //
@@ -5845,7 +5844,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    public Boolean doNotRefactorFields = Boolean.TRUE;\n" //
 				+ "    public boolean booleanField;\n" //
 				+ "    public Boolean wrapperField;\n" //
 				+ "\n" //
@@ -6081,6 +6079,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.Observable;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
+				+ "    public Boolean doNotRefactorFields = Boolean.TRUE;\n" //
 				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public Object doNotBreakAutoboxing() {\n" //
@@ -6545,7 +6544,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public Short doNotRefactorFields = Short.MIN_VALUE;\n" //
-				+ "\n" //
 				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public Object doNotBreakAutoboxing() {\n" //
@@ -7102,7 +7100,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public Integer doNotRefactorFields = Integer.MIN_VALUE;\n" //
-				+ "\n" //
 				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public Object doNotBreakAutoboxing() {\n" //
@@ -7613,7 +7610,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public Long doNotRefactorFields = Long.MIN_VALUE;\n" //
-				+ "\n" //
 				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public Object doNotBreakAutoboxing() {\n" //
@@ -7667,6 +7663,482 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPrimitiveFloatRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public float floatField;\n" //
+				+ "    public Float wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ Float /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Float.MIN_VALUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float plusVar = f1 + f2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceLessWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float lessVar = f1 - f2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceTimesWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float timesVar = f1 * f2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceDivideWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float divideVar = f1 / f2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceMinusWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float minusVar = -f;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePreDecrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float preDecrementVar = --f;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePreIncrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float preDecrementVar = ++f;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePostDecrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float postDecrementVar = f--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePostIncrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float postIncrementVar = f++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperFromValueOf(float f1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float varFromValueOf = Float.valueOf(f1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceParentherizedWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float parentherizedVar = (f1 + f2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceComplexExprWrapper(float f1, float f2, float f3, float f4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float complexVar = f1 + f2 / (f3 - f4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceCastWrapper(Float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float castVar = (float) f;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float floatInPreIncrement = Float.MIN_VALUE;\n" //
+				+ "        return ++floatInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float floatInPreDecrement = Float.MAX_VALUE;\n" //
+				+ "        return --floatInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float floatInPostDecrement = Float.MIN_NORMAL;\n" //
+				+ "        return floatInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float floatInPostIncrement = Float.NaN;\n" //
+				+ "        return floatInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float returnedFloat = Float.NEGATIVE_INFINITY;\n" //
+				+ "        return returnedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceMultiReturnedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float returnedFloat = Float.POSITIVE_INFINITY;\n" //
+				+ "        if (f > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Float replaceReturnedAutoBoxedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float returnedFloat = Float.MIN_VALUE;\n" //
+				+ "        if (f > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float reassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        reassignedFloat = 123f;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float multiReassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        multiReassignedFloat = 123f;\n" //
+				+ "        multiReassignedFloat = 456f;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float assignedLocal = Float.MIN_VALUE;\n" //
+				+ "        Float anotherFloat = assignedLocal;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnFloatField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        floatField = assignedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float assignedWrapper = Float.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedWrapper;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Float aFloat, Float anotherFloat,\n" //
+				+ "            Float yetAnotherFloat, Float evenAnotherFloat) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        aFloat += assignedFloat;\n" //
+				+ "        anotherFloat -= assignedFloat;\n" //
+				+ "        yetAnotherFloat *= assignedFloat;\n" //
+				+ "        evenAnotherFloat /= assignedFloat;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public float floatField;\n" //
+				+ "    public Float wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ float /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Float.MIN_VALUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float plusVar = f1 + f2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceLessWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float lessVar = f1 - f2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceTimesWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float timesVar = f1 * f2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceDivideWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float divideVar = f1 / f2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceMinusWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float minusVar = -f;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePreDecrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float preDecrementVar = --f;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePreIncrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float preDecrementVar = ++f;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePostDecrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float postDecrementVar = f--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePostIncrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float postIncrementVar = f++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperFromValueOf(float f1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float varFromValueOf = Float.valueOf(f1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceParentherizedWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float parentherizedVar = (f1 + f2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceComplexExprWrapper(float f1, float f2, float f3, float f4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float complexVar = f1 + f2 / (f3 - f4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceCastWrapper(Float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float castVar = (float) f;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float floatInPreIncrement = Float.MIN_VALUE;\n" //
+				+ "        return ++floatInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float floatInPreDecrement = Float.MAX_VALUE;\n" //
+				+ "        return --floatInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float floatInPostDecrement = Float.MIN_NORMAL;\n" //
+				+ "        return floatInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float floatInPostIncrement = Float.NaN;\n" //
+				+ "        return floatInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float returnedFloat = Float.NEGATIVE_INFINITY;\n" //
+				+ "        return returnedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceMultiReturnedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float returnedFloat = Float.POSITIVE_INFINITY;\n" //
+				+ "        if (f > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Float replaceReturnedAutoBoxedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float returnedFloat = Float.MIN_VALUE;\n" //
+				+ "        if (f > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float reassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        reassignedFloat = 123f;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float multiReassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        multiReassignedFloat = 123f;\n" //
+				+ "        multiReassignedFloat = 456f;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float assignedLocal = Float.MIN_VALUE;\n" //
+				+ "        Float anotherFloat = assignedLocal;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnFloatField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        floatField = assignedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float assignedWrapper = Float.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedWrapper;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Float aFloat, Float anotherFloat,\n" //
+				+ "            Float yetAnotherFloat, Float evenAnotherFloat) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        aFloat += assignedFloat;\n" //
+				+ "        anotherFloat -= assignedFloat;\n" //
+				+ "        yetAnotherFloat *= assignedFloat;\n" //
+				+ "        evenAnotherFloat /= assignedFloat;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveFloatRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Float doNotRefactorFields = Float.MIN_VALUE;\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Float returnedObject = Float.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Float reassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        reassignedFloat = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Float, Observable> obsByFloat) {\n" //
+				+ "        Float reassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        obsByFloat.get(reassignedFloat).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Float assignedObject = Float.MIN_VALUE;\n" //
+				+ "        objectField = assignedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        Float anotherFloat = assignedFloat;\n" //
+				+ "        Float yetAnotherFloat = assignedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Float doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        Float anotherFloat = assignedFloat;\n" //
+				+ "        return assignedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Float returnedObject = Float.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Float doNotReplaceAssignedAndReturnedWrapper(Float f) {\n" //
+				+ "        Float returnedObject = Float.MIN_VALUE;\n" //
+				+ "        returnedObject = f;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPrimitiveDoubleRatherThanWrapper() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -7674,13 +8146,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    public Double doNotRefactorFields = Double.MIN_VALUE;\n" //
 				+ "    public double doubleField;\n" //
 				+ "    public Double wrapperField;\n" //
 				+ "\n" //
 				+ "    public void replaceWrapper(double d) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        /* c1 */ Double /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Double.MIN_VALUE /* c5 */;\n" //
 				+ "        if (alwaysInitializedVar > d) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7688,7 +8159,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(double d) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        java.lang.Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        java.lang.Double alwaysInitializedVar = Double.MAX_VALUE;\n" //
 				+ "        if (alwaysInitializedVar < d) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7777,25 +8248,25 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public double replaceWrapperInPreIncrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        Double alwaysInitializedVar = Double.MIN_NORMAL;\n" //
 				+ "        return ++alwaysInitializedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public double replaceWrapperInPreDecrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        Double alwaysInitializedVar = Double.NaN;\n" //
 				+ "        return --alwaysInitializedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public double replaceWrapperInPostDecrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        Double alwaysInitializedVar = Double.NEGATIVE_INFINITY;\n" //
 				+ "        return alwaysInitializedVar--;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public double replaceWrapperInPostIncrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        Double alwaysInitializedVar = Double.POSITIVE_INFINITY;\n" //
 				+ "        return alwaysInitializedVar++;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -7886,13 +8357,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    public Double doNotRefactorFields = Double.MIN_VALUE;\n" //
 				+ "    public double doubleField;\n" //
 				+ "    public Double wrapperField;\n" //
 				+ "\n" //
 				+ "    public void replaceWrapper(double d) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        /* c1 */ double /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Double.MIN_VALUE /* c5 */;\n" //
 				+ "        if (alwaysInitializedVar > d) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7900,7 +8370,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(double d) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        double alwaysInitializedVar = Double.MAX_VALUE;\n" //
 				+ "        if (alwaysInitializedVar < d) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7989,25 +8459,25 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public double replaceWrapperInPreIncrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        double alwaysInitializedVar = Double.MIN_NORMAL;\n" //
 				+ "        return ++alwaysInitializedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public double replaceWrapperInPreDecrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        double alwaysInitializedVar = Double.NaN;\n" //
 				+ "        return --alwaysInitializedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public double replaceWrapperInPostDecrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        double alwaysInitializedVar = Double.NEGATIVE_INFINITY;\n" //
 				+ "        return alwaysInitializedVar--;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public double replaceWrapperInPostIncrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        double alwaysInitializedVar = Double.POSITIVE_INFINITY;\n" //
 				+ "        return alwaysInitializedVar++;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -8114,7 +8584,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public Double doNotRefactorFields = Double.MIN_VALUE;\n" //
-				+ "\n" //
 				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public Object doNotBreakAutoboxing() {\n" //
