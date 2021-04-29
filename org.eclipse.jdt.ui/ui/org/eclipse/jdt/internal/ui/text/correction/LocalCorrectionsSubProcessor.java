@@ -839,9 +839,6 @@ public class LocalCorrectionsSubProcessor {
 				QualifiedName qualifiedName= (QualifiedName) selectedNode;
 				Name qualifier= qualifiedName.getQualifier();
 				binding= qualifier.resolveTypeBinding();
-				if (binding == null) {
-					return;
-				}
 			}
 		} else {
 			selectedNode= ASTNodes.getParent(selectedNode, ASTNode.EXPRESSION_STATEMENT);
@@ -857,9 +854,9 @@ public class LocalCorrectionsSubProcessor {
 				Expression expression2= ((MethodInvocation) expression).getExpression();
 				binding= expression2 == null ? null : expression2.resolveTypeBinding();
 			}
-			if (binding == null) {
-				return;
-			}
+		}
+		if (binding == null) {
+			return;
 		}
 		ICompilationUnit cu= context.getCompilationUnit();
 		CreateObjectReferenceProposal createObjectReferenceProposal= new CreateObjectReferenceProposal(cu, selectedNode, binding, IProposalRelevance.ADD_CONSTRUCTOR_FROM_SUPER_CLASS);
