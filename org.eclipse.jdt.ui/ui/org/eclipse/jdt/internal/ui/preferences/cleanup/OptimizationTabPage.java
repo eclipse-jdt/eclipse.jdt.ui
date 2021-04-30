@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringBufferToStringBuilderCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringBuilderCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UseStringIsBlankCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp;
@@ -56,6 +57,7 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 				new PrimitiveSerializationCleanUp(values),
 				new PrimitiveRatherThanWrapperCleanUp(values),
 				new PatternCleanUp(values),
+				new StringBufferToStringBuilderCleanUp(values),
 				new NoStringCreationCleanUp(values),
 				new BooleanLiteralCleanUp(values)
 		};
@@ -106,6 +108,12 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 		final CheckboxPreference precompileRegExPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_PrecompileRegEx, CleanUpConstants.PRECOMPILE_REGEX,
 				CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(precompileRegExPref);
+
+		final CheckboxPreference stringBufferToStringBuilderPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_StringBufferToStringBuilder, CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(stringBufferToStringBuilderPref);
+		intent(optimizationGroup);
+		CheckboxPreference onlyLocalsPref= createCheckboxPref(optimizationGroup, 1, CleanUpMessages.OptimizationTabPage_CheckboxName_StringBufferToStringBuilderLocalsOnly, CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS, CleanUpModifyDialog.FALSE_TRUE);
+		registerSlavePreference(stringBufferToStringBuilderPref, new CheckboxPreference[] {onlyLocalsPref});
 
 		final CheckboxPreference noStringCreation= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_NoStringCreation, CleanUpConstants.NO_STRING_CREATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(noStringCreation);

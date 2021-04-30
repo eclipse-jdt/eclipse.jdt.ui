@@ -1199,6 +1199,30 @@ public class CleanUpConstants {
 	public static final String STRINGBUILDER= "cleanup.stringbuilder"; //$NON-NLS-1$
 
 	/**
+	 * Replaces StringBuffer by StringBuilder.
+	 *
+	 * For detailed setting use<br>
+	 * {@link #STRINGBUILDER_FOR_LOCAL_VARS_ONLY}<br>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.21
+	 */
+	public static final String STRINGBUFFER_TO_STRINGBUILDER= "cleanup.stringbuffer_to_stringbuilder"; //$NON-NLS-1$
+
+	/**
+	 * Only replace local var StringBuffer uses with StringBuilder.
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.21
+	 */
+	public static final String STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS= "cleanup.stringbuilder_for_local_vars"; //$NON-NLS-1$
+
+	/**
 	 * Replaces <code>String.replaceAll()</code> by <code>String.replace()</code>.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

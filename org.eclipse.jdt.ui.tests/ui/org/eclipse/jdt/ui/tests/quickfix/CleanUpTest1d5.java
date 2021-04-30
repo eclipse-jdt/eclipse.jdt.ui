@@ -3655,4 +3655,409 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
+	@Test
+	public void testStringBufferToStringBuilderForLocals() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String sample0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public StringBuffer field0;\n" //
+				+ "    public void method0(StringBuffer parm) {\n" //
+				+ "        System.out.println(parm.toString());\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu0= pack1.createCompilationUnit("SuperClass.java", sample0, false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuffer field1;\n" //
+				+ "    StringBuffer field2;\n" //
+				+ "    public void changeForSimpleCase() {\n" //
+				+ "        StringBuffer x = new StringBuffer();\n" //
+				+ "        x.append(\"abc\");\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void changeWithSafeParmUse(StringBuffer a) {\n" //
+				+ "        StringBuffer x = new StringBuffer();\n" //
+				+ "        x.append(a.toString());\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void changeWithArrayAndForLoop() {\n" //
+				+ "        StringBuffer[] j = new StringBuffer[14];\n" //
+				+ "        for (StringBuffer sb : j) {\n" //
+				+ "            StringBuffer k = sb.append(\"abc\");\n" //
+				+ "            System.out.println(k.toString());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void changeConstructors() {\n" //
+				+ "        StringBuffer x = null;\n" //
+				+ "        x = new StringBuffer();\n" //
+				+ "        x.append(new StringBuffer(\"abc\"));\n" //
+				+ "    }\n" //
+				+ "    public void changeWithConditional(int x) {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        StringBuffer b = null;\n" //
+				+ "        b = x < 0 ? new StringBuffer() : a;\n" //
+				+ "    }\n" //
+				+ "    private void someMethod(Object a) {}\n" //
+				+ "    public void changeWithValidMethodCall() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        someMethod(a.toString());\n" //
+				+ "    }\n" //
+				+ "    private void varArgMethod(StringBuffer ...a) {}\n" //
+				+ "    public void changeWithVarArgMethodWithSafeUse(StringBuffer parm) {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        varArgMethod(field1, super.field0, parm);\n" //
+				+ "    }\n" //
+				+ "    public void changeWithVarArgMethodWithSafeUse2() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        varArgMethod();\n" //
+				+ "    }\n" //
+				+ "    public StringBuffer changeWithSafeFieldAndParmUse(StringBuffer parm) {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        StringBuffer b = new StringBuffer(\"abc\");\n" //
+				+ "        a.append(b);\n" //
+				+ "        a.append(field1.toString());\n" //
+				+ "        b.append(parm.toString());\n" //
+				+ "        field1 = field2;\n" //
+				+ "        super.field0 = field1;\n" //
+				+ "        changeWithSafeParmUse(parm);\n" //
+				+ "        super.method0(parm);\n" //
+				+ "        field2 = parm.append(\"def\");\n" //
+				+ "        return field2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuffer field1;\n" //
+				+ "    StringBuffer field2;\n" //
+				+ "    public void changeForSimpleCase() {\n" //
+				+ "        StringBuilder x = new StringBuilder();\n" //
+				+ "        x.append(\"abc\");\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void changeWithSafeParmUse(StringBuffer a) {\n" //
+				+ "        StringBuilder x = new StringBuilder();\n" //
+				+ "        x.append(a.toString());\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void changeWithArrayAndForLoop() {\n" //
+				+ "        StringBuilder[] j = new StringBuilder[14];\n" //
+				+ "        for (StringBuilder sb : j) {\n" //
+				+ "            StringBuilder k = sb.append(\"abc\");\n" //
+				+ "            System.out.println(k.toString());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void changeConstructors() {\n" //
+				+ "        StringBuilder x = null;\n" //
+				+ "        x = new StringBuilder();\n" //
+				+ "        x.append(new StringBuffer(\"abc\"));\n" //
+				+ "    }\n" //
+				+ "    public void changeWithConditional(int x) {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        StringBuilder b = null;\n" //
+				+ "        b = x < 0 ? new StringBuilder() : a;\n" //
+				+ "    }\n" //
+				+ "    private void someMethod(Object a) {}\n" //
+				+ "    public void changeWithValidMethodCall() {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        someMethod(a.toString());\n" //
+				+ "    }\n" //
+				+ "    private void varArgMethod(StringBuffer ...a) {}\n" //
+				+ "    public void changeWithVarArgMethodWithSafeUse(StringBuffer parm) {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        varArgMethod(field1, super.field0, parm);\n" //
+				+ "    }\n" //
+				+ "    public void changeWithVarArgMethodWithSafeUse2() {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        varArgMethod();\n" //
+				+ "    }\n" //
+				+ "    public StringBuffer changeWithSafeFieldAndParmUse(StringBuffer parm) {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        StringBuilder b = new StringBuilder(\"abc\");\n" //
+				+ "        a.append(b);\n" //
+				+ "        a.append(field1.toString());\n" //
+				+ "        b.append(parm.toString());\n" //
+				+ "        field1 = field2;\n" //
+				+ "        super.field0 = field1;\n" //
+				+ "        changeWithSafeParmUse(parm);\n" //
+				+ "        super.method0(parm);\n" //
+				+ "        field2 = parm.append(\"def\");\n" //
+				+ "        return field2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu0, cu1 }, new String[] { sample0, expected1 }, null);
+	}
+
+	@Test
+	public void testDoNotConvertStringBufferToStringBuilderForLocals() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public StringBuffer field0;\n" //
+				+ "    public void method0(StringBuffer parm) {\n" //
+				+ "        System.out.println(parm.toString());\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu0= pack1.createCompilationUnit("SuperClass.java", sample0, false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuffer field1;\n" //
+				+ "    StringBuffer field2;\n" //
+				+ "    public void doNotChangeForParmAssignment(StringBuffer parm) {\n" //
+				+ "        StringBuffer x = parm;\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeForFieldAssignment(StringBuffer a) {\n" //
+				+ "        StringBuffer x = field1.append(\"abc\");\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeForSuperFieldAssignment(StringBuffer a) {\n" //
+				+ "        StringBuffer x = super.field0.append(\"abc\");\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeWithParmForLoop(StringBuffer[] parm) {\n" //
+				+ "        for (StringBuffer sb : parm) {\n" //
+				+ "            StringBuffer k = sb.append(\"abc\");\n" //
+				+ "            System.out.println(k.toString());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeWithParmCast(Object o) {\n" //
+				+ "        StringBuffer k= (StringBuffer)o;\n" //
+				+ "    }\n" //
+				+ "    public StringBuffer doNotChangeWithReturn() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        return a;\n" //
+				+ "    }"
+				+ "    public void doNotChangeWithMethodReturnAssignment() {\n" //
+				+ "        StringBuffer a = doNotChangeWithReturn();\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeWhenMethodParm() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        doNotChangeForFieldAssignment(a);\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeWhenSuperMethodParm() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        super.method0(a);\n" //
+				+ "    }\n" //
+				+ "    private void someMethod(Object a, Object b) {}\n" //
+				+ "    public void doNotChangeWhenMethodParmPassedAsObject() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        someMethod(a.toString(), a);\n" //
+				+ "    }\n" //
+				+ "    private void varArgMethod(StringBuffer ...a) {}\n" //
+				+ "    public void doNotChangeWhenPassedAsVarArg() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        varArgMethod(a);\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeWhenPassedAsVarArg2() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        varArgMethod(field1, a);\n" //
+				+ "    }\n" //
+				+ "    private void varArgObjectMethod(Object ...a) {}\n" //
+				+ "    public void doNotChangeWhenPassedAsObjectVarArg() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        varArgObjectMethod(a);\n" //
+				+ "    }\n" //
+			+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu0, cu1 });
+	}
+
+	@Test
+	public void testConvertStringBufferToStringBuilderAll() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public StringBuffer field0;\n" //
+				+ "    public void method0(StringBuffer parm) {\n" //
+				+ "        System.out.println(parm.toString());\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu0= pack1.createCompilationUnit("SuperClass.java", sample0, false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuffer field1;\n" //
+				+ "    StringBuffer field2;\n" //
+				+ "    /**\n" //
+				+ "     * {@link StringBuffer}\n" //
+				+ "     */\n" //
+				+ "    public void changeForParmAssignment(StringBuffer parm) {\n" //
+				+ "        StringBuffer x = (parm instanceof StringBuffer) ? parm : null;\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    /**\n" //
+				+ "     * @see StringBuffer#append(StringBuffer)\n" //
+				+ "     */\n" //
+				+ "    public void changeForFieldAssignment(StringBuffer a) {\n" //
+				+ "        StringBuffer x = field1.append(\"abc\");\n" //
+				+ "        Map<String, StringBuffer> map= null;\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void changeForSuperFieldAssignment(StringBuffer a) {\n" //
+				+ "        StringBuffer x = super.field0.append(\"abc\");\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void changeWithParmForLoop(StringBuffer[] parm) {\n" //
+				+ "        for (StringBuffer sb : parm) {\n" //
+				+ "            StringBuffer k = sb.append(\"abc\");\n" //
+				+ "            System.out.println(k.toString());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void changeWithParmCast(Object o) {\n" //
+				+ "        StringBuffer k= (StringBuffer)o;\n" //
+				+ "    }\n" //
+				+ "    public StringBuffer changeWithReturn() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        return a;\n" //
+				+ "    }"
+				+ "    public void changeWithMethodReturnAssignment() {\n" //
+				+ "        StringBuffer a = changeWithReturn();\n" //
+				+ "    }\n" //
+				+ "    public void changeWhenMethodParm() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        changeForFieldAssignment(a);\n" //
+				+ "    }\n" //
+				+ "    public void changeWhenSuperMethodParm() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        super.method0(a);\n" //
+				+ "    }\n" //
+				+ "    private void someMethod(Object a, Object b) {}\n" //
+				+ "    public void changeWhenMethodParmPassedAsObject() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        someMethod(a.toString(), a);\n" //
+				+ "    }\n" //
+				+ "    private void varArgMethod(StringBuffer ...a) {}\n" //
+				+ "    public void changeWhenPassedAsVarArg() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        varArgMethod(a);\n" //
+				+ "    }\n" //
+				+ "    public void changeWhenPassedAsVarArg2() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        varArgMethod(field1, a);\n" //
+				+ "    }\n" //
+				+ "    private void varArgObjectMethod(Object ...a) {}\n" //
+				+ "    public void changeWhenPassedAsObjectVarArg() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        varArgObjectMethod(a);\n" //
+				+ "    }\n" //
+			+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		String expected0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public StringBuilder field0;\n" //
+				+ "    public void method0(StringBuilder parm) {\n" //
+				+ "        System.out.println(parm.toString());\n" //
+				+ "    }\n" //
+				+ "}";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuilder field1;\n" //
+				+ "    StringBuilder field2;\n" //
+				+ "    /**\n" //
+				+ "     * {@link StringBuilder}\n" //
+				+ "     */\n" //
+				+ "    public void changeForParmAssignment(StringBuilder parm) {\n" //
+				+ "        StringBuilder x = (parm instanceof StringBuilder) ? parm : null;\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    /**\n" //
+				+ "     * @see StringBuilder#append(StringBuilder)\n" //
+				+ "     */\n" //
+				+ "    public void changeForFieldAssignment(StringBuilder a) {\n" //
+				+ "        StringBuilder x = field1.append(\"abc\");\n" //
+				+ "        Map<String, StringBuilder> map= null;\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void changeForSuperFieldAssignment(StringBuilder a) {\n" //
+				+ "        StringBuilder x = super.field0.append(\"abc\");\n" //
+				+ "        System.out.println(x.toString());\n" //
+				+ "    }\n" //
+				+ "    public void changeWithParmForLoop(StringBuilder[] parm) {\n" //
+				+ "        for (StringBuilder sb : parm) {\n" //
+				+ "            StringBuilder k = sb.append(\"abc\");\n" //
+				+ "            System.out.println(k.toString());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public void changeWithParmCast(Object o) {\n" //
+				+ "        StringBuilder k= (StringBuilder)o;\n" //
+				+ "    }\n" //
+				+ "    public StringBuilder changeWithReturn() {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        return a;\n" //
+				+ "    }"
+				+ "    public void changeWithMethodReturnAssignment() {\n" //
+				+ "        StringBuilder a = changeWithReturn();\n" //
+				+ "    }\n" //
+				+ "    public void changeWhenMethodParm() {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        changeForFieldAssignment(a);\n" //
+				+ "    }\n" //
+				+ "    public void changeWhenSuperMethodParm() {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        super.method0(a);\n" //
+				+ "    }\n" //
+				+ "    private void someMethod(Object a, Object b) {}\n" //
+				+ "    public void changeWhenMethodParmPassedAsObject() {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        someMethod(a.toString(), a);\n" //
+				+ "    }\n" //
+				+ "    private void varArgMethod(StringBuilder ...a) {}\n" //
+				+ "    public void changeWhenPassedAsVarArg() {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        varArgMethod(a);\n" //
+				+ "    }\n" //
+				+ "    public void changeWhenPassedAsVarArg2() {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        varArgMethod(field1, a);\n" //
+				+ "    }\n" //
+				+ "    private void varArgObjectMethod(Object ...a) {}\n" //
+				+ "    public void changeWhenPassedAsObjectVarArg() {\n" //
+				+ "        StringBuilder a = new StringBuilder();\n" //
+				+ "        varArgObjectMethod(a);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+		disable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS);
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu0, cu1 }, new String[] { expected0, expected1 },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StringBufferToStringBuilderCleanUp_description)));
+	}
+
 }

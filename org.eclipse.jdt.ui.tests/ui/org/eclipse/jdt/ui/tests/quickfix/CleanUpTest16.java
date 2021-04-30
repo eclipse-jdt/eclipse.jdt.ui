@@ -433,4 +433,197 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
+
+	@Test
+	public void testStringBufferToStringBuilderLocalsOnly() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public static StringBuffer field0;\n" //
+				+ "}";
+		ICompilationUnit cu0= pack1.createCompilationUnit("SuperClass.java", sample0, false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    public record K(StringBuffer comp1) {\n" //
+				+ "        public static StringBuffer field1;\n" //
+				+ "        public static StringBuffer field2;\n" //
+				+ "        public static void changeWithFieldAccess(StringBuffer parm) {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            field1 = field2;\n" //
+				+ "            TestStringBuilderCleanup.field0 = parm;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    public record K(StringBuffer comp1) {\n" //
+				+ "        public static StringBuffer field1;\n" //
+				+ "        public static StringBuffer field2;\n" //
+				+ "        public static void changeWithFieldAccess(StringBuffer parm) {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            field1 = field2;\n" //
+				+ "            TestStringBuilderCleanup.field0 = parm;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu0, cu1 }, new String[] { sample0, expected1 }, null);
+	}
+
+	@Test
+	public void testDoNotChangeStringBufferToStringBuilderLocalsOnly() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public static StringBuffer field0;\n" //
+				+ "}";
+		ICompilationUnit cu0= pack1.createCompilationUnit("SuperClass.java", sample0, false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    public static StringBuffer field1;\n" //
+				+ "    public record K(StringBuffer comp1) {\n" //
+				+ "        public static StringBuffer field0;\n" //
+				+ "        public static K doNotChangeWithFieldAssignment(StringBuffer x) {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = field0;\n" //
+				+ "            return new K(a);\n" //
+				+ "        }\n" //
+				+ "        public static void doNotChangeWithParmAssignment(StringBuffer parm) {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = parm;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        }\n" //
+				+ "        public static void doNotChangeWithParentFieldAssignment(StringBuffer parm) {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = TestStringBuilderCleanup.field0;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        }\n" //
+				+ "        public static void doNotChangeWithMethodCall(StringBuffer parm) {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            doNotChangeWithParentFieldAssignment(a);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu0, cu1 });
+	}
+
+	@Test
+	public void testChangeStringBufferToStringBuilderAll() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public static StringBuffer field0;\n" //
+				+ "}";
+		ICompilationUnit cu0= pack1.createCompilationUnit("SuperClass.java", sample0, false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    public static StringBuffer field1;\n" //
+				+ "    public record K(StringBuffer comp1) {\n" //
+				+ "        public static StringBuffer field0;\n" //
+				+ "        public static K changeWithFieldAssignment(StringBuffer x) {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            List<StringBuffer> = new ArrayList<>();\n" //
+				+ "            a = field0;\n" //
+				+ "            return new K(a);\n" //
+				+ "        }\n" //
+				+ "        public static void changeWithParmAssignment(StringBuffer parm) {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = parm;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        }\n" //
+				+ "        public static void changeWithParentFieldAssignment(StringBuffer parm) {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = TestStringBuilderCleanup.field0;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        }\n" //
+				+ "        public static void changeWithMethodCall(StringBuffer parm) {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            changeWithParentFieldAssignment(a);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+		disable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS);
+
+		String expected0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public static StringBuilder field0;\n" //
+				+ "}";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    public static StringBuilder field1;\n" //
+				+ "    public record K(StringBuilder comp1) {\n" //
+				+ "        public static StringBuilder field0;\n" //
+				+ "        public static K changeWithFieldAssignment(StringBuilder x) {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            List<StringBuilder> = new ArrayList<>();\n" //
+				+ "            a = field0;\n" //
+				+ "            return new K(a);\n" //
+				+ "        }\n" //
+				+ "        public static void changeWithParmAssignment(StringBuilder parm) {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            a = parm;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        }\n" //
+				+ "        public static void changeWithParentFieldAssignment(StringBuilder parm) {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            a = TestStringBuilderCleanup.field0;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        }\n" //
+				+ "        public static void changeWithMethodCall(StringBuilder parm) {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            changeWithParentFieldAssignment(a);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu0, cu1 }, new String[] { expected0, expected1 }, null);
+	}
+
 }
