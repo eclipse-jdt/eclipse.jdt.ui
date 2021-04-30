@@ -175,6 +175,74 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoNotUseLocalVariableTypeInferenceInWildCardConstructorWithLambda() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "        new E1((String a) -> a.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public E1(Function<?, ?> function) {\n" //
+				+ "        System.out.println(function);\n" //
+    			+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotUseLocalVariableTypeInferenceInWildCardSuperCallsWithLambda() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public E1(Function<?, ?> function) {\n" //
+				+ "        System.out.println(function);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void method(Function<?, ?> function) {\n" //
+				+ "        System.out.println(function);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		String sample2= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class E2 extends E1 {\n" //
+				+ "    public E2(Function<?, ?> function) {\n" //
+				+ "        super((String a) -> a.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void method(Function<?, ?> function) {\n" //
+				+ "        super.method((String a) -> a.length());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample2, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1, cu2 });
+	}
+
+	@Test
 	public void testUseLocalVariableTypeInferenceInParamTypeDeclarationWithLambda() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
