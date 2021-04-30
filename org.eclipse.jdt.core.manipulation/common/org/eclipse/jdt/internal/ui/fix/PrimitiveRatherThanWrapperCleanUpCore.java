@@ -77,6 +77,16 @@ public class PrimitiveRatherThanWrapperCleanUpCore extends AbstractCleanUpCore {
 		bld.append("}\n"); //$NON-NLS-1$
 
 		if (isEnabled(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER)) {
+			bld.append("char aCharacter = Character.MIN_VALUE;\n"); //$NON-NLS-1$
+		} else {
+			bld.append("Character aCharacter = Character.MIN_VALUE;\n"); //$NON-NLS-1$
+		}
+
+		bld.append("if (aCharacter == 'a') {\n"); //$NON-NLS-1$
+		bld.append("    System.out.println(\"A!\");\n"); //$NON-NLS-1$
+		bld.append("}\n"); //$NON-NLS-1$
+
+		if (isEnabled(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER)) {
 			bld.append("short aShort = Short.MIN_VALUE;\n"); //$NON-NLS-1$
 		} else {
 			bld.append("Short aShort = Short.MIN_VALUE;\n"); //$NON-NLS-1$

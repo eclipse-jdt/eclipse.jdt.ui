@@ -6149,6 +6149,448 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPrimitiveCharRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public char charField;\n" //
+				+ "    public Character wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Character alwaysInitializedVar = Character.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character preDecrementVar = --c;\n" //
+				+ "        return preDecrementVar - 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character preDecrementVar = ++c;\n" //
+				+ "        return preDecrementVar + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character postDecrementVar = c--;\n" //
+				+ "        return -postDecrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replacePostIncrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character postIncrementVar = c++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperFromValueOf(char c1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character varFromValueOf = Character.valueOf(c1);\n" //
+				+ "        return +varFromValueOf;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceCastWrapper(Character c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character castVar = (char) c;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceObjectCastWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character castVar = (Character) Character.MAX_HIGH_SURROGATE;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MAX_LOW_SURROGATE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MAX_SURROGATE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MIN_HIGH_SURROGATE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MIN_LOW_SURROGATE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character charInSwitch = Character.MIN_SURROGATE;\n" //
+				+ "        switch (charInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character charInArrayAccess = Character.MIN_VALUE;\n" //
+				+ "        return strings[charInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        return returnedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceMultiReturnedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        if (c > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Character replaceReturnedAutoBoxedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        if (c > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character reassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        reassignedCharacter = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character multiReassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        multiReassignedCharacter = 123;\n" //
+				+ "        multiReassignedCharacter = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        Character anotherCharacter = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnCharacterField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        charField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(int anInteger, int anotherInteger,\n" //
+				+ "            int yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        anInteger &= assignedCharacter;\n" //
+				+ "        anotherInteger += assignedCharacter;\n" //
+				+ "        yetAnotherInteger ^= assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public char charField;\n" //
+				+ "    public Character wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char preDecrementVar = --c;\n" //
+				+ "        return preDecrementVar - 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char preDecrementVar = ++c;\n" //
+				+ "        return preDecrementVar + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char postDecrementVar = c--;\n" //
+				+ "        return -postDecrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replacePostIncrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char postIncrementVar = c++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperFromValueOf(char c1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char varFromValueOf = Character.valueOf(c1);\n" //
+				+ "        return +varFromValueOf;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceCastWrapper(Character c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char castVar = (char) c;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceObjectCastWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char castVar = (Character) Character.MAX_HIGH_SURROGATE;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MAX_LOW_SURROGATE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MAX_SURROGATE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MIN_HIGH_SURROGATE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MIN_LOW_SURROGATE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char charInSwitch = Character.MIN_SURROGATE;\n" //
+				+ "        switch (charInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char charInArrayAccess = Character.MIN_VALUE;\n" //
+				+ "        return strings[charInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        return returnedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceMultiReturnedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        if (c > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Character replaceReturnedAutoBoxedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        if (c > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char reassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        reassignedCharacter = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char multiReassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        multiReassignedCharacter = 123;\n" //
+				+ "        multiReassignedCharacter = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        Character anotherCharacter = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnCharacterField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        charField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(int anInteger, int anotherInteger,\n" //
+				+ "            int yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        anInteger &= assignedCharacter;\n" //
+				+ "        anotherInteger += assignedCharacter;\n" //
+				+ "        yetAnotherInteger ^= assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveCharRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Character doNotRefactorFields = Character.MIN_VALUE;\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Character returnedObject = Character.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Character reassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        reassignedCharacter = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Character, Observable> obsByCharacter) {\n" //
+				+ "        Character reassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        obsByCharacter.get(reassignedCharacter).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        objectField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        Character anotherCharacter = assignedCharacter;\n" //
+				+ "        Character yetAnotherCharacter = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Character doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        Character anotherCharacter = assignedCharacter;\n" //
+				+ "        return assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Character returnedObject = Character.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Character doNotReplaceAssignedAndReturnedWrapper(Character c) {\n" //
+				+ "        Character returnedObject = Character.MIN_VALUE;\n" //
+				+ "        returnedObject = c;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPrimitiveShortRatherThanWrapper() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -6617,7 +7059,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        java.lang.Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        java.lang.Integer alwaysInitializedVar = Integer.MAX_VALUE;\n" //
 				+ "        if (alwaysInitializedVar < i) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -6724,7 +7166,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperInPreIncrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        Integer alwaysInitializedVar = Integer.SIZE;\n" //
 				+ "        return ++alwaysInitializedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -6857,7 +7299,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        int alwaysInitializedVar = Integer.MAX_VALUE;\n" //
 				+ "        if (alwaysInitializedVar < i) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -6964,7 +7406,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperInPreIncrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        int alwaysInitializedVar = Integer.SIZE;\n" //
 				+ "        return ++alwaysInitializedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
