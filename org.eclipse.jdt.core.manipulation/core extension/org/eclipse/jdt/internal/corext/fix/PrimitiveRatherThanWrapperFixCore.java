@@ -24,6 +24,7 @@ public class PrimitiveRatherThanWrapperFixCore extends CompilationUnitRewriteOpe
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		compilationUnit.accept(new PrimitiveBooleanRatherThanWrapperFinder(operations));
 		compilationUnit.accept(new PrimitiveCharRatherThanWrapperFinder(operations));
+		compilationUnit.accept(new PrimitiveByteRatherThanWrapperFinder(operations));
 		compilationUnit.accept(new PrimitiveShortRatherThanWrapperFinder(operations));
 		compilationUnit.accept(new PrimitiveIntRatherThanWrapperFinder(operations));
 		compilationUnit.accept(new PrimitiveLongRatherThanWrapperFinder(operations));

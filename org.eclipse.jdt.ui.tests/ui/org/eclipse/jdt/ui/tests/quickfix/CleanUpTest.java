@@ -6591,6 +6591,442 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPrimitiveByteRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public byte byteField;\n" //
+				+ "    public Byte wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Byte alwaysInitializedVar = Byte.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte preDecrementVar = --b;\n" //
+				+ "        return preDecrementVar - 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte preDecrementVar = ++b;\n" //
+				+ "        return preDecrementVar + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte postDecrementVar = b--;\n" //
+				+ "        return +postDecrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostIncrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte postIncrementVar = b++;\n" //
+				+ "        return -postIncrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperFromValueOf(byte b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte varFromValueOf = Byte.valueOf(b1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceParentherizedWrapper(byte b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte parentherizedVar = (Byte.MIN_VALUE);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceCastWrapper(Byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte castVar = (byte) b;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceObjectCastWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte castVar = (Byte) Byte.MIN_VALUE;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte byteInSwitch = Byte.MIN_VALUE;\n" //
+				+ "        switch (byteInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte byteInArrayAccess = Byte.MIN_VALUE;\n" //
+				+ "        return strings[byteInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        return returnedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceMultiReturnedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        if (b > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Byte replaceReturnedAutoBoxedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        if (b > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte reassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        reassignedByte = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte multiReassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        multiReassignedByte = 1;\n" //
+				+ "        multiReassignedByte = 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        Byte anotherByte = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnByteField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        byteField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public byte byteField;\n" //
+				+ "    public Byte wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte preDecrementVar = --b;\n" //
+				+ "        return preDecrementVar - 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte preDecrementVar = ++b;\n" //
+				+ "        return preDecrementVar + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte postDecrementVar = b--;\n" //
+				+ "        return +postDecrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostIncrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte postIncrementVar = b++;\n" //
+				+ "        return -postIncrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperFromValueOf(byte b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte varFromValueOf = Byte.valueOf(b1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceParentherizedWrapper(byte b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte parentherizedVar = (Byte.MIN_VALUE);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceCastWrapper(Byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte castVar = (byte) b;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceObjectCastWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte castVar = (Byte) Byte.MIN_VALUE;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte byteInSwitch = Byte.MIN_VALUE;\n" //
+				+ "        switch (byteInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte byteInArrayAccess = Byte.MIN_VALUE;\n" //
+				+ "        return strings[byteInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        return returnedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceMultiReturnedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        if (b > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Byte replaceReturnedAutoBoxedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        if (b > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte reassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        reassignedByte = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte multiReassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        multiReassignedByte = 1;\n" //
+				+ "        multiReassignedByte = 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        Byte anotherByte = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnByteField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        byteField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveByteRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Byte doNotRefactorFields = Byte.MIN_VALUE;\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Byte returnedObject = Byte.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Byte reassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        reassignedByte = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Byte, Observable> obsByByte) {\n" //
+				+ "        Byte reassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        obsByByte.get(reassignedByte).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        objectField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        Byte anotherByte = assignedByte;\n" //
+				+ "        Byte yetAnotherByte = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Byte doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        Byte anotherByte = assignedByte;\n" //
+				+ "        return assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Byte returnedObject = Byte.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Byte doNotReplaceAssignedAndReturnedWrapper(Byte b) {\n" //
+				+ "        Byte returnedObject = Byte.MIN_VALUE;\n" //
+				+ "        returnedObject = b;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testPrimitiveShortRatherThanWrapper() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
