@@ -90,6 +90,7 @@ import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThr
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PullOutIfFromIfElseCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUp;
@@ -783,6 +784,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testPullOutIfFromIfElseCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.PULL_OUT_IF_FROM_IF_ELSE, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new PullOutIfFromIfElseCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}

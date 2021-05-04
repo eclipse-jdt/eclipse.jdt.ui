@@ -13924,6 +13924,173 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPullOutIfFromIfElse() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorCommonInnerIf(boolean b1, boolean b2) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b1) {\n" //
+				+ "            if (b2) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                System.out.println(b1);\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            if (b2) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                System.out.println(!b1);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithoutBrackets(boolean isValid, boolean isCreation) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            if (isCreation) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                System.out.println(isValid);\n" //
+				+ "            }\n" //
+				+ "        } else if (isCreation) {\n" //
+				+ "            // Keep this comment\n" //
+				+ "            System.out.println(!isValid);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void refactorCommonInnerIf(boolean b1, boolean b2) throws Exception {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b2) {\n" //
+				+ "            if (b1) {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                System.out.println(b1);\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment too\n" //
+				+ "                System.out.println(!b1);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorWithoutBrackets(boolean isValid, boolean isCreation) {\n" //
+				+ "        if (isCreation) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                System.out.println(isValid);\n" //
+				+ "            } else {\n" //
+				+ "                // Keep this comment\n" //
+				+ "                System.out.println(!isValid);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PULL_OUT_IF_FROM_IF_ELSE);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PullOutIfFromIfElseCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotPullOutIfFromIfElse() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void doNotRefactorBecauseOfInnerElse1(boolean isActive, boolean isFound) throws Exception {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isFound) {\n" //
+				+ "                System.out.println(isFound);\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(isActive);\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            if (isFound) {\n" //
+				+ "                System.out.println(!isActive);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorBecauseOfInnerElse2(boolean isActive, boolean isFound) throws Exception {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isFound) {\n" //
+				+ "                System.out.println(isActive);\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            if (isFound) {\n" //
+				+ "                System.out.println(isFound);\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(!isActive);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorActiveCondition(List<String> myList) throws Exception {\n" //
+				+ "        if (myList.remove(\"lorem\")) {\n" //
+				+ "            if (myList.isEmpty()) {\n" //
+				+ "                System.out.println(\"Now empty\");\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            if (myList.isEmpty()) {\n" //
+				+ "                System.out.println(\"Still empty\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorAssignment(boolean isActive, boolean isFound) throws Exception {\n" //
+				+ "        if (isFound = isActive) {\n" //
+				+ "            if (isFound) {\n" //
+				+ "                System.out.println(isActive);\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            if (isFound) {\n" //
+				+ "                System.out.println(!isActive);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorPostincrement(int i1, int i2) throws Exception {\n" //
+				+ "        if (i1 == i2++) {\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                System.out.println(i1);\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                System.out.println(-i1);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorPreincrement(int i1, int i2) throws Exception {\n" //
+				+ "        if (i1 == ++i2) {\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                System.out.println(i1);\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            if (i2 == 0) {\n" //
+				+ "                System.out.println(-i1);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PULL_OUT_IF_FROM_IF_ELSE);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testRedundantComparator() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
