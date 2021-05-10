@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringBuilderCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UseStringIsBlankCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp;
 
 public final class OptimizationTabPage extends AbstractCleanUpTabPage {
@@ -47,6 +48,7 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 				new StaticInnerClassCleanUp(values),
 				new StringBuilderCleanUp(values),
 				new PlainReplacementCleanUp(values),
+				new UseStringIsBlankCleanUp(values),
 				new LazyLogicalCleanUp(values),
 				new ValueOfRatherThanInstantiationCleanUp(values),
 				new PrimitiveComparisonCleanUp(values),
@@ -77,6 +79,10 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference plainReplacementPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_PlainReplacement, CleanUpConstants.PLAIN_REPLACEMENT, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(plainReplacementPref);
+
+		final CheckboxPreference useStringIsBlankPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_UseStringIsBlank, CleanUpConstants.USE_STRING_IS_BLANK,
+				CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(useStringIsBlankPref);
 
 		final CheckboxPreference useLazyLogicalPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_UseLazyLogicalOperator,
 				CleanUpConstants.USE_LAZY_LOGICAL_OPERATOR, CleanUpModifyDialog.FALSE_TRUE);

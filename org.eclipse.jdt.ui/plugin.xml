@@ -7163,9 +7163,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.stringbuilder">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UseStringIsBlankCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.use_string_is_blank"
+            runAfter="org.eclipse.jdt.ui.cleanup.plain_replacement">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp"
             id="org.eclipse.jdt.ui.cleanup.lazy_logical"
-            runAfter="org.eclipse.jdt.ui.cleanup.plain_replacement">
+            runAfter="org.eclipse.jdt.ui.cleanup.use_string_is_blank">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp"

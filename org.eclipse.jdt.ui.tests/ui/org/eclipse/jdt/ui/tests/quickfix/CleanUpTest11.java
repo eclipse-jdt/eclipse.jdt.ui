@@ -13,6 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertNotEquals;
+
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -24,6 +29,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java11ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
@@ -342,4 +348,222 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+
+	@Test
+	public void testUseStringIsBlank() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final int ZERO = 0;\n" //
+				+ "    private static final int THREE = 3;\n" //
+				+ "    private static final String EMPTY_STRING = \"\";\n" //
+				+ "\n" //
+				+ "    void isBlank(String text) {\n" //
+				+ "        if (text.strip().isEmpty()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.stripLeading().isEmpty()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.stripTrailing().isEmpty()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.strip().length() == 0) {\n" //
+				+ "            System.err.println(\"The text must not be blank\");\n" //
+				+ "        } else if (text.strip().length() <= 0) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.strip().length() < 1) {\n" //
+				+ "            System.err.println(\"This text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (0 == text.strip().length()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        } else if (0 >= text.strip().length()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (1 > text.strip().length()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.strip().length() == ZERO) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.strip().equals(\"\")) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (\"\".equals(text.stripLeading())) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (EMPTY_STRING.equals(text.stripTrailing())) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    void isNotBlank(String text, StringBuilder builder) {\n" //
+				+ "        if (!text.strip().isEmpty()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (text.strip().length() != 0) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        } else if (text.strip().length() > 0) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (text.strip().length() >= 1) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (0 != text.strip().length()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        } else if (0 < text.strip().length()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (1 <= text.strip().length()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (4 - THREE <= builder.toString().strip().length()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    void printList(List<String> list) {\n" //
+				+ "        list.stream().filter(s -> !s.strip().isEmpty()).map(String::strip);\n" //
+				+ "        list.stream().filter(s -> s.strip().length() != 0).map(String::strip);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    private static final int ZERO = 0;\n" //
+				+ "    private static final int THREE = 3;\n" //
+				+ "    private static final String EMPTY_STRING = \"\";\n" //
+				+ "\n" //
+				+ "    void isBlank(String text) {\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"The text must not be blank\");\n" //
+				+ "        } else if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"This text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        } else if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "        if (text.isBlank()) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    void isNotBlank(String text, StringBuilder builder) {\n" //
+				+ "        if (!text.isBlank()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (!text.isBlank()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        } else if (!text.isBlank()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (!text.isBlank()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (!text.isBlank()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        } else if (!text.isBlank()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (!text.isBlank()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "        if (!builder.toString().isBlank()) {\n" //
+				+ "            System.out.println(text)\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    void printList(List<String> list) {\n" //
+				+ "        list.stream().filter(s -> !s.isBlank()).map(String::strip);\n" //
+				+ "        list.stream().filter(s -> !s.isBlank()).map(String::strip);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.USE_STRING_IS_BLANK);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(FixMessages.UseStringIsBlankCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUseStringIsBlank() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class NotAString {\n" //
+				+ "    int mostlyZero= 0;\n" //
+				+ "    private static int NON_FINAL_ZERO = 0;\n" //
+				+ "\n" //
+				+ "    public String strip() {\n" //
+				+ "        return \"\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    void doNotUseStringIsBlank(NotAString noString, String text) {\n" //
+				+ "        if (noString.strip().length() == 0) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (text.strip().length() == mostlyZero) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        } else if (text.strip().length() <= NON_FINAL_ZERO) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    void doNotUseStringIsBlankWithUnknownString(String text, String emptyString) {\n" //
+				+ "        if (text.strip().equals(emptyString)) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (emptyString.equals(text.strip())) {\n" //
+				+ "            System.err.println(\"Text must not be blank\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("NotAString.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_STRING_IS_BLANK);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
 }
