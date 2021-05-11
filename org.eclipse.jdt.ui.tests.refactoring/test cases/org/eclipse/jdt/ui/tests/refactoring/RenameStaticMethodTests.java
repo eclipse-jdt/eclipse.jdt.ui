@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -39,8 +40,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class RenameStaticMethodTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenameStaticMethod/";
-
-	private static final boolean BUG_83332_SPLIT_SINGLE_IMPORT= true;
 
 	public RenameStaticMethodTests() {
 		rts= new RefactoringTestSetup();
@@ -266,12 +265,9 @@ public class RenameStaticMethodTests extends GenericRefactoringTest {
 		assertEqualLines("invalid renaming in C", getFileContents(getOutputTestFileName("C")), cuA.getSource());
 	}
 
+	@Ignore("BUG_83332_SPLIT_SINGLE_IMPORT")
 	@Test
 	public void testStaticImport3() throws Exception {
-		if (BUG_83332_SPLIT_SINGLE_IMPORT) {
-			printTestDisabledMessage("BUG_83332_SPLIT_SINGLE_IMPORT");
-			return;
-		}
 		helper2();
 	}
 
@@ -280,12 +276,9 @@ public class RenameStaticMethodTests extends GenericRefactoringTest {
 		helper2();
 	}
 
+	@Ignore("BUG_83332_SPLIT_SINGLE_IMPORT")
 	@Test
 	public void testStaticImport5() throws Exception {
-		if (BUG_83332_SPLIT_SINGLE_IMPORT) {
-			printTestDisabledMessage("BUG_83332_SPLIT_SINGLE_IMPORT");
-			return;
-		}
 		helper2();
 	}
 

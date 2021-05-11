@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -38,9 +39,6 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class RenameTempTests extends GenericRefactoringTest{
-	private static final boolean BUG_checkDeclInNestedClass= true;
-	private static final boolean BUG_checkShadowing= true;
-
 	private static final String REFACTORING_PATH= "RenameTemp/";
 
 	public RenameTempTests() {
@@ -500,12 +498,9 @@ public class RenameTempTests extends GenericRefactoringTest{
 	}
 
 // -----
+	@Ignore("BUG_checkDeclInNestedClass fails - must revisit")
 	@Test
 	public void testFail0() throws Exception{
-		if (BUG_checkDeclInNestedClass) {
-			printTestDisabledMessage("fails - must revisit");
-			return;
-		}
 		helper2("j");
 	}
 
@@ -534,12 +529,9 @@ public class RenameTempTests extends GenericRefactoringTest{
 		helper2("j");
 	}
 
+	@Ignore("BUG_checkDeclInNestedClass fails - must revisit")
 	@Test
 	public void testFail6() throws Exception{
-		if (BUG_checkDeclInNestedClass) {
-			printTestDisabledMessage("fails - must revisit");
-			return;
-		}
 		helper2("j");
 	}
 
@@ -640,12 +632,9 @@ public class RenameTempTests extends GenericRefactoringTest{
 		helper2("j");
 	}
 
+	@Ignore("BUG_checkShadowing Test disabled until it is clear how 1.4 treats this")
 	@Test
 	public void testFail26() throws Exception{
-		if (BUG_checkShadowing) {
-			printTestDisabledMessage("Test disabled until it is clear how 1.4 treats this");
-			return;
-		}
 		helper2("j");
 	}
 

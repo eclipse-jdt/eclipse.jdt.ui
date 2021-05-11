@@ -63,6 +63,7 @@ import org.junit.runners.Suite;
 	ExtractInterfaceTests1d8.class,
 	ExtractSupertypeTests.class,
 	MoveInnerToTopLevelTests.class,
+	MoveInnerToTopLevelTests16.class,
 	MoveInnerToNewTests16.class,
 	UseSupertypeWherePossibleTests.class,
 	ExtractClassTests.class,

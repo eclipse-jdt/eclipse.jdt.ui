@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -165,32 +166,30 @@ public class VarCleanUp extends AbstractMultiFix {
 						if (lambdaParent instanceof MethodInvocation) {
 							MethodInvocation methodInvocation= (MethodInvocation) lambdaParent;
 							List<Expression> args= methodInvocation.arguments();
-							int index= -1;
-
-							for (int i= 0; i < args.size(); ++i) {
-								if (args.get(i) == lambda) {
-									index= i;
-									break;
-								}
-							}
-
-							if (index < 0) {
-								return true;
-							}
-
 							IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-
-							if (methodBinding == null) {
+							if (checkForWildCard(lambda, args, methodBinding)) {
 								return true;
 							}
-
-							ITypeBinding lambdaParamType= methodBinding.getParameterTypes()[index];
-							ITypeBinding[] typeArgs= lambdaParamType.getTypeArguments();
-
-							for (ITypeBinding typeArg : typeArgs) {
-								if (typeArg.isWildcardType()) {
-									return true;
-								}
+						} else if (lambdaParent instanceof ClassInstanceCreation) {
+							ClassInstanceCreation classInstance= (ClassInstanceCreation) lambdaParent;
+							List<Expression> args= classInstance.arguments();
+							IMethodBinding methodBinding= classInstance.resolveConstructorBinding();
+							if (checkForWildCard(lambda, args, methodBinding)) {
+								return true;
+							}
+						} else if (lambdaParent instanceof SuperMethodInvocation) {
+							SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) lambdaParent;
+							List<Expression> args= superMethodInvocation.arguments();
+							IMethodBinding methodBinding= superMethodInvocation.resolveMethodBinding();
+							if (checkForWildCard(lambda, args, methodBinding)) {
+								return true;
+							}
+						} else if (lambdaParent instanceof SuperConstructorInvocation) {
+							SuperConstructorInvocation superConstructorInvocation= (SuperConstructorInvocation) lambdaParent;
+							List<Expression> args= superConstructorInvocation.arguments();
+							IMethodBinding methodBinding= superConstructorInvocation.resolveConstructorBinding();
+							if (checkForWildCard(lambda, args, methodBinding)) {
+								return true;
 							}
 						} else if (lambdaParent instanceof VariableDeclarationFragment) {
 							VariableDeclarationStatement statement= (VariableDeclarationStatement) ASTNodes.getFirstAncestorOrNull(lambdaParent, VariableDeclarationStatement.class);
@@ -313,6 +312,35 @@ public class VarCleanUp extends AbstractMultiFix {
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.VarCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+	}
+
+	private boolean checkForWildCard(LambdaExpression lambda, List<Expression> args, IMethodBinding methodBinding) {
+		int index= -1;
+
+		for (int i= 0; i < args.size(); ++i) {
+			if (args.get(i) == lambda) {
+				index= i;
+				break;
+			}
+		}
+
+		if (index < 0) {
+			return true;
+		}
+
+		if (methodBinding == null) {
+			return true;
+		}
+
+		ITypeBinding lambdaParamType= methodBinding.getParameterTypes()[index];
+		ITypeBinding[] typeArgs= lambdaParamType.getTypeArguments();
+
+		for (ITypeBinding typeArg : typeArgs) {
+			if (typeArg.isWildcardType()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

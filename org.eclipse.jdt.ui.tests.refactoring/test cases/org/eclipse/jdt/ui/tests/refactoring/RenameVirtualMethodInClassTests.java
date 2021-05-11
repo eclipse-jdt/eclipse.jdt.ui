@@ -18,8 +18,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -45,8 +45,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 public class RenameVirtualMethodInClassTests extends GenericRefactoringTest {
 
 	private static final String REFACTORING_PATH= "RenameVirtualMethodInClass/";
-
-	private static final boolean BUG_83217_IMPLICIT_ENUM_METHODS= true;
 
 	public RenameVirtualMethodInClassTests() {
 		rts= new RefactoringTestSetup();
@@ -156,9 +154,9 @@ public class RenameVirtualMethodInClassTests extends GenericRefactoringTest {
 		helper2_0("getSquare", "get2ndPower", new String[0]);
 	}
 
+	@Ignore("BUG_83217_IMPLICIT_ENUM_METHODS")
 	@Test
 	public void testEnumFail1() throws Exception {
-		assumeFalse(BUG_83217_IMPLICIT_ENUM_METHODS);
 		helper1_0("value", "valueOf", new String[]{"QString;"});
 	}
 
@@ -554,9 +552,9 @@ public class RenameVirtualMethodInClassTests extends GenericRefactoringTest {
 		helper2();
 	}
 
+	@Ignore("test for bug#18553")
 	@Test
 	public void test34() throws Exception{
-		printTestDisabledMessage("test for bug#18553");
 //		helper2_0("A", "foo", new String[0], true, true);
 	}
 
@@ -575,10 +573,10 @@ public class RenameVirtualMethodInClassTests extends GenericRefactoringTest {
 		helper2_0("foo", "bar", new String[] {"QA;"}, true);
 	}
 
+	@Ignore("difficult to set up test in current testing framework")
 	@Test
 	public void test38() throws Exception {
-		printTestDisabledMessage("difficult to set up test in current testing framework");
-//		helper2();
+		helper2();
 	}
 
 	@Test

@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.StringAsserts;
@@ -45,8 +46,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
  *
  */
 public class ChangeTypeRefactoringTests extends GenericRefactoringTest {
-	private static final boolean BUG_CORE_TYPE_HIERARCHY_ILLEGAL_PARAMETERIZED_INTERFACES= true;
-
 	private static final String REFACTORING_PATH= "ChangeTypeRefactoring/";
 
 	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength){
@@ -471,12 +470,9 @@ public class ChangeTypeRefactoringTests extends GenericRefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
+	@Ignore("BUG_CORE_TYPE_HIERARCHY_ILLEGAL_PARAMETERIZED_INTERFACES core bug")
 	@Test
 	public void test4TypeParameters() throws Exception {
-		if (BUG_CORE_TYPE_HIERARCHY_ILLEGAL_PARAMETERIZED_INTERFACES) {
-			printTestDisabledMessage("core bug");
-			return;
-		}
 
 		Collection<String> types= helper1(3, 40, 3, 40, "p.I<java.lang.Double,java.lang.Float>").getValidTypeNames();
 		String[] actual= types.toArray(new String[types.size()]);

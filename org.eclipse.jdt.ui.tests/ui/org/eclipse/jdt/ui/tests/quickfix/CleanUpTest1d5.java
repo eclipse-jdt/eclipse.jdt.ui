@@ -2896,8 +2896,66 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
-//		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
+	}
+
+	@Test
+	public void testUnnecessaryArrayIncompatibleParameters() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static void foo(int i, String text, String... elementsOrTreePaths) {\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void foo(String i, int text) {\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void foo(String i, int text, String anotherParameter) {\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar() {\n" //
+				+ "        foo(0, \"bar\", new String[0]);\n" //
+				+ "        foo(0, \"bar\", new String[] {\"bar\"});\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static void foo(int i, String text, String... elementsOrTreePaths) {\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void foo(String i, int text) {\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void foo(String i, int text, String anotherParameter) {\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar() {\n" //
+				+ "        foo(0, \"bar\");\n" //
+				+ "        foo(0, \"bar\", \"bar\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", given, false, null);
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
 	}
 
 	@Test
@@ -3007,6 +3065,333 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
+
+	@Test
+	public void testUnnecessaryArrayNotCompilingParameter() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Date;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static void doNotRefactorOnNotCompilingMethod() {\n" //
+				+ "        bar(undeclaredVariable, new String[] {\"b\"});\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar(Object boss, String... elements) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar(Integer boss, String parameter) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { sample }, null);
+	}
+
+	@Test
+	public void testUnnecessaryArrayUndeclaredVariable() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static void doNotRefactorOnNotCompilingMethod() {\n" //
+				+ "        bar(undeclaredVariable, new String[] {\"c\"});\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar(Object parameter, String... elements) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar(Integer parameter, String text) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { sample }, null);
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572656_ConstructorConflict() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static A doNotChangeConstructorDispatch() {\n" //
+				+ "        return new A(new Object[] {\"d\"});\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public A(Object... elements) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public A(Object element) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572656_MethodConflict() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static void doNotChangeMethodDispatch() {\n" //
+				+ "        bar(new Object[] {\"e\"});\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar(Object... elements) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void bar(Object element) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572656_SelfMethodConflict() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public static void doNotChangeToSelfMethod(Object element) {\n" //
+				+ "        doNotChangeToSelfMethod(new Object[] {\"f\"});\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotChangeToSelfMethod(Object... elements) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572656_ConflictingStaticMethodImport() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import static java.util.Date.parse;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public void doNotCallAnotherMethod(String text) {\n" //
+				+ "        parse(new String[]{text});\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void parse(String... texts) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572656_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public class ChildClass extends A {\n" //
+				+ "        public void overloadedMethod(int number) {\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        public void doNotCallAnotherMethod(int number) {\n" //
+				+ "            overloadedMethod(new int[]{number});\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void overloadedMethod(int... numbers) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572656_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    private void overloadedMethod(int number) {\n" //
+				+ "    }\n" //
+				+ "    public class ChildClass {\n" //
+				+ "\n" //
+				+ "        public void doNotCallAnotherMethod(int number) {\n" //
+				+ "            overloadedMethod(new int[]{number});\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void overloadedMethod(int... numbers) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572656_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A extends C {\n" //
+				+ "    @SuppressWarnings(\"unused\")\n" //
+				+ "    private void func(Object a) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    protected void func(Object ...objs) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void foo() {\n" //
+				+ "        new B().func(new Object[] {this});\n" //
+				+ "        new B().func(new Object[] {this, this});\n" //
+				+ "        B b = new B();\n" //
+				+ "        b.func(new Object[] {this});\n" //
+				+ "        b.func(new Object[] {this, this});\n" //
+				+ "        this.func(new Object[] {this});\n" //
+				+ "        this.func(new Object[] {this, this});\n" //
+				+ "        A a = new A();\n" //
+				+ "        a.func(new Object[] {this});\n" //
+				+ "        a.func(new Object[] {this, this});\n" //
+				+ "        super.func(new Object[] {this});\n" //
+				+ "        super.func(new Object[] {this, this, this});\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		String sample2= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class B {\n" //
+				+ "    public void func(Object ...objs) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    protected void func(Object a, Object b) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", sample2, false, null);
+
+		String sample3= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class C {\n" //
+				+ "    protected void func(Object ...objs) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    protected void func(Object a, Object b, Object c) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu3= pack1.createCompilationUnit("C.java", sample3, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A extends C {\n" //
+				+ "    @SuppressWarnings(\"unused\")\n" //
+				+ "    private void func(Object a) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    protected void func(Object ...objs) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void foo() {\n" //
+				+ "        new B().func(this);\n" //
+				+ "        new B().func(new Object[] {this, this});\n" //
+				+ "        B b = new B();\n" //
+				+ "        b.func(this);\n" //
+				+ "        b.func(new Object[] {this, this});\n" //
+				+ "        this.func(new Object[] {this});\n" //
+				+ "        this.func(this, this);\n" //
+				+ "        A a = new A();\n" //
+				+ "        a.func(new Object[] {this});\n" //
+				+ "        a.func(this, this);\n" //
+				+ "        super.func(this);\n" //
+				+ "        super.func(new Object[] {this, this, this});\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3 }, new String[] { expected1, sample2, sample3 }, null);
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug572656_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import static test1.B.func;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public void foo() {\n" //
+				+ "        func(new Object[] {this, this});\n" //
+				+ "        func(new Object[] {this});\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		String sample2= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class B {\n" //
+				+ "    public static void func(Object ...objects) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void func(Object a) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", sample2, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import static test1.B.func;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public void foo() {\n" //
+				+ "        func(this, this);\n" //
+				+ "        func(new Object[] {this});\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, sample2 }, null);
+    }
 
 	@Test
 	public void testUnnecessaryArrayBug568082() throws Exception {

@@ -105,7 +105,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  */
 public class EditTemplateDialog extends StatusDialog {
 
-	private static class TextViewerAction extends Action implements IUpdate {
+	protected static class TextViewerAction extends Action implements IUpdate {
 
 		private int fOperationCode= -1;
 		private ITextOperationTarget fOperationTarget;

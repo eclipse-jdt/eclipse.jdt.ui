@@ -28,13 +28,13 @@ import org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PrimitiveIntRatherThanWrapperCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PrimitiveLongRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveParsingCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringBuilderCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UseStringIsBlankCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp;
 
 public final class OptimizationTabPage extends AbstractCleanUpTabPage {
@@ -48,13 +48,13 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 				new StaticInnerClassCleanUp(values),
 				new StringBuilderCleanUp(values),
 				new PlainReplacementCleanUp(values),
+				new UseStringIsBlankCleanUp(values),
 				new LazyLogicalCleanUp(values),
 				new ValueOfRatherThanInstantiationCleanUp(values),
 				new PrimitiveComparisonCleanUp(values),
 				new PrimitiveParsingCleanUp(values),
 				new PrimitiveSerializationCleanUp(values),
-				new PrimitiveIntRatherThanWrapperCleanUp(values),
-				new PrimitiveLongRatherThanWrapperCleanUp(values),
+				new PrimitiveRatherThanWrapperCleanUp(values),
 				new PatternCleanUp(values),
 				new NoStringCreationCleanUp(values),
 				new BooleanLiteralCleanUp(values)
@@ -79,6 +79,10 @@ public final class OptimizationTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference plainReplacementPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_PlainReplacement, CleanUpConstants.PLAIN_REPLACEMENT, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(plainReplacementPref);
+
+		final CheckboxPreference useStringIsBlankPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_UseStringIsBlank, CleanUpConstants.USE_STRING_IS_BLANK,
+				CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(useStringIsBlankPref);
 
 		final CheckboxPreference useLazyLogicalPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.OptimizationTabPage_CheckboxName_UseLazyLogicalOperator,
 				CleanUpConstants.USE_LAZY_LOGICAL_OPERATOR, CleanUpModifyDialog.FALSE_TRUE);

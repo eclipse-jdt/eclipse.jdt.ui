@@ -70,16 +70,17 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		//Functional Interfaces
 		options.setOption(CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.FALSE);
 		options.setOption(SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpOptions.FALSE);
+
+		// Optimization
 		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 		options.setOption(NO_STRING_CREATION, CleanUpOptions.FALSE);
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
-
-		// Optimization
 		options.setOption(SINGLE_USED_FIELD, CleanUpOptions.FALSE);
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(PLAIN_REPLACEMENT, CleanUpOptions.FALSE);
+		options.setOption(USE_STRING_IS_BLANK, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(VALUEOF_RATHER_THAN_INSTANTIATION, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);
@@ -117,7 +118,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(OVERRIDDEN_ASSIGNMENT, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(RAISE_EMBEDDED_IF, CleanUpOptions.FALSE);
-		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.FALSE);
+		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.TRUE);
 		options.setOption(REDUNDANT_COMPARATOR, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.FALSE);
 		options.setOption(ARRAY_WITH_CURLY, CleanUpOptions.FALSE);
@@ -145,13 +146,13 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
 		options.setOption(FORMAT_SOURCE_CODE_CHANGES_ONLY, CleanUpOptions.FALSE);
 
-		options.setOption(FORMAT_REMOVE_TRAILING_WHITESPACES, CleanUpOptions.FALSE);
+		options.setOption(FORMAT_REMOVE_TRAILING_WHITESPACES, CleanUpOptions.TRUE);
 		options.setOption(FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, CleanUpOptions.TRUE);
 		options.setOption(FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, CleanUpOptions.FALSE);
 
 		options.setOption(FORMAT_CORRECT_INDENTATION, CleanUpOptions.FALSE);
 
-		options.setOption(ORGANIZE_IMPORTS, CleanUpOptions.FALSE);
+		options.setOption(ORGANIZE_IMPORTS, CleanUpOptions.TRUE);
 
 		options.setOption(SORT_MEMBERS, CleanUpOptions.FALSE);
 		options.setOption(SORT_MEMBERS_ALL, CleanUpOptions.FALSE);
@@ -181,7 +182,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(JOIN, CleanUpOptions.FALSE);
 		options.setOption(TRY_WITH_RESOURCE, CleanUpOptions.FALSE);
 		options.setOption(MULTI_CATCH, CleanUpOptions.FALSE);
-		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
+		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY, CleanUpOptions.FALSE);
@@ -191,8 +192,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.FALSE);
 
-		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.FALSE);
-		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);
+		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
+		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_USE_ADD_ALL, CleanUpOptions.FALSE);
 	}
 
@@ -242,16 +243,17 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		//Functional Interfaces
 		options.setOption(CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.FALSE);
 		options.setOption(SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpOptions.FALSE);
+
+		// Optimization
 		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 		options.setOption(NO_STRING_CREATION, CleanUpOptions.FALSE);
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
-
-		// Optimization
 		options.setOption(SINGLE_USED_FIELD, CleanUpOptions.FALSE);
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(PLAIN_REPLACEMENT, CleanUpOptions.FALSE);
+		options.setOption(USE_STRING_IS_BLANK, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
 		options.setOption(VALUEOF_RATHER_THAN_INSTANTIATION, CleanUpOptions.FALSE);
 		options.setOption(PRIMITIVE_COMPARISON, CleanUpOptions.FALSE);

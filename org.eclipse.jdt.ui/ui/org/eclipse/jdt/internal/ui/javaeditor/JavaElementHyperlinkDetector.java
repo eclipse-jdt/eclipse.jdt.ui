@@ -302,7 +302,9 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 		}
 
 		ASTNode node= NodeFinder.perform(astRoot, region.getOffset(), region.getLength());
-		if (node == null || node.getParent().getNodeType() != ASTNode.ENUM_CONSTANT_DECLARATION) {
+		if (node == null 
+				|| node.getParent() == null 
+				|| node.getParent().getNodeType() != ASTNode.ENUM_CONSTANT_DECLARATION) {
 			return null;
 		}
 		EnumConstantDeclaration enumNode= (EnumConstantDeclaration) node.getParent();

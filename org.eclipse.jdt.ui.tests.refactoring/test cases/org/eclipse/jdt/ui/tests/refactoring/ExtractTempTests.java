@@ -23,6 +23,7 @@ import java.util.Hashtable;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -42,9 +43,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class ExtractTempTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "ExtractTemp/";
-
-	private static final boolean BUG_82166_ImportRewrite_context= true;
-	private static final boolean BUG_161617_ASTRewrite_space= true;
 
 	private String fCompactPref;
 
@@ -626,12 +624,9 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(5, 1, 6, 1, true, false, "one", "integer");
 	}
 
+	@Ignore("BUG_82166_ImportRewrite_context")
 	@Test
 	public void test83() throws Exception {
-		if (BUG_82166_ImportRewrite_context) {
-			printTestDisabledMessage("BUG_82166_ImportRewrite_context");
-			return;
-		}
 		helper1(7, 17, 7, 27, false, false, "temp", "test");
 	}
 
@@ -640,12 +635,9 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(5, 16, 5, 17, false, false, "temp", "j");
 	}
 
+	@Ignore("BUG_82166_ImportRewrite_context")
 	@Test
 	public void test85() throws Exception {
-		if (BUG_82166_ImportRewrite_context) {
-			printTestDisabledMessage("BUG_82166_ImportRewrite_context");
-			return;
-		}
 		helper1(10, 22, 10, 32, true, true, "temp", "test2");
 	}
 
@@ -735,13 +727,9 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(7, 32, 7, 36, true, false, "temp", "a");
 	}
 
+	@Ignore("BUG_161617_ASTRewrite_space")
 	@Test
 	public void test100() throws Exception {
-		//test for bug 161617
-		if (BUG_161617_ASTRewrite_space) {
-			printTestDisabledMessage("BUG_161617_ASTRewrite_space");
-			return;
-		}
 		helper1(5, 28, 5, 40, true, false, "temp", "object");
 	}
 

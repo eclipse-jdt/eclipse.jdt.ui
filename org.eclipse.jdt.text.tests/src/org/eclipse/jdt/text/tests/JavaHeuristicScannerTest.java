@@ -21,6 +21,7 @@ import java.util.Hashtable;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.jface.text.Document;
@@ -41,7 +42,6 @@ import org.eclipse.jdt.internal.ui.text.JavaIndenter;
  * @since 3.0
  */
 public class JavaHeuristicScannerTest {
-	private static final boolean BUG_65463= true;
 	private FastPartitioner fPartitioner;
 	private Document fDocument;
 	private JavaIndenter fScanner;
@@ -872,10 +872,9 @@ public class JavaHeuristicScannerTest {
 	    	assertFalse(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
     }
 
+	@Ignore("enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed")
 	@Test
 	public void testConditional1() throws Exception {
-		if (BUG_65463) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
-			return;
     	fDocument.set(
     			"		public boolean isPrime() {\n" +
     			"			return fPrime == true ? true\n" +
@@ -886,10 +885,9 @@ public class JavaHeuristicScannerTest {
     	assertEquals("			                      ", indent);
     }
 
+	@Ignore("enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed")
 	@Test
 	public void testConditional2() throws Exception {
-		if (BUG_65463) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
-			return;
     	fDocument.set(
     			"		public boolean isPrime() {\n" +
     			"			return fPrime == true" +

@@ -1211,6 +1211,21 @@ public class CleanUpConstants {
 	public static final String PLAIN_REPLACEMENT= "cleanup.plain_replacement"; //$NON-NLS-1$
 
 	/**
+	 * Replace
+	 * <code>s.strip().length() == 0</code>
+	 * by
+	 * <code>s.isBlank()</code> (Java 11).
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String USE_STRING_IS_BLANK= "cleanup.use_string_is_blank"; //$NON-NLS-1$
+
+	/**
 	 * Removes unused imports. <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>

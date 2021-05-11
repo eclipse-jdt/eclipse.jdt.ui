@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -72,7 +73,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DeleteTest extends GenericRefactoringTest {
 
-	private static final boolean BUG_55221= true;
 	private static final String REFACTORING_PATH= "Delete/";
 
 	public DeleteTest() {
@@ -621,12 +621,9 @@ public class DeleteTest extends GenericRefactoringTest {
 		ParticipantTesting.testDelete(handles);
 	}
 
+	@Ignore("testDeleteWithinCu16 disabled for bug#55221")
 	@Test
 	public void testDeleteWithinCu16() throws Exception{
-		if (BUG_55221) {
-			printTestDisabledMessage("testDeleteWithinCu16 disabled for bug#55221");
-			return;
-		}
 		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("Test");

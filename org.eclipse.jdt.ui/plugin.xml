@@ -7163,9 +7163,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.stringbuilder">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UseStringIsBlankCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.use_string_is_blank"
+            runAfter="org.eclipse.jdt.ui.cleanup.plain_replacement">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp"
             id="org.eclipse.jdt.ui.cleanup.lazy_logical"
-            runAfter="org.eclipse.jdt.ui.cleanup.plain_replacement">
+            runAfter="org.eclipse.jdt.ui.cleanup.use_string_is_blank">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp"
@@ -7188,19 +7193,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.primitive_parsing">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.PrimitiveIntRatherThanWrapperCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.primitive_int_rather_than_wrapper"
+            class="org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.primitive_rather_than_wrapper"
             runAfter="org.eclipse.jdt.ui.cleanup.primitive_serialization">
-      </cleanUp>
-      <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.PrimitiveLongRatherThanWrapperCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.primitive_long_rather_than_wrapper"
-            runAfter="org.eclipse.jdt.ui.cleanup.primitive_int_rather_than_wrapper">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PatternCleanUp"
             id="org.eclipse.jdt.ui.cleanup.precompile_regex"
-            runAfter="org.eclipse.jdt.ui.cleanup.primitive_long_rather_than_wrapper">
+            runAfter="org.eclipse.jdt.ui.cleanup.primitive_rather_than_wrapper">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp"

@@ -28,6 +28,7 @@ import java.util.Hashtable;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -188,10 +189,10 @@ public class ConvertAnonymousToNestedTests extends GenericRefactoringTest {
 
 	//--- TESTS
 
+	@Ignore("corner case - local types")
 	@Test
 	public void testFail0() throws Exception{
-		printTestDisabledMessage("corner case - local types");
-//		failHelper1(6, 14, 6, 16, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
+		failHelper1(6, 14, 6, 16, true, "Inner", Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
 	@Test

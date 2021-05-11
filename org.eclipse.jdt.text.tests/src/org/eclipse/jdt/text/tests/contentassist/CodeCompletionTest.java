@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -101,7 +101,6 @@ import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposalComputer;
 //predictable order for https://bugs.eclipse.org/bugs/show_bug.cgi?id=423416
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CodeCompletionTest extends AbstractCompletionTest {
-	private final static boolean BUG_80782= true;
 
 	private IJavaProject fJProject1;
 
@@ -1682,9 +1681,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Ignore("BUG_80782")
 	@Test
 	public void testOverrideCompletion5() throws Exception {
-		assumeFalse(BUG_80782);
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -2694,5 +2693,253 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		}
 		assertNull(exception.get());
 		assertEquals(Collections.emptyList(), errors);
+	}
+
+	@Test
+	public void testCastExpressionUnaryExpression() throws CoreException {
+		// copy-adjusted from JDT/Core's FieldAccessCompletionTest.testCastExpressionUnaryExpression() to validate replacement
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack", false, null);
+		String contents=
+				"package pack;\n" +
+				"class Fred {\n" +
+				"	Object xyzObject;\n" +
+				"}\n" +
+				"public class Bar {\n" +
+				"	Fred fred() { return new Fred(); }n" +
+				"	Bar foo() {\n" +
+				"		return (Bar)(fred().xyz);\n" +
+				"	}\n" +
+				"}\n";
+		ICompilationUnit cu= pack0.createCompilationUnit("Bar.java", contents, false, null);
+		int offset = contents.indexOf("(fred().x") + "(fred().x".length();
+		JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
+		List<ICompletionProposal> proposals= computer.computeCompletionProposals(createContext(offset, cu), null);
+		assertEquals("expect 1 proposal", 1, proposals.size());
+
+		IDocument doc= new Document(contents);
+		proposals.get(0).apply(doc);
+
+		String expected=
+				"package pack;\n" +
+				"class Fred {\n" +
+				"	Object xyzObject;\n" +
+				"}\n" +
+				"public class Bar {\n" +
+				"	Fred fred() { return new Fred(); }n	Bar foo() {\n" +
+				"		return (Bar)(fred().xyzObject);\n" +
+				"	}\n" +
+				"}\n";
+		assertEquals(expected, doc.get());
+	}
+
+	@Test
+	public void testArgumentName() throws CoreException {
+		// copy-adjusted from JDT/Core's CompletionRecoveryTest.test12() to validate replacement
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack", false, null);
+		String contents=
+				"package pack;\n"+
+				"class A  {\n"+
+				"\n"+
+				"	public static void main(String[] argv\n"+
+				"			new Member().f\n"+
+				"			;\n"+
+				"	}\n"+
+				"	class Member {\n"+
+				"		int foo()\n"+
+				"		}\n"+
+				"	}\n"+
+				"};\n";
+		ICompilationUnit cu= pack0.createCompilationUnit("A.java", contents, false, null);
+		int offset = contents.indexOf("argv") + "argv".length();
+		JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
+		List<ICompletionProposal> proposals= computer.computeCompletionProposals(createContext(offset, cu), null);
+		assertEquals("expect 1 proposal", 1, proposals.size());
+
+		IDocument doc= new Document(contents);
+		proposals.get(0).apply(doc);
+
+		String expected=
+				"package pack;\n"+
+				"class A  {\n"+
+				"\n"+
+				"	public static void main(String[] argvStrings\n"+
+				"			new Member().f\n"+
+				"			;\n"+
+				"	}\n"+
+				"	class Member {\n"+
+				"		int foo()\n"+
+				"		}\n"+
+				"	}\n"+
+				"};\n";
+		assertEquals(expected, doc.get());
+	}
+
+	@Test
+	public void superCallInAnonymous() throws CoreException {
+		// copy-adjusted from JDT/Core's CompletionParserTest2.test0137_Method() to validate replacement
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack", false, null);
+		String contents=
+				"package pack;" +
+				"class MyObject {\n" +
+				"	void zzzX() {}\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	void foo(){\n" +
+				"		new MyObject(){\n" +
+				"			void bar(){\n" +
+				"				super.zzz();\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}\n" +
+				"}\n";
+		String completeBehind = "zzz(";
+		int cursorLocation = contents.indexOf(completeBehind) + completeBehind.length() - 1;
+		ICompilationUnit cu= pack0.createCompilationUnit("X.java", contents, false, null);
+		JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
+		List<ICompletionProposal> proposals= computer.computeCompletionProposals(createContext(cursorLocation, cu), null);
+		assertEquals("expect 1 proposal", 1, proposals.size());
+
+		IDocument doc= new Document(contents);
+		proposals.get(0).apply(doc);
+
+		String expected=
+				"package pack;" +
+				"class MyObject {\n" +
+				"	void zzzX() {}\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	void foo(){\n" +
+				"		new MyObject(){\n" +
+				"			void bar(){\n" +
+				"				super.zzzX();\n" +
+				"			}\n" +
+				"		};\n" +
+				"	}\n" +
+				"}\n";
+		assertEquals(expected, doc.get());
+	}
+
+	@Test
+	public void testInIfStatement() throws CoreException {
+		// copy-adjusted from JDT/Core's MethodInvocationCompletionTest.testInIfStatement() to validate replacement
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack", false, null);
+		String contents =
+				"package pack;" +
+				"class Bar {\n" +
+				"	void freddy() {}\n" +
+				"}\n" +
+				"class X {\n" +
+				"	void foo(Bar bar) {\n" +
+				"		if (true) {\n" +
+				"			bar.fred();\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n";
+		String completeBehind = "fred(";
+		int cursorLocation = contents.indexOf(completeBehind) + completeBehind.length() - 1;
+		ICompilationUnit cu= pack0.createCompilationUnit("X.java", contents, false, null);
+		JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
+		List<ICompletionProposal> proposals= computer.computeCompletionProposals(createContext(cursorLocation, cu), null);
+		assertEquals("expect 1 proposal", 1, proposals.size());
+
+		IDocument doc= new Document(contents);
+		proposals.get(0).apply(doc);
+
+		String expected=
+				"package pack;" +
+				"class Bar {\n" +
+				"	void freddy() {}\n" +
+				"}\n" +
+				"class X {\n" +
+				"	void foo(Bar bar) {\n" +
+				"		if (true) {\n" +
+				"			bar.freddy();\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n";
+		assertEquals(expected, doc.get());
+	}
+
+	@Test
+	public void testWithExpressionReceiver() throws CoreException {
+		// copy-adjusted from JDT/Core's MethodInvocationCompletionTest.testWithExpressionReceiver() to validate replacement
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack", false, null);
+		String contents =
+				"package pack;" +
+				"class Bar {\n" +
+				"	void freddy() {}\n" +
+				"}\n" +
+				"class X {\n" +
+				"	Bar bar() { return new Bar(); }\n" +
+				"	void foo() {\n" +
+				"		if (true) {\n" +
+				"			bar().fred();\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n";
+		String completeBehind = "fred(";
+		int cursorLocation = contents.indexOf(completeBehind) + completeBehind.length() - 1;
+		ICompilationUnit cu= pack0.createCompilationUnit("X.java", contents, false, null);
+		JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
+		List<ICompletionProposal> proposals= computer.computeCompletionProposals(createContext(cursorLocation, cu), null);
+		assertEquals("expect 1 proposal", 1, proposals.size());
+
+		IDocument doc= new Document(contents);
+		proposals.get(0).apply(doc);
+
+		String expected=
+				"package pack;" +
+				"class Bar {\n" +
+				"	void freddy() {}\n" +
+				"}\n" +
+				"class X {\n" +
+				"	Bar bar() { return new Bar(); }\n" +
+				"	void foo() {\n" +
+				"		if (true) {\n" +
+				"			bar().freddy();\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n";
+		assertEquals(expected, doc.get());
+	}
+
+	@Test
+	public void test0215_Method() throws CoreException {
+		// copy-adjusted from JDT/Core's GenericsCompletionParserTest.test0215_Method() to validate replacement
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack", false, null);
+		String contents =
+				"package pack;\n" +
+				"public class X {\n" +
+				"	<T> void bar(T t) { }\n" +
+				"	void foo() {\n" +
+				"      this.<X>bar();\n" +
+				"   }" +
+				"}\n";
+
+		String completeBehind = "<X>bar(";
+		int cursorLocation = contents.indexOf(completeBehind) + completeBehind.length() - 1;
+		ICompilationUnit cu= pack0.createCompilationUnit("X.java", contents, false, null);
+		JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
+		List<ICompletionProposal> proposals= computer.computeCompletionProposals(createContext(cursorLocation, cu), null);
+		assertEquals("expect 1 proposal", 1, proposals.size());
+
+		IDocument doc= new Document(contents);
+		proposals.get(0).apply(doc);
+
+		String expected=
+				"package pack;\n" +
+				"public class X {\n" +
+				"	<T> void bar(T t) { }\n" +
+				"	void foo() {\n" +
+				"      this.<X>bar(t);\n" +
+				"   }" +
+				"}\n";
+		assertEquals(expected, doc.get());
 	}
 }

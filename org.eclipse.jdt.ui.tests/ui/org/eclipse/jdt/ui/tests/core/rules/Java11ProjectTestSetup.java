@@ -33,12 +33,12 @@ import org.eclipse.jdt.internal.core.ClasspathEntry;
 public class Java11ProjectTestSetup extends ProjectTestSetup {
 
 	public Java11ProjectTestSetup() {
-		super("TestSetupProject11", JavaProjectHelper.RT_STUBS_10);
+		super("TestSetupProject11", JavaProjectHelper.RT_STUBS_12);
 	}
 
 	@Override
 	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar(ipath); // use stubs 10 for now
+		IPath[] rtJarPath= JavaProjectHelper.findRtJar(ipath); // use stubs 12 for now
 		IClasspathAttribute[] extraAttributes= { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, Boolean.TRUE.toString()) };
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], ClasspathEntry.NO_ACCESS_RULES, extraAttributes, true) };
 	}

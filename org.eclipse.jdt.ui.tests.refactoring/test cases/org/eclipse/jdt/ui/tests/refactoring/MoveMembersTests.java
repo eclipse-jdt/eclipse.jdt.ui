@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -300,10 +301,10 @@ public class MoveMembersTests extends GenericRefactoringTest {
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Ignore("not currently handling visibility issues induced by moving more than one static member")
 	@Test
 	public void test21() throws Exception{
-		printTestDisabledMessage("not currently handling visibility issues induced by moving more than one static member");
-		//fieldHelper_passing(new String[]{"F", "i"});
+		fieldHelper_passing(new String[]{"F", "i"});
 	}
 
 	@Test
@@ -359,10 +360,10 @@ public class MoveMembersTests extends GenericRefactoringTest {
 		fieldHelper_passing(new String[]{"odd"});
 	}
 
+	@Ignore("test for 41734")
 	@Test
 	public void test32() throws Exception{ //test for bug 41734, 41691
-		printTestDisabledMessage("test for 41734");
-		//methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
+		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
 	@Test
@@ -387,10 +388,10 @@ public class MoveMembersTests extends GenericRefactoringTest {
 		typeHelper_passing(new String[]{"I"});
 	}
 
+	@Ignore("qualified access to source")
 	@Test
 	public void test37() throws Exception {
-		printTestDisabledMessage("qualified access to source");
-//		typeHelper_passing(new String[] {"Inner"});
+		typeHelper_passing(new String[] {"Inner"});
 	}
 
 	@Test
@@ -398,9 +399,9 @@ public class MoveMembersTests extends GenericRefactoringTest {
 		fieldMethodTypeABHelper_passing(new String[0], new String[0], new String[0][0], new String[]{"Inner"});
 	}
 
+	@Ignore("complex imports - need more work")
 	@Test
 	public void test39() throws Exception {
-		printTestDisabledMessage("complex imports - need more work");
 //		fieldMethodType3CUsHelper_passing(new String[0], new String[0], new String[0][0],
 //							new String[]{"Inner"});
 	}

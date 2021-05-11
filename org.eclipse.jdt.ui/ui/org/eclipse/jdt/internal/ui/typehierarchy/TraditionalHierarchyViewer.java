@@ -83,7 +83,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 				IType[] superInterfaces= hierarchy.getSuperInterfaces(input);
 				while (superInterfaces != null && superInterfaces.length > 0) {
 					count++;
-					IType superInterface= hierarchy.getSuperInterfaces(input)[0];
+					IType superInterface= superInterfaces[0];
 					superInterfaces= hierarchy.getSuperInterfaces(superInterface);
 				}
 

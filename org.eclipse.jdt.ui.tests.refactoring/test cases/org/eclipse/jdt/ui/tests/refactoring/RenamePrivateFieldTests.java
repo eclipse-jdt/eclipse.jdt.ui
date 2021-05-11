@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -47,9 +48,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class RenamePrivateFieldTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenamePrivateField/";
-
-	private static final boolean BUG_75642_GENERIC_METHOD_SEARCH= true;
-	private static final boolean BUG_81084= true;
 
 	private String fPrefixPref;
 
@@ -283,22 +281,16 @@ public class RenamePrivateFieldTests extends GenericRefactoringTest {
 		helper2("fBig", "fSmall", true, false, true, true, true, true);
 	}
 
+	@Ignore("BUG_81084")
 	@Test
 	public void test10() throws Exception{
 		//regression test for 81084
-		if (BUG_81084) {
-			printTestDisabledMessage("BUG_81084");
-			return;
-		}
 		helper2("fList", "fElements", true, false, false, false, false, false);
 	}
 
+	@Ignore("BUG_75642_GENERIC_METHOD_SEARCH")
 	@Test
 	public void test11() throws Exception{
-		if (BUG_75642_GENERIC_METHOD_SEARCH) {
-			printTestDisabledMessage("BUG_75642_GENERIC_METHOD_SEARCH");
-			return;
-		}
 		helper2("fList", "fElements", true, false, true, true, true, true);
 	}
 

@@ -894,8 +894,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				fTypeImports= new HashSet<>();
 				fStaticImports= new HashSet<>();
 				ImportRewriteUtil.collectImports(fType.getJavaProject(), declaration, fTypeImports, fStaticImports, false);
-				if (binding != null)
-					fTypeImports.remove(binding);
+				handleParametrizedTypeImports(fTypeImports);
+				removeEnclosingTypeImports(binding);
 			}
 			addEnclosingInstanceTypeParameters(parameters, declaration, rewrite);
 			modifyAccessToEnclosingInstance(targetRewrite, declaration, monitor);
@@ -933,6 +933,53 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			updateTypeReference(parameters, reference, targetRewrite, targetUnit);
 		for (ASTNode reference : getReferenceNodesIn(root, constructorReferences, targetUnit))
 			updateConstructorReference(parameters, reference, targetRewrite, targetUnit);
+	}
+
+	private void removeEnclosingTypeImports(final ITypeBinding binding) {
+		if (binding != null && fTypeImports != null) {
+			Iterator<ITypeBinding> iterator= fTypeImports.iterator();
+			while (iterator.hasNext()) {
+				ITypeBinding typeBinding=  iterator.next();
+				ITypeBinding parentBinding= typeBinding;
+				while (parentBinding != null) {
+					if (parentBinding == binding) {
+						iterator.remove();
+						break;
+					}
+					parentBinding= parentBinding.getDeclaringClass();
+				}
+			}
+		}
+	}
+
+	private void handleParametrizedTypeImports(Collection<ITypeBinding> imports) {
+		if (imports != null) {
+			Iterator<ITypeBinding> iterator= imports.iterator();
+			Collection<ITypeBinding> additionalTypeImports= new HashSet<>();
+			while (iterator.hasNext()) {
+				ITypeBinding typeBinding=  iterator.next();
+				if (typeBinding.isParameterizedType()) {
+					addParametrizedTypeArgumentImports(additionalTypeImports, typeBinding);
+					iterator.remove();
+				}
+			}
+			imports.addAll(additionalTypeImports);
+		}
+	}
+
+	private void addParametrizedTypeArgumentImports(Collection<ITypeBinding> importsList,ITypeBinding typeBinding) {
+		if (importsList != null && typeBinding != null && typeBinding.isParameterizedType()) {
+			ITypeBinding basicType= typeBinding.getTypeDeclaration();
+			ITypeBinding[] typeArguments= typeBinding.getTypeArguments();
+			importsList.add(basicType);
+			for (ITypeBinding typeArgument : typeArguments) {
+				if (typeArgument.isParameterizedType()) {
+					addParametrizedTypeArgumentImports(importsList, typeArgument);
+				} else {
+					importsList.add(typeArgument);
+				}
+			}
+		}
 	}
 
 	private void createConstructor(final AbstractTypeDeclaration declaration, final ASTRewrite rewrite) throws CoreException {

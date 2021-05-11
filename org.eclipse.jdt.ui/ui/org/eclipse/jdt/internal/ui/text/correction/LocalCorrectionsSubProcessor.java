@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -186,6 +187,9 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConstructorFromSuperclassProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CreateNewObjectProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CreateObjectReferenceProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CreateVariableReferenceProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
@@ -203,13 +207,17 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
   */
 public class LocalCorrectionsSubProcessor {
 	private static final String RAW_TYPE_REFERENCE_ID= "org.eclipse.jdt.ui.correction.rawTypeReference"; //$NON-NLS-1$
+
 	private static final String ADD_EXCEPTION_TO_THROWS_ID= "org.eclipse.jdt.ui.correction.addThrowsDecl"; //$NON-NLS-1$
+
 	private static final String ADD_NON_NLS_ID= "org.eclipse.jdt.ui.correction.addNonNLS"; //$NON-NLS-1$
+
 	private static final String ADD_FIELD_QUALIFICATION_ID= "org.eclipse.jdt.ui.correction.qualifyField"; //$NON-NLS-1$
+
 	private static final String ADD_STATIC_ACCESS_ID= "org.eclipse.jdt.ui.correction.changeToStatic"; //$NON-NLS-1$
+
 	private static final String REMOVE_UNNECESSARY_NLS_TAG_ID= "org.eclipse.jdt.ui.correction.removeNlsTag"; //$NON-NLS-1$
 
-	@SuppressWarnings("deprecation")
 	public static void addUncaughtExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -226,8 +234,8 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		boolean isSelectedNodeThrowStatement= false;
-		if (selectedNode instanceof  ThrowStatement) {
-			isSelectedNodeThrowStatement = true;
+		if (selectedNode instanceof ThrowStatement) {
+			isSelectedNodeThrowStatement= true;
 		}
 
 		int offset= selectedNode.getStartPosition();
@@ -247,10 +255,10 @@ public class LocalCorrectionsSubProcessor {
 		SimpleName vName= null;
 		ITypeBinding vType= null;
 		if (selectedNode.getAST().apiLevel() >= ASTHelper.JLS10 && (selectedNode instanceof VariableDeclarationStatement)) {
-			for (Object o : ((VariableDeclarationStatement)selectedNode).fragments()) {
-				VariableDeclarationFragment v= ((VariableDeclarationFragment)o);
+			for (Object o : ((VariableDeclarationStatement) selectedNode).fragments()) {
+				VariableDeclarationFragment v= ((VariableDeclarationFragment) o);
 				vName= v.getName();
-				vType= ((VariableDeclarationStatement)selectedNode).getType().resolveBinding();
+				vType= ((VariableDeclarationStatement) selectedNode).getType().resolveBinding();
 			}
 
 			// If no references to 'var' type exist, entire statement will be placed in try block
@@ -434,7 +442,7 @@ public class LocalCorrectionsSubProcessor {
 			if (isApplicable) {
 				IMethodBinding overriddenMethod= Bindings.findOverriddenMethod(binding, true);
 
-				if (overriddenMethod != null ) {
+				if (overriddenMethod != null) {
 					isApplicable= overriddenMethod.getDeclaringClass().isFromSource();
 
 					if (!isApplicable) { // bug 349051
@@ -476,7 +484,7 @@ public class LocalCorrectionsSubProcessor {
 						}
 					}
 
-					for (int i = 0; i < uncaughtExceptions.length; i++) {
+					for (int i= 0; i < uncaughtExceptions.length; i++) {
 						desc[i + nExistingExceptions]= new InsertDescription(uncaughtExceptions[i], ""); //$NON-NLS-1$
 					}
 
@@ -508,7 +516,8 @@ public class LocalCorrectionsSubProcessor {
 		return type;
 	}
 
-	private static void addAdditionalCatchProposal(IInvocationContext context, Collection<ICommandAccess> proposals, ICompilationUnit cu, ASTNode selectedNode, int offset, int length, BodyDeclaration decl,
+	private static void addAdditionalCatchProposal(IInvocationContext context, Collection<ICommandAccess> proposals, ICompilationUnit cu, ASTNode selectedNode, int offset, int length,
+			BodyDeclaration decl,
 			ITypeBinding[] uncaughtExceptions, TryStatement surroundingTry, AST ast) throws CoreException {
 		ASTRewrite rewrite= ASTRewrite.create(surroundingTry.getAST());
 
@@ -519,8 +528,7 @@ public class LocalCorrectionsSubProcessor {
 		ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
-		CodeScopeBuilder.Scope scope= CodeScopeBuilder.perform(decl, Selection.createFromStartLength(offset, length)).
-				findScope(offset, length);
+		CodeScopeBuilder.Scope scope= CodeScopeBuilder.perform(decl, Selection.createFromStartLength(offset, length)).findScope(offset, length);
 		scope.setCursor(offset);
 
 		ListRewrite clausesRewrite= rewrite.getListRewrite(surroundingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
@@ -581,7 +589,7 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addNLSProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
-		if (cu == null || !cu.exists()){
+		if (cu == null || !cu.exists()) {
 			return;
 		}
 		String name= CorrectionMessages.LocalCorrectionsSubProcessor_externalizestrings_description;
@@ -591,6 +599,7 @@ public class LocalCorrectionsSubProcessor {
 			public void apply(IDocument document) {
 				ExternalizeWizard.open(cu, JavaPlugin.getActiveWorkbenchShell());
 			}
+
 			@Override
 			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 				return CorrectionMessages.LocalCorrectionsSubProcessor_externalizestrings_additional_info;
@@ -754,14 +763,149 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+	public static void addNewObjectProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return;
+		}
+		ASTNode selectedExpressionStatement= ASTNodes.getParent(selectedNode, ASTNode.EXPRESSION_STATEMENT);
+		if (selectedExpressionStatement != null) {
+			ExpressionStatement expressionStatement= (ExpressionStatement) selectedExpressionStatement;
+			Expression expression= expressionStatement.getExpression();
+			ITypeBinding binding= null;
+			if (expression instanceof MethodInvocation) {
+				Expression expression2= ((MethodInvocation) expression).getExpression();
+				binding= expression2 == null ? null : expression2.resolveTypeBinding();
+			}
+			if (binding == null) {
+				return;
+			}
+			ICompilationUnit cu= context.getCompilationUnit();
+			CreateNewObjectProposal createNewObjectProposal= new CreateNewObjectProposal(cu, expressionStatement, binding, IProposalRelevance.ADD_CONSTRUCTOR_FROM_SUPER_CLASS);
+			if (createNewObjectProposal.hasProposal()) {
+				proposals.add(createNewObjectProposal);
+			}
+			return;
+		}
+
+		ASTNode selectedVariableDeclarationFragment= ASTNodes.getParent(selectedNode, ASTNode.VARIABLE_DECLARATION_FRAGMENT);
+		if (selectedVariableDeclarationFragment != null) {
+			VariableDeclarationFragment vdf= (VariableDeclarationFragment) selectedVariableDeclarationFragment;
+			VariableDeclarationStatement vds= (VariableDeclarationStatement) ASTNodes.getParent(selectedNode, ASTNode.VARIABLE_DECLARATION_STATEMENT);
+			if (vds == null) {
+				return;
+			}
+			Type type= vds.getType();
+			ITypeBinding binding= null;
+			binding= type == null ? null : type.resolveBinding();
+			if (binding == null) {
+				return;
+			}
+			ICompilationUnit cu= context.getCompilationUnit();
+			CreateNewObjectProposal createNewObjectProposal= new CreateNewObjectProposal(cu, vdf, binding, IProposalRelevance.ADD_CONSTRUCTOR_FROM_SUPER_CLASS);
+			if (createNewObjectProposal.hasProposal()) {
+				proposals.add(createNewObjectProposal);
+			}
+			/* create instance of qualifier, ex; X in X.s; */
+			Expression initializer= vdf.getInitializer();
+			if(initializer instanceof QualifiedName == false) {
+				return;
+			}
+			QualifiedName qualifiedName= (QualifiedName)initializer;
+			IBinding resolveBinding= qualifiedName.getName().resolveBinding();
+			if(resolveBinding instanceof IVariableBinding == false) {
+				return;
+			}
+			CreateNewObjectProposal createNewObjectProposal2= new CreateNewObjectProposal(cu, vdf, (IVariableBinding)resolveBinding, IProposalRelevance.ADD_CONSTRUCTOR_FROM_SUPER_CLASS);
+			if (createNewObjectProposal2.hasProposal()) {
+				proposals.add(createNewObjectProposal2);
+			}
+			return;
+		}
+		if (problem.getProblemId() == IProblem.StaticMethodRequested ||
+				problem.getProblemId() == IProblem.NonStaticFieldFromStaticInvocation) {
+			addUncaughtExceptionProposals(context, problem, proposals);
+		}
+	}
+
+	public static void addObjectReferenceProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		ITypeBinding binding= null;
+		if (selectedNode == null) {
+			return;
+		}
+		if (problem.getProblemId() == IProblem.NonStaticFieldFromStaticInvocation) {
+			if (selectedNode instanceof QualifiedName) {
+				QualifiedName qualifiedName= (QualifiedName) selectedNode;
+				Name qualifier= qualifiedName.getQualifier();
+				binding= qualifier.resolveTypeBinding();
+			}
+		} else {
+			selectedNode= ASTNodes.getParent(selectedNode, ASTNode.EXPRESSION_STATEMENT);
+			if (selectedNode == null) {
+				if (problem.getProblemId() == IProblem.StaticMethodRequested) {
+					addUncaughtExceptionProposals(context, problem, proposals);
+				}
+				return;
+			}
+			ExpressionStatement expressionStatement= (ExpressionStatement) selectedNode;
+			Expression expression= expressionStatement.getExpression();
+			if (expression instanceof MethodInvocation) {
+				Expression expression2= ((MethodInvocation) expression).getExpression();
+				binding= expression2 == null ? null : expression2.resolveTypeBinding();
+			}
+		}
+		if (binding == null) {
+			return;
+		}
+		ICompilationUnit cu= context.getCompilationUnit();
+		CreateObjectReferenceProposal createObjectReferenceProposal= new CreateObjectReferenceProposal(cu, selectedNode, binding, IProposalRelevance.ADD_CONSTRUCTOR_FROM_SUPER_CLASS);
+		if (createObjectReferenceProposal.hasProposal()) {
+			proposals.add(createObjectReferenceProposal);
+		}
+	}
+
+	public static void addVariableReferenceProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return;
+		}
+		selectedNode= ASTNodes.getParent(selectedNode, ASTNode.VARIABLE_DECLARATION_FRAGMENT);
+		if (selectedNode == null) {
+			if (problem.getProblemId() == IProblem.NonStaticFieldFromStaticInvocation) {
+				addUncaughtExceptionProposals(context, problem, proposals);
+			}
+			return;
+		}
+		VariableDeclarationFragment fragment= (VariableDeclarationFragment) selectedNode;
+		Type type= null;
+		if(fragment.getParent() instanceof VariableDeclarationStatement) {
+			type= ((VariableDeclarationStatement)fragment.getParent()).getType();
+		} else if(fragment.getParent() instanceof FieldDeclaration) {
+			type= ((FieldDeclaration)fragment.getParent()).getType();
+		}
+		if (type == null) {
+			return;
+		}
+		ITypeBinding binding= type.resolveBinding();
+		if (binding == null) {
+			return;
+		}
+		ICompilationUnit cu= context.getCompilationUnit();
+		CreateVariableReferenceProposal createVariableReferenceProposal= new CreateVariableReferenceProposal(cu, fragment, binding, IProposalRelevance.ADD_CONSTRUCTOR_FROM_SUPER_CLASS);
+		if (createVariableReferenceProposal.hasProposal()) {
+			proposals.add(createVariableReferenceProposal);
+		}
+	}
+
 	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		int problemId = problem.getProblemId();
+		int problemId= problem.getProblemId();
 		UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(context.getASTRoot(), problem, false);
 		if (fix != null) {
 			addProposal(context, proposals, fix);
 		}
 
-		if (problemId==IProblem.LocalVariableIsNeverUsed){
+		if (problemId == IProblem.LocalVariableIsNeverUsed) {
 			fix= UnusedCodeFix.createUnusedMemberFix(context.getASTRoot(), problem, true);
 			addProposal(context, proposals, fix);
 		}
@@ -773,7 +917,6 @@ public class LocalCorrectionsSubProcessor {
 		if (problemId == IProblem.UnusedPrivateField) {
 			GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, IProposalRelevance.GETTER_SETTER_UNUSED_PRIVATE_FIELD);
 		}
-
 	}
 
 	public static void addUnusedTypeParameterProposal(IInvocationContext context, IProblemLocation problemLoc, Collection<ICommandAccess> proposals) {
@@ -811,13 +954,13 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addSuperfluousSemicolonProposal(IInvocationContext context, IProblemLocation problem,  Collection<ICommandAccess> proposals) {
+	public static void addSuperfluousSemicolonProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removesemicolon_description;
 		ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), "", IProposalRelevance.REMOVE_SEMICOLON); //$NON-NLS-1$
 		proposals.add(proposal);
 	}
 
-	public static void addUnnecessaryCastProposal(IInvocationContext context, IProblemLocation problem,  Collection<ICommandAccess> proposals) {
+	public static void addUnnecessaryCastProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		IProposableFix fix= UnusedCodeFix.createRemoveUnusedCastFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -980,7 +1123,7 @@ public class LocalCorrectionsSubProcessor {
 						label= CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_instanceof_description;
 						break;
 					case ASTNode.INFIX_EXPRESSION:
-						InfixExpression infixExpression= (InfixExpression)parent;
+						InfixExpression infixExpression= (InfixExpression) parent;
 						label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_description, infixExpression.getOperator().toString());
 						break;
 				}
@@ -1038,6 +1181,7 @@ public class LocalCorrectionsSubProcessor {
 	private static class CompareInBitWiseOpFinder extends ASTVisitor {
 
 		private InfixExpression fCompareExpression= null;
+
 		private final ASTNode fSelectedNode;
 
 		public CompareInBitWiseOpFinder(ASTNode selectedNode) {
@@ -1092,7 +1236,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		ASTRewrite rewrite= ASTRewrite.create(root.getAST());
-		ASTNode placeholder=QuickAssistProcessor.getCopyOfInner(rewrite, ifStatement.getElseStatement(), false);
+		ASTNode placeholder= QuickAssistProcessor.getCopyOfInner(rewrite, ifStatement.getElseStatement(), false);
 		if (placeholder == null) {
 			return;
 		}
@@ -1175,28 +1319,28 @@ public class LocalCorrectionsSubProcessor {
 			addRemoveIncludingConditionProposal(context, parent, null, proposals);
 
 		} else if (selectedNode.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY) {
-			Statement elseStatement= ((IfStatement)parent).getElseStatement();
+			Statement elseStatement= ((IfStatement) parent).getElseStatement();
 			addRemoveIncludingConditionProposal(context, parent, elseStatement, proposals);
 
 		} else if (selectedNode.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
-			Statement thenStatement= ((IfStatement)parent).getThenStatement();
+			Statement thenStatement= ((IfStatement) parent).getThenStatement();
 			addRemoveIncludingConditionProposal(context, parent, thenStatement, proposals);
 
 		} else if (selectedNode.getLocationInParent() == ForStatement.BODY_PROPERTY) {
-			Statement body= ((ForStatement)parent).getBody();
+			Statement body= ((ForStatement) parent).getBody();
 			addRemoveIncludingConditionProposal(context, parent, body, proposals);
 
 		} else if (selectedNode.getLocationInParent() == ConditionalExpression.THEN_EXPRESSION_PROPERTY) {
-			Expression elseExpression= ((ConditionalExpression)parent).getElseExpression();
+			Expression elseExpression= ((ConditionalExpression) parent).getElseExpression();
 			addRemoveIncludingConditionProposal(context, parent, elseExpression, proposals);
 
 		} else if (selectedNode.getLocationInParent() == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
-			Expression thenExpression= ((ConditionalExpression)parent).getThenExpression();
+			Expression thenExpression= ((ConditionalExpression) parent).getThenExpression();
 			addRemoveIncludingConditionProposal(context, parent, thenExpression, proposals);
 
 		} else if (selectedNode.getLocationInParent() == InfixExpression.RIGHT_OPERAND_PROPERTY) {
 			// also offer split && / || condition proposals:
-			InfixExpression infixExpression= (InfixExpression)parent;
+			InfixExpression infixExpression= (InfixExpression) parent;
 			Expression leftOperand= infixExpression.getLeftOperand();
 
 			ASTRewrite rewrite= ASTRewrite.create(parent.getAST());
@@ -1295,7 +1439,7 @@ public class LocalCorrectionsSubProcessor {
 
 		if (replacement == null
 				|| replacement instanceof EmptyStatement
-				|| replacement instanceof Block && ((Block)replacement).statements().size() == 0) {
+				|| replacement instanceof Block && ((Block) replacement).statements().size() == 0) {
 			if (ASTNodes.isControlStatementBody(toRemove.getLocationInParent())) {
 				rewrite.replace(toRemove, toRemove.getAST().newBlock(), null);
 			} else {
@@ -1327,7 +1471,7 @@ public class LocalCorrectionsSubProcessor {
 			ASTNode moveTarget;
 			if ((parent instanceof Block || parent instanceof SwitchStatement) && replacement instanceof Block) {
 				ListRewrite listRewrite= rewrite.getListRewrite(replacement, Block.STATEMENTS_PROPERTY);
-				List<Statement> list= ((Block)replacement).statements();
+				List<Statement> list= ((Block) replacement).statements();
 				int lastIndex= list.size() - 1;
 				moveTarget= listRewrite.createMoveTarget(list.get(0), list.get(lastIndex));
 			} else {
@@ -1396,7 +1540,7 @@ public class LocalCorrectionsSubProcessor {
 				if (returnTypeBinding != null && exprType != null && exprType.isAssignmentCompatible(returnTypeBinding)) {
 					relevance= IProposalRelevance.RETURN_ALLOCATED_OBJECT_MATCH;
 				} else if (method.getReturnType2() instanceof PrimitiveType
-						&& ((PrimitiveType)method.getReturnType2()).getPrimitiveTypeCode() == PrimitiveType.VOID) {
+						&& ((PrimitiveType) method.getReturnType2()).getPrimitiveTypeCode() == PrimitiveType.VOID) {
 					relevance= IProposalRelevance.RETURN_ALLOCATED_OBJECT_VOID;
 				} else {
 					relevance= IProposalRelevance.RETURN_ALLOCATED_OBJECT;
@@ -1438,7 +1582,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
-		if (typeBinding == null)  {
+		if (typeBinding == null) {
 			return;
 		}
 		IVariableBinding fieldBinding= Bindings.findFieldInHierarchy(typeBinding, binding.getName());
@@ -1507,7 +1651,7 @@ public class LocalCorrectionsSubProcessor {
 		if (fix != null) {
 			for (ICommandAccess element : proposals) {
 				if (element instanceof FixCorrectionProposal) {
-					FixCorrectionProposal fixProp= (FixCorrectionProposal)element;
+					FixCorrectionProposal fixProp= (FixCorrectionProposal) element;
 					if (RAW_TYPE_REFERENCE_ID.equals(fixProp.getCommandId())) {
 						return;
 					}
@@ -1525,15 +1669,16 @@ public class LocalCorrectionsSubProcessor {
 		boolean hasInferTypeArgumentsProposal= false;
 		for (ICommandAccess completionProposal : proposals) {
 			if (completionProposal instanceof ChangeCorrectionProposal) {
-				if (IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION.equals(((ChangeCorrectionProposal)completionProposal).getCommandId())) {
+				if (IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION.equals(((ChangeCorrectionProposal) completionProposal).getCommandId())) {
 					hasInferTypeArgumentsProposal= true;
 					break;
 				}
 			}
 		}
-		if (! hasInferTypeArgumentsProposal) {
+		if (!hasInferTypeArgumentsProposal) {
 			final ICompilationUnit cu= context.getCompilationUnit();
-			ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments, null, IProposalRelevance.INFER_GENERIC_TYPE_ARGUMENTS, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+			ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments, null,
+					IProposalRelevance.INFER_GENERIC_TYPE_ARGUMENTS, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 				@Override
 				public void apply(IDocument document) {
 					IEditorInput input= new FileEditorInput((IFile) cu.getResource());
@@ -1545,7 +1690,7 @@ public class LocalCorrectionsSubProcessor {
 					if (!(part instanceof JavaEditor))
 						return;
 
-					IEditorSite site= ((JavaEditor)part).getEditorSite();
+					IEditorSite site= ((JavaEditor) part).getEditorSite();
 					InferTypeArgumentsAction action= new InferTypeArgumentsAction(site);
 					action.run(new StructuredSelection(cu));
 				}
@@ -1620,7 +1765,8 @@ public class LocalCorrectionsSubProcessor {
 			if (!(normalizedNode.getParent() instanceof Type) && node.getParent() != normalizedNode) {
 				ITypeBinding normBinding= ASTResolving.guessBindingForTypeReference(normalizedNode);
 				if (normBinding != null && !normBinding.isRecovered()) {
-					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, IProposalRelevance.TYPE_ARGUMENTS_FROM_CONTEXT, TypeLocation.TYPE_ARGUMENT));
+					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, IProposalRelevance.TYPE_ARGUMENTS_FROM_CONTEXT,
+							TypeLocation.TYPE_ARGUMENT));
 				}
 			}
 		}
@@ -1724,7 +1870,7 @@ public class LocalCorrectionsSubProcessor {
 									ITypeBinding[] typeArguments= parameterTypes[i].getTypeArguments();
 									for (ITypeBinding typeArgument : typeArguments) {
 										typeArgument= Bindings.normalizeForDeclarationUse(typeArgument, ast);
-										if (! TypeRules.isJavaLangObject(typeArgument)) {
+										if (!TypeRules.isJavaLangObject(typeArgument)) {
 											// add all type arguments if at least one is found to be necessary:
 											List<Type> typeArgumentsList= method.typeArguments();
 											for (ITypeBinding t : typeArguments) {
@@ -1740,7 +1886,8 @@ public class LocalCorrectionsSubProcessor {
 
 						astRewrite.replace(selectedNode, method, null);
 
-						String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(method)));
+						String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description,
+								BasicElementLabels.getJavaElementName(ASTNodes.asString(method)));
 						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 						ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, astRewrite, IProposalRelevance.REPLACE_FIELD_ACCESS_WITH_METHOD, image);
 						proposal.setImportRewrite(importRewrite);
@@ -1752,12 +1899,13 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	private static Map<String, String[]> resolveMap;
+
 	private static String[] getMethod(String fieldName) {
-		if (resolveMap==null){
-			resolveMap=new HashMap<>();
-			resolveMap.put("java.util.Collections.EMPTY_MAP", new String[]{"java.util.Collections","emptyMap"});   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-			resolveMap.put("java.util.Collections.EMPTY_SET", new String[]{"java.util.Collections","emptySet"});  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-			resolveMap.put("java.util.Collections.EMPTY_LIST", new String[]{"java.util.Collections","emptyList"});//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		if (resolveMap == null) {
+			resolveMap= new HashMap<>();
+			resolveMap.put("java.util.Collections.EMPTY_MAP", new String[] { "java.util.Collections", "emptyMap" }); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			resolveMap.put("java.util.Collections.EMPTY_SET", new String[] { "java.util.Collections", "emptySet" }); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			resolveMap.put("java.util.Collections.EMPTY_LIST", new String[] { "java.util.Collections", "emptyList" });//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
 		return resolveMap.get(fieldName);
 	}
@@ -1811,7 +1959,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 
-		boolean hasDefault=false;
+		boolean hasDefault= false;
 		for (Statement curr : switchStatements) {
 			if (curr instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) curr;
@@ -2106,7 +2254,7 @@ public class LocalCorrectionsSubProcessor {
 					if (!(part instanceof JavaEditor))
 						return;
 
-					IEditorSite site= ((JavaEditor)part).getEditorSite();
+					IEditorSite site= ((JavaEditor) part).getEditorSite();
 					GenerateHashCodeEqualsAction action= new GenerateHashCodeEqualsAction(site);
 					action.run(new StructuredSelection(type));
 				}
@@ -2294,9 +2442,9 @@ public class LocalCorrectionsSubProcessor {
 		proposals.add(proposal);
 	}
 
-	public static void addServiceProviderProposal (IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void addServiceProviderProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ASTNode node= problem.getCoveredNode(context.getASTRoot());
-		if (! (node instanceof Name) && ! (node.getParent() instanceof ProvidesDirective)) {
+		if (!(node instanceof Name) && !(node.getParent() instanceof ProvidesDirective)) {
 			return;
 		}
 
@@ -2319,7 +2467,7 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addServiceProviderConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ASTNode node= problem.getCoveredNode(context.getASTRoot());
-		if (! (node instanceof Name) && ! (node.getParent() instanceof ProvidesDirective)) {
+		if (!(node instanceof Name) && !(node.getParent() instanceof ProvidesDirective)) {
 			return;
 		}
 
@@ -2364,8 +2512,8 @@ public class LocalCorrectionsSubProcessor {
 				}
 
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_changeconstructor_public_description;
-				int include=Modifier.PUBLIC;
-				int exclude=Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
+				int include= Modifier.PUBLIC;
+				int exclude= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
 
 				// Locate the constructor declaration node in the target AST Node
 				MethodDeclaration targetMethodDecl= ASTNodeSearchUtil.getMethodDeclarationNode(targetMethod, (CompilationUnit) targetRoot);
@@ -2374,10 +2522,11 @@ public class LocalCorrectionsSubProcessor {
 						JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)));
 			} else {
 				// no-arg constructor does not exist, need to create it
-				String[] args= new String[] { org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature(org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getTypeSignature(targetBinding), new ITypeBinding[0], false) };
+				String[] args= new String[] { org.eclipse.jdt.internal.ui.text.correction.ASTResolving
+						.getMethodSignature(org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getTypeSignature(targetBinding), new ITypeBinding[0], false) };
 				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconstructor_description, args);
 				Image image= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
-				proposals.add(new NewMethodCorrectionProposal(label, targetCU, targetRoot, new ArrayList<> (), targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR, image));
+				proposals.add(new NewMethodCorrectionProposal(label, targetCU, targetRoot, new ArrayList<>(), targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR, image));
 			}
 		}
 	}

@@ -17,6 +17,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_description;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -57,6 +58,7 @@ import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
+import org.eclipse.jdt.internal.corext.fix.UpdateProperty;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -5615,21 +5617,1873 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testPrimitiveIntRatherThanWrapper() throws Exception {
+	public void testPrimitiveBooleanRatherThanWrapper() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean booleanField;\n" //
+				+ "    public Boolean wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ Boolean /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Boolean.TRUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInCast() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if ((boolean) alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInParenthesis() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if ((alwaysInitializedVar)) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceGreaterWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean greaterVar = i > 0;\n" //
+				+ "        if (greaterVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceLesserWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean lesserVar = i < 0;\n" //
+				+ "        if (lesserVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAndWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean andVar = b1 && b2;\n" //
+				+ "        if (andVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOrWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean orVar = b1 || b2;\n" //
+				+ "        if (orVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOppositeWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean oppositeVar = !b;\n" //
+				+ "        if (oppositeVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperFromValueOf(boolean b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean varFromValueOf = Boolean.valueOf(b1);\n" //
+				+ "        if (varFromValueOf) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceParentherizedWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean parentherizedVar = (b1 || b2);\n" //
+				+ "        if (parentherizedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceComplexExprWrapper(boolean b1, boolean b2, boolean b3, boolean b4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean complexVar = b1 ? !b2 : (b3 || b4);\n" //
+				+ "        if (complexVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceCastWrapper(Boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean castVar = (boolean) b;\n" //
+				+ "        if (castVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInPrefixExpression() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        if (!alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInIf() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInWhile() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = true;\n" //
+				+ "        while (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInDoWhile() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = false;\n" //
+				+ "        do {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        } while (alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInConditionalExpression() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        return alwaysInitializedVar ? \"foo\" : \"bar\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        return returnedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceMultiReturnedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean replaceReturnedAutoBoxedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean returnedBoolean = Boolean.FALSE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        reassignedBoolean = Boolean.FALSE;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "        multiReassignedBoolean = Boolean.FALSE;\n" //
+				+ "        multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnBooleanField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        booleanField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        wrapperField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Boolean aBoolean, Boolean anotherBoolean,\n" //
+				+ "            Boolean yetAnotherBoolean) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        aBoolean &= assignedBoolean;\n" //
+				+ "        anotherBoolean |= assignedBoolean;\n" //
+				+ "        yetAnotherBoolean ^= assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean booleanField;\n" //
+				+ "    public Boolean wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ boolean /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Boolean.TRUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInCast() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if ((boolean) alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInParenthesis() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        if ((alwaysInitializedVar)) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceGreaterWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean greaterVar = i > 0;\n" //
+				+ "        if (greaterVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceLesserWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean lesserVar = i < 0;\n" //
+				+ "        if (lesserVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAndWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean andVar = b1 && b2;\n" //
+				+ "        if (andVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOrWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean orVar = b1 || b2;\n" //
+				+ "        if (orVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOppositeWrapper(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean oppositeVar = !b;\n" //
+				+ "        if (oppositeVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperFromValueOf(boolean b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean varFromValueOf = Boolean.valueOf(b1);\n" //
+				+ "        if (varFromValueOf) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceParentherizedWrapper(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean parentherizedVar = (b1 || b2);\n" //
+				+ "        if (parentherizedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceComplexExprWrapper(boolean b1, boolean b2, boolean b3, boolean b4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean complexVar = b1 ? !b2 : (b3 || b4);\n" //
+				+ "        if (complexVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceCastWrapper(Boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean castVar = (boolean) b;\n" //
+				+ "        if (castVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInPrefixExpression() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        if (!alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInIf() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInWhile() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = true;\n" //
+				+ "        while (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInDoWhile() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = false;\n" //
+				+ "        do {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        } while (alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInConditionalExpression() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        return alwaysInitializedVar ? \"foo\" : \"bar\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        return returnedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceMultiReturnedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean replaceReturnedAutoBoxedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean returnedBoolean = Boolean.FALSE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedBoolean;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        reassignedBoolean = Boolean.FALSE;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "        multiReassignedBoolean = Boolean.FALSE;\n" //
+				+ "        multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnBooleanField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        booleanField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        wrapperField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Boolean aBoolean, Boolean anotherBoolean,\n" //
+				+ "            Boolean yetAnotherBoolean) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        aBoolean &= assignedBoolean;\n" //
+				+ "        anotherBoolean |= assignedBoolean;\n" //
+				+ "        yetAnotherBoolean ^= assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveBooleanRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.util.Map;\n" //
 				+ "import java.util.Observable;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    public int intField;\n" //
-				+ "\n" //
-				+ "    public Integer wrapperField;\n" //
-				+ "\n" //
+				+ "    public Boolean doNotRefactorFields = Boolean.TRUE;\n" //
 				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Boolean returnedObject = Boolean.TRUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        reassignedBoolean = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Boolean, Observable> obsByBoolean) {\n" //
+				+ "        Boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        obsByBoolean.get(reassignedBoolean).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        objectField = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
+				+ "        Boolean yetAnotherBoolean = assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
+				+ "        return assignedBoolean;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Boolean returnedObject = Boolean.TRUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceRessignedWrapper(Boolean b) {\n" //
+				+ "        Boolean returnedObject = Boolean.TRUE;\n" //
+				+ "        try {\n" //
+				+ "            returnedObject = b;\n" //
+				+ "        } catch (Exception e) {\n" //
+				+ "            System.out.println(\"Error!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean doNotReplaceAssignedAndReturnedWrapper(Boolean b) {\n" //
+				+ "        Boolean returnedObject = Boolean.FALSE;\n" //
+				+ "        returnedObject = b;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorMultiDeclaration(boolean isValid) {\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.TRUE, otherVar;\n" //
+				+ "        if (alwaysInitializedVar && isValid) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveCharRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public char charField;\n" //
+				+ "    public Character wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Character alwaysInitializedVar = Character.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character preDecrementVar = --c;\n" //
+				+ "        return preDecrementVar - 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character preDecrementVar = ++c;\n" //
+				+ "        return preDecrementVar + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character postDecrementVar = c--;\n" //
+				+ "        return -postDecrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replacePostIncrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character postIncrementVar = c++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperFromValueOf(char c1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character varFromValueOf = Character.valueOf(c1);\n" //
+				+ "        return +varFromValueOf;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceCastWrapper(Character c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character castVar = (char) c;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceObjectCastWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character castVar = (Character) Character.MAX_HIGH_SURROGATE;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MAX_LOW_SURROGATE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MAX_SURROGATE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MIN_HIGH_SURROGATE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MIN_LOW_SURROGATE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character charInSwitch = Character.MIN_SURROGATE;\n" //
+				+ "        switch (charInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character charInArrayAccess = Character.MIN_VALUE;\n" //
+				+ "        return strings[charInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        return returnedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceMultiReturnedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        if (c > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Character replaceReturnedAutoBoxedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        if (c > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character reassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        reassignedCharacter = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character multiReassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        multiReassignedCharacter = 123;\n" //
+				+ "        multiReassignedCharacter = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        Character anotherCharacter = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnCharacterField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        charField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(int anInteger, int anotherInteger,\n" //
+				+ "            int yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        anInteger &= assignedCharacter;\n" //
+				+ "        anotherInteger += assignedCharacter;\n" //
+				+ "        yetAnotherInteger ^= assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public char charField;\n" //
+				+ "    public Character wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char preDecrementVar = --c;\n" //
+				+ "        return preDecrementVar - 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char preDecrementVar = ++c;\n" //
+				+ "        return preDecrementVar + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char postDecrementVar = c--;\n" //
+				+ "        return -postDecrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replacePostIncrementWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char postIncrementVar = c++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperFromValueOf(char c1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char varFromValueOf = Character.valueOf(c1);\n" //
+				+ "        return +varFromValueOf;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceCastWrapper(Character c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char castVar = (char) c;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceObjectCastWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char castVar = (Character) Character.MAX_HIGH_SURROGATE;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MAX_LOW_SURROGATE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MAX_SURROGATE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MIN_HIGH_SURROGATE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MIN_LOW_SURROGATE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char charInSwitch = Character.MIN_SURROGATE;\n" //
+				+ "        switch (charInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char charInArrayAccess = Character.MIN_VALUE;\n" //
+				+ "        return strings[charInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        return returnedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceMultiReturnedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        if (c > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Character replaceReturnedAutoBoxedWrapper(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char returnedCharacter = Character.MIN_VALUE;\n" //
+				+ "        if (c > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedCharacter;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char reassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        reassignedCharacter = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char multiReassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        multiReassignedCharacter = 123;\n" //
+				+ "        multiReassignedCharacter = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        Character anotherCharacter = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnCharacterField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        charField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(int anInteger, int anotherInteger,\n" //
+				+ "            int yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        anInteger &= assignedCharacter;\n" //
+				+ "        anotherInteger += assignedCharacter;\n" //
+				+ "        yetAnotherInteger ^= assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveCharRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Character doNotRefactorFields = Character.MIN_VALUE;\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Character returnedObject = Character.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Character reassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        reassignedCharacter = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Character, Observable> obsByCharacter) {\n" //
+				+ "        Character reassignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        obsByCharacter.get(reassignedCharacter).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        objectField = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        Character anotherCharacter = assignedCharacter;\n" //
+				+ "        Character yetAnotherCharacter = assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Character doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Character assignedCharacter = Character.MIN_VALUE;\n" //
+				+ "        Character anotherCharacter = assignedCharacter;\n" //
+				+ "        return assignedCharacter;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Character returnedObject = Character.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Character doNotReplaceAssignedAndReturnedWrapper(Character c) {\n" //
+				+ "        Character returnedObject = Character.MIN_VALUE;\n" //
+				+ "        returnedObject = c;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveByteRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public byte byteField;\n" //
+				+ "    public Byte wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Byte alwaysInitializedVar = Byte.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte preDecrementVar = --b;\n" //
+				+ "        return preDecrementVar - 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte preDecrementVar = ++b;\n" //
+				+ "        return preDecrementVar + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte postDecrementVar = b--;\n" //
+				+ "        return +postDecrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostIncrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte postIncrementVar = b++;\n" //
+				+ "        return -postIncrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperFromValueOf(byte b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte varFromValueOf = Byte.valueOf(b1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceParentherizedWrapper(byte b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte parentherizedVar = (Byte.MIN_VALUE);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceCastWrapper(Byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte castVar = (byte) b;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceObjectCastWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte castVar = (Byte) Byte.MIN_VALUE;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte byteInSwitch = Byte.MIN_VALUE;\n" //
+				+ "        switch (byteInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte byteInArrayAccess = Byte.MIN_VALUE;\n" //
+				+ "        return strings[byteInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        return returnedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceMultiReturnedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        if (b > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Byte replaceReturnedAutoBoxedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        if (b > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte reassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        reassignedByte = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte multiReassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        multiReassignedByte = 1;\n" //
+				+ "        multiReassignedByte = 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        Byte anotherByte = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnByteField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        byteField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public byte byteField;\n" //
+				+ "    public Byte wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreDecrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte preDecrementVar = --b;\n" //
+				+ "        return preDecrementVar - 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePreIncrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte preDecrementVar = ++b;\n" //
+				+ "        return preDecrementVar + 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostDecrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte postDecrementVar = b--;\n" //
+				+ "        return +postDecrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replacePostIncrementWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte postIncrementVar = b++;\n" //
+				+ "        return -postIncrementVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperFromValueOf(byte b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte varFromValueOf = Byte.valueOf(b1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceParentherizedWrapper(byte b1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte parentherizedVar = (Byte.MIN_VALUE);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceCastWrapper(Byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte castVar = (byte) b;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceObjectCastWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte castVar = (Byte) Byte.MIN_VALUE;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte byteInSwitch = Byte.MIN_VALUE;\n" //
+				+ "        switch (byteInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte byteInArrayAccess = Byte.MIN_VALUE;\n" //
+				+ "        return strings[byteInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        return returnedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceMultiReturnedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        if (b > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Byte replaceReturnedAutoBoxedWrapper(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte returnedByte = Byte.MIN_VALUE;\n" //
+				+ "        if (b > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedByte;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte reassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        reassignedByte = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte multiReassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        multiReassignedByte = 1;\n" //
+				+ "        multiReassignedByte = 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        Byte anotherByte = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnByteField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        byteField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveByteRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Byte doNotRefactorFields = Byte.MIN_VALUE;\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Byte returnedObject = Byte.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Byte reassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        reassignedByte = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Byte, Observable> obsByByte) {\n" //
+				+ "        Byte reassignedByte = Byte.MIN_VALUE;\n" //
+				+ "        obsByByte.get(reassignedByte).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        objectField = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        Byte anotherByte = assignedByte;\n" //
+				+ "        Byte yetAnotherByte = assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Byte doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Byte assignedByte = Byte.MIN_VALUE;\n" //
+				+ "        Byte anotherByte = assignedByte;\n" //
+				+ "        return assignedByte;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Byte returnedObject = Byte.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Byte doNotReplaceAssignedAndReturnedWrapper(Byte b) {\n" //
+				+ "        Byte returnedObject = Byte.MIN_VALUE;\n" //
+				+ "        returnedObject = b;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveShortRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public short shortField;\n" //
+				+ "    public Short wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePreDecrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short preDecrementVar = --s;\n" //
+				+ "        if (preDecrementVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePreIncrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short preDecrementVar = ++s;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePostDecrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short postDecrementVar = s--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePostIncrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short postIncrementVar = s++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperFromValueOf(short s1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short varFromValueOf = Short.valueOf(s1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceParentherizedWrapper(short s1, short s2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short parentherizedVar = ((short)(s1 + s2));\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceCastWrapper(Short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short castVar = (short) s;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInPreIncrement = Short.MIN_VALUE;\n" //
+				+ "        return ++shortInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInPreDecrement = Short.MIN_VALUE;\n" //
+				+ "        return --shortInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInPostDecrement = Short.MIN_VALUE;\n" //
+				+ "        return shortInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInPostIncrement = Short.MIN_VALUE;\n" //
+				+ "        return shortInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInSwitch = Short.MIN_VALUE;\n" //
+				+ "        switch (shortInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short shortInArrayAccess = Short.MAX_VALUE;\n" //
+				+ "        return strings[shortInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        return returnedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceMultiReturnedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        if (s > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Short replaceReturnedAutoBoxedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        if (s > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short reassignedShort = Short.MIN_VALUE;\n" //
+				+ "        reassignedShort = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short multiReassignedShort = Short.MIN_VALUE;\n" //
+				+ "        multiReassignedShort = 123;\n" //
+				+ "        multiReassignedShort = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        Short anotherShort = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnShortField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        shortField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Integer anInteger, Integer anotherInteger,\n" //
+				+ "            Integer yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        anInteger |= assignedShort;\n" //
+				+ "        anotherInteger += assignedShort;\n" //
+				+ "        yetAnotherInteger ^= assignedShort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public short shortField;\n" //
+				+ "    public Short wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePreDecrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short preDecrementVar = --s;\n" //
+				+ "        if (preDecrementVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePreIncrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short preDecrementVar = ++s;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePostDecrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short postDecrementVar = s--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replacePostIncrementWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short postIncrementVar = s++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperFromValueOf(short s1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short varFromValueOf = Short.valueOf(s1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceParentherizedWrapper(short s1, short s2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short parentherizedVar = ((short)(s1 + s2));\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceCastWrapper(Short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short castVar = (short) s;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInPreIncrement = Short.MIN_VALUE;\n" //
+				+ "        return ++shortInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInPreDecrement = Short.MIN_VALUE;\n" //
+				+ "        return --shortInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInPostDecrement = Short.MIN_VALUE;\n" //
+				+ "        return shortInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInPostIncrement = Short.MIN_VALUE;\n" //
+				+ "        return shortInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInSwitch = Short.MIN_VALUE;\n" //
+				+ "        switch (shortInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short shortInArrayAccess = Short.MAX_VALUE;\n" //
+				+ "        return strings[shortInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        return returnedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceMultiReturnedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        if (s > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Short replaceReturnedAutoBoxedWrapper(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short returnedShort = Short.MIN_VALUE;\n" //
+				+ "        if (s > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedShort;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short reassignedShort = Short.MIN_VALUE;\n" //
+				+ "        reassignedShort = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short multiReassignedShort = Short.MIN_VALUE;\n" //
+				+ "        multiReassignedShort = 123;\n" //
+				+ "        multiReassignedShort = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        Short anotherShort = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnShortField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        shortField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Integer anInteger, Integer anotherInteger,\n" //
+				+ "            Integer yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        anInteger |= assignedShort;\n" //
+				+ "        anotherInteger += assignedShort;\n" //
+				+ "        yetAnotherInteger ^= assignedShort;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveShortRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Short doNotRefactorFields = Short.MIN_VALUE;\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Short returnedObject = Short.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Short reassignedShort = Short.MIN_VALUE;\n" //
+				+ "        reassignedShort = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Short, Observable> obsByShort) {\n" //
+				+ "        Short reassignedShort = Short.MIN_VALUE;\n" //
+				+ "        obsByShort.get(reassignedShort).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        objectField = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        Short anotherShort = assignedShort;\n" //
+				+ "        Short yetAnotherShort = assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Short doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Short assignedShort = Short.MIN_VALUE;\n" //
+				+ "        Short anotherShort = assignedShort;\n" //
+				+ "        return assignedShort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Short returnedObject = Short.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Short doNotReplaceAssignedAndReturnedWrapper(Short s) {\n" //
+				+ "        Short returnedObject = Short.MIN_VALUE;\n" //
+				+ "        returnedObject = s;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveIntRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public int intField;\n" //
+				+ "    public Integer wrapperField;\n" //
 				+ "\n" //
 				+ "    public void replaceWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
@@ -5641,7 +7495,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        java.lang.Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        java.lang.Integer alwaysInitializedVar = Integer.MAX_VALUE;\n" //
 				+ "        if (alwaysInitializedVar < i) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5748,7 +7602,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperInPreIncrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        Integer alwaysInitializedVar = Integer.SIZE;\n" //
 				+ "        return ++alwaysInitializedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -5763,20 +7617,113 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
 				+ "        return alwaysInitializedVar--;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer intInSwitch = Integer.MIN_VALUE;\n" //
+				+ "        switch (intInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer intInArrayAccess = Integer.MIN_VALUE;\n" //
+				+ "        return strings[intInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        return returnedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceMultiReturnedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Integer replaceReturnedAutoBoxedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer reassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        reassignedInteger = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer multiReassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        multiReassignedInteger = 123;\n" //
+				+ "        multiReassignedInteger = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        Integer anotherInteger = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnIntegerField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        intField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Integer aInteger, Integer anotherInteger,\n" //
+				+ "            Integer yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        aInteger &= assignedInteger;\n" //
+				+ "        anotherInteger += assignedInteger;\n" //
+				+ "        yetAnotherInteger ^= assignedInteger;\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public int intField;\n" //
-				+ "\n" //
 				+ "    public Integer wrapperField;\n" //
-				+ "\n" //
-				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public void replaceWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
@@ -5788,7 +7735,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        int alwaysInitializedVar = Integer.MAX_VALUE;\n" //
 				+ "        if (alwaysInitializedVar < i) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5895,7 +7842,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperInPreIncrement() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        int alwaysInitializedVar = Integer.SIZE;\n" //
 				+ "        return ++alwaysInitializedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -5910,6 +7857,105 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
 				+ "        return alwaysInitializedVar--;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperInSwitch() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int intInSwitch = Integer.MIN_VALUE;\n" //
+				+ "        switch (intInSwitch) {\n" //
+				+ "        case 1:\n" //
+				+ "            System.out.println(\"One\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        case 2:\n" //
+				+ "            System.out.println(\"Two\");\n" //
+				+ "            break;\n" //
+				+ "\n" //
+				+ "        default:\n" //
+				+ "            break;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperInArrayAccess(String[] strings) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int intInArrayAccess = Integer.MIN_VALUE;\n" //
+				+ "        return strings[intInArrayAccess];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        return returnedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceMultiReturnedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Integer replaceReturnedAutoBoxedWrapper(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int returnedInteger = Integer.MIN_VALUE;\n" //
+				+ "        if (i > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedInteger;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int reassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        reassignedInteger = 123;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int multiReassignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        multiReassignedInteger = 123;\n" //
+				+ "        multiReassignedInteger = 456;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        Integer anotherInteger = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnIntegerField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        intField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedInteger;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Integer aInteger, Integer anotherInteger,\n" //
+				+ "            Integer yetAnotherInteger) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int assignedInteger = Integer.MIN_VALUE;\n" //
+				+ "        aInteger &= assignedInteger;\n" //
+				+ "        anotherInteger += assignedInteger;\n" //
+				+ "        yetAnotherInteger ^= assignedInteger;\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		// When
@@ -5918,7 +7964,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveIntRatherThanWrapperCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
 	}
 
 	@Test
@@ -5932,7 +7978,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public Integer doNotRefactorFields = Integer.MIN_VALUE;\n" //
-				+ "\n" //
 				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public Object doNotBreakAutoboxing() {\n" //
@@ -5992,17 +8037,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		String given= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
 				+ "public class E {\n" //
-				+ "    public Long doNotRefactorFields = Long.MIN_VALUE;\n" //
-				+ "\n" //
 				+ "    public long longField;\n" //
-				+ "\n" //
 				+ "    public Long wrapperField;\n" //
-				+ "\n" //
-				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public void replaceWrapper(long l) {\n" //
 				+ "        // Keep this comment\n" //
@@ -6217,17 +8254,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
 				+ "public class E {\n" //
-				+ "    public Long doNotRefactorFields = Long.MIN_VALUE;\n" //
-				+ "\n" //
 				+ "    public long longField;\n" //
-				+ "\n" //
 				+ "    public Long wrapperField;\n" //
-				+ "\n" //
-				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public void replaceWrapper(long l) {\n" //
 				+ "        // Keep this comment\n" //
@@ -6445,7 +8474,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveLongRatherThanWrapperCleanUp_description)));
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
 	}
 
 	@Test
@@ -6458,6 +8487,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.Observable;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
+				+ "    public Long doNotRefactorFields = Long.MIN_VALUE;\n" //
 				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public Object doNotBreakAutoboxing() {\n" //
@@ -6500,6 +8530,980 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public Long doNotReplaceAssignedAndReturnedWrapper(Long l) {\n" //
 				+ "        Long returnedObject = Long.MIN_VALUE;\n" //
 				+ "        returnedObject = l;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveFloatRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public float floatField;\n" //
+				+ "    public Float wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ Float /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Float.MIN_VALUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float plusVar = f1 + f2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceLessWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float lessVar = f1 - f2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceTimesWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float timesVar = f1 * f2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceDivideWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float divideVar = f1 / f2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceMinusWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float minusVar = -f;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePreDecrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float preDecrementVar = --f;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePreIncrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float preDecrementVar = ++f;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePostDecrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float postDecrementVar = f--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePostIncrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float postIncrementVar = f++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperFromValueOf(float f1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float varFromValueOf = Float.valueOf(f1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceParentherizedWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float parentherizedVar = (f1 + f2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceComplexExprWrapper(float f1, float f2, float f3, float f4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float complexVar = f1 + f2 / (f3 - f4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceCastWrapper(Float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float castVar = (float) f;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float floatInPreIncrement = Float.MIN_VALUE;\n" //
+				+ "        return ++floatInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float floatInPreDecrement = Float.MAX_VALUE;\n" //
+				+ "        return --floatInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float floatInPostDecrement = Float.MIN_NORMAL;\n" //
+				+ "        return floatInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float floatInPostIncrement = Float.NaN;\n" //
+				+ "        return floatInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float returnedFloat = Float.NEGATIVE_INFINITY;\n" //
+				+ "        return returnedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceMultiReturnedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float returnedFloat = Float.POSITIVE_INFINITY;\n" //
+				+ "        if (f > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Float replaceReturnedAutoBoxedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float returnedFloat = Float.MIN_VALUE;\n" //
+				+ "        if (f > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float reassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        reassignedFloat = 123f;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float multiReassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        multiReassignedFloat = 123f;\n" //
+				+ "        multiReassignedFloat = 456f;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float assignedLocal = Float.MIN_VALUE;\n" //
+				+ "        Float anotherFloat = assignedLocal;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnFloatField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        floatField = assignedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float assignedWrapper = Float.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedWrapper;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Float aFloat, Float anotherFloat,\n" //
+				+ "            Float yetAnotherFloat, Float evenAnotherFloat) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        aFloat += assignedFloat;\n" //
+				+ "        anotherFloat -= assignedFloat;\n" //
+				+ "        yetAnotherFloat *= assignedFloat;\n" //
+				+ "        evenAnotherFloat /= assignedFloat;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public float floatField;\n" //
+				+ "    public Float wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ float /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Float.MIN_VALUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float plusVar = f1 + f2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceLessWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float lessVar = f1 - f2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceTimesWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float timesVar = f1 * f2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceDivideWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float divideVar = f1 / f2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceMinusWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float minusVar = -f;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePreDecrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float preDecrementVar = --f;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePreIncrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float preDecrementVar = ++f;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePostDecrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float postDecrementVar = f--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replacePostIncrementWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float postIncrementVar = f++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperFromValueOf(float f1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float varFromValueOf = Float.valueOf(f1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceParentherizedWrapper(float f1, float f2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float parentherizedVar = (f1 + f2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceComplexExprWrapper(float f1, float f2, float f3, float f4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float complexVar = f1 + f2 / (f3 - f4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceCastWrapper(Float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float castVar = (float) f;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float floatInPreIncrement = Float.MIN_VALUE;\n" //
+				+ "        return ++floatInPreIncrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float floatInPreDecrement = Float.MAX_VALUE;\n" //
+				+ "        return --floatInPreDecrement;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float floatInPostDecrement = Float.MIN_NORMAL;\n" //
+				+ "        return floatInPostDecrement--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float floatInPostIncrement = Float.NaN;\n" //
+				+ "        return floatInPostIncrement++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float returnedFloat = Float.NEGATIVE_INFINITY;\n" //
+				+ "        return returnedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceMultiReturnedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float returnedFloat = Float.POSITIVE_INFINITY;\n" //
+				+ "        if (f > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Float replaceReturnedAutoBoxedWrapper(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float returnedFloat = Float.MIN_VALUE;\n" //
+				+ "        if (f > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedFloat;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float reassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        reassignedFloat = 123f;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float multiReassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        multiReassignedFloat = 123f;\n" //
+				+ "        multiReassignedFloat = 456f;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float assignedLocal = Float.MIN_VALUE;\n" //
+				+ "        Float anotherFloat = assignedLocal;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnFloatField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        floatField = assignedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float assignedWrapper = Float.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedWrapper;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Float aFloat, Float anotherFloat,\n" //
+				+ "            Float yetAnotherFloat, Float evenAnotherFloat) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        aFloat += assignedFloat;\n" //
+				+ "        anotherFloat -= assignedFloat;\n" //
+				+ "        yetAnotherFloat *= assignedFloat;\n" //
+				+ "        evenAnotherFloat /= assignedFloat;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveFloatRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Float doNotRefactorFields = Float.MIN_VALUE;\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Float returnedObject = Float.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Float reassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        reassignedFloat = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Float, Observable> obsByFloat) {\n" //
+				+ "        Float reassignedFloat = Float.MIN_VALUE;\n" //
+				+ "        obsByFloat.get(reassignedFloat).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Float assignedObject = Float.MIN_VALUE;\n" //
+				+ "        objectField = assignedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        Float anotherFloat = assignedFloat;\n" //
+				+ "        Float yetAnotherFloat = assignedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Float doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Float assignedFloat = Float.MIN_VALUE;\n" //
+				+ "        Float anotherFloat = assignedFloat;\n" //
+				+ "        return assignedFloat;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Float returnedObject = Float.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Float doNotReplaceAssignedAndReturnedWrapper(Float f) {\n" //
+				+ "        Float returnedObject = Float.MIN_VALUE;\n" //
+				+ "        returnedObject = f;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveDoubleRatherThanWrapper() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public double doubleField;\n" //
+				+ "    public Double wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ Double /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Double.MIN_VALUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        java.lang.Double alwaysInitializedVar = Double.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double plusVar = d1 + d2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceLessWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double lessVar = d1 - d2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceTimesWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double timesVar = d1 * d2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceDivideWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double divideVar = d1 / d2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceMinusWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double minusVar = -d;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replacePreDecrementWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double preDecrementVar = --d;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replacePreIncrementWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double preDecrementVar = ++d;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replacePostDecrementWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double postDecrementVar = d--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replacePostIncrementWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double postIncrementVar = d++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperFromValueOf(double d1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double varFromValueOf = Double.valueOf(d1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceParentherizedWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double parentherizedVar = (d1 + d2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceComplexExprWrapper(double d1, double d2, double d3, double d4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double complexVar = d1 + d2 / (d3 - d4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceCastWrapper(Double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double castVar = (double) d;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double alwaysInitializedVar = Double.MIN_NORMAL;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double alwaysInitializedVar = Double.NaN;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double alwaysInitializedVar = Double.NEGATIVE_INFINITY;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double alwaysInitializedVar = Double.POSITIVE_INFINITY;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double returnedDouble = Double.MIN_VALUE;\n" //
+				+ "        return returnedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceMultiReturnedWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double returnedDouble = Double.MIN_VALUE;\n" //
+				+ "        if (d > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedDouble;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedDouble;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Double replaceReturnedAutoBoxedWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double returnedDouble = Double.MIN_VALUE;\n" //
+				+ "        if (d > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedDouble;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedDouble;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double reassignedDouble = Double.MIN_VALUE;\n" //
+				+ "        reassignedDouble = 123.0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double multiReassignedDouble = Double.MIN_VALUE;\n" //
+				+ "        multiReassignedDouble = 123.0;\n" //
+				+ "        multiReassignedDouble = 456.0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        Double anotherDouble = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnDoubleVariable() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        doubleField = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperVariable() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnDoubleField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        this.doubleField = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        this.wrapperField = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Double aDouble, Double anotherDouble,\n" //
+				+ "            Double yetAnotherDouble) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        aDouble -= assignedDouble;\n" //
+				+ "        anotherDouble += assignedDouble;\n" //
+				+ "        yetAnotherDouble *= assignedDouble;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public double doubleField;\n" //
+				+ "    public Double wrapperField;\n" //
+				+ "\n" //
+				+ "    public void replaceWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        /* c1 */ double /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Double.MIN_VALUE /* c5 */;\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceFullyQualifiedWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.MAX_VALUE;\n" //
+				+ "        if (alwaysInitializedVar < d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replacePlusWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double plusVar = d1 + d2;\n" //
+				+ "        return plusVar > 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceLessWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double lessVar = d1 - d2;\n" //
+				+ "        return -lessVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceTimesWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double timesVar = d1 * d2;\n" //
+				+ "        return timesVar + 100;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceDivideWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double divideVar = d1 / d2;\n" //
+				+ "        if (divideVar <= 0) {\n" //
+				+ "            return -1;\n" //
+				+ "        }\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceMinusWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double minusVar = -d;\n" //
+				+ "        return minusVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replacePreDecrementWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double preDecrementVar = --d;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replacePreIncrementWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double preDecrementVar = ++d;\n" //
+				+ "        return preDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replacePostDecrementWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double postDecrementVar = d--;\n" //
+				+ "        return postDecrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replacePostIncrementWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double postIncrementVar = d++;\n" //
+				+ "        return postIncrementVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperFromValueOf(double d1) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double varFromValueOf = Double.valueOf(d1);\n" //
+				+ "        return varFromValueOf++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceParentherizedWrapper(double d1, double d2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double parentherizedVar = (d1 + d2);\n" //
+				+ "        return parentherizedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceComplexExprWrapper(double d1, double d2, double d3, double d4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double complexVar = d1 + d2 / (d3 - d4);\n" //
+				+ "        return complexVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceCastWrapper(Double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double castVar = (double) d;\n" //
+				+ "        return castVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperInPreIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.MIN_NORMAL;\n" //
+				+ "        return ++alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperInPreDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.NaN;\n" //
+				+ "        return --alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperInPostDecrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.NEGATIVE_INFINITY;\n" //
+				+ "        return alwaysInitializedVar--;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperInPostIncrement() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.POSITIVE_INFINITY;\n" //
+				+ "        return alwaysInitializedVar++;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceReturnedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double returnedDouble = Double.MIN_VALUE;\n" //
+				+ "        return returnedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceMultiReturnedWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double returnedDouble = Double.MIN_VALUE;\n" //
+				+ "        if (d > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedDouble;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedDouble;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Double replaceReturnedAutoBoxedWrapper(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double returnedDouble = Double.MIN_VALUE;\n" //
+				+ "        if (d > 0) {\n" //
+				+ "            System.out.println(\"Positive\");\n" //
+				+ "            return returnedDouble;\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Negative\");\n" //
+				+ "            return returnedDouble;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double reassignedDouble = Double.MIN_VALUE;\n" //
+				+ "        reassignedDouble = 123.0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceMultiReassignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double multiReassignedDouble = Double.MIN_VALUE;\n" //
+				+ "        multiReassignedDouble = 123.0;\n" //
+				+ "        multiReassignedDouble = 456.0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceAssignedWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        Double anotherDouble = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnDoubleVariable() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        doubleField = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperVariable() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        wrapperField = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnDoubleField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        this.doubleField = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        this.wrapperField = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceBitAssignedWrapper(Double aDouble, Double anotherDouble,\n" //
+				+ "            Double yetAnotherDouble) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        aDouble -= assignedDouble;\n" //
+				+ "        anotherDouble += assignedDouble;\n" //
+				+ "        yetAnotherDouble *= assignedDouble;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
+	}
+
+	@Test
+	public void testDoNotUsePrimitiveDoubleRatherThanWrapper() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Double doNotRefactorFields = Double.MIN_VALUE;\n" //
+				+ "    public Object objectField;\n" //
+				+ "\n" //
+				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Double returnedObject = Double.MIN_VALUE;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceNullWrapper() {\n" //
+				+ "        Double reassignedDouble = Double.MIN_VALUE;\n" //
+				+ "        reassignedDouble = null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Double, Observable> obsByDouble) {\n" //
+				+ "        Double reassignedDouble = Double.MIN_VALUE;\n" //
+				+ "        obsByDouble.get(reassignedDouble).notifyObservers();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
+				+ "        Double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        objectField = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
+				+ "        Double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        Double anotherDouble = assignedDouble;\n" //
+				+ "        Double yetAnotherDouble = assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Double doNotReplaceMultiAutoBoxedWrapper() {\n" //
+				+ "        Double assignedDouble = Double.MIN_VALUE;\n" //
+				+ "        Double anotherDouble = assignedDouble;\n" //
+				+ "        return assignedDouble;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
+				+ "        Double returnedObject = Double.MIN_VALUE;\n" //
+				+ "        Object anotherObject = returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Double doNotReplaceAssignedAndReturnedWrapper(Double d) {\n" //
+				+ "        Double returnedObject = Double.MIN_VALUE;\n" //
+				+ "        returnedObject = d;\n" //
 				+ "        return returnedObject;\n" //
 				+ "    }\n" //
 				+ "}\n";
@@ -23375,7 +26379,11 @@ public class CleanUpTest extends CleanUpTestCase {
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
-				new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
+				new HashSet<>(Arrays.asList(Messages.format(ConstantsCleanUp_description,UpdateProperty.FILE_SEPARATOR.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.PATH_SEPARATOR.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.LINE_SEPARATOR.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.FILE_ENCODING.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.BOOLEAN_PROPERTY.toString()))));
 	}
 
 	@Test
@@ -23432,7 +26440,11 @@ public class CleanUpTest extends CleanUpTestCase {
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
-				new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
+				new HashSet<>(Arrays.asList(Messages.format(ConstantsCleanUp_description,UpdateProperty.FILE_SEPARATOR.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.PATH_SEPARATOR.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.LINE_SEPARATOR.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.FILE_ENCODING.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.BOOLEAN_PROPERTY.toString()))));
 	}
 
 	@Test

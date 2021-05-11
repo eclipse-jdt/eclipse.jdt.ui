@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_description;
 import static org.junit.Assert.assertNotEquals;
 
 import java.util.Arrays;
@@ -30,11 +31,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.UpdateProperty;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java1d6ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-
-import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 /**
  * Tests the cleanup features related to Java 6 (i.e. Mustang).
@@ -260,11 +261,14 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
-
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
-				new HashSet<>(Arrays.asList(MultiFixMessages.ConstantsCleanUp_description)));
+				new HashSet<>(Arrays.asList(Messages.format(ConstantsCleanUp_description,UpdateProperty.FILE_SEPARATOR.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.PATH_SEPARATOR.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.LINE_SEPARATOR.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.FILE_ENCODING.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.BOOLEAN_PROPERTY.toString()))));
 	}
 
 }

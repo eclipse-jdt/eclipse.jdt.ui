@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -156,13 +156,15 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			try {
 				// don't want to add semicolon if we are completing a method parameter
 				ICompilationUnit cu= fInvocationContext.getCompilationUnit();
-				IJavaElement element= cu.getElementAt(getReplacementOffset());
-				if (element instanceof IMember) {
-					// check if parentheses' are matched
-					return areParenthesesMatched(cu, (IMember)element);
-				} else if (element instanceof ILocalVariable) {
-					ILocalVariable localVar= (ILocalVariable)element;
-					return !localVar.isParameter();
+				if (cu != null) {
+					IJavaElement element= cu.getElementAt(getReplacementOffset());
+					if (element instanceof IMember) {
+						// check if parentheses' are matched
+						return areParenthesesMatched(cu, (IMember)element);
+					} else if (element instanceof ILocalVariable) {
+						ILocalVariable localVar= (ILocalVariable)element;
+						return !localVar.isParameter();
+					}
 				}
 			} catch (JavaModelException e) {
 				return false;

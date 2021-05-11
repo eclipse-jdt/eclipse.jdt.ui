@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -24,9 +25,6 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
  * This test tests only <= 1.5 source level tags.
  */
 public class JavadocCompletionTest extends AbstractCompletionTest {
-	private static final boolean BUG_NO_HTML_TAG_PROPOSALS_IN_CORE_JDOC_ASSIST= true;
-	private static final boolean BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION= true;
-	private static final boolean BUG_113544= true;
 	private static final String METHOD=
 			"	public int method(int param) {\n" +
 			"		return 0;\n" +
@@ -118,12 +116,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 		assertTypeJavadocProposal(" * @see java.util.List#siz|", "size(", " * @see java.util.List#size()|");
 	}
 
+	@Ignore("JavadocCompletionTest.testSeeMethodWithoutImport() - no best-effort imports with Core completion")
 	@Test
 	public void testSeeMethodWithoutImport() throws Exception {
-		if (BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION) {
-			System.out.println("JavadocCompletionTest.testSeeMethodWithoutImport() - no best-effort imports with Core completion");
-			return;
-		}
 		assertTypeJavadocProposal(" * @see List#siz|", "size(", " * @see List#size()|");
 	}
 
@@ -160,12 +155,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	public void testDirectLinkType() throws Exception {
 		assertTypeJavadocProposal(" * Prefix List|", "{@link List}", " * Prefix {@link java.util.List}|");
 	}
+	@Ignore("BUG_113544 not testing autoclosing behavior, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544")
 	@Test
 	public void testDirectLinkTypeNoAutoClose() throws Exception {
-		if (BUG_113544) {
-			System.out.println("not testing autoclosing behavior, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544");
-			return;
-		}
 		getJDTUIPrefs().setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, false);
 		assertTypeJavadocProposal(" * Prefix List|", "{@link List}", " * Prefix {@link java.util.List|");
 	}
@@ -218,12 +210,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 		assertTypeJavadocProposal(" * Prefix java.text.DF|", "{@link DateFormat}", " * Prefix {@link java.text.DateFormat}|");
 	}
 
+	@Ignore("BUG_113544 not testing autoclosing behavior, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544")
 	@Test
 	public void testDirectLinkTypeNoAutoCloseImportsOn() throws Exception {
-		if (BUG_113544) {
-			System.out.println("not testing autoclosing behavior, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544");
-			return;
-		}
 		expectImport("java.util.List");
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, false);
@@ -248,12 +237,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 		assertTypeJavadocProposal(" * Prefix {@link Comple|}", "Completion_testLinkTypeSameTypeClosed", " * Prefix {@link Completion_testLinkTypeSameTypeClosed|}");
 	}
 
+	@Ignore("JavadocCompletionTest.testLinkMethodWithoutImport() - no best-effort imports with Core completion")
 	@Test
 	public void testLinkMethodWithoutImport() throws Exception {
-		if (BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION) {
-			System.out.println("JavadocCompletionTest.testLinkMethodWithoutImport() - no best-effort imports with Core completion");
-			return;
-		}
 		assertTypeJavadocProposal(" * Prefix {@link List#siz|", "size(", " * Prefix {@link List#size()|");
 	}
 
@@ -444,12 +430,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 		setUp();
 	}
 
+	@Ignore("no HTML tag proposals in core jdoc assist")
 	@Test
 	public void testHTMLTags() throws Exception {
-		if (BUG_NO_HTML_TAG_PROPOSALS_IN_CORE_JDOC_ASSIST) {
- 			System.out.println("no HTML tag proposals in core jdoc assist");
- 			return;
- 		}
 		tearDown();
 		for (String t : HTML_TAGS) {
 			setUp();

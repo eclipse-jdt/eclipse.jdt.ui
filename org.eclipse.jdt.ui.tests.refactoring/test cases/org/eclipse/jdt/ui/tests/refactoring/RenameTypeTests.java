@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -67,7 +68,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class RenameTypeTests extends GenericRefactoringTest {
 
-	private static final boolean BUG_54948= false;
 	private static final String REFACTORING_PATH= "RenameType/";
 
 	public RenameTypeTests() {
@@ -504,22 +504,22 @@ public class RenameTypeTests extends GenericRefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail28() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail29() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail30() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
 	@Test
@@ -551,22 +551,22 @@ public class RenameTypeTests extends GenericRefactoringTest {
 		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail34() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail35() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail36() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
 	@Test
@@ -593,46 +593,46 @@ public class RenameTypeTests extends GenericRefactoringTest {
 		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail41() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail42() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail43() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail44() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail45() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail46() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("obscuring")
 	@Test
 	public void testFail47() throws Exception {
-		printTestDisabledMessage("obscuring");
-//		helper1();
+		helper1();
 	}
 
 	@Test
@@ -825,16 +825,16 @@ public class RenameTypeTests extends GenericRefactoringTest {
 		helper1();
 	}
 
+	@Ignore("native method with A as parameter (same CU)")
 	@Test
 	public void testFail86() throws Exception {
-		printTestDisabledMessage("native method with A as parameter (same CU)");
-//		helper1();
+		helper1();
 	}
 
+	@Ignore("native method with A as parameter (same CU)")
 	@Test
 	public void testFail87() throws Exception {
-		printTestDisabledMessage("native method with A as parameter (same CU)");
-//		helper1();
+		helper1();
 	}
 
 	@Test
@@ -1208,11 +1208,10 @@ public class RenameTypeTests extends GenericRefactoringTest {
 		helper2("A", "B");
 	}
 
+	@Ignore("https://bugs.eclipse.org/bugs/show_bug.cgi?id=54948")
 	@Test
 	public void test50() throws Exception {
-		printTestDisabledMessage("https://bugs.eclipse.org/bugs/show_bug.cgi?id=54948");
-		if (BUG_54948)
-			helper2("A", "B");
+		helper2("A", "B");
 	}
 
 	@Test

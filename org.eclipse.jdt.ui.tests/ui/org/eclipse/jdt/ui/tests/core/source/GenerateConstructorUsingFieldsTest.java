@@ -18,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Modifier;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -32,6 +33,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -159,10 +161,9 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Ignore("see bug 113052 (import issue)")
 	@Test
 	public void test02() throws Exception {
-
-		printTestDisabledMessage("see bug 113052 (import issue)");
 
 //		ICompilationUnit pB= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
 //		"\r\n" +
@@ -171,44 +172,44 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 //		"}\r\n" +
 //		"", true, null);
 
-//		IPackageFragment packageQ= fRoot.createPackageFragment("q", true, null);
-//		packageQ.createCompilationUnit("B.java", "package p;\r\n" +
-//		"\r\n" +
-//		"public class B {\r\n" +
-//		"\r\n" +
-//		"}\r\n" +
-//		"", true, null);
+		IPackageFragment packageQ= fRoot.createPackageFragment("q", true, null);
+		packageQ.createCompilationUnit("B.java", "package p;\r\n" +
+		"\r\n" +
+		"public class B {\r\n" +
+		"\r\n" +
+		"}\r\n" +
+		"", true, null);
 
-//		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-//		"\r\n" +
-//		"public class A {\r\n" +
-//		"	q.B field1;\r\n" +
-//		"	B field2;\r\n" +
-//		"}\r\n" +
-//		"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+		"\r\n" +
+		"public class A {\r\n" +
+		"	q.B field1;\r\n" +
+		"	B field2;\r\n" +
+		"}\r\n" +
+		"", true, null);
 
-//		IField f1= a.getType("A").getField("field1");
-//		IField f2= a.getType("A").getField("field2");
+		IField f1= a.getType("A").getField("field1");
+		IField f2= a.getType("A").getField("field2");
 
-//		runOperation(a.getType("A"), new IField[] { f1, f2 }, null);
+		runOperation(a.getType("A"), new IField[] { f1, f2 }, null);
 
-//		compareSource("package p;\r\n" +
-//		"\r\n" +
-//		"public class A {\r\n" +
-//		"	q.B field1;\r\n" +
-//		"	B field2;\r\n" +
-//		"	/**\r\n" +
-//		"	 * @param field1\r\n" +
-//		"	 * @param field2\r\n" +
-//		"	 */\r\n" +
-//		"	public A(q.B field1, B field2) {\r\n" +
-//		"		super();\r\n" +
-//		"		// TODO Auto-generated constructor stub\r\n" +
-//		"		this.field1 = field1;\r\n" +
-//		"		this.field2 = field2;\r\n" +
-//		"	}\r\n" +
-//		"}\r\n" +
-//		"", a.getSource());
+		compareSource("package p;\r\n" +
+		"\r\n" +
+		"public class A {\r\n" +
+		"	q.B field1;\r\n" +
+		"	B field2;\r\n" +
+		"	/**\r\n" +
+		"	 * @param field1\r\n" +
+		"	 * @param field2\r\n" +
+		"	 */\r\n" +
+		"	public A(q.B field1, B field2) {\r\n" +
+		"		super();\r\n" +
+		"		// TODO Auto-generated constructor stub\r\n" +
+		"		this.field1 = field1;\r\n" +
+		"		this.field2 = field2;\r\n" +
+		"	}\r\n" +
+		"}\r\n" +
+		"", a.getSource());
 	}
 
 	/**

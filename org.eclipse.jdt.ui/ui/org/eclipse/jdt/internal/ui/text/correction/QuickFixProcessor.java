@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -471,6 +471,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.StaticMethodRequested:
 			case IProblem.NonStaticFieldFromStaticInvocation:
+				LocalCorrectionsSubProcessor.addObjectReferenceProposal(context, problem, proposals);
+				LocalCorrectionsSubProcessor.addVariableReferenceProposal(context, problem, proposals);
+				LocalCorrectionsSubProcessor.addNewObjectProposal(context, problem, proposals);
+				//$FALL-THROUGH$
 			case IProblem.InstanceMethodDuringConstructorInvocation:
 			case IProblem.InstanceFieldDuringConstructorInvocation:
 				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_STATIC, IProposalRelevance.CHANGE_MODIFIER_TO_STATIC);
