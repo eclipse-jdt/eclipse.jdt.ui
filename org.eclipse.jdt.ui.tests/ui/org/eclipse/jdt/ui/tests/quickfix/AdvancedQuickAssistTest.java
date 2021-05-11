@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -6211,7 +6211,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 
-	}
+}
 
 	@Test
 	public void testPickOutStringProposals2() throws Exception {
@@ -6708,5 +6708,43 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+	}
+
+	@Test
+	public void testConvertParamsToFields() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String buf= "" +
+				"package test;\n\n" +
+				"package test16_3;\n" +
+				"public class App {\n" +
+				"	private String s;\n" +
+				"\n" +
+				"	public App(String s, String s3, String s2) {\n" +
+				"	}\n" +
+				"}";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("App.java", buf, false, null);
+
+		String str= "String s3";
+		AssistContext context= getCorrectionContext(cu, buf.indexOf(str) + str.length(), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertProposalExists(proposals, CorrectionMessages.AssignToVariableAssistProposal_assignallparamstofields_description);
+		String expected= "" +
+				"package test;\n\n" +
+				"package test16_3;\n" +
+				"public class App {\n" +
+				"	private String s;\n" +
+				"    private String s4;\n" +
+				"    private String s3;\n" +
+				"    private String s2;\n" +
+				"\n" +
+				"	public App(String s, String s3, String s2) {\n" +
+				"        s4 = s;\n" +
+				"        this.s3 = s3;\n" +
+				"        this.s2 = s2;\n" +
+				"	}\n" +
+				"}";
+
+		assertProposalPreviewEquals(expected, CorrectionMessages.AssignToVariableAssistProposal_assignallparamstofields_description, proposals);
 	}
 }
