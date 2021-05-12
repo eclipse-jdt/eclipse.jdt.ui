@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.MethodReferenceMatch;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -694,8 +695,33 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		SearchResultGroup[] result= RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(),
 				new CuCollectingSearchRequestor(binaryRefs), pm, status);
 		binaryRefs.addErrorIfNecessary(status);
-
+		result= filterAccessorMethods(result);
 		return result;
+	}
+
+	private SearchResultGroup[] filterAccessorMethods(SearchResultGroup[] grouped) {
+		if (this.fIsRecordComponent) {
+			List<SearchResultGroup> result= new ArrayList<>();
+			for (SearchResultGroup g : grouped) {
+				SearchMatch[] matches= g.getSearchResults();
+				List<SearchMatch> newList= new ArrayList<>();
+				for (SearchMatch match : matches) {
+					if (match instanceof MethodReferenceMatch) {
+						continue;
+					}
+					newList.add(match);
+				}
+				if (newList.size() != matches.length) {
+					result.add(new SearchResultGroup(g.getResource(), newList.toArray(new SearchMatch[newList.size()])));
+				} else {
+					result.add(g);
+				}
+			}
+			return result.toArray(new SearchResultGroup[result.size()]);
+		} else {
+			return grouped;
+		}
+
 	}
 
 	@Override
