@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -599,6 +599,22 @@ public class QuickFixTest {
 									.collect(Collectors.toList());
 		for (int i=0; i<expectedChoices.length; i++) {
 			assertEquals("Unexpected choice", expectedChoices[i], sortedChoices.get(i));
+		}
+	}
+	protected void assertLinkedChoicesContains(ICompletionProposal proposal, String linkedGroup, String[] expectedChoices) throws CoreException{
+		assertTrue("Not a LinkedCorrectionProposal", proposal instanceof LinkedCorrectionProposal);
+		LinkedCorrectionProposal linkedProposal = (LinkedCorrectionProposal)proposal;
+		linkedProposal.getChange(); // force computing the proposal details
+		LinkedProposalModel linkedProposalModel = linkedProposal.getLinkedProposalModel();
+		LinkedProposalPositionGroup positionGroup = linkedProposalModel.getPositionGroup(linkedGroup, false);
+		Proposal[] choices = positionGroup.getProposals();
+		assertTrue("Contains less number of choices", choices.length >= expectedChoices.length);
+		List<String> sortedChoices= Arrays.stream(choices)
+									.map(Proposal::getDisplayString)
+									.sorted()
+									.collect(Collectors.toList());
+		for (int i=0; i<expectedChoices.length; i++) {
+			assertTrue("choice not found" + expectedChoices[i], sortedChoices.contains(expectedChoices[i]));
 		}
 	}
 
