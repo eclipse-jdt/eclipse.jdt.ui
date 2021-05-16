@@ -5629,15 +5629,52 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapper(boolean b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        /* c1 */ Boolean /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Boolean.TRUE /* c5 */;\n" //
+				+ "        /* c1 */ Boolean /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ true /* c5 */;\n" //
 				+ "        if (alwaysInitializedVar && b) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "    public void replaceWrapperAndUseParsing(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = Boolean.valueOf(\"true\");\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public String replaceWrapperAndToStringMethod(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = true;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.toString();\n" //
+				+ "    }\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = true;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.compareTo(b);\n" //
+				+ "    }\n" //
+				+ "    public boolean replaceWrapperAndPrimitiveValueMethod() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Boolean alwaysInitializedVar = true;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.booleanValue();\n" //
+				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(boolean b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        java.lang.Boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        java.lang.Boolean alwaysInitializedVar = false;\n" //
 				+ "        if (alwaysInitializedVar && b) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5645,7 +5682,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapperInCast() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        Boolean alwaysInitializedVar = false;\n" //
 				+ "        if ((boolean) alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5653,7 +5690,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapperInParenthesis() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        Boolean alwaysInitializedVar = false;\n" //
 				+ "        if ((alwaysInitializedVar)) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5733,7 +5770,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapperInPrefixExpression() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        Boolean alwaysInitializedVar = true;\n" //
 				+ "        if (!alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5741,7 +5778,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapperInIf() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        Boolean alwaysInitializedVar = true;\n" //
 				+ "        if (alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5765,19 +5802,19 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public String replaceWrapperInConditionalExpression() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        Boolean alwaysInitializedVar = true;\n" //
 				+ "        return alwaysInitializedVar ? \"foo\" : \"bar\";\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public boolean replaceReturnedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean returnedBoolean = true;\n" //
 				+ "        return returnedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public boolean replaceMultiReturnedWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean returnedBoolean = true;\n" //
 				+ "        if (i > 0) {\n" //
 				+ "            System.out.println(\"Positive\");\n" //
 				+ "            return returnedBoolean;\n" //
@@ -5789,7 +5826,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Boolean replaceReturnedAutoBoxedWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean returnedBoolean = Boolean.FALSE;\n" //
+				+ "        Boolean returnedBoolean = false;\n" //
 				+ "        if (i > 0) {\n" //
 				+ "            System.out.println(\"Positive\");\n" //
 				+ "            return returnedBoolean;\n" //
@@ -5801,39 +5838,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceReassignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean reassignedBoolean = Boolean.TRUE;\n" //
-				+ "        reassignedBoolean = Boolean.FALSE;\n" //
+				+ "        Boolean reassignedBoolean = true;\n" //
+				+ "        reassignedBoolean = false;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceMultiReassignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean multiReassignedBoolean = Boolean.TRUE;\n" //
-				+ "        multiReassignedBoolean = Boolean.FALSE;\n" //
-				+ "        multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean multiReassignedBoolean = true;\n" //
+				+ "        multiReassignedBoolean = false;\n" //
+				+ "        multiReassignedBoolean = true;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAssignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean assignedBoolean = true;\n" //
 				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceWrapperAssignedOnBooleanField() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean assignedBoolean = true;\n" //
 				+ "        booleanField = assignedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean assignedBoolean = true;\n" //
 				+ "        wrapperField = assignedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceBitAssignedWrapper(Boolean aBoolean, Boolean anotherBoolean,\n" //
 				+ "            Boolean yetAnotherBoolean) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean assignedBoolean = true;\n" //
 				+ "        aBoolean &= assignedBoolean;\n" //
 				+ "        anotherBoolean |= assignedBoolean;\n" //
 				+ "        yetAnotherBoolean ^= assignedBoolean;\n" //
@@ -5849,15 +5886,52 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapper(boolean b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        /* c1 */ boolean /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ Boolean.TRUE /* c5 */;\n" //
+				+ "        /* c1 */ boolean /* c2 */ alwaysInitializedVar /* c3 */ = /* c4 */ true /* c5 */;\n" //
 				+ "        if (alwaysInitializedVar && b) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "    public void replaceWrapperAndUseParsing(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.parseBoolean(\"true\");\n" //
+				+ "        if (alwaysInitializedVar && b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public String replaceWrapperAndToStringMethod(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = true;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Boolean.toString(alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(boolean b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = true;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Boolean.compare(alwaysInitializedVar, b);\n" //
+				+ "    }\n" //
+				+ "    public boolean replaceWrapperAndPrimitiveValueMethod() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean alwaysInitializedVar = true;\n" //
+				+ "        if (alwaysInitializedVar) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar;\n" //
+				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(boolean b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        boolean alwaysInitializedVar = false;\n" //
 				+ "        if (alwaysInitializedVar && b) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5865,7 +5939,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapperInCast() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        boolean alwaysInitializedVar = false;\n" //
 				+ "        if ((boolean) alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5873,7 +5947,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapperInParenthesis() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean alwaysInitializedVar = Boolean.FALSE;\n" //
+				+ "        boolean alwaysInitializedVar = false;\n" //
 				+ "        if ((alwaysInitializedVar)) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5921,7 +5995,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapperFromValueOf(boolean b1) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean varFromValueOf = Boolean.valueOf(b1);\n" //
+				+ "        boolean varFromValueOf = b1;\n" //
 				+ "        if (varFromValueOf) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5953,7 +6027,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapperInPrefixExpression() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        boolean alwaysInitializedVar = true;\n" //
 				+ "        if (!alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5961,7 +6035,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceWrapperInIf() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        boolean alwaysInitializedVar = true;\n" //
 				+ "        if (alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5985,19 +6059,19 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public String replaceWrapperInConditionalExpression() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean alwaysInitializedVar = Boolean.TRUE;\n" //
+				+ "        boolean alwaysInitializedVar = true;\n" //
 				+ "        return alwaysInitializedVar ? \"foo\" : \"bar\";\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public boolean replaceReturnedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        boolean returnedBoolean = true;\n" //
 				+ "        return returnedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public boolean replaceMultiReturnedWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean returnedBoolean = Boolean.TRUE;\n" //
+				+ "        boolean returnedBoolean = true;\n" //
 				+ "        if (i > 0) {\n" //
 				+ "            System.out.println(\"Positive\");\n" //
 				+ "            return returnedBoolean;\n" //
@@ -6009,7 +6083,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public Boolean replaceReturnedAutoBoxedWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean returnedBoolean = Boolean.FALSE;\n" //
+				+ "        boolean returnedBoolean = false;\n" //
 				+ "        if (i > 0) {\n" //
 				+ "            System.out.println(\"Positive\");\n" //
 				+ "            return returnedBoolean;\n" //
@@ -6021,39 +6095,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void replaceReassignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean reassignedBoolean = Boolean.TRUE;\n" //
-				+ "        reassignedBoolean = Boolean.FALSE;\n" //
+				+ "        boolean reassignedBoolean = true;\n" //
+				+ "        reassignedBoolean = false;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceMultiReassignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean multiReassignedBoolean = Boolean.TRUE;\n" //
-				+ "        multiReassignedBoolean = Boolean.FALSE;\n" //
-				+ "        multiReassignedBoolean = Boolean.TRUE;\n" //
+				+ "        boolean multiReassignedBoolean = true;\n" //
+				+ "        multiReassignedBoolean = false;\n" //
+				+ "        multiReassignedBoolean = true;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAssignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        boolean assignedBoolean = true;\n" //
 				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceWrapperAssignedOnBooleanField() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        boolean assignedBoolean = true;\n" //
 				+ "        booleanField = assignedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceWrapperAssignedOnWrapperField() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        boolean assignedBoolean = true;\n" //
 				+ "        wrapperField = assignedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceBitAssignedWrapper(Boolean aBoolean, Boolean anotherBoolean,\n" //
 				+ "            Boolean yetAnotherBoolean) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        boolean assignedBoolean = true;\n" //
 				+ "        aBoolean &= assignedBoolean;\n" //
 				+ "        anotherBoolean |= assignedBoolean;\n" //
 				+ "        yetAnotherBoolean ^= assignedBoolean;\n" //
@@ -6079,48 +6153,53 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.Observable;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    public Boolean doNotRefactorFields = Boolean.TRUE;\n" //
+				+ "    public Boolean doNotRefactorFields = true;\n" //
 				+ "    public Object objectField;\n" //
 				+ "\n" //
 				+ "    public Object doNotBreakAutoboxing() {\n" //
+				+ "        Boolean returnedObject = true;\n" //
+				+ "        return returnedObject;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Boolean doNotUsePrimitiveWithWrappedInitializer() {\n" //
 				+ "        Boolean returnedObject = Boolean.TRUE;\n" //
 				+ "        return returnedObject;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void doNotReplaceNullWrapper() {\n" //
-				+ "        Boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean reassignedBoolean = true;\n" //
 				+ "        reassignedBoolean = null;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void doNotReplaceWrapperPassedAsObject(Map<Boolean, Observable> obsByBoolean) {\n" //
-				+ "        Boolean reassignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean reassignedBoolean = true;\n" //
 				+ "        obsByBoolean.get(reassignedBoolean).notifyObservers();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void doNotReplaceWrapperAssignedOnObjectField() {\n" //
-				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean assignedBoolean = true;\n" //
 				+ "        objectField = assignedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void doNotReplaceMultiAssignedWrapper() {\n" //
-				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean assignedBoolean = true;\n" //
 				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
 				+ "        Boolean yetAnotherBoolean = assignedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Boolean doNotReplaceMultiAutoBoxedWrapper() {\n" //
-				+ "        Boolean assignedBoolean = Boolean.TRUE;\n" //
+				+ "        Boolean assignedBoolean = true;\n" //
 				+ "        Boolean anotherBoolean = assignedBoolean;\n" //
 				+ "        return assignedBoolean;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void doNotBreakAutoboxingOnAssignment() {\n" //
-				+ "        Boolean returnedObject = Boolean.TRUE;\n" //
+				+ "        Boolean returnedObject = true;\n" //
 				+ "        Object anotherObject = returnedObject;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void doNotReplaceRessignedWrapper(Boolean b) {\n" //
-				+ "        Boolean returnedObject = Boolean.TRUE;\n" //
+				+ "        Boolean returnedObject = true;\n" //
 				+ "        try {\n" //
 				+ "            returnedObject = b;\n" //
 				+ "        } catch (Exception e) {\n" //
@@ -6129,13 +6208,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public Boolean doNotReplaceAssignedAndReturnedWrapper(Boolean b) {\n" //
-				+ "        Boolean returnedObject = Boolean.FALSE;\n" //
+				+ "        Boolean returnedObject = false;\n" //
 				+ "        returnedObject = b;\n" //
 				+ "        return returnedObject;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void doNotRefactorMultiDeclaration(boolean isValid) {\n" //
-				+ "        Boolean alwaysInitializedVar = Boolean.TRUE, otherVar;\n" //
+				+ "        Boolean alwaysInitializedVar = true, otherVar;\n" //
 				+ "        if (alwaysInitializedVar && isValid) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -6165,6 +6244,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (alwaysInitializedVar > c) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.compareTo(c);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperAndPrimitiveValueMethod(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.charValue();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(char c) {\n" //
@@ -6350,6 +6462,39 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Character.toString(alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Character.compare(alwaysInitializedVar, c);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public char replaceWrapperAndPrimitiveValueMethod(char c) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > c) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(char c) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        char alwaysInitializedVar = Character.MAX_VALUE;\n" //
@@ -6384,7 +6529,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperFromValueOf(char c1) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        char varFromValueOf = Character.valueOf(c1);\n" //
+				+ "        char varFromValueOf = c1;\n" //
 				+ "        return +varFromValueOf;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -6609,6 +6754,47 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.valueOf(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.compareTo(b);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperAndPrimitiveValueMethod(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.byteValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(byte b) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        java.lang.Byte alwaysInitializedVar = Byte.MAX_VALUE;\n" //
@@ -6789,6 +6975,47 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.parseByte(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Byte.toString(alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Byte.compare(alwaysInitializedVar, b);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public byte replaceWrapperAndPrimitiveValueMethod(byte b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > b) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(byte b) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        byte alwaysInitializedVar = Byte.MAX_VALUE;\n" //
@@ -6823,7 +7050,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public byte replaceWrapperFromValueOf(byte b1) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        byte varFromValueOf = Byte.valueOf(b1);\n" //
+				+ "        byte varFromValueOf = b1;\n" //
 				+ "        return varFromValueOf++;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -7045,6 +7272,55 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short alwaysInitializedVar = Short.valueOf(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndConstructor(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short alwaysInitializedVar = new Short(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.compareTo(s);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperAndPrimitiveValueMethod(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.shortValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(short s) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        java.lang.Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
@@ -7231,6 +7507,55 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short alwaysInitializedVar = Short.parseShort(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndConstructor(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short alwaysInitializedVar = Short.parseShort(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Short.toString(alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Short.compare(alwaysInitializedVar, s);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public short replaceWrapperAndPrimitiveValueMethod(short s) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > s) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(short s) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        short alwaysInitializedVar = Short.MIN_VALUE;\n" //
@@ -7268,7 +7593,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public short replaceWrapperFromValueOf(short s1) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        short varFromValueOf = Short.valueOf(s1);\n" //
+				+ "        short varFromValueOf = s1;\n" //
 				+ "        return varFromValueOf++;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -7491,6 +7816,55 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (alwaysInitializedVar > i) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.valueOf(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsingWithRadix(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.valueOf(\"0\", 10);\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.compareTo(i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndPrimitiveValueMethod(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.intValue();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
@@ -7733,6 +8107,55 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.parseInt(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsingWithRadix(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.parseInt(\"0\", 10);\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Integer.toString(alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Integer.compare(alwaysInitializedVar, i);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndPrimitiveValueMethod(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > i) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(int i) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        int alwaysInitializedVar = Integer.MAX_VALUE;\n" //
@@ -7818,7 +8241,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperFromValueOf(int i1) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        int varFromValueOf = Integer.valueOf(i1);\n" //
+				+ "        int varFromValueOf = i1;\n" //
 				+ "        return varFromValueOf++;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -8049,6 +8472,63 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long alwaysInitializedVar = Long.valueOf(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsingWithRadix(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long alwaysInitializedVar = Long.valueOf(\"0\", 10);\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndConstructor(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long alwaysInitializedVar = new Long(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.compareTo(l);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperAndPrimitiveValueMethod(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.longValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(long l) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        java.lang.Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
@@ -8266,6 +8746,63 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.parseLong(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsingWithRadix(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.parseLong(\"0\", 10);\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndConstructor(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.parseLong(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Long.toString(alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Long.compare(alwaysInitializedVar, l);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long replaceWrapperAndPrimitiveValueMethod(long l) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > l) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(long l) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        long alwaysInitializedVar = Long.MIN_VALUE;\n" //
@@ -8351,7 +8888,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long replaceWrapperFromValueOf(long l1) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        long varFromValueOf = Long.valueOf(l1);\n" //
+				+ "        long varFromValueOf = l1;\n" //
 				+ "        return varFromValueOf++;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -8559,6 +9096,47 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float alwaysInitializedVar = Float.valueOf(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.compareTo(f);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperAndPrimitiveValueMethod(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.floatValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(float f) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        java.lang.Float alwaysInitializedVar = Float.MIN_VALUE;\n" //
@@ -8759,6 +9337,47 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float alwaysInitializedVar = Float.parseFloat(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Float.toString(alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Float.compare(alwaysInitializedVar, f);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public float replaceWrapperAndPrimitiveValueMethod(float f) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > f) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(float f) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        float alwaysInitializedVar = Float.MIN_VALUE;\n" //
@@ -8826,7 +9445,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public float replaceWrapperFromValueOf(float f1) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        float varFromValueOf = Float.valueOf(f1);\n" //
+				+ "        float varFromValueOf = f1;\n" //
 				+ "        return varFromValueOf++;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -9033,6 +9652,55 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (alwaysInitializedVar > d) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double alwaysInitializedVar = Double.valueOf(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndConstructor(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double alwaysInitializedVar = new Double(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.compareTo(d);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperAndPrimitiveValueMethod(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar.doubleValue();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(double d) {\n" //
@@ -9246,6 +9914,55 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWrapperAndUseParsing(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.parseDouble(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceWrapperAndConstructor(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.parseDouble(\"0\");\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceWrapperAndToStringMethod(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Double.toString(alwaysInitializedVar);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int replaceWrapperAndCompareToMethod(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return Double.compare(alwaysInitializedVar, d);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double replaceWrapperAndPrimitiveValueMethod(double d) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        if (alwaysInitializedVar > d) {\n" //
+				+ "            System.out.println(\"True!\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        return alwaysInitializedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void replaceFullyQualifiedWrapper(double d) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        double alwaysInitializedVar = Double.MAX_VALUE;\n" //
@@ -9313,7 +10030,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public double replaceWrapperFromValueOf(double d1) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        double varFromValueOf = Double.valueOf(d1);\n" //
+				+ "        double varFromValueOf = d1;\n" //
 				+ "        return varFromValueOf++;\n" //
 				+ "    }\n" //
 				+ "\n" //
