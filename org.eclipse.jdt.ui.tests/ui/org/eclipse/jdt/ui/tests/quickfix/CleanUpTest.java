@@ -5653,7 +5653,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(boolean b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean alwaysInitializedVar = true;\n" //
+				+ "        Boolean alwaysInitializedVar = new Boolean(\"true\");\n" //
 				+ "        if (alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -5910,7 +5910,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(boolean b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean alwaysInitializedVar = true;\n" //
+				+ "        boolean alwaysInitializedVar = Boolean.parseBoolean(\"true\");\n" //'				+ "        if (alwaysInitializedVar) {\n" //
 				+ "        if (alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -6775,7 +6775,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(byte b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        Byte alwaysInitializedVar = new Byte(\"0\");\n" //
 				+ "        if (alwaysInitializedVar > b) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -6996,7 +6996,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(byte b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        byte alwaysInitializedVar = Byte.parseByte(\"0\");\n" //
 				+ "        if (alwaysInitializedVar > b) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7301,7 +7301,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(short s) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        Short alwaysInitializedVar = new Short(\"0\");\n" //
 				+ "        if (alwaysInitializedVar > s) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7536,7 +7536,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(short s) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        short alwaysInitializedVar = Short.parseShort(\"0\");\n" //
 				+ "        if (alwaysInitializedVar > s) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7847,7 +7847,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        Integer alwaysInitializedVar = new Integer(\"0\");\n" //
 				+ "        if (alwaysInitializedVar > i) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -8136,7 +8136,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        int alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        int alwaysInitializedVar = Integer.parseInt(\"0\");\n" //
 				+ "        if (alwaysInitializedVar > i) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -8509,7 +8509,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(long l) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        Long alwaysInitializedVar = new Long(\"0\");\n" //
 				+ "        if (alwaysInitializedVar > l) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -8783,7 +8783,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(long l) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        long alwaysInitializedVar = Long.parseLong(\"0\");\n" //
 				+ "        if (alwaysInitializedVar > l) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -9117,7 +9117,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(float f) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        Float alwaysInitializedVar = new Float(\"0.0\");\n" //
 				+ "        if (alwaysInitializedVar > f) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -9358,7 +9358,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(float f) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        float alwaysInitializedVar = Float.parseFloat(\"0.0\");\n" //
 				+ "        if (alwaysInitializedVar > f) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -9683,7 +9683,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(double d) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        Double alwaysInitializedVar = new Double(\"0.0\");\n" //
 				+ "        if (alwaysInitializedVar > d) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -9943,7 +9943,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(double d) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        double alwaysInitializedVar = Double.parseDouble(\"0.0\");\n" //
 				+ "        if (alwaysInitializedVar > d) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //

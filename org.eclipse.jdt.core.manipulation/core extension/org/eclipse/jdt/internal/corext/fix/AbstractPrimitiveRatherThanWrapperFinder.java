@@ -265,6 +265,17 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 							);
 		}
 
+		ClassInstanceCreation classInstanceCreation= ASTNodes.as(expression, ClassInstanceCreation.class);
+		if (classInstanceCreation != null) {
+			List<Expression> classInstanceCreationArguments= classInstanceCreation.arguments();
+
+			if (classInstanceCreationArguments.size() == 1) {
+				Expression arg0= classInstanceCreationArguments.get(0);
+
+				return ASTNodes.hasType(arg0, String.class.getCanonicalName());
+			}
+		}
+
 		return false;
 	}
 
