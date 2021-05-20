@@ -163,7 +163,11 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 					if (root instanceof CompilationUnit) {
 						CompilationUnit compilationUnit= (CompilationUnit) root;
 						List<ImportDeclaration> imports= compilationUnit.imports();
-						String localPackage= compilationUnit.getPackage().getName().getFullyQualifiedName();
+						String localPackage= null;
+
+						if (compilationUnit.getPackage() != null && compilationUnit.getPackage().getName() != null) {
+							localPackage= compilationUnit.getPackage().getName().getFullyQualifiedName();
+						}
 
 						for (ImportDeclaration oneImport : imports) {
 							if (oneImport.isStatic()
@@ -173,11 +177,16 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 								String methodIdentifier= methodName.getName().getIdentifier();
 								ITypeBinding conflictingType= methodName.getQualifier().resolveTypeBinding();
 
-								if (conflictingType == null || conflictingType.getPackage() == null) {
+								if (conflictingType == null) {
 									return true; // Error on side of caution
 								}
 
-								String importPackage= conflictingType.getPackage().getName();
+								String importPackage= null;
+
+								if (conflictingType.getPackage() != null) {
+									importPackage= conflictingType.getPackage().getName();
+								}
+
 								boolean inSamePackage= Objects.equals(localPackage, importPackage);
 
 								for (IMethodBinding declaredMethod : conflictingType.getDeclaredMethods()) {

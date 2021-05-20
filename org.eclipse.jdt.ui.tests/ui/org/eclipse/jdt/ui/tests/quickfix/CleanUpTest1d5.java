@@ -14,7 +14,10 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.fail;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -2855,6 +2858,71 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
 				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
+	}
+
+	@Test
+	public void testUnnecessaryArray_default_package() throws Exception {
+		try {
+			// Given
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
+			String given= "" //
+					+ "public class A {\n" //
+					+ "    public class B {\n" //
+					+ "        public void foo(Object elementsOrTreePaths, Integer obj, Integer obj2) {\n" //
+					+ "            return;\n" //
+					+ "        }\n" //
+					+ "    }\n" //
+					+ "\n" //
+					+ "    public class C extends B {\n" //
+					+ "        public void foo(Object... elementsOrTreePaths) {\n" //
+					+ "            return;\n" //
+					+ "        }\n" //
+					+ "\n" //
+					+ "        public void foo(Object elementsOrTreePaths, Integer obj) {\n" //
+					+ "            foo(new Object[] {elementsOrTreePaths, obj});\n" //
+					+ "            foo(new Object[] {elementsOrTreePaths, elementsOrTreePaths});\n" //
+					+ "            foo(new Object[] {elementsOrTreePaths, obj, obj});\n" //
+					+ "            foo(new Object[] {elementsOrTreePaths, obj, elementsOrTreePaths});\n" //
+					+ "        }\n" //
+					+ "    }\n" //
+					+ "}\n";
+
+			String expected= "" //
+					+ "public class A {\n" //
+					+ "    public class B {\n" //
+					+ "        public void foo(Object elementsOrTreePaths, Integer obj, Integer obj2) {\n" //
+					+ "            return;\n" //
+					+ "        }\n" //
+					+ "    }\n" //
+					+ "\n" //
+					+ "    public class C extends B {\n" //
+					+ "        public void foo(Object... elementsOrTreePaths) {\n" //
+					+ "            return;\n" //
+					+ "        }\n" //
+					+ "\n" //
+					+ "        public void foo(Object elementsOrTreePaths, Integer obj) {\n" //
+					+ "            foo(new Object[] {elementsOrTreePaths, obj});\n" //
+					+ "            foo(elementsOrTreePaths, elementsOrTreePaths);\n" //
+					+ "            foo(new Object[] {elementsOrTreePaths, obj, obj});\n" //
+					+ "            foo(elementsOrTreePaths, obj, elementsOrTreePaths);\n" //
+					+ "        }\n" //
+					+ "    }\n" //
+					+ "}\n";
+
+			// When
+			ICompilationUnit cu= pack1.createCompilationUnit("A.java", given, false, null);
+			enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+			// Then
+			assertNotEquals("The class must be changed", given, expected);
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+					new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
+		} catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            fail(sw.toString());
+		}
 	}
 
 	@Test
