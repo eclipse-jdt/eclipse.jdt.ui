@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -165,7 +165,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private Link fLink;
 	private Label fImage;
 
-	private JUnitVersion fJUnitVersion=JUnitVersion.VERSION_3;
+	private JUnitVersion fJUnitVersion= JUnitVersion.VERSION_3;
 
 	/**
 	 * Available JUnit versions.
@@ -193,14 +193,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				/* IDX_SETUP */ WizardMessages.NewJ5TestCaseWizardPageOne_methodStub_setUp,
 				/* IDX_TEARDOWN */ WizardMessages.NewJ5TestCaseWizardPageOne_methodStub_tearDown,
 				/* IDX_CONSTRUCTOR */ WizardMessages.NewTestCaseWizardPageOne_methodStub_constructor
-		}
-		);
+		});
+
 		/**
 		 * @since 3.12
 		 */
 		public final String[] buttonNames;
 
-		JUnitVersion(String[] buttonNames){
+		JUnitVersion(String[] buttonNames) {
 			this.buttonNames= buttonNames;
 		}
 	}
@@ -217,7 +217,6 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 		setTitle(WizardMessages.NewTestCaseWizardPageOne_title);
 		setDescription(WizardMessages.NewTestCaseWizardPageOne_description);
-
 
 		enableCommentControl(true);
 
@@ -415,7 +414,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private void internalSetJUnit(JUnitVersion version) {
 		fJUnitVersion= version;
-		fMethodStubsButtons.updateButtonText(version);
+		fMethodStubsButtons.updateButtons(version);
 		fJUnitStatus= junitStatusChanged();
 		if (isDefaultSuperClass() || "".equals(getSuperClass().trim())) //$NON-NLS-1$
 			setSuperClass(getDefaultSuperClassName(), true);
