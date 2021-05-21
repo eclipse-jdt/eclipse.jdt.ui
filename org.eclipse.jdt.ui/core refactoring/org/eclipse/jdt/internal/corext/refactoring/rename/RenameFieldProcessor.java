@@ -558,8 +558,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				pm.worked(1);
 			}
 
-			if (getAccessor() != null && fIsRecordComponent){
-				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getAccessor(), getNewElementName()));
+			if (fIsRecordComponent){
+				result.merge(checkRecordComponentAccessor(new SubProgressMonitor(pm, 1), getAccessor(), getNewElementName()));
 				result.merge(Checks.checkIfConstructorName(getAccessor(), getNewElementName(), fField.getDeclaringType().getElementName()));
 			} else {
 				pm.worked(1);
@@ -592,6 +592,15 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return result;
 	}
 
+	private RefactoringStatus checkRecordComponentAccessor(IProgressMonitor pm, IMethod existingAccessor, String newAccessorName) throws CoreException{
+		RefactoringStatus result= new RefactoringStatus();
+		if (existingAccessor != null) {
+			result.merge(checkAccessorDeclarations(pm, existingAccessor));
+		}
+		result.merge(checkNewRecordComponentAccessor(newAccessorName));
+		return result;
+	}
+
 	private RefactoringStatus checkNewAccessor(IMethod existingAccessor, String newAccessorName) throws CoreException{
 		RefactoringStatus result= new RefactoringStatus();
 		IMethod accessor= JavaModelUtil.findMethod(newAccessorName, existingAccessor.getParameterTypes(), false, fField.getDeclaringType());
@@ -599,6 +608,17 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return null;
 
 		String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_already_exists,
+				new String[]{JavaElementUtil.createMethodSignature(accessor), BasicElementLabels.getJavaElementName(fField.getDeclaringType().getFullyQualifiedName('.'))});
+		result.addError(message, JavaStatusContext.create(accessor));
+		return result;
+	}
+
+	private RefactoringStatus checkNewRecordComponentAccessor(String newAccessorName) throws CoreException{
+		RefactoringStatus result= new RefactoringStatus();
+		IMethod accessor= JavaModelUtil.findMethod(newAccessorName, new String[]{}, false, fField.getDeclaringType());
+		if (accessor == null || !accessor.exists())
+			return null;
+		String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_recordromponent_accessor_method_already_exists,
 				new String[]{JavaElementUtil.createMethodSignature(accessor), BasicElementLabels.getJavaElementName(fField.getDeclaringType().getFullyQualifiedName('.'))});
 		result.addError(message, JavaStatusContext.create(accessor));
 		return result;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,7 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -274,6 +275,27 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 		renameRecordCompactConstructor(methodName, newMethodName, updateReferences, fail, true);
 	}
 
+	private void renameRecordComponentFail(String record, String fieldName, String newFieldName, String failMsg) throws Exception {
+		ParticipantTesting.reset();
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), record);
+		IType recordA= getType(cu, record);
+		IField field= recordA.getField(fieldName);
+		IJavaProject jProj= recordA.getJavaProject();
+		String projName= jProj.getElementName();
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		descriptor.setJavaElement(field);
+		descriptor.setNewName(newFieldName);
+		descriptor.setUpdateReferences(true);
+		descriptor.setUpdateTextualOccurrences(false);
+		descriptor.setRenameGetters(false);
+		descriptor.setRenameSetters(false);
+		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
+		RefactoringStatus result= performRefactoring(refactoring);
+		assertNotNull("was supposed to fail", result);
+		assertTrue("should have errors", result.hasError());
+		assertEquals(failMsg.replaceAll("TestProject", projName), result.toString());
+	}
+
 	private void renameRecord(String recordName, String newRecordName, boolean updateReferences) throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), recordName);
@@ -390,5 +412,17 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 	@Test
 	public void testRenameRecordCompactConstructorFailLocalVariableConflict() throws Exception{
 		renameRecordCompactConstructor("f", "g", true, true, true);
+	}
+
+	@Test
+	public void testRenameRecordComponentFail01() throws Exception{
+		String errorMsg = "<ERROR\n" +
+				"	\n" +
+				"ERROR: Method 'void g()' already exists in 'p.A', having same signature as the new accessor method.\n" +
+				"Context: A.java (not open) [in p [in src [in TestProject]]]\n" +
+				"code: none\n" +
+				"Data: null\n" +
+				">";
+		renameRecordComponentFail("A","f","g",errorMsg);
 	}
 }
