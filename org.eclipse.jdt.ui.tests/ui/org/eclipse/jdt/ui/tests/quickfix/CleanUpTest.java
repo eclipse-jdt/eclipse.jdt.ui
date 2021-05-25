@@ -5643,7 +5643,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "    public String replaceWrapperAndToStringMethod(boolean b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean alwaysInitializedVar = true;\n" //
+				+ "        Boolean alwaysInitializedVar = new Boolean(true);\n" //
 				+ "        if (alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -6259,7 +6259,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(char c) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Character alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        Character alwaysInitializedVar = new Character(Character.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > c) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -6764,7 +6764,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public String replaceWrapperAndToStringMethod(byte b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        Byte alwaysInitializedVar = new Byte(Byte.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > b) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7290,7 +7290,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public String replaceWrapperAndToStringMethod(short s) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        Short alwaysInitializedVar = new Short(Short.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > s) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7858,7 +7858,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndPrimitiveValueMethod(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        Integer alwaysInitializedVar = new Integer(Integer.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > i) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -8498,7 +8498,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public String replaceWrapperAndToStringMethod(long l) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        Long alwaysInitializedVar = new Long(Long.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > l) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -9128,7 +9128,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public float replaceWrapperAndPrimitiveValueMethod(float f) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        Float alwaysInitializedVar = new Float(Float.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > f) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -9694,7 +9694,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public double replaceWrapperAndPrimitiveValueMethod(double d) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        Double alwaysInitializedVar = new Double(Double.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > d) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
