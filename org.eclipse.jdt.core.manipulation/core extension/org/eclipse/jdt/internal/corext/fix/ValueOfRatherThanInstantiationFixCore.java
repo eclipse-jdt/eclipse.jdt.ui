@@ -74,7 +74,8 @@ public class ValueOfRatherThanInstantiationFixCore extends CompilationUnitRewrit
 					ITypeBinding destinationTypeBinding= ASTNodes.getTargetType(visited);
 
 					if (destinationTypeBinding != null
-							&& destinationTypeBinding.isPrimitive()) {
+							&& destinationTypeBinding.isPrimitive()
+							&& !ASTNodes.hasType(arg0, String.class.getCanonicalName())) {
 						fResult.add(new ValueOfRatherThanInstantiationWithTheSingleArgumentFixOperation(visited));
 						return false;
 					}

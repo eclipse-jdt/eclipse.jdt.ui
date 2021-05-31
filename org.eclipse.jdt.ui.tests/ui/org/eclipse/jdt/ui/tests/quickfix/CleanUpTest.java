@@ -5042,6 +5042,17 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        Float f3 = new Float(dObject);\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public static void parsedByStringAutoboxedToPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by = new Byte(\"42\");\n" //
+				+ "        boolean bo = new Boolean(\"true\");\n" //
+				+ "        double d = new Double(\"42\");\n" //
+				+ "        float f = new Float(\"42\");\n" //
+				+ "        long l = new Long(\"42\");\n" //
+				+ "        short s = new Short(\"42\");\n" //
+				+ "        int i = new Integer(\"42\");\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        new Byte(\"0\").byteValue();\n" //
@@ -5131,6 +5142,17 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "        // Implicit object narrowing\n" //
 				+ "        Float f3 = dObject.floatValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void parsedByStringAutoboxedToPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        byte by = Byte.valueOf(\"42\");\n" //
+				+ "        boolean bo = Boolean.valueOf(\"true\");\n" //
+				+ "        double d = Double.valueOf(\"42\");\n" //
+				+ "        float f = Float.valueOf(\"42\");\n" //
+				+ "        long l = Long.valueOf(\"42\");\n" //
+				+ "        short s = Short.valueOf(\"42\");\n" //
+				+ "        int i = Integer.valueOf(\"42\");\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public static void removeUnnecessaryObjectCreation() {\n" //
