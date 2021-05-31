@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.ui.fix.AbstractCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -6618,14 +6619,14 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public void replaceReassignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        Character reassignedCharacter = Character.MIN_VALUE;\n" //
-				+ "        reassignedCharacter = 123;\n" //
+				+ "        reassignedCharacter = 'a';\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceMultiReassignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        Character multiReassignedCharacter = Character.MIN_VALUE;\n" //
-				+ "        multiReassignedCharacter = 123;\n" //
-				+ "        multiReassignedCharacter = 456;\n" //
+				+ "        multiReassignedCharacter = 'a';\n" //
+				+ "        multiReassignedCharacter = 'b';\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAssignedWrapper() {\n" //
@@ -6834,14 +6835,14 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public void replaceReassignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        char reassignedCharacter = Character.MIN_VALUE;\n" //
-				+ "        reassignedCharacter = 123;\n" //
+				+ "        reassignedCharacter = 'a';\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceMultiReassignedWrapper() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        char multiReassignedCharacter = Character.MIN_VALUE;\n" //
-				+ "        multiReassignedCharacter = 123;\n" //
-				+ "        multiReassignedCharacter = 456;\n" //
+				+ "        multiReassignedCharacter = 'a';\n" //
+				+ "        multiReassignedCharacter = 'b';\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceAssignedWrapper() {\n" //
@@ -10438,6 +10439,42 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testPrimitiveRatherThanWrapperPreview() throws Exception {
+		String previewHeader= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void preview(int i) {\n";
+		String previewFooter= "" //
+				+ "    }\n" //
+				+ "}\n";
+		AbstractCleanUpCore cleanUp= new PrimitiveRatherThanWrapperCleanUpCore() {
+			@Override
+			protected boolean isEnabled(String key) {
+				return false;
+			}
+		};
+		String given= previewHeader + cleanUp.getPreview() + previewFooter;
+		cleanUp= new PrimitiveRatherThanWrapperCleanUpCore() {
+			@Override
+			protected boolean isEnabled(String key) {
+				return true;
+			}
+		};
+		String expected= previewHeader + cleanUp.getPreview() + previewFooter;
+
+		// When
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.PRIMITIVE_RATHER_THAN_WRAPPER);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description)));
 	}
 
 	@Test

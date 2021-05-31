@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -429,6 +430,13 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 				return getPrefixOutSafeOperators().contains(((PrefixExpression) parentNode).getOperator());
 
 			case ASTNode.INFIX_EXPRESSION:
+				InfixExpression infixExpression= (InfixExpression) parentNode;
+				Operator operator= infixExpression.getOperator();
+				if (InfixExpression.Operator.EQUALS.equals(operator) || InfixExpression.Operator.NOT_EQUALS.equals(operator)) {
+					Expression leftOperand= infixExpression.getLeftOperand();
+					Expression rightOperand= infixExpression.getRightOperand();
+					return isNotNull(node.equals(leftOperand) ? rightOperand : leftOperand);
+				}
 				return getInfixOutSafeOperators().contains(((InfixExpression) parentNode).getOperator());
 
 			case ASTNode.POSTFIX_EXPRESSION:

@@ -18,9 +18,9 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 
@@ -38,7 +38,7 @@ public final class PrimitiveCharRatherThanWrapperFinder extends AbstractPrimitiv
 
 	@Override
 	public Class<? extends Expression> getLiteralClass() {
-		return NumberLiteral.class;
+		return CharacterLiteral.class;
 	}
 
 	@Override
