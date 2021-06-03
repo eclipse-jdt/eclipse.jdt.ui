@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Hashtable;
 import java.util.List;
 
@@ -23,6 +25,8 @@ import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -254,5 +258,38 @@ public class AdvancedQuickAssistTest10 extends QuickFixTest {
 			"}";
 
 		assertProposalPreviewEquals(buf, CorrectionMessages.QuickAssistProcessor_splitdeclaration_description, proposals);
+	}
+
+	@Test
+	public void testVarOptionAvailableForLocalVarTypeVariable() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String buf= "" +
+				"package test1;\n" +
+				"\n" +
+				"import java.io.BufferedReader;\n" +
+				"\n" +
+				"public class Test {\n" +
+				"	public void sample() {\n" +
+				"		new BufferedReader(null);\n" +
+				"	}\n" +
+				"}";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		String str= "new BufferedReader(null)";
+		AssistContext context= getCorrectionContext(cu, buf.indexOf(str) + str.length(), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertProposalExists(proposals, CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description);
+		assertProposalExists(proposals, CorrectionMessages.AssignToVariableAssistProposal_assignintrywithresources_description);
+		String[] choices= new String [] { "BufferedReader - java.io", "var" }; // NOT containing IllegalFoo
+
+		ICompletionProposal proposal= findProposalByName(CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description, proposals);
+		ICompletionProposal proposal2=  findProposalByName(CorrectionMessages.AssignToVariableAssistProposal_assignintrywithresources_description, proposals);
+
+		assertNotNull("Proposal `" + CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description + "` missing",proposal);
+		assertNotNull("Proposal `" + CorrectionMessages.AssignToVariableAssistProposal_assignintrywithresources_description + "` missing",proposal2);
+
+		assertLinkedChoicesContains(proposal, "type", choices);
+        assertLinkedChoicesContains(proposal2, "type", choices);
 	}
 }

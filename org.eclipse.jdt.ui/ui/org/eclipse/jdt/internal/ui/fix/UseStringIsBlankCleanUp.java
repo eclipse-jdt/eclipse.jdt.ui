@@ -146,7 +146,9 @@ public class UseStringIsBlankCleanUp extends AbstractCleanUp {
 				}
 
 				// "".equals(s.strip())
-				if ("".equals(visited.getExpression().resolveConstantExpressionValue()) //$NON-NLS-1$
+				Expression expression= visited.getExpression();
+				if (expression != null
+						&& "".equals(expression.resolveConstantExpressionValue()) //$NON-NLS-1$
 						&& (isStringMethodInvocation(arguments.get(0), "strip") //$NON-NLS-1$
 								|| isStringMethodInvocation(arguments.get(0), "stripLeading") //$NON-NLS-1$
 								|| isStringMethodInvocation(arguments.get(0), "stripTrailing"))) { //$NON-NLS-1$

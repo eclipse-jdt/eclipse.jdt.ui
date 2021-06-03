@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
+
+import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageOne.JUnitVersion;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -53,18 +55,16 @@ public class MethodStubsSelectionButtonGroup {
 	/**
 	 * Creates a group without border.
 	 * @param buttonsStyle one of {@link SWT#RADIO}, {@link SWT#CHECK}, or {@link SWT#TOGGLE}
-	 * @param buttonNames names of the buttons
+	 * @param jver the JUnit version
 	 * @param nColumns column count
 	 */
-	public MethodStubsSelectionButtonGroup(int buttonsStyle, String[] buttonNames, int nColumns) {
+	public MethodStubsSelectionButtonGroup(int buttonsStyle, JUnitVersion jver, int nColumns) {
 		fEnabled= true;
 		fLabel= null;
 		fLabelText= ""; //$NON-NLS-1$
 
 		Assert.isTrue(buttonsStyle == SWT.RADIO || buttonsStyle == SWT.CHECK || buttonsStyle == SWT.TOGGLE);
-		fButtonNames= buttonNames;
-
-		int nButtons= buttonNames.length;
+		int nButtons= updateButtons(jver);
 		fButtonsSelected= new boolean[nButtons];
 		fButtonsEnabled= new boolean[nButtons];
 		for (int i= 0; i < nButtons; i++) {
@@ -80,6 +80,18 @@ public class MethodStubsSelectionButtonGroup {
 		fGroupNumberOfColumns= (nColumns <= 0) ? nButtons : nColumns;
 
 		fButtonsStyle= buttonsStyle;
+	}
+
+	public int updateButtons(JUnitVersion jver) {
+		fButtonNames= jver.buttonNames;
+		int nButtons= fButtonNames.length;
+		if (fButtons != null) {
+			for (int i= 0; i < nButtons; i++) {
+				fButtons[i].setText(jver.buttonNames[i]);
+				fButtons[i].requestLayout();
+			}
+		}
+		return nButtons;
 	}
 
 	/*

@@ -172,6 +172,7 @@ public final class FixMessages extends NLS {
 	public static String ReturnExpressionFix_description;
 
 	public static String OneIfRatherThanDuplicateBlocksThatFallThroughFix_description;
+	public static String PullOutIfFromIfElseFix_description;
 
 	public static String TypeAnnotationFix_move;
 	public static String TypeAnnotationFix_remove;

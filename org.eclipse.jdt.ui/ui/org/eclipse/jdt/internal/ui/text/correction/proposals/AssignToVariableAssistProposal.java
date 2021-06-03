@@ -27,6 +27,8 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.ProjectScope;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.NamingConventions;
@@ -85,6 +87,7 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -95,6 +98,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.AbstractSaveParticipantPreferenceConfiguration;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Proposals for 'Assign to variable' quick assist
@@ -111,11 +115,13 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	private final String KEY_TYPE= "type";  //$NON-NLS-1$
 	private final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
 	private final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
+	private final String VAR_TYPE= "var";  //$NON-NLS-1$
 
 	private final int  fVariableKind;
 	private final List<ASTNode> fNodesToAssign; // ExpressionStatement or SingleVariableDeclaration(s)
 	private final ITypeBinding fTypeBinding;
 	private final ICompilationUnit fCUnit;
+	private final List<String> fParamNames;
 
 	private VariableDeclarationFragment fExistingFragment;
 
@@ -124,6 +130,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 		fCUnit= cu;
 		fVariableKind= variableKind;
+		fParamNames = null;
 		fNodesToAssign= new ArrayList<>();
 		fNodesToAssign.add(node);
 
@@ -148,6 +155,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		fVariableKind= FIELD;
 		fNodesToAssign= new ArrayList<>();
 		fNodesToAssign.add(parameter);
+		fParamNames= null;
 		fTypeBinding= typeBinding;
 		fExistingFragment= existingFragment;
 
@@ -167,7 +175,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		fNodesToAssign= new ArrayList<>();
 		fNodesToAssign.addAll(parameters);
 		fTypeBinding= null;
-
+		fParamNames= new ArrayList<>();
+		populateNames(parameters);
 		setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignallparamstofields_description);
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 	}
@@ -183,6 +192,16 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			}
 		} else { // LOCAL or TRY_WITH_RESOURCES
 			return doAddLocal();
+		}
+	}
+
+	private void populateNames(List<SingleVariableDeclaration> parameters) {
+		if (parameters != null && parameters.size() > 0) {
+			for (SingleVariableDeclaration param : parameters) {
+				if (param.getName() != null) {
+					fParamNames.add(param.getName().getIdentifier());
+				}
+			}
 		}
 	}
 
@@ -205,6 +224,12 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDeclFrag.setInitializer((Expression) rewrite.createCopyTarget(expression));
 
 		Type type= evaluateType(ast, nodeToAssign, fTypeBinding, KEY_TYPE, TypeLocation.LOCAL_VARIABLE);
+
+		ICompilationUnit cu= getCompilationUnit();
+		if (type != null && cu != null && JavaModelUtil.is10OrHigher(cu.getJavaProject())) {
+			ImageDescriptor desc= BindingLabelProvider.getBindingImageDescriptor(fTypeBinding, BindingLabelProvider.DEFAULT_IMAGEFLAGS);
+			addLinkedPositionProposal(KEY_TYPE, VAR_TYPE, (desc != null) ? JavaPlugin.getImageDescriptorRegistry().get(desc) : null);
+		}
 
 		if (fVariableKind == LOCAL) {
 			if (ASTNodes.isControlStatementBody(nodeToAssign.getLocationInParent())) {
@@ -533,7 +558,29 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	}
 
 	private Collection<String> getUsedVariableNames(ASTNode nodeToAssign) {
-		return Arrays.asList(ASTResolving.getUsedVariableNames(nodeToAssign));
+		Collection<String> usedVarNames = Arrays.asList(ASTResolving.getUsedVariableNames(nodeToAssign));
+		Collection<String> additionalVarNames= getRemainingParamNamed(nodeToAssign);
+		if (additionalVarNames != null) {
+			usedVarNames = new ArrayList<>(Arrays.asList(ASTResolving.getUsedVariableNames(nodeToAssign)));
+			usedVarNames.addAll(additionalVarNames);
+		}
+		return usedVarNames;
+	}
+
+	private ArrayList<String> getRemainingParamNamed(ASTNode nodeToAssign) {
+		ArrayList<String> paramNames = null;
+		if (fParamNames != null) {
+			paramNames = new ArrayList<>();
+			paramNames.addAll(fParamNames);
+			if (nodeToAssign instanceof SingleVariableDeclaration
+					&& ((SingleVariableDeclaration)nodeToAssign).getName() != null) {
+				int index= fNodesToAssign.indexOf(nodeToAssign);
+				if (index >= 0 && index < paramNames.size()) {
+					paramNames.remove(index);
+				}
+			}
+		}
+		return paramNames;
 	}
 
 	private int findAssignmentInsertIndex(List<Statement> statements, ASTNode nodeToAssign) {

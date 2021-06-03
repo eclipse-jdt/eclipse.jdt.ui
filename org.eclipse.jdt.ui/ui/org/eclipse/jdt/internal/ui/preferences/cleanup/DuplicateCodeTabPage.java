@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
 import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp;
 import org.eclipse.jdt.internal.ui.fix.OperandFactorizationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PullOutIfFromIfElseCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp;
@@ -43,7 +44,8 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 				new ControlFlowMergeCleanUp(values),
 				new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
-				new RedundantIfConditionCleanUp(values)
+				new RedundantIfConditionCleanUp(values),
+				new PullOutIfFromIfElseCleanUp(values)
 		};
 	}
 
@@ -74,5 +76,8 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference redundantIfCondition= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_RedundantIfCondition, CleanUpConstants.REDUNDANT_IF_CONDITION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(redundantIfCondition);
+
+		final CheckboxPreference pullOutIfFromIfElse= createCheckboxPref(duplicateGroup, numColumns, CleanUpMessages.DuplicateCodeTabPage_CheckboxName_PullOutIfFromIfElse, CleanUpConstants.PULL_OUT_IF_FROM_IF_ELSE, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(pullOutIfFromIfElse);
 	}
 }

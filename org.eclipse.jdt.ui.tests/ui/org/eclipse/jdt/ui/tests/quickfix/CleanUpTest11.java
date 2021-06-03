@@ -559,6 +559,12 @@ public class CleanUpTest11 extends CleanUpTestCase {
 				+ "            System.err.println(\"Text must not be blank\");\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    void bug_573831(String text) {\n" //
+				+ "        if (equals(text.strip())) {\n" //
+				+ "            System.err.println(\"Applying the cleanup should not cause NPE\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("NotAString.java", sample, false, null);
 

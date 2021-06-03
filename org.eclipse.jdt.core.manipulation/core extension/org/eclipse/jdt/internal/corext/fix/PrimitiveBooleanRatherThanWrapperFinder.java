@@ -22,15 +22,11 @@ import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 
-import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
-
 public final class PrimitiveBooleanRatherThanWrapperFinder extends AbstractPrimitiveRatherThanWrapperFinder {
-	public PrimitiveBooleanRatherThanWrapperFinder(List<CompilationUnitRewriteOperation> ops) {
+	public PrimitiveBooleanRatherThanWrapperFinder(final List<CompilationUnitRewriteOperation> ops) {
 		fResult= ops;
 	}
 
@@ -88,10 +84,5 @@ public final class PrimitiveBooleanRatherThanWrapperFinder extends AbstractPrimi
 		default:
 			return false;
 		}
-	}
-
-	@Override
-	public void refactorWrapper(VariableDeclarationStatement node) {
-		fResult.add(new PrimitiveRatherThanWrapperOperation(node, MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description, PrimitiveType.BOOLEAN));
 	}
 }

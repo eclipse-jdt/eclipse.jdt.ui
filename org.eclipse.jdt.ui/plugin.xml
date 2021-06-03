@@ -7428,9 +7428,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.redundant_falling_through_block_end">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PullOutIfFromIfElseCleanUp"
+            id="org.eclipse.jdt.ui.pull_out_if_from_if_else"
+            runAfter="org.eclipse.jdt.ui.cleanup.if_condition">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp"
             id="org.eclipse.jdt.ui.cleanup.pattern_matching"
-            runAfter="org.eclipse.jdt.ui.cleanup.if_condition">
+            runAfter="org.eclipse.jdt.ui.pull_out_if_from_if_else">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp"

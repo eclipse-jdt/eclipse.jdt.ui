@@ -126,34 +126,35 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUpCore
 
 	@Override
 	public String getPreview() {
-		StringBuilder sb=new StringBuilder();
+		StringBuilder sb= new StringBuilder();
+		boolean isEnabled= isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY);
 		EnumSet<UpdateProperty> computeFixSet= computeFixSet();
 
-		if(computeFixSet.contains(UpdateProperty.PATH_SEPARATOR)) {
-			sb.append("String ps = File.pathSeparator;\n"); //$NON-NLS-1$
-		} else {
-			sb.append("String ps = System.getProperty(\"path.separator\");\n"); //$NON-NLS-1$
-		}
-
-		if(computeFixSet.contains(UpdateProperty.FILE_SEPARATOR)) {
+		if (isEnabled && computeFixSet.contains(UpdateProperty.FILE_SEPARATOR)) {
 			sb.append("String fs = FileSystems.getDefault().getSeparator(); /* on JVM 1.6 this will be File.separator; */ \n"); //$NON-NLS-1$
 		} else {
 			sb.append("String fs = System.getProperty(\"file.separator\");\n"); //$NON-NLS-1$
 		}
 
-		if(computeFixSet.contains(UpdateProperty.FILE_ENCODING)) {
-			sb.append("String fe = Charset.defaultCharset().displayName();\n"); //$NON-NLS-1$
+		if (isEnabled && computeFixSet.contains(UpdateProperty.PATH_SEPARATOR)) {
+			sb.append("String ps = File.pathSeparator;\n"); //$NON-NLS-1$
 		} else {
-			sb.append("String fe = System.getProperty(\"file.encoding\");\n"); //$NON-NLS-1$
+			sb.append("String ps = System.getProperty(\"path.separator\");\n"); //$NON-NLS-1$
 		}
 
-		if(computeFixSet.contains(UpdateProperty.LINE_SEPARATOR)) {
+		if (isEnabled && computeFixSet.contains(UpdateProperty.LINE_SEPARATOR)) {
 			sb.append("String ls = System.lineSeparator();\n"); //$NON-NLS-1$
 		} else {
 			sb.append("String ls = System.getProperty(\"line.separator\");\n"); //$NON-NLS-1$
 		}
 
-		if(computeFixSet.contains(UpdateProperty.BOOLEAN_PROPERTY)) {
+		if (isEnabled && computeFixSet.contains(UpdateProperty.FILE_ENCODING)) {
+			sb.append("String fe = Charset.defaultCharset().displayName();\n"); //$NON-NLS-1$
+		} else {
+			sb.append("String fe = System.getProperty(\"file.encoding\");\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.BOOLEAN_PROPERTY)) {
 			sb.append("Boolean b = Boolean.getBoolean(\"arbitrarykey\")\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Boolean b = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -66,26 +66,16 @@ public class CopyFailureListAction extends Action {
 		StringBuilder buf= new StringBuilder();
 		TestElement[] failures= fRunner.getAllFailures();
 
-		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
+		String lineDelim= System.lineSeparator();
 		for (TestElement failure : failures) {
 			buf.append(failure.getTestName()).append(lineDelim);
 			String failureTrace= failure.getTrace();
 			if (failureTrace != null) {
-				int start= 0;
-				while (start < failureTrace.length()) {
-					int idx= failureTrace.indexOf('\n', start);
-					if (idx != -1) {
-						String line= failureTrace.substring(start, idx);
-						buf.append(line).append(lineDelim);
-						start= idx + 1;
-					} else {
-						start= Integer.MAX_VALUE;
-					}
-				}
+				failureTrace = failureTrace.replaceAll("\\r\\n|\\r|\\n", lineDelim); //$NON-NLS-1$
+				buf.append(failureTrace);
 			}
 		}
 		return buf.toString();
 	}
-
 
 }

@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -44,6 +46,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisitor {
 	protected List<CompilationUnitRewriteOperation> fResult;
@@ -61,13 +64,6 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 	 * @return the literal class.
 	 */
 	public abstract Class<? extends Expression> getLiteralClass();
-
-	/**
-	 * Refactor the wrapper.
-	 *
-	 * @param node the node
-	 */
-	public abstract void refactorWrapper(final VariableDeclarationStatement node);
 
 	/**
 	 * Get the wrapper fully qualified name.
@@ -162,22 +158,35 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 	}
 
 	@Override
-	public boolean visit(final VariableDeclarationStatement node) {
-		VariableDeclarationFragment fragment= ASTNodes.getUniqueFragment(node);
+	public boolean visit(final VariableDeclarationStatement visited) {
+		VariableDeclarationFragment fragment= ASTNodes.getUniqueFragment(visited);
 
 		if (fragment != null
-				&& (fragment.resolveBinding() != null && ASTNodes.hasType(fragment.resolveBinding().getType(), getWrapperFullyQualifiedName())
-						|| node.getType() != null && node.getType().resolveBinding() != null && ASTNodes.hasType(node.getType().resolveBinding(), getWrapperFullyQualifiedName()))
 				&& fragment.getInitializer() != null
-				&& isNotNull(fragment.getInitializer())) {
+				&& (isNotNull(fragment.getInitializer()) || canReturnPrimitiveInstead(fragment.getInitializer()))
+				&& (fragment.resolveBinding() != null && ASTNodes.hasType(fragment.resolveBinding().getType(), getWrapperFullyQualifiedName())
+						|| visited.getType() != null && visited.getType().resolveBinding() != null && ASTNodes.hasType(visited.getType().resolveBinding(), getWrapperFullyQualifiedName()))) {
 			VarOccurrenceVisitor varOccurrenceVisitor= new VarOccurrenceVisitor(fragment);
 			Block parentBlock= ASTNodes.getTypedAncestor(fragment, Block.class);
 
 			if (parentBlock != null) {
 				varOccurrenceVisitor.traverseNodeInterruptibly(parentBlock);
+				int boxingCount= varOccurrenceVisitor.getAutoBoxingCount();
 
-				if (varOccurrenceVisitor.isPrimitiveAllowed() && varOccurrenceVisitor.getAutoBoxingCount() < 2) {
-					refactorWrapper(node);
+				if (ASTNodes.hasType(fragment.getInitializer(), getWrapperFullyQualifiedName()) && !canReturnPrimitiveInstead(fragment.getInitializer())) {
+					boxingCount++;
+				}
+
+				if (varOccurrenceVisitor.isPrimitiveAllowed() && boxingCount < 2) {
+					fResult.add(new PrimitiveRatherThanWrapperOperation(
+							visited,
+							getPrimitiveTypeName(),
+							getWrapperFullyQualifiedName(),
+							fragment.getInitializer(),
+							varOccurrenceVisitor.getToStringMethods(),
+							varOccurrenceVisitor.getCompareToMethods(),
+							varOccurrenceVisitor.getPrimitiveValueMethods(),
+							getParsingMethodName(getWrapperFullyQualifiedName(), (CompilationUnit) visited.getRoot())));
 					return false;
 				}
 			}
@@ -230,22 +239,101 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 							&& isNotNull(castExpression.getExpression());
 		}
 
-		if (expression instanceof MethodInvocation) {
-			MethodInvocation methodInvocation= (MethodInvocation) expression;
-			return ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), "valueOf", getPrimitiveTypeName()); //$NON-NLS-1$
+		if (expression instanceof ClassInstanceCreation) {
+			ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) expression;
+			List<Expression> classInstanceCreationArguments= classInstanceCreation.arguments();
+
+			if (classInstanceCreationArguments.size() == 1) {
+				Expression arg0= classInstanceCreationArguments.get(0);
+
+				return ASTNodes.hasType(arg0, String.class.getCanonicalName());
+			}
 		}
 
 		return false;
 	}
 
+	private boolean canReturnPrimitiveInstead(final Expression expression) {
+		MethodInvocation methodInvocation= ASTNodes.as(expression, MethodInvocation.class);
+
+		if (methodInvocation != null) {
+			return ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), "valueOf", getPrimitiveTypeName()) //$NON-NLS-1$
+					|| getParsingMethodName(getWrapperFullyQualifiedName(), (CompilationUnit) expression.getRoot()) != null
+					&& (
+							ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), "valueOf", String.class.getCanonicalName()) //$NON-NLS-1$
+							|| ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), "valueOf", String.class.getCanonicalName(), int.class.getSimpleName()) //$NON-NLS-1$
+							);
+		}
+
+		ClassInstanceCreation classInstanceCreation= ASTNodes.as(expression, ClassInstanceCreation.class);
+		if (classInstanceCreation != null) {
+			List<Expression> classInstanceCreationArguments= classInstanceCreation.arguments();
+
+			if (classInstanceCreationArguments.size() == 1) {
+				Expression arg0= classInstanceCreationArguments.get(0);
+
+				return ASTNodes.hasType(arg0, String.class.getCanonicalName());
+			}
+		}
+
+		return false;
+	}
+
+	private String getParsingMethodName(final String wrapperFullyQualifiedName, final CompilationUnit compilationUnit) {
+		if (Boolean.class.getCanonicalName().equals(wrapperFullyQualifiedName) && JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+			return "parseBoolean"; //$NON-NLS-1$
+		}
+
+		if (Integer.class.getCanonicalName().equals(wrapperFullyQualifiedName)) {
+			return "parseInt"; //$NON-NLS-1$
+		}
+
+		if (Long.class.getCanonicalName().equals(wrapperFullyQualifiedName)) {
+			return "parseLong"; //$NON-NLS-1$
+		}
+
+		if (Double.class.getCanonicalName().equals(wrapperFullyQualifiedName) && JavaModelUtil.is1d2OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+			return "parseDouble"; //$NON-NLS-1$
+		}
+
+		if (Float.class.getCanonicalName().equals(wrapperFullyQualifiedName) && JavaModelUtil.is1d2OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+			return "parseFloat"; //$NON-NLS-1$
+		}
+
+		if (Short.class.getCanonicalName().equals(wrapperFullyQualifiedName)) {
+			return "parseShort"; //$NON-NLS-1$
+		}
+
+		if (Byte.class.getCanonicalName().equals(wrapperFullyQualifiedName)) {
+			return "parseByte"; //$NON-NLS-1$
+		}
+
+		return null;
+	}
+
 	private class VarOccurrenceVisitor extends InterruptibleVisitor {
 		private final VariableDeclarationFragment varDecl;
+		private final List<MethodInvocation> toStringMethods = new ArrayList<>();
+		private final List<MethodInvocation> compareToMethods = new ArrayList<>();
+		private final List<MethodInvocation> primitiveValueMethods = new ArrayList<>();
 		private boolean isPrimitiveAllowed= true;
 		private boolean isVarReturned;
 		private int autoBoxingCount;
 
 		public VarOccurrenceVisitor(final VariableDeclarationFragment var) {
 			varDecl= var;
+		}
+
+		public List<MethodInvocation> getToStringMethods() {
+			return toStringMethods;
+		}
+
+		public List<MethodInvocation> getCompareToMethods() {
+			return compareToMethods;
+		}
+
+		public List<MethodInvocation> getPrimitiveValueMethods() {
+			return primitiveValueMethods;
 		}
 
 		public boolean isPrimitiveAllowed() {
@@ -346,9 +434,36 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 			case ASTNode.POSTFIX_EXPRESSION:
 				return getPostfixOutSafeOperators().contains(((PostfixExpression) parentNode).getOperator());
 
+			case ASTNode.METHOD_INVOCATION:
+				MethodInvocation methodInvocation= (MethodInvocation) parentNode;
+
+				if (node.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
+					if (ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), getPrimitiveTypeName() + "Value")) { //$NON-NLS-1$
+						primitiveValueMethods.add(methodInvocation);
+						return true;
+					}
+
+					if (ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), "toString")) { //$NON-NLS-1$
+						toStringMethods.add(methodInvocation);
+						return true;
+					}
+
+					if (ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), "compareTo", getWrapperFullyQualifiedName())) { //$NON-NLS-1$
+						if (ASTNodes.hasType((Expression) methodInvocation.arguments().get(0), getWrapperFullyQualifiedName())) {
+							autoBoxingCount++;
+						}
+
+						compareToMethods.add(methodInvocation);
+						return true;
+					}
+				}
+
+				break;
+
 			default:
-				return isSpecificPrimitiveAllowed(node);
 			}
+
+			return isSpecificPrimitiveAllowed(node);
 		}
 
 		private boolean isOfType(final ITypeBinding resolveTypeBinding) {

@@ -121,6 +121,14 @@ public final class WizardMessages extends NLS {
 	public static String UpdateTestSuite_error;
 	public static String UpdateTestSuite_update;
 	public static String UpdateTestSuite_could_not_update;
+	public static String NewJ4TestCaseWizardPageOne_methodStub_setUpBeforeClass;
+	public static String NewJ4TestCaseWizardPageOne_methodStub_tearDownAfterClass;
+	public static String NewJ4TestCaseWizardPageOne_methodStub_setUp;
+	public static String NewJ4TestCaseWizardPageOne_methodStub_tearDown;
+	public static String NewJ5TestCaseWizardPageOne_methodStub_setUpBeforeClass;
+	public static String NewJ5TestCaseWizardPageOne_methodStub_tearDownAfterClass;
+	public static String NewJ5TestCaseWizardPageOne_methodStub_setUp;
+	public static String NewJ5TestCaseWizardPageOne_methodStub_tearDown;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, WizardMessages.class);

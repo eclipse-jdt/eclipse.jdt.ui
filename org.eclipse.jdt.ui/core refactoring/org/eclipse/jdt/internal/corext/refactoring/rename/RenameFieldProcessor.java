@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.MethodReferenceMatch;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -557,8 +558,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				pm.worked(1);
 			}
 
-			if (getAccessor() != null && fIsRecordComponent){
-				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getAccessor(), getNewElementName()));
+			if (fIsRecordComponent){
+				result.merge(checkRecordComponentAccessor(new SubProgressMonitor(pm, 1), getAccessor(), getNewElementName()));
 				result.merge(Checks.checkIfConstructorName(getAccessor(), getNewElementName(), fField.getDeclaringType().getElementName()));
 			} else {
 				pm.worked(1);
@@ -591,6 +592,15 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return result;
 	}
 
+	private RefactoringStatus checkRecordComponentAccessor(IProgressMonitor pm, IMethod existingAccessor, String newAccessorName) throws CoreException{
+		RefactoringStatus result= new RefactoringStatus();
+		if (existingAccessor != null) {
+			result.merge(checkAccessorDeclarations(pm, existingAccessor));
+		}
+		result.merge(checkNewRecordComponentAccessor(newAccessorName));
+		return result;
+	}
+
 	private RefactoringStatus checkNewAccessor(IMethod existingAccessor, String newAccessorName) throws CoreException{
 		RefactoringStatus result= new RefactoringStatus();
 		IMethod accessor= JavaModelUtil.findMethod(newAccessorName, existingAccessor.getParameterTypes(), false, fField.getDeclaringType());
@@ -598,6 +608,17 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return null;
 
 		String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_already_exists,
+				new String[]{JavaElementUtil.createMethodSignature(accessor), BasicElementLabels.getJavaElementName(fField.getDeclaringType().getFullyQualifiedName('.'))});
+		result.addError(message, JavaStatusContext.create(accessor));
+		return result;
+	}
+
+	private RefactoringStatus checkNewRecordComponentAccessor(String newAccessorName) throws CoreException{
+		RefactoringStatus result= new RefactoringStatus();
+		IMethod accessor= JavaModelUtil.findMethod(newAccessorName, new String[]{}, false, fField.getDeclaringType());
+		if (accessor == null || !accessor.exists())
+			return null;
+		String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_recordromponent_accessor_method_already_exists,
 				new String[]{JavaElementUtil.createMethodSignature(accessor), BasicElementLabels.getJavaElementName(fField.getDeclaringType().getFullyQualifiedName('.'))});
 		result.addError(message, JavaStatusContext.create(accessor));
 		return result;
@@ -694,8 +715,44 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		SearchResultGroup[] result= RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(),
 				new CuCollectingSearchRequestor(binaryRefs), pm, status);
 		binaryRefs.addErrorIfNecessary(status);
-
+		result= filterAccessorMethods(result, true);
 		return result;
+	}
+
+	/**
+	 * @param grouped the list that needs to be filtered
+	 * @param filterOut if <code>true</code>, filters out the references to record component
+	 *            accessor methods. If <code>false</code>, returns only the references to record
+	 *            component accessor methods.
+	 * @return the filtered list
+	 */
+	private SearchResultGroup[] filterAccessorMethods(SearchResultGroup[] grouped, boolean filterOut) {
+		if (this.fIsRecordComponent) {
+			List<SearchResultGroup> result= new ArrayList<>();
+			for (SearchResultGroup g : grouped) {
+				SearchMatch[] matches= g.getSearchResults();
+				List<SearchMatch> newList= new ArrayList<>();
+				for (SearchMatch match : matches) {
+					if (match instanceof MethodReferenceMatch) {
+						if (filterOut) {
+							continue;
+						}
+						newList.add(match);
+					} else if (filterOut) {
+						newList.add(match);
+					}
+				}
+				if (newList.size() != matches.length) {
+					result.add(new SearchResultGroup(g.getResource(), newList.toArray(new SearchMatch[newList.size()])));
+				} else {
+					result.add(g);
+				}
+			}
+			return result.toArray(new SearchResultGroup[result.size()]);
+		} else {
+			return grouped;
+		}
+
 	}
 
 	@Override
@@ -954,20 +1011,23 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	private void addFieldAccessorOccurrences(IProgressMonitor pm, String editName, String newAccessorName, RefactoringStatus status) throws CoreException {
 		Assert.isTrue(fField.exists());
-
+		String fieldName= fField.getElementName();
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fField.getDeclaringType());
-		String patternStr= getCurrentElementQualifier() + '.' + fField.getElementName();
-		SearchPattern pattern= SearchPattern.createPattern(patternStr, IJavaSearchConstants.METHOD,
-				IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH);
-		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(
-				pattern, scope, new MethodOccurenceCollector(fField.getElementName()), pm, status);
-		for (SearchResultGroup groupedResult : groupedResults) {
+
+		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getCurrentElementName()));
+		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
+
+		SearchResultGroup[] result= RefactoringSearchEngine.search(createSearchPattern(), scope,
+				new CuCollectingSearchRequestor(binaryRefs), pm, status);
+		binaryRefs.addErrorIfNecessary(status);
+		result= filterAccessorMethods(result, false);
+		for (SearchResultGroup groupedResult : result) {
 			ICompilationUnit cu= groupedResult.getCompilationUnit();
 			if (cu == null)
 				continue;
 			SearchMatch[] results= groupedResult.getSearchResults();
 			for (SearchMatch searchResult : results) {
-				TextEdit edit= new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), newAccessorName);
+				TextEdit edit= new ReplaceEdit(searchResult.getOffset(), fieldName.length(), newAccessorName);
 				addTextEdit(fChangeManager.get(cu), editName, edit);
 			}
 		}

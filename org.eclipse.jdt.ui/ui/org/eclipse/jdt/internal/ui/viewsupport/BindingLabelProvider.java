@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -167,7 +167,9 @@ public class BindingLabelProvider extends LabelProvider {
 			if (inner)
 				return getInnerInterfaceImageDescriptor(binding.getModifiers());
 			return getInterfaceImageDescriptor(binding.getModifiers());
-		} else if (binding.isClass()) {
+		} else if (binding.isRecord())
+			return JavaPluginImages.DESC_OBJS_RECORD;
+		else if (binding.isClass()) {
 			if ((flags & JavaElementImageProvider.LIGHT_TYPE_ICONS) != 0)
 				return JavaPluginImages.DESC_OBJS_CLASSALT;
 			if (inner)

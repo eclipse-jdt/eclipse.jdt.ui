@@ -22,15 +22,11 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 
-import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
-
 public final class PrimitiveByteRatherThanWrapperFinder extends AbstractPrimitiveRatherThanWrapperFinder {
-	public PrimitiveByteRatherThanWrapperFinder(List<CompilationUnitRewriteOperation> ops) {
+	public PrimitiveByteRatherThanWrapperFinder(final List<CompilationUnitRewriteOperation> ops) {
 		fResult= ops;
 	}
 
@@ -99,10 +95,5 @@ public final class PrimitiveByteRatherThanWrapperFinder extends AbstractPrimitiv
 		default:
 			return false;
 		}
-	}
-
-	@Override
-	public void refactorWrapper(VariableDeclarationStatement node) {
-		fResult.add(new PrimitiveRatherThanWrapperOperation(node, MultiFixMessages.PrimitiveRatherThanWrapperCleanUp_description, PrimitiveType.BYTE));
 	}
 }
