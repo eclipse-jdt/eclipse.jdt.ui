@@ -2504,7 +2504,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, nType, null);
 			DimensionRewrite.removeAllChildren(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 		}
-		
+
 		ListRewrite listRewriter= rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
 		listRewriter.insertAt(newStatement, insertIndex, null);
 		resultingCollections.add(proposal);
@@ -4187,8 +4187,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				VariableDeclarationStatement varDeclaration= ast.newVariableDeclarationStatement(varFragment);
 				Type varType;
 				if (initializerIsArray) {
-					Type copiedType= DimensionRewrite.copyTypeAndAddDimensions(parameter.getType(), parameter.extraDimensions(), rewrite);
-					varType= ASTNodeFactory.newArrayType(copiedType);
+					if (parameter.getType().isVar()) {
+						varType= ASTNodeFactory.newType(ast, "var"); //$NON-NLS-1$
+					} else {
+						Type copiedType= DimensionRewrite.copyTypeAndAddDimensions(parameter.getType(), parameter.extraDimensions(), rewrite);
+						varType= ASTNodeFactory.newArrayType(copiedType);
+					}
 				} else {
 					ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);

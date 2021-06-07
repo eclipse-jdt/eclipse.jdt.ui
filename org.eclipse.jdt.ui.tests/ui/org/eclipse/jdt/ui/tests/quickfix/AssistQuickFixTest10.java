@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 IBM Corporation and others.
+ * Copyright (c) 2018, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 
 public class AssistQuickFixTest10 extends QuickFixTest {
@@ -53,6 +54,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
     public ProjectTestSetup projectSetup= new Java10ProjectTestSetup();
 
 	private static final Class<?>[] TYPE_CHANGE_PROPOSAL_TYPE= { TypeChangeCorrectionProposal.class };
+	private static final Class<?>[] LINKED_PROPOSAL_TYPE= { LinkedCorrectionProposal.class };
 
 	private IJavaProject fJProject1;
 
@@ -443,6 +445,46 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 
+	}
+
+	@Test
+	public void testConvertToForUsingIndexWithVar() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("public class Cls {\n");
+		buf.append("  public void foo() {\n");
+	    buf.append("    for (var y : new int[0]) {\n");
+	    buf.append("      System.out.println(y);\n");
+	    buf.append("    }\n");
+	    buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("for");
+
+		AssistContext context= getCorrectionContext(cu, offset, 3);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= getExpectedProposals(collectAssists(context, false), LINKED_PROPOSAL_TYPE);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("public class Cls {\n");
+		buf.append("  public void foo() {\n");
+	    buf.append("    var is = new int[0];\n");
+	    buf.append("    for (int i = 0; i < is.length; i++) {\n");
+	    buf.append("        var y = is[i];\n");
+	    buf.append("        System.out.println(y);\n");
+	    buf.append("    }\n");
+	    buf.append("  }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
 
 	private static final ArrayList<IJavaCompletionProposal> getExpectedProposals(ArrayList<IJavaCompletionProposal> proposals, Class<?>[] expectedTypes) {
