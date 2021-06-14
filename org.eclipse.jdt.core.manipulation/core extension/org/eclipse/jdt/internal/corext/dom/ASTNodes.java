@@ -2129,6 +2129,9 @@ public class ASTNodes {
 
 		} else if (locationInParent == SwitchStatement.EXPRESSION_PROPERTY) {
 			final ITypeBinding discriminentType= expression.resolveTypeBinding();
+			if (discriminentType == null) {
+				return null;
+			}
 			if (discriminentType.isPrimitive() || discriminentType.isEnum()
 					|| discriminentType.getQualifiedName().equals(String.class.getCanonicalName())) {
 				return discriminentType;
