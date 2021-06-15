@@ -3594,4 +3594,65 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
+
+	@Test
+	public void testOrganizeImportsBug573629() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class TestOrganizeImports {\n" //
+				+ "    public void foo(int a, List<String> list) {\n" //
+				+ "        label_1:\n" //
+				+ "        switch (a) {\n" //
+				+ "            case 0:\n" //
+				+ "                while (true) {\n" //
+				+ "                    int len = 0;\n" //
+				+ "                    for (int i = 0; i < list.size(); ++i) {\n" //
+				+ "                        String s = list.get(i);\n" //
+				+ "                        len += s.length();\n" //
+				+ "                    }\n" //
+				+ "                    if (len < 100) {\n"
+				+ "                        break label_1;\n" //
+				+ "                    }\n" //
+				+ "                    break;\n" //
+				+ "                }\n" //
+				+ "                break;\n" //
+				+ "            default:\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestOrganizeImports.java", sample, false, null);
+
+		enable(CleanUpConstants.ORGANIZE_IMPORTS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class TestOrganizeImports {\n" //
+				+ "    public void foo(int a, List<String> list) {\n" //
+				+ "        label_1:\n" //
+				+ "        switch (a) {\n" //
+				+ "            case 0:\n" //
+				+ "                while (true) {\n" //
+				+ "                    int len = 0;\n" //
+				+ "                    for (String s : list) {\n" //
+				+ "                        len += s.length();\n" //
+				+ "                    }\n" //
+				+ "                    if (len < 100) {\n"
+				+ "                        break label_1;\n" //
+				+ "                    }\n" //
+				+ "                    break;\n" //
+				+ "                }\n" //
+				+ "                break;\n" //
+				+ "            default:\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
 }
