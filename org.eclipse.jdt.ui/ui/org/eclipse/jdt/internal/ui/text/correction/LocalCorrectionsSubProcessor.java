@@ -51,9 +51,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -149,6 +151,7 @@ import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
@@ -1300,6 +1303,55 @@ public class LocalCorrectionsSubProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CHANGE_CLASS_TO_INTERFACE, image);
 			proposals.add(proposal);
 		}
+	}
+
+	public static void addSealedAsDirectSuperTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return;
+		}
+		if (!ASTHelper.isSealedTypeSupportedInAST(selectedNode.getAST())) {
+			return;
+		}
+
+		while (selectedNode.getParent() instanceof Type) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (selectedNode.getLocationInParent() != TypeDeclaration.PERMITS_TYPES_PROPERTY) {
+			return;
+		}
+		TypeDeclaration sealedType= (TypeDeclaration) selectedNode.getParent();
+
+		IJavaElement permittedTypeElement= null;
+		if (selectedNode instanceof SimpleType) {
+			ITypeBinding typeBinding= ((SimpleType) selectedNode).resolveBinding();
+			if (typeBinding != null) {
+				permittedTypeElement= typeBinding.getJavaElement();
+			}
+		}
+		if (!(permittedTypeElement instanceof IType)) {
+			return;
+		}
+
+		ICompilationUnit compilationUnit= ((IType) permittedTypeElement).getCompilationUnit();
+		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(compilationUnit);
+		TypeDeclaration declaration= ASTNodeSearchUtil.getTypeDeclarationNode((IType) permittedTypeElement, cuRewrite.getRoot());
+		if (declaration == null) {
+			return;
+		}
+
+		AST ast= declaration.getAST();
+		String sealedTypeName= sealedType.getName().getIdentifier();
+		Type type= ast.newSimpleType(ast.newSimpleName(sealedTypeName));
+
+		ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+		astRewrite.getListRewrite(declaration, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, null);
+
+		String permittedTypeName= problem.getProblemArguments()[0];
+		String label= Messages.format(CorrectionMessages.localCorrectionsSubProcessor_declareSealedAsDirectSuperInterface_description, new String[] { sealedTypeName, permittedTypeName });
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, compilationUnit, astRewrite, IProposalRelevance.DECLARE_SEALED_AS_DIRECT_SUPER_TYPE, image);
+		proposals.add(proposal);
 	}
 
 	public static void getUnreachableCodeProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -2533,4 +2585,5 @@ public class LocalCorrectionsSubProcessor {
 
 	private LocalCorrectionsSubProcessor() {
 	}
+
 }
