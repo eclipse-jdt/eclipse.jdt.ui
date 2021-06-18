@@ -150,9 +150,26 @@ public class InlineConstantRefactoring extends Refactoring {
 					return false;
 
 				ITypeBinding onesContainerBinding= getTypeBindingForTypeDeclaration(onesContainer);
+				if (one instanceof SimpleName) {
+					IBinding oneTypeBinding= ((SimpleName)one).resolveBinding();
+					if (oneTypeBinding instanceof IVariableBinding) {
+						ITypeBinding onesDeclaringClassBinding= ((IVariableBinding)oneTypeBinding).getDeclaringClass();
+						if (onesDeclaringClassBinding != null) {
+							onesContainerBinding= onesDeclaringClassBinding;
+						}
+					}
+				} else if (one instanceof MethodInvocation) {
+					IMethodBinding oneMethodBinding= ((MethodInvocation)one).resolveMethodBinding();
+					if (oneMethodBinding != null) {
+						ITypeBinding onesDeclaringClassBinding= oneMethodBinding.getDeclaringClass();
+						if (onesDeclaringClassBinding != null) {
+							onesContainerBinding= onesDeclaringClassBinding;
+						}
+					}
+				}
 				ITypeBinding othersContainerBinding= getTypeBindingForTypeDeclaration(othersContainer);
 
-				Assert.isNotNull(onesContainerBinding);
+
 				Assert.isNotNull(othersContainerBinding);
 
 				String onesKey= onesContainerBinding.getKey();

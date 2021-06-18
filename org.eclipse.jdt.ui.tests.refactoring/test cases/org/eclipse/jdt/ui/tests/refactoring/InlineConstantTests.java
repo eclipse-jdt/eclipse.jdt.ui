@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -387,6 +387,16 @@ public class InlineConstantTests extends GenericRefactoringTest {
 	@Test
 	public void test43() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434747
 		helper1("p.A", 4, 39, 4, 40, true, true);
+	}
+
+	@Test
+	public void test44() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=221003
+		helper1(new String[] {"p1.A", "p2.B"}, "p2.B", 8, 33, 8, 40, true, true);
+	}
+
+	@Test
+	public void test45() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=221003
+		helper1(new String[] {"p1.A", "p2.B"}, "p2.B", 8, 33, 8, 40, true, true);
 	}
 
 	// -- testing failing preconditions
