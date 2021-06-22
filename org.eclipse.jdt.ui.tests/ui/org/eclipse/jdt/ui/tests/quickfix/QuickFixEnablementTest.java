@@ -68,7 +68,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 		// quick fix is contributed only for files with name 'A.java' in a 1.5 project
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -84,7 +84,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 		String[] previewContents= getPreviewContents(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -100,7 +100,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 	public void testContributedQuickFix2() throws Exception {
 		// quick fix is contributed only for files with name 'A.java' in a 1.5 project
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -121,7 +121,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 		assertNumberOfProposals(collectCorrections(cu, getASTRoot(cu)), 0); // wrong version
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class B {\n");
 		buf.append("    public void foo() {\n");

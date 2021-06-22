@@ -83,7 +83,7 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 	@Test
 	public void testRemoveTypeParameter() throws Exception {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("import java.util.*;\n");
 			buf.append("public class A {\n");
 			buf.append("}\n");
@@ -98,7 +98,7 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 			assertNumberOfProposals(proposals, 1);
 
 			String[] expected= new String[1];
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("import java.util.*;\n");
 			buf.append("public class A {\n");
 			buf.append("}\n");
@@ -112,7 +112,7 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 	@Test
 	public void testRemoveTypeParameter2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("import java.util.*;\n");
 		buf.append("public class A {\n");
 		buf.append("}\n");
@@ -127,7 +127,7 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("import java.util.*;\n");
 		buf.append("public class A {\n");
 		buf.append("}\n");
@@ -141,7 +141,7 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 	@Test
 	public void testInferDiamondArguments() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("import java.util.*;\n");
 		buf.append("public class A {\n");
 		buf.append("    void foo() {\n");
@@ -157,7 +157,7 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("import java.util.*;\n");
 		buf.append("public class A {\n");
 		buf.append("    void foo() {\n");

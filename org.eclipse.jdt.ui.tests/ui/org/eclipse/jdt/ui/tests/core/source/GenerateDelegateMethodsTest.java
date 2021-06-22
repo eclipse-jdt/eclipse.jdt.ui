@@ -816,7 +816,7 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	@Test
 	public void insertAt() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class A  {\n");
@@ -841,7 +841,7 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		final int NUM_MEMBERS= 6;
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("public void run() {\n");
 		buf.append("		x.run();\n");
 		buf.append("	}");

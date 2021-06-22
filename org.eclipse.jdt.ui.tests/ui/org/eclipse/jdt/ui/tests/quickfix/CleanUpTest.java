@@ -27362,10 +27362,10 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testRemoveRedundantModifiers () throws Exception {
-		StringBuffer buf;
+		StringBuilder buf;
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public abstract interface IFoo {\n");
 		buf.append("  public static final int MAGIC_NUMBER = 646;\n");
@@ -27375,7 +27375,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("IFoo.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public interface IFoo {\n");
 		buf.append("  int MAGIC_NUMBER = 646;\n");
@@ -27385,7 +27385,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		String expected1 = buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public final class Sealed {\n");
 		buf.append("  public final void foo () {};\n");
@@ -27395,7 +27395,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("Sealed.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public final class Sealed {\n");
 		buf.append("  public void foo () {};\n");
@@ -27407,7 +27407,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Anonymous class within an interface:
 		// public keyword must not be removed (see bug#536612)
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public interface X {\n");
 		buf.append("  void B();\n");
@@ -27442,7 +27442,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		// public modifier must not be removed from enum methods
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public interface A {\n");
 		buf.append("  public static enum B {\n");
@@ -27456,7 +27456,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected5 = buf.toString().replace("static enum", "enum");
 
 		// Bug#551038: final keyword must not be removed from method with varargs
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public final class SafeVarargsExample {\n");
 		buf.append("  @SafeVarargs\n");
@@ -27467,7 +27467,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu6= pack1.createCompilationUnit("SafeVarargsExample.java", buf.toString(), false, null);
 
 		// Bug#553608: modifiers public static final must not be removed from inner enum within interface
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public interface Foo {\n");
 		buf.append("  enum Bar {\n");

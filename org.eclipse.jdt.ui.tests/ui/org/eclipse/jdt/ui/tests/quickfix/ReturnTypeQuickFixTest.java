@@ -76,7 +76,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testReturnTypeMissingWithSimpleType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
@@ -101,7 +101,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				String preview= getPreviewContent(proposal);
 
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("import java.util.Enumeration;\n");
 				buf.append("import java.util.Vector;\n");
@@ -117,7 +117,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("import java.util.Vector;\n");
 				buf.append("public class E {\n");
@@ -134,7 +134,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testReturnTypeMissingWithVoid() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public foo() {\n");
@@ -158,7 +158,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				String preview= getPreviewContent(proposal);
 
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    public void foo() {\n");
@@ -172,7 +172,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    public E() {\n");
@@ -189,7 +189,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testReturnTypeMissing() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public interface E {\n");
 		buf.append("    public foo();\n");
@@ -204,7 +204,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public interface E {\n");
 		buf.append("    public void foo();\n");
@@ -219,7 +219,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testReturnTypeMissingWithVoid2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public foo() {\n");
@@ -246,7 +246,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				String preview= getPreviewContent(proposal);
 
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    public void foo() {\n");
@@ -263,7 +263,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    public E() {\n");
@@ -281,7 +281,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testVoidMissingInAnonymousType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -304,7 +304,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -323,7 +323,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testReturnTypeMissingWithNull() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public foo() {\n");
@@ -347,7 +347,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				String preview= getPreviewContent(proposal);
 
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    public Object foo() {\n");
@@ -361,7 +361,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    public E() {\n");
@@ -376,7 +376,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testReturnTypeMissingWithArrayType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public foo() {\n");
@@ -400,7 +400,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				String preview= getPreviewContent(proposal);
 
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    public int[][] foo() {\n");
@@ -414,7 +414,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) elem;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    public E() {\n");
@@ -429,7 +429,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testVoidMethodReturnsStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
@@ -449,7 +449,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 			ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import java.util.Vector;\n");
 			buf.append("public class E {\n");
@@ -464,7 +464,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 			ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import java.util.Vector;\n");
 			buf.append("public class E {\n");
@@ -480,7 +480,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testVoidMethodReturnsAnonymClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void getOperation() {\n");
@@ -499,7 +499,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public Runnable getOperation() {\n");
@@ -513,7 +513,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void getOperation() {\n");
@@ -528,7 +528,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testReturnTypeMissingWithWildcardSuper() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -546,7 +546,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -559,7 +559,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -575,7 +575,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testReturnTypeMissingWithWildcardExtends() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -594,7 +594,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -608,7 +608,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -625,7 +625,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testConstructorReturnsValue() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public E() {\n");
@@ -643,7 +643,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 			ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("\n");
 			buf.append("import java.util.Properties;\n");
@@ -659,7 +659,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 			ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
 			buf.append("    public E() {\n");
@@ -673,7 +673,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testVoidMethodReturnsWildcardSuper() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -691,7 +691,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -704,7 +704,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -720,7 +720,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testVoidMethodReturnsWildcardExtends() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -738,7 +738,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -751,7 +751,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -768,7 +768,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testCorrectReturnStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public Runnable getOperation() {\n");
@@ -785,7 +785,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public Runnable getOperation() {\n");
@@ -797,7 +797,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void getOperation() {\n");
@@ -925,7 +925,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testReturnVoid() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    /**\n");
@@ -947,7 +947,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    /**\n");
@@ -968,7 +968,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testCorrectReturnStatementForArray() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public int[][] getArray() {\n");
@@ -985,7 +985,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public int[][] getArray() {\n");
@@ -997,7 +997,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void getArray() {\n");
@@ -1012,7 +1012,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMethodWithConstructorName() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public int[][] E() {\n");
@@ -1029,7 +1029,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public E() {\n");
@@ -1042,7 +1042,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingReturnStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public int[][] getArray() {\n");
@@ -1058,7 +1058,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public int[][] getArray() {\n");
@@ -1070,7 +1070,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void getArray() {\n");
@@ -1084,7 +1084,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingReturnStatementWithCode() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int[] fArray;\n");
@@ -1103,7 +1103,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int[] fArray;\n");
@@ -1118,7 +1118,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int[] fArray;\n");
@@ -1135,7 +1135,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingReturnStatementWithCode2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public boolean isVisible() {\n");
@@ -1155,7 +1155,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public boolean isVisible() {\n");
@@ -1171,7 +1171,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		proposal= (ASTRewriteCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void isVisible() {\n");
@@ -1189,7 +1189,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingReturnStatementWithCode3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public String getDebugInfo() {\n");
@@ -1206,7 +1206,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public String getDebugInfo() {\n");
@@ -1222,7 +1222,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingReturnStatementWithCode4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public String getDebugInfo() {\n");
@@ -1239,7 +1239,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public String getDebugInfo() {\n");
@@ -1256,7 +1256,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMethodInEnum_bug239887() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("enum Bug {X;\n");
 		buf.append("        wrap(){}\n");
@@ -1270,14 +1270,14 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("enum Bug {X;\n");
 		buf.append("        void wrap(){}\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("enum Bug {X;\n");
 		buf.append("        Bug(){}\n");

@@ -972,7 +972,7 @@ public class MoveTest extends GenericRefactoringTest {
 	public void testDestination_yes_cuToOtherPackageBug549674() throws Exception {
 		ParticipantTesting.reset();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import q.Class1;\n");
@@ -986,13 +986,13 @@ public class MoveTest extends GenericRefactoringTest {
 		buf.append("}\n");
 		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", buf.toString(), false, new NullProgressMonitor());
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package q;\n");
 		buf.append("public class Class1 {\n");
 		buf.append("}\n");
 		getPackageQ().createCompilationUnit("Class1.java", buf.toString(), false, new NullProgressMonitor());
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package q;\n");
 		buf.append("public class Class3 {\n");
 		buf.append("    public interface InnerClass3 {\n");
@@ -1012,7 +1012,7 @@ public class MoveTest extends GenericRefactoringTest {
 		ICompilationUnit newCu= getPackageQ().getCompilationUnit(toMove.getElementName());
 		assertTrue("new file does not exist after moving", newCu.exists());
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package q;\n");
 		buf.append("\n");
 		buf.append("import q.Class3.InnerClass3;\n");
@@ -1036,7 +1036,7 @@ public class MoveTest extends GenericRefactoringTest {
 	public void testDestination_yes_cuToOtherPackageBug21008() throws Exception {
 		ParticipantTesting.reset();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import q.*;\n");
@@ -1048,13 +1048,13 @@ public class MoveTest extends GenericRefactoringTest {
 		buf.append("}\n");
 		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", buf.toString(), false, new NullProgressMonitor());
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package q;\n");
 		buf.append("public class Class1 {\n");
 		buf.append("}\n");
 		getPackageQ().createCompilationUnit("Class1.java", buf.toString(), false, new NullProgressMonitor());
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package q;\n");
 		buf.append("public class Class3 {\n");
 		buf.append("    public interface InnerClass3 {\n");
@@ -1074,7 +1074,7 @@ public class MoveTest extends GenericRefactoringTest {
 		ICompilationUnit newCu= getPackageQ().getCompilationUnit(toMove.getElementName());
 		assertTrue("new file does not exist after moving", newCu.exists());
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package q;\n");
 		buf.append("\n");
 		buf.append("public class Class2 {\n");
@@ -1135,7 +1135,7 @@ public class MoveTest extends GenericRefactoringTest {
 	public void testDestination_yes_cuToOtherPackageWithMultiRootBug109145() throws Exception {
 		ParticipantTesting.reset();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("public class Class2 {\n");
 		buf.append("    Class1 c;\n");
@@ -1144,7 +1144,7 @@ public class MoveTest extends GenericRefactoringTest {
 
 		IPackageFragmentRoot testSrc= JavaProjectHelper.addSourceContainer(rts.getProject(), "testSrc");
 		IPackageFragment testP= testSrc.createPackageFragment("p", true, new NullProgressMonitor());
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("public class Class1 {\n");
 		buf.append("}\n");
@@ -1163,7 +1163,7 @@ public class MoveTest extends GenericRefactoringTest {
 		ICompilationUnit newCu= destination.getCompilationUnit(toMove.getElementName());
 		assertTrue("new file does not exist after moving", newCu.exists());
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p2;\n");
 		buf.append("\n");
 		buf.append("import p.Class1;\n");
@@ -1173,7 +1173,7 @@ public class MoveTest extends GenericRefactoringTest {
 		buf.append("}\n");
 		assertEqualLines(buf.toString(), newCu.getSource());
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("public class Class1 {\n");
 		buf.append("}\n");

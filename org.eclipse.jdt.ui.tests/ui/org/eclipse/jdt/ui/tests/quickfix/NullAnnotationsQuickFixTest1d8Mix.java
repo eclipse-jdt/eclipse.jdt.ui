@@ -119,7 +119,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 	@Test
 	public void testBug473068_elided() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testNullAnnotations", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package testNullAnnotations;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -149,7 +149,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package testNullAnnotations;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -175,7 +175,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package testNullAnnotations;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -207,7 +207,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 	@Test
 	public void testBug473068_explicit_type() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testNullAnnotations", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package testNullAnnotations;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -237,7 +237,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package testNullAnnotations;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -262,7 +262,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package testNullAnnotations;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -288,7 +288,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package testNullAnnotations;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");

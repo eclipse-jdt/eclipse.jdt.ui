@@ -178,7 +178,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -192,7 +192,7 @@ public class PropertiesFileQuickAssistTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
@@ -208,7 +208,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// Accessor class
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -228,7 +228,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -242,7 +242,7 @@ public class PropertiesFileQuickAssistTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
@@ -259,7 +259,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// Accessor class
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -280,7 +280,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -297,7 +297,7 @@ public class PropertiesFileQuickAssistTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		buf.append("Test_3=Hello3\n");
@@ -316,7 +316,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// Accessor class
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -339,7 +339,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -357,7 +357,7 @@ public class PropertiesFileQuickAssistTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		buf.append("Test_3=Hello3\n");
@@ -378,7 +378,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// Accessor class
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -403,7 +403,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -421,7 +421,7 @@ public class PropertiesFileQuickAssistTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_3=Hello3\n");
 		buf.append("Test_4=Hello4\n");
@@ -442,7 +442,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// Accessor class
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -468,7 +468,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class RandomName extends NLS {\n");
@@ -482,7 +482,7 @@ public class PropertiesFileQuickAssistTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("RandomName.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
@@ -498,7 +498,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// Accessor class
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class RandomName extends NLS {\n");
@@ -518,7 +518,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -532,7 +532,7 @@ public class PropertiesFileQuickAssistTest {
 		pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
@@ -548,7 +548,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_2=Hello2\n");
 		checkContentOfFile("property file", file, buf.toString());
 	}
@@ -558,7 +558,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -572,7 +572,7 @@ public class PropertiesFileQuickAssistTest {
 		pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
@@ -589,7 +589,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		checkContentOfFile("property file", file, buf.toString());
 	}
 
@@ -598,7 +598,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -614,7 +614,7 @@ public class PropertiesFileQuickAssistTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
@@ -630,7 +630,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// Accessor class
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -645,7 +645,7 @@ public class PropertiesFileQuickAssistTest {
 		checkContentOfCu("nls file", cu, buf.toString());
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_2=Hello2\n");
 		checkContentOfFile("property file", file, buf.toString());
 	}
@@ -655,7 +655,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -675,7 +675,7 @@ public class PropertiesFileQuickAssistTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		buf.append("Test_3=Hello3\n");
@@ -696,7 +696,7 @@ public class PropertiesFileQuickAssistTest {
 		proposal.apply(context.getDocument());
 
 		// Accessor class
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -714,7 +714,7 @@ public class PropertiesFileQuickAssistTest {
 		checkContentOfCu("nls file", cu, buf.toString());
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		buf.append("Test_5=Hello5\n");
@@ -727,7 +727,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -743,7 +743,7 @@ public class PropertiesFileQuickAssistTest {
 		pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		buf.append("    \n");
@@ -765,7 +765,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -781,7 +781,7 @@ public class PropertiesFileQuickAssistTest {
 		pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		buf.append("    \n");
@@ -803,7 +803,7 @@ public class PropertiesFileQuickAssistTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		// Accessor class
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -819,7 +819,7 @@ public class PropertiesFileQuickAssistTest {
 		pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
 		// property file
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		buf.append("    \n");

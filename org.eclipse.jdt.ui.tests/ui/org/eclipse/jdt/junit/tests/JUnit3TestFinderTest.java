@@ -62,7 +62,7 @@ public class JUnit3TestFinderTest {
 	@Test
 	public void testTestCase() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -75,7 +75,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest1, new String[] { "p.MyTest" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.MyTest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -88,7 +88,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest2, new String[] { "p.MySuperTest" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.MySuperTest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -102,7 +102,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest3, new String[] { "p.InvisibleTest" });
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.InvisibleTest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -117,7 +117,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest4, new String[] { "p.Outer.InnerTest" });
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "p.Outer.InnerTest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -142,7 +142,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(invalidTests[0].getCompilationUnit(), new String[] {});
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -155,7 +155,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("\n");
@@ -178,7 +178,7 @@ public class JUnit3TestFinderTest {
 	@Test
 	public void testSuite() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("\n");
@@ -192,7 +192,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest1, new String[] { "p.SuiteClass" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.SuiteClass" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("\n");
@@ -206,7 +206,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest2, new String[] { "p.AbstractSuiteClass" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.AbstractSuiteClass" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("\n");
@@ -220,7 +220,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest3, new String[] { "p.InvisibleSuiteClass" });
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.InvisibleSuiteClass" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("\n");
@@ -236,7 +236,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest4, new String[] { "p.SuiteOuter.InnerSuite" });
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "p.SuiteOuter.InnerSuite" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -261,7 +261,7 @@ public class JUnit3TestFinderTest {
 		}
 		assertTestFound(invalidTests[0].getCompilationUnit(), new String[] {});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("\n");
@@ -275,7 +275,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("\n");
@@ -289,7 +289,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(invalidTest2, new String[] {});
 		assertTestFound(invalidTest2.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("\n");
@@ -313,7 +313,7 @@ public class JUnit3TestFinderTest {
 	@Test
 	public void testTestInterface() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("import junit.framework.TestResult;\n");
@@ -330,7 +330,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest1, new String[] { "p.MyITest" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.MyITest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class MySuperITest extends MyITest {\n");
@@ -342,7 +342,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(validTest2, new String[] { "p.MySuperITest" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.MySuperITest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("\n");
@@ -353,7 +353,7 @@ public class JUnit3TestFinderTest {
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestResult;\n");
 		buf.append("\n");

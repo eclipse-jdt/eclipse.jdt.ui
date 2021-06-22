@@ -1468,7 +1468,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 	public void testSurroundWithRunnableBug133560() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -1488,7 +1488,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -1508,7 +1508,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 	public void testSurroundWithRunnableBug233278() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("  {\n");
@@ -1535,7 +1535,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("  {\n");
@@ -1560,7 +1560,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 	public void testSurroundWithRunnableBug138323() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<I> {\n");
 		buf.append("    public void foo() {\n");
@@ -1578,7 +1578,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<I> {\n");
 		buf.append("    public void foo() {\n");
@@ -1596,7 +1596,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 	public void testSurroundWithBug162549() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void m() {\n");
@@ -1622,7 +1622,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void m() {\n");

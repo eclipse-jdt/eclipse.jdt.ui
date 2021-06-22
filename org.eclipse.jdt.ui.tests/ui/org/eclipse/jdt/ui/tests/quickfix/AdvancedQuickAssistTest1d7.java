@@ -92,7 +92,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertSwitchToIf() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -119,7 +119,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -134,7 +134,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -155,7 +155,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -178,7 +178,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -233,7 +233,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -256,7 +256,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -275,7 +275,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -304,7 +304,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -327,7 +327,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -346,7 +346,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -375,7 +375,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -396,7 +396,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -412,7 +412,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -438,7 +438,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	public void testReplaceReturnConditionWithIf4() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=112443
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Collections;\n");
 		buf.append("import java.util.List;\n");
@@ -455,7 +455,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Collections;\n");
 		buf.append("import java.util.List;\n");
@@ -475,7 +475,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceReturnIfWithCondition3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.List;\n");
@@ -497,7 +497,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.List;\n");
@@ -515,7 +515,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceReturnIfWithCondition4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Collections;\n");
 		buf.append("import java.util.Map;\n");
@@ -537,7 +537,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.util.Collections;\n");
@@ -556,7 +556,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public static boolean isOdd(String number) {\n");
@@ -577,7 +577,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public static boolean isOdd(String number) {\n");

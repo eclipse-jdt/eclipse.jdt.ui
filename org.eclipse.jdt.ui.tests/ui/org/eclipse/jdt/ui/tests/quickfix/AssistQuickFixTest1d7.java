@@ -99,7 +99,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertToMultiCatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -121,7 +121,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -140,7 +140,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertToMultiCatch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -162,7 +162,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -182,7 +182,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertToMultiCatch3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -205,7 +205,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -307,7 +307,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUnrollMultiCatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -327,7 +327,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -348,7 +348,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUnrollMultiCatch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -370,7 +370,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -393,7 +393,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUnrollMultiCatch3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -415,7 +415,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -438,7 +438,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUnrollMultiCatch4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -462,7 +462,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -512,7 +512,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	public void testUnrollMultiCatch6() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285#c12
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -535,7 +535,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -565,7 +565,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceMultiCatchClauseWithThrows1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -584,7 +584,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() throws IllegalArgumentException, NullPointerException {\n");
@@ -593,7 +593,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -636,7 +636,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceMultiCatchClauseWithThrows3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -655,7 +655,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -667,7 +667,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() throws IllegalArgumentException {\n");
@@ -679,7 +679,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -698,7 +698,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceMultiCatchClauseWithThrows4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -721,7 +721,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -737,7 +737,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -753,7 +753,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -777,7 +777,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testPickoutTypeFromMulticatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -802,7 +802,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -812,7 +812,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -822,7 +822,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -839,7 +839,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -869,7 +869,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testPickoutTypeFromMulticatch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -893,7 +893,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -909,7 +909,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -925,7 +925,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");
 		buf.append("public class E {\n");
@@ -1004,7 +1004,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	public void testInferDiamondArguments() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.HashMap;\n");
 		buf.append("import java.util.Map;\n");
@@ -1025,7 +1025,7 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.HashMap;\n");
 		buf.append("import java.util.Map;\n");

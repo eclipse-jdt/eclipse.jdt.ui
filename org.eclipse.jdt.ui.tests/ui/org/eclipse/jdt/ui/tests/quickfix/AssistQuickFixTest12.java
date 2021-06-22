@@ -61,14 +61,14 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public static void foo(Day day) {\n");
@@ -93,7 +93,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public static void foo(Day day) {\n");
@@ -127,14 +127,14 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public static void foo(Day day) {\n");
@@ -157,7 +157,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public static void foo(Day day) {\n");

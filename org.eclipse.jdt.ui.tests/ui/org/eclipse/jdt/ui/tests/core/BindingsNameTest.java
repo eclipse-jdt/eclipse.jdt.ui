@@ -59,13 +59,13 @@ public class BindingsNameTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class X {\n");
 		buf.append("}\n");
 		pack0.createCompilationUnit("X.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("import X;\n");
 		buf.append("public class E {\n");

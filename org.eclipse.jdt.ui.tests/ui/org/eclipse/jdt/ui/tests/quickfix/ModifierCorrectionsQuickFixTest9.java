@@ -82,7 +82,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 	@Test
 	public void testAddSafeVarargs1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
@@ -99,7 +99,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
@@ -116,7 +116,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 	@Test
 	public void testAddSafeVarargs2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public interface E {\n");
@@ -133,7 +133,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public interface E {\n");
@@ -156,7 +156,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    @Deprecated(since=\"3\")\n");
@@ -180,7 +180,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    @Deprecated(since=\"3\")\n");
@@ -199,7 +199,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		buf.append("\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    @Deprecated(since=\"3\")\n");
@@ -229,7 +229,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    @Deprecated(forRemoval=true)\n");
@@ -253,7 +253,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    @Deprecated(forRemoval=true)\n");
@@ -272,7 +272,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		buf.append("\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    @Deprecated(forRemoval=true)\n");
@@ -302,7 +302,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    @Deprecated(since=\"4.2\",forRemoval=true)\n");
@@ -326,7 +326,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    @Deprecated(since=\"4.2\",forRemoval=true)\n");
@@ -345,7 +345,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		buf.append("\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class E {\n");
 		buf.append("    @Deprecated(since=\"4.2\",forRemoval=true)\n");

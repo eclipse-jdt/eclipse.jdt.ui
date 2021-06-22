@@ -340,7 +340,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class C {\n");
 		buf.append("  protected static class C1 {\n");
@@ -352,7 +352,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 
 		buf.append("import test2.A.A1;\n");
@@ -413,7 +413,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class C {\n");
@@ -427,7 +427,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -440,7 +440,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class C extends Vector {\n");
 		buf.append("}\n");
@@ -453,7 +453,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -468,7 +468,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -484,7 +484,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -499,7 +499,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.getPackageFragment("");
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
@@ -512,7 +512,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
@@ -523,7 +523,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.getPackageFragment("");
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class C extends Vector {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
@@ -535,7 +535,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("import java.util.Vector;\n");
 		buf.append("\n");
 		buf.append("public class C extends Vector {\n");
@@ -548,7 +548,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.getPackageFragment("");
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("import java.util.Set;\n");
 		buf.append("\n");
 		buf.append("public class C extends Vector {\n");
@@ -562,7 +562,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("import java.util.Vector;\n");
 		buf.append("\n");
 		buf.append("public class C extends Vector {\n");
@@ -575,7 +575,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\r\n");
 		buf.append("\r\n");
 		buf.append("import x;\r\n");
@@ -593,7 +593,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\r\n");
 		buf.append("\r\n");
 		buf.append("import java.util.Vector; // comment\r\n");
@@ -609,7 +609,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class List {\n");
 		buf.append("}\n");
@@ -617,7 +617,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -642,7 +642,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -664,7 +664,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class List {\n");
 		buf.append("}\n");
@@ -672,7 +672,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("// comment 1\n");
@@ -698,7 +698,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("// comment 1\n");
@@ -729,19 +729,19 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class List {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class List2 {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List2.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class List3 {\n");
 		buf.append("}\n");
@@ -749,7 +749,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -780,7 +780,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -805,14 +805,14 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class List {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -837,7 +837,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 1, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -859,20 +859,20 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class List {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class Set {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("Set.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -897,7 +897,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 1, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -920,21 +920,21 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class List {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
 
 		IPackageFragment pack3= sourceFolder.createPackageFragment("pack3", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack3;\n");
 		buf.append("public class List {\n");
 		buf.append("}\n");
 		pack3.createCompilationUnit("List.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -959,7 +959,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 1, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -989,13 +989,13 @@ public class ImportOrganizeTest extends CoreTests {
 			IPackageFragmentRoot sourceFolder2= JavaProjectHelper.addSourceContainer(project2, "src");
 
 			IPackageFragment pack22= sourceFolder2.createPackageFragment("packx", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package pack;\n");
 			buf.append("public class Vector {\n");
 			buf.append("}\n");
 			pack22.createCompilationUnit("List.java", buf.toString(), false, null);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package pack;\n");
 			buf.append("public class Set {\n");
 			buf.append("}\n");
@@ -1004,14 +1004,14 @@ public class ImportOrganizeTest extends CoreTests {
 			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 			IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package pack;\n");
 			buf.append("public class List {\n");
 			buf.append("}\n");
 			pack2.createCompilationUnit("List.java", buf.toString(), false, null);
 
 			IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package pack1;\n");
 			buf.append("\n");
 			buf.append("import java.util.Set;\n");
@@ -1036,7 +1036,7 @@ public class ImportOrganizeTest extends CoreTests {
 			OrganizeImportsOperation op= createOperation(cu, order, 1, false, true, true, query);
 			op.run(null);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package pack1;\n");
 			buf.append("\n");
 			buf.append("import java.util.*;\n");
@@ -1062,14 +1062,14 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class List1 {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -1092,7 +1092,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");  // no imports from default in compatibility >= 1.4
@@ -1112,19 +1112,19 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class List1 {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("public class List2 {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List2.java", buf.toString(), false, null);
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");  // no imports from default in compatibility >= 1.4
@@ -1148,7 +1148,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -1170,7 +1170,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1192,7 +1192,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -1215,14 +1215,14 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public class List1 {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1241,7 +1241,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.io.File;\n");
@@ -1267,14 +1267,14 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public class List1 {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1293,7 +1293,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -1319,7 +1319,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public interface MyInterface {\n");
 		buf.append("	public interface MyInnerInterface {\n");
@@ -1327,7 +1327,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		pack2.createCompilationUnit("MyInterface.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("import pack0.MyInterface.MyInnerInterface;\n");
@@ -1345,7 +1345,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("public class MyClass implements MyInterface {\n");
@@ -1361,7 +1361,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class ClusterSingletonStepped {\n");
 		buf.append("	public interface SingletonStep {\n");
@@ -1370,7 +1370,7 @@ public class ImportOrganizeTest extends CoreTests {
 		pack1.createCompilationUnit("ClusterSingletonStepped.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("import pack1.ClusterSingletonStepped;\n");
@@ -1388,7 +1388,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("import pack1.ClusterSingletonStepped;\n");
@@ -1405,7 +1405,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class ClusterSingletonStepped {\n");
 		buf.append("	public interface SingletonStep {\n");
@@ -1414,7 +1414,7 @@ public class ImportOrganizeTest extends CoreTests {
 		pack1.createCompilationUnit("ClusterSingletonStepped.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("import pack1.ClusterSingletonStepped;\n");
@@ -1432,7 +1432,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("import pack1.ClusterSingletonStepped;\n");
@@ -1448,7 +1448,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public class A {\n");
 		buf.append("	public class AX {\n");
@@ -1456,7 +1456,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		pack2.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("import pack0.A.AX;\n");
@@ -1473,7 +1473,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("public class B extends A {\n");
@@ -1488,7 +1488,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class A {\n");
 		buf.append("	public class AX {\n");
@@ -1498,7 +1498,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("import pack1.A;\n");
@@ -1517,7 +1517,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("import pack1.A;\n");
@@ -1535,7 +1535,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("class A {\n");
@@ -1555,7 +1555,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("class A {\n");
@@ -1575,7 +1575,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public interface A<X> {\n");
 		buf.append("	public interface AX<Y> {\n");
@@ -1585,7 +1585,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("import pack1.A;\n");
@@ -1603,7 +1603,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("import pack1.A;\n");
@@ -1621,7 +1621,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment packUtil= sourceFolder.createPackageFragment("util", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package util;\n");
 		buf.append("\n");
 		buf.append("public interface Map \n");
@@ -1630,7 +1630,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		packUtil.createCompilationUnit("Map.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package util;\n");
 		buf.append("\n");
 		buf.append("public interface HashMap implements Map {\n");
@@ -1640,7 +1640,7 @@ public class ImportOrganizeTest extends CoreTests {
 		packUtil.createCompilationUnit("HashMap.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import util.HashMap;\n");
@@ -1668,7 +1668,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public abstract class Parent<E> {\n");
 		buf.append("    public static class Inner {\n");
@@ -1681,7 +1681,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack0.Parent;\n");
@@ -1737,7 +1737,7 @@ public class ImportOrganizeTest extends CoreTests {
 		body.append("}\n");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append(body.toString());
@@ -1748,7 +1748,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;\n");
@@ -1809,7 +1809,7 @@ public class ImportOrganizeTest extends CoreTests {
 		body.append("}\n");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append(body.toString());
@@ -1820,7 +1820,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, threshold, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -1877,7 +1877,7 @@ public class ImportOrganizeTest extends CoreTests {
 		body.append("}\n");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append(body.toString());
@@ -1888,7 +1888,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, threshold, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import com.misc.Class5;\n");
@@ -1909,7 +1909,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import static java.lang.System.out;\n");
@@ -1928,7 +1928,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.io.File;\n");
@@ -1949,7 +1949,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import static java.io.File.*;\n");
@@ -1968,7 +1968,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import static java.io.File.pathSeparator;\n");
@@ -1989,7 +1989,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public class Test1 {\n");
 		buf.append("	public static final <T> void assertNotEquals(final String msg, final T expected, final T toCheck) {\n");
@@ -1998,7 +1998,7 @@ public class ImportOrganizeTest extends CoreTests {
 		pack0.createCompilationUnit("Test1.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack0.Test1;\n");
@@ -2018,7 +2018,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack0.Test1;\n"); // no static import for 'assertNotEquals'
@@ -2036,7 +2036,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public class BasePanel<T extends Number> {\n");
 		buf.append("	public static void add2panel(String... s) {\n");
@@ -2044,7 +2044,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		pack0.createCompilationUnit("Test1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("public class ManufacturerMainPanel<T extends Number> extends BasePanel<T>{\n");
@@ -2061,7 +2061,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("public class ManufacturerMainPanel<T extends Number> extends BasePanel<T>{\n");
@@ -2077,7 +2077,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("\n");
 		buf.append("public abstract class Test<M>\n");
@@ -2097,7 +2097,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("\n");
 		buf.append("import java.util.Map;\n");
@@ -2118,7 +2118,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public enum E {\n");
 		buf.append("	A, B, C;\n");
@@ -2126,7 +2126,7 @@ public class ImportOrganizeTest extends CoreTests {
 		pack0.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack0.E;\n");
@@ -2148,7 +2148,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack0.E;\n"); // no import for E.A
@@ -2168,7 +2168,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("import java.util.List;\n");
@@ -2180,7 +2180,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.List;\n");
@@ -2243,7 +2243,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("\n");
 		buf.append("import static java.lang.Math.max;\n");
@@ -2264,7 +2264,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("\n");
 		buf.append("public class Test {\n");
@@ -2282,7 +2282,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("b", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package b;\n");
 		buf.append("\n");
 		buf.append("abstract public class Parent<T> {\n");
@@ -2291,7 +2291,7 @@ public class ImportOrganizeTest extends CoreTests {
 		pack0.createCompilationUnit("Parent.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("a", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package a;\n");
 		buf.append("\n");
 		buf.append("import b.Parent;\n");
@@ -2309,7 +2309,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package a;\n");
 		buf.append("\n");
 		buf.append("import b.Parent;\n"); 		// no static import for CONSTANT
@@ -2327,7 +2327,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("b", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package b;\n");
 		buf.append("\n");
 		buf.append("abstract public class Parent<T> {\n");
@@ -2336,7 +2336,7 @@ public class ImportOrganizeTest extends CoreTests {
 		pack0.createCompilationUnit("Parent.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("a", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package a;\n");
 		buf.append("\n");
 		buf.append("import b.Parent;\n");
@@ -2354,7 +2354,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package a;\n");
 		buf.append("\n");
 		buf.append("import b.Parent;\n"); 		// no static import for CONSTANT()
@@ -2372,7 +2372,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("a", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package a;\n");
 		buf.append("\n");
 		buf.append("class Test<T> {\n");
@@ -2392,7 +2392,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package a;\n");
 		buf.append("\n");                            // no static import for 'TEST'
 		buf.append("class Test<T> {\n");
@@ -2414,7 +2414,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -2430,7 +2430,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import static java.lang.Math.max;\n");
@@ -2449,7 +2449,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -2467,7 +2467,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -2491,7 +2491,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -2511,7 +2511,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -2535,7 +2535,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("/**comment1*/\n");
 		buf.append("/*lead1*/import java.util.*;// trail 1\n");
@@ -2555,7 +2555,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("/**comment1*/\n");
 		buf.append("/*lead1*/\n");
@@ -2581,7 +2581,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.HashMap;\n");
@@ -2600,7 +2600,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -2624,7 +2624,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -2645,7 +2645,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.net.Socket;\n");
@@ -2671,7 +2671,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.BitSet;\n");
@@ -2691,7 +2691,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -2715,7 +2715,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.BitSet;\n");
@@ -2737,7 +2737,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -2761,7 +2761,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.BitSet;\n");
@@ -2785,7 +2785,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -2809,7 +2809,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.BitSet;\n");
@@ -2834,7 +2834,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -2860,7 +2860,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("import java.util.Collection;\n");
 		buf.append("public class A {\n");
@@ -2874,7 +2874,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("import java.util.Collection;\n");
 		buf.append("public class A {\n");
@@ -2888,7 +2888,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public class A {\n");
 		buf.append("    public <T extends Collection> void method1() { }\n");
@@ -2901,7 +2901,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("\n");
 		buf.append("import java.util.Collection;\n");
@@ -2917,7 +2917,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public enum MyEnum {\n");
 		buf.append("	A, B, C\n");
@@ -2925,7 +2925,7 @@ public class ImportOrganizeTest extends CoreTests {
 		pack0.createCompilationUnit("MyEnum.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack0.MyEnum;\n");
@@ -2942,7 +2942,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack0.MyEnum;\n");
@@ -2960,7 +2960,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class Foo extends Bar {\n");
@@ -2983,7 +2983,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class Foo extends Bar {\n");
@@ -3006,13 +3006,13 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@Foo\n");
 		buf.append("package pack1;");
 		ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("public @interface Foo {\n");
 		buf.append("}\n");
@@ -3024,7 +3024,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("@Foo\n");
 		buf.append("package pack1;\n");
 		buf.append("\n");
@@ -3037,7 +3037,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@Foo @Bar\n");
 		buf.append("package pack1;\n");
 		buf.append("\n");
@@ -3046,13 +3046,13 @@ public class ImportOrganizeTest extends CoreTests {
 		ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("public @interface Foo {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("Foo.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("public @interface Bar {\n");
 		buf.append("}\n");
@@ -3064,7 +3064,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("@Foo @Bar\n");
 		buf.append("package pack1;\n");
 		buf.append("\n");
@@ -3079,7 +3079,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * @see Bar\n");
 		buf.append(" */\n");
@@ -3088,13 +3088,13 @@ public class ImportOrganizeTest extends CoreTests {
 		ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("public @interface Foo {\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("Foo.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("public @interface Bar {\n");
 		buf.append("}\n");
@@ -3106,7 +3106,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * @see Bar\n");
 		buf.append(" */\n");
@@ -3123,7 +3123,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class B {\n");
@@ -3151,7 +3151,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.io.File;\n");
@@ -3185,20 +3185,20 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public @interface MyAnnot1 {\n");
 		buf.append("}\n");
 		pack0.createCompilationUnit("MyAnnot1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public @interface MyAnnot2 {\n");
 		buf.append("    int value();\n");
 		buf.append("}\n");
 		pack0.createCompilationUnit("MyAnnot2.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public @interface MyAnnot3 {\n");
 		buf.append("}\n");
@@ -3206,7 +3206,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("@MyAnnot3 public class Test2 {\n");
@@ -3222,7 +3222,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack0.MyAnnot1;\n");
@@ -3242,13 +3242,13 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public @interface MyAnnot1 {\n");
 		buf.append("}\n");
 		pack0.createCompilationUnit("MyAnnot1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public @interface MyAnnot2 {\n");
 		buf.append("    char value();\n");
@@ -3257,7 +3257,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("@MyAnnot1()\n");
@@ -3272,7 +3272,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.io.File;\n");
@@ -3291,7 +3291,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import p.Main.I;\n");
@@ -3313,7 +3313,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("/**\n");
@@ -3517,7 +3517,7 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import static Broken;\n");
@@ -3534,7 +3534,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class C{\n");
@@ -3557,7 +3557,7 @@ public class ImportOrganizeTest extends CoreTests {
 		pack1.createCompilationUnit("ISomeInterface.java", buf1.toString(), false, null);
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
-		StringBuffer buf2= new StringBuffer();
+		StringBuilder buf2= new StringBuilder();
 		buf2.append("package test2;\n");
 		buf2.append("public class Test {\n");
 		buf2.append("    private FirstInnerClass first;\n");
@@ -3571,7 +3571,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu2, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf2= new StringBuffer();
+		buf2= new StringBuilder();
 		buf2.append("package test2;\n");
 		buf2.append("\n");
 		buf2.append("import test1.ISomeInterface.FirstInnerClass;\n");
@@ -3592,7 +3592,7 @@ public class ImportOrganizeTest extends CoreTests {
 				new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") });
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
-		StringBuffer buf1= new StringBuffer();
+		StringBuilder buf1= new StringBuilder();
 		buf1.append("package pp;\n");
 		buf1.append("public class C1 {\n");
 		buf1.append("    Tests at=new Tests();\n");
@@ -3612,7 +3612,7 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation op= createOperation(cu1, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf1= new StringBuffer();
+		buf1= new StringBuilder();
 		buf1.append("package pp;\n");
 		buf1.append("public class C1 {\n");
 		buf1.append("    Tests at=new Tests();\n");

@@ -552,7 +552,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);

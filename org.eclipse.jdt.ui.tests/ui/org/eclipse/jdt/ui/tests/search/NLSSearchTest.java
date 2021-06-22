@@ -110,7 +110,7 @@ public class NLSSearchTest {
 	@Test
 	public void test02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -123,14 +123,14 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("    public String s1= Accessor.Client_s1;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Client_s1=s1\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
@@ -140,7 +140,7 @@ public class NLSSearchTest {
 	@Test
 	public void test03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -153,14 +153,14 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("    public String s1= Accessor.Client_s1;\n");
 		buf.append("}\n");
 		ICompilationUnit client= pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 2);
@@ -172,7 +172,7 @@ public class NLSSearchTest {
 	@Test
 	public void test04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -185,13 +185,13 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Client_s1=foo\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
@@ -204,7 +204,7 @@ public class NLSSearchTest {
 	@Test
 	public void test05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -217,13 +217,13 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 2);
@@ -235,7 +235,7 @@ public class NLSSearchTest {
 	@Test
 	public void test06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -248,14 +248,14 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("    public String s1= Accessor.Client_s1;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Client_s1=s1\n");
 		buf.append("Client_s1=s1\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
@@ -268,7 +268,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug152604() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -281,14 +281,14 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("    public int length= Accessor.Client_s1.length();\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Client_s1=s1\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
@@ -298,7 +298,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug133810() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -311,14 +311,14 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("    public String s1= Accessor.Client_s1;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Client_s2=s1\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
@@ -337,7 +337,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug185178() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.MissingResourceException;\n");
 		buf.append("import java.util.ResourceBundle;\n");
@@ -355,7 +355,7 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("    public String s1= Accessor\n");
@@ -363,7 +363,7 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Client.0=s1\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
@@ -373,7 +373,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug247012_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.MissingResourceException;\n");
 		buf.append("import java.util.ResourceBundle;\n");
@@ -391,7 +391,7 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("	private static final String X =\"Main.indirect\";//$NON-NLS-1$ \n");
@@ -403,7 +403,7 @@ public class NLSSearchTest {
 
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Main.direct=Main.direct\n");
 		buf.append("Main.indirect=Main.indirect\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
@@ -414,7 +414,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug247012_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.MissingResourceException;\n");
 		buf.append("import java.util.ResourceBundle;\n");
@@ -432,7 +432,7 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("	private static final String X = Accessor.getString(\"Main.indirect\");//$NON-NLS-1$ \n");
@@ -444,7 +444,7 @@ public class NLSSearchTest {
 
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Main.direct=Main.direct\n");
 		buf.append("Main.indirect=Main.indirect\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
@@ -455,7 +455,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug247012_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.MissingResourceException;\n");
 		buf.append("import java.util.ResourceBundle;\n");
@@ -469,7 +469,7 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("	private static final int i = 10; \n");
@@ -480,7 +480,7 @@ public class NLSSearchTest {
 
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
@@ -489,7 +489,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug247012_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.MissingResourceException;\n");
 		buf.append("import java.util.ResourceBundle;\n");
@@ -507,7 +507,7 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("	public static void main(String[] args) { \n");
@@ -517,7 +517,7 @@ public class NLSSearchTest {
 
 		ICompilationUnit client= pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 1);
@@ -527,7 +527,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug295040() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.MissingResourceException;\n");
 		buf.append("import java.util.ResourceBundle;\n");
@@ -548,7 +548,7 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("	public static void main(String[] args) { \n");
@@ -559,7 +559,7 @@ public class NLSSearchTest {
 
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Client_s1=s1\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
@@ -569,7 +569,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug306168_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.MissingResourceException;\n");
 		buf.append("import java.util.ResourceBundle;\n");
@@ -587,7 +587,7 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("	private static final String X =\"Main.indirect\";//$NON-NLS-1$ \n");
@@ -598,7 +598,7 @@ public class NLSSearchTest {
 
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("Main.indirect=Main.indirect\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
@@ -608,7 +608,7 @@ public class NLSSearchTest {
 	@Test
 	public void testBug306168_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.MissingResourceException;\n");
 		buf.append("import java.util.ResourceBundle;\n");
@@ -626,7 +626,7 @@ public class NLSSearchTest {
 		buf.append("}\n");
 		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Client {\n");
 		buf.append("	private static final String X =\"Main.undefined\";//$NON-NLS-1$ \n");
@@ -637,7 +637,7 @@ public class NLSSearchTest {
 
 		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 1);

@@ -191,7 +191,7 @@ public class NewTypeWizardTest {
 	public void testCreateClass3() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class A<T> {\n");
 		buf.append("    public abstract void foo(T t);\n");
@@ -219,7 +219,7 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");
@@ -250,7 +250,7 @@ public class NewTypeWizardTest {
 	public void testCreateClass4() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class A<T> {\n");
 		buf.append("    public A(T t);\n");
@@ -278,7 +278,7 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");
@@ -316,7 +316,7 @@ public class NewTypeWizardTest {
 	public void testCreateInnerClass1() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class A<T> {\n");
 		buf.append("    public abstract void foo(T t);\n");
@@ -345,7 +345,7 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -420,7 +420,7 @@ public class NewTypeWizardTest {
 	public void testCreateClassExtraImports2() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class A {\n");
 		buf.append("    public static class Inner {\n");
@@ -454,7 +454,7 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");
@@ -486,7 +486,7 @@ public class NewTypeWizardTest {
 	public void testCreateClassExtraImports3() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("public class A {\n");
 		buf.append("    public static class Inner {\n");
@@ -496,7 +496,7 @@ public class NewTypeWizardTest {
 		pack0.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Map;\n"); // an unused import: should not be touched
@@ -525,7 +525,7 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Map;\n");
@@ -771,7 +771,7 @@ public class NewTypeWizardTest {
 	{
 		// Foo1.java and Foo2.java in test1
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n\n");
 		buf.append("public class Foo1 {\n\n");
 		buf.append("}\n");
@@ -780,7 +780,7 @@ public class NewTypeWizardTest {
 
 		// Foo3.java in test2
 		pack1= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n\n");
 		buf.append("public class Foo3 {\n\n");
 		buf.append("}\n");

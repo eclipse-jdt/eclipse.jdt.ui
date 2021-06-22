@@ -1116,7 +1116,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackage= root.createPackageFragment("p", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class B  {\n");
@@ -1126,7 +1126,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		fPackage.createCompilationUnit("B.java", buf.toString(), true, null);
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class A extends B {\n");
@@ -1152,7 +1152,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		final int NUM_MEMBERS= 6;
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("public A(int x) {\n");
 		buf.append("        super(x);\n");
 		buf.append("        // TODO\n");

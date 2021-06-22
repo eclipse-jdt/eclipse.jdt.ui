@@ -79,7 +79,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetter() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("b112441", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package b112441;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -109,7 +109,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package b112441;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -132,7 +132,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package b112441;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -161,7 +161,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetterBug335173_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -191,7 +191,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -220,7 +220,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetterBug335173_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -250,7 +250,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -279,7 +279,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetterBug335173_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -309,7 +309,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -338,7 +338,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetterBug335173_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -368,7 +368,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -397,7 +397,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testCreateFieldUsingSef() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("\n");
 		buf.append("public class A {\n");
 		buf.append("    private int t;\n");
@@ -420,7 +420,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("\n");
 		buf.append("public class A {\n");
 		buf.append("    int t;\n");
@@ -436,7 +436,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("\n");
 		buf.append("public class A {\n");
 		buf.append("    private int t;\n");

@@ -96,7 +96,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersTask() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void x() {\n");
@@ -112,7 +112,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void a() {}\n");
@@ -135,7 +135,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersBookmarks() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void x() {\n");
@@ -151,7 +151,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void a() {}\n");
@@ -174,7 +174,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersBreakpoints() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void x() {\n");
@@ -190,7 +190,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void a() {}\n");
@@ -213,7 +213,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersProblemMarker() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private void x() {\n");
@@ -234,7 +234,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void a() {}\n");

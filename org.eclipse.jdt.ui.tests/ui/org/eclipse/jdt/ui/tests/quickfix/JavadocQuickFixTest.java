@@ -64,7 +64,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 
-		StringBuffer comment= new StringBuffer();
+		StringBuilder comment= new StringBuilder();
 		comment.append("/**\n");
 		comment.append(" * A comment.\n");
 		comment.append(" * ${tags}\n");
@@ -74,20 +74,20 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, res, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, res, null);
 
-		comment= new StringBuffer();
+		comment= new StringBuilder();
 		comment.append("/**\n");
 		comment.append(" * A field comment for ${field}.\n");
 		comment.append(" */");
 		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, comment.toString(), null);
 
-		comment= new StringBuffer();
+		comment= new StringBuilder();
 		comment.append("/**\n");
 		comment.append(" * A override comment.\n");
 		comment.append(" * ${see_to_overridden}\n");
 		comment.append(" */");
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, comment.toString(), null);
 
-		comment= new StringBuffer();
+		comment= new StringBuilder();
 		comment.append("/**\n");
 		comment.append(" * A delegate comment.\n");
 		comment.append(" * ${see_to_target}\n");
@@ -109,7 +109,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingParam1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -134,7 +134,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -158,7 +158,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingParam2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -182,7 +182,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -203,7 +203,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingParam3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -227,7 +227,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -249,7 +249,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingParam4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -273,7 +273,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -295,7 +295,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingParam5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" * @param <B> Hello\n");
@@ -313,7 +313,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" * @param <A> \n");
@@ -329,7 +329,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingParam6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" * @author ae\n");
@@ -347,7 +347,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" * @author ae\n");
@@ -363,7 +363,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingReturn1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -388,7 +388,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -411,7 +411,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingReturn2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -433,7 +433,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -453,7 +453,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingReturn3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -476,7 +476,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -497,7 +497,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingThrows() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -520,7 +520,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -541,7 +541,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInsertAllMissing1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -558,7 +558,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -582,7 +582,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInsertAllMissing2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -600,7 +600,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -625,7 +625,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInsertAllMissing3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -636,7 +636,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 2);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" * @param <S> \n");
@@ -652,7 +652,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInsertAllMissing4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -671,7 +671,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 3);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -695,7 +695,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveParamTag1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -717,7 +717,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -735,7 +735,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveParamTag2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -757,7 +757,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -777,7 +777,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveThrowsTag1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -800,7 +800,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -820,7 +820,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveThrowsTag2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -842,7 +842,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -861,7 +861,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveThrowsTag3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("/**\n");
@@ -886,7 +886,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("/**\n");
@@ -908,7 +908,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveReturnTag1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -932,7 +932,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -952,7 +952,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveUnknownTag1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -976,7 +976,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -996,7 +996,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingMethodComment1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("/**\n");
@@ -1014,7 +1014,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("/**\n");
@@ -1036,7 +1036,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingMethodComment2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -1054,7 +1054,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -1074,7 +1074,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingMethodComment3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -1091,7 +1091,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -1109,7 +1109,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingMethodComment4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("\n");
 		buf.append("/**\n");
@@ -1134,7 +1134,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("\n");
 		buf.append("/**\n");
@@ -1163,7 +1163,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingConstructorComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("/**\n");
@@ -1181,7 +1181,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("/**\n");
@@ -1202,7 +1202,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingTypeComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<A, B> {\n");
 		buf.append("}\n");
@@ -1215,7 +1215,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" * A comment.\n");
@@ -1231,7 +1231,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingFieldComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -1247,7 +1247,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
@@ -1270,7 +1270,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package pack;\n");
 			buf.append("\n");
 			buf.append("public class A {\n");
@@ -1283,7 +1283,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 			pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 			IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package pack2;\n");
 			buf.append("\n");
 			buf.append("import pack.A.B.C;\n");
@@ -1302,7 +1302,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 			assertNumberOfProposals(proposals, 2);
 
 			String[] expected= new String[1];
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package pack2;\n");
 			buf.append("\n");
 			buf.append("import pack.A.B.C;\n");
@@ -1323,7 +1323,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvalidQualification2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("\n");
 		buf.append("public class A {\n");
@@ -1333,7 +1333,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("import pack.A;\n");
@@ -1352,7 +1352,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("import pack.A;\n");
@@ -1370,7 +1370,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvalidQualification3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("\n");
 		buf.append("public class A {\n");
@@ -1381,7 +1381,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("import pack.A;\n");
@@ -1400,7 +1400,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("import pack.A;\n");

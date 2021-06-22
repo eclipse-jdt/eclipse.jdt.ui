@@ -88,7 +88,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInFieldDecl() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    Vector1 vec;\n");
@@ -99,7 +99,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -109,7 +109,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class Vector1 {\n");
@@ -117,7 +117,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface Vector1 {\n");
@@ -125,7 +125,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public enum Vector1 {\n");
@@ -133,7 +133,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<Vector1> {\n");
 		buf.append("    Vector1 vec;\n");
@@ -147,7 +147,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInMethodArguments() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(Vect1or[] vec) {\n");
@@ -159,7 +159,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -170,7 +170,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class Vect1or {\n");
@@ -178,7 +178,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface Vect1or {\n");
@@ -186,7 +186,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public enum Vect1or {\n");
@@ -194,7 +194,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<Vect1or> {\n");
 		buf.append("    void foo(Vect1or[] vec) {\n");
@@ -202,7 +202,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    <Vect1or> void foo(Vect1or[] vec) {\n");
@@ -216,7 +216,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInMethodReturnType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    Vect1or[] foo() {\n");
@@ -229,7 +229,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -241,7 +241,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class Vect1or {\n");
@@ -249,7 +249,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface Vect1or {\n");
@@ -257,7 +257,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public enum Vect1or {\n");
@@ -265,7 +265,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<Vect1or> {\n");
 		buf.append("    Vect1or[] foo() {\n");
@@ -274,7 +274,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    <Vect1or> Vect1or[] foo() {\n");
@@ -289,7 +289,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInExceptionType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() throws IOExcpetion {\n");
@@ -301,7 +301,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.io.IOException;\n");
@@ -312,7 +312,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class IOExcpetion extends Exception {\n");
@@ -327,7 +327,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInVarDeclWithWildcard() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -342,7 +342,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -352,7 +352,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class XY {\n");
@@ -360,7 +360,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface XY {\n");
@@ -368,7 +368,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public enum XY {\n");
@@ -376,7 +376,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -386,7 +386,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E<XY> {\n");
@@ -402,7 +402,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -416,7 +416,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E {\n");
@@ -426,7 +426,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -443,7 +443,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testArrayTypeInStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.*;\n");
 		buf.append("public class E {\n");
@@ -457,7 +457,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.*;\n");
 		buf.append("public class E {\n");
@@ -467,7 +467,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.*;\n");
 		buf.append("import java.util.ArrayList;\n");
@@ -478,7 +478,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.io.Serializable;\n");
@@ -488,7 +488,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.io.Serializable;\n");
@@ -498,7 +498,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.io.Serializable;\n");
@@ -508,7 +508,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.*;\n");
 		buf.append("public class E<ArrayListExtra> {\n");
@@ -518,7 +518,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected6= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.*;\n");
 		buf.append("public class E {\n");
@@ -534,7 +534,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testQualifiedType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -547,7 +547,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("public class Test {\n");
@@ -555,7 +555,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("public interface Test {\n");
@@ -563,7 +563,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("public enum Test {\n");
@@ -577,7 +577,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInnerType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -587,7 +587,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
 		buf.append("}\n");
@@ -597,7 +597,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -607,7 +607,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
 		buf.append("\n");
@@ -617,7 +617,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
 		buf.append("\n");
@@ -633,7 +633,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInCatchBlock() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -648,7 +648,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class XXX extends Exception {\n");
@@ -662,7 +662,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInSuperType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E extends XXX {\n");
 		buf.append("}\n");
@@ -672,7 +672,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class XXX {\n");
@@ -686,7 +686,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInSuperInterface() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public interface E extends XXX {\n");
 		buf.append("}\n");
@@ -696,7 +696,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface XXX {\n");
@@ -710,7 +710,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInAnnotation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("@Xyz\n");
 		buf.append("public interface E {\n");
@@ -721,7 +721,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public @interface Xyz {\n");
@@ -735,7 +735,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInAnnotation_bug153881() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("a", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package a;\n");
 		buf.append("public class SomeClass {\n");
 		buf.append("        @scratch.Unimportant void foo() {}\n");
@@ -748,7 +748,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package scratch;\n");
 		buf.append("\n");
 		buf.append("public @interface Unimportant {\n");
@@ -763,7 +763,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testPrimitiveTypeInFieldDecl() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    floot vec= 1.0;\n");
@@ -774,28 +774,28 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    double vec= 1.0;\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    Float vec= 1.0;\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    float vec= 1.0;\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class floot {\n");
@@ -803,7 +803,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface floot {\n");
@@ -811,7 +811,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public enum floot {\n");
@@ -819,7 +819,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected6= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<floot> {\n");
 		buf.append("    floot vec= 1.0;\n");
@@ -832,7 +832,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInTypeArguments1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<T> {\n");
 		buf.append("    class SomeType { }\n");
@@ -847,7 +847,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[6];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<T> {\n");
 		buf.append("    class SomeType { }\n");
@@ -857,7 +857,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class XYX {\n");
@@ -865,7 +865,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[1]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface XYX {\n");
@@ -873,7 +873,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[2]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public enum XYX {\n");
@@ -881,7 +881,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[3]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<T> {\n");
 		buf.append("    class SomeType { }\n");
@@ -891,7 +891,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[4]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E<T, XYX> {\n");
 		buf.append("    class SomeType { }\n");
@@ -907,7 +907,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTypeInTypeArguments2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
@@ -924,7 +924,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[6];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
@@ -936,7 +936,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import test1.E.SomeType;\n");
@@ -946,7 +946,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[1]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface XYX {\n");
@@ -954,7 +954,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[2]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public enum XYX {\n");
@@ -962,7 +962,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[3]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
@@ -974,7 +974,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[4]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T, XYX> {\n");
@@ -993,7 +993,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testParameterizedType1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
@@ -1009,7 +1009,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class XXY<T> {\n");
@@ -1017,7 +1017,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface XXY<T> {\n");
@@ -1031,7 +1031,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testParameterizedType2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
@@ -1052,7 +1052,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[3];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
@@ -1063,7 +1063,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import test1.E.SomeType;\n");
@@ -1073,7 +1073,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[1]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface XXY<T1, T2> {\n");
@@ -1087,28 +1087,28 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	private void createSomeAmbiguity(boolean ifc, boolean isException) throws Exception {
 
 		IPackageFragment pack3= fSourceFolder.createPackageFragment("test3", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("public "); buf.append(ifc ? "interface" : "class");
 		buf.append(" A "); buf.append(isException ? "extends Exception " : ""); buf.append("{\n");
 		buf.append("}\n");
 		pack3.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("public class B {\n");
 		buf.append("}\n");
 		pack3.createCompilationUnit("B.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("public "); buf.append(ifc ? "interface" : "class");
 		buf.append(" A "); buf.append(isException ? "extends Exception " : ""); buf.append("{\n");
 		buf.append("}\n");
 		pack2.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
@@ -1122,7 +1122,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1140,7 +1140,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test2.A;\n");
@@ -1154,7 +1154,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1174,7 +1174,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1192,7 +1192,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test2.A;\n");
@@ -1206,7 +1206,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1226,7 +1226,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1245,7 +1245,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test2.A;\n");
@@ -1260,7 +1260,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1281,7 +1281,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1301,7 +1301,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test2.A;\n");
@@ -1317,7 +1317,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1339,7 +1339,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1360,7 +1360,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test2.A;\n");
@@ -1377,7 +1377,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1400,7 +1400,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1420,7 +1420,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test2.A;\n");
@@ -1436,7 +1436,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1458,7 +1458,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1481,7 +1481,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test2.A;\n");
@@ -1500,7 +1500,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.*;\n");
 		buf.append("import test3.*;\n");
@@ -1532,9 +1532,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("class B {\n");
 		buf.append("    public Object get(Object c) {\n");
@@ -1543,7 +1543,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    B b = new B();\n");
@@ -1553,7 +1553,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.A;\n");
 		buf.append("public class C {\n");
@@ -1568,7 +1568,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class B {\n");
 		buf.append("    public Object get(Object c) {\n");
@@ -1583,7 +1583,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	@Test
 	public void testForEachMissingType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -1603,7 +1603,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 6);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
