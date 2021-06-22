@@ -258,7 +258,7 @@ public class PluginsNotLoadedTest {
 
 	@Test
 	public void pluginsNotLoaded() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (String element : NOT_LOADED_BUNDLES) {
 			Bundle bundle= Platform.getBundle(element);
 			if (element.contains("org.junit"))

@@ -125,7 +125,7 @@ public class StringAsserts {
 				assertEqualString(list1.get(0), list2.get(0));
 			}
 
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			for (int i= 0; i < n1; i++) {
 				String s1= list1.get(i);
 				if (s1 != null) {
@@ -135,7 +135,7 @@ public class StringAsserts {
 			}
 			String actual= buf.toString();
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			for (int i= 0; i < n2; i++) {
 				String s2= list2.get(i);
 				if (s2 != null) {
@@ -168,7 +168,7 @@ public class StringAsserts {
 				assertEqualString(list1.get(0), list2.get(0));
 			}
 
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			for (int i= 0; i < n1; i++) {
 				String s1= list1.get(i);
 				if (s1 != null) {
@@ -178,7 +178,7 @@ public class StringAsserts {
 			}
 			String actual= buf.toString();
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			for (int i= 0; i < n2; i++) {
 				String s2= list2.get(i);
 				if (s2 != null) {
