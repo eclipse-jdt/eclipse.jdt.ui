@@ -90,6 +90,13 @@ public class BindingProperty extends ASTAttribute {
 		fIsRelevant= isRelevant;
 	}
 
+	public BindingProperty(Binding parent, StringBuilder label, boolean isRelevant) {
+		fParent= parent;
+		fName= label.toString();
+		fValues= null;
+		fIsRelevant= isRelevant;
+	}
+
 	private Binding[] createBindings(IBinding[] bindings, boolean isRelevant) {
 		Binding[] res= new Binding[bindings.length];
 		for (int i= 0; i < res.length; i++) {
