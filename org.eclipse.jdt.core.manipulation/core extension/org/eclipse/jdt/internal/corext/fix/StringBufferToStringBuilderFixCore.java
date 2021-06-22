@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -340,7 +341,10 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 														!((IVariableBinding)binding).isField() &&
 														!((IVariableBinding)binding).isParameter() &&
 														!((IVariableBinding)binding).isRecordComponent()) {
-													return true;
+													ITypeBinding typeBinding= ((IVariableBinding)binding).getType();
+													if (isStringBufferType(typeBinding)) {
+														return true;
+													}
 												}
 											}
 											throw new AbortSearchException();
@@ -441,7 +445,10 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 							if (expBinding instanceof IVariableBinding) {
 								IVariableBinding expVarBinding= (IVariableBinding)expBinding;
 								if (!expVarBinding.isField() && !expVarBinding.isParameter() && !expVarBinding.isRecordComponent()) {
-									return true;
+									ITypeBinding typeBinding= expVarBinding.getType();
+									if (isStringBufferType(typeBinding)) {
+										return true;
+									}
 								}
 							}
 						}
@@ -455,6 +462,24 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 							throw new AbortSearchException();
 						}
 						return checkMethodArgs(superMethodInvocation.arguments(), methodInvocationBinding);
+					}
+
+					@Override
+					public boolean visit(ConstructorInvocation constructorInvocation) {
+						IMethodBinding constructorBinding= constructorInvocation.resolveConstructorBinding();
+						if (constructorBinding == null) {
+							throw new AbortSearchException();
+						}
+						return checkMethodArgs(constructorInvocation.arguments(), constructorBinding);
+					}
+
+					@Override
+					public boolean visit(ClassInstanceCreation classInstanceCreation) {
+						IMethodBinding constructorBinding= classInstanceCreation.resolveConstructorBinding();
+						if (constructorBinding == null) {
+							throw new AbortSearchException();
+						}
+						return checkMethodArgs(classInstanceCreation.arguments(), constructorBinding);
 					}
 
 					private boolean checkMethodArgs(List<Expression> methodArgs, IMethodBinding methodInvocationBinding) {

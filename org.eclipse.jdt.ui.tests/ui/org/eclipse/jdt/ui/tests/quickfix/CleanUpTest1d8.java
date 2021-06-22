@@ -3609,6 +3609,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
+				+ "import java.io.StringWriter;\n" //
+				+ "\n" //
 				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
 				+ "    StringBuffer field1;\n" //
 				+ "    StringBuffer field2;\n" //
@@ -3647,6 +3649,19 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "            a.append(\"abc\");\n" //
 				+ "        };\n" //
 				+ "    }\n" //
+				+ "    public void doNotChangeConstructorCall() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        new Helper(a);\n" //
+				+ "    }\n"
+				+ "    private class Helper {\n" //
+				+ "    	   public Helper(StringBuffer b) {\n" //
+				+ "	           System.out.println(b.toString()); \n" //
+				+ "   	   }\n"
+				+ "    }\n"
+				+ "    public void doNotChangeIfBufferIsAssigned() {\n" //
+				+ "        StringWriter stringWriter = new StringWriter();\n"
+				+ "	       StringBuffer buffer = stringWriter.getBuffer();"
+				+ "    }\n"
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
 
