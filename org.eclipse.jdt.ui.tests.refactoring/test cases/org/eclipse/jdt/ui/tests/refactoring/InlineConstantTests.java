@@ -29,8 +29,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.dom.AST;
 
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -103,7 +103,7 @@ public class InlineConstantTests extends GenericRefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(AST.getJLSLatest()).parse(selectionCu, true), selection.getOffset(), selection.getLength());
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			ref= null;
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
@@ -144,7 +144,7 @@ public class InlineConstantTests extends GenericRefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(AST.getJLSLatest()).parse(selectionCu, true), selection.getOffset(), selection.getLength());
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			ref= null;
 		if (ref == null)

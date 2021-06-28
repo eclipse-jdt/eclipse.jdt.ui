@@ -30,11 +30,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 
@@ -57,7 +57,7 @@ public class EnumConstructorTargetFinderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fASTParser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		fASTParser= ASTParser.newParser(AST.getJLSLatest());
 		fJavaProject= f18p.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 	}

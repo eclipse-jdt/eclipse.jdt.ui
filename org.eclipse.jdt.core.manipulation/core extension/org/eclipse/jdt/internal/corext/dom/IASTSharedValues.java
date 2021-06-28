@@ -15,15 +15,13 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.dom.AST;
 
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
-
 public interface IASTSharedValues {
 
 	/**
 	 * This value is subject to change with every release. JDT-UI-internal code typically supports
 	 * the latest available {@link AST#apiLevel() AST level} exclusively.
 	 */
-	int SHARED_AST_LEVEL= ASTHelper.JLS_Latest;
+	int SHARED_AST_LEVEL= AST.getJLSLatest();
 
 	boolean SHARED_AST_STATEMENT_RECOVERY= true;
 

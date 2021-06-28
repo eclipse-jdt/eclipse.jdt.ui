@@ -114,6 +114,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
@@ -136,7 +137,7 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 
-	static final int JLS_LATEST= ASTHelper.JLS_Latest;
+	static final int JLS_LATEST= AST.getJLSLatest();
 	private static final int JLS16= ASTHelper.JLS16;
 	private static final int JLS15= ASTHelper.JLS15;
 	private static final int JLS14= ASTHelper.JLS14;

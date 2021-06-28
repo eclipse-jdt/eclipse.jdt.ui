@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -42,7 +43,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 
@@ -181,7 +181,7 @@ public class TypeEnvironmentTests extends AbstractJunit4CUTestCase {
 
 	private ASTNode createAST(IPackageFragment pack) throws Exception {
 		IJavaProject project= pack.getJavaProject();
-		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
 		parser.setProject(project);
 		parser.setResolveBindings(true);
 		ICompilationUnit unit= createCU(pack, getName());

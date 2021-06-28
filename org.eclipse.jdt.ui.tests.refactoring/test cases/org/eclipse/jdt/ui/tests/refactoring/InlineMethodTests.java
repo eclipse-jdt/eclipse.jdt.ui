@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.OperatorPrecedence;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
@@ -82,7 +81,7 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	protected void performTestInlineCall(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(unit, true), selection[0], selection[1]);
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.getJLSLatest()).parse(unit, true), selection[0], selection[1]);
 
 		String out= null;
 		if (mode == COMPARE_WITH_OUTPUT)
@@ -95,7 +94,7 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IType type= unit.getTypes()[0];
 		IMethod method= getMethodToInline(type);
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.getJLSLatest()).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
 
 		String out= null;
 		if (mode == COMPARE_WITH_OUTPUT)
@@ -117,7 +116,7 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IType type= unit.getTypes()[0];
 		IMethod method= getFirstConstructor(type);
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.getJLSLatest()).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
 
 		String out= null;
 		if (mode == COMPARE_WITH_OUTPUT)
@@ -219,7 +218,7 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	public void testNotMethodName() throws Exception {
 		ICompilationUnit unit= createCU(fgTestSetup.getInvalidPackage(), getName());
 		int[] selection= getSelection();
-		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(unit, true), selection[0], selection[1]);
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.getJLSLatest()).parse(unit, true), selection[0], selection[1]);
 		assertNull(refactoring);
 	}
 
@@ -1168,7 +1167,7 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 		IMethod logMessage= target2type.getMethods()[1]; // method 0 is ctor
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
 				target2ClassFile,
-				new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(target2ClassFile, true),
+				new RefactoringASTParser(AST.getJLSLatest()).parse(target2ClassFile, true),
 				logMessage.getNameRange().getOffset(),
 				logMessage.getNameRange().getLength());
 
@@ -1266,7 +1265,7 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 
 	@Test
 	public void testOperatorPredence() throws Exception {
-		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
+		AST ast= AST.newAST(AST.getJLSLatest(), false);
 
 		int assignment= OperatorPrecedence.getExpressionPrecedence(ast.newAssignment());
 		int conditional= OperatorPrecedence.getExpressionPrecedence(ast.newConditionalExpression());

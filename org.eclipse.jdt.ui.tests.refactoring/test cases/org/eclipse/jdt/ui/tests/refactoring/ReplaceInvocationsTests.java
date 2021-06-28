@@ -24,10 +24,10 @@ import org.junit.Test;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
@@ -60,7 +60,7 @@ public class ReplaceInvocationsTests extends AbstractJunit4SelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
 
-		CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(unit, false);
+		CompilationUnit compilationUnit= new RefactoringASTParser(AST.getJLSLatest()).parse(unit, false);
 		Comment comment= (Comment) compilationUnit.getCommentList().get(0);
 		String commentString= unit.getBuffer().getText(comment.getStartPosition(), comment.getLength());
 		Matcher matcher= Pattern.compile("(?s)/\\*\\s*params:[[^\\r\\n]&&\\s]*" + "([^\\r\\n]*)" + "(\\r\\n?|\\n)" + "(.+)" + "\\*/").matcher(commentString);
