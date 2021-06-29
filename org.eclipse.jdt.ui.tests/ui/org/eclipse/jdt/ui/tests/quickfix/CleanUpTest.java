@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -38,6 +39,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -83,6 +86,14 @@ public class CleanUpTest extends CleanUpTestCase {
 	public ProjectTestSetup projectSetup= new Java13ProjectTestSetup(false);
 
 	IJavaProject fJProject1= getProject();
+
+	@Override
+	@Before
+	public void setUp() throws Exception {
+		super.setUp();
+		IPath osgiJar= new Path("testresources/org.junit.jupiter.api_stub.jar");
+		JavaProjectHelper.addLibrary(fJProject1, JavaProjectHelper.findRtJar(osgiJar)[0]);
+	}
 
 	@Override
 	protected IJavaProject getProject() {
@@ -21504,6 +21515,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.sql.DriverPropertyInfo;\n" //
+				+ "import org.junit.jupiter.api.Nested;\n" //
 				+ "\n" //
 				+ "public class E<T> {\n" //
 				+ "    public interface DoNotRefactorInnerInterface {\n" //
@@ -21610,6 +21622,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public class DoNotRefactorInnerClassThatUsesTheTopLevelGenericity {\n" //
 				+ "        public T aGenericField= null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Nested\n" //
+				+ "    public class DoNotRefactorInnerClassWithJunitNestedAnnotation {\n" //
+				+ "        public int a;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
