@@ -125,7 +125,7 @@ public class Binding extends ASTAttribute {
 					boolean isRefType= isType(typeKind, REF_TYPE);
 					final boolean isNonPrimitive= ! isType(typeKind, PRIMITIVE_TYPE);
 
-					StringBuffer kinds= new StringBuffer("KIND:"); //$NON-NLS-1$
+					StringBuilder kinds= new StringBuilder("KIND:"); //$NON-NLS-1$
 					if (typeBinding.isArray()) kinds.append(" isArray"); //$NON-NLS-1$
 					if (typeBinding.isCapture()) kinds.append(" isCapture"); //$NON-NLS-1$
 					if (typeBinding.isNullType()) kinds.append(" isNullType"); //$NON-NLS-1$
@@ -139,7 +139,7 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isEnum()) kinds.append(" isEnum"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, kinds, true));
 
-					StringBuffer generics= new StringBuffer("GENERICS:"); //$NON-NLS-1$
+					StringBuilder generics= new StringBuilder("GENERICS:"); //$NON-NLS-1$
 					if (typeBinding.isRawType()) generics.append(" isRawType"); //$NON-NLS-1$
 					if (typeBinding.isGenericType()) generics.append(" isGenericType"); //$NON-NLS-1$
 					if (typeBinding.isParameterizedType()) generics.append(" isParameterizedType"); //$NON-NLS-1$
@@ -165,7 +165,7 @@ public class Binding extends ASTAttribute {
 						}
 					}
 
-					StringBuffer origin= new StringBuffer("ORIGIN:"); //$NON-NLS-1$
+					StringBuilder origin= new StringBuilder("ORIGIN:"); //$NON-NLS-1$
 					if (typeBinding.isTopLevel()) origin.append(" isTopLevel"); //$NON-NLS-1$
 					if (typeBinding.isNested()) origin.append(" isNested"); //$NON-NLS-1$
 					if (typeBinding.isLocal()) origin.append(" isLocal"); //$NON-NLS-1$
@@ -218,7 +218,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS VARARGS", methodBinding.isVarargs(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "EXCEPTION TYPES", methodBinding.getExceptionTypes(), true)); //$NON-NLS-1$
 
-					StringBuffer genericsM= new StringBuffer("GENERICS:"); //$NON-NLS-1$
+					StringBuilder genericsM= new StringBuilder("GENERICS:"); //$NON-NLS-1$
 					if (methodBinding.isRawMethod()) genericsM.append(" isRawMethod"); //$NON-NLS-1$
 					if (methodBinding.isGenericMethod()) genericsM.append(" isGenericMethod"); //$NON-NLS-1$
 					if (methodBinding.isParameterizedMethod()) genericsM.append(" isParameterizedMethod"); //$NON-NLS-1$
