@@ -4,8 +4,8 @@ class A {
 	A fi\u0065ld;
 	
 	/**
-	 * @see A # field
-	 * @see A # fiel\u0064
+	 * @see A#field
+	 * @see A#fiel\u0064
 	 * @see #fiel\u0064
 	 */
 	A(A a) {

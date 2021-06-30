@@ -4,8 +4,8 @@ class A {
 	A feel;
 	
 	/**
-	 * @see A # feel
-	 * @see A # feel
+	 * @see A#feel
+	 * @see A#feel
 	 * @see #feel
 	 */
 	A(A a) {
