@@ -76,14 +76,14 @@ public class ValidateEditTests extends GenericRefactoringTest {
 	public void testPackageRename1() throws Exception {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("class A {\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= fragment.createCompilationUnit("A.java", buf.toString(), true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("class B {\n");
 		buf.append("}\n");
@@ -110,14 +110,14 @@ public class ValidateEditTests extends GenericRefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class A {\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= fragment.createCompilationUnit("A.java", buf.toString(), true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class B {\n");
 		buf.append("}\n");
@@ -126,7 +126,7 @@ public class ValidateEditTests extends GenericRefactoringTest {
 
 		IPackageFragment fragment2= getRoot().createPackageFragment("org.other", true, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package org.other;\n");
 		buf.append("public class C extends org.test.A {\n");
 		buf.append("}\n");
@@ -219,14 +219,14 @@ public class ValidateEditTests extends GenericRefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class C extends MyClass {\n");
 		buf.append("}\n");
@@ -252,14 +252,14 @@ public class ValidateEditTests extends GenericRefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class C extends MyClass {\n");
 		buf.append("}\n");
@@ -287,7 +287,7 @@ public class ValidateEditTests extends GenericRefactoringTest {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");
@@ -299,7 +299,7 @@ public class ValidateEditTests extends GenericRefactoringTest {
 		file.create(getStream(content), true, null);
 		setReadOnly(file);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class C extends MyClass {\n");
 		buf.append("}\n");
@@ -361,7 +361,7 @@ public class ValidateEditTests extends GenericRefactoringTest {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");
@@ -369,7 +369,7 @@ public class ValidateEditTests extends GenericRefactoringTest {
 		setReadOnly(cu1);
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package org.test1;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");
@@ -400,14 +400,14 @@ public class ValidateEditTests extends GenericRefactoringTest {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package org.test1;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");

@@ -136,7 +136,7 @@ public abstract class AbstractJspParser {
 
 		boolean hasValue= false;
 		StringBuilder name= new StringBuilder();
-		StringBuffer value= new StringBuffer();
+		StringBuilder value= new StringBuilder();
 		String startTag= ""; //$NON-NLS-1$
 		int i= 0;
 		int ix= 0;

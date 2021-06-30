@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2021 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -66,6 +68,9 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * </ul>
  */
 public class StaticInnerClassCleanUp extends AbstractMultiFix {
+
+	private final String JUPITER_NESTED= "org.junit.jupiter.api.Nested"; //$NON-NLS-1$
+
 	public StaticInnerClassCleanUp() {
 		this(Collections.emptyMap());
 	}
@@ -222,6 +227,20 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 					if (enclosingType instanceof TypeDeclaration && ((TypeDeclaration) enclosingType).isInterface()) {
 						// An inner class in an interface is static by default so the keyword is redundant
 						return true;
+					}
+
+					List<IExtendedModifier> modifiers= visited.modifiers();
+					for (IExtendedModifier modifier : modifiers) {
+						if (modifier.isAnnotation()) {
+							Annotation annotation= (Annotation)modifier;
+							if (annotation.isMarkerAnnotation()) {
+								Name name= annotation.getTypeName();
+								ITypeBinding nameBinding= name.resolveTypeBinding();
+								if (nameBinding != null && nameBinding.getQualifiedName().equals(JUPITER_NESTED)) {
+									return true;
+								}
+							}
+						}
 					}
 
 					TypeDeclaration topLevelClass= null;

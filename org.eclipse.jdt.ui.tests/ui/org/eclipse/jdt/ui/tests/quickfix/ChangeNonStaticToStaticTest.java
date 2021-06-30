@@ -115,7 +115,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static int I;\n");
@@ -131,7 +131,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static int I;\n");
@@ -147,7 +147,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<T> {\n");
 		buf.append("    public static int I;\n");
@@ -163,7 +163,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<T> {\n");
 		buf.append("    public static int I;\n");
@@ -179,7 +179,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<T extends String> {\n");
 		buf.append("    public static int I;\n");
@@ -195,7 +195,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<T extends String> {\n");
 		buf.append("    public static int I;\n");
@@ -211,14 +211,14 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static int I;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 {\n");
 		buf.append("    private static class E1 {\n");
@@ -240,7 +240,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 {\n");
 		buf.append("    private static class E1 {\n");
@@ -262,20 +262,20 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static int I;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 extends E1 {}\n");
 		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E2;\n");
 		buf.append("public class E3  {\n");
@@ -292,7 +292,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E1;\n");
 		buf.append("import test1.E2;\n");
@@ -310,20 +310,20 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<T> {\n");
 		buf.append("    public static int I;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2<T, G> extends E1<T> {}\n");
 		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E2;\n");
 		buf.append("public class E3<G>  {\n");
@@ -340,7 +340,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E1;\n");
 		buf.append("import test1.E2;\n");
@@ -358,20 +358,20 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<T> {\n");
 		buf.append("    public static int I;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2<T, G> extends E1<T> {}\n");
 		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E2;\n");
 		buf.append("public class E3<G>  {\n");
@@ -389,7 +389,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E2;\n");
 		buf.append("public class E3<G>  {\n");
@@ -407,20 +407,20 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<T> {\n");
 		buf.append("    public static int I;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2<T, G> extends E1<T> {}\n");
 		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E2;\n");
 		buf.append("public class E3<G>  {\n");
@@ -441,7 +441,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E2;\n");
 		buf.append("public class E3<G>  {\n");
@@ -462,20 +462,20 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<T> {\n");
 		buf.append("    public static int I;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2<T, G> extends E1<T> {}\n");
 		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E2;\n");
 		buf.append("public class E3<G>  {\n");
@@ -496,7 +496,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("import test1.E1;\n");
 		buf.append("import test1.E2;\n");
@@ -518,14 +518,14 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static void foo() {};\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 {\n");
 		buf.append("    private static String E1= \"\";\n");
@@ -542,7 +542,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 {\n");
 		buf.append("    private static String E1= \"\";\n");
@@ -559,14 +559,14 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<T> {\n");
 		buf.append("    public static void foo() {};\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 {\n");
 		buf.append("    private static String E1= \"\";\n");
@@ -583,7 +583,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 {\n");
 		buf.append("    private static String E1= \"\";\n");
@@ -600,14 +600,14 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1<G> {\n");
 		buf.append("    public static int I;\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.E1;\n");
 		buf.append("public class E2 {\n");
@@ -620,7 +620,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("public class E1<G>  {}\n");
 		pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
@@ -631,7 +631,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import test2.E1;\n");
 		buf.append("public class E2 {\n");

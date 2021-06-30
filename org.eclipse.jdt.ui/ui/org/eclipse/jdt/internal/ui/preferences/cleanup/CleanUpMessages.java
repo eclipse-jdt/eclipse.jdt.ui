@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -95,6 +95,8 @@ public class CleanUpMessages extends NLS {
 	public static String OptimizationTabPage_CheckboxName_PrimitiveSerialization;
 	public static String OptimizationTabPage_CheckboxName_PrimitiveRatherThanWrapper;
 	public static String OptimizationTabPage_CheckboxName_PrecompileRegEx;
+	public static String OptimizationTabPage_CheckboxName_StringBufferToStringBuilder;
+	public static String OptimizationTabPage_CheckboxName_StringBufferToStringBuilderLocalsOnly;
 	public static String OptimizationTabPage_CheckboxName_NoStringCreation;
 	public static String OptimizationTabPage_CheckboxName_BooleanLiteral;
 

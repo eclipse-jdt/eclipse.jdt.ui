@@ -136,7 +136,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -155,7 +155,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -176,7 +176,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -197,7 +197,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -221,7 +221,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -241,7 +241,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -264,7 +264,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -284,7 +284,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -307,7 +307,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -329,7 +329,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -353,7 +353,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -374,7 +374,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -397,7 +397,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(0);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -420,7 +420,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("import java.util.List;\n");
@@ -440,7 +440,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("import java.util.List;\n");
@@ -462,7 +462,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -481,7 +481,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -502,7 +502,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField9() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -523,7 +523,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -549,7 +549,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractPotentiallyNullField1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -569,7 +569,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -591,7 +591,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -607,7 +607,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractPotentiallyNullField2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -628,7 +628,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -652,7 +652,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter1a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -672,7 +672,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -688,7 +688,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter1b() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -708,7 +708,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -723,7 +723,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter1c() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -742,7 +742,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -756,7 +756,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter1d() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -775,7 +775,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -811,7 +811,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter3a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -820,7 +820,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 extends E {\n");
@@ -839,7 +839,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 extends E {\n");
@@ -855,7 +855,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -870,7 +870,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter3b() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -879,7 +879,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 extends E {\n");
 		buf.append("    void foo(Exception e1) {\n");
@@ -897,7 +897,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
@@ -917,7 +917,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		// quickfix only offered with this warning enabled, but no need to say, because default is already "warning"
 //		this.fJProject1.setOption(JavaCore.COMPILER_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED, JavaCore.WARNING);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -926,7 +926,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 extends E {\n");
 		buf.append("    void foo(Exception e1) {\n");
@@ -944,7 +944,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -963,7 +963,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -973,7 +973,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 {\n");
@@ -992,7 +992,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 {\n");
@@ -1008,7 +1008,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1026,7 +1026,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter4a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1036,7 +1036,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 {\n");
 		buf.append("    void test(E e, Object in) {\n");
@@ -1054,7 +1054,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -1072,7 +1072,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1132,7 +1132,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1152,7 +1152,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1168,7 +1168,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(@org.eclipse.jdt.annotation.NonNull Object o) {\n");
@@ -1187,7 +1187,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
@@ -1207,7 +1207,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		fJProject1.setOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.ENABLED);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
 			buf.append("public class E {\n");
@@ -1217,7 +1217,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf.append("}\n");
 			pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
 			buf.append("@NonNullByDefault\n");
@@ -1238,7 +1238,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
 			buf.append("@NonNullByDefault\n");
@@ -1255,7 +1255,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
 			buf.append("public class E {\n");
@@ -1273,7 +1273,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeReturn1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1290,7 +1290,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1305,7 +1305,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeReturn2a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1315,7 +1315,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 extends E {\n");
@@ -1334,7 +1334,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 extends E {\n");
@@ -1350,7 +1350,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1364,7 +1364,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeReturn2b() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1374,7 +1374,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 extends E {\n");
 		buf.append("    Object foo() {\n");
@@ -1389,7 +1389,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -1410,7 +1410,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		fJProject1.setOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.ENABLED);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
 			buf.append("public class E {\n");
@@ -1420,7 +1420,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf.append("}\n");
 			pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
 			buf.append("public interface IE {\n");
@@ -1428,7 +1428,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf.append("}\n");
 			pack1.createCompilationUnit("IE.java", buf.toString(), false, null);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("public class E2 extends E implements IE {\n");
 			buf.append("    public Object foo() {\n");
@@ -1447,7 +1447,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("\n");
 			buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
@@ -1465,7 +1465,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("\n");
 			buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -1487,7 +1487,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeReturn4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1498,7 +1498,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 {\n");
@@ -1518,7 +1518,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 {\n");
@@ -1534,7 +1534,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1557,12 +1557,12 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			fJProject1.setOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, JavaCore.ENABLED);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 			buf.append("package test1;\n");
 			pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
 			buf.append("public class E {\n");
@@ -1572,7 +1572,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf.append("}\n");
 			pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("public class E2 {\n");
 			buf.append("    public Object foo(E e) {\n"); // non-null by default
@@ -1591,7 +1591,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("\n");
 			buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
@@ -1609,7 +1609,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			preview= getPreviewContent(proposal);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
 			buf.append("public class E {\n");
@@ -1631,12 +1631,12 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	public void testChangeReturn6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault(false)\n"); // <- HERE
@@ -1647,7 +1647,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E2 {\n");
 		buf.append("    public Object foo(E e) {\n"); // non-null by default
@@ -1666,7 +1666,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
@@ -1684,7 +1684,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault(false)\n");
@@ -1699,7 +1699,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveRedundantAnnotation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1715,7 +1715,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1729,7 +1729,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveRedundantAnnotation2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1747,7 +1747,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1762,7 +1762,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveRedundantAnnotation3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1780,7 +1780,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1795,7 +1795,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveRedundantAnnotation4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1812,7 +1812,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1826,7 +1826,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveRedundantAnnotation5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1843,7 +1843,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1857,7 +1857,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveRedundantAnnotation6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1876,7 +1876,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1892,12 +1892,12 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveRedundantAnnotation7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault\n");
@@ -1911,7 +1911,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1922,12 +1922,12 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testRemoveRedundantAnnotation8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1943,7 +1943,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1955,7 +1955,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testAddNonNull() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public <T extends Number> double foo(boolean b) {\n");
@@ -1976,7 +1976,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
@@ -2000,7 +2000,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBug506108() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -2009,7 +2009,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 extends E {\n");
@@ -2028,7 +2028,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E2 extends E {\n");
@@ -2044,7 +2044,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");

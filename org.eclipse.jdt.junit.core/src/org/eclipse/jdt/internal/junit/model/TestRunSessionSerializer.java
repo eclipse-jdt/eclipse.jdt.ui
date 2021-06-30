@@ -235,12 +235,12 @@ public class TestRunSessionSerializer implements XMLReader {
 	 * @since 3.6
 	 */
 	private static String escapeNonUnicodeChars(String string) {
-		StringBuffer buf= null;
+		StringBuilder buf= null;
 		for (int i= 0; i < string.length(); i++) {
 			char ch= string.charAt(i);
 			if (ch != 9 && ch != 10 && ch != 13 && ch < 32) {
 				if (buf == null) {
-					buf= new StringBuffer(string.substring(0, i));
+					buf= new StringBuilder(string.substring(0, i));
 				}
 				buf.append("\\u"); //$NON-NLS-1$
 				String hex= Integer.toHexString(ch);

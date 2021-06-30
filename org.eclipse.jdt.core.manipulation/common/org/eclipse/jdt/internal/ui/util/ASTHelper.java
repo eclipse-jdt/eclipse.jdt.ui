@@ -33,11 +33,6 @@ public class ASTHelper {
 	public static final int JLS15 = AST.JLS15;
 	public static final int JLS16 = AST.JLS16;
 
-	/*
-	 *  Junit4TestFinder and Junit5TestFinder use AST.JLS_Latest directly
-	 */
-	public static final int JLS_Latest = AST.JLS_Latest;
-
 	private static boolean isNodeTypeSupportedInAST(AST ast, int nodeType) {
 		switch (nodeType) {
 			case ASTNode.SWITCH_CASE:

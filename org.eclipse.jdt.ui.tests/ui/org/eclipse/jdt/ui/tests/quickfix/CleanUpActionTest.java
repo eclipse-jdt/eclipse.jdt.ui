@@ -63,7 +63,7 @@ public class CleanUpActionTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersAction() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testSortMembersAction", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package testSortMembersAction;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private void methodX() {}\n");
@@ -89,7 +89,7 @@ public class CleanUpActionTest extends CleanUpTestCase {
 
 		action.run(selection);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package testSortMembersAction;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private int fieldA;\n");

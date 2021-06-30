@@ -440,7 +440,7 @@ public abstract class AbstractCompletionTest {
 				"	}\n" +
 				fMembers +
 				"}\n";
-		StringBuffer lineBuffer= new StringBuffer(javadocLine);
+		StringBuilder lineBuffer= new StringBuilder(javadocLine);
 		int firstPipe= lineBuffer.indexOf(CARET);
 		int secondPipe;
 		if (firstPipe == -1) {
@@ -469,7 +469,7 @@ public abstract class AbstractCompletionTest {
 		"\n" +
 		fMembers +
 		"}\n";
-		StringBuffer lineBuffer= new StringBuffer(javadocLine);
+		StringBuilder lineBuffer= new StringBuilder(javadocLine);
 		int firstPipe= lineBuffer.indexOf(CARET);
 		int secondPipe;
 		if (firstPipe == -1) {
@@ -498,7 +498,7 @@ public abstract class AbstractCompletionTest {
 				"\n" +
 				fMembers +
 				"}\n";
-		StringBuffer lineBuffer= new StringBuffer(javadocLine);
+		StringBuilder lineBuffer= new StringBuilder(javadocLine);
 		int firstPipe= lineBuffer.indexOf(CARET);
 		int secondPipe;
 		if (firstPipe == -1) {
@@ -525,7 +525,7 @@ public abstract class AbstractCompletionTest {
 				"	 */\n" +
 				fMembers +
 				"}\n";
-		StringBuffer lineBuffer= new StringBuffer(javadocLine);
+		StringBuilder lineBuffer= new StringBuilder(javadocLine);
 		int firstPipe= lineBuffer.indexOf(CARET);
 		int secondPipe;
 		if (firstPipe == -1) {

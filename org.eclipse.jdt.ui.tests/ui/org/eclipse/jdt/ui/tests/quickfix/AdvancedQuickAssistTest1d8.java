@@ -140,7 +140,7 @@ public class AdvancedQuickAssistTest1d8 extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
-		StringBuffer buf1= new StringBuffer();
+		StringBuilder buf1= new StringBuilder();
 		buf1.append("package test1;\n");
 		buf1.append("@FunctionalInterface\n");
 		buf1.append("interface A {\n");
@@ -196,7 +196,7 @@ public class AdvancedQuickAssistTest1d8 extends QuickFixTest {
 		proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		buf1= new StringBuffer();
+		buf1= new StringBuilder();
 		buf1.append("package test1;\n");
 		buf1.append("@FunctionalInterface\n");
 		buf1.append("interface A {\n");
@@ -253,7 +253,7 @@ public class AdvancedQuickAssistTest1d8 extends QuickFixTest {
 		proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		buf1= new StringBuffer();
+		buf1= new StringBuilder();
 		buf1.append("package test1;\n");
 		buf1.append("@FunctionalInterface\n");
 		buf1.append("interface A {\n");
@@ -310,7 +310,7 @@ public class AdvancedQuickAssistTest1d8 extends QuickFixTest {
 		proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		buf1= new StringBuffer();
+		buf1= new StringBuilder();
 		buf1.append("package test1;\n");
 		buf1.append("@FunctionalInterface\n");
 		buf1.append("interface A {\n");

@@ -111,7 +111,7 @@ public class CodeFormatterTest extends CoreTests {
 	@Test
 	public void testFormatSelection() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append("*\n");
 		buf.append(" * HEADER\n");
@@ -128,7 +128,7 @@ public class CodeFormatterTest extends CoreTests {
 		String original= buf.toString();
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("    /** \n");
 		buf.append("* Bla\n");
 		buf.append("     */\n");
@@ -136,7 +136,7 @@ public class CodeFormatterTest extends CoreTests {
 
 		String formatted= format(cu, original.indexOf(selection), selection.length());
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append("*\n");
 		buf.append(" * HEADER\n");
@@ -156,7 +156,7 @@ public class CodeFormatterTest extends CoreTests {
 
 	@Test
 	public void testFormatFieldDeclWithExtraWhitespace() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("    class A {\n");
 		buf.append("        int i;\n");
@@ -177,7 +177,7 @@ public class CodeFormatterTest extends CoreTests {
 		edit.apply(doc);
 		String formatted= doc.get();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("class A {\n");
 		buf.append("    int i;\n");

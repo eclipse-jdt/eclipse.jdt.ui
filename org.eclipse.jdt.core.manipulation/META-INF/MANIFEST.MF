@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.core.manipulation
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.core.manipulation; singleton:=true
-Bundle-Version: 1.14.500.qualifier
+Bundle-Version: 1.15.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin
 Bundle-Localization: plugin
@@ -62,4 +62,4 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.internal.ui.text.correction.proposals;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.text.template.contentassist;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.util;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.astview,org.eclipse.jdt.junit.core"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11

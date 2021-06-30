@@ -30,11 +30,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
@@ -56,7 +56,7 @@ public class BreakContinueTargetFinderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fParser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		fParser = ASTParser.newParser(AST.getJLSLatest());
 		fFinder= new BreakContinueTargetFinder();
 
 		fJProject1= pts.getProject();

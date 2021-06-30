@@ -72,7 +72,7 @@ public class PartitionTokenScannerTest {
 
 	public static IDocument getRandomDocument(int size) {
 		final char[] characters= {'/', '*', '\'', '"', '\r', '\n', '\\'};
-		final StringBuffer buffer= new StringBuffer();
+		final StringBuilder buffer= new StringBuilder();
 
 		for (int i= 0; i < size; i++) {
 			final int randomIndex= (int) (Math.random() * characters.length);
@@ -165,7 +165,7 @@ public class PartitionTokenScannerTest {
 
 	private void testConformance(final IDocument document) {
 
-		final StringBuffer message= new StringBuffer();
+		final StringBuilder message= new StringBuilder();
 
 		fReference.setRange(document, 0, document.getLength());
 		fTestee.setRange(document, 0, document.getLength());
@@ -215,7 +215,7 @@ public class PartitionTokenScannerTest {
 	}
 
 	private static String extractString(IDocument document, int offset) {
-		final StringBuffer buffer= new StringBuffer();
+		final StringBuilder buffer= new StringBuilder();
 
 		try {
 			IRegion region= document.getLineInformationOfOffset(offset);
@@ -246,7 +246,7 @@ public class PartitionTokenScannerTest {
 	 * @return the escaped string
 	 */
 	public static String escape(String string) {
-		final StringBuffer buffer= new StringBuffer();
+		final StringBuilder buffer= new StringBuilder();
 
 		final int length= string.length();
 		for (int i= 0; i < length; i++) {

@@ -34,21 +34,21 @@ public class NullTestUtils {
 		sourceFolder.getJavaProject().setOptions(options);
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("annots", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
 		buf.append("public @interface NonNull {}\n");
 		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
 		buf.append("public @interface Nullable {}\n");
 		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.*;\n");
@@ -69,7 +69,7 @@ public class NullTestUtils {
 		project.setOptions(options);
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("annots", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.*;\n");
@@ -79,7 +79,7 @@ public class NullTestUtils {
 		buf.append("public @interface NonNull {}\n");
 		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.*;\n");
@@ -89,13 +89,13 @@ public class NullTestUtils {
 		buf.append("public @interface Nullable {}\n");
 		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("public enum DefaultLocation { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT, ARRAY_CONTENTS, TYPE_PARAMETER }\n");
 		pack0.createCompilationUnit("DefaultLocation.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.*;\n");

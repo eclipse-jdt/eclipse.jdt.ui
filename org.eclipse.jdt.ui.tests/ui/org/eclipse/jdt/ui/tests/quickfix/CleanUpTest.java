@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -38,6 +39,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -49,6 +52,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -76,13 +80,20 @@ import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class CleanUpTest extends CleanUpTestCase {
 	@Rule
 	public ProjectTestSetup projectSetup= new Java13ProjectTestSetup(false);
 
 	IJavaProject fJProject1= getProject();
+
+	@Override
+	@Before
+	public void setUp() throws Exception {
+		super.setUp();
+		IPath osgiJar= new Path("testresources/org.junit.jupiter.api_stub.jar");
+		JavaProjectHelper.addLibrary(fJProject1, JavaProjectHelper.findRtJar(osgiJar)[0]);
+	}
 
 	@Override
 	protected IJavaProject getProject() {
@@ -5643,7 +5654,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "    public String replaceWrapperAndToStringMethod(boolean b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Boolean alwaysInitializedVar = true;\n" //
+				+ "        Boolean alwaysInitializedVar = new Boolean(true);\n" //
 				+ "        if (alwaysInitializedVar) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -6259,7 +6270,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndCompareToMethod(char c) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Character alwaysInitializedVar = Character.MIN_VALUE;\n" //
+				+ "        Character alwaysInitializedVar = new Character(Character.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > c) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -6764,7 +6775,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public String replaceWrapperAndToStringMethod(byte b) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Byte alwaysInitializedVar = Byte.MIN_VALUE;\n" //
+				+ "        Byte alwaysInitializedVar = new Byte(Byte.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > b) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7290,7 +7301,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public String replaceWrapperAndToStringMethod(short s) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Short alwaysInitializedVar = Short.MIN_VALUE;\n" //
+				+ "        Short alwaysInitializedVar = new Short(Short.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > s) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -7858,7 +7869,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public int replaceWrapperAndPrimitiveValueMethod(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Integer alwaysInitializedVar = Integer.MIN_VALUE;\n" //
+				+ "        Integer alwaysInitializedVar = new Integer(Integer.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > i) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -8498,7 +8509,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public String replaceWrapperAndToStringMethod(long l) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Long alwaysInitializedVar = Long.MIN_VALUE;\n" //
+				+ "        Long alwaysInitializedVar = new Long(Long.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > l) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -9128,7 +9139,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public float replaceWrapperAndPrimitiveValueMethod(float f) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Float alwaysInitializedVar = Float.MIN_VALUE;\n" //
+				+ "        Float alwaysInitializedVar = new Float(Float.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > f) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -9694,7 +9705,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public double replaceWrapperAndPrimitiveValueMethod(double d) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        Double alwaysInitializedVar = Double.MIN_VALUE;\n" //
+				+ "        Double alwaysInitializedVar = new Double(Double.MIN_VALUE);\n" //
 				+ "        if (alwaysInitializedVar > d) {\n" //
 				+ "            System.out.println(\"True!\");\n" //
 				+ "        }\n" //
@@ -21504,6 +21515,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.sql.DriverPropertyInfo;\n" //
+				+ "import org.junit.jupiter.api.Nested;\n" //
 				+ "\n" //
 				+ "public class E<T> {\n" //
 				+ "    public interface DoNotRefactorInnerInterface {\n" //
@@ -21610,6 +21622,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public class DoNotRefactorInnerClassThatUsesTheTopLevelGenericity {\n" //
 				+ "        public T aGenericField= null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Nested\n" //
+				+ "    public class DoNotRefactorInnerClassWithJunitNestedAnnotation {\n" //
+				+ "        public int a;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
@@ -27362,10 +27379,10 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testRemoveRedundantModifiers () throws Exception {
-		StringBuffer buf;
+		StringBuilder buf;
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public abstract interface IFoo {\n");
 		buf.append("  public static final int MAGIC_NUMBER = 646;\n");
@@ -27375,7 +27392,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("IFoo.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public interface IFoo {\n");
 		buf.append("  int MAGIC_NUMBER = 646;\n");
@@ -27385,7 +27402,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		String expected1 = buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public final class Sealed {\n");
 		buf.append("  public final void foo () {};\n");
@@ -27395,7 +27412,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("Sealed.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public final class Sealed {\n");
 		buf.append("  public void foo () {};\n");
@@ -27407,7 +27424,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		// Anonymous class within an interface:
 		// public keyword must not be removed (see bug#536612)
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public interface X {\n");
 		buf.append("  void B();\n");
@@ -27442,7 +27459,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "}\n";
 
 		// public modifier must not be removed from enum methods
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public interface A {\n");
 		buf.append("  public static enum B {\n");
@@ -27456,7 +27473,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected5 = buf.toString().replace("static enum", "enum");
 
 		// Bug#551038: final keyword must not be removed from method with varargs
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public final class SafeVarargsExample {\n");
 		buf.append("  @SafeVarargs\n");
@@ -27467,7 +27484,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu6= pack1.createCompilationUnit("SafeVarargsExample.java", buf.toString(), false, null);
 
 		// Bug#553608: modifiers public static final must not be removed from inner enum within interface
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public interface Foo {\n");
 		buf.append("  enum Bar {\n");
@@ -27526,7 +27543,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 
 		// When
-		ASTParser parser= ASTParser.newParser(ASTHelper.JLS_Latest);
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(cu1);
 		parser.setResolveBindings(true);

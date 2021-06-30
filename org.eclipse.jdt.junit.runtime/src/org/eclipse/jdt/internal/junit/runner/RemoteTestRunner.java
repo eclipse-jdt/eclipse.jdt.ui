@@ -586,7 +586,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	public static String escapeText(String s) {
 		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0) && (s.indexOf('\r') < 0) && (s.indexOf('\n') < 0))
 			return s;
-		StringBuffer sb= new StringBuffer(s.length()+10);
+		StringBuilder sb= new StringBuilder(s.length()+10);
 		for (int i= 0; i < s.length(); i++) {
 			char c= s.charAt(i);
 			switch (c) {

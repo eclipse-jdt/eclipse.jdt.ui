@@ -48,7 +48,7 @@ import org.junit.runners.Suite;
 	MarkerResolutionTest.class,
 	JavadocQuickFixTest.class,
 	JavadocQuickFixTest9.class,
-	JavadocQuickFixTestPreview.class,
+	JavadocQuickFixTest16.class,
 	ConvertForLoopQuickFixTest.class,
 	ConvertIterableLoopQuickFixTest.class,
 	ConvertIterableLoopQuickFixTest1d7.class,

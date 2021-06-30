@@ -799,11 +799,11 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		ASTNode node= haveSource ? getHoveredASTNode(editorInputElement, hoverRegion) : null;
 		IBinding binding= getHoverBinding(element, node);
 
-		StringBuffer label;
+		StringBuilder label;
 		if (binding != null) {
-			label= new StringBuffer(JavaElementLinks.getBindingLabel(binding, element, flags, haveSource));
+			label= new StringBuilder(JavaElementLinks.getBindingLabel(binding, element, flags, haveSource));
 		} else {
-			label= new StringBuffer(JavaElementLinks.getElementLabel(element, flags));
+			label= new StringBuilder(JavaElementLinks.getElementLabel(element, flags));
 		}
 
 		if (element.getElementType() == IJavaElement.FIELD) {
@@ -1102,7 +1102,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					element= null; // no link
 				}
 			}
-			StringBuffer imageStyle= new StringBuffer("border:none; position: absolute; "); //$NON-NLS-1$
+			StringBuilder imageStyle= new StringBuilder("border:none; position: absolute; "); //$NON-NLS-1$
 			imageStyle.append("width: ").append(imageWidth).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
 			imageStyle.append("height: ").append(imageHeight).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
 			imageStyle.append("left: ").append(- labelLeft - 1).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$

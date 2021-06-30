@@ -80,7 +80,7 @@ public class ASTRewriteSnippet {
 			// create a test file
 			IPackageFragmentRoot root= javaProject.getPackageFragmentRoot(project);
 			IPackageFragment pack1= root.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
 			buf.append("    public void foo(int i) {\n");
@@ -132,7 +132,7 @@ public class ASTRewriteSnippet {
 			// test result
 			String preview= cu.getSource();
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
 			buf.append("    public void foo(int i) {\n");

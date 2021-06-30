@@ -102,18 +102,19 @@ public class PrimitiveRatherThanWrapperOperation extends CompilationUnitRewriteO
 			List<Expression> classInstanceCreationArguments= classInstanceCreation.arguments();
 
 			if (classInstanceCreationArguments.size() == 1
-					&& parsingMethodName != null
-					&& !Character.class.getCanonicalName().equals(wrapperFullyQualifiedName)
 					&& ASTNodes.hasType(classInstanceCreation, wrapperFullyQualifiedName)) {
 				Expression arg0= classInstanceCreationArguments.get(0);
 
-				if (ASTNodes.hasType(arg0, String.class.getCanonicalName())) {
+				if (ASTNodes.hasType(arg0, String.class.getCanonicalName()) && parsingMethodName != null) {
 					MethodInvocation newMethodInvocation= ast.newMethodInvocation();
 					newMethodInvocation.setExpression((Expression) rewrite.createCopyTarget(((SimpleType) visited.getType()).getName()));
 					newMethodInvocation.setName(ast.newSimpleName(parsingMethodName));
 					newMethodInvocation.arguments().add(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(arg0)));
 
 					ASTNodes.replaceButKeepComment(rewrite, initializer, newMethodInvocation, group);
+				} else if (ASTNodes.hasType(arg0, primitiveTypeName)) {
+					Expression newExpression= (Expression)rewrite.createCopyTarget(arg0);
+					ASTNodes.replaceButKeepComment(rewrite, classInstanceCreation, newExpression, group);
 				}
 			}
 		}

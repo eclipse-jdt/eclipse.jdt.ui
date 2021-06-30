@@ -86,7 +86,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Map;\n");
@@ -109,7 +109,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.net.Socket;\n");
@@ -134,7 +134,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -151,7 +151,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.x.Socket;\n");
@@ -169,7 +169,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set; // comment\n");
@@ -185,7 +185,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set; // comment\n");
@@ -201,7 +201,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -223,7 +223,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.*;\n");
@@ -240,7 +240,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -257,7 +257,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Set;\n");
@@ -272,7 +272,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack= sourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("\n");
 		buf.append("public class A {\n");
@@ -282,7 +282,7 @@ public class AddImportTest extends CoreTests {
 		pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		IPackageFragment test1= sourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import pack.A;\n");
@@ -311,7 +311,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import pack.A;\n");
@@ -327,7 +327,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import p.A.*;\n");
@@ -343,7 +343,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import p.Inner;\n");
@@ -359,7 +359,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.awt.Panel;\n");
@@ -377,7 +377,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.awt.Panel;\n");
@@ -395,7 +395,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -411,7 +411,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.io.Exception;\n");
@@ -427,7 +427,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -445,7 +445,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import static java.lang.Math.max;\n");
@@ -463,7 +463,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -481,7 +481,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import static xx.MyConstants.SIZE;\n");
@@ -502,7 +502,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.*;\n");
 		buf.append("import java.net.*;\n");
@@ -517,7 +517,7 @@ public class AddImportTest extends CoreTests {
 		String content= buf.toString();
 		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class B {\n");
 		buf.append("}\n");
@@ -556,7 +556,7 @@ public class AddImportTest extends CoreTests {
 		}
 		apply(importsRewrite);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.List;\n");
@@ -696,7 +696,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.*;\n");
 		buf.append("import java.net.*;\n");
@@ -709,7 +709,7 @@ public class AddImportTest extends CoreTests {
 		String content= buf.toString();
 		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class B {\n");
 		buf.append("}\n");
@@ -731,7 +731,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(importsRewrite);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Map;\n");
@@ -752,7 +752,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -800,7 +800,7 @@ public class AddImportTest extends CoreTests {
 
 		apply(imports);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import static java.lang.Math.max;\n");
@@ -827,7 +827,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -842,7 +842,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -859,7 +859,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -874,7 +874,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -891,7 +891,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -906,7 +906,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -923,7 +923,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -938,7 +938,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -955,7 +955,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.io.Serializable;\n");
@@ -976,7 +976,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.io.Serializable;\n");
@@ -1111,7 +1111,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("class SnippetY {\n");
@@ -1130,7 +1130,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import static p.SnippetY.Test.bar;\n");
@@ -1224,7 +1224,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -1239,7 +1239,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -1255,7 +1255,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -1270,7 +1270,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import static java.io.File.separator;\n");
@@ -1290,7 +1290,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -1305,7 +1305,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -1321,7 +1321,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1334,7 +1334,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1348,7 +1348,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1361,7 +1361,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.Thread.State;\n");
@@ -1377,7 +1377,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1390,7 +1390,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Map;\n");
@@ -1406,7 +1406,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1419,7 +1419,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Map.Entry;\n");
@@ -1435,7 +1435,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1448,7 +1448,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Map;\n");
@@ -1464,7 +1464,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1477,7 +1477,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Map.Entry;\n");
@@ -1493,7 +1493,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("public class Outer {\n");
@@ -1505,7 +1505,7 @@ public class AddImportTest extends CoreTests {
 		pack2.createCompilationUnit("Outer.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1518,7 +1518,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import pack2.Outer.Middle;\n");
@@ -1535,7 +1535,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack2;\n");
 		buf.append("\n");
 		buf.append("public class Outer {\n");
@@ -1547,7 +1547,7 @@ public class AddImportTest extends CoreTests {
 		pack2.createCompilationUnit("Outer.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1560,7 +1560,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -1574,7 +1574,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -1591,7 +1591,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -1611,7 +1611,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -1628,7 +1628,7 @@ public class AddImportTest extends CoreTests {
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -1845,14 +1845,14 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public abstract class E1 {\n");
 		buf.append("    protected class C {}\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E2 extends E1 {\n");
 		buf.append("    //<-insert\n");

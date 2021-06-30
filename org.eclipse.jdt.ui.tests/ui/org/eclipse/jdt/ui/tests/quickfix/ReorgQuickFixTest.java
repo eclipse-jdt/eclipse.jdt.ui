@@ -100,7 +100,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testUnusedImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
@@ -120,7 +120,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) p1;
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("}\n");
@@ -130,7 +130,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testUnusedImportsInDefaultPackage() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
 		buf.append("}\n");
@@ -149,7 +149,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) p1;
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("\n");
 		buf.append("public class E {\n");
 		buf.append("}\n");
@@ -159,7 +159,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testUnusedImportOnDemand() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -183,7 +183,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) p1;
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -197,7 +197,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testCollidingImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Date;\n");
@@ -223,7 +223,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) p1;
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Date;\n");
@@ -239,7 +239,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongPackageStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
@@ -261,7 +261,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("\n");
 				buf.append("public class E {\n");
@@ -275,7 +275,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				IPackageFragment pack2= fSourceFolder.getPackageFragment("test2");
 				ICompilationUnit cu2= pack2.getCompilationUnit("E.java");
 				assertTrue("CU does not exist", cu2.exists());
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test2;\n");
 				buf.append("\n");
 				buf.append("public class E {\n");
@@ -288,7 +288,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongPackageStatementInEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("public enum E {\n");
@@ -310,7 +310,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("\n");
 				buf.append("public enum E {\n");
@@ -324,7 +324,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				IPackageFragment pack2= fSourceFolder.getPackageFragment("test2");
 				ICompilationUnit cu2= pack2.getCompilationUnit("E.java");
 				assertTrue("CU does not exist", cu2.exists());
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test2;\n");
 				buf.append("\n");
 				buf.append("public enum E {\n");
@@ -337,7 +337,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongPackageStatementFromDefault() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
@@ -359,7 +359,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("\n");
 				buf.append("\n");
 				buf.append("public class E {\n");
@@ -373,7 +373,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				IPackageFragment pack2= fSourceFolder.getPackageFragment("test2");
 				ICompilationUnit cu2= pack2.getCompilationUnit("E.java");
 				assertTrue("CU does not exist", cu2.exists());
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test2;\n");
 				buf.append("\n");
 				buf.append("public class E {\n");
@@ -386,7 +386,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongDefaultPackageStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test2", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class E {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -406,7 +406,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test2;\n");
 				buf.append("\n");
 				buf.append("public class E {\n");
@@ -420,7 +420,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				IPackageFragment pack2= fSourceFolder.getPackageFragment("");
 				ICompilationUnit cu2= pack2.getCompilationUnit("E.java");
 				assertTrue("CU does not exist", cu2.exists());
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("public class E {\n");
 				buf.append("}\n");
 				assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
@@ -431,7 +431,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongPackageStatementButColliding() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
@@ -452,7 +452,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
@@ -463,7 +463,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongTypeName() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
@@ -485,7 +485,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("\n");
 				buf.append("public class X {\n");
@@ -498,7 +498,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 				ICompilationUnit cu2= pack1.getCompilationUnit("E.java");
 				assertTrue("CU does not exist", cu2.exists());
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("\n");
 				buf.append("public class E {\n");
@@ -511,7 +511,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongTypeName_bug180330() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("public class \\u0042 {\n");
 		buf.append("}\n");
@@ -533,7 +533,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
 				String preview= getPreviewContent(proposal);
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package p;\n");
 				buf.append("public class C {\n");
 				buf.append("}\n");
@@ -545,7 +545,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 				ICompilationUnit cu2= pack1.getCompilationUnit("B.java");
 				assertTrue("CU does not exist", cu2.exists());
-				buf= new StringBuffer();
+				buf= new StringBuilder();
 				buf.append("package p;\n");
 				buf.append("public class \\u0042 {\n");
 				buf.append("}\n");
@@ -557,7 +557,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongTypeNameButColliding() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class X {\n");
@@ -578,7 +578,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 
 		String preview= getPreviewContent(proposal);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
@@ -589,7 +589,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongTypeNameWithConstructor() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class X {\n");
@@ -613,7 +613,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 
 		String preview= getPreviewContent(proposal);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
@@ -627,7 +627,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongTypeNameInEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public enum X {\n");
@@ -651,7 +651,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 
 		String preview= getPreviewContent(proposal);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public enum E {\n");
@@ -665,7 +665,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testWrongTypeNameInAnnot() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public @interface X {\n");
@@ -686,7 +686,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 
 		String preview= getPreviewContent(proposal);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public @interface E {\n");
@@ -697,7 +697,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTodoTasks1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -719,7 +719,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -731,7 +731,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTodoTasks2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -751,7 +751,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -764,7 +764,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTodoTasks3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -784,7 +784,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -796,7 +796,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTodoTasks4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -818,7 +818,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -830,7 +830,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTodoTasks5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -852,7 +852,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -867,7 +867,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTodoTasks6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -887,7 +887,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -900,7 +900,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testTodoTasks7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -920,7 +920,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -934,7 +934,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@Test
 	public void testAddToClasspathSourceFolder() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import mylib.Foo;\n");
 		buf.append("public class E {\n");
@@ -946,7 +946,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		try {
 			IPackageFragmentRoot otherRoot= JavaProjectHelper.addSourceContainer(otherProject, "src");
 			IPackageFragment otherPack= otherRoot.createPackageFragment("mylib", false, null);
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package mylib;\n");
 			buf.append("public class Foo {\n");
 			buf.append("}\n");

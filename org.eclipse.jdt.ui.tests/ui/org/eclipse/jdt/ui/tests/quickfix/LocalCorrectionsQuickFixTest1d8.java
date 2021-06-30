@@ -91,7 +91,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionTypeUseAnnotation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -112,7 +112,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -134,7 +134,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class C1 {\n");
 		buf.append("    Runnable r = () -> info(\"Processing rule #{} {}\", \"\");\n");
@@ -150,7 +150,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class C1 {\n");
 		buf.append("    Runnable r = () -> {\n");
@@ -172,7 +172,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class C2 {\n");
 		buf.append("    void test() {\n");
@@ -192,7 +192,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class C2 {\n");
 		buf.append("    void test() {\n");
@@ -218,7 +218,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class C3 {\n");
@@ -243,7 +243,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class C3 {\n");
@@ -270,7 +270,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.File;\n");
 		buf.append("import java.io.IOException;\n");
@@ -300,7 +300,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.File;\n");
 		buf.append("import java.io.IOException;\n");
@@ -334,7 +334,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.File;\n");
 		buf.append("import java.io.IOException;\n");
@@ -369,7 +369,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.File;\n");
 		buf.append("import java.io.IOException;\n");
@@ -408,7 +408,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.File;\n");
 		buf.append("import java.io.IOException;\n");
@@ -443,7 +443,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.File;\n");
 		buf.append("import java.io.IOException;\n");
@@ -482,7 +482,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.io.InvalidClassException;\n");
@@ -510,7 +510,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.io.InvalidClassException;\n");
@@ -532,7 +532,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.io.InvalidClassException;\n");
@@ -559,7 +559,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference1() throws Exception { // ExpressionMethodReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.util.function.Consumer;\n");
@@ -580,7 +580,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.util.function.Consumer;\n");
@@ -605,7 +605,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.util.Optional;\n");
@@ -629,7 +629,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.util.Optional;\n");
@@ -657,7 +657,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.util.Optional;\n");
@@ -683,7 +683,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
 		buf.append("import java.util.Optional;\n");
@@ -738,7 +738,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference5() throws Exception { // CreationReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.util.HashSet;\n");
@@ -762,7 +762,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.util.HashSet;\n");
@@ -790,7 +790,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference6() throws Exception { // TypeMethodReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.util.function.Function;\n");
@@ -813,7 +813,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.util.function.Function;\n");
@@ -840,7 +840,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference7() throws Exception { // SuperMethodReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.util.function.Supplier;\n");
@@ -861,7 +861,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.util.function.Supplier;\n");
@@ -887,7 +887,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface FI1 {\n");
@@ -908,7 +908,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface FI1 {\n");
@@ -927,7 +927,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface FI1 {\n");
@@ -952,7 +952,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface FI1 {\n");
@@ -973,7 +973,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface FI1 {\n");
@@ -992,7 +992,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface FI1 {\n");
@@ -1017,7 +1017,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface FI1 {\n");
@@ -1038,7 +1038,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface FI1 {\n");
@@ -1058,7 +1058,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface FI1 {\n");
@@ -1084,7 +1084,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface I1 {\n");
@@ -1105,7 +1105,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface I1 {\n");
@@ -1124,7 +1124,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface I1 {\n");
@@ -1148,7 +1148,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod_multiLevel() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.List;\n");
@@ -1171,7 +1171,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.List;\n");
@@ -1192,7 +1192,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.List;\n");
@@ -1219,7 +1219,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod_noParam() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface I1 {\n");
@@ -1240,7 +1240,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface I1 {\n");
@@ -1259,7 +1259,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("interface I1 {\n");
@@ -1284,7 +1284,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	public void testCorrectVariableType() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Collections;\n");
 		buf.append("import java.util.List;\n");
@@ -1306,7 +1306,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Collections;\n");
 		buf.append("import java.util.List;\n");
@@ -1333,7 +1333,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			JavaCore.setOptions(options);
 			NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package pack;\n");
 			buf.append("import java.util.*;\n");
 			buf.append("import annots.*;\n");
@@ -1351,7 +1351,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			assertCorrectLabels(proposals);
 			assertNumberOfProposals(proposals, 6);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package pack;\n");
 			buf.append("import java.util.*;\n");
 			buf.append("import annots.*;\n");

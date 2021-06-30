@@ -710,7 +710,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	@Test
 	public void insertAt1() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class A  {\n");
@@ -735,7 +735,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 		final int NUM_MEMBERS= 6;
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("public A(int x) {\n");
 		buf.append("		this.x = x;\n");
 		buf.append("	}");

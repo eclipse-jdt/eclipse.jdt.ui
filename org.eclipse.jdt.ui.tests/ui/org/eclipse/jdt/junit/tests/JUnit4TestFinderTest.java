@@ -72,7 +72,7 @@ public class JUnit4TestFinderTest {
 	@Test
 	public void testTestCase() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -85,7 +85,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest1, new String[] { "p.MyTest" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.MyTest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -98,7 +98,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest2, new String[] { "p.MySuperTest" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.MySuperTest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -112,7 +112,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest3, new String[] { "p.InvisibleTest" });
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.InvisibleTest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -127,7 +127,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest4, new String[] { "p.Outer.InnerTest" });
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "p.Outer.InnerTest" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -152,7 +152,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(invalidTests[0].getCompilationUnit(), new String[] {});
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
 		buf.append("\n");
@@ -165,7 +165,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("\n");
@@ -211,7 +211,7 @@ public class JUnit4TestFinderTest {
 	@Test
 	public void testRunWith() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.Test;\n");
@@ -222,7 +222,7 @@ public class JUnit4TestFinderTest {
 		buf.append("}\n");
 		p.createCompilationUnit("Test1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.runner.RunWith;\n");
@@ -239,7 +239,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest1, new String[] { "p.Test2" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.Test2" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class Test3 extends Test2 {\n");
@@ -250,7 +250,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest2, new String[] { "p.Test3" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.Test3" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.runner.RunWith;\n");
@@ -267,7 +267,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.runner.RunWith;\n");
@@ -284,7 +284,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest3, new String[] { "p.Test5"});
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.Test5" });
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.runner.RunWith;\n");
@@ -298,7 +298,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(invalidTest2, new String[] {});
 		assertTestFound(invalidTest2.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("import java.util.Arrays;\n");
 		buf.append("import java.util.Collection;\n");
 		buf.append("\n");
@@ -338,7 +338,7 @@ public class JUnit4TestFinderTest {
 	@Test
 	public void testTestAnnotation() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.Test;\n");
@@ -353,7 +353,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.Test1" });
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class Test2 extends Test1 {\n");
@@ -366,7 +366,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.Test2" });
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.Test;\n");
@@ -381,7 +381,7 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.Test3" });
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.Test;\n");

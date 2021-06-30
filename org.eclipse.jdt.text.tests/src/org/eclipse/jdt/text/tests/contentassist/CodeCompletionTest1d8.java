@@ -196,7 +196,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride1() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class Main {\n");
 		buf.append("    private static class Cls implements Interface {\n");
@@ -223,7 +223,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class Main {\n");
 		buf.append("    private static class Cls implements Interface {\n");
@@ -249,7 +249,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride2() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class Main {\n");
 		buf.append("    private static interface Bar extends Foo {\n");
@@ -276,7 +276,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class Main {\n");
 		buf.append("    private static interface Bar extends Foo {\n");
@@ -302,7 +302,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride3() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public interface I {\n");
 		buf.append("    default int getSize(String name) {\n");
@@ -327,7 +327,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public interface I {\n");
 		buf.append("    default int getSize(String name) {\n");
@@ -351,7 +351,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride0() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Collection;\n");
 		buf.append("abstract class X implements Collection<Integer> {\n");
@@ -371,7 +371,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Collection;\n");
 		buf.append("import java.util.stream.Stream;\n");
@@ -392,7 +392,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride5() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I1 {\n");
@@ -413,7 +413,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I1 {\n");
@@ -430,7 +430,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride6() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I2 {\n");
@@ -451,7 +451,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I2 {\n");
@@ -468,7 +468,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride7() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I3 {\n");
@@ -489,7 +489,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I3 {\n");
@@ -506,7 +506,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride8() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I4 {\n");
@@ -527,7 +527,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[2].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I4 {\n");
@@ -543,7 +543,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride9() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I5 {\n");
@@ -564,7 +564,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[1].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I5 {\n");
@@ -580,7 +580,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride10() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I6 extends A {\n");
@@ -605,7 +605,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public interface I6 extends A {\n");
@@ -629,7 +629,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride11() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pp;\n");
 		buf.append("\n");
 		buf.append("public class CC implements I2 {\n");
@@ -654,7 +654,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 
 		proposals[0].apply(doc);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pp;\n");
 		buf.append("\n");
 		buf.append("public class CC implements I2 {\n");
@@ -678,7 +678,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride12() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pp;\n");
 		buf.append("\n");
 		buf.append("public class CC extends S1 {\n");
@@ -703,7 +703,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 
 		proposals[0].apply(doc);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pp;\n");
 		buf.append("\n");
 		buf.append("public class CC extends S1 {\n");
@@ -727,7 +727,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride13() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pp;\n");
 		buf.append("\n");
 		buf.append("public class CC extends S1 {\n");
@@ -756,7 +756,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 
 		proposals[1].apply(doc);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package pp;\n");
 		buf.append("\n");
 		buf.append("public class CC extends S1 {\n");
@@ -789,7 +789,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		NullTestUtils.prepareNullTypeAnnotations(sourceFolder);
 		try {
 			IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("\n");
 			buf.append("import annots.NonNull;\n");
@@ -827,7 +827,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 			proposals[0].apply(doc);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("\n");
 			buf.append("import annots.NonNull;\n");
@@ -862,7 +862,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.function.Consumer;\n");
@@ -902,7 +902,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			proposal.apply(doc);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("\n");
 			buf.append("import java.util.function.Consumer;\n");

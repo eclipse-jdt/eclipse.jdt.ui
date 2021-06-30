@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -682,7 +682,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					try {
 						// check favourite static imports
 						boolean isMethod= name.getParent() instanceof MethodInvocation;
-						String[] staticFavourites= JavaModelUtil.getStaticImportFavorites(importRewrite.getCompilationUnit(), identifier, isMethod, favourites);
+						ICompilationUnit cu= importRewrite.getCompilationUnit().getPrimary();
+						String[] staticFavourites= JavaModelUtil.getStaticImportFavorites(cu, identifier, isMethod, favourites);
 						if (staticFavourites.length > 0) {
 							String qualifiedTypeName= Signature.getQualifier(staticFavourites[0]);
 							importRewrite.addStaticImport(qualifiedTypeName, identifier, !isMethod);

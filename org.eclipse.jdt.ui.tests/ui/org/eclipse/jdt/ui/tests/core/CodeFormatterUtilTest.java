@@ -128,7 +128,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCU() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -140,7 +140,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 0, "\n", fJProject1);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -154,7 +154,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCUIndented() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -166,7 +166,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 1, "\n", fJProject1);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("    package test1;\n");
 		buf.append("    public class A {\n");
 		buf.append("        public void foo() {\n");
@@ -180,7 +180,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCUNewAPI() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -195,7 +195,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String formatted= doc.get();
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -209,7 +209,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCUNewAPI2() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("/**\n");
@@ -227,7 +227,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String formatted= doc.get();
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    /**\n");
@@ -244,7 +244,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCUWithPos() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -262,7 +262,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
@@ -279,7 +279,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testPackage() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("  package   com . test1;");
 		String contents= buf.toString();
 
@@ -291,14 +291,14 @@ public class CodeFormatterUtilTest extends CoreTests {
 		Document document= new Document(contents);
 		edit.apply(document);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package com.test1;");
 		assertEqualString(document.get(), buf.toString());
 	}
 
 	@Test
 	public void testPackageWithPos() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package   com . test1;");
 		String contents= buf.toString();
 
@@ -318,7 +318,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package com.test1;");
 		String expected= buf.toString();
 		assertEqualString(formatted, expected);
@@ -333,7 +333,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testVarDeclStatemenetWithPos() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("x[ ]=\nnew  int[ offset]");
 		String contents= buf.toString();
 
@@ -353,7 +353,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("x[] = new int[offset]");
 		String expected= buf.toString();
 		assertEqualString(formatted, expected);
@@ -368,7 +368,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testJavadoc() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/** bar\n");
 		buf.append(" * foo\n");
 		buf.append(" */\n");
@@ -390,7 +390,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("/** bar\n");
 		buf.append(" * foo\n");
 		buf.append(" */\n");
@@ -407,7 +407,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testJavadoc2() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/** bar\n");
 		buf.append(" * foo\n");
 		buf.append(" */");
@@ -429,7 +429,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("    /** bar\n");
 		buf.append("     * foo\n");
 		buf.append("     */");
@@ -446,7 +446,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testJavadoc3() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/** bar\n");
 		buf.append(" * foo\n");
 		buf.append(" */");
@@ -469,7 +469,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("/** bar\r\n");
 		buf.append(" * foo\r\n");
 		buf.append(" */");
@@ -486,7 +486,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCatchClause() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("catch\n");
 		buf.append("(Exception e) {\n");
 		buf.append("}");
@@ -508,7 +508,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append(" catch (Exception e) {\n");
 		buf.append("}");
 		String expected= buf.toString();
@@ -524,7 +524,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCatchStringLiteral() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("\"Hello\" ");
 		String contents= buf.toString();
 
@@ -536,7 +536,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		Document document= new Document(contents);
 		edit.apply(document);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("\"Hello\"");
 		String expected= buf.toString();
 		assertEqualString(document.get(), expected);
@@ -545,7 +545,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testFormatSubstring() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -579,7 +579,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2, pos3});
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3535,4 +3535,258 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
+
+	@Test
+	public void testStringBufferToStringBuilderLocalsOnly() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public StringBuffer field0;\n" //
+				+ "    public void method0(StringBuffer parm) {\n" //
+				+ "        System.out.println(parm.toString());\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu0= pack1.createCompilationUnit("SuperClass.java", sample0, false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuffer field1;\n" //
+				+ "    StringBuffer field2;\n" //
+				+ "    public void changeLambda(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            field1 = field2;\n" //
+				+ "            super.field0 = parm;\n" //
+				+ "            super.method0(parm);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuffer field1;\n" //
+				+ "    StringBuffer field2;\n" //
+				+ "    public void changeLambda(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            field1 = field2;\n" //
+				+ "            super.field0 = parm;\n" //
+				+ "            super.method0(parm);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu0, cu1 }, new String[] { sample0, expected1 }, null);
+	}
+
+	@Test
+	public void testDoNotChangeStringBufferToStringBuilderLocalsOnly() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public StringBuffer field0;\n" //
+				+ "    public void method0(StringBuffer parm) {\n" //
+				+ "        System.out.println(parm.toString());\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu0= pack1.createCompilationUnit("SuperClass.java", sample0, false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.StringWriter;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuffer field1;\n" //
+				+ "    StringBuffer field2;\n" //
+				+ "    public void doNotChangeLambdaWithFieldAssignment() {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = field1;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeLambdaWithParmAssignment(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = parm;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeLambdaWithSuperFieldAssignment(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = super.field0;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeLambdaWithMethodCall(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            doNotChangeLambdaWithSuperFieldAssignment(a);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeLambdaWithSuperMethodCall(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            super.method0(a);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void doNotChangeConstructorCall() {\n" //
+				+ "        StringBuffer a = new StringBuffer();\n" //
+				+ "        new Helper(a);\n" //
+				+ "    }\n"
+				+ "    private class Helper {\n" //
+				+ "    	   public Helper(StringBuffer b) {\n" //
+				+ "	           System.out.println(b.toString()); \n" //
+				+ "   	   }\n"
+				+ "    }\n"
+				+ "    public void doNotChangeIfBufferIsAssigned() {\n" //
+				+ "        StringWriter stringWriter = new StringWriter();\n"
+				+ "	       StringBuffer buffer = stringWriter.getBuffer();"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu0, cu1 });
+	}
+
+	@Test
+	public void testChangeStringBufferToStringBuilderAll() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public StringBuffer field0;\n" //
+				+ "    public void method0(StringBuffer parm) {\n" //
+				+ "        System.out.println(parm.toString());\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu0= pack1.createCompilationUnit("SuperClass.java", sample0, false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuffer field1;\n" //
+				+ "    StringBuffer field2;\n" //
+				+ "    public void changeLambdaWithFieldAssignment() {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = field1;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void changeLambdaWithParmAssignment(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = parm;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void changeLambdaWithSuperFieldAssignment(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            a = super.field0;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void changeLambdaWithMethodCall(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            changeLambdaWithSuperFieldAssignment(a);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void changeLambdaWithSuperMethodCall(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuffer a = new StringBuffer();\n" //
+				+ "            super.method0(a);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+		disable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS);
+
+		String expected0= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class SuperClass {\n" //
+				+ "    public StringBuilder field0;\n" //
+				+ "    public void method0(StringBuilder parm) {\n" //
+				+ "        System.out.println(parm.toString());\n" //
+				+ "    }\n" //
+				+ "}";
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    StringBuilder field1;\n" //
+				+ "    StringBuilder field2;\n" //
+				+ "    public void changeLambdaWithFieldAssignment() {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            a = field1;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void changeLambdaWithParmAssignment(StringBuilder parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            a = parm;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void changeLambdaWithSuperFieldAssignment(StringBuilder parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            a = super.field0;\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void changeLambdaWithMethodCall(StringBuilder parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            changeLambdaWithSuperFieldAssignment(a);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void changeLambdaWithSuperMethodCall(StringBuilder parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringBuilder a = new StringBuilder();\n" //
+				+ "            super.method0(a);\n" //
+				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu0, cu1 }, new String[] { expected0, expected1 },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StringBufferToStringBuilderCleanUp_description)));
+	}
+
 }

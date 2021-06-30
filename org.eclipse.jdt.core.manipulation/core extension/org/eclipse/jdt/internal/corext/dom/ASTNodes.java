@@ -1085,7 +1085,7 @@ public class ASTNodes {
 	 * @since 3.10
 	 */
 	public static String getTypeName(Type type) {
-		final StringBuffer buffer= new StringBuffer();
+		final StringBuilder buffer= new StringBuilder();
 		ASTVisitor visitor= new ASTVisitor() {
 			@Override
 			public boolean visit(PrimitiveType node) {
@@ -1132,7 +1132,7 @@ public class ASTNodes {
 	 * @since 3.10
 	 */
 	public static String getQualifiedTypeName(Type type) {
-		final StringBuffer buffer= new StringBuffer();
+		final StringBuilder buffer= new StringBuilder();
 		ASTVisitor visitor= new ASTVisitor() {
 			@Override
 			public boolean visit(SimpleType node) {

@@ -258,7 +258,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	@Test
 	public void testVariableDeclarations4() throws Exception {
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class Rectangle {\n");
@@ -268,7 +268,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		pack0.createCompilationUnit("Rectangle.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("import pack1.Rectangle;\n");
 		buf.append("public class E {\n");
@@ -299,7 +299,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testVariableDeclarations5() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public interface IConstants {\n");
@@ -308,7 +308,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		pack0.createCompilationUnit("IConstants.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int fVar1, fVar2;\n");
@@ -697,7 +697,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testTypeDeclarationsTypeParameters() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("test0.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class H<M> {\n");
 		buf.append("}\n");
@@ -705,7 +705,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("import test0.ae.H;\n");
 		buf.append("public class G<X, Y> extends H<String> {\n");

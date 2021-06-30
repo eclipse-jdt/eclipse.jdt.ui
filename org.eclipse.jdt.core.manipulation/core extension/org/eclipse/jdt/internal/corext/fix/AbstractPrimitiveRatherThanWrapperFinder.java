@@ -246,7 +246,7 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 			if (classInstanceCreationArguments.size() == 1) {
 				Expression arg0= classInstanceCreationArguments.get(0);
 
-				return ASTNodes.hasType(arg0, String.class.getCanonicalName());
+				return ASTNodes.hasType(arg0, String.class.getCanonicalName()) || ASTNodes.hasType(arg0, getPrimitiveTypeName());
 			}
 		}
 
@@ -272,7 +272,7 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 			if (classInstanceCreationArguments.size() == 1) {
 				Expression arg0= classInstanceCreationArguments.get(0);
 
-				return ASTNodes.hasType(arg0, String.class.getCanonicalName());
+				return ASTNodes.hasType(arg0, String.class.getCanonicalName()) || ASTNodes.hasType(arg0, getPrimitiveTypeName());
 			}
 		}
 

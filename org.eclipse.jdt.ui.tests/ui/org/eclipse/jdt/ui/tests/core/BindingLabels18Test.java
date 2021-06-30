@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -49,7 +50,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 public class BindingLabels18Test extends AbstractBindingLabelsTest {
@@ -464,7 +464,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 					this.ast= unit;
 				}
 			}
-			ASTParser parser= ASTParser.newParser(ASTHelper.JLS_Latest);
+			ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
 			parser.setResolveBindings(true);
 			parser.setBindingsRecovery(true);
 			parser.setProject(javaProject);

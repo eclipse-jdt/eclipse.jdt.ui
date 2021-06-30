@@ -99,14 +99,14 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Test
 	public void testChangeVarTypeToBindingTypeProposal() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append(" {\n");
@@ -124,7 +124,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String preview= getPreviewContent((TypeChangeCorrectionProposal) proposals.get(0));
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append(" {\n");
@@ -136,14 +136,14 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Test
 	public void testChangeTypeToVarTypeProposal() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append(" {\n");
@@ -161,7 +161,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String preview= getPreviewContent((TypeChangeCorrectionProposal) proposals.get(0));
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append(" {\n");
@@ -174,14 +174,14 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Test
 	public void testChangeVarTypeToBindingTypeProposalWithTypeAnnotation() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
 		buf.append("import java.lang.annotation.Target;\n\n");
@@ -204,7 +204,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String preview= getPreviewContent((TypeChangeCorrectionProposal) proposals.get(0));
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
 		buf.append("import java.lang.annotation.Target;\n\n");
@@ -221,14 +221,14 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Test
 	public void testChangeTypeToVarTypeProposalWithoutTypeAnnotation() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
 		buf.append("import java.lang.annotation.Target;\n\n");
@@ -251,7 +251,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String preview= getPreviewContent((TypeChangeCorrectionProposal) proposals.get(0));
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
 		buf.append("import java.lang.annotation.Target;\n\n");
@@ -269,14 +269,14 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Test
 	public void testChangeVarToTypeNoTypeChangeProposal() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append(" {\n");
@@ -308,14 +308,14 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Test
 	public void testChangeTypeToVarChangeProposalRemoveUnusedImport() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.util.List;\n\n");
 		buf.append("public class Second {\n");
@@ -326,7 +326,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		pack.createCompilationUnit("Second.java", buf.toString(), false, null);
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.util.List;\n\n");
 		buf.append("public class Cls {\n");
@@ -345,7 +345,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String preview= getPreviewContent((TypeChangeCorrectionProposal) proposals.get(0));
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("public class Cls {\n");
 		buf.append(" {\n");
@@ -357,14 +357,14 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Test
 	public void testChangeTypeToVarChangeProposalDonotRemoveUsedImport() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.util.List;\n\n");
 		buf.append("public class Second {\n");
@@ -375,7 +375,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		pack.createCompilationUnit("Second.java", buf.toString(), false, null);
 
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.util.List;\n\n");
 		buf.append("public class Cls {\n");
@@ -395,7 +395,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String preview= getPreviewContent((TypeChangeCorrectionProposal) proposals.get(0));
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.util.List;\n\n");
 		buf.append("public class Cls {\n");
@@ -409,14 +409,14 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Test
 	public void testChangeParametrizedTypeToVarTypeProposalDoesNotLoseTypeArguments() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.util.ArrayList;\n\n");
 		buf.append("public class Cls {\n");
@@ -435,7 +435,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String preview= getPreviewContent((TypeChangeCorrectionProposal) proposals.get(0));
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("import java.util.ArrayList;\n\n");
 		buf.append("public class Cls {\n");
@@ -449,14 +449,14 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Test
 	public void testConvertToForUsingIndexWithVar() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("public class Cls {\n");
 		buf.append("  public void foo() {\n");
@@ -473,7 +473,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= getExpectedProposals(collectAssists(context, false), LINKED_PROPOSAL_TYPE);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n\n");
 		buf.append("public class Cls {\n");
 		buf.append("  public void foo() {\n");

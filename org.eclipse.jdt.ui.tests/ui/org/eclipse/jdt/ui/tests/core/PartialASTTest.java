@@ -89,7 +89,7 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCU1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
@@ -111,7 +111,7 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
@@ -175,7 +175,7 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCU2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
@@ -211,7 +211,7 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
@@ -240,7 +240,7 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCU3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.io.Serializable;\n");
@@ -277,7 +277,7 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.io.Serializable;\n");
@@ -309,7 +309,7 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCU4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.io.IOException;\n");
@@ -347,7 +347,7 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.io.IOException;\n");
@@ -374,7 +374,7 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCUPositionNotInMethod1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.io.IOException;\n");
@@ -412,7 +412,7 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.io.IOException;\n");
@@ -438,7 +438,7 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCUPositionNotInMethod2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.io.IOException;\n");
@@ -477,7 +477,7 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.io.IOException;\n");

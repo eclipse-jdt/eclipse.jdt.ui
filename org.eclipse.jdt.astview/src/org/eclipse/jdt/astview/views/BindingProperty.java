@@ -83,7 +83,16 @@ public class BindingProperty extends ASTAttribute {
 		fIsRelevant= isRelevant;
 	}
 
+
+	@Deprecated
 	public BindingProperty(Binding parent, StringBuffer label, boolean isRelevant) {
+		fParent= parent;
+		fName= label.toString();
+		fValues= null;
+		fIsRelevant= isRelevant;
+	}
+
+	public BindingProperty(Binding parent, StringBuilder label, boolean isRelevant) {
 		fParent= parent;
 		fName= label.toString();
 		fValues= null;

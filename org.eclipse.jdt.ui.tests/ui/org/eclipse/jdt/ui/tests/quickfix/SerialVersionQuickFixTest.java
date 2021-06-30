@@ -110,7 +110,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testLocalClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test5 {\n");
@@ -134,7 +134,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test5 {\n");
@@ -154,7 +154,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test5 {\n");
@@ -181,7 +181,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testAnonymousClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test3 {\n");
@@ -201,7 +201,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test3 {\n");
@@ -217,7 +217,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test3 {\n");
@@ -239,7 +239,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInnerClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test2", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("import java.io.Serializable;\n");
@@ -259,7 +259,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("import java.io.Serializable;\n");
@@ -275,7 +275,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test2;\n");
 		buf.append("\n");
 		buf.append("import java.io.Serializable;\n");
@@ -298,7 +298,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testOuterClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test1 implements Serializable {\n");
@@ -313,7 +313,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test1 implements Serializable {\n");
@@ -324,7 +324,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test1 implements Serializable {\n");
@@ -341,7 +341,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testOuterClass2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("import java.util.EventObject;\n");
 		buf.append("public class Test4 extends EventObject {\n");
@@ -367,7 +367,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("import java.util.EventObject;\n");
 		buf.append("public class Test4 extends EventObject {\n");
@@ -389,7 +389,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test3;\n");
 		buf.append("import java.util.EventObject;\n");
 		buf.append("public class Test4 extends EventObject {\n");
@@ -419,7 +419,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		// longer package
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("a.b.c", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package a.b.c;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test1 implements Serializable {\n");
@@ -434,7 +434,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package a.b.c;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test1 implements Serializable {\n");
@@ -445,7 +445,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package a.b.c;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("public class Test1 implements Serializable {\n");

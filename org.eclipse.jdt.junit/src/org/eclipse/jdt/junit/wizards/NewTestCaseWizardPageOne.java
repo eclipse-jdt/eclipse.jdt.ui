@@ -1174,7 +1174,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private void appendParameterNamesToMethodName(StringBuffer buffer, String[] parameters) {
 		for (String parameter : parameters) {
-			final StringBuffer buf= new StringBuffer(Signature.getSimpleName(Signature.toString(Signature.getElementType(parameter))));
+			final StringBuilder buf= new StringBuilder(Signature.getSimpleName(Signature.toString(Signature.getElementType(parameter))));
 			final char character= buf.charAt(0);
 			if (buf.length() > 0 && !Character.isUpperCase(character))
 				buf.setCharAt(0, Character.toUpperCase(character));

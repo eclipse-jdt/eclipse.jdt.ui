@@ -61,14 +61,14 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		IPackageFragmentRoot java9Src= JavaProjectHelper.addSourceContainer(fJProject2, "src");
 		IPackageFragment def= java9Src.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module annots {\n");
 		buf.append("     exports annots; \n");
 		buf.append("}\n");
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment annots= java9Src.createPackageFragment("annots", false, null);
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -79,7 +79,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 		buf.append("}\n");
 		annots.createCompilationUnit("Nullable.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -90,7 +90,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 		buf.append("}\n");
 		annots.createCompilationUnit("NonNull.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("public enum DefaultLocation {\n");
@@ -99,7 +99,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 		buf.append("");
 		annots.createCompilationUnit("DefaultLocation.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("import static annots.DefaultLocation.*;\n");
@@ -143,7 +143,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 	@Test
 	public void testBug530580a() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@annots.NonNullByDefault module test {\n");
 		buf.append(" requires annots;");
 		buf.append("}\n");
@@ -152,7 +152,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("import annots.*;\n");
@@ -175,7 +175,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("import annots.*;\n");
@@ -197,7 +197,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("import annots.*;\n");
@@ -217,7 +217,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("import annots.*;\n");
@@ -233,7 +233,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 	}
 	@Test
 	public void testBug530580b() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@annots.NonNullByDefault module test {\n");
 		buf.append(" requires annots;");
 		buf.append("}\n");
@@ -242,7 +242,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import annots.*;\n");
 		buf.append("\n");
@@ -266,7 +266,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import annots.*;\n");
 		buf.append("\n");
@@ -287,7 +287,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import annots.*;\n");
 		buf.append("\n");

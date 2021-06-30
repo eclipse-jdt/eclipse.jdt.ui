@@ -297,7 +297,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						Expression rhs= oldAssignment.getRightHandSide();
 						// Ugly hack to tack on trailing comments
 						IBuffer buffer= cuRewrite.getCu().getBuffer();
-						StringBuffer b= new StringBuffer();
+						StringBuilder b= new StringBuilder();
 						b.append(buffer.getText(rhs.getStartPosition(), rhs.getLength()) + ";"); //$NON-NLS-1$
 						List<Comment> trailingComments= ASTNodes.getTrailingComments(oldExpStatement);
 						for (Comment comment : trailingComments) {
@@ -317,7 +317,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					Assignment oldAssignment= (Assignment)oldExpStatement.getExpression();
 					Expression rhs= oldAssignment.getRightHandSide();
 					IBuffer buffer= cuRewrite.getCu().getBuffer();
-					StringBuffer b= new StringBuffer();
+					StringBuilder b= new StringBuilder();
 					List<Comment> leadingComments= ASTNodes.getLeadingComments(oldExpStatement);
 					for (Comment comment : leadingComments) {
 						b.append(buffer.getText(comment.getStartPosition(), comment.getLength()) + "\n"); //$NON-NLS-1$

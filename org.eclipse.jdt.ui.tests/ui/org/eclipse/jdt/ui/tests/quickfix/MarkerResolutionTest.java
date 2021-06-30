@@ -142,7 +142,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 			return;
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
@@ -171,7 +171,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 
 			proposals[0].apply(doc);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("PACKAGE test1;\n");
 			buf.append("import java.util.Vector;\n");
 			buf.append("public class E {\n");
@@ -191,7 +191,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 			return;
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class E {\n");
@@ -218,7 +218,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 
 			proposals[0].apply(doc);
 
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			buf.append("\n");
 			buf.append("package TEST1;\n");
 			buf.append("import java.util.Vector;\n");

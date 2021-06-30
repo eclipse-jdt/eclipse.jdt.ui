@@ -471,7 +471,7 @@ public class NLSSourceModifierTest {
             "	private String str=Accessor.k_0;\n" +
             "}\n";
 
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -517,7 +517,7 @@ public class NLSSourceModifierTest {
         Document accessorDoc= new Document(accessorKlazz);
         accessorChange.getEdit().apply(accessorDoc);
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -586,7 +586,7 @@ public class NLSSourceModifierTest {
             "	private String str=Accessor.key_0;\n" +
             "}\n";
 
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -632,7 +632,7 @@ public class NLSSourceModifierTest {
         Document accessorDoc= new Document(accessorKlazz);
         accessorChange.getEdit().apply(accessorDoc);
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -698,7 +698,7 @@ public class NLSSourceModifierTest {
             "	private String str=Accessor.key_0; \n" +
             "}\n";
 
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -745,7 +745,7 @@ public class NLSSourceModifierTest {
         Document accessorDoc= new Document(accessorKlazz);
         accessorChange.getEdit().apply(accessorDoc);
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -775,7 +775,7 @@ public class NLSSourceModifierTest {
 			"	private String str=Accessor.key_1;\n" +
 			"}\n";
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -829,7 +829,7 @@ public class NLSSourceModifierTest {
 		Document accessorDoc= new Document(accessorKlazz);
 		accessorChange.getEdit().apply(accessorDoc);
 
-		buf= new StringBuffer();
+		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");
@@ -910,7 +910,7 @@ public class NLSSourceModifierTest {
             "	private String str2=Accessor.key_0;\n" +
             "}\n";
 
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -956,7 +956,7 @@ public class NLSSourceModifierTest {
         Document accessorDoc= new Document(accessorKlazz);
         accessorChange.getEdit().apply(accessorDoc);
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -986,7 +986,7 @@ public class NLSSourceModifierTest {
              "	private String str5=\"z\";\n" +
              "}\n";
 
-         StringBuffer buf= new StringBuffer();
+         StringBuilder buf= new StringBuilder();
          buf.append("package test;\n");
          buf.append("import org.eclipse.osgi.util.NLS;\n");
          buf.append("public class Accessor extends NLS {\n");
@@ -1043,7 +1043,7 @@ public class NLSSourceModifierTest {
          Document accessorDoc= new Document(accessorKlazz);
          accessorChange.getEdit().apply(accessorDoc);
 
-         buf= new StringBuffer();
+         buf= new StringBuilder();
          buf.append("package test;\n");
          buf.append("import org.eclipse.osgi.util.NLS;\n");
          buf.append("public class Accessor extends NLS {\n");
@@ -1076,7 +1076,7 @@ public class NLSSourceModifierTest {
             "	private String str5=\"z\";\n" +
             "}\n";
 
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -1135,7 +1135,7 @@ public class NLSSourceModifierTest {
         Document accessorDoc= new Document(accessorKlazz);
         accessorChange.getEdit().apply(accessorDoc);
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -1159,7 +1159,7 @@ public class NLSSourceModifierTest {
 
 	@Test
 	public void insertionOrder3() throws Exception {
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("public class Test {\n");
         buf.append("    private String str1= Accessor.Test_A_1;\n");
@@ -1168,7 +1168,7 @@ public class NLSSourceModifierTest {
         buf.append("}\n");
         String klazz= buf.toString();
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -1210,7 +1210,7 @@ public class NLSSourceModifierTest {
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("public class Test {\n");
         buf.append("    private String str1= Accessor.Test_A_1;\n");
@@ -1225,7 +1225,7 @@ public class NLSSourceModifierTest {
         Document accessorDoc= new Document(accessorKlazz);
         accessorChange.getEdit().apply(accessorDoc);
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -1251,7 +1251,7 @@ public class NLSSourceModifierTest {
 
 	@Test
 	public void insertionOrder4() throws Exception {
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("public class Test {\n");
         buf.append("    private String str1= Accessor.Test_A_a;\n");
@@ -1263,7 +1263,7 @@ public class NLSSourceModifierTest {
         buf.append("}\n");
         String klazz= buf.toString();
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");
@@ -1314,7 +1314,7 @@ public class NLSSourceModifierTest {
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("public class Test {\n");
         buf.append("    private String str1= Accessor.Test_A_a;\n");
@@ -1332,7 +1332,7 @@ public class NLSSourceModifierTest {
         Document accessorDoc= new Document(accessorKlazz);
         accessorChange.getEdit().apply(accessorDoc);
 
-        buf= new StringBuffer();
+        buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("public class Accessor extends NLS {\n");

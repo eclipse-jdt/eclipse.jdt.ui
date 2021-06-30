@@ -79,6 +79,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
+		options.setOption(STRINGBUFFER_TO_STRINGBUILDER, CleanUpOptions.FALSE);
+		options.setOption(STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS, CleanUpOptions.TRUE);
 		options.setOption(PLAIN_REPLACEMENT, CleanUpOptions.FALSE);
 		options.setOption(USE_STRING_IS_BLANK, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);
@@ -253,6 +255,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
+		options.setOption(STRINGBUFFER_TO_STRINGBUILDER, CleanUpOptions.FALSE);
+		options.setOption(STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS, CleanUpOptions.TRUE);
 		options.setOption(PLAIN_REPLACEMENT, CleanUpOptions.FALSE);
 		options.setOption(USE_STRING_IS_BLANK, CleanUpOptions.FALSE);
 		options.setOption(USE_LAZY_LOGICAL_OPERATOR, CleanUpOptions.FALSE);

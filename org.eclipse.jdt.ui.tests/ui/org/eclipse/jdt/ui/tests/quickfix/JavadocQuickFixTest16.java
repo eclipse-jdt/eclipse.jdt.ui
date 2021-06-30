@@ -41,10 +41,10 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
-public class JavadocQuickFixTestPreview extends QuickFixTest {
+public class JavadocQuickFixTest16 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java16ProjectTestSetup(true);
+    public ProjectTestSetup projectsetup = new Java16ProjectTestSetup(false);
 
 	private IJavaProject fJProject1;
 
@@ -72,7 +72,7 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, res, null);
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
 		JavaProjectHelper.addRequiredModularProject(fJProject1, projectsetup.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
