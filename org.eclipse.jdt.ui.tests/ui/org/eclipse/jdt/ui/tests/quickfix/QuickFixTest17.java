@@ -29,15 +29,15 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java16ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java17ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
-public class QuickFixTestPreview extends QuickFixTest {
+public class QuickFixTest17 extends QuickFixTest {
 
     @Rule
-    public ProjectTestSetup projectsetup = new Java16ProjectTestSetup(true);
+    public ProjectTestSetup projectsetup = new Java17ProjectTestSetup(false);
 
     private IJavaProject fJProject1;
 
@@ -54,7 +54,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	public void testAddSealedMissingClassModifierProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		Map<String, String> options= fJProject1.getOptions(false);
 		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
@@ -114,7 +114,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	public void testAddSealedMissingInterfaceModifierProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		Map<String, String> options= fJProject1.getOptions(false);
 		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
