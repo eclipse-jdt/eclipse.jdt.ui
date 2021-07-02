@@ -131,6 +131,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SealedMissingClassModifier:
 			case IProblem.SealedMissingInterfaceModifier:
 			case IProblem.SealedNotDirectSuperInterface:
+			case IProblem.SealedSuperClassDoesNotPermit:
+			case IProblem.SealedSuperInterfaceDoesNotPermit:
 			case IProblem.Task:
 			case IProblem.UnusedMethodDeclaredThrownException:
 			case IProblem.UnusedConstructorDeclaredThrownException:
@@ -472,6 +474,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.SealedNotDirectSuperInterface:
 				LocalCorrectionsSubProcessor.addSealedAsDirectSuperTypeProposal(context, problem, proposals);
+				break;
+			case IProblem.SealedSuperClassDoesNotPermit:
+			case IProblem.SealedSuperInterfaceDoesNotPermit:
+				LocalCorrectionsSubProcessor.addTypeAsPermittedSubTypeProposal(context, problem, proposals);
 				break;
 			case IProblem.StaticMethodRequested:
 			case IProblem.NonStaticFieldFromStaticInvocation:

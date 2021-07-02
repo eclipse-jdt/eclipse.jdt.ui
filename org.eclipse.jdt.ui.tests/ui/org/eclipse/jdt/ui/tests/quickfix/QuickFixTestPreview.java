@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -160,5 +160,156 @@ public class QuickFixTestPreview extends QuickFixTest {
 
 	}
 
+	@Test
+	public void testAddSealedAsDirectSuperTypeProposal1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
 
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed class Shape permits Square {\n" +
+				"}\n";
+		pack1.createCompilationUnit("Shape.java", test, false, null);
+
+		test= "" +
+				"package test;\n" +
+				"\n" +
+				"public non-sealed class Square extends Shape {\n" +
+				"}\n";
+		pack1.createCompilationUnit("Square.java", test, false, null);
+
+		test= "" +
+				"package test;\n" +
+				"\n" +
+				"public non-sealed class Circle extends Shape {\n" +
+				"}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("Circle.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu2, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		String expected= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed class Shape permits Square, Circle {\n" +
+				"}\n";
+
+		assertEqualString(preview, expected);
+	}
+
+	@Test
+	public void testAddSealedAsDirectSuperTypeProposal2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface Shape permits Square {\n" +
+				"}\n";
+		pack1.createCompilationUnit("Shape.java", test, false, null);
+
+		test= "" +
+				"package test;\n" +
+				"\n" +
+				"public non-sealed class Square implements Shape {\n" +
+				"}\n";
+		pack1.createCompilationUnit("Square.java", test, false, null);
+
+		test= "" +
+				"package test;\n" +
+				"\n" +
+				"public non-sealed class Circle implements Shape {\n" +
+				"}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("Circle.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu2, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		String expected= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface Shape permits Square, Circle {\n" +
+				"}\n";
+
+		assertEqualString(preview, expected);
+	}
+
+	@Test
+	public void testAddSealedAsDirectSuperTypeProposal3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface Shape permits Square {\n" +
+				"}\n";
+		pack1.createCompilationUnit("Shape.java", test, false, null);
+
+		test= "" +
+				"package test;\n" +
+				"\n" +
+				"public non-sealed class Square implements Shape {\n" +
+				"}\n";
+		pack1.createCompilationUnit("Square.java", test, false, null);
+
+		test= "" +
+				"package test;\n" +
+				"\n" +
+				"public non-sealed interface Circle extends Shape {\n" +
+				"}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("Circle.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu2, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		String expected= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface Shape permits Square, Circle {\n" +
+				"}\n";
+
+		assertEqualString(preview, expected);
+	}
 }
