@@ -915,7 +915,7 @@ public class ModifierCorrectionSubProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.REMOVE_OVERRIDE, image);
 			proposals.add(proposal);
 
-			QuickAssistProcessor.getCreateInSuperClassProposals(context, methodDecl.getName(), proposals);
+			QuickAssistProcessor.getCreateInSuperClassProposals(context, methodDecl.getName(), proposals, false);
 		}
 	}
 

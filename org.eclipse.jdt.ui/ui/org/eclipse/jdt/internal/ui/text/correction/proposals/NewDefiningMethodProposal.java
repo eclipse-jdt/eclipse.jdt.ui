@@ -66,10 +66,13 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 
 	private final String[] fParamNames;
 
-	public NewDefiningMethodProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, IMethodBinding method, String[] paramNames, int relevance) {
+	private boolean fAddOverrideAnnotation;
+
+	public NewDefiningMethodProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, IMethodBinding method, String[] paramNames, boolean addOverride, int relevance) {
 		super(label, targetCU, invocationNode, binding, relevance, null);
 		fMethod= method;
 		fParamNames= paramNames;
+		fAddOverrideAnnotation= addOverride;
 
 		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(binding.isInterface() || binding.isAnnotation(), method.getModifiers());
 		setImage(JavaPlugin.getImageDescriptorRegistry().get(desc));
@@ -82,7 +85,9 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 
 	@Override
 	protected void performChange(IEditorPart part, IDocument document) throws CoreException {
-		addOverrideAnnotation(document);
+		if (fAddOverrideAnnotation) {
+			addOverrideAnnotation(document);
+		}
 		super.performChange(part, document);
 	}
 

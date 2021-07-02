@@ -3985,6 +3985,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 
 	public static boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) throws CoreException {
+		return getCreateInSuperClassProposals(context, node, resultingCollections, true);
+	}
+
+	public static boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections, boolean addOverride) throws CoreException {
 		if (!(node instanceof SimpleName) || !(node.getParent() instanceof MethodDeclaration)) {
 			return false;
 		}
@@ -4024,7 +4028,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					if (targetCU != null) {
 						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description,
 								new String[] { BasicElementLabels.getJavaElementName(curr.getName()), BasicElementLabels.getJavaElementName(binding.getName()) });
-						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, typeDecl, binding, paramNames, IProposalRelevance.CREATE_METHOD_IN_SUPER));
+						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, typeDecl, binding, paramNames, addOverride, IProposalRelevance.CREATE_METHOD_IN_SUPER));
 					}
 				}
 			}
