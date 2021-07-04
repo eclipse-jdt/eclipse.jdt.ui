@@ -29,6 +29,9 @@ import java.util.concurrent.CompletableFuture;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -881,20 +884,22 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public Control createControl(Composite parent) {
 
 			Composite composite= new Composite(parent, SWT.NONE);
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			GridData gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+			gridData.exclude= true;
+			composite.setLayoutData(gridData);
 			GridLayout layout= new GridLayout(2, false);
 			layout.horizontalSpacing= 10;
 			composite.setLayout(layout);
 
-			fIcon= new Label(composite, SWT.LEFT);
+			fIcon= new Label(composite, SWT.LEAD);
 			fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
-			GridData gridData= new GridData(SWT.LEFT, SWT.TOP, false, false);
+			gridData= new GridData(SWT.LEAD, SWT.TOP, false, false);
 			fIcon.setLayoutData(gridData);
 
 			fHintText= new Link(composite, SWT.WRAP);
 			fHintText.setFont(composite.getFont());
 			fHintText.addSelectionListener(this);
-			gridData= new GridData(GridData.FILL, SWT.FILL, true, true);
+			gridData= new GridData(GridData.FILL, SWT.FILL, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(50);
 			gridData.heightHint= convertHeightInCharsToPixels(3);
 			fHintText.setLayoutData(gridData);
@@ -907,9 +912,8 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 			if (JavaRuntime.getDefaultVMInstall() == null) {
 				fHintText.setText(NewWizardMessages.NewJavaProjectWizardPageOne_NoJREFound_link);
-				fHintText.setVisible(true);
 				fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
-				fIcon.setVisible(true);
+				setInfoControlVisible(true);
 				return;
 			}
 
@@ -917,13 +921,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			if (selectedCompliance != null) {
 				String defaultCompliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
 				if (selectedCompliance.equals(defaultCompliance)) {
-					fHintText.setVisible(false);
-					fIcon.setVisible(false);
+					setInfoControlVisible(false);
 				} else {
 					fHintText.setText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_differendWorkspaceCC_message, new String[] {  BasicElementLabels.getVersionName(defaultCompliance), BasicElementLabels.getVersionName(selectedCompliance)}));
-					fHintText.setVisible(true);
 					fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO));
-					fIcon.setVisible(true);
+					setInfoControlVisible(true);
 				}
 				return;
 			}
@@ -939,14 +941,19 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 			if (!selectedCompliance.equals(jvmCompliance) && (JavaModelUtil.is50OrHigher(selectedCompliance) || JavaModelUtil.is50OrHigher(jvmCompliance))) {
 				fHintText.setText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_jre_message, new String[] {BasicElementLabels.getVersionName(selectedCompliance), BasicElementLabels.getVersionName(jvmCompliance)}));
-				fHintText.setVisible(true);
 				fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
-				fIcon.setVisible(true);
+				setInfoControlVisible(true);
 			} else {
-				fHintText.setVisible(false);
-				fIcon.setVisible(false);
+				setInfoControlVisible(false);
 			}
 
+		}
+
+		private void setInfoControlVisible(boolean visible) {
+			Composite composite= fHintText.getParent();
+			composite.setVisible(visible);
+			((GridData) composite.getLayoutData()).exclude= !visible;
+			updateSize();
 		}
 
 		private boolean computeDetectState() {
@@ -1139,6 +1146,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	private final Validator fValidator;
 	private final WorkingSetGroup fWorkingSetGroup;
 	private final ModuleGroup fModuleGroup;
+	private Runnable sizeUpdater;
 
 	/**
 	 * Creates a new {@link NewJavaProjectWizardPageOne}.
@@ -1199,9 +1207,13 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		final Composite composite= new Composite(parent, SWT.NULL);
+		final ScrolledComposite scroll= new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
+		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		final Composite composite= new Composite(scroll, SWT.NULL);
 		composite.setFont(parent.getFont());
-		composite.setLayout(initGridLayout(new GridLayout(1, false), true));
+		final GridLayout compositeLayout= initGridLayout(new GridLayout(1, false), true);
+		composite.setLayout(compositeLayout);
 		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		// create UI elements
@@ -1223,10 +1235,62 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		Control moduleControl= createModuleControl(composite);
 		moduleControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Control infoControl= createInfoControl(composite);
-		infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		createInfoControl(composite);
 
-		setControl(composite);
+		scroll.setContent(composite);
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		sizeUpdater= new Runnable() {
+
+			@Override
+			public void run() {
+
+				// show/hide horizontal scrollbar
+				scroll.setMinWidth(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+
+				// show/hide vertical scrollbar
+				final int availableWidthBefore = scroll.getClientArea().width;
+				scroll.setMinHeight(computeHeight(availableWidthBefore));
+
+				// showing/hiding vertical scrollbar can change available width and therefore the height
+				final int availableWidthAfter = scroll.getClientArea().width;
+				if (availableWidthBefore != availableWidthAfter) {
+					scroll.setMinHeight(computeHeight(availableWidthAfter));
+				}
+
+			}
+
+			private int computeHeight(int width) {
+				final int availableWidth= width - 2 * compositeLayout.marginWidth;
+				int height= 0;
+				for (Control child : composite.getChildren()) {
+					if (child.getLayoutData() instanceof GridData && ((GridData) child.getLayoutData()).exclude) {
+						continue;
+					}
+					if (height > 0) {
+						height+= compositeLayout.verticalSpacing;
+					}
+					height+= child.computeSize(availableWidth, SWT.DEFAULT).y;
+				}
+				height+= 2 * compositeLayout.marginHeight;
+				return height;
+			}
+
+		};
+		scroll.addControlListener(new ControlAdapter() {
+			@Override
+			public void controlResized(ControlEvent e) {
+				updateSize();
+			}
+		});
+
+		setControl(scroll);
+	}
+
+	private void updateSize() {
+		if (sizeUpdater != null) {
+			sizeUpdater.run();
+		}
 	}
 
 	@Override
@@ -1500,6 +1564,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		super.setVisible(visible);
 		if (visible) {
 			fNameGroup.postSetFocus();
+			updateSize();
 		}
 	}
 
