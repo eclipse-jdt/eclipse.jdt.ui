@@ -131,13 +131,14 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 
 		@Override
 		public boolean visit(final MethodDeclaration visited) {
-			Type returnType= visited.getReturnType2();
-			ITypeBinding returnTypeBinding= returnType.resolveBinding();
 			IMethodBinding methodBinding= visited.resolveBinding();
-			if (methodBinding == null || returnTypeBinding == null) {
+			if (methodBinding == null) {
 				return true;
 			}
-			checkType(returnType);
+			Type returnType= visited.getReturnType2();
+			if (returnType != null) {
+				checkType(returnType);
+			}
 			for (Object obj : visited.parameters()) {
 				SingleVariableDeclaration parm= (SingleVariableDeclaration)obj;
 				Type type= parm.getType();

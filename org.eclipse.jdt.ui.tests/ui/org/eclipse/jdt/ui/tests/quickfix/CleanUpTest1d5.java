@@ -3887,6 +3887,25 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoNotConvertStringBufferToStringBuilder() throws Exception {
+		// test bug 574588 NPE on private constructor
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestStringBuilderCleanup {\n" //
+				+ "    private TestStringBuilderCleanup(){\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
+
+		enable(CleanUpConstants.STRINGBUFFER_TO_STRINGBUILDER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testConvertStringBufferToStringBuilderAll() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample0= "" //
@@ -3894,6 +3913,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class SuperClass {\n" //
 				+ "    public StringBuffer field0;\n" //
+				+ "    private SuperClass(StringBuffer a) {\n" //
+				+ "        this.field0 = a;\n" //
+				+ "    }\n" //
 				+ "    public void method0(StringBuffer parm) {\n" //
 				+ "        System.out.println(parm.toString());\n" //
 				+ "    }\n" //
@@ -3977,6 +3999,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class SuperClass {\n" //
 				+ "    public StringBuilder field0;\n" //
+				+ "    private SuperClass(StringBuilder a) {\n" //
+				+ "        this.field0 = a;\n" //
+				+ "    }\n" //
 				+ "    public void method0(StringBuilder parm) {\n" //
 				+ "        System.out.println(parm.toString());\n" //
 				+ "    }\n" //
