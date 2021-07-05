@@ -312,4 +312,99 @@ public class QuickFixTestPreview extends QuickFixTest {
 
 		assertEqualString(preview, expected);
 	}
+
+	@Test
+	public void testAddSealedAsDirectSuperInterface1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface IShape permits Circle {\\n" +
+				"\n" +
+				"}\n" +
+				"\n" +
+				"class Circle {\n" +
+				"    \n" +
+				"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface IShape permits Circle {\\n" +
+				"\n" +
+				"}\n" +
+				"\n" +
+				"class Circle implements IShape {\n" +
+				"    \n" +
+				"}\n";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testAddSealedAsDirectSuperInterface2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface IShape permits IRectangle {\\n" +
+				"\n" +
+				"}\n" +
+				"\n" +
+				"interface IRectangle {\n" +
+				"    \n" +
+				"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface IShape permits IRectangle {\\n" +
+				"\n" +
+				"}\n" +
+				"\n" +
+				"interface IRectangle extends IShape {\n" +
+				"    \n" +
+				"}\n";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
+
 }
