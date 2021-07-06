@@ -12,15 +12,20 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.templates;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.platform.suite.api.SelectClasses;
 import org.junit.runner.RunWith;
 /**
  * Template test suite.
  *
  * @since 3.4
  */
-@RunWith(JUnitPlatform.class)
-@SelectClasses( TemplateContributionTest.class )
+import org.junit.runners.Suite;
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	//$JUnit-BEGIN$
+	TemplateContributionTest.class,
+	TemplateCompletionTests.class
+	//$JUnit-END$
+})
 public class TemplatesTestSuite {
 }
