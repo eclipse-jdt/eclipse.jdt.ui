@@ -1387,6 +1387,10 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		ICompilationUnit compilationUnit= ((IType) permittedTypeElement).getCompilationUnit();
+		if (compilationUnit == null) {
+			return;
+		}
+
 		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(compilationUnit);
 		TypeDeclaration declaration= ASTNodeSearchUtil.getTypeDeclarationNode((IType) permittedTypeElement, cuRewrite.getRoot());
 		if (declaration == null) {
