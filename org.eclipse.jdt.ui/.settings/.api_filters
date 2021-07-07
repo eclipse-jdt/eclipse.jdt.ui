@@ -129,6 +129,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/LocalCorrectionsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.LocalCorrectionsSubProcessor">
+        <filter comment="Sealed types preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="LocalCorrectionsSubProcessor"/>
+                <message_argument value="isSealed()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/util/ViewerPane.java" type="org.eclipse.jdt.internal.ui.util.ViewerPane">
         <filter id="571473929">
             <message_arguments>
