@@ -407,4 +407,32 @@ public class QuickFixTestPreview extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 
+	@Test
+	public void testAddSealedAsDirectSuperInterface3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"import java.lang.annotation.IncompleteAnnotationException;\n" +
+				"\n" +
+				"public sealed interface IShape permits IncompleteAnnotationException {\\n" +
+				"\n" +
+				"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
+		assertNumberOfProposals(proposals, 0);
+	}
+
 }
