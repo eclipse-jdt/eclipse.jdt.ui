@@ -791,7 +791,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	private RefactoringStatus checkFinalFields(final IProgressMonitor monitor) throws JavaModelException {
+	protected RefactoringStatus checkFinalFields(final IProgressMonitor monitor) throws JavaModelException {
 		final RefactoringStatus result= new RefactoringStatus();
 		monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, fMembersToMove.length);
 		for (final IMember member : fMembersToMove) {

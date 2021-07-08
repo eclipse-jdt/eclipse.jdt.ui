@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -82,24 +83,27 @@ public final class ExtractSupertypeTests extends GenericRefactoringTest {
 		return REFACTORING_PATH;
 	}
 
-	private void helper1(String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, boolean replaceOccurences) throws Exception {
+	private void helper1(String[] methodNames, String[][] signatures, String[] fieldNames, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, boolean replaceOccurences) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType type= getType(cu, "B");
 		IMethod[] methods= getMethods(type, methodNames, signatures);
 
-		ExtractSupertypeProcessor processor= createRefactoringProcessor(methods);
+		IField[] fields= getFields(type, fieldNames);
+
+		IMember[] members= merge(methods, fields);
+		ExtractSupertypeProcessor processor= createRefactoringProcessor(members);
 		Refactoring refactoring= processor.getRefactoring();
-		processor.setMembersToMove(methods);
 
 		assertTrue("activation", refactoring.checkInitialConditions(new NullProgressMonitor()).isOK());
 
+		processor.setMembersToMove(members);
 		processor.setTypesToExtract(new IType[] { type});
 		processor.setTypeName("Z");
-		processor.setCreateMethodStubs(true);
+		processor.setCreateMethodStubs(false);
 		processor.setInstanceOf(false);
 		processor.setReplace(replaceOccurences);
 		if (deleteAllInSourceType)
-			processor.setDeletedMethods(methods);
+			processor.setDeletedMethods(getMethods(members));
 		if (deleteAllMatchingMethods)
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
@@ -108,49 +112,65 @@ public final class ExtractSupertypeTests extends GenericRefactoringTest {
 		performChange(refactoring, false);
 
 		String expected= getFileContents(getOutputTestFileName("A"));
-		String actual= cu.getSource();
+		ICompilationUnit unit= getPackageP().getCompilationUnit("A.java");
+		String actual= unit.getBuffer().getContents();
 		assertEqualLines(expected, actual);
 
 		expected= getFileContents(getOutputTestFileName("Z"));
-		ICompilationUnit unit= getPackageP().getCompilationUnit("Z.java");
+		unit= getPackageP().getCompilationUnit("Z.java");
 		assertTrue("extracted compilation unit does not exist", unit.exists());
 		actual= unit.getBuffer().getContents();
 		assertEqualLines(expected, actual);
-
 	}
 
 	@Test
 	public void test0() throws Exception {
-		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, null, true, false, true);
 	}
 
 	@Test
 	public void test1() throws Exception {
-		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, null, true, false, true);
 	}
 
 	@Test
 	public void test2() throws Exception {
-		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, true, false, true);
+		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, null, true, false, true);
 	}
 
 	@Test
 	public void test3() throws Exception {
-		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, true, false, true);
+		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, null, true, false, true);
 	}
 
 	@Test
 	public void test4() throws Exception {
-		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, null, true, false, true);
 	}
 
 	@Test
 	public void testBug151683() throws Exception {
-		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, false);
+		helper1(new String[] { "m" }, new String[][] { new String[0] }, null, true, false, false);
 	}
 
 	@Test
 	public void testBug240353() throws Exception {
-		helper1(new String[] { "foo" }, new String[][] { new String[] { Signature.createTypeSignature("T", false) } }, true, false, false);
+		helper1(new String[] { "foo" }, new String[][] { new String[] { Signature.createTypeSignature("T", false) } },
+				null, true, false, false);
+	}
+
+	@Test
+	public void testBug573884_1() throws Exception {
+		helper1(new String[] { "geta", "getb" }, new String[][] { new String[0], new String[0] }, new String[] { "a", "b" }, true, false, true);
+	}
+
+	@Test
+	public void testBug573884_2() throws Exception {
+		helper1(new String[] { "geta", "getb" }, new String[][] { new String[0], new String[0] }, new String[] { "a", "b" }, true, false, true);
+	}
+
+	@Test
+	public void testBug573884_3() throws Exception {
+		helper1(new String[] { "geta", "getb" }, new String[][] { new String[0], new String[0] }, new String[] { "a", "b" }, true, false, true);
 	}
 }
