@@ -314,6 +314,68 @@ public class QuickFixTestPreview extends QuickFixTest {
 	}
 
 	@Test
+	public void testAddSealedAsDirectSuperTypeProposal4() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface Shape permits Square {\n" +
+				"}\n";
+		pack1.createCompilationUnit("Shape.java", test, false, null);
+
+		test= "" +
+				"package test;\n" +
+				"\n" +
+				"public non-sealed class Square implements Shape {\n" +
+				"}\n";
+		pack1.createCompilationUnit("Square.java", test, false, null);
+
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+
+		test= "" +
+				"package test2;\n" +
+				"\n" +
+				"import test.Shape;\n" +
+				"\n" +
+				"public non-sealed interface Circle extends Shape {\n" +
+				"}\n";
+		ICompilationUnit cu2= pack2.createCompilationUnit("Circle.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu2, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		String expected= "" +
+				"package test;\n" +
+				"\n" +
+				"import test2.Circle;\n" +
+				"\n" +
+				"public sealed interface Shape permits Square, Circle {\n" +
+				"}\n";
+
+		assertEqualString(preview, expected);
+	}
+
+	@Test
 	public void testAddSealedAsDirectSuperInterface1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
