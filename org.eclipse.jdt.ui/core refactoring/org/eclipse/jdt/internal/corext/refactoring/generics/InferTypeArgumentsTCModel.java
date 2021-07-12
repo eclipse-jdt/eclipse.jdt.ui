@@ -778,7 +778,7 @@ public class InferTypeArgumentsTCModel {
 
 	@SuppressWarnings("unchecked")
 	private static HashMap<String, CollectionElementVariable2> getIndexedCollectionElements(ConstraintVariable2 constraintVariable) {
-		return (HashMap<String, CollectionElementVariable2>) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+		return constraintVariable == null ? null : (HashMap<String, CollectionElementVariable2>) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
 	}
 
 	private static void setElementVariable(ConstraintVariable2 typeConstraintVariable, CollectionElementVariable2 elementVariable, TypeVariable typeVariable) {

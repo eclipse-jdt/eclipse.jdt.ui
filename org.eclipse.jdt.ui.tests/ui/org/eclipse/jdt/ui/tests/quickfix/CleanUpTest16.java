@@ -449,6 +449,8 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    private TestStringBuilderCleanup(){\n" //
+				+ "    }\n" //
 				+ "    public record K(StringBuffer comp1) {\n" //
 				+ "        public static StringBuffer field1;\n" //
 				+ "        public static StringBuffer field2;\n" //
@@ -469,6 +471,8 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
+				+ "    private TestStringBuilderCleanup(){\n" //
+				+ "    }\n" //
 				+ "    public record K(StringBuffer comp1) {\n" //
 				+ "        public static StringBuffer field1;\n" //
 				+ "        public static StringBuffer field2;\n" //

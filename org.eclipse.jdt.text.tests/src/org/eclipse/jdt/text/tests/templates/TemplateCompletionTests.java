@@ -12,16 +12,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.templates;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -54,7 +54,7 @@ public class TemplateCompletionTests {
 
 	private IPackageFragment pkg;
 
-	@BeforeEach
+	@Before
 	public void setUp() throws Exception {
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar18(fJProject);
@@ -62,7 +62,7 @@ public class TemplateCompletionTests {
 		pkg= javaSrc.createPackageFragment("test", false, null);
 	}
 
-	@AfterEach
+	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}
@@ -105,6 +105,41 @@ public class TemplateCompletionTests {
 		if (fail) {
 			fail("Proposal '" + propDisplay + "' should not exist");
 		}
+	}
+
+	@Test
+	public void testRegressionBug574267() throws Exception {
+		String propDisplay= "sysout - print to standard out";
+		StringBuffer buf= new StringBuffer();
+		buf.append("class Sample {\n" +
+				"	void sample(String foo) {\n" +
+				"		if (foo != null) {\n" +
+				"			sys$ // content assist here\n" +
+				"			System.out.println();\n" +
+				"		}\n" +
+				"	}\n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Sample.java");
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertProposalsExist(Arrays.asList(propDisplay), proposals);
+
+		ITextViewer viewer= initializeViewer(cu);
+		applyProposal(viewer, proposals, "sysout", completionIndex);
+
+		StringBuffer expected= new StringBuffer();
+		expected.append("class Sample {\n" +
+				"	void sample(String foo) {\n" +
+				"		if (foo != null) {\n" +
+				"			System.out.println(); // content assist here\n" +
+				"			System.out.println();\n" +
+				"		}\n" +
+				"	}\n" +
+				"}");
+
+		assertEquals(expected.toString(), viewer.getDocument().get());
 	}
 
 	private ITextViewer initializeViewer(ICompilationUnit cu) throws Exception {

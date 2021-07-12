@@ -29,7 +29,7 @@ class A {
 	 * @see #getList(..)
 	 * @see p.A#getList(int, int, boolean)
 	 * @see <a href="spec.html#section">Java Spec</a>
-	 * @see A# getList(boolean, int, char)
+	 * @see A#getList (boolean, int, char)
 	 */
 	public ArrayList getList(int from, long to, Object[] arr[]) {
 		return new ArrayList(Arrays.asList(arr).subList(from, (int)to));

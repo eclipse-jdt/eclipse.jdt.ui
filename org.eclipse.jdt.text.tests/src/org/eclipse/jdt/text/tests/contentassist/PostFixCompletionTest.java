@@ -57,12 +57,15 @@ public class PostFixCompletionTest {
 
 	private IPackageFragment pkg;
 
+	private Hashtable<String, String> savedOptions;
+
 	@Rule
 	public ProjectTestSetup cts= new ProjectTestSetup();
 
 	@Before
 	public void setUp() throws Exception {
 		Hashtable<String, String> options= JavaCore.getDefaultOptions();
+		savedOptions= new Hashtable<>(options);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "2");
 		JavaCore.setOptions(options);
@@ -76,6 +79,7 @@ public class PostFixCompletionTest {
 	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
+		JavaCore.setOptions(savedOptions);
 	}
 
 	@Test

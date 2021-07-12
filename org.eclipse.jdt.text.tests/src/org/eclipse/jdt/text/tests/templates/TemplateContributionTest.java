@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Iterator;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
