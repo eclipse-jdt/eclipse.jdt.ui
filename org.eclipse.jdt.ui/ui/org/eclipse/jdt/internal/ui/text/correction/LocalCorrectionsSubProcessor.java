@@ -1362,7 +1362,8 @@ public class LocalCorrectionsSubProcessor {
 
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(declaration.getRoot(), importRewrite);
 		importRewrite.addImport(subTypeBinding, astRewrite.getAST(), importRewriteContext);
-		proposal.setImportRewrite(importRewrite);	proposals.add(proposal);
+		proposal.setImportRewrite(importRewrite);
+		proposals.add(proposal);
 	}
 
 	public static void addSealedAsDirectSuperTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
@@ -1415,6 +1416,16 @@ public class LocalCorrectionsSubProcessor {
 		String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_declareSealedAsDirectSuperInterface_description, new String[] { sealedTypeName, permittedTypeName });
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, compilationUnit, astRewrite, IProposalRelevance.DECLARE_SEALED_AS_DIRECT_SUPER_TYPE, image);
+
+		ImportRewrite importRewrite= proposal.getImportRewrite();
+		if (importRewrite == null) {
+			importRewrite= StubUtility.createImportRewrite(compilationUnit, true);
+		}
+
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(declaration.getRoot(), importRewrite);
+		importRewrite.addImport(sealedType.resolveBinding(), astRewrite.getAST(), importRewriteContext);
+		proposal.setImportRewrite(importRewrite);
+
 		proposals.add(proposal);
 	}
 
