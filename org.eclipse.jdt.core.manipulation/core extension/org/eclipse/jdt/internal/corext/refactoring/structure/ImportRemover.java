@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
  * {@link ImportRewrite#addImport(ITypeBinding)} etc.
  */
 public class ImportRemover {
+
 	private static class StaticImportData {
 		private boolean fField;
 
@@ -72,8 +74,16 @@ public class ImportRemover {
 
 	private static final String REMOVED= "removed"; //$NON-NLS-1$
 	private static final String RETAINED= "retained"; //$NON-NLS-1$
+	/**
+	 * Namespace for the property key
+	 */
+	private static final String PROPERTY_KEY_CLASS_ID= "IR"; //$NON-NLS-1$
+	/**
+	 * Provides thread-safe uniqueness for the <code>propertyKey</code>
+	 */
+	private static final AtomicInteger PROPERTY_KEY_COUNTER = new AtomicInteger();
 
-	private final String PROPERTY_KEY= String.valueOf(System.currentTimeMillis());
+	private final String propertyKey;
 	private final IJavaProject fProject;
 	private final CompilationUnit fRoot;
 
@@ -85,6 +95,7 @@ public class ImportRemover {
 	public ImportRemover(IJavaProject project, CompilationUnit root) {
 		fProject= project;
 		fRoot= root;
+		propertyKey= PROPERTY_KEY_CLASS_ID + PROPERTY_KEY_COUNTER.getAndIncrement();
 	}
 
 	private void divideTypeRefs(List<SimpleName> importNames, List<SimpleName> staticNames, List<SimpleName> removedRefs, List<SimpleName> unremovedRefs) {
@@ -93,7 +104,7 @@ public class ImportRemover {
 			int fRemovingStart= -1;
 			@Override
 			public void preVisit(ASTNode node) {
-				Object property= node.getProperty(PROPERTY_KEY);
+				Object property= node.getProperty(propertyKey);
 				if (property == REMOVED) {
 					if (fRemovingStart == -1) {
 						fRemovingStart= node.getStartPosition();
@@ -103,7 +114,7 @@ public class ImportRemover {
 						 * an intermediate RETAINED node.
 						 * Drop REMOVED property to prevent problems later (premature end of REMOVED section).
 						 */
-						node.setProperty(PROPERTY_KEY, null);
+						node.setProperty(propertyKey, null);
 					}
 				} else if (property == RETAINED) {
 					if (fRemovingStart != -1) {
@@ -115,14 +126,14 @@ public class ImportRemover {
 						 * an intermediate REMOVED node and must have an enclosing REMOVED node.
 						 * Drop RETAINED property to prevent problems later (premature restart of REMOVED section).
 						 */
-						node.setProperty(PROPERTY_KEY, null);
+						node.setProperty(propertyKey, null);
 					}
 				}
 				super.preVisit(node);
 			}
 			@Override
 			public void postVisit(ASTNode node) {
-				Object property= node.getProperty(PROPERTY_KEY);
+				Object property= node.getProperty(propertyKey);
 				if (property == RETAINED) {
 					int end= node.getStartPosition() + node.getLength();
 					fRemovingStart= end;
@@ -288,11 +299,11 @@ public class ImportRemover {
 
 	public void registerRemovedNode(ASTNode removed) {
 		fHasRemovedNodes= true;
-		removed.setProperty(PROPERTY_KEY, REMOVED);
+		removed.setProperty(propertyKey, REMOVED);
 	}
 
 	public void registerRetainedNode(ASTNode retained) {
-		retained.setProperty(PROPERTY_KEY, RETAINED);
+		retained.setProperty(propertyKey, RETAINED);
 	}
 
 	public void applyRemoves(ImportRewrite importRewrite) {
