@@ -1400,20 +1400,31 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(compilationUnit);
-		TypeDeclaration declaration= ASTNodeSearchUtil.getTypeDeclarationNode((IType) permittedTypeElement, cuRewrite.getRoot());
-		if (declaration == null) {
+		TypeDeclaration permittedTypeDeclaration= ASTNodeSearchUtil.getTypeDeclarationNode((IType) permittedTypeElement, cuRewrite.getRoot());
+		if (permittedTypeDeclaration == null) {
 			return;
 		}
 
-		AST ast= declaration.getAST();
+		AST ast= permittedTypeDeclaration.getAST();
 		String sealedTypeName= sealedType.getName().getIdentifier();
 		Type type= ast.newSimpleType(ast.newSimpleName(sealedTypeName));
 
+		boolean isSealedInterface= sealedType.isInterface();
+
 		ASTRewrite astRewrite= cuRewrite.getASTRewrite();
-		astRewrite.getListRewrite(declaration, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, null);
+		if (isSealedInterface) {
+			astRewrite.getListRewrite(permittedTypeDeclaration, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, null);
+		} else {
+			astRewrite.set(permittedTypeDeclaration, TypeDeclaration.SUPERCLASS_TYPE_PROPERTY, type, null);
+		}
 
 		String permittedTypeName= problem.getProblemArguments()[0];
-		String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_declareSealedAsDirectSuperInterface_description, new String[] { sealedTypeName, permittedTypeName });
+		String label;
+		if (isSealedInterface) {
+			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_declareSealedAsDirectSuperInterface_description, new String[] { sealedTypeName, permittedTypeName });
+		} else {
+			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_declareSealedAsDirectSuperClass_description, new String[] { sealedTypeName, permittedTypeName });
+		}
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, compilationUnit, astRewrite, IProposalRelevance.DECLARE_SEALED_AS_DIRECT_SUPER_TYPE, image);
 
@@ -1422,7 +1433,7 @@ public class LocalCorrectionsSubProcessor {
 			importRewrite= StubUtility.createImportRewrite(compilationUnit, true);
 		}
 
-		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(declaration.getRoot(), importRewrite);
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(permittedTypeDeclaration.getRoot(), importRewrite);
 		importRewrite.addImport(sealedType.resolveBinding(), astRewrite.getAST(), importRewriteContext);
 		proposal.setImportRewrite(importRewrite);
 
