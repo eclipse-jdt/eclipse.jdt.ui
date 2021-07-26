@@ -5793,6 +5793,9 @@
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameFieldRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.field"/>
       <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameModuleRefactoringContribution"
+            id="org.eclipse.jdt.ui.rename.module"/>      
+      <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameJavaProjectRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.java.project"/>
       <contribution

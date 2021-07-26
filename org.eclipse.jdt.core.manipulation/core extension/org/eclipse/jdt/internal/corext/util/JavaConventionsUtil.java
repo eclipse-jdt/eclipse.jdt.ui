@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2020 IBM Corporation and others.
+ * Copyright (c) 2007, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -93,6 +93,18 @@ public class JavaConventionsUtil {
 	public static IStatus validateFieldName(String name, IJavaElement context) {
 		String[] sourceComplianceLevels= getSourceComplianceLevels(context);
 		return JavaConventions.validateFieldName(name, sourceComplianceLevels[0], sourceComplianceLevels[1]);
+	}
+
+	/**
+	 * @param name the name to validate
+	 * @param context an {@link IJavaElement} or <code>null</code>
+	 * @return validation status in <code>context</code>'s project or in the workspace
+	 *
+	 * @see JavaConventions#validateModuleName(String, String, String)
+	 */
+	public static IStatus validateModuleName(String name, IJavaElement context) {
+		String[] sourceComplianceLevels= getSourceComplianceLevels(context);
+		return JavaConventions.validateModuleName(name, sourceComplianceLevels[0], sourceComplianceLevels[1]);
 	}
 
 	/**

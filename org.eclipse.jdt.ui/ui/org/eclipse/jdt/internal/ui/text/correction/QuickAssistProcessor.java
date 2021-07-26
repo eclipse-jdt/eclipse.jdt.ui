@@ -3148,7 +3148,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		IJavaElement javaElement= binding.getJavaElement();
-		if (javaElement == null ? !isRecordComponentAccessorMethod(binding) : !RefactoringAvailabilityTester.isRenameElementAvailable(javaElement)) {
+		if (javaElement == null ? !isRecordComponentAccessorMethod(binding) : !RefactoringAvailabilityTester.isRenameElementAvailable(javaElement, true)) {
 			return false;
 		}
 

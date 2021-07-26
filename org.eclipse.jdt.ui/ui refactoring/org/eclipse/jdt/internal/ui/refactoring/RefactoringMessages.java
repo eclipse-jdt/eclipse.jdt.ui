@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -797,6 +797,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String RenameAction_unavailable;
 
+	public static String RenameAction_unavailable_in_editor;
+
 	public static String RenameCuWizard_defaultPageTitle;
 
 	public static String RenameCuWizard_inputPage_description;
@@ -846,6 +848,10 @@ public final class RefactoringMessages extends NLS {
 	public static String RenameMethodWizard_defaultPageTitle;
 
 	public static String RenameMethodWizard_inputPage_description;
+
+	public static String RenameModule_defaultPageTitle;
+
+	public static String RenameModule_inputPage_description;
 
 	public static String RenamePackageWizard_defaultPageTitle;
 

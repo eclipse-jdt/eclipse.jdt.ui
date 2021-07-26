@@ -1862,6 +1862,18 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameTypeParameterRefactoring_update_type_parameter_reference;
 
+	public static String RenameModuleRefactoring_name;
+
+	public static String RenameModuleRefactoring_deleted;
+
+	public static String RenameModuleRefactoring_Update_module_declaration;
+
+	public static String RenameModuleRefactoring_Update_module_reference;
+
+	public static String RenameModuleRefactoring_descriptor_description_short;
+
+	public static String RenameModuleProcessor_descriptor_description;
+
 	public static String ReferencesInBinaryContext_binaryRefsNotUpdated;
 
 	public static String RenameTypeProcessor_cannot_rename_fields_same_new_name;

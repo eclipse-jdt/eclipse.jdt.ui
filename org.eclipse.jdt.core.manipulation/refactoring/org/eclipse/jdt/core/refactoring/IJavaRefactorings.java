@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -377,6 +377,17 @@ public interface IJavaRefactorings {
 	 * </p>
 	 */
 	String RENAME_FIELD= "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
+
+	/**
+	 * Refactoring id of the 'Rename Module' refactoring (value:
+	 * <code>org.eclipse.jdt.ui.rename.module</code>).
+	 * <p>
+	 * Clients may safely cast the obtained refactoring descriptor to
+	 * {@link RenameJavaElementDescriptor}.
+	 * </p>
+	 * @since 1.15
+	 */
+	String RENAME_MODULE= "org.eclipse.jdt.ui.rename.module"; //$NON-NLS-1$
 
 	/**
 	 * Refactoring id of the 'Rename Java Project' refactoring (value:

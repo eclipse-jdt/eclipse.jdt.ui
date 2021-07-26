@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcess
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameLocalVariableProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameModuleProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor;
@@ -449,6 +451,24 @@ public class RenameSupport {
 	 */
 	public static RenameSupport create(ILocalVariable variable, String newName, int flags) throws CoreException {
 		RenameLocalVariableProcessor processor= new RenameLocalVariableProcessor(variable);
+		processor.setUpdateReferences(updateReferences(flags));
+		return new RenameSupport(processor, newName, flags);
+	}
+
+	/**
+	 * Creates a new rename support for the given {@link IModuleDescription}.
+	 *
+	 * @param module the {@link IModuleDescription} to be renamed.
+	 * @param newName the module's new name. <code>null</code> is not a valid value
+	 * @param flags flags controlling additional parameters. Valid flags are
+	 * <code>UPDATE_REFERENCES</code>, or <code>NONE</code>.
+	 * @return the {@link RenameSupport}.
+	 * @throws CoreException if an unexpected error occurred while creating
+	 * the {@link RenameSupport}.
+	 * @since 3.24
+	 */
+	public static RenameSupport create(IModuleDescription module, String newName, int flags) throws CoreException {
+		RenameModuleProcessor processor= new RenameModuleProcessor(module);
 		processor.setUpdateReferences(updateReferences(flags));
 		return new RenameSupport(processor, newName, flags);
 	}
