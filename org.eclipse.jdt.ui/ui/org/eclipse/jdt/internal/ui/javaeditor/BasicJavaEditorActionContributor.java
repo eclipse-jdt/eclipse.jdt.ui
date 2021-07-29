@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - Bug 522218 - add raw paste support
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -224,6 +225,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
 		action= getAction(textEditor, IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
 		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, action);
+		action= getAction(textEditor, IJavaEditorActionConstants.RAW_PASTE);
+		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.RAW_PASTE_ACTION_HANDLE_ID, action);
 
 		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
 		actionBars.setGlobalActionHandler("org.eclipse.jdt.internal.ui.actions.OpenHyperlink", getAction(textEditor, ITextEditorActionConstants.OPEN_HYPERLINK)); //$NON-NLS-1$
