@@ -71,7 +71,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.FALSE);
 		options.setOption(SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpOptions.FALSE);
 
-		// Optimization
+		// Performance
 		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 		options.setOption(NO_STRING_CREATION, CleanUpOptions.FALSE);
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
@@ -248,7 +248,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.FALSE);
 		options.setOption(SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpOptions.FALSE);
 
-		// Optimization
+		// Performance
 		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 		options.setOption(NO_STRING_CREATION, CleanUpOptions.FALSE);
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
