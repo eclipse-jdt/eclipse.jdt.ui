@@ -297,6 +297,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ConstructorReferenceNotBelow18:
 			case IProblem.IntersectionCastNotBelow18:
 			case IProblem.InvalidUsageOfTypeAnnotations:
+			case IProblem.MultiConstantCaseLabelsNotSupported:
 			case IProblem.DuplicateInheritedDefaultMethods:
 			case IProblem.InheritedDefaultMethodConflictsWithOtherInherited:
 			case IProblem.IllegalTypeAnnotationsInStaticMemberAccess:
@@ -709,6 +710,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IntersectionCastNotBelow18:
 			case IProblem.InvalidUsageOfTypeAnnotations:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_8);
+				break;
+			case IProblem.MultiConstantCaseLabelsNotSupported:
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_14);
 				break;
 			case IProblem.NonGenericType:
 				TypeArgumentMismatchSubProcessor.removeMismatchedArguments(context, problem, proposals);
