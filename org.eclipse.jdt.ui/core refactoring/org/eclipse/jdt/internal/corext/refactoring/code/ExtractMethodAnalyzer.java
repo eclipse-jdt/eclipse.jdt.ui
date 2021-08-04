@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -77,6 +77,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
@@ -432,6 +433,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		for (ASTNode astNode : selectedNodes) {
 			astNode.accept(new ASTVisitor() {
 				ArrayList<String> fLocalLoopLabels= new ArrayList<>();
+				ArrayList<Statement> fBreakTargets= new ArrayList<>();
 
 				@Override
 				public boolean visit(BreakStatement node) {
@@ -440,6 +442,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 						continueMatchesLoopProblem[0]= Messages.format(
 							RefactoringCoreMessages.ExtractMethodAnalyzer_branch_break_mismatch,
 							new Object[] { ("break " + label.getIdentifier()) }); //$NON-NLS-1$
+					} else if (label == null) {
+						ASTNode parentStatement= ASTNodes.getFirstAncestorOrNull(node, WhileStatement.class, ForStatement.class,
+								DoStatement.class, SwitchStatement.class, EnhancedForStatement.class);
+						if (parentStatement != null && !fBreakTargets.contains(parentStatement)) {
+							continueMatchesLoopProblem[0]= RefactoringCoreMessages.ExtractMethodAnalyzer_break_parent_missing;
+						}
 					}
 					return false;
 				}
@@ -450,6 +458,31 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 					if (label != null)
 						fLocalLoopLabels.add(label.getIdentifier());
 					return true;
+				}
+
+				@Override
+				public void endVisit(ForStatement node) {
+					fBreakTargets.add(node);
+				}
+
+				@Override
+				public void endVisit(EnhancedForStatement node) {
+					fBreakTargets.add(node);
+				}
+
+				@Override
+				public void endVisit(DoStatement node) {
+					fBreakTargets.add(node);
+				}
+
+				@Override
+				public void endVisit(SwitchStatement node) {
+					fBreakTargets.add(node);
+				}
+
+				@Override
+				public void endVisit(WhileStatement node) {
+					fBreakTargets.add(node);
 				}
 
 				@Override
@@ -994,6 +1027,28 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	public void endVisit(QualifiedName node) {
 		if (isResourceInTry(node)) {
 			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_resource_used_in_try_with_resources, JavaStatusContext.create(fCUnit, getSelection()));
+		}
+		super.endVisit(node);
+	}
+
+	@Override
+	public void endVisit(BreakStatement node) {
+		if (isFirstSelectedNode(node)) {
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_break, JavaStatusContext.create(fCUnit, getSelection()));
+		}
+	}
+
+	@Override
+	public void endVisit(ContinueStatement node) {
+		if (isFirstSelectedNode(node)) {
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_continue, JavaStatusContext.create(fCUnit, getSelection()));
+		}
+	}
+
+	@Override
+	public void endVisit(YieldStatement node) {
+		if (isFirstSelectedNode(node)) {
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_yield, JavaStatusContext.create(fCUnit, getSelection()));
 		}
 		super.endVisit(node);
 	}
