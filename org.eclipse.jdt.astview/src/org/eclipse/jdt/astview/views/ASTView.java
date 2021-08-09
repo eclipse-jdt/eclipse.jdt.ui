@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -138,6 +142,7 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 
 	static final int JLS_LATEST= AST.getJLSLatest();
+	private static final int JLS17= ASTHelper.JLS17;
 	private static final int JLS16= ASTHelper.JLS16;
 	private static final int JLS15= ASTHelper.JLS15;
 	private static final int JLS14= ASTHelper.JLS14;
@@ -509,6 +514,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				case JLS14:
 				case JLS15:
 				case JLS16:
+				case JLS17:
 					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
@@ -1131,6 +1137,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				new ASTLevelToggle("AST Level 1&4 (14)", JLS14), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&5 (15)", JLS15), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&6 (16)", JLS16), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level 1&7 (17)", JLS17), //$NON-NLS-1$
 		};
 
 		fAddToTrayAction= new Action() {
