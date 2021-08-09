@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -53,6 +53,7 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -64,18 +65,34 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
@@ -92,6 +109,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -153,6 +171,26 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 
 	/** The types where to extract the supertype */
 	private IType[] fTypesToExtract= {};
+
+	private class FieldInfo {
+		private ITypeBinding fieldBinding;
+		private String fieldName;
+
+		public FieldInfo(ITypeBinding fieldBinding, String fieldName) {
+			this.fieldBinding= fieldBinding;
+			this.fieldName= fieldName;
+		}
+
+		public ITypeBinding getFieldBinding() {
+			return fieldBinding;
+		}
+
+		public String getFieldName() {
+			return fieldName;
+		}
+	}
+
+	private List<FieldInfo> fUninitializedFinalFieldsToMove= new ArrayList<>();
 
 	/**
 	 * Creates a new extract supertype refactoring processor.
@@ -358,7 +396,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				final String name= JavaModelUtil.getRenamedCUName(declaring.getCompilationUnit(), fTypeName);
 				final ICompilationUnit original= declaring.getPackageFragment().getCompilationUnit(name);
 				final ICompilationUnit copy= getSharedWorkingCopy(original.getPrimary(), new SubProgressMonitor(monitor, 10));
-				fSuperSource= createSuperTypeSource(copy, superType, declaringDeclaration, status, new SubProgressMonitor(monitor, 10));
+				fSuperSource= createSuperTypeSource(copy, superType, declaringDeclaration, declaringRewrite, status, new SubProgressMonitor(monitor, 10));
 				if (fSuperSource != null) {
 					copy.getBuffer().setContents(fSuperSource);
 					JavaModelUtil.reconcile(copy);
@@ -423,12 +461,18 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 *            <code>java.lang.Object</code>) is available
 	 * @param targetDeclaration
 	 *            the type declaration of the target type
+	 * @param declaringDeclaration
+	 *            the type declaration of the source type
+	 * @param declaringRewrite
+	 *            the CompilationUnitRewrite for the source type
 	 * @param status
 	 *            the refactoring status
 	 */
-	protected void createNecessaryConstructors(final CompilationUnitRewrite targetRewrite, final IType superType, final AbstractTypeDeclaration targetDeclaration, final RefactoringStatus status) {
+	protected void createNecessaryConstructors(final CompilationUnitRewrite targetRewrite, final IType superType,
+			final AbstractTypeDeclaration targetDeclaration, final AbstractTypeDeclaration declaringDeclaration, CompilationUnitRewrite declaringRewrite, final RefactoringStatus status) {
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(targetDeclaration);
+		fUninitializedFinalFieldsToMove.clear();
 		if (superType != null) {
 			final ITypeBinding binding= targetDeclaration.resolveBinding();
 			if (binding != null && binding.isClass()) {
@@ -441,6 +485,34 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				}
 				final ListRewrite rewrite= targetRewrite.getASTRewrite().getListRewrite(targetDeclaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 				if (rewrite != null) {
+					List<BodyDeclaration> members= declaringDeclaration.bodyDeclarations();
+					ImportRewrite importRewrite= targetRewrite.getImportRewrite();
+					for (BodyDeclaration member : members) {
+						if (member instanceof FieldDeclaration) {
+							FieldDeclaration fieldDecl= (FieldDeclaration)member;
+							Type fieldType= fieldDecl.getType();
+							ITypeBinding fieldTypeBinding= fieldType.resolveBinding();
+							if (fieldTypeBinding == null) {
+								continue;
+							}
+							int modifiers= fieldDecl.getModifiers();
+							if (Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
+								List<VariableDeclarationFragment> fragments= fieldDecl.fragments();
+								for (VariableDeclarationFragment fragment : fragments) {
+									for (IMember memberToMove : fMembersToMove) {
+										if (memberToMove instanceof IField) {
+											String name= memberToMove.getElementName();
+											if (name.equals(fragment.getName().getFullyQualifiedName())) {
+												if (fragment.getInitializer() == null) {
+													fUninitializedFinalFieldsToMove.add(new FieldInfo(fieldTypeBinding, name));
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
 					boolean createDeprecated= deprecationCount == bindings.length;
 					for (IMethodBinding curr : bindings) {
 						if (!curr.isDeprecated() || createDeprecated) {
@@ -449,8 +521,24 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 								ImportRewriteContext context= new ContextSensitiveImportRewriteContext(targetDeclaration, targetRewrite.getImportRewrite());
 								stub= StubUtility2.createConstructorStub(targetRewrite.getCu(), targetRewrite.getASTRewrite(), targetRewrite.getImportRewrite(), context, curr, binding.getName(),
 									Modifier.PUBLIC, false, false, fSettings);
-								if (stub != null)
+								if (stub != null) {
+									if (!fUninitializedFinalFieldsToMove.isEmpty()) {
+										ASTRewrite astRewrite= targetRewrite.getASTRewrite();
+										List<SingleVariableDeclaration> newParms= getNewConstructorParms(stub, fUninitializedFinalFieldsToMove, importRewrite);
+										stub.parameters().addAll(newParms);
+										Block body= stub.getBody();
+										ListRewrite bodyRewrite= astRewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
+										for (int i= 0; i < fUninitializedFinalFieldsToMove.size(); ++i) {
+											FieldInfo finalField= fUninitializedFinalFieldsToMove.get(i);
+											SingleVariableDeclaration parm= newParms.get(i);
+											String name= finalField.getFieldName();
+											String buffer= "this." + name + " = " + parm.getName().getFullyQualifiedName() + ";"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+											ExpressionStatement assignment= (ExpressionStatement)astRewrite.createStringPlaceholder(buffer, ASTNode.EXPRESSION_STATEMENT);
+											bodyRewrite.insertLast(assignment, null);
+										}
+									}
 									rewrite.insertLast(stub, null);
+								}
 							} catch (CoreException exception) {
 								JavaPlugin.log(exception);
 								status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
@@ -460,6 +548,150 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				}
 			}
 		}
+	}
+
+	private List<SingleVariableDeclaration> getNewConstructorParms(MethodDeclaration stub,
+			List<FieldInfo> uninitializedFinalFieldsToMove, ImportRewrite importRewrite) {
+		List<SingleVariableDeclaration> result= new ArrayList<>();
+		Set<String> usedFieldNames= new HashSet<>();
+		Set<String> usedFinalFieldNames= new HashSet<>();
+		List<SingleVariableDeclaration> params= stub.parameters();
+		for (SingleVariableDeclaration param : params) {
+			usedFieldNames.add(param.getName().getFullyQualifiedName());
+		}
+		for (FieldInfo fieldInfo : uninitializedFinalFieldsToMove) {
+			String name= fieldInfo.getFieldName();
+			usedFinalFieldNames.add(name);
+		}
+		for (FieldInfo fieldInfo : uninitializedFinalFieldsToMove) {
+			String name= fieldInfo.getFieldName();
+			if (usedFieldNames.contains(name)) {
+				String newName= name;
+				int i= 2;
+				do {
+					newName= name + "_" + i++; //$NON-NLS-1$
+				} while (usedFieldNames.contains(newName) || usedFinalFieldNames.contains(newName));
+				name= newName;
+			}
+			AST ast= stub.getAST();
+			SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
+			newParam.setName(ast.newSimpleName(name));
+			newParam.setType(importRewrite.addImport(fieldInfo.getFieldBinding(), ast));
+			result.add(newParam);
+		}
+		return result;
+	}
+
+	@Override
+	public RefactoringStatus checkFinalFields(IProgressMonitor monitor) {
+		final RefactoringStatus result= new RefactoringStatus();
+		monitor.done();
+		return result;
+	}
+
+	private void fixConstructorsWithFinalFieldInitialization(CompilationUnitRewrite rewrite) {
+		ASTRewrite rewriter= rewrite.getASTRewrite();
+		CompilationUnit cu= rewrite.getRoot();
+		ASTVisitor visitor= new ASTVisitor() {
+			MethodDeclaration currentConstructor= null;
+			SuperConstructorInvocation currentSuperCall= null;
+			boolean constructorInvocation= false;
+			Expression[] fRightSide= new Expression[fUninitializedFinalFieldsToMove.size()];
+			@Override
+			public boolean visit(MethodDeclaration node) {
+				IMethodBinding binding= node.resolveBinding();
+				if (binding != null && node.isConstructor() && binding.getDeclaringClass().getQualifiedName().equals(getDeclaringType().getFullyQualifiedName())) {
+					currentConstructor= node;
+					return true;
+				}
+				return false;
+			}
+
+			@Override
+			public boolean visit(SuperConstructorInvocation node) {
+				currentSuperCall= node;
+				return false;
+			}
+
+			@Override
+			public boolean visit(ConstructorInvocation node) {
+				constructorInvocation= true;
+				return false;
+			}
+
+			@Override
+			public void endVisit(MethodDeclaration node) {
+				if (!constructorInvocation) {
+					if (currentConstructor != null) {
+						Block constructorBody= currentConstructor.getBody();
+						ListRewrite constructorRewrite= rewriter.getListRewrite(constructorBody, Block.STATEMENTS_PROPERTY);
+						AST ast= cu.getAST();
+						if (currentSuperCall != null) {
+							SuperConstructorInvocation newSuperCall= ast.newSuperConstructorInvocation();
+							List<Expression> oldArguments= currentSuperCall.arguments();
+							for (Expression argument : oldArguments) {
+								newSuperCall.arguments().add(rewriter.createCopyTarget(argument));
+							}
+							for (Expression exp : fRightSide) {
+								if (exp == null) {
+									return;
+								}
+								Expression newExp= (Expression)rewriter.createCopyTarget(exp);
+								newSuperCall.arguments().add(newExp);
+								Statement stmt= (Statement)ASTNodes.getFirstAncestorOrNull(exp, Statement.class);
+								constructorRewrite.remove(stmt, null);
+							}
+							constructorRewrite.replace(currentSuperCall, newSuperCall, null);
+						} else {
+							SuperConstructorInvocation newSuperCall= ast.newSuperConstructorInvocation();
+							for (Expression exp : fRightSide) {
+								if (exp == null) {
+									return;
+								}
+								Expression newExp= (Expression)rewriter.createCopyTarget(exp);
+								newSuperCall.arguments().add(newExp);
+								Statement stmt= (Statement)ASTNodes.getFirstAncestorOrNull(exp, Statement.class);
+								constructorRewrite.remove(stmt, null);
+							}
+							constructorRewrite.insertFirst(newSuperCall, null);
+						}
+					}
+				}
+				currentConstructor= null;
+				currentSuperCall= null;
+				constructorInvocation= false;
+			}
+
+			@Override
+			public boolean visit(Assignment node) {
+				if (currentConstructor != null) {
+					Expression leftSide= node.getLeftHandSide();
+					if (leftSide instanceof FieldAccess) {
+						FieldAccess f= (FieldAccess)leftSide;
+						for (int i= 0; i < fUninitializedFinalFieldsToMove.size(); ++i) {
+							if (fUninitializedFinalFieldsToMove.get(i).getFieldName().equals(f.getName().getFullyQualifiedName())) {
+								fRightSide[i]= node.getRightHandSide();
+							}
+						}
+					} else if (leftSide instanceof SimpleName) {
+						IBinding binding= ((SimpleName)leftSide).resolveBinding();
+						if (binding instanceof IVariableBinding) {
+							IVariableBinding varBinding= (IVariableBinding)binding;
+							if (varBinding.isField() && varBinding.getDeclaringClass().getQualifiedName().equals(getDeclaringType().getFullyQualifiedName())) {
+								String fieldName= ((SimpleName)leftSide).getFullyQualifiedName();
+								for (int i= 0; i < fUninitializedFinalFieldsToMove.size(); ++i) {
+									if (fUninitializedFinalFieldsToMove.get(i).getFieldName().equals(fieldName)) {
+										fRightSide[i]= node.getRightHandSide();
+									}
+								}
+							}
+						}
+					}
+				}
+				return false;
+			}
+		};
+		cu.accept(visitor);
 	}
 
 	/**
@@ -472,6 +704,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 *            <code>java.lang.Object</code>) is available
 	 * @param declaringDeclaration
 	 *            the declaration of the declaring type
+	 * @param declaringRewrite
 	 * @param status
 	 *            the refactoring status
 	 * @param monitor
@@ -480,7 +713,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected String createSuperTypeSource(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected String createSuperTypeSource(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, CompilationUnitRewrite declaringRewrite, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(extractedWorkingCopy);
 		Assert.isNotNull(declaringDeclaration);
 		Assert.isNotNull(status);
@@ -516,7 +749,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (imports != null && !"".equals(imports)) { //$NON-NLS-1$
 				buffer.append(imports);
 			}
-			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, typeComment, buffer, status, new SubProgressMonitor(monitor, 1));
+			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, declaringRewrite, typeComment, buffer, status, new SubProgressMonitor(monitor, 1));
 			source= createTypeTemplate(extractedWorkingCopy, "", fileComment, "", buffer.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 			if (source == null) {
 				if (!declaring.getPackageFragment().isDefaultPackage()) {
@@ -554,6 +787,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 *            <code>java.lang.Object</code>) is available
 	 * @param declaringDeclaration
 	 *            the declaration of the declaring type
+	 * @param declaringRewrite
+	 *            the CompilationUnitRewrite for the declaring type
 	 * @param comment
 	 *            the comment of the new type declaration
 	 * @param buffer
@@ -565,7 +800,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected void createTypeDeclaration(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final String comment, final StringBuffer buffer, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected void createTypeDeclaration(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, CompilationUnitRewrite declaringRewrite, final String comment, final StringBuffer buffer, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(extractedWorkingCopy);
 		Assert.isNotNull(declaringDeclaration);
 		Assert.isNotNull(buffer);
@@ -607,7 +842,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			final AbstractTypeDeclaration targetDeclaration= (AbstractTypeDeclaration) targetRewrite.getRoot().types().get(0);
 			createTypeParameters(targetRewrite, superType, declaringDeclaration, targetDeclaration);
 			createTypeSignature(targetRewrite, superType, declaringDeclaration, targetDeclaration);
-			createNecessaryConstructors(targetRewrite, superType, targetDeclaration, status);
+			createNecessaryConstructors(targetRewrite, superType, targetDeclaration, declaringDeclaration, declaringRewrite, status);
 			final TextEdit edit= targetRewrite.createChange(true).getEdit();
 			try {
 				edit.apply(document, TextEdit.UPDATE_REGIONS);
@@ -1103,6 +1338,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					}
 				} else {
 					rewrite= fCompilationUnitRewrites.get(unit);
+					fixConstructorsWithFinalFieldInitialization(rewrite);
 					if (rewrite != null) {
 						final CompilationUnitChange layerChange= fLayerChanges.get(unit.getPrimary());
 						final CompilationUnitChange rewriteChange= rewrite.createChange(true);

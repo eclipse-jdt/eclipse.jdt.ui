@@ -993,7 +993,7 @@ public final class JavaModelUtil {
 		return is17OrHigher(getSourceCompliance(project));
 	}
 
-	private static String getSourceCompliance(IJavaProject project) {
+	public static String getSourceCompliance(IJavaProject project) {
 		return project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 	}
 

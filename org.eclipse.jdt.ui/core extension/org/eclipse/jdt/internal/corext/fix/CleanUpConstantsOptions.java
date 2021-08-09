@@ -71,12 +71,13 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.FALSE);
 		options.setOption(SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpOptions.FALSE);
 
-		// Optimization
+		// Performance
 		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 		options.setOption(NO_STRING_CREATION, CleanUpOptions.FALSE);
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
 		options.setOption(SINGLE_USED_FIELD, CleanUpOptions.FALSE);
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
+		options.setOption(DO_WHILE_RATHER_THAN_WHILE, CleanUpOptions.TRUE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUFFER_TO_STRINGBUILDER, CleanUpOptions.FALSE);
@@ -247,12 +248,13 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.FALSE);
 		options.setOption(SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpOptions.FALSE);
 
-		// Optimization
+		// Performance
 		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 		options.setOption(NO_STRING_CREATION, CleanUpOptions.FALSE);
 		options.setOption(PREFER_BOOLEAN_LITERAL, CleanUpOptions.FALSE);
 		options.setOption(SINGLE_USED_FIELD, CleanUpOptions.FALSE);
 		options.setOption(BREAK_LOOP, CleanUpOptions.FALSE);
+		options.setOption(DO_WHILE_RATHER_THAN_WHILE, CleanUpOptions.FALSE);
 		options.setOption(STATIC_INNER_CLASS, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(STRINGBUFFER_TO_STRINGBUILDER, CleanUpOptions.FALSE);

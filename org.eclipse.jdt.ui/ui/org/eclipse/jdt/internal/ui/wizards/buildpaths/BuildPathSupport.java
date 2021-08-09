@@ -387,6 +387,11 @@ public class BuildPathSupport {
 					options.put(option, inlineJSR);
 				}
 
+				// enable '--release' option for Java 7 or higher
+				String compliance= eeOptions.get(JavaCore.COMPILER_COMPLIANCE);
+				boolean release= compliance != null && JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_1_7) >= 0;
+				options.put(JavaCore.COMPILER_RELEASE, release ? JavaCore.ENABLED : JavaCore.DISABLED);
+
 				javaProject.setOptions(options);
 			}
 		}

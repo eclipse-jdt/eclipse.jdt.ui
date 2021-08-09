@@ -6983,8 +6983,8 @@
             cleanUpKind="cleanUp">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
-            class="org.eclipse.jdt.internal.ui.preferences.cleanup.OptimizationTabPage"
-            name="%CleanUpTabPage.Optimization.name"
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.PerformanceTabPage"
+            name="%CleanUpTabPage.Performance.name"
             cleanUpKind="cleanUp">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
@@ -7029,8 +7029,8 @@
             cleanUpKind="saveAction">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
-            class="org.eclipse.jdt.internal.ui.preferences.cleanup.OptimizationTabPage"
-            name="%CleanUpTabPage.Optimization.name"
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.PerformanceTabPage"
+            name="%CleanUpTabPage.Performance.name"
             cleanUpKind="saveAction">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI

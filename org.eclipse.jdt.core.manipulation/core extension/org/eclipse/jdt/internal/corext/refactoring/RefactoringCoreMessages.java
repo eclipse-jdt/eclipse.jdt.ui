@@ -524,9 +524,15 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_branch_mismatch;
 
+	public static String ExtractMethodAnalyzer_break_parent_missing;
+
 	public static String ExtractMethodAnalyzer_cannot_determine_return_type;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_anonymous_type;
+
+	public static String ExtractMethodAnalyzer_cannot_extract_break;
+
+	public static String ExtractMethodAnalyzer_cannot_extract_continue;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_for_initializer;
 
@@ -551,6 +557,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractMethodAnalyzer_cannot_extract_variable_declaration_fragment;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_variable_declaration_fragment_from_field;
+
+	public static String ExtractMethodAnalyzer_cannot_extract_yield;
 
 	public static String ExtractMethodAnalyzer_compile_errors;
 

@@ -131,6 +131,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SealedMissingClassModifier:
 			case IProblem.SealedMissingInterfaceModifier:
 			case IProblem.SealedNotDirectSuperInterface:
+			case IProblem.SealedNotDirectSuperClass:
 			case IProblem.SealedSuperClassDoesNotPermit:
 			case IProblem.SealedSuperInterfaceDoesNotPermit:
 			case IProblem.Task:
@@ -296,6 +297,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ConstructorReferenceNotBelow18:
 			case IProblem.IntersectionCastNotBelow18:
 			case IProblem.InvalidUsageOfTypeAnnotations:
+			case IProblem.MultiConstantCaseLabelsNotSupported:
 			case IProblem.DuplicateInheritedDefaultMethods:
 			case IProblem.InheritedDefaultMethodConflictsWithOtherInherited:
 			case IProblem.IllegalTypeAnnotationsInStaticMemberAccess:
@@ -473,6 +475,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ModifierCorrectionSubProcessor.addSealedMissingModifierProposal(context, problem, proposals);
 				break;
 			case IProblem.SealedNotDirectSuperInterface:
+			case IProblem.SealedNotDirectSuperClass:
 				LocalCorrectionsSubProcessor.addSealedAsDirectSuperTypeProposal(context, problem, proposals);
 				break;
 			case IProblem.SealedSuperClassDoesNotPermit:
@@ -707,6 +710,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IntersectionCastNotBelow18:
 			case IProblem.InvalidUsageOfTypeAnnotations:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_8);
+				break;
+			case IProblem.MultiConstantCaseLabelsNotSupported:
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_14);
 				break;
 			case IProblem.NonGenericType:
 				TypeArgumentMismatchSubProcessor.removeMismatchedArguments(context, problem, proposals);

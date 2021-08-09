@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2516,7 +2516,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -6191,7 +6191,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
@@ -6232,7 +6232,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
@@ -10515,4 +10515,272 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 		assertProposalExists(proposals, Messages.format(CorrectionMessages.QuickAssistProcessor_create_new_impl, "E.java"));
 	}
+
+	@Test
+	public void testDoWhileRatherThanWhile1() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWhileByDoWhile(int i) {\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        while (true) {\n");
+		buf.append("            // Keep this comment too\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                return;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "while (";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWhileByDoWhile(int i) {\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        do {\n");
+		buf.append("            // Keep this comment too\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                return;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("        } while (true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
+	@Test
+	public void testDoWhileRatherThanWhile2() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWithInitedBoolean(int i) {\n");
+		buf.append("        boolean isInitedToTrue= true;\n");
+		buf.append("\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        while (isInitedToTrue) {\n");
+		buf.append("           ); Keep this comment too\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                isInitedToTrue= false;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "while (";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWithInitedBoolean(int i) {\n");
+		buf.append("        boolean isInitedToTrue= true;\n");
+		buf.append("\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        do {\n");
+		buf.append("           ); Keep this comment too\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                isInitedToTrue= false;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("        } while (isInitedToTrue);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
+	@Test
+	public void testDoWhileRatherThanWhile3() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWithInitedBooleanAndInteger(int i) {\n");
+		buf.append("        int j= 1000;\n");
+		buf.append("        boolean isInitedToTrue= true;\n");
+		buf.append("\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        while (isInitedToTrue && j > 0) {\n");
+		buf.append("            // Keep this comment too\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                isInitedToTrue= false;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("            j--;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "while (";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWithInitedBooleanAndInteger(int i) {\n");
+		buf.append("        int j= 1000;\n");
+		buf.append("        boolean isInitedToTrue= true;\n");
+		buf.append("\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        do {\n");
+		buf.append("            // Keep this comment too\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                isInitedToTrue= false;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("            j--;\n");
+		buf.append("        } while (isInitedToTrue && j > 0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
+	@Test
+	public void testDoWhileRatherThanWhile4() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWithReassignment(int i) {\n");
+		buf.append("        int j= 1000;\n");
+		buf.append("        int k= -1000;\n");
+		buf.append("        boolean isInitedToTrue= false;\n");
+		buf.append("        isInitedToTrue= k < 0;\n");
+		buf.append("\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        while (isInitedToTrue && j > 0) {\n");
+		buf.append("            // Keep this comment too\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                isInitedToTrue= false;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("            j--;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "while (";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWithReassignment(int i) {\n");
+		buf.append("        int j= 1000;\n");
+		buf.append("        int k= -1000;\n");
+		buf.append("        boolean isInitedToTrue= false;\n");
+		buf.append("        isInitedToTrue= k < 0;\n");
+		buf.append("\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        do {\n");
+		buf.append("            // Keep this comment too\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                isInitedToTrue= false;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("            j--;\n");
+		buf.append("        } while (isInitedToTrue && j > 0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
+	@Test
+	public void testDoWhileRatherThanWhile5() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWithInnerWhile(int i) {\n");
+		buf.append("        int j= 1000;\n");
+		buf.append("        int k= -1000;\n");
+		buf.append("        boolean isInitedToTrue= false;\n");
+		buf.append("        isInitedToTrue= k < 0;\n");
+		buf.append("\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        while (isInitedToTrue && j > 0) {\n");
+		buf.append("            // Keep this comment too\n");
+		buf.append("            while (i < 50 || isInitedToTrue) {\n");
+		buf.append("                ++i;\n");
+		buf.append("            }\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                isInitedToTrue= false;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("            j--;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "while (is";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void replaceWithInnerWhile(int i) {\n");
+		buf.append("        int j= 1000;\n");
+		buf.append("        int k= -1000;\n");
+		buf.append("        boolean isInitedToTrue= false;\n");
+		buf.append("        isInitedToTrue= k < 0;\n");
+		buf.append("\n");
+		buf.append("        // Keep this comment\n");
+		buf.append("        do {\n");
+		buf.append("            // Keep this comment too\n");
+		buf.append("            while (i < 50 || isInitedToTrue) {\n");
+		buf.append("                ++i;\n");
+		buf.append("            }\n");
+		buf.append("            if (i > 100) {\n");
+		buf.append("                isInitedToTrue= false;\n");
+		buf.append("            }\n");
+		buf.append("            i *= 2;\n");
+		buf.append("            j--;\n");
+		buf.append("        } while (isInitedToTrue && j > 0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
 }

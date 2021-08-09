@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2021 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
@@ -57,6 +59,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
@@ -155,6 +158,14 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					}
 					currentBlock.add(statement);
 				}
+			}
+
+			// look for final case that has implicit break statement
+			if (currentCase != null) {
+				if (currentBlock != null && currentBlock.isEmpty()) {
+					return null;
+				}
+				caseMap.put(currentCase,  currentBlock);
 			}
 
 			String commonAssignmentName= null;
@@ -371,6 +382,11 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 										newVarFragment.setName(ast.newSimpleName(varName));
 										newVarFragment.setInitializer(newSwitchExpression);
 										VariableDeclarationStatement newVar= ast.newVariableDeclarationStatement(newVarFragment);
+										ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+										newVar.setType(importRewrite.addImport(((IVariableBinding) assignmentBinding).getType(), ast));
+										if (varDeclarationStatement != null && Modifier.isFinal(varDeclarationStatement.getModifiers())) {
+											newVar.modifiers().add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));
+										}
 										replaceWithLeadingComments(cuRewrite, listRewrite, varDeclarationStatement, group, newVar);
 										listRewrite.remove(switchStatement, group);
 										return;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2021 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -67,7 +67,6 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				+ "            case 3: throw new RuntimeException(); // throw comment\n" //
 				+ "            default:\n" //
 				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
 				+ "        }\n" //
 				+ "        return i;\n" //
 				+ "    }\n" //
@@ -254,6 +253,55 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				+ "            case THURSDAY, FRIDAY -> 14;\n" //
 				+ "        };\n" //
 				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+	@Test
+	public void testConvertToSwitchExpressionBug574824() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(String[] args) {\n" //
+				+ "        // comment 1\n" //
+				+ "        final File file;\n" //
+				+ "        switch (args[1]) {\n" //
+				+ "            case \"foo\":\n" //
+				+ "                file = new File(\"foo.txt\");\n" //
+				+ "                break;\n" //
+				+ "            case \"bar\":\n" //
+				+ "                file = new File(\"bar.txt\");\n" //
+				+ "                break;\n" //
+				+ "            default:\n" //
+				+ "                file = new File(\"foobar.txt\");\n" //
+				+ "        }\n" //
+				+ "        System.err.println(file);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(String[] args) {\n" //
+				+ "        // comment 1\n" //
+				+ "        final File file = switch (args[1]) {\n" //
+				+ "            case \"foo\" -> new File(\"foo.txt\");\n" //
+				+ "            case \"bar\" -> new File(\"bar.txt\");\n" //
+				+ "            default -> new File(\"foobar.txt\");\n" //
+				+ "        };\n" //
+				+ "        System.err.println(file);\n" //
 				+ "    }\n" //
 				+ "}\n";
 		String expected1= sample;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -410,15 +410,26 @@ public class JavaDocLocations {
 		 * This breaks all clients that directly create such URLs.
 		 * We can't know what format is required, so we just guess by the project's compiler compliance.
 		 */
-		boolean is18OrHigher= JavaModelUtil.is1d8OrHigher(meth.getJavaProject());
-		buf.append(is18OrHigher ? '-' : '(');
+		IJavaProject javaProject= meth.getJavaProject();
+		String compliance= JavaModelUtil.getSourceCompliance(javaProject);
+		boolean is1d8Or9= JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_1_8) == 0 || JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_9) == 0;
+		boolean is10OrHigher= JavaModelUtil.is10OrHigher(javaProject);
+		buf.append(is1d8Or9 ? '-' : '(');
 		String[] params= meth.getParameterTypes();
 		IType declaringType= meth.getDeclaringType();
 		boolean isVararg= Flags.isVarargs(meth.getFlags());
 		int lastParam= params.length - 1;
 		for (int i= 0; i <= lastParam; i++) {
 			if (i != 0) {
-				buf.append(is18OrHigher ? "-" : ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				String paramDelim;
+				if (is1d8Or9) {
+					paramDelim= "-"; //$NON-NLS-1$
+				} else if (is10OrHigher) {
+					paramDelim= ","; //$NON-NLS-1$
+				} else {
+					paramDelim= ", "; //$NON-NLS-1$
+				}
+				buf.append(paramDelim);
 			}
 			String curr= Signature.getTypeErasure(params[i]);
 			String fullName= JavaModelUtil.getResolvedTypeName(curr, declaringType);
@@ -432,7 +443,7 @@ public class JavaDocLocations {
 					dim--;
 				}
 				while (dim > 0) {
-					buf.append(is18OrHigher ? ":A" : "[]"); //$NON-NLS-1$ //$NON-NLS-2$
+					buf.append(is1d8Or9 ? ":A" : "[]"); //$NON-NLS-1$ //$NON-NLS-2$
 					dim--;
 				}
 				if (i == lastParam && isVararg) {
@@ -440,7 +451,7 @@ public class JavaDocLocations {
 				}
 			}
 		}
-		buf.append(is18OrHigher ? '-' : ')');
+		buf.append(is1d8Or9 ? '-' : ')');
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import com.ibm.icu.text.Collator;
 
@@ -161,7 +162,7 @@ public class AccessorClassCreator {
 
 			StringBuilder result= new StringBuilder();
 			result.append("public class ").append(fAccessorClassName).append(" extends NLS {"); //$NON-NLS-1$ //$NON-NLS-2$
-			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME_FIELD).append(" = \"").append(getResourceBundleName()).append("\"; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME_FIELD).append(" = ").append(getBundleNameFieldValue()).append("; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			result.append(NLSElement.createTagText(1)).append(lineDelim);
 
 			if (constructorIdx < fieldIdx) {
@@ -200,7 +201,7 @@ public class AccessorClassCreator {
 			StringBuilder result= new StringBuilder();
 			result.append("public class ").append(fAccessorClassName).append(" {"); //$NON-NLS-1$ //$NON-NLS-2$
 			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME_FIELD); //$NON-NLS-1$
-			result.append(" = \"").append(getResourceBundleName()).append("\"; ").append(NLSElement.createTagText(1)).append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+			result.append(" = ").append(getBundleNameFieldValue()).append("; ").append(NLSElement.createTagText(1)).append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
 
 			result.append(lineDelim).append("private static final ResourceBundle ").append(getResourceBundleConstantName()); //$NON-NLS-1$
 			result.append("= ResourceBundle.getBundle(").append(NLSRefactoring.BUNDLE_NAME_FIELD).append(");").append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
@@ -217,6 +218,15 @@ public class AccessorClassCreator {
 
 			return result.toString();
 		}
+	}
+
+	private String getBundleNameFieldValue() throws CoreException {
+		IPath resourceBundleContainerPath= fResourceBundlePath.removeLastSegments(1);
+		IPath accessorContainerPath= fAccessorPath.removeLastSegments(1);
+		if (Objects.equals(accessorContainerPath, resourceBundleContainerPath)) {
+			return fAccessorClassName + ".class.getPackageName() + \"." + getPropertyFileNameWithoutExtension() + "\""; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return "\"" + getResourceBundleName() + "\""; //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	private String getResourceBundleConstantName() {
