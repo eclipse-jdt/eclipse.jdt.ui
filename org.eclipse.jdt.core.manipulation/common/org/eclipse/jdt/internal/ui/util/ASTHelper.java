@@ -59,7 +59,7 @@ public class ASTHelper {
 		switch (modifier) {
 			case Modifier.SEALED:
 			case Modifier.NON_SEALED:
-				return ast.isPreviewEnabled();
+				return ast.apiLevel() >= JLS17;
 			default:
 				break;
 		}
