@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -602,6 +606,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	//---- End Name Hierarchy ------------------------------------
 
 	@Override
+	public boolean visit(GuardedPattern node) {
+		return visit((Pattern)node);
+	}
+
+	@Override
+	public void endVisit(GuardedPattern node) {
+		endVisit((Pattern)node);
+	}
+
+	@Override
 	public boolean visit(NullLiteral node) {
 		return visit((Expression)node);
 	}
@@ -612,12 +626,30 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(NullPattern node) {
+		return visit((Pattern)node);
+	}
+
+	@Override
+	public void endVisit(NullPattern node) {
+		endVisit((Pattern)node);
+	}
+
+	@Override
 	public boolean visit(NumberLiteral node) {
 		return visit((Expression)node);
 	}
 
 	@Override
 	public void endVisit(NumberLiteral node) {
+		endVisit((Expression)node);
+	}
+
+	public boolean visit(Pattern node) {
+		return visit((Expression)node);
+	}
+
+	public void endVisit(Pattern node) {
 		endVisit((Expression)node);
 	}
 
@@ -709,6 +741,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(TypeLiteral node) {
 		endVisit((Expression)node);
+	}
+
+	@Override
+	public boolean visit(TypePattern node) {
+		return visit((Pattern)node);
+	}
+
+	@Override
+	public void endVisit(TypePattern node) {
+		endVisit((Pattern)node);
 	}
 
 	@Override

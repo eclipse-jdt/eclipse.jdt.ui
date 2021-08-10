@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -39,6 +43,7 @@ import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.ModuleDirective;
 import org.eclipse.jdt.core.dom.ModulePackageAccess;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -255,6 +260,23 @@ public class HierarchicalASTVisitorTest {
 			super.visit(node);
 		}
 
+		@Override
+		public boolean visit(Pattern node) {
+			registerCall(Pattern.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(Pattern node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(Pattern node) {
+			registerCall(Pattern.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(Pattern node) {
+			super.visit(node);
+		}
 
 		@Override
 		public boolean visit(Statement node) {
