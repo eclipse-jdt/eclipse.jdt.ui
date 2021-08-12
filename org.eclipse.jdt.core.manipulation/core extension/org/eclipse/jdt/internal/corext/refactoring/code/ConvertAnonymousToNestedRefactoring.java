@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
@@ -472,7 +473,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     public CompilationUnitChange createCompilationUnitChange(IProgressMonitor pm) throws CoreException {
 		final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fCu, fCompilationUnitNode);
 		final ITypeBinding[] typeParameters= getTypeParameters();
-		addNestedClass(rewrite, typeParameters);
+		final ITypeBinding[] impliedSuperParameters= getImpliedClassCreationTypeParameters();
+		addNestedClass(rewrite, typeParameters, impliedSuperParameters);
 		modifyConstructorCall(rewrite, typeParameters);
 		return rewrite.createChange(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name, false, pm);
     }
@@ -486,6 +488,39 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		final CompilationUnitChange result= createCompilationUnitChange(pm);
 		result.setDescriptor(createRefactoringDescriptor());
 		return result;
+	}
+
+	private ITypeBinding[] getImpliedClassCreationTypeParameters() {
+		final ClassInstanceCreation creation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
+		// In assignments and variable declaration statements, a type parameter might exist in the
+		// left side of the statement and implied in the class creation (e.g. Set<String> x= new HashSet<>();)
+		ASTNode nodeOfInterest= ASTNodes.getFirstAncestorOrNull(creation, Assignment.class, FieldDeclaration.class, VariableDeclarationStatement.class);
+		if (nodeOfInterest instanceof Assignment) {
+			Assignment assignment= (Assignment)nodeOfInterest;
+			ITypeBinding typeBinding= assignment.resolveTypeBinding();
+			if (typeBinding != null && typeBinding.isParameterizedType()) {
+				return typeBinding.getTypeArguments();
+			}
+		} else if (nodeOfInterest instanceof FieldDeclaration) {
+			FieldDeclaration fieldDeclaration= (FieldDeclaration)nodeOfInterest;
+			Type fieldType= fieldDeclaration.getType();
+			if (fieldType.isParameterizedType()) {
+				ITypeBinding typeBinding= fieldType.resolveBinding();
+				if (typeBinding != null) {
+					return typeBinding.getTypeArguments();
+				}
+			}
+		} else if (nodeOfInterest instanceof VariableDeclarationStatement) {
+			VariableDeclarationStatement vds= (VariableDeclarationStatement)nodeOfInterest;
+			Type vdsType= vds.getType();
+			if (vdsType.isParameterizedType()) {
+				ITypeBinding typeBinding= vdsType.resolveBinding();
+				if (typeBinding != null) {
+					return typeBinding.getTypeArguments();
+				}
+			}
+		}
+		return new ITypeBinding[0];
 	}
 
 	private ITypeBinding[] getTypeParameters() {
@@ -650,12 +685,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	}
     }
 
-    private void addNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] typeParameters) throws CoreException {
+    private void addNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] typeParameters, ITypeBinding[] impliedSuperTypeParameters) throws CoreException {
         final AbstractTypeDeclaration declarations= ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
         int index= findIndexOfFistNestedClass(declarations.bodyDeclarations());
         if (index == -1)
             index= 0;
-        rewrite.getASTRewrite().getListRewrite(declarations, declarations.getBodyDeclarationsProperty()).insertAt(createNewNestedClass(rewrite, typeParameters), index, null);
+        rewrite.getASTRewrite().getListRewrite(declarations, declarations.getBodyDeclarationsProperty()).insertAt(createNewNestedClass(rewrite, typeParameters, impliedSuperTypeParameters), index, null);
     }
 
     private static int findIndexOfFistNestedClass(List<BodyDeclaration> list) {
@@ -673,7 +708,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         return (each.getParent() instanceof AbstractTypeDeclaration);
     }
 
-    private AbstractTypeDeclaration createNewNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] typeParameters) throws CoreException {
+    private AbstractTypeDeclaration createNewNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] typeParameters, ITypeBinding[] impliedSuperTypeParameters) throws CoreException {
 		final AST ast= fAnonymousInnerClassNode.getAST();
 
 		final TypeDeclaration newDeclaration= ast.newTypeDeclaration();
@@ -688,7 +723,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			parameter.setName(ast.newSimpleName(typeParameter.getName()));
 			newDeclaration.typeParameters().add(parameter);
 		}
-		setSuperType(newDeclaration);
+		setSuperType(rewrite, newDeclaration, impliedSuperTypeParameters);
 
 		IJavaProject project= fCu.getJavaProject();
 
@@ -1058,20 +1093,33 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		return param;
     }
 
-    private void setSuperType(TypeDeclaration declaration) {
-        ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
+    private void setSuperType(CompilationUnitRewrite rewrite, TypeDeclaration declaration, ITypeBinding[] impliedSuperTypeParameters) {
+		ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
 		ITypeBinding binding= classInstanceCreation.resolveTypeBinding();
-        if (binding == null)
-            return;
-		Type newType= (Type) ASTNode.copySubtree(fAnonymousInnerClassNode.getAST(), classInstanceCreation.getType());
+		if (binding == null)
+			return;
+		Type newType= null;
+		if (impliedSuperTypeParameters.length == 0 || !classInstanceCreation.getType().isParameterizedType()) {
+			newType= (Type) ASTNode.copySubtree(fAnonymousInnerClassNode.getAST(), classInstanceCreation.getType());
+		} else {
+			ImportRewrite importRewriter= rewrite.getImportRewrite();
+			AST ast= fAnonymousInnerClassNode.getAST();
+			Type oldType= classInstanceCreation.getType();
+			Type newBaseType= (Type) ASTNode.copySubtree(ast, ((ParameterizedType) oldType).getType());
+			newType= ast.newParameterizedType(newBaseType);
+			for (ITypeBinding impliedTypeBinding : impliedSuperTypeParameters) {
+				Type type= importRewriter.addImport(impliedTypeBinding, ast);
+				((ParameterizedType) newType).typeArguments().add(type);
+			}
+		}
 		if ("java.lang.Object".equals(binding.getSuperclass().getQualifiedName())) { //$NON-NLS-1$
-            Assert.isTrue(binding.getInterfaces().length <= 1);
-            if (binding.getInterfaces().length == 0)
-                return;
-            declaration.superInterfaceTypes().add(0, newType);
-        } else {
-            declaration.setSuperclassType(newType);
-        }
+			Assert.isTrue(binding.getInterfaces().length <= 1);
+			if (binding.getInterfaces().length == 0)
+				return;
+			declaration.superInterfaceTypes().add(0, newType);
+		} else {
+			declaration.setSuperclassType(newType);
+		}
     }
 
     private ITypeBinding getSuperTypeBinding() {
