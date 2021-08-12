@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -86,6 +87,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -99,6 +101,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -107,6 +110,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
@@ -127,6 +132,8 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.template.java.TemplateUtils;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
@@ -314,6 +321,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public int F_FINAL = Flags.AccFinal;
 	/** Abstract property flag. See The Java Virtual Machine Specification for more details. */
 	public int F_ABSTRACT = Flags.AccAbstract;
+	/** Non-Sealed access Flag. */
+	private int F_NON_SEALED = Flags.AccNonSealed;
+	/** Sealed access Flag. */
+	private int F_SEALED = Flags.AccSealed;
 
 	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
 
@@ -331,24 +342,50 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected final static String INTERFACES= PAGE_NAME + ".interfaces"; //$NON-NLS-1$
 	/** Field ID of the modifier check boxes. */
 	protected final static String MODIFIERS= PAGE_NAME + ".modifiers"; //$NON-NLS-1$
+	/** Field ID of the modifier check boxes.
+	 * @since 3.25*/
+	protected final static String SEALEDMODIFIERS= PAGE_NAME + ".sealedmodifiers"; //$NON-NLS-1$
 	/** Field ID of the method stubs check boxes. */
 	protected final static String METHODS= PAGE_NAME + ".methods"; //$NON-NLS-1$
 
 	private static class InterfaceWrapper {
-		public String interfaceName;
+		private String interfaceName;
+		private IType type;
 
 		public InterfaceWrapper(String interfaceName) {
+			this(interfaceName, null);
+		}
+
+		public InterfaceWrapper(String interfaceName, IType type) {
 			this.interfaceName= interfaceName;
+			this.type= type;
 		}
 
 		@Override
 		public int hashCode() {
-			return interfaceName.hashCode();
+			int hashCode= interfaceName.hashCode();
+			if (type != null) {
+				hashCode &= type.hashCode();
+			}
+			return hashCode;
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			return obj != null && getClass().equals(obj.getClass()) && ((InterfaceWrapper) obj).interfaceName.equals(interfaceName);
+			return obj != null && getClass().equals(obj.getClass()) && ((InterfaceWrapper) obj).interfaceName.equals(interfaceName) && ((InterfaceWrapper) obj).type == type ;
+		}
+
+		public void setInterfaceName(String newName, IType type) {
+			this.type= type;
+			this.interfaceName= newName;
+		}
+
+		public String getInterfaceName() {
+			return this.interfaceName;
+		}
+
+		public IType getType() {
+			return this.type;
 		}
 	}
 
@@ -361,7 +398,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		@Override
 		public String getText(Object element) {
-			return BasicElementLabels.getJavaElementName(((InterfaceWrapper) element).interfaceName);
+			return BasicElementLabels.getJavaElementName(((InterfaceWrapper) element).getInterfaceName());
 		}
 
 		@Override
@@ -385,6 +422,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * a handle to the type to be created (does usually not exist, can be null)
 	 */
 	private IType fCurrType;
+	private IType fSuperClass;
 	private StringDialogField fTypeNameDialogField;
 
 	private StringButtonDialogField fSuperClassDialogField;
@@ -392,7 +430,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	private SelectionButtonDialogFieldGroup fAccMdfButtons;
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
+	private SelectionButtonDialogFieldGroup fSealedMdfButtons;
 
+	private boolean fIsSealedSupported;
+	private boolean fResetSuperClass= true;
 	/**
 	 * @noreference This field is not intended to be referenced by clients.
 	 */
@@ -401,6 +442,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	// will use the preferences settings
 
 	private IType fCreatedType;
+
+	private ITypeBinding fCreatedTypeBinding;
 
 	private JavaPackageCompletionProcessor fCurrPackageCompletionProcessor;
 	private JavaTypeCompletionProcessor fEnclosingTypeCompletionProcessor;
@@ -414,8 +457,27 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected IStatus fModifierStatus;
 	protected IStatus fSuperInterfacesStatus;
 
+	/**
+	 * @since 3.25
+	 */
+	protected IStatus fSealedModifierStatus;
+
+	/**
+	 * @since 3.25
+	 */
+	protected IStatus fSealedSuperClassStatus;
+
+	/**
+	 * @since 3.25
+	 */
+	protected IStatus fSealedSuperInterfacesStatus;
+
+
+	private TypeFieldsAdapter fTypeFieldAdapter;
+
 	private final int PUBLIC_INDEX= 0, DEFAULT_INDEX= 1, PRIVATE_INDEX= 2, PROTECTED_INDEX= 3;
 	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1, STATIC_INDEX= 2, ENUM_ANNOT_STATIC_INDEX= 1;
+	private final int SEALED_FINAL_INDEX= 3, SEALED_INDEX= 1, NON_SEALED_INDEX= 2;
 
 	private int fTypeKind;
 
@@ -475,28 +537,28 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	    fCreatedType= null;
 
-		TypeFieldsAdapter adapter= new TypeFieldsAdapter();
+		fTypeFieldAdapter= new TypeFieldsAdapter();
 
-		fPackageDialogField= new StringButtonStatusDialogField(adapter);
-		fPackageDialogField.setDialogFieldListener(adapter);
+		fPackageDialogField= new StringButtonStatusDialogField(fTypeFieldAdapter);
+		fPackageDialogField.setDialogFieldListener(fTypeFieldAdapter);
 		fPackageDialogField.setLabelText(getPackageLabel());
 		fPackageDialogField.setButtonLabel(NewWizardMessages.NewTypeWizardPage_package_button);
 		fPackageDialogField.setStatusWidthHint(NewWizardMessages.NewTypeWizardPage_default);
 
 		fEnclosingTypeSelection= new SelectionButtonDialogField(SWT.CHECK);
-		fEnclosingTypeSelection.setDialogFieldListener(adapter);
+		fEnclosingTypeSelection.setDialogFieldListener(fTypeFieldAdapter);
 		fEnclosingTypeSelection.setLabelText(getEnclosingTypeLabel());
 
-		fEnclosingTypeDialogField= new StringButtonDialogField(adapter);
-		fEnclosingTypeDialogField.setDialogFieldListener(adapter);
+		fEnclosingTypeDialogField= new StringButtonDialogField(fTypeFieldAdapter);
+		fEnclosingTypeDialogField.setDialogFieldListener(fTypeFieldAdapter);
 		fEnclosingTypeDialogField.setButtonLabel(NewWizardMessages.NewTypeWizardPage_enclosing_button);
 
 		fTypeNameDialogField= new StringDialogField();
-		fTypeNameDialogField.setDialogFieldListener(adapter);
+		fTypeNameDialogField.setDialogFieldListener(fTypeFieldAdapter);
 		fTypeNameDialogField.setLabelText(getTypeNameLabel());
 
-		fSuperClassDialogField= new StringButtonDialogField(adapter);
-		fSuperClassDialogField.setDialogFieldListener(adapter);
+		fSuperClassDialogField= new StringButtonDialogField(fTypeFieldAdapter);
+		fSuperClassDialogField.setDialogFieldListener(fTypeFieldAdapter);
 		fSuperClassDialogField.setLabelText(getSuperClassLabel());
 		fSuperClassDialogField.setButtonLabel(NewWizardMessages.NewTypeWizardPage_superclass_button);
 
@@ -505,8 +567,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			/* 1 */ null,
 			NewWizardMessages.NewTypeWizardPage_interfaces_remove
 		};
-		fSuperInterfacesDialogField= new ListDialogField<>(adapter, addButtons, new InterfacesListLabelProvider());
-		fSuperInterfacesDialogField.setDialogFieldListener(adapter);
+		fSuperInterfacesDialogField= new ListDialogField<>(fTypeFieldAdapter, addButtons, new InterfacesListLabelProvider());
+		fSuperInterfacesDialogField.setDialogFieldListener(fTypeFieldAdapter);
 		fSuperInterfacesDialogField.setTableColumns(new ListDialogField.ColumnsDescription(1, false));
 		fSuperInterfacesDialogField.setLabelText(getSuperInterfacesLabel());
 		fSuperInterfacesDialogField.setRemoveButtonIndex(2);
@@ -518,7 +580,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			NewWizardMessages.NewTypeWizardPage_modifiers_protected
 		};
 		fAccMdfButtons= new SelectionButtonDialogFieldGroup(SWT.RADIO, buttonNames1, 4);
-		fAccMdfButtons.setDialogFieldListener(adapter);
+		fAccMdfButtons.setDialogFieldListener(fTypeFieldAdapter);
 		fAccMdfButtons.setLabelText(getModifiersLabel());
 		fAccMdfButtons.setSelection(0, true);
 
@@ -545,7 +607,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 
 		fOtherMdfButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames2, 4);
-		fOtherMdfButtons.setDialogFieldListener(adapter);
+		fOtherMdfButtons.setDialogFieldListener(fTypeFieldAdapter);
 
 		fAccMdfButtons.enableSelectionButton(PRIVATE_INDEX, false);
 		fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, false);
@@ -575,6 +637,57 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperClassStatus= new StatusInfo();
 		fSuperInterfacesStatus= new StatusInfo();
 		fModifierStatus= new StatusInfo();
+		fSealedModifierStatus= new StatusInfo();
+		fSealedSuperClassStatus= new StatusInfo();
+		fSealedSuperInterfacesStatus= new StatusInfo();
+	}
+
+	private void initOtherButtons() {
+		String[] buttonNames3= null;
+		switch (fTypeKind) {
+			case CLASS_TYPE:
+				if (fIsSealedSupported) {
+					buttonNames3= new String[] {
+							NewWizardMessages.NewTypeWizardPage_none_label,
+							NewWizardMessages.NewTypeWizardPage_modifiers_sealed,
+							NewWizardMessages.NewTypeWizardPage_modifiers_non_sealed,
+							NewWizardMessages.NewTypeWizardPage_modifiers_final
+					};
+				}
+				break;
+			case INTERFACE_TYPE:
+				if (fIsSealedSupported) {
+					buttonNames3= new String[] {
+							NewWizardMessages.NewTypeWizardPage_none_label,
+							NewWizardMessages.NewTypeWizardPage_modifiers_sealed,
+							NewWizardMessages.NewTypeWizardPage_modifiers_non_sealed
+					};
+				}
+				//$FALL-THROUGH$
+			default:
+				// do nothing
+
+		}
+		fSealedMdfButtons= null;
+		if (buttonNames3 != null) {
+			fSealedMdfButtons= new SelectionButtonDialogFieldGroup(SWT.RADIO, buttonNames3, 4);
+			fSealedMdfButtons.setDialogFieldListener(fTypeFieldAdapter);
+			fSealedMdfButtons.enableSelectionButton(SEALED_INDEX, false);
+			fSealedMdfButtons.enableSelectionButton(NON_SEALED_INDEX, false);
+			fSealedMdfButtons.enableSelectionButton(SEALED_FINAL_INDEX, true);
+			fOtherMdfButtons.enableSelectionButton(FINAL_INDEX, false);
+
+			switch (fTypeKind) {
+				case CLASS_TYPE:
+				case INTERFACE_TYPE:
+					if (fIsSealedSupported) {
+						fSealedMdfButtons.enableSelectionButton(SEALED_INDEX, true);
+					}
+					break;
+				default:
+					// do nothing
+			}
+		}
 	}
 
 	/**
@@ -593,6 +706,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		if (elem != null) {
 			project= elem.getJavaProject();
+			setIsNonSealedSupported(project);
 			pack= (IPackageFragment) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 			if (pack == null && project != null) {
 				pack= getPackage(project);
@@ -929,13 +1043,25 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		DialogField.createEmptySpace(composite);
 
-		if (fTypeKind == CLASS_TYPE) {
+		if (fTypeKind == CLASS_TYPE || fTypeKind == INTERFACE_TYPE) {
 			DialogField.createEmptySpace(composite);
 
 			control= fOtherMdfButtons.getSelectionButtonsGroup(composite);
 			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.horizontalSpan= nColumns - 2;
+			if (fSealedMdfButtons != null) {
+				gd.horizontalSpan= nColumns - 1;
+			} else {
+				gd.horizontalSpan= nColumns - 2;
+			}
 			control.setLayoutData(gd);
+
+			if (fSealedMdfButtons != null) {
+				DialogField.createEmptySpace(composite);
+				control= fSealedMdfButtons.getSelectionButtonsGroup(composite);
+				gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+				gd.horizontalSpan= nColumns - 2;
+				control.setLayoutData(gd);
+			}
 
 			DialogField.createEmptySpace(composite);
 		}
@@ -1018,12 +1144,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (element instanceof Item)
 					element = ((Item) element).getData();
 
-				((InterfaceWrapper) element).interfaceName= (String) value;
+				IType interfaceType= null;
+				try {
+					interfaceType= findType(getJavaProject(), (String) value);
+				} catch (JavaModelException e) {
+					//do nothing
+				}
+				((InterfaceWrapper) element).setInterfaceName((String) value, interfaceType);
+
 				fSuperInterfacesDialogField.elementChanged((InterfaceWrapper) element);
 			}
 			@Override
 			public Object getValue(Object element, String property) {
-				return ((InterfaceWrapper) element).interfaceName;
+				return ((InterfaceWrapper) element).getInterfaceName();
 			}
 			@Override
 			public boolean canModify(Object element, String property) {
@@ -1168,13 +1301,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		} else if (field == fEnclosingTypeDialogField) {
 			IType type= chooseEnclosingType();
 			if (type != null) {
-				fEnclosingTypeDialogField.setText(type.getFullyQualifiedName('.'));
+				setEnclosingType(type);
 			}
 		} else if (field == fSuperClassDialogField) {
 			IType type= chooseSuperClass();
-			if (type != null) {
-				fSuperClassDialogField.setText(SuperInterfaceSelectionDialog.getNameWithTypeParameters(type));
-			}
+			setSuperClass(type);
 		}
 	}
 
@@ -1229,14 +1360,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			fTypeNameStatus= typeNameChanged();
 			fieldName= TYPENAME;
 		} else if (field == fSuperClassDialogField) {
+			setSuperClassType();
 			fSuperClassStatus= superClassChanged();
+			fSealedModifierStatus= sealedModifiersChanged();
 			fieldName= SUPER;
 		} else if (field == fSuperInterfacesDialogField) {
 			fSuperInterfacesStatus= superInterfacesChanged();
+			fSealedModifierStatus= sealedModifiersChanged();
 			fieldName= INTERFACES;
 		} else if (field == fOtherMdfButtons || field == fAccMdfButtons) {
 			fModifierStatus= modifiersChanged();
 			fieldName= MODIFIERS;
+		} else if (field == fSealedMdfButtons) {
+			fSealedModifierStatus= sealedModifiersChanged();
+			fieldName= SEALEDMODIFIERS;
 		} else {
 			fieldName= METHODS;
 		}
@@ -1258,6 +1395,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			fTypeNameStatus= typeNameChanged();
 			fSuperClassStatus= superClassChanged();
 			fSuperInterfacesStatus= superInterfacesChanged();
+			fSealedModifierStatus= sealedModifiersChanged();
 		}
 	}
 
@@ -1313,6 +1451,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		String str= (pack == null) ? "" : pack.getElementName(); //$NON-NLS-1$
 		fPackageDialogField.setText(str);
 		updateEnableState();
+		if (fCurrPackage != null) {
+			setIsNonSealedSupported(fCurrPackage.getJavaProject());
+		}
 	}
 
 	/**
@@ -1423,6 +1564,17 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (fOtherMdfButtons.isSelected(STATIC_INDEX)) {
 			mdf+= F_STATIC;
 		}
+		if (fSealedMdfButtons != null) {
+			if (fSealedMdfButtons.isSelected(SEALED_FINAL_INDEX)) {
+				mdf+= F_FINAL;
+			}
+			if (fSealedMdfButtons.isSelected(NON_SEALED_INDEX)) {
+				mdf+= F_NON_SEALED;
+			}
+			if (fSealedMdfButtons.isSelected(SEALED_INDEX)) {
+				mdf+= F_SEALED;
+			}
+		}
 		return mdf;
 	}
 
@@ -1450,10 +1602,22 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			fOtherMdfButtons.setSelection(ABSTRACT_INDEX, true);
 		}
 		if (Flags.isFinal(modifiers)) {
-			fOtherMdfButtons.setSelection(FINAL_INDEX, true);
+			if (fOtherMdfButtons.isEnabled(FINAL_INDEX))
+				fOtherMdfButtons.setSelection(FINAL_INDEX, true);
+			else if (fSealedMdfButtons != null)
+				fSealedMdfButtons.setSelection(SEALED_FINAL_INDEX, true);
 		}
 		if (Flags.isStatic(modifiers)) {
 			fOtherMdfButtons.setSelection(STATIC_INDEX, true);
+		}
+		if (fSealedMdfButtons != null) {
+			if (Flags.isSealed(modifiers)) {
+				fSealedMdfButtons.setSelection(SEALED_INDEX, true);
+			}
+			if (Flags.isNonSealed(modifiers)) {
+				fSealedMdfButtons.setSelection(NON_SEALED_INDEX, true);
+			}
+			fSealedModifierStatus= sealedModifiersChanged();
 		}
 
 		fAccMdfButtons.setEnabled(canBeModified);
@@ -1469,6 +1633,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return fSuperClassDialogField.getText();
 	}
 
+	private void setSuperClass(IType type) {
+		if (type != null) {
+			fSuperClass= type;
+			fResetSuperClass= false;
+			fSuperClassDialogField.setText(SuperInterfaceSelectionDialog.getNameWithTypeParameters(type));
+			fResetSuperClass= true;
+		}
+	}
+
+	private void setEnclosingType(IType type) {
+		if (type != null) {
+			fEnclosingTypeDialogField.setText(type.getFullyQualifiedName('.'));
+		}
+	}
+
 	/**
 	 * Sets the super class name.
 	 *
@@ -1482,6 +1661,28 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
+	 * Sets the super class name.
+	 *
+	 * @param type the binding of superclass
+	 * @param canBeModified if <code>true</code> the superclass name field is editable; 
+	 * otherwise it is read-only.
+	 * @since 3.25
+	 */
+	public void setSuperClass(ITypeBinding type, boolean canBeModified) {
+		fSuperClass= null;
+		if (type != null) {
+			IJavaElement jElem= type.getJavaElement();
+			if (jElem instanceof IType) {
+				fSuperClass= (IType) jElem;
+			}
+			this.fResetSuperClass= false;
+			setSuperClass(type.getQualifiedName(), canBeModified);
+			this.fResetSuperClass= true;
+		}
+		fSuperClassStatus= superClassChanged();
+	}
+
+	/**
 	 * Returns the chosen super interfaces.
 	 *
 	 * @return a list of chosen super interfaces. The list's elements
@@ -1491,7 +1692,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		List<InterfaceWrapper> interfaces= fSuperInterfacesDialogField.getElements();
 		ArrayList<String> result= new ArrayList<>(interfaces.size());
 		for (InterfaceWrapper wrapper : interfaces) {
-			result.add(wrapper.interfaceName);
+			result.add(wrapper.getInterfaceName());
 		}
 		return result;
 	}
@@ -1514,6 +1715,29 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
+	 * Sets the super interfaces.
+	 *
+	 * @param interfaceBindings a list of super interface bindings. The method requires that
+	 * the list's elements are of type <code>ITypeBinding</code>
+	 * @param canBeModified if <code>true</code> the super interface field is
+	 * editable; otherwise it is read-only.
+	 * @since 3.25
+	 */
+	public void setSuperInterfacesList(List<ITypeBinding> interfaceBindings, boolean canBeModified) {
+		ArrayList<InterfaceWrapper> interfaces= new ArrayList<>(interfaceBindings.size());
+		for (ITypeBinding typeBinding : interfaceBindings) {
+			IJavaElement jElem= typeBinding.getJavaElement();
+			if (jElem instanceof IType)
+				interfaces.add(new InterfaceWrapper(typeBinding.getQualifiedName(), (IType) jElem));
+			else
+				interfaces.add(new InterfaceWrapper(typeBinding.getQualifiedName()));
+		}
+		fSuperInterfacesDialogField.setElements(interfaces);
+		fSuperInterfacesDialogField.setEnabled(canBeModified);
+		fSuperInterfacesStatus= superInterfacesChanged();
+	}
+
+	/**
 	 * Adds a super interface to the end of the list and selects it if it is not in the list yet.
 	 *
 	 * @param superInterface the fully qualified type name of the interface.
@@ -1523,6 +1747,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public boolean addSuperInterface(String superInterface) {
 		return fSuperInterfacesDialogField.addElement(new InterfaceWrapper(superInterface));
+	}
+
+	/**
+	 * Adds a super interface to the end of the list and selects it if it is not in the list yet.
+	 *
+	 * @param superInterface the fully qualified type name of the interface.
+	 * @param type IType java element of the interface.
+	 * @return returns <code>true</code>if the interfaces has been added, <code>false</code>
+	 * if the interface already is in the list.
+	 * @since 3.25
+	 */
+	public boolean addSuperInterface(String superInterface, IType type) {
+		return fSuperInterfacesDialogField.addElement(new InterfaceWrapper(superInterface, type));
 	}
 
 
@@ -1939,6 +2176,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperClassStubTypeContext= null;
 
 		String sclassName= getSuperClass();
+
 		if (sclassName.length() == 0) {
 			// accept the empty field (stands for java.lang.Object)
 			return status;
@@ -1957,7 +2195,194 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		} else {
 			status.setError(""); //$NON-NLS-1$
 		}
+		fSealedSuperClassStatus= validateSealedSuperClassStatus();
+		enableSealedModifierButtonsIfRequired();
 		return status;
+	}
+
+	/**
+	 * Hook provided to get called when the super class get changed. This method validates
+	 * if the sealed super class can be extended by this type
+	 * <p>
+	 * Subclasses may extend this method to perform their own validation.
+	 * </p>
+	 *
+	 * @return the status of the validation
+	 * @since 3.25
+	 */
+	private IStatus validateSealedSuperClassStatus() {
+		StatusInfo status= new StatusInfo();
+		if (fSuperClass != null) {
+			StatusInfo validStatus= canSuperTypeBeExtended(fSuperClass);
+			if (validStatus.isError()) {
+				return validStatus;
+			}
+		}
+		return status;
+	}
+
+	private void enableSealedModifierButtonsIfRequired() {
+		if (fSealedMdfButtons != null) {
+			if (fIsSealedSupported) {
+				if (fSealedSuperClassStatus != null && fSealedSuperClassStatus.isOK()
+						&& fSealedSuperInterfacesStatus != null && fSealedSuperInterfacesStatus.isOK()
+						&& isSuperTypeSealed()) {
+					if (!this.isValidSealedFlagSelected()) {
+						fSealedMdfButtons.enableSelectionButton(NON_SEALED_INDEX, true);
+					}
+				} else {
+					setSealedModifiersButtonDefault();
+				}
+			} else {
+				setSealedModifiersButtonDefault();
+			}
+
+		}
+	}
+
+	private void setSealedModifiersButtonDefault() {
+		if (fSealedMdfButtons != null) {
+			fSealedMdfButtons.enableSelectionButton(NON_SEALED_INDEX, false);
+			fSealedMdfButtons.setSelection(NON_SEALED_INDEX, false);
+			fSealedMdfButtons.enableSelectionButton(SEALED_INDEX, true);
+			fSealedMdfButtons.setSelection(SEALED_INDEX, false);
+			fSealedMdfButtons.setSelection(0, true);
+		}
+	}
+
+	private StatusInfo canSuperTypeBeExtended(IType type) {
+		StatusInfo status= new StatusInfo();
+		IJavaProject currJavaProject= getJavaProject();
+		if (fIsSealedSupported && type != null && currJavaProject != null) {
+			try {
+				if (type.isSealed()) {
+					IJavaProject javaProject= type.getJavaProject();
+					if (JavaModelUtil.is9OrHigher(currJavaProject)) {
+						IModuleDescription projectModule= currJavaProject.getModuleDescription();
+						if (projectModule != null
+								&& !projectModule.isAutoModule()) {
+							if (!currJavaProject.equals(javaProject)) {
+								String msg= NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperClassInDifferentModule;
+								switch (fTypeKind) {
+									case INTERFACE_TYPE:
+										msg= NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentModule;
+										break;
+									case CLASS_TYPE:
+										if (type.isInterface()) {
+											msg= NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperInterfaceInDifferentModule;
+										}
+										break;
+									default:
+										break;
+								}
+								status.setError(msg);
+							}
+						} else if (fCurrPackage != null) {
+							IPackageFragment scPkgFrag= type.getPackageFragment();
+							if (!fCurrPackage.equals(scPkgFrag)) {
+								if (currJavaProject.equals(javaProject)) {
+									String msg= NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperClassInDifferentPackage;
+									switch (fTypeKind) {
+										case INTERFACE_TYPE:
+											msg= NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentPackage;
+											break;
+										case CLASS_TYPE:
+											if (type.isInterface()) {
+												msg= NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperInterfaceInDifferentPackage;
+											}
+											break;
+										default:
+											break;
+									}
+									status.setError(msg);
+								} else {
+									String msg= NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperClassInDifferentProject;
+									switch (fTypeKind) {
+										case INTERFACE_TYPE:
+											msg= NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentProject;
+											break;
+										case CLASS_TYPE:
+											if (type.isInterface()) {
+												msg= NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperInterfaceInDifferentProject;
+											}
+											break;
+										default:
+											break;
+									}
+									status.setError(msg);
+								}
+							}
+						}
+					}
+				}
+			} catch (JavaModelException e) {
+				// do nothing
+			}
+		}
+		return status;
+	}
+
+	/**
+	 * @return returns if any of the super types is sealed or not
+	 * @since 3.25
+	 */
+	protected boolean isSuperTypeSealed() {
+		boolean isSealed= false;
+		if (fIsSealedSupported && fSuperClass != null) {
+			try {
+				if (fSuperClass.isSealed()) {
+					isSealed= true;
+				}
+			} catch (JavaModelException e) {
+				// do nothing
+			}
+		}
+		if (!isSealed) {
+			List<InterfaceWrapper> interfaces= fSuperInterfacesDialogField.getElements();
+			for (InterfaceWrapper intWrap : interfaces) {
+				try {
+					IType type= intWrap.getType();
+					if (type != null && type.isSealed()) {
+						isSealed= true;
+					}
+				} catch (JavaModelException e) {
+					//do nothing
+				}
+			}
+		}
+		return isSealed;
+	}
+
+	private boolean isSuperClassSealed() {
+		boolean isSealed= false;
+		if (fIsSealedSupported && fSuperClass != null) {
+			try {
+				if (fSuperClass.isSealed()) {
+					isSealed= true;
+				}
+			} catch (JavaModelException e) {
+				// do nothing
+			}
+		}
+		return isSealed;
+	}
+
+	private boolean isValidSealedFlagSelected() {
+		boolean isEnabled= false;
+		if (fSealedMdfButtons != null) {
+			if (fSealedMdfButtons.isEnabled(SEALED_INDEX)
+					&& fSealedMdfButtons.isSelected(SEALED_INDEX)) {
+				isEnabled= true;
+			} else if (fSealedMdfButtons.isEnabled(NON_SEALED_INDEX)
+					&& fSealedMdfButtons.isSelected(NON_SEALED_INDEX)) {
+				isEnabled= true;
+			} else if (fTypeKind != INTERFACE_TYPE
+					&& fSealedMdfButtons.isEnabled(SEALED_FINAL_INDEX)
+					&& fSealedMdfButtons.isSelected(SEALED_FINAL_INDEX)) {
+				isEnabled= true;
+			}
+		}
+		return isEnabled;
 	}
 
 	private StubTypeContext getSuperClassStubTypeContext() {
@@ -1991,7 +2416,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (root != null) {
 			List<InterfaceWrapper> elements= fSuperInterfacesDialogField.getElements();
 			for (InterfaceWrapper element : elements) {
-				String intfname= element.interfaceName;
+				String intfname= element.getInterfaceName();
 				Type type= TypeContextChecker.parseSuperInterface(intfname);
 				if (type == null) {
 					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperInterfaceName, BasicElementLabels.getJavaElementName(intfname)));
@@ -2000,6 +2425,33 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (type instanceof ParameterizedType && ! JavaModelUtil.is50OrHigher(root.getJavaProject())) {
 					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_SuperInterfaceNotParameterized, BasicElementLabels.getJavaElementName(intfname)));
 					return status;
+				}
+			}
+		}
+		fSealedSuperInterfacesStatus= validateSealedSuperInterfacesStatus();
+		enableSealedModifierButtonsIfRequired();
+		return status;
+	}
+
+	/**
+	 * Hook provided to get called when the super interfaces get changed. This method validates
+	 * if the sealed super interfaces can be extended/implemented by this type
+	 * <p>
+	 * Subclasses may extend this method to perform their own validation.
+	 * </p>
+	 *
+	 * @return the status of the validation
+	 * @since 3.25
+	 */
+	protected IStatus validateSealedSuperInterfacesStatus() {
+		StatusInfo status= new StatusInfo();
+		List<InterfaceWrapper> elements= fSuperInterfacesDialogField.getElements();
+		for (InterfaceWrapper element : elements) {
+			IType eType= element.getType();
+			if (eType != null) {
+				StatusInfo validStatus= canSuperTypeBeExtended(eType);
+				if (validStatus.isError()) {
+					status= validStatus;
 				}
 			}
 		}
@@ -2033,6 +2485,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		int modifiers= getModifiers();
 		if (Flags.isFinal(modifiers) && Flags.isAbstract(modifiers)) {
 			status.setError(NewWizardMessages.NewTypeWizardPage_error_ModifiersFinalAndAbstract);
+		}
+		return status;
+	}
+
+	private IStatus sealedModifiersChanged() {
+		StatusInfo status= new StatusInfo();
+		if (isSuperTypeSealed() && !isValidSealedFlagSelected()) {
+			String msg= NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message;
+			if (fTypeKind == INTERFACE_TYPE) {
+				msg= NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedInterface_extend_superinterface_notSelected_message;
+			} else if (!isSuperClassSealed()) {
+				msg= NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message;
+			}
+			status.setError(msg);
 		}
 		return status;
 	}
@@ -2144,6 +2610,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			return (IType) dialog.getFirstResult();
 		}
 		return null;
+	}
+
+	private void setSuperClassType() {
+		if (this.fResetSuperClass) {
+			fSuperClass= null;
+			IJavaProject project= getJavaProject();
+			if (project == null) {
+				return;
+			}
+			try {
+				this.fSuperClass= project.findType(getSuperClass());
+			} catch (JavaModelException e) {
+				//do nothing
+			}
+		}
 	}
 
 	/**
@@ -2356,6 +2837,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			} else {
 				monitor.worked(1);
 			}
+
+			updateSealedSuperTypes();
 
 		} finally {
 			if (connectedCU != null) {
@@ -2808,6 +3291,100 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 	}
 
+	private ITypeBinding getCreatedTypeBinding(boolean reset) {
+		if (fCreatedTypeBinding != null && !reset)
+			return fCreatedTypeBinding;
+		if (fCreatedType != null) {
+			final ICompilationUnit cu= fCreatedType.getCompilationUnit();
+			ASTParser parser2= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+			parser2.setResolveBindings(true);
+			parser2.setSource(cu);
+			CompilationUnit unit= (CompilationUnit) parser2.createAST(new NullProgressMonitor());
+			try {
+				TypeDeclaration typeDecl= ASTNodeSearchUtil.getTypeDeclarationNode(fCreatedType, unit);
+				if (typeDecl != null) {
+					return typeDecl.resolveBinding();
+				}
+			} catch (JavaModelException e) {
+				// do nothing
+			}
+		}
+		return null;
+	}
+
+	private void updateSealedSuperClass() {
+		updateSealedSuperType(fSuperClass);
+	}
+
+	private void updateSealedSuperInterfaces() {
+		List<InterfaceWrapper> elements= fSuperInterfacesDialogField.getElements();
+		for (InterfaceWrapper element : elements) {
+			updateSealedSuperType(element.getType());
+		}
+	}
+
+	private void updateSealedSuperTypes() {
+		if (fCreatedType != null && isSuperTypeSealed()) {
+			getCreatedTypeBinding(true);
+			updateSealedSuperClass();
+			updateSealedSuperInterfaces();
+		}
+	}
+
+	private void updateSealedSuperType(IType superType) {
+		try {
+			if (superType != null
+					&& superType.isSealed() && fCreatedType != null) {
+				String typeName= getTypeNameWithoutParameters();
+				String[] names= superType.getPermittedSubtypeNames();
+				List<String> nameList= Arrays.asList(names);
+				if (!nameList.contains(typeName)) {
+					final ICompilationUnit cu= superType.getCompilationUnit();
+					IPackageFragment parent= superType.getPackageFragment();
+					IPackageFragment child= fCreatedType.getPackageFragment();
+					boolean importTobeAdded= false;
+					if (parent != null && !parent.equals(child)) {
+						importTobeAdded= true;
+					}
+					JavaModelUtil.reconcile(cu);
+					ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+					parser.setResolveBindings(true);
+					parser.setSource(cu);
+					CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(cu);
+					TypeDeclaration typeDecl= ASTNodeSearchUtil.getTypeDeclarationNode(superType, cuRewrite.getRoot());
+					if (typeDecl != null) {
+						ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+						AST ast= astRewrite.getAST();
+						Type astType= ast.newSimpleType(ast.newSimpleName(typeName));
+						astRewrite.getListRewrite(typeDecl, TypeDeclaration.PERMITS_TYPES_PROPERTY).insertLast(astType, null);
+						TextEdit tEdit= astRewrite.rewriteAST();
+						ImportRewrite importRewrite= null;
+						if (importTobeAdded) {
+							ITypeBinding typeBinding= this.getCreatedTypeBinding(false);
+							if (typeBinding != null) {
+								importRewrite= StubUtility.createImportRewrite(cu, true);
+								ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(typeDecl.getRoot(), importRewrite);
+								importRewrite.addImport(typeBinding, importRewriteContext);
+							}
+						}
+						try {
+							JavaModelUtil.applyEdit(cu, tEdit, true, new NullProgressMonitor());
+							if (importRewrite != null) {
+								TextEdit iEdit= importRewrite.rewriteImports(new NullProgressMonitor());
+								JavaModelUtil.applyEdit(cu, iEdit, true, new NullProgressMonitor());
+							}
+							cu.commitWorkingCopy(true, new NullProgressMonitor());
+						} catch (CoreException e) {
+							//do nothing
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			//do nothing
+		}
+	}
+
 
 	// ---- creation ----------------
 
@@ -2828,5 +3405,50 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				throw new InvocationTargetException(e);
 			}
 		};
+	}
+
+	private void setIsNonSealedSupported(IJavaProject project) {
+		fIsSealedSupported= (project != null && JavaModelUtil.is17OrHigher(project));
+		initOtherButtons();
+	}
+
+	/**
+	 * @return the error status based on super class
+	 * @since 3.25
+	 */
+	public IStatus getSuperClassStatus() {
+		return this.fSuperClassStatus;
+	}
+
+	/**
+	 * @return the error status based on super interface
+	 * @since 3.25
+	 */
+	public IStatus getSuperInterfaceStatus() {
+		return this.fSuperInterfacesStatus;
+	}
+
+	/**
+	 * @return the error status based on super class
+	 * @since 3.25
+	 */
+	public IStatus getSealedSuperClassStatus() {
+		return this.fSealedSuperClassStatus;
+	}
+
+	/**
+	 * @return the error status based on super interface
+	 * @since 3.25
+	 */
+	public IStatus getSealedSuperInterfaceStatus() {
+		return this.fSealedSuperInterfacesStatus;
+	}
+
+	/**
+	 * @return the error status based on super type
+	 * @since 3.25
+	 */
+	public IStatus getSealedModifierStatus() {
+		return this.fSealedModifierStatus;
 	}
 }

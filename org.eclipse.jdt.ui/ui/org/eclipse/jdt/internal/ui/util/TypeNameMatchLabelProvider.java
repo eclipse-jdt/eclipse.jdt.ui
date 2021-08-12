@@ -146,6 +146,12 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 			if (Flags.isDeprecated(modifiers)) {
 				adornmentFlags |= JavaElementImageDescriptor.DEPRECATED;
 			}
+			if (Flags.isSealed(modifiers)) {
+				adornmentFlags |= JavaElementImageDescriptor.SEALED;
+			}
+			if (Flags.isNonSealed(modifiers)) {
+				adornmentFlags |= JavaElementImageDescriptor.NON_SEALED;
+			}
 
 			return new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
 		}

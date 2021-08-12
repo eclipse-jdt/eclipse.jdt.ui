@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -47,7 +48,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * A type selection dialog providing means to open interface(s).
@@ -139,10 +139,11 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 			if (obj instanceof TypeNameMatch) {
 				accessedHistoryItem(obj);
 				TypeNameMatch type= (TypeNameMatch) obj;
-				String qualifiedName= getNameWithTypeParameters(type.getType());
+				IType ttype= type.getType();
+				String qualifiedName= getNameWithTypeParameters(ttype);
 				String message;
 
-				if (fTypeWizardPage.addSuperInterface(qualifiedName)) {
+				if (fTypeWizardPage.addSuperInterface(qualifiedName, ttype)) {
 					message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfaceadded_info, BasicElementLabels.getJavaElementName(qualifiedName));
 				} else {
 					message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfacealreadyadded_info, BasicElementLabels.getJavaElementName(qualifiedName));

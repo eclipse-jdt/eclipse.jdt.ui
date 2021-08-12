@@ -36,11 +36,13 @@ public class Java17ProjectTestSetup extends ProjectTestSetup {
 
 	public static final String PROJECT_NAME17= "TestSetupProject17";
 
+	private String projectName;
+
 	private boolean enable_preview_feature;
 
 	@Override
 	public IJavaProject getProject() {
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME17);
+		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		return JavaCore.create(project);
 	}
 
@@ -53,6 +55,12 @@ public class Java17ProjectTestSetup extends ProjectTestSetup {
 
 	public Java17ProjectTestSetup( boolean enable_preview_feature) {
 		this.enable_preview_feature= enable_preview_feature;
+		projectName= PROJECT_NAME17;
+	}
+
+	public Java17ProjectTestSetup( String projectName, boolean enable_preview_feature) {
+		this.enable_preview_feature= enable_preview_feature;
+		this.projectName= projectName;
 	}
 
 	@Override
@@ -62,7 +70,7 @@ public class Java17ProjectTestSetup extends ProjectTestSetup {
 
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
-		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME17, "bin");
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject(projectName, "bin");
 		javaProject.setRawClasspath(getDefaultClasspath(), null);
 		JavaProjectHelper.set17CompilerOptions(javaProject, enable_preview_feature);
 		return javaProject;

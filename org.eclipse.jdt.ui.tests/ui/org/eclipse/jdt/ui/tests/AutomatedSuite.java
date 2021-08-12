@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.wizardapi.ImporterTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewTypeWizardTest;
+import org.eclipse.jdt.ui.tests.wizardapi.NewTypeWizardTest17;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -55,6 +56,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 	NewJavaProjectWizardTest.class,
 	NewTypeWizardTest.class,
+	NewTypeWizardTest17.class,
 	ImporterTest.class,
 
 	PackageExplorerTests.class,

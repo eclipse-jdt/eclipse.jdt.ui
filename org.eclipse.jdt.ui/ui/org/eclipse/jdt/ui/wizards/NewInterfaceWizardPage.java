@@ -80,7 +80,9 @@ public class NewInterfaceWizardPage extends NewTypeWizardPage {
 			isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
 			fTypeNameStatus,
 			fModifierStatus,
-			fSuperInterfacesStatus
+			fSuperInterfacesStatus,
+			fSealedSuperInterfacesStatus,
+			fSealedModifierStatus
 		};
 
 		// the mode severe status will be displayed and the OK button enabled/disabled.
@@ -145,6 +147,9 @@ public class NewInterfaceWizardPage extends NewTypeWizardPage {
 		super.setVisible(visible);
 		if (visible) {
 			setFocus();
+			if (isSuperTypeSealed()) {
+				doStatusUpdate();
+			}
 		}
 	}
 

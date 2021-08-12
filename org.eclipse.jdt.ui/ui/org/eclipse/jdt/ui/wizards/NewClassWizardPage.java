@@ -118,7 +118,10 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 			fTypeNameStatus,
 			fModifierStatus,
 			fSuperClassStatus,
-			fSuperInterfacesStatus
+			fSuperInterfacesStatus,
+			fSealedSuperClassStatus,
+			fSealedSuperInterfacesStatus,
+			fSealedModifierStatus
 		};
 
 		// the mode severe status will be displayed and the OK button enabled/disabled.
@@ -186,8 +189,12 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
-		if (visible)
+		if (visible) {
 			setFocus();
+			if (isSuperTypeSealed()) {
+				doStatusUpdate();
+			}
+		}
 	}
 
 	private void createMethodStubSelectionControls(Composite composite, int nColumns) {

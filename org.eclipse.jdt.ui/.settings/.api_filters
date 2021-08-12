@@ -185,4 +185,37 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/ui/wizards/NewTypeWizardPage.java" type="org.eclipse.jdt.ui.wizards.NewTypeWizardPage">
+        <filter id="336658481">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.wizards.NewTypeWizardPage"/>
+                <message_argument value="SEALEDMODIFIERS"/>
+            </message_arguments>
+        </filter>
+        <filter id="336658481">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.wizards.NewTypeWizardPage"/>
+                <message_argument value="fSealedModifierStatus"/>
+            </message_arguments>
+        </filter>
+        <filter id="336658481">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.wizards.NewTypeWizardPage"/>
+                <message_argument value="fSealedSuperClassStatus"/>
+            </message_arguments>
+        </filter>
+        <filter id="336658481">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.wizards.NewTypeWizardPage"/>
+                <message_argument value="fSealedSuperInterfacesStatus"/>
+            </message_arguments>
+        </filter>
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="NewTypeWizardPage"/>
+                <message_argument value="isSealed()"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>

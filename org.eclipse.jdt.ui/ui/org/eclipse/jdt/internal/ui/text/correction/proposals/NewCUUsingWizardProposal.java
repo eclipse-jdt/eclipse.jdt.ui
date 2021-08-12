@@ -402,11 +402,11 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				}
 				if (type.isTopLevel() || type.isMember()) {
 					if (type.isClass() && (fTypeKind == K_CLASS)) {
-						page.setSuperClass(type.getQualifiedName(), true);
+						page.setSuperClass(type, true);
 					} else if (type.isInterface()) {
-						List<String> superInterfaces= new ArrayList<>();
-						superInterfaces.add(type.getQualifiedName());
-						page.setSuperInterfaces(superInterfaces, true);
+						List<ITypeBinding> superInterfaces= new ArrayList<>();
+						superInterfaces.add(type);
+						page.setSuperInterfacesList(superInterfaces, true);
 					}
 				}
 			}
