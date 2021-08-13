@@ -17,6 +17,7 @@ package org.eclipse.jdt.text.tests.contentassist;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Hashtable;
 
@@ -35,6 +36,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
@@ -914,6 +916,61 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			buf.append("        add(o -> r.run())\n");
 			buf.append("    }\n");
 			buf.append("    static void add(Consumer<Object> consumer) {}\n");
+			buf.append("}\n");
+			assertEquals(buf.toString(), doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+
+	@Test
+	public void testBug575377() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("class Strong {}\n");
+		buf.append("public class A {\n");
+		buf.append("    void lambda(Object o) {\n");
+		buf.append("        Runnable r = () -> ((Stron))\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "(Stron";
+
+			int offset= contents.indexOf(str) + str.length();
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+			for (IJavaCompletionProposal iJavaCompletionProposal : proposals) {
+				System.out.println(iJavaCompletionProposal);
+			}
+			assertEquals("number of proposals", 1, proposals.length);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			IJavaCompletionProposal proposal= proposals[0];
+			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
+			proposal.apply(doc);
+
+			buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("class Strong {}\n");
+			buf.append("public class A {\n");
+			buf.append("    void lambda(Object o) {\n");
+			buf.append("        Runnable r = () -> ((Strong))\n");
+			buf.append("    }\n");
 			buf.append("}\n");
 			assertEquals(buf.toString(), doc.get());
 		} finally {
