@@ -384,6 +384,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(CaseDefaultExpression node) {
+		return visit((Expression)node);
+	}
+
+	@Override
+	public void endVisit(CaseDefaultExpression node) {
+		endVisit((Expression)node);
+	}
+
+	@Override
 	public boolean visit(CastExpression node) {
 		return visit((Expression)node);
 	}
