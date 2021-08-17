@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -158,6 +158,18 @@ public interface IRefactoringProcessorIds {
 	 * </ul>
 	 */
 	String RENAME_FIELD_PROCESSOR= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
+
+	/**
+	 * Processor ID of the rename module processor
+	 * (value <code>"org.eclipse.jdt.ui.renameModuleProcessor"</code>).
+	 *
+	 * The rename module processor loads the following participants:
+	 * <ul>
+	 *   <li>participants registered for renaming <code>IModuleDescription</code>.</li>
+	 * </ul>
+	 * @since 3.24
+	 */
+	String RENAME_MODULE_PROCESSOR= "org.eclipse.jdt.ui.renameModuleProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the rename enum constant processor

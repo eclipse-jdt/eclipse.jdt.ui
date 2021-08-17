@@ -172,7 +172,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/** The types where to extract the supertype */
 	private IType[] fTypesToExtract= {};
 
-	private class FieldInfo {
+	private static class FieldInfo {
 		private ITypeBinding fieldBinding;
 		private String fieldName;
 
@@ -1338,8 +1338,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					}
 				} else {
 					rewrite= fCompilationUnitRewrites.get(unit);
-					fixConstructorsWithFinalFieldInitialization(rewrite);
 					if (rewrite != null) {
+						fixConstructorsWithFinalFieldInitialization(rewrite);
 						final CompilationUnitChange layerChange= fLayerChanges.get(unit.getPrimary());
 						final CompilationUnitChange rewriteChange= rewrite.createChange(true);
 						if (rewriteChange != null && layerChange != null) {

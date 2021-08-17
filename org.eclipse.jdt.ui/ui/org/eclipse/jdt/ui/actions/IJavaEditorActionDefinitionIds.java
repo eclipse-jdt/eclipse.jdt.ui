@@ -89,6 +89,20 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	String SELECT_LAST= "org.eclipse.jdt.ui.edit.text.java.select.last"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the edit -> raw paste
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.raw.paste"</code>).
+	 * @since 3.24
+	 */
+	String RAW_PASTE= "org.eclipse.jdt.ui.edit.text.java.raw.paste"; //$NON-NLS-1$
+
+	/**
+	 * Action handler ID of the edit -> raw paste
+	 * (value <code>"org.eclipse.jdt.ui.actions.rawPaste"</code>).
+	 * @since 3.24
+	 */
+	String RAW_PASTE_ACTION_HANDLE_ID= "org.eclipse.jdt.ui.actions.RawPaste"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the edit -> correction assist proposal action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"</code>).
 	 *

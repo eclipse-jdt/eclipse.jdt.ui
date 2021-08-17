@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -139,7 +139,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 				}
 				else {
 					if (elements.length == 1) {
-						setEnabled(RefactoringAvailabilityTester.isRenameElementAvailable(elements[0]));
+						setEnabled(RefactoringAvailabilityTester.isRenameElementAvailable(elements[0], true));
 					} else {
 						ASTNode node= javaTextSelection.resolveCoveringNode();
 						setEnabled(node instanceof SimpleName);
@@ -157,13 +157,21 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
-		if (canRunInEditor() && !isVarTypeSelection(selection))
-			doRun();
-		else
+		boolean isVarTypeSelection= isVarTypeSelection(selection);
+		if (!isVarTypeSelection && canRunInEditor())
+			doRun(true);
+		else if (!isVarTypeSelection && canBeRenamed(false)) {
+			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable_in_editor);
+		} else {
 			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable);
+		}
 	}
 
 	public void doRun() {
+		doRun(false);
+	}
+
+	public void doRun(boolean isTextSelection) {
 		RenameLinkedMode activeLinkedMode= RenameLinkedMode.getActiveLinkedMode();
 		if (activeLinkedMode != null) {
 			if (activeLinkedMode.isCaretInLinkedPosition()) {
@@ -178,7 +186,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			IJavaElement element= getJavaElementFromEditor();
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			boolean lightweight= store.getBoolean(PreferenceConstants.REFACTOR_LIGHTWEIGHT);
-			if (element != null && RefactoringAvailabilityTester.isRenameElementAvailable(element)) {
+			if (element != null && RefactoringAvailabilityTester.isRenameElementAvailable(element, isTextSelection)) {
 				run(element, lightweight);
 				return;
 			} else if (lightweight) {
@@ -199,12 +207,16 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (RenameLinkedMode.getActiveLinkedMode() != null)
 			return true;
 
+		return canBeRenamed(true);
+	}
+
+	private boolean canBeRenamed(boolean isTextSelection) {
 		try {
 			IJavaElement element= getJavaElementFromEditor();
 			if (element == null)
 				return true;
 
-			return RefactoringAvailabilityTester.isRenameElementAvailable(element);
+			return RefactoringAvailabilityTester.isRenameElementAvailable(element, isTextSelection);
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);

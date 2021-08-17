@@ -61,7 +61,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	@Override
 	public void apply(IDocument document) {
 		RenameJavaElementAction renameAction= new RenameJavaElementAction(fEditor);
-		renameAction.doRun();
+		renameAction.doRun(true);
 	}
 
 	/*

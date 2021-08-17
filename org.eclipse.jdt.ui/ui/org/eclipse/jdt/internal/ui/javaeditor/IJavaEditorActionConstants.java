@@ -46,4 +46,10 @@ public interface IJavaEditorActionConstants {
 	 * @since 3.3
 	 */
 	String COPY_QUALIFIED_NAME= "copyQualifiedName"; //$NON-NLS-1$
+
+	/**
+	 * ID of the action to paste raw text and ignore smart settings.
+	 * @since 4.21
+	 */
+	String RAW_PASTE= "rawPaste"; //$NON-NLS-1$
 }

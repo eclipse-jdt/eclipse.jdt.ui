@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - Bug 522218 - add raw paste support
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -60,6 +61,7 @@ import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
+import org.eclipse.ui.texteditor.ITextEditorExtension3.InsertMode;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -83,6 +85,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -93,6 +96,8 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  * Action for cut/copy and paste with support for adding imports on paste.
  */
 public final class ClipboardOperationAction extends TextEditorAction {
+
+	static final int RAW_PASTE= ITextOperationTarget.PASTE + 100; // raw paste
 
 	public static class ClipboardData {
 		private String fOriginHandle;
@@ -239,6 +244,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				setActionDefinitionId(IWorkbenchCommandConstants.EDIT_PASTE);
 				updateImages(IWorkbenchCommandConstants.EDIT_PASTE);
 				break;
+			case RAW_PASTE:
+				setHelpContextId(IAbstractTextEditorHelpContextIds.PASTE_ACTION);
+				setActionDefinitionId(IJavaEditorActionDefinitionIds.RAW_PASTE);
+				updateImages(IWorkbenchCommandConstants.EDIT_PASTE);
+				break;
 			default:
 				Assert.isTrue(false, "Invalid operation code"); //$NON-NLS-1$
 				break;
@@ -318,8 +328,37 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		return false;
 	}
 
+	/**
+	 * Sets the Insert Mode.
+	 *
+	 * @param insertMode to set
+	 * @since 4.21
+	 */
+	private void setInsertMode(InsertMode insertMode) {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			IEditorPart part= page.getActiveEditor();
+			if (part instanceof ITextEditorExtension3) {
+				ITextEditorExtension3 extension= (ITextEditorExtension3)part;
+				extension.setInsertMode(insertMode);
+			} else if (part != null && EditorUtility.isCompareEditorInput(part.getEditorInput())) {
+				ITextEditorExtension3 extension= part.getAdapter(ITextEditorExtension3.class);
+				if (extension != null)
+					extension.setInsertMode(insertMode);
+			}
+		}
+	}
+
 	protected void internalDoOperation() {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE) && isSmartInsertMode()) {
+		if (fOperationCode == RAW_PASTE) {
+			if (isSmartInsertMode()) {
+				setInsertMode(ITextEditorExtension3.INSERT);
+				fOperationTarget.doOperation(ITextOperationTarget.PASTE);
+				setInsertMode(ITextEditorExtension3.SMART_INSERT);
+			} else {
+				fOperationTarget.doOperation(ITextOperationTarget.PASTE);
+			}
+		} else if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE) && isSmartInsertMode()) {
 			if (fOperationCode == ITextOperationTarget.PASTE) {
 				doPasteWithImportsOperation();
 			} else {
@@ -343,7 +382,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		if (fOperationTarget == null && editor!= null && fOperationCode != -1)
 			fOperationTarget= editor.getAdapter(ITextOperationTarget.class);
 
-		boolean isEnabled= (fOperationTarget != null && fOperationTarget.canDoOperation(fOperationCode));
+		boolean isEnabled= (fOperationTarget != null &&
+				(fOperationCode == RAW_PASTE ? fOperationTarget.canDoOperation(ITextOperationTarget.PASTE) : fOperationTarget.canDoOperation(fOperationCode)));
 		setEnabled(isEnabled);
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -448,6 +448,7 @@ public interface IJavaHelpContextIds {
 	String RENAME_FIELD_WIZARD_PAGE= 									PREFIX + "rename_field_wizard_page_context"; //$NON-NLS-1$
 	String RENAME_RESOURCE_WIZARD_PAGE= 								PREFIX + "rename_resource_wizard_page_context"; //$NON-NLS-1$
 	String RENAME_JAVA_PROJECT_WIZARD_PAGE= 							PREFIX + "rename_java_project_wizard_page_context"; //$NON-NLS-1$
+	String RENAME_MODULE_WIZARD_PAGE= 									PREFIX + "rename_module_wizard_page_context"; //$NON-NLS-1$
 	String RENAME_SOURCE_FOLDER_WIZARD_PAGE= 							PREFIX + "rename_source_folder_wizard_page_context"; //$NON-NLS-1$
 	String SEF_WIZARD_PAGE= 											PREFIX + "self_encapsulate_field_wizard_page_context"; //$NON-NLS-1$
 	String USE_SUPERTYPE_WIZARD_PAGE= 									PREFIX + "use_supertype_wizard_page_context"; //$NON-NLS-1$

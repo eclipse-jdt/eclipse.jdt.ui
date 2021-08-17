@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -128,6 +128,19 @@ public class Checks {
 	public static RefactoringStatus checkFieldName(String name, IJavaElement context) {
 		return checkName(name, JavaConventionsUtil.validateFieldName(name, context));
 	}
+
+	/**
+	 * Checks if the given name is a valid Java module name.
+	 *
+	 * @param name the java module name.
+	 * @param context an {@link IJavaElement} or <code>null</code>
+	 * @return a refactoring status containing the error message if the
+	 *  name is not a valid java module name.
+	 */
+	public static RefactoringStatus checkModuleName(String name, IJavaElement context) {
+		return checkName(name, JavaConventionsUtil.validateModuleName(name, context));
+	}
+
 
 	/**
 	 * Checks if the given name is a valid Java type parameter name.

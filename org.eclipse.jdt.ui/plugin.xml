@@ -2536,6 +2536,15 @@
                icon="$nl$/icons/full/elcl16/cpyqual_menu.png"
                id="org.eclipse.jdt.ui.actions.CopyQualifiedName">
          </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.raw.paste"
+               label="%RawPaste.label"
+               retarget="true"
+               menubarPath="edit/paste"
+               icon="$nl$/icons/full/elcl16/cpyqual_menu.png"
+               id="org.eclipse.jdt.ui.actions.RawPaste">
+         </action>
+
 <!-- =========================================================================== -->
 <!-- Navigate Menu                                                               -->
 <!-- =========================================================================== -->
@@ -3573,6 +3582,12 @@
             id="org.eclipse.jdt.ui.category.refactoring">
       </category>
 <!-- edit -->
+      <command
+            name="%ActionDefinition.raw.paste.name"
+            description="%ActionDefinition.raw.paste.description"
+            categoryId="org.eclipse.ui.category.edit"
+            id="org.eclipse.jdt.ui.edit.text.java.raw.paste">
+      </command>
       <command
             name="%ActionDefinition.selectEnclosing.name"
             description="%ActionDefinition.selectEnclosing.description"
@@ -5792,6 +5807,9 @@
       <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameFieldRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.field"/>
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameModuleRefactoringContribution"
+            id="org.eclipse.jdt.ui.rename.module"/>      
       <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameJavaProjectRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.java.project"/>
