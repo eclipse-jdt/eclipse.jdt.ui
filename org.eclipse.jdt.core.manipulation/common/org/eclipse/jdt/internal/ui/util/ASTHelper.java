@@ -49,6 +49,8 @@ public class ASTHelper {
 			case ASTNode.RECORD_DECLARATION:
 			case ASTNode.INSTANCEOF_EXPRESSION:
 				return ast.apiLevel() >= JLS16;
+			case ASTNode.TYPE_PATTERN:
+				return ast.isPreviewEnabled();
 			default:
 				break;
 		}
@@ -92,6 +94,10 @@ public class ASTHelper {
 
 	public static boolean isInstanceofExpressionPatternSupported(AST ast) {
 		return isNodeTypeSupportedInAST(ast, ASTNode.INSTANCEOF_EXPRESSION);
+	}
+
+	public static boolean isPatternSupported(AST ast) {
+		return isNodeTypeSupportedInAST(ast, ASTNode.TYPE_PATTERN);
 	}
 
 }
