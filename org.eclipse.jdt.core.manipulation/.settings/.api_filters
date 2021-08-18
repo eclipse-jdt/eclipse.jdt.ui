@@ -8,4 +8,41 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ASTFlattener.java" type="org.eclipse.jdt.internal.corext.dom.ASTFlattener">
+        <filter comment="Java preview feature API" id="640712815">
+            <message_arguments>
+                <message_argument value="ASTNode"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="accept(ASTVisitor)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Java preview feature API" id="640712815">
+            <message_arguments>
+                <message_argument value="ASTNode"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="getAST()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Java preview feature API" id="640712815">
+            <message_arguments>
+                <message_argument value="GuardedPattern"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="getExpression()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Java preview feature API" id="640712815">
+            <message_arguments>
+                <message_argument value="GuardedPattern"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="getPattern()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Java preview feature API" id="640712815">
+            <message_arguments>
+                <message_argument value="TypePattern"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="getPatternVariable()"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>

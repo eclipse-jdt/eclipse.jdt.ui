@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -353,6 +357,14 @@ public class ASTFlattener extends GenericVisitor {
 			node.getLabel().accept(this);
 		}
 		this.fBuffer.append(";");//$NON-NLS-1$
+		return false;
+	}
+
+	@Override
+	public boolean visit(CaseDefaultExpression node) {
+		if (ASTHelper.isPatternSupported(node.getAST())) {
+			this.fBuffer.append("default");//$NON-NLS-1$
+		}
 		return false;
 	}
 
@@ -724,6 +736,16 @@ public class ASTFlattener extends GenericVisitor {
 		}
 		this.fBuffer.append(") ");//$NON-NLS-1$
 		node.getBody().accept(this);
+		return false;
+	}
+
+	@Override
+	public boolean visit(GuardedPattern node) {
+		if (ASTHelper.isPatternSupported(node.getAST())) {
+			node.getPattern().accept(this);
+			this.fBuffer.append(" && ");//$NON-NLS-1$
+			node.getExpression().accept(this);
+		}
 		return false;
 	}
 
@@ -1179,6 +1201,14 @@ public class ASTFlattener extends GenericVisitor {
 		return false;
 	}
 
+	@Override
+	public boolean visit(NullPattern node) {
+		if (ASTHelper.isPatternSupported(node.getAST())) {
+			this.fBuffer.append("null");//$NON-NLS-1$
+		}
+		return false;
+	}
+
 	/*
 	 * @see ASTVisitor#visit(NumberLiteral)
 	 */
@@ -1578,7 +1608,7 @@ public class ASTFlattener extends GenericVisitor {
 	@Override
 	public boolean visit(SwitchCase node) {
 		if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(node.getAST())) {
-			if (node.isDefault()) {
+			if (node.isDefault() && !isCaseDefaultExpression(node)) {
 				this.fBuffer.append("default");//$NON-NLS-1$
 				this.fBuffer.append(node.isSwitchLabeledRule() ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
 			} else {
@@ -1591,13 +1621,20 @@ public class ASTFlattener extends GenericVisitor {
 				}
 			}
 		} else {
-			if (node.isDefault()) {
+			if (node.isDefault() && !isCaseDefaultExpression(node)) {
 				this.fBuffer.append("default :\n");//$NON-NLS-1$
 			} else {
 				this.fBuffer.append("case ");//$NON-NLS-1$
 				node.getExpression().accept(this);
 				this.fBuffer.append(":\n");//$NON-NLS-1$
 			}
+		}
+		return false;
+	}
+
+	private boolean isCaseDefaultExpression(SwitchCase node) {
+		if (node.expressions() != null && node.expressions().size() == 1 && node.expressions().get(0) instanceof CaseDefaultExpression) {
+			return true;
 		}
 		return false;
 	}
@@ -1897,6 +1934,14 @@ public class ASTFlattener extends GenericVisitor {
 					this.fBuffer.append(" & ");//$NON-NLS-1$
 				}
 			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean visit(TypePattern node) {
+		if (ASTHelper.isPatternSupported(node.getAST())) {
+			node.getPatternVariable().accept(this);
 		}
 		return false;
 	}
