@@ -1240,6 +1240,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		scroll.setContent(composite);
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
+		scroll.setShowFocusedControl(true);
 		sizeUpdater= new Runnable() {
 
 			@Override
