@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -412,11 +413,53 @@ public final class JavaUI {
 			boolean multipleSelection, boolean removeDuplicates, String filter) {
 
 		int flag= removeDuplicates ? PackageSelectionDialog.F_REMOVE_DUPLICATES : 0;
-		PackageSelectionDialog dialog= new PackageSelectionDialog(parent, context, flag, scope);
+		return createPackageDialog(parent, context, scope, multipleSelection, flag, filter);
+	}
+
+	/**
+	 * Creates a selection dialog that lists all packages of the given Java search scope.
+	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
+	 * and subsequently extracting the selected package (of type
+	 * <code>IPackageFragment</code>) via <code>SelectionDialog.getResult</code>.
+	 *
+	 * @param parent the parent shell of the dialog to be created
+	 * @param context the runnable context to run the search in
+	 * @param scope the scope defining the available packages.
+	 * @param multipleSelection true if multiple selection is allowed
+	 * @param flags a combination of <code>PackageSelectionDialog.F_REMOVE_DUPLICATES</code>, <code>PackageSelectionDialog.F_SHOW_PARENTS</code>,
+	 *  <code>PackageSelectionDialog.F_HIDE_DEFAULT_PACKAGE</code> and  <code>PackageSelectionDialog.F_HIDE_EMPTY_INNER</code>
+	 * @param filter the initial pattern to filter the set of packages. For example "com" shows
+	 * all packages starting with "com". The meta character '?' representing any character and
+	 * '*' representing any string are supported. Clients can pass an empty string if no filtering
+	 * is required.
+	 * @return a new selection dialog
+	 *
+	 * @since 3.26
+	 */
+	public static SelectionDialog createPackageDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, boolean multipleSelection, int flags, String filter) {
+		PackageSelectionDialog dialog= new PackageSelectionDialog(parent, context, flags, scope);
 		dialog.setFilter(filter);
 		dialog.setIgnoreCase(false);
 		dialog.setMultipleSelection(multipleSelection);
 		return dialog;
+	}
+
+	/**
+	 * Creates a selection dialog that lists all packages of all the Java projects.
+	 *
+	 * @since 3.26
+	 * @param shell the parent shell of the dialog to be created
+	 * @param multipleSelection true if multiple selection is allowed
+	 * @param flags a combination of <code>PackageSelectionDialog.F_REMOVE_DUPLICATES</code>, <code>PackageSelectionDialog.F_SHOW_PARENTS</code>,
+	 *  <code>PackageSelectionDialog.F_HIDE_DEFAULT_PACKAGE</code> and  <code>PackageSelectionDialog.F_HIDE_EMPTY_INNER</code>
+	 * @param filter the initial pattern to filter the set of packages. For example "com" shows
+	 * all packages starting with "com". The meta character '?' representing any character and
+	 * '*' representing any string are supported. Clients can pass an empty string if no filtering
+	 * is required.
+	 * @return a new selection dialog
+	 */
+	public static SelectionDialog createPackageDialog(Shell shell, boolean multipleSelection, int flags, String filter) {
+		return createPackageDialog(shell, PlatformUI.getWorkbench().getProgressService(), SearchEngine.createWorkspaceScope(), multipleSelection, flags, filter);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.junit;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -174,8 +173,8 @@ public class JUnitPreferencesConstants {
 	 *
 	 * @return list
 	 */
-	public static List<String> createDefaultStackFiltersList() {
-		return Arrays.asList(fgDefaultFilterPatterns);
+	public static String[] createDefaultStackFiltersList() {
+		return fgDefaultFilterPatterns;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,12 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -31,35 +27,24 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.filtertable.FilterManager;
+import org.eclipse.jdt.internal.ui.filtertable.JavaFilterTable;
+import org.eclipse.jdt.internal.ui.filtertable.JavaFilterTable.ButtonLabel;
+import org.eclipse.jdt.internal.ui.filtertable.JavaFilterTable.FilterTableConfig;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 /*
@@ -72,61 +57,9 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	private static final String PREF_FILTER_ENABLED= PreferenceConstants.TYPEFILTER_ENABLED;
 	private static final String PREF_FILTER_DISABLED= PreferenceConstants.TYPEFILTER_DISABLED;
 
-	private static String[] unpackOrderList(String str) {
-		StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
-		int nTokens= tok.countTokens();
-		String[] res= new String[nTokens];
-		for (int i= 0; i < nTokens; i++) {
-			res[i]= tok.nextToken();
-		}
-		return res;
-	}
+	private static final String ITEM_SEPARATOR = ";"; //$NON-NLS-1$
 
-	private static String packOrderList(List<String> orderList) {
-		StringBuilder buf= new StringBuilder();
-		for (String element : orderList) {
-			buf.append(element);
-			buf.append(';');
-		}
-		return buf.toString();
-	}
-
-	private class TypeFilterAdapter implements IListAdapter<String>, IDialogFieldListener {
-
-		private boolean canEdit(ListDialogField<String> field) {
-			return field.getSelectedElements().size() == 1;
-		}
-
-        @Override
-		public void customButtonPressed(ListDialogField<String> field, int index) {
-        	doButtonPressed(index);
-        }
-
-        @Override
-		public void selectionChanged(ListDialogField<String> field) {
-			fFilterListField.enableButton(IDX_EDIT, canEdit(field));
-        }
-
-        @Override
-		public void dialogFieldChanged(DialogField field) {
-        }
-
-        @Override
-		public void doubleClicked(ListDialogField<String> field) {
-        	if (canEdit(field)) {
-				doButtonPressed(IDX_EDIT);
-        	}
-        }
-	}
-
-	private static final int IDX_ADD= 0;
-	private static final int IDX_ADD_PACKAGE= 1;
-	private static final int IDX_EDIT= 2;
-	private static final int IDX_REMOVE= 3;
-	private static final int IDX_SELECT= 5;
-	private static final int IDX_DESELECT= 6;
-
-	private CheckedListDialogField<String> fFilterListField;
+	private JavaFilterTable fFilterTable;
 	private SelectionButtonDialogField fHideForbiddenField;
 	private SelectionButtonDialogField fHideDiscouragedField;
 
@@ -135,26 +68,21 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(PreferencesMessages.TypeFilterPreferencePage_description);
 
-		String[] buttonLabels= new String[] {
-			PreferencesMessages.TypeFilterPreferencePage_add_button,
-			PreferencesMessages.TypeFilterPreferencePage_addpackage_button,
-			PreferencesMessages.TypeFilterPreferencePage_edit_button,
-			PreferencesMessages.TypeFilterPreferencePage_remove_button,
-			/* 4 */  null,
-			PreferencesMessages.TypeFilterPreferencePage_selectall_button,
-			PreferencesMessages.TypeFilterPreferencePage_deselectall_button,
-		};
-
-		TypeFilterAdapter adapter= new TypeFilterAdapter();
-
-		fFilterListField= new CheckedListDialogField<>(adapter, buttonLabels, new LabelProvider());
-		fFilterListField.setDialogFieldListener(adapter);
-		fFilterListField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_list_label);
-		fFilterListField.setCheckAllButtonIndex(IDX_SELECT);
-		fFilterListField.setUncheckAllButtonIndex(IDX_DESELECT);
-		fFilterListField.setRemoveButtonIndex(IDX_REMOVE);
-
-		fFilterListField.enableButton(IDX_EDIT, false);
+		fFilterTable= new JavaFilterTable(this,
+				new FilterManager(PREF_FILTER_ENABLED, PREF_FILTER_DISABLED, ITEM_SEPARATOR),
+				new FilterTableConfig()
+						.setLabelText(PreferencesMessages.TypeFilterPreferencePage_list_label)
+						.setAddFilter(new ButtonLabel(PreferencesMessages.TypeFilterPreferencePage_add_button))
+						.setEditFilter(new ButtonLabel(PreferencesMessages.TypeFilterPreferencePage_edit_button))
+						.setAddPackage(new ButtonLabel(PreferencesMessages.TypeFilterPreferencePage_addpackage_button))
+						.setRemove(new ButtonLabel(PreferencesMessages.TypeFilterPreferencePage_remove_button))
+						.setSelectAll(new ButtonLabel(PreferencesMessages.TypeFilterPreferencePage_selectall_button))
+						.setDeselectAll(new ButtonLabel(PreferencesMessages.TypeFilterPreferencePage_deselectall_button))
+						.setAddTypeDialog(new JavaFilterTable.DialogLabels(PreferencesMessages.TypeFilterInputDialog_title, PreferencesMessages.TypeFilterInputDialog_message))
+						.setAddPackageDialog(new JavaFilterTable.DialogLabels(PreferencesMessages.TypeFilterPreferencePage_choosepackage_label,
+								PreferencesMessages.TypeFilterPreferencePage_choosepackage_description))
+						.setHelpContextId(IJavaHelpContextIds.TYPE_FILTER_PREFERENCE_PAGE)
+						.setShowParents(true));
 
 		fHideForbiddenField= new SelectionButtonDialogField(SWT.CHECK);
 		fHideForbiddenField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_hideForbidden_label);
@@ -188,12 +116,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 
 		composite.setLayout(layout);
 
-		fFilterListField.doFillIntoGrid(composite, 3);
-		LayoutUtil.setHorizontalSpan(fFilterListField.getLabelControl(null), 2);
-		LayoutUtil.setWidthHint(fFilterListField.getLabelControl(null), convertWidthInCharsToPixels(40));
-		LayoutUtil.setHorizontalGrabbing(fFilterListField.getListControl(null));
-
-		fFilterListField.getTableViewer().setComparator(new ViewerComparator());
+		fFilterTable.createTable(composite);
 
 		Label spacer= new Label(composite, SWT.LEFT );
 		GridData gd= new GridData(SWT.DEFAULT, convertHeightInCharsToPixels(1) / 2);
@@ -226,20 +149,9 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	}
 
 	private void initialize(boolean fromDefault) {
-		IPreferenceStore store= getPreferenceStore();
-
-		String enabled= fromDefault ? store.getDefaultString(PREF_FILTER_ENABLED) : store.getString(PREF_FILTER_ENABLED);
-		String disabled= fromDefault ? store.getDefaultString(PREF_FILTER_DISABLED) : store.getString(PREF_FILTER_DISABLED);
-
-		ArrayList<String> res= new ArrayList<>();
-
-		String[] enabledEntries= unpackOrderList(enabled);
-		res.addAll(Arrays.asList(enabledEntries));
-		String[] disabledEntries= unpackOrderList(disabled);
-		res.addAll(Arrays.asList(disabledEntries));
-
-		fFilterListField.setElements(res);
-		fFilterListField.setCheckedElements(Arrays.asList(enabledEntries));
+		if (fromDefault) {
+			fFilterTable.performDefaults();
+		}
 
 		boolean hideForbidden= getJDTCoreOption(JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK, fromDefault);
 		fHideForbiddenField.setSelection(hideForbidden);
@@ -251,67 +163,6 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		Object value= fromDefault ? JavaCore.getDefaultOptions().get(option) : JavaCore.getOption(option);
 		return JavaCore.ENABLED.equals(value);
 	}
-
-	private void doButtonPressed(int index) {
-		switch (index) {
-			case IDX_ADD:
-				// add new
-				TypeFilterInputDialog dialog= new TypeFilterInputDialog(getShell(), fFilterListField.getElements());
-				if (dialog.open() == Window.OK) {
-					String res= (String) dialog.getResult();
-					fFilterListField.addElement(res);
-					fFilterListField.setChecked(res, true);
-				}
-				break;
-			case IDX_ADD_PACKAGE:
-				// add packages
-				String[] res= choosePackage();
-				if (res != null) {
-					fFilterListField.addElements(Arrays.asList(res));
-					for (String re : res) {
-						fFilterListField.setChecked(re, true);
-					}
-				}
-				break;
-			case IDX_EDIT:
-				// edit
-				List<String> selected= fFilterListField.getSelectedElements();
-				if (selected.isEmpty()) {
-					return;
-				}
-				String editedEntry= selected.get(0);
-				List<String> existing= fFilterListField.getElements();
-				existing.remove(editedEntry);
-				dialog= new TypeFilterInputDialog(getShell(), existing);
-				dialog.setInitialString(editedEntry);
-				if (dialog.open() == Window.OK) {
-					fFilterListField.replaceElement(editedEntry, (String) dialog.getResult());
-				}
-				break;
-			default:
-				break;
-		}
-	}
-
-	private String[] choosePackage() {
-		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-		int flags= PackageSelectionDialog.F_SHOW_PARENTS | PackageSelectionDialog.F_HIDE_DEFAULT_PACKAGE | PackageSelectionDialog.F_REMOVE_DUPLICATES;
-		PackageSelectionDialog dialog = new PackageSelectionDialog(getShell(), context, flags , scope);
-		dialog.setTitle(PreferencesMessages.TypeFilterPreferencePage_choosepackage_label);
-		dialog.setMessage(PreferencesMessages.TypeFilterPreferencePage_choosepackage_description);
-		dialog.setMultipleSelection(true);
-		if (dialog.open() == IDialogConstants.OK_ID) {
-			Object[] fragments= dialog.getResult();
-			String[] res= new String[fragments.length];
-			for (int i= 0; i < res.length; i++) {
-				res[i]= ((IPackageFragment) fragments[i]).getElementName() + ".*"; //$NON-NLS-1$
-			}
-			return res;
-		}
-		return null;
-	}
-
 
 	@Override
 	public void init(IWorkbench workbench) {
@@ -327,7 +178,6 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		super.performDefaults();
     }
 
-
     /*
      * @see org.eclipse.jface.preference.IPreferencePage#performOk()
      */
@@ -335,12 +185,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	public boolean performOk() {
   		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 
-  		List<String> checked= fFilterListField.getCheckedElements();
-  		List<String> unchecked= fFilterListField.getElements();
-  		unchecked.removeAll(checked);
-
-  		prefs.setValue(PREF_FILTER_ENABLED, packOrderList(checked));
-  		prefs.setValue(PREF_FILTER_DISABLED, packOrderList(unchecked));
+		fFilterTable.performOk(prefs);
 		JavaPlugin.flushInstanceScope();
 
 		Hashtable<String, String> coreOptions= JavaCore.getOptions();
@@ -353,7 +198,5 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
         return true;
     }
 
-
 }
-
 

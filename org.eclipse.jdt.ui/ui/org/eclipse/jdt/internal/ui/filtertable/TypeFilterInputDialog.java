@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,8 +10,10 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ * Note:
+ *     The class moved from the org.eclipse.jdt.internal.ui.preferences package.
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.preferences;
+package org.eclipse.jdt.internal.ui.filtertable;
 
 import java.util.List;
 
@@ -40,10 +42,10 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -54,7 +56,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 /**
  * Dialog to enter a new entry in the type filter preference page.
  */
-public class TypeFilterInputDialog extends StatusDialog {
+class TypeFilterInputDialog extends StatusDialog {
 
 	private class TypeFilterInputAdapter implements IDialogFieldListener, IStringButtonAdapter {
 		/*
@@ -75,9 +77,11 @@ public class TypeFilterInputDialog extends StatusDialog {
 
 	private StringButtonDialogField fNameDialogField;
 	private List<String> fExistingEntries;
+	private final String helpContextId;
 
-	public TypeFilterInputDialog(Shell parent, List<String> existingEntries) {
+	public TypeFilterInputDialog(Shell parent, List<String> existingEntries, String helpContextId) {
 		super(parent);
+		this.helpContextId = helpContextId;
 
 		fExistingEntries= existingEntries;
 
@@ -133,7 +137,7 @@ public class TypeFilterInputDialog extends StatusDialog {
 		dialog.setFilter(fNameDialogField.getText());
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			IPackageFragment res= (IPackageFragment) dialog.getFirstResult();
-			fNameDialogField.setText(res.getElementName() + "*"); //$NON-NLS-1$
+			fNameDialogField.setText(res.getElementName() + ".*"); //$NON-NLS-1$
 		}
 	}
 
@@ -162,6 +166,6 @@ public class TypeFilterInputDialog extends StatusDialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.TYPE_FILTER_PREFERENCE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, helpContextId);
 	}
 }

@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.ui; singleton:=true
-Bundle-Version: 3.25.100.qualifier
+Bundle-Version: 3.26.0.qualifier
 Bundle-Activator: org.eclipse.jdt.internal.ui.JavaPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
@@ -45,6 +45,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.ui.dialogs;x-friends:="org.eclipse.jdt.apt.ui,org.eclipse.jdt.junit",
  org.eclipse.jdt.internal.ui.dnd;x-internal:=true,
  org.eclipse.jdt.internal.ui.filters;x-internal:=true,
+ org.eclipse.jdt.internal.ui.filtertable;x-friends:="org.eclipse.jdt.junit,org.eclipse.jdt.debug.ui",
  org.eclipse.jdt.internal.ui.fix;x-internal:=true,
  org.eclipse.jdt.internal.ui.infoviews;x-internal:=true,
  org.eclipse.jdt.internal.ui.jarimport;x-internal:=true,
@@ -133,7 +134,7 @@ Require-Bundle:
  org.eclipse.ui.forms;bundle-version="[3.4.0,4.0.0)",
  org.eclipse.ui.navigator;bundle-version="[3.3.200,4.0.0)",
  org.eclipse.ui.navigator.resources;bundle-version="[3.4.0,4.0.0)",
- org.eclipse.jdt.core.manipulation;bundle-version="[1.15.100,2.0.0)",
+ org.eclipse.jdt.core.manipulation;bundle-version="[1.15.200,2.0.0)",
  com.ibm.icu;bundle-version="4.4.2",
  org.eclipse.equinox.bidi;bundle-version="[0.10.0,2.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
