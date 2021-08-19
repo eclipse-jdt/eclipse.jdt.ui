@@ -206,7 +206,12 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 			}
 		}
 		IType type= (IType)fTypeBinding.getJavaElement();
-		IField[] allFields= type.getFields();
+		final IField[] allFields;
+		if (type.isRecord()) {
+			allFields= type.getRecordComponents();
+		} else {
+			allFields= type.getFields();
+		}
 		fFields= new ArrayList<>();
 		populateMembers(fFields, allFields, fieldsToBindings);
 		fSelectedFields= new ArrayList<>();
