@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,12 +14,15 @@
 package org.eclipse.jdt.internal.ui;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -207,6 +210,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	private WorkingCopyManager fWorkingCopyManager;
 
 	private static final String CODE_ASSIST_MIGRATED= "code_assist_migrated"; //$NON-NLS-1$
+
+	private static final String TYPEFILTER_MIGRATED= "typefilter_migrated"; //$NON-NLS-1$
 
 	/**
 	 * @deprecated to avoid deprecation warning
@@ -434,6 +439,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		JavaManipulation.setCodeTemplateStore(getCodeTemplateStore());
 		JavaManipulation.setCodeTemplateContextRegistry(getCodeTemplateContextRegistry());
 		disableNewCodeAssistCategoryPreferences();
+		setTypeFilterPreferences();
 	}
 
 	private void createOrUpdateWorkingSet(String name, String oldname, String label, final String id) {
@@ -1099,6 +1105,86 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		String key= CODE_ASSIST_MIGRATED + "_" + id; //$NON-NLS-1$
 		IEclipsePreferences preferences= InstanceScope.INSTANCE.getNode(JavaPlugin.getPluginId());
 		preferences.putBoolean(key, true);
+		try {
+			preferences.flush();
+		} catch (BackingStoreException e) {
+			JavaPlugin.log(e);
+		}
+	}
+
+	/**
+	 * Add the new default type filters in old workspaces that already have non-default type
+	 * filters. Only do this once, so that users have a way to opt-out if they don't want the new
+	 * filters.
+	 */
+	private void setTypeFilterPreferences() {
+		Set<String> enabledFiltersToAdd= new LinkedHashSet<>();
+		enabledFiltersToAdd.add("com.sun.*"); //$NON-NLS-1$
+		enabledFiltersToAdd.add("sun.*"); //$NON-NLS-1$
+		enabledFiltersToAdd.add("jdk.*"); //$NON-NLS-1$
+		enabledFiltersToAdd.add("org.graalvm.*"); //$NON-NLS-1$
+		enabledFiltersToAdd.add("java.awt.*"); //$NON-NLS-1$
+		enabledFiltersToAdd.add("io.micrometer.shaded.*"); //$NON-NLS-1$
+
+		Set<String> disabledFiltersToAdd= new LinkedHashSet<>();
+		disabledFiltersToAdd.add("java.rmi.*"); //$NON-NLS-1$
+
+		// default value - enabled
+		Set<String> defaultEnabled= new LinkedHashSet<>();
+		String defaultEnabledString= PreferenceConstants.getPreferenceStore().getDefaultString(PreferenceConstants.TYPEFILTER_ENABLED);
+		defaultEnabled.addAll(Arrays.asList(defaultEnabledString.split(";"))); //$NON-NLS-1$
+		defaultEnabled.addAll(enabledFiltersToAdd);
+		String newDefaultEnabledString= defaultEnabled.stream().collect(Collectors.joining(";")); //$NON-NLS-1$
+		PreferenceConstants.getPreferenceStore().setDefault(PreferenceConstants.TYPEFILTER_ENABLED, newDefaultEnabledString);
+
+		// default value - disabled
+		Set<String> defaultDisabled= new LinkedHashSet<>();
+		String defaultDisabledString= PreferenceConstants.getPreferenceStore().getDefaultString(PreferenceConstants.TYPEFILTER_DISABLED);
+		defaultDisabled.addAll(Arrays.asList(defaultDisabledString.split(";"))); //$NON-NLS-1$
+		defaultDisabled.addAll(disabledFiltersToAdd);
+		String newDefaultDisabledString= defaultDisabled.stream().collect(Collectors.joining(";")); //$NON-NLS-1$
+		PreferenceConstants.getPreferenceStore().setDefault(PreferenceConstants.TYPEFILTER_DISABLED, newDefaultDisabledString);
+
+		if (isTypeFilterMigrated()) {
+			return;
+		}
+
+		// current values
+		Set<String> currentEnabled= new LinkedHashSet<>();
+		String currentEnabledString= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.TYPEFILTER_ENABLED);
+		currentEnabled.addAll(Arrays.asList(currentEnabledString.split(";"))); //$NON-NLS-1$
+
+		Set<String> currentDisabled= new LinkedHashSet<>();
+		String currentDisabledString= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.TYPEFILTER_DISABLED);
+		currentDisabled.addAll(Arrays.asList(currentDisabledString.split(";"))); //$NON-NLS-1$
+
+		enabledFiltersToAdd.removeAll(currentEnabled);
+		enabledFiltersToAdd.removeAll(currentDisabled);
+
+		disabledFiltersToAdd.removeAll(currentEnabled);
+		disabledFiltersToAdd.removeAll(currentDisabled);
+
+		if (!enabledFiltersToAdd.isEmpty()) {
+			String newEnabledString= currentEnabledString + ";" + enabledFiltersToAdd.stream().collect(Collectors.joining(";")); //$NON-NLS-1$ //$NON-NLS-2$
+			PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.TYPEFILTER_ENABLED, newEnabledString);
+		}
+
+		if (!disabledFiltersToAdd.isEmpty()) {
+			String newDisabledString= currentDisabledString + ";" + disabledFiltersToAdd.stream().collect(Collectors.joining(";")); //$NON-NLS-1$ //$NON-NLS-2$
+			PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.TYPEFILTER_DISABLED, newDisabledString);
+		}
+
+		// set as migrated
+		setTypeFilterMigrated();
+	}
+
+	private boolean isTypeFilterMigrated() {
+		return Platform.getPreferencesService().getBoolean(JavaPlugin.getPluginId(), TYPEFILTER_MIGRATED, false, null);
+	}
+
+	private void setTypeFilterMigrated() {
+		IEclipsePreferences preferences= InstanceScope.INSTANCE.getNode(JavaPlugin.getPluginId());
+		preferences.putBoolean(TYPEFILTER_MIGRATED, true);
 		try {
 			preferences.flush();
 		} catch (BackingStoreException e) {
