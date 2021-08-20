@@ -30,7 +30,7 @@ import org.eclipse.jface.text.TextUtilities;
  */
 public class PartitionDoubleClickSelector extends DefaultTextDoubleClickStrategy {
 
-	private String fPartitioning;
+	protected final String fPartitioning;
 
 	int fLeftBorder;
 	int fRightBorder;

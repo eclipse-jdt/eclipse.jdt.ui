@@ -93,6 +93,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaMultiLineStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavadocDoubleClickStrategy;
 import org.eclipse.jdt.internal.ui.text.java.PartitionDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
@@ -177,6 +178,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 */
 	private JavaDoubleClickSelector fJavaDoubleClickSelector;
 
+	private JavaStringDoubleClickStrategy fJavaStringDoubleClickStrategy;
+
+	private JavaStringDoubleClickStrategy fJavaTextBlockDoubleClickStrategy;
 
 	/**
 	 * Creates a new Java source viewer configuration for viewers in the given editor
@@ -541,9 +545,17 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 					return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
 				case IJavaPartitions.JAVA_STRING:
 				case IJavaPartitions.JAVA_CHARACTER:
-					return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 1, 1);
+					if (fJavaStringDoubleClickStrategy == null) {
+						fJavaStringDoubleClickStrategy= new JavaStringDoubleClickStrategy(getConfiguredDocumentPartitioning(sourceViewer), 1, 1);
+						fJavaStringDoubleClickStrategy.setSourceVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
+					}
+					return fJavaStringDoubleClickStrategy;
 				case IJavaPartitions.JAVA_MULTI_LINE_STRING:
-					return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 3, 3, 3);
+					if (fJavaTextBlockDoubleClickStrategy == null) {
+						fJavaTextBlockDoubleClickStrategy= new JavaStringDoubleClickStrategy(getConfiguredDocumentPartitioning(sourceViewer), 3, 3, 3);
+						fJavaTextBlockDoubleClickStrategy.setSourceVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
+					}
+					return fJavaTextBlockDoubleClickStrategy;
 				default:
 					break;
 			}
@@ -942,9 +954,17 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			fStringScanner.adaptToPreferenceChange(event);
 		if (fJavaDocScanner.affectsBehavior(event))
 			fJavaDocScanner.adaptToPreferenceChange(event);
-		if (fJavaDoubleClickSelector != null && JavaCore.COMPILER_SOURCE.equals(event.getProperty()))
-			if (event.getNewValue() instanceof String)
+		if (JavaCore.COMPILER_SOURCE.equals(event.getProperty()) && event.getNewValue() instanceof String) {
+			if (fJavaDoubleClickSelector != null) {
 				fJavaDoubleClickSelector.setSourceVersion((String) event.getNewValue());
+			}
+			if (fJavaStringDoubleClickStrategy != null) {
+				fJavaStringDoubleClickStrategy.setSourceVersion((String) event.getNewValue());
+			}
+			if (fJavaTextBlockDoubleClickStrategy != null) {
+				fJavaTextBlockDoubleClickStrategy.setSourceVersion((String) event.getNewValue());
+			}
+		}
 	}
 
 	/*
