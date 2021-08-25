@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -46,8 +47,26 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 /**
  * A fix that replaces (X && Y) || (X && Z) by (X && (Y || Z)):
  * <ul>
- * <li>The operands must be passive and primitive.</li>
+ * <li>The operators can be lazy or eager,</li>
+ * <li>The factor operand must be passive and primitive,</li>
+ * <li>An operand can alter the expression if it's still at the very start of the expression,</li>
+ * <li>An operand can alter the expression if it's still at the very end of an eager expression.</li>
  * </ul>
+ *
+ * Truth table:
+ * <pre>
+   -------------------------------------------------------------------------------------------
+   | a | b | c | (a && b) || (a && c) | a && (b || c) | (a || b) && (a || c) | a || (b && c) |
+   | 0 | 0 | 0 |                    0 |             0 |                    0 |             0 |
+   | 0 | 0 | 1 |                    0 |             0 |                    0 |             0 |
+   | 0 | 1 | 0 |                    0 |             0 |                    0 |             0 |
+   | 0 | 1 | 1 |                    0 |             0 |                    1 |             1 |
+   | 1 | 0 | 0 |                    0 |             0 |                    1 |             1 |
+   | 1 | 0 | 1 |                    1 |             1 |                    1 |             1 |
+   | 1 | 1 | 0 |                    1 |             1 |                    1 |             1 |
+   | 1 | 1 | 1 |                    1 |             1 |                    1 |             1 |
+   -------------------------------------------------------------------------------------------
+   </pre>
  */
 public class OperandFactorizationCleanUp extends AbstractMultiFix {
 	public OperandFactorizationCleanUp() {
@@ -76,10 +95,10 @@ public class OperandFactorizationCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.OPERAND_FACTORIZATION)) {
-			return "boolean newBoolean = (repeatedBoolean && (isValid || isActive));\n"; //$NON-NLS-1$
+			return "boolean newBoolean = (repeatedExpression && (thenExpression || elseExpression));\n"; //$NON-NLS-1$
 		}
 
-		return "boolean newBoolean = repeatedBoolean && isValid || repeatedBoolean && isActive;\n"; //$NON-NLS-1$
+		return "boolean newBoolean = repeatedExpression && thenExpression || repeatedExpression && elseExpression;\n"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -94,7 +113,7 @@ public class OperandFactorizationCleanUp extends AbstractMultiFix {
 			@Override
 			public boolean visit(final InfixExpression visited) {
 				if (!visited.hasExtendedOperands()
-						&& ASTNodes.hasOperator(visited, InfixExpression.Operator.CONDITIONAL_OR, InfixExpression.Operator.OR)) {
+						&& ASTNodes.hasOperator(visited, InfixExpression.Operator.CONDITIONAL_OR, InfixExpression.Operator.CONDITIONAL_AND, InfixExpression.Operator.OR, InfixExpression.Operator.AND)) {
 					InfixExpression firstCondition= ASTNodes.as(visited.getLeftOperand(), InfixExpression.class);
 					InfixExpression secondCondition= ASTNodes.as(visited.getRightOperand(), InfixExpression.class);
 
@@ -102,44 +121,70 @@ public class OperandFactorizationCleanUp extends AbstractMultiFix {
 							&& secondCondition != null
 							&& !firstCondition.hasExtendedOperands()
 							&& !secondCondition.hasExtendedOperands()
-							&& ASTNodes.hasOperator(firstCondition, InfixExpression.Operator.CONDITIONAL_AND, InfixExpression.Operator.AND)
-							&& ASTNodes.hasOperator(secondCondition, InfixExpression.Operator.CONDITIONAL_AND, InfixExpression.Operator.AND)
-							&& ASTNodes.hasType(firstCondition.getLeftOperand(), boolean.class.getCanonicalName(), int.class.getCanonicalName(), long.class.getCanonicalName(),
-									short.class.getCanonicalName(), char.class.getCanonicalName(), byte.class.getCanonicalName())
-							&& ASTNodes.hasType(firstCondition.getRightOperand(), boolean.class.getCanonicalName(), int.class.getCanonicalName(), long.class.getCanonicalName(),
-									short.class.getCanonicalName(), char.class.getCanonicalName(), byte.class.getCanonicalName())
-							&& ASTNodes.hasType(secondCondition.getLeftOperand(), boolean.class.getCanonicalName(), int.class.getCanonicalName(), long.class.getCanonicalName(),
-									short.class.getCanonicalName(), char.class.getCanonicalName(), byte.class.getCanonicalName())
-							&& ASTNodes.hasType(secondCondition.getRightOperand(), boolean.class.getCanonicalName(), int.class.getCanonicalName(), long.class.getCanonicalName(),
-									short.class.getCanonicalName(), char.class.getCanonicalName(), byte.class.getCanonicalName())
-							&& ASTNodes.isPassiveWithoutFallingThrough(firstCondition.getLeftOperand())
-							&& ASTNodes.isPassiveWithoutFallingThrough(firstCondition.getRightOperand())
-							&& ASTNodes.isPassiveWithoutFallingThrough(secondCondition.getLeftOperand())
-							&& ASTNodes.isPassiveWithoutFallingThrough(secondCondition.getRightOperand())) {
-						return maybeReplaceDuplicateExpression(visited, firstCondition, firstCondition.getLeftOperand(),
-								secondCondition.getLeftOperand(), firstCondition.getRightOperand(), secondCondition.getRightOperand())
-								&& maybeReplaceDuplicateExpression(visited, firstCondition, firstCondition.getLeftOperand(),
-										secondCondition.getRightOperand(), firstCondition.getRightOperand(), secondCondition.getLeftOperand())
-								&& maybeReplaceDuplicateExpression(visited, firstCondition, firstCondition.getRightOperand(),
-										secondCondition.getLeftOperand(), firstCondition.getLeftOperand(), secondCondition.getRightOperand())
-								&& maybeReplaceDuplicateExpression(visited, firstCondition, firstCondition.getRightOperand(),
-										secondCondition.getRightOperand(), firstCondition.getLeftOperand(), secondCondition.getLeftOperand());
+							&& ASTNodes.hasOperator(firstCondition, InfixExpression.Operator.CONDITIONAL_OR, InfixExpression.Operator.CONDITIONAL_AND, InfixExpression.Operator.OR, InfixExpression.Operator.AND)
+							&& ASTNodes.hasOperator(secondCondition, InfixExpression.Operator.CONDITIONAL_OR, InfixExpression.Operator.CONDITIONAL_AND, InfixExpression.Operator.OR, InfixExpression.Operator.AND)
+							&& Objects.equals(firstCondition.getOperator(), secondCondition.getOperator())
+							&& (ASTNodes.hasOperator(visited, InfixExpression.Operator.CONDITIONAL_OR, InfixExpression.Operator.OR) ^ ASTNodes.hasOperator(firstCondition, InfixExpression.Operator.CONDITIONAL_OR, InfixExpression.Operator.OR))) {
+						boolean eagerEvaluation= ASTNodes.hasOperator(visited, InfixExpression.Operator.AND, InfixExpression.Operator.OR)
+								&& ASTNodes.hasOperator(firstCondition, InfixExpression.Operator.AND, InfixExpression.Operator.OR);
+
+						return maybeReplaceDuplicateExpression(visited, firstCondition.getOperator(), firstCondition.getLeftOperand(),
+								secondCondition.getLeftOperand(), firstCondition.getRightOperand(), secondCondition.getRightOperand(), eagerEvaluation, false, true)
+								&& maybeReplaceDuplicateExpression(visited, firstCondition.getOperator(), firstCondition.getLeftOperand(),
+										secondCondition.getRightOperand(), firstCondition.getRightOperand(), secondCondition.getLeftOperand(), eagerEvaluation, false, false)
+								&& maybeReplaceDuplicateExpression(visited, firstCondition.getOperator(), firstCondition.getRightOperand(),
+										secondCondition.getLeftOperand(), firstCondition.getLeftOperand(), secondCondition.getRightOperand(), eagerEvaluation, true, true)
+								&& maybeReplaceDuplicateExpression(visited, firstCondition.getOperator(), firstCondition.getRightOperand(),
+										secondCondition.getRightOperand(), firstCondition.getLeftOperand(), secondCondition.getLeftOperand(), eagerEvaluation, true, false);
 					}
 				}
 
 				return true;
 			}
 
-			private boolean maybeReplaceDuplicateExpression(final InfixExpression visited, final InfixExpression firstCondition,
-					final Expression firstExpression, final Expression firstOppositeExpression, final Expression secondExpression, final Expression secondOppositeExpression) {
-				if (ASTNodes.match(firstExpression, firstOppositeExpression)
-						&& !ASTNodes.match(secondExpression, secondOppositeExpression)
-						&& !ASTSemanticMatcher.INSTANCE.matchNegative(secondExpression, secondOppositeExpression)) {
-					rewriteOperations.add(new OperandFactorizationOperation(visited, firstCondition, firstExpression, secondExpression, secondOppositeExpression));
-					return false;
+			private boolean maybeReplaceDuplicateExpression(final InfixExpression visited, final InfixExpression.Operator innerOperator,
+					final Expression factor, final Expression factorDuplicate, final Expression thenExpression, final Expression elseExpression,
+					final boolean eagerEvaluation, final boolean isThenExpressionFirst, boolean isElseExpressionLast) {
+				if (ASTNodes.match(factor, factorDuplicate)
+						&& !ASTNodes.match(thenExpression, elseExpression)
+						&& !ASTSemanticMatcher.INSTANCE.matchNegative(thenExpression, elseExpression)
+						&& isPassiveWithoutBreak(factor)) {
+					boolean isThenExpressionPassiveWithoutBreak= isPassiveWithoutBreak(thenExpression);
+					boolean isElseExpressionPassiveWithoutBreak= isPassiveWithoutBreak(elseExpression);
+
+					if (isThenExpressionPassiveWithoutBreak
+							&& isElseExpressionLast
+							&& (eagerEvaluation || isElseExpressionPassiveWithoutBreak)) {
+						rewriteOperations.add(new OperandFactorizationOperation(visited, innerOperator, factor, thenExpression, elseExpression, true));
+						return false;
+					}
+
+					if (isElseExpressionPassiveWithoutBreak
+							&& (isThenExpressionFirst || isThenExpressionPassiveWithoutBreak)) {
+						rewriteOperations.add(new OperandFactorizationOperation(visited, innerOperator, factor, thenExpression, elseExpression, false));
+						return false;
+					}
 				}
 
 				return true;
+			}
+
+			/**
+			 * True if the expression is passive, may not throw exception and is a primitive
+			 * (because a wrapper may create a Null Pointer Exception).
+			 *
+			 * @param disturbingExpression The expression
+			 * @return true if the expression is passive, may not throw exception and is a primitive
+			 */
+			private boolean isPassiveWithoutBreak(final Expression disturbingExpression) {
+				return ASTNodes.hasType(disturbingExpression,
+						boolean.class.getCanonicalName(),
+						int.class.getCanonicalName(),
+						long.class.getCanonicalName(),
+						short.class.getCanonicalName(),
+						char.class.getCanonicalName(),
+						byte.class.getCanonicalName())
+						&& ASTNodes.isPassiveWithoutFallingThrough(disturbingExpression);
 			}
 		});
 
@@ -163,22 +208,25 @@ public class OperandFactorizationCleanUp extends AbstractMultiFix {
 
 	private static class OperandFactorizationOperation extends CompilationUnitRewriteOperation {
 		private final InfixExpression visited;
-		private final InfixExpression firstCondition;
-		private final Expression firstExpression;
-		private final Expression secondExpression;
-		private final Expression secondOppositeExpression;
+		private final InfixExpression.Operator innerOperator;
+		private final Expression factor;
+		private final Expression thenExpression;
+		private final Expression elseExpression;
+		private final boolean isFactorOnTheLeft;
 
 		public OperandFactorizationOperation(
 				final InfixExpression visited,
-				final InfixExpression firstCondition,
-				final Expression firstExpression,
-				final Expression secondExpression,
-				final Expression secondOppositeExpression) {
+				final InfixExpression.Operator innerOperator,
+				final Expression factor,
+				final Expression thenExpression,
+				final Expression elseExpression,
+				final boolean isFactorOnTheLeft) {
 			this.visited= visited;
-			this.firstCondition= firstCondition;
-			this.firstExpression= firstExpression;
-			this.secondExpression= secondExpression;
-			this.secondOppositeExpression= secondOppositeExpression;
+			this.innerOperator= innerOperator;
+			this.factor= factor;
+			this.thenExpression= thenExpression;
+			this.elseExpression= elseExpression;
+			this.isFactorOnTheLeft= isFactorOnTheLeft;
 		}
 
 		@Override
@@ -189,13 +237,19 @@ public class OperandFactorizationCleanUp extends AbstractMultiFix {
 
 			InfixExpression newInnerInfixExpression= ast.newInfixExpression();
 			newInnerInfixExpression.setOperator(visited.getOperator());
-			newInnerInfixExpression.setLeftOperand(ASTNodes.createMoveTarget(rewrite, secondExpression));
-			newInnerInfixExpression.setRightOperand(ASTNodes.createMoveTarget(rewrite, secondOppositeExpression));
+			newInnerInfixExpression.setLeftOperand(ASTNodes.createMoveTarget(rewrite, thenExpression));
+			newInnerInfixExpression.setRightOperand(ASTNodes.createMoveTarget(rewrite, elseExpression));
 
 			InfixExpression newMainInfixExpression= ast.newInfixExpression();
-			newMainInfixExpression.setOperator(firstCondition.getOperator());
-			newMainInfixExpression.setLeftOperand(ASTNodes.createMoveTarget(rewrite, firstExpression));
-			newMainInfixExpression.setRightOperand(ASTNodeFactory.parenthesizeIfNeeded(ast, newInnerInfixExpression));
+			newMainInfixExpression.setOperator(innerOperator);
+
+			if (isFactorOnTheLeft) {
+				newMainInfixExpression.setLeftOperand(ASTNodes.createMoveTarget(rewrite, factor));
+				newMainInfixExpression.setRightOperand(ASTNodeFactory.parenthesizeIfNeeded(ast, newInnerInfixExpression));
+			} else  {
+				newMainInfixExpression.setLeftOperand(ASTNodeFactory.parenthesizeIfNeeded(ast, newInnerInfixExpression));
+				newMainInfixExpression.setRightOperand(ASTNodes.createMoveTarget(rewrite, factor));
+			}
 
 			ASTNodes.replaceButKeepComment(rewrite, visited, ASTNodeFactory.parenthesizeIfNeeded(ast, newMainInfixExpression), group);
 		}

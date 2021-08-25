@@ -10962,51 +10962,120 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    private static int staticField = 0;\n" //
-				+ "\n" //
-				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean repeatedBoolean, boolean isValid, boolean isActive) {\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean repeatedBoolean, boolean thenExpression, boolean elseExpression) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean newBoolean1 = repeatedBoolean && isValid || repeatedBoolean && isActive;\n" //
-				+ "        boolean newBoolean2 = repeatedBoolean && !isValid || repeatedBoolean && isActive;\n" //
-				+ "        boolean newBoolean3 = repeatedBoolean && isValid || repeatedBoolean && !isActive;\n" //
-				+ "        boolean newBoolean4 = repeatedBoolean && !isValid || repeatedBoolean && !isActive;\n" //
-				+ "        boolean newBoolean5 = !repeatedBoolean && isValid || !repeatedBoolean && isActive;\n" //
-				+ "        boolean newBoolean6 = !repeatedBoolean && !isValid || !repeatedBoolean && isActive;\n" //
-				+ "        boolean newBoolean7 = !repeatedBoolean && isValid || !repeatedBoolean && !isActive;\n" //
-				+ "        boolean newBoolean8 = !repeatedBoolean && !isValid || !repeatedBoolean && !isActive;\n" //
+				+ "        boolean newBoolean1 = repeatedBoolean && thenExpression || repeatedBoolean && elseExpression;\n" //
+				+ "        boolean newBoolean2 = repeatedBoolean && !thenExpression || repeatedBoolean && elseExpression;\n" //
+				+ "        boolean newBoolean3 = repeatedBoolean && thenExpression || repeatedBoolean && !elseExpression;\n" //
+				+ "        boolean newBoolean4 = repeatedBoolean && !thenExpression || repeatedBoolean && !elseExpression;\n" //
+				+ "        boolean newBoolean5 = !repeatedBoolean && thenExpression || !repeatedBoolean && elseExpression;\n" //
+				+ "        boolean newBoolean6 = !repeatedBoolean && !thenExpression || !repeatedBoolean && elseExpression;\n" //
+				+ "        boolean newBoolean7 = !repeatedBoolean && thenExpression || !repeatedBoolean && !elseExpression;\n" //
+				+ "        boolean newBoolean8 = !repeatedBoolean && !thenExpression || !repeatedBoolean && !elseExpression;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean repeatedBoolean, boolean isValid, boolean isEnable) {\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedExpressions(boolean repeatedExpression, boolean thenExpression, boolean elseExpression) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean newBoolean1 = repeatedBoolean & isValid | repeatedBoolean & isEnable;\n" //
-				+ "        boolean newBoolean2 = repeatedBoolean & !isValid | repeatedBoolean & isEnable;\n" //
-				+ "        boolean newBoolean3 = repeatedBoolean & isValid | repeatedBoolean & !isEnable;\n" //
-				+ "        boolean newBoolean4 = repeatedBoolean & !isValid | repeatedBoolean & !isEnable;\n" //
-				+ "        boolean newBoolean5 = !repeatedBoolean & isValid | !repeatedBoolean & isEnable;\n" //
-				+ "        boolean newBoolean6 = !repeatedBoolean & !isValid | !repeatedBoolean & isEnable;\n" //
-				+ "        boolean newBoolean7 = !repeatedBoolean & isValid | !repeatedBoolean & !isEnable;\n" //
-				+ "        boolean newBoolean8 = !repeatedBoolean & !isValid | !repeatedBoolean & !isEnable;\n" //
+				+ "        boolean newBoolean1 = repeatedExpression && thenExpression || elseExpression && repeatedExpression;\n" //
+				+ "        boolean newBoolean2 = repeatedExpression && !thenExpression || elseExpression && repeatedExpression;\n" //
+				+ "        boolean newBoolean3 = repeatedExpression && thenExpression || !elseExpression && repeatedExpression;\n" //
+				+ "        boolean newBoolean4 = repeatedExpression && !thenExpression || !elseExpression && repeatedExpression;\n" //
+				+ "        boolean newBoolean5 = !repeatedExpression && thenExpression || elseExpression && !repeatedExpression;\n" //
+				+ "        boolean newBoolean6 = !repeatedExpression && !thenExpression || elseExpression && !repeatedExpression;\n" //
+				+ "        boolean newBoolean7 = !repeatedExpression && thenExpression || !elseExpression && !repeatedExpression;\n" //
+				+ "        boolean newBoolean8 = !repeatedExpression && !thenExpression || !elseExpression && !repeatedExpression;\n" //
+				+ "\n" //
+				+ "        newBoolean1 = thenExpression && repeatedExpression || repeatedExpression && elseExpression;\n" //
+				+ "        newBoolean2 = !thenExpression && repeatedExpression || repeatedExpression && elseExpression;\n" //
+				+ "        newBoolean3 = thenExpression && repeatedExpression || repeatedExpression && !elseExpression;\n" //
+				+ "        newBoolean4 = !thenExpression && repeatedExpression || repeatedExpression && !elseExpression;\n" //
+				+ "        newBoolean5 = !repeatedExpression && thenExpression || !repeatedExpression && elseExpression;\n" //
+				+ "        newBoolean6 = !repeatedExpression && !thenExpression || !repeatedExpression && elseExpression;\n" //
+				+ "        newBoolean7 = !repeatedExpression && thenExpression || !repeatedExpression && !elseExpression;\n" //
+				+ "        newBoolean8 = !repeatedExpression && !thenExpression || !repeatedExpression && !elseExpression;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean repeatedBoolean, boolean isValid, boolean isActive) {\n" //
+				+ "    public void replaceDuplicateConditionsOnConditionalAndExpression(boolean repeatedBoolean, boolean thenExpression, boolean elseExpression) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean newBoolean1 = repeatedBoolean && isValid || isActive && repeatedBoolean;\n" //
-				+ "        boolean newBoolean2 = repeatedBoolean && !isValid || isActive && repeatedBoolean;\n" //
-				+ "        boolean newBoolean3 = repeatedBoolean && isValid || !isActive && repeatedBoolean;\n" //
-				+ "        boolean newBoolean4 = repeatedBoolean && !isValid || !isActive && repeatedBoolean;\n" //
-				+ "        boolean newBoolean5 = !repeatedBoolean && isValid || isActive && !repeatedBoolean;\n" //
-				+ "        boolean newBoolean6 = !repeatedBoolean && !isValid || isActive && !repeatedBoolean;\n" //
-				+ "        boolean newBoolean7 = !repeatedBoolean && isValid || !isActive && !repeatedBoolean;\n" //
-				+ "        boolean newBoolean8 = !repeatedBoolean && !isValid || !isActive && !repeatedBoolean;\n" //
+				+ "        boolean newBoolean1 = (repeatedBoolean || thenExpression) && (repeatedBoolean || elseExpression);\n" //
+				+ "        boolean newBoolean2 = (repeatedBoolean || !thenExpression) && (repeatedBoolean || elseExpression);\n" //
+				+ "        boolean newBoolean3 = (repeatedBoolean || thenExpression) && (repeatedBoolean || !elseExpression);\n" //
+				+ "        boolean newBoolean4 = (repeatedBoolean || !thenExpression) && (repeatedBoolean || !elseExpression);\n" //
+				+ "        boolean newBoolean5 = (!repeatedBoolean || thenExpression) && (!repeatedBoolean || elseExpression);\n" //
+				+ "        boolean newBoolean6 = (!repeatedBoolean || !thenExpression) && (!repeatedBoolean || elseExpression);\n" //
+				+ "        boolean newBoolean7 = (!repeatedBoolean || thenExpression) && (!repeatedBoolean || !elseExpression);\n" //
+				+ "        boolean newBoolean8 = (!repeatedBoolean || !thenExpression) && (!repeatedBoolean || !elseExpression);\n" //
+				+ "    }\n" //
 				+ "\n" //
-				+ "        newBoolean1 = isValid && repeatedBoolean || repeatedBoolean && isActive;\n" //
-				+ "        newBoolean2 = !isValid && repeatedBoolean || repeatedBoolean && isActive;\n" //
-				+ "        newBoolean3 = isValid && repeatedBoolean || repeatedBoolean && !isActive;\n" //
-				+ "        newBoolean4 = !isValid && repeatedBoolean || repeatedBoolean && !isActive;\n" //
-				+ "        newBoolean5 = !repeatedBoolean && isValid || !repeatedBoolean && isActive;\n" //
-				+ "        newBoolean6 = !repeatedBoolean && !isValid || !repeatedBoolean && isActive;\n" //
-				+ "        newBoolean7 = !repeatedBoolean && isValid || !repeatedBoolean && !isActive;\n" //
-				+ "        newBoolean8 = !repeatedBoolean && !isValid || !repeatedBoolean && !isActive;\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean repeatedBoolean, boolean thenExpression, boolean elseExpression) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = repeatedBoolean & thenExpression | repeatedBoolean & elseExpression;\n" //
+				+ "        boolean newBoolean2 = repeatedBoolean & !thenExpression | repeatedBoolean & elseExpression;\n" //
+				+ "        boolean newBoolean3 = repeatedBoolean & thenExpression | repeatedBoolean & !elseExpression;\n" //
+				+ "        boolean newBoolean4 = repeatedBoolean & !thenExpression | repeatedBoolean & !elseExpression;\n" //
+				+ "        boolean newBoolean5 = !repeatedBoolean & thenExpression | !repeatedBoolean & elseExpression;\n" //
+				+ "        boolean newBoolean6 = !repeatedBoolean & !thenExpression | !repeatedBoolean & elseExpression;\n" //
+				+ "        boolean newBoolean7 = !repeatedBoolean & thenExpression | !repeatedBoolean & !elseExpression;\n" //
+				+ "        boolean newBoolean8 = !repeatedBoolean & !thenExpression | !repeatedBoolean & !elseExpression;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsOnEagerAndExpression(boolean repeatedBoolean, boolean thenExpression, boolean elseExpression) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (repeatedBoolean | thenExpression) & (repeatedBoolean | elseExpression);\n" //
+				+ "        boolean newBoolean2 = (repeatedBoolean | !thenExpression) & (repeatedBoolean | elseExpression);\n" //
+				+ "        boolean newBoolean3 = (repeatedBoolean | thenExpression) & (repeatedBoolean | !elseExpression);\n" //
+				+ "        boolean newBoolean4 = (repeatedBoolean | !thenExpression) & (repeatedBoolean | !elseExpression);\n" //
+				+ "        boolean newBoolean5 = (!repeatedBoolean | thenExpression) & (!repeatedBoolean | elseExpression);\n" //
+				+ "        boolean newBoolean6 = (!repeatedBoolean | !thenExpression) & (!repeatedBoolean | elseExpression);\n" //
+				+ "        boolean newBoolean7 = (!repeatedBoolean | thenExpression) & (!repeatedBoolean | !elseExpression);\n" //
+				+ "        boolean newBoolean8 = (!repeatedBoolean | !thenExpression) & (!repeatedBoolean | !elseExpression);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceDuplicateConditionsWithWrapperAtTheStart(boolean factor, Boolean thenExpression, boolean elseExpression) {\n" //
+				+ "        return thenExpression && factor || factor && elseExpression;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceDuplicateConditionsWithWrapperAtTheEnd(boolean factor, boolean thenExpression, Boolean elseExpression) {\n" //
+				+ "        return thenExpression & factor | factor & elseExpression;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithActiveExpressionAtFirstPosition(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (!(i3 == i4++) && (i1 == i2)) || ((i1 == i2) && (i5 == i6));\n" //
+				+ "        boolean newBoolean2 = (!(i3 == ++i4) && (i1 == i2)) || ((i1 == i2) && (i5 == i6));\n" //
+				+ "        boolean newBoolean3 = (!(i3 == i4--) && (i1 == i2)) || ((i1 == i2) && (i5 == i6));\n" //
+				+ "        boolean newBoolean4 = (!(i3 == --i4) && (i1 == i2)) || ((i1 == i2) && (i5 == i6));\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = ((i3 == i4++) && (i1 == i2)) || ((i1 == i2) && !(i5 == i6));\n" //
+				+ "        boolean newBoolean6 = ((i3 == ++i4) && (i1 == i2)) || ((i1 == i2) && !(i5 == i6));\n" //
+				+ "        boolean newBoolean7 = ((i3 == i4--) && (i1 == i2)) || ((i1 == i2) && !(i5 == i6));\n" //
+				+ "        boolean newBoolean8 = ((i3 == --i4) && (i1 == i2)) || ((i1 == i2) && !(i5 == i6));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsOnEagerActiveExpression(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = ((i1 == i2) & !(i3 == i4)) | ((i1 == i2) & (i5 == i6++));\n" //
+				+ "        boolean newBoolean2 = ((i1 == i2) & !(i3 == i4)) | ((i1 == i2) & (i5 == ++i6));\n" //
+				+ "        boolean newBoolean3 = ((i1 == i2) & !(i3 == i4)) | ((i1 == i2) & (i5 == i6--));\n" //
+				+ "        boolean newBoolean4 = ((i1 == i2) & !(i3 == i4)) | ((i1 == i2) & (i5 == --i6));\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = ((i1 == i2) & (i3 == i4)) | ((i1 == i2) & !(i5 == i6++));\n" //
+				+ "        boolean newBoolean6 = ((i1 == i2) & (i3 == i4)) | ((i1 == i2) & !(i5 == ++i6));\n" //
+				+ "        boolean newBoolean7 = ((i1 == i2) & (i3 == i4)) | ((i1 == i2) & !(i5 == i6--));\n" //
+				+ "        boolean newBoolean8 = ((i1 == i2) & (i3 == i4)) | ((i1 == i2) & !(i5 == --i6));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveDuplicateExpressionOnTheLeftWithFinalEagerActiveExpression(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (!(i3 == i4) & (i1 == i2)) | ((i1 == i2) & (i5 == i6++));\n" //
+				+ "        boolean newBoolean2 = (!(i3 == i4) & (i1 == i2)) | ((i1 == i2) & (i5 == ++i6));\n" //
+				+ "        boolean newBoolean3 = (!(i3 == i4) & (i1 == i2)) | ((i1 == i2) & (i5 == i6--));\n" //
+				+ "        boolean newBoolean4 = (!(i3 == i4) & (i1 == i2)) | ((i1 == i2) & (i5 == --i6));\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = ((i3 == i4) & (i1 == i2)) | ((i1 == i2) & !(i5 == i6++));\n" //
+				+ "        boolean newBoolean6 = ((i3 == i4) & (i1 == i2)) | ((i1 == i2) & !(i5 == ++i6));\n" //
+				+ "        boolean newBoolean7 = ((i3 == i4) & (i1 == i2)) | ((i1 == i2) & !(i5 == i6--));\n" //
+				+ "        boolean newBoolean8 = ((i3 == i4) & (i1 == i2)) | ((i1 == i2) & !(i5 == --i6));\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
@@ -11034,51 +11103,120 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.List;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    private static int staticField = 0;\n" //
-				+ "\n" //
-				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean repeatedBoolean, boolean isValid, boolean isActive) {\n" //
+				+ "    public void replaceDuplicateConditionsWithPrimitiveTypes(boolean repeatedBoolean, boolean thenExpression, boolean elseExpression) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean newBoolean1 = (repeatedBoolean && (isValid || isActive));\n" //
-				+ "        boolean newBoolean2 = (repeatedBoolean && (!isValid || isActive));\n" //
-				+ "        boolean newBoolean3 = (repeatedBoolean && (isValid || !isActive));\n" //
-				+ "        boolean newBoolean4 = (repeatedBoolean && (!isValid || !isActive));\n" //
-				+ "        boolean newBoolean5 = (!repeatedBoolean && (isValid || isActive));\n" //
-				+ "        boolean newBoolean6 = (!repeatedBoolean && (!isValid || isActive));\n" //
-				+ "        boolean newBoolean7 = (!repeatedBoolean && (isValid || !isActive));\n" //
-				+ "        boolean newBoolean8 = (!repeatedBoolean && (!isValid || !isActive));\n" //
+				+ "        boolean newBoolean1 = (repeatedBoolean && (thenExpression || elseExpression));\n" //
+				+ "        boolean newBoolean2 = (repeatedBoolean && (!thenExpression || elseExpression));\n" //
+				+ "        boolean newBoolean3 = (repeatedBoolean && (thenExpression || !elseExpression));\n" //
+				+ "        boolean newBoolean4 = (repeatedBoolean && (!thenExpression || !elseExpression));\n" //
+				+ "        boolean newBoolean5 = (!repeatedBoolean && (thenExpression || elseExpression));\n" //
+				+ "        boolean newBoolean6 = (!repeatedBoolean && (!thenExpression || elseExpression));\n" //
+				+ "        boolean newBoolean7 = (!repeatedBoolean && (thenExpression || !elseExpression));\n" //
+				+ "        boolean newBoolean8 = (!repeatedBoolean && (!thenExpression || !elseExpression));\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean repeatedBoolean, boolean isValid, boolean isEnable) {\n" //
+				+ "    public void replaceDuplicateConditionsWithPermutedExpressions(boolean repeatedExpression, boolean thenExpression, boolean elseExpression) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean newBoolean1 = (repeatedBoolean & (isValid | isEnable));\n" //
-				+ "        boolean newBoolean2 = (repeatedBoolean & (!isValid | isEnable));\n" //
-				+ "        boolean newBoolean3 = (repeatedBoolean & (isValid | !isEnable));\n" //
-				+ "        boolean newBoolean4 = (repeatedBoolean & (!isValid | !isEnable));\n" //
-				+ "        boolean newBoolean5 = (!repeatedBoolean & (isValid | isEnable));\n" //
-				+ "        boolean newBoolean6 = (!repeatedBoolean & (!isValid | isEnable));\n" //
-				+ "        boolean newBoolean7 = (!repeatedBoolean & (isValid | !isEnable));\n" //
-				+ "        boolean newBoolean8 = (!repeatedBoolean & (!isValid | !isEnable));\n" //
+				+ "        boolean newBoolean1 = ((thenExpression || elseExpression) && repeatedExpression);\n" //
+				+ "        boolean newBoolean2 = ((!thenExpression || elseExpression) && repeatedExpression);\n" //
+				+ "        boolean newBoolean3 = ((thenExpression || !elseExpression) && repeatedExpression);\n" //
+				+ "        boolean newBoolean4 = ((!thenExpression || !elseExpression) && repeatedExpression);\n" //
+				+ "        boolean newBoolean5 = ((thenExpression || elseExpression) && !repeatedExpression);\n" //
+				+ "        boolean newBoolean6 = ((!thenExpression || elseExpression) && !repeatedExpression);\n" //
+				+ "        boolean newBoolean7 = ((thenExpression || !elseExpression) && !repeatedExpression);\n" //
+				+ "        boolean newBoolean8 = ((!thenExpression || !elseExpression) && !repeatedExpression);\n" //
+				+ "\n" //
+				+ "        newBoolean1 = (repeatedExpression && (thenExpression || elseExpression));\n" //
+				+ "        newBoolean2 = (repeatedExpression && (!thenExpression || elseExpression));\n" //
+				+ "        newBoolean3 = (repeatedExpression && (thenExpression || !elseExpression));\n" //
+				+ "        newBoolean4 = (repeatedExpression && (!thenExpression || !elseExpression));\n" //
+				+ "        newBoolean5 = (!repeatedExpression && (thenExpression || elseExpression));\n" //
+				+ "        newBoolean6 = (!repeatedExpression && (!thenExpression || elseExpression));\n" //
+				+ "        newBoolean7 = (!repeatedExpression && (thenExpression || !elseExpression));\n" //
+				+ "        newBoolean8 = (!repeatedExpression && (!thenExpression || !elseExpression));\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void replaceDuplicateConditionsWithPermutedBooleans(boolean repeatedBoolean, boolean isValid, boolean isActive) {\n" //
+				+ "    public void replaceDuplicateConditionsOnConditionalAndExpression(boolean repeatedBoolean, boolean thenExpression, boolean elseExpression) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean newBoolean1 = (repeatedBoolean && (isValid || isActive));\n" //
-				+ "        boolean newBoolean2 = (repeatedBoolean && (!isValid || isActive));\n" //
-				+ "        boolean newBoolean3 = (repeatedBoolean && (isValid || !isActive));\n" //
-				+ "        boolean newBoolean4 = (repeatedBoolean && (!isValid || !isActive));\n" //
-				+ "        boolean newBoolean5 = (!repeatedBoolean && (isValid || isActive));\n" //
-				+ "        boolean newBoolean6 = (!repeatedBoolean && (!isValid || isActive));\n" //
-				+ "        boolean newBoolean7 = (!repeatedBoolean && (isValid || !isActive));\n" //
-				+ "        boolean newBoolean8 = (!repeatedBoolean && (!isValid || !isActive));\n" //
+				+ "        boolean newBoolean1 = (repeatedBoolean || (thenExpression && elseExpression));\n" //
+				+ "        boolean newBoolean2 = (repeatedBoolean || (!thenExpression && elseExpression));\n" //
+				+ "        boolean newBoolean3 = (repeatedBoolean || (thenExpression && !elseExpression));\n" //
+				+ "        boolean newBoolean4 = (repeatedBoolean || (!thenExpression && !elseExpression));\n" //
+				+ "        boolean newBoolean5 = (!repeatedBoolean || (thenExpression && elseExpression));\n" //
+				+ "        boolean newBoolean6 = (!repeatedBoolean || (!thenExpression && elseExpression));\n" //
+				+ "        boolean newBoolean7 = (!repeatedBoolean || (thenExpression && !elseExpression));\n" //
+				+ "        boolean newBoolean8 = (!repeatedBoolean || (!thenExpression && !elseExpression));\n" //
+				+ "    }\n" //
 				+ "\n" //
-				+ "        newBoolean1 = (repeatedBoolean && (isValid || isActive));\n" //
-				+ "        newBoolean2 = (repeatedBoolean && (!isValid || isActive));\n" //
-				+ "        newBoolean3 = (repeatedBoolean && (isValid || !isActive));\n" //
-				+ "        newBoolean4 = (repeatedBoolean && (!isValid || !isActive));\n" //
-				+ "        newBoolean5 = (!repeatedBoolean && (isValid || isActive));\n" //
-				+ "        newBoolean6 = (!repeatedBoolean && (!isValid || isActive));\n" //
-				+ "        newBoolean7 = (!repeatedBoolean && (isValid || !isActive));\n" //
-				+ "        newBoolean8 = (!repeatedBoolean && (!isValid || !isActive));\n" //
+				+ "    public void replaceDuplicateConditionsWithEagerOperator(boolean repeatedBoolean, boolean thenExpression, boolean elseExpression) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (repeatedBoolean & (thenExpression | elseExpression));\n" //
+				+ "        boolean newBoolean2 = (repeatedBoolean & (!thenExpression | elseExpression));\n" //
+				+ "        boolean newBoolean3 = (repeatedBoolean & (thenExpression | !elseExpression));\n" //
+				+ "        boolean newBoolean4 = (repeatedBoolean & (!thenExpression | !elseExpression));\n" //
+				+ "        boolean newBoolean5 = (!repeatedBoolean & (thenExpression | elseExpression));\n" //
+				+ "        boolean newBoolean6 = (!repeatedBoolean & (!thenExpression | elseExpression));\n" //
+				+ "        boolean newBoolean7 = (!repeatedBoolean & (thenExpression | !elseExpression));\n" //
+				+ "        boolean newBoolean8 = (!repeatedBoolean & (!thenExpression | !elseExpression));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsOnEagerAndExpression(boolean repeatedBoolean, boolean thenExpression, boolean elseExpression) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (repeatedBoolean | (thenExpression & elseExpression));\n" //
+				+ "        boolean newBoolean2 = (repeatedBoolean | (!thenExpression & elseExpression));\n" //
+				+ "        boolean newBoolean3 = (repeatedBoolean | (thenExpression & !elseExpression));\n" //
+				+ "        boolean newBoolean4 = (repeatedBoolean | (!thenExpression & !elseExpression));\n" //
+				+ "        boolean newBoolean5 = (!repeatedBoolean | (thenExpression & elseExpression));\n" //
+				+ "        boolean newBoolean6 = (!repeatedBoolean | (!thenExpression & elseExpression));\n" //
+				+ "        boolean newBoolean7 = (!repeatedBoolean | (thenExpression & !elseExpression));\n" //
+				+ "        boolean newBoolean8 = (!repeatedBoolean | (!thenExpression & !elseExpression));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceDuplicateConditionsWithWrapperAtTheStart(boolean factor, Boolean thenExpression, boolean elseExpression) {\n" //
+				+ "        return ((thenExpression || elseExpression) && factor);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean replaceDuplicateConditionsWithWrapperAtTheEnd(boolean factor, boolean thenExpression, Boolean elseExpression) {\n" //
+				+ "        return (factor & (thenExpression | elseExpression));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsWithActiveExpressionAtFirstPosition(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = ((!(i3 == i4++) || (i5 == i6)) && (i1 == i2));\n" //
+				+ "        boolean newBoolean2 = ((!(i3 == ++i4) || (i5 == i6)) && (i1 == i2));\n" //
+				+ "        boolean newBoolean3 = ((!(i3 == i4--) || (i5 == i6)) && (i1 == i2));\n" //
+				+ "        boolean newBoolean4 = ((!(i3 == --i4) || (i5 == i6)) && (i1 == i2));\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (((i3 == i4++) || !(i5 == i6)) && (i1 == i2));\n" //
+				+ "        boolean newBoolean6 = (((i3 == ++i4) || !(i5 == i6)) && (i1 == i2));\n" //
+				+ "        boolean newBoolean7 = (((i3 == i4--) || !(i5 == i6)) && (i1 == i2));\n" //
+				+ "        boolean newBoolean8 = (((i3 == --i4) || !(i5 == i6)) && (i1 == i2));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceDuplicateConditionsOnEagerActiveExpression(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = ((i1 == i2) & (!(i3 == i4) | (i5 == i6++)));\n" //
+				+ "        boolean newBoolean2 = ((i1 == i2) & (!(i3 == i4) | (i5 == ++i6)));\n" //
+				+ "        boolean newBoolean3 = ((i1 == i2) & (!(i3 == i4) | (i5 == i6--)));\n" //
+				+ "        boolean newBoolean4 = ((i1 == i2) & (!(i3 == i4) | (i5 == --i6)));\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = ((i1 == i2) & ((i3 == i4) | !(i5 == i6++)));\n" //
+				+ "        boolean newBoolean6 = ((i1 == i2) & ((i3 == i4) | !(i5 == ++i6)));\n" //
+				+ "        boolean newBoolean7 = ((i1 == i2) & ((i3 == i4) | !(i5 == i6--)));\n" //
+				+ "        boolean newBoolean8 = ((i1 == i2) & ((i3 == i4) | !(i5 == --i6)));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void moveDuplicateExpressionOnTheLeftWithFinalEagerActiveExpression(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = ((i1 == i2) & (!(i3 == i4) | (i5 == i6++)));\n" //
+				+ "        boolean newBoolean2 = ((i1 == i2) & (!(i3 == i4) | (i5 == ++i6)));\n" //
+				+ "        boolean newBoolean3 = ((i1 == i2) & (!(i3 == i4) | (i5 == i6--)));\n" //
+				+ "        boolean newBoolean4 = ((i1 == i2) & (!(i3 == i4) | (i5 == --i6)));\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = ((i1 == i2) & ((i3 == i4) | !(i5 == i6++)));\n" //
+				+ "        boolean newBoolean6 = ((i1 == i2) & ((i3 == i4) | !(i5 == ++i6)));\n" //
+				+ "        boolean newBoolean7 = ((i1 == i2) & ((i3 == i4) | !(i5 == i6--)));\n" //
+				+ "        boolean newBoolean8 = ((i1 == i2) & ((i3 == i4) | !(i5 == --i6)));\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceDuplicateConditionsWithExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
@@ -11113,15 +11251,15 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    private static int staticField = 0;\n" //
 				+ "\n" //
-				+ "    public boolean doNoRefactorFailingCode(boolean b1, boolean[] b2, boolean b3) {\n" //
-				+ "        return b2[-1] && b1 || b3 && b1;\n" //
+				+ "    public boolean doNoRefactorFailingCode(boolean factor, boolean thenExpression, boolean[] elseCrashingExpression) {\n" //
+				+ "        return thenExpression && factor || elseCrashingExpression[-1] && factor;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public boolean doNoReplaceDuplicateConditionsWithOtherCondition(boolean b1, boolean b2, boolean b3, boolean b4) {\n" //
-				+ "        return b1 && b2 || b1 && b3 && b4;\n" //
+				+ "    public boolean doNotRefactorWithOtherCondition(boolean factor, boolean thenExpression, boolean elseExpression, boolean extendedOperand) {\n" //
+				+ "        return factor && thenExpression || factor && elseExpression && extendedOperand;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void doNoReplaceDuplicateConditionsWithOtherOperandBefore(boolean b1, boolean b2, boolean b3, boolean unrelevantCondition) {\n" //
+				+ "    public void doNotRefactorWithOtherOperandBefore(boolean b1, boolean b2, boolean b3, boolean unrelevantCondition) {\n" //
 				+ "        boolean newBoolean1 = unrelevantCondition || (b1 && b2) || (!b1 && b3);\n" //
 				+ "        boolean newBoolean2 = unrelevantCondition || (b1 && !b2) || (b3 && !b1);\n" //
 				+ "        boolean newBoolean3 = unrelevantCondition || (b1 && b2) || (!b3 && !b1);\n" //
@@ -11132,7 +11270,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean8 = unrelevantCondition || (!b1 && !b2) || (!b3 && b1);\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void doNoReplaceDuplicateConditionsWithOtherOperandAfter(boolean b1, boolean b2, boolean b3, boolean unrelevantCondition) {\n" //
+				+ "    public void doNotRefactorWithOtherOperandAfter(boolean b1, boolean b2, boolean b3, boolean unrelevantCondition) {\n" //
 				+ "        boolean newBoolean1 = (b1 && b2) || (!b1 && b3) || unrelevantCondition;\n" //
 				+ "        boolean newBoolean2 = (b1 && !b2) || (b3 && !b1) || unrelevantCondition;\n" //
 				+ "        boolean newBoolean3 = (b1 && b2) || (!b3 && !b1) || unrelevantCondition;\n" //
@@ -11143,18 +11281,26 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean8 = (!b1 && !b2) || (!b3 && b1) || unrelevantCondition;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public boolean doNoReplaceDuplicateConditionsWithWrappers(Boolean b1, Boolean b2, Boolean b3) {\n" //
-				+ "        return b1 && b2 || b1 && b3;\n" //
+				+ "    public boolean doNotRefactorWithWrapperFactor(Boolean factor, boolean thenExpression, boolean elseExpression) {\n" //
+				+ "        return factor & thenExpression | factor & elseExpression;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void doNotReplaceDuplicateConditionsWithMethods(List<String> myList) {\n" //
+				+ "    public boolean doNotRefactorWithWrapperInTheMiddle(boolean factor, Boolean thenExpression, boolean elseExpression) {\n" //
+				+ "        return factor & thenExpression | factor & elseExpression;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRefactorWithLazyWrapperAtTheEnd(boolean factor, boolean thenExpression, Boolean elseExpression) {\n" //
+				+ "        return thenExpression && factor || factor && elseExpression;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorWithMethods(List<String> myList) {\n" //
 				+ "        boolean newBoolean1 = myList.remove(\"lorem\") && !myList.remove(\"foo\") || myList.remove(\"lorem\")\n" //
 				+ "                && myList.remove(\"ipsum\");\n" //
 				+ "        boolean newBoolean2 = myList.remove(\"lorem\") && myList.remove(\"bar\") || myList.remove(\"lorem\")\n" //
 				+ "                && !myList.remove(\"ipsum\");\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void doNotReplaceDuplicateConditionsWithIncrements(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "    public void doNotRefactorWithIncrements(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
 				+ "        boolean newBoolean1 = (i1 == i2) && !(i3 == i4++) || (i1 == i2) && (i5 == i6++);\n" //
 				+ "        boolean newBoolean2 = (i1 == i2) && !(i3 == ++i4) || (i1 == i2) && (i5 == ++i6);\n" //
 				+ "        boolean newBoolean3 = (i1 == i2) && !(i3 == i4--) || (i1 == i2) && (i5 == i6--);\n" //
@@ -11166,7 +11312,31 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean8 = (i1 == i2) && (i3 == --i4) || (i1 == i2) && !(i5 == --i6);\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void doNotReplaceDuplicateConditionsWithAssignments(int i1, int i2, boolean b1, boolean b2, boolean b3) {\n" //
+				+ "    public void doNotReplaceActiveDuplicateConditions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2++) & !(i3 == i4) | (i1 == i2++) & (i5 == i6);\n" //
+				+ "        boolean newBoolean2 = (i1 == ++i2) & !(i3 == i4) | (i1 == ++i2) & (i5 == i6);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2--) & !(i3 == i4) | (i1 == i2--) & (i5 == i6);\n" //
+				+ "        boolean newBoolean4 = (i1 == --i2) & !(i3 == i4) | (i1 == --i2) & (i5 == i6);\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (i1 == i2++) & (i3 == i4) || (i1 == i2++) & !(i5 == i6);\n" //
+				+ "        boolean newBoolean6 = (i1 == ++i2) & (i3 == i4) || (i1 == ++i2) & !(i5 == i6);\n" //
+				+ "        boolean newBoolean7 = (i1 == i2--) & (i3 == i4) || (i1 == i2--) & !(i5 == i6);\n" //
+				+ "        boolean newBoolean8 = (i1 == --i2) & (i3 == i4) || (i1 == --i2) & !(i5 == i6);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRefactorWithSideEffectDueToThenExpression(int i1, int i2, int i3, int i4, int i5) {\n" //
+				+ "        return ((i1 == i2) & (i3 == i2++)) | ((i1 == i2) & (i5 == i4));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRefactorWithSideEffectDueToElseExpression(int i1, int i2, int i3, int i4, int i5) {\n" //
+				+ "        return ((i1 == i2) & (i3 == i4)) | ((i5 == i2++) & (i1 == i2));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotRefactorWithSideEffectDueToElseExpressionToo(int i1, int i2, int i3, int i4, int i5) {\n" //
+				+ "        return ((i3 == i4) & (i1 == i2)) | ((i5 == i2++) & (i1 == i2));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotRefactorWithAssignments(int i1, int i2, boolean b1, boolean b2, boolean b3) {\n" //
 				+ "        boolean newBoolean1 = (i1 == i2) && !(b1 = b2) || (i1 == i2) && (b1 = b3);\n" //
 				+ "        boolean newBoolean2 = (i1 == i2) && (b1 = b2) || (i1 == i2) && !(b1 = b3);\n" //
 				+ "    }\n" //
@@ -11177,7 +11347,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public void doNotReplaceDuplicateConditionsWithInstanciations(Boolean b1) {\n" //
+				+ "    public void doNotRefactorWithInstantiation(boolean b1) {\n" //
 				+ "        boolean newBoolean1 = b1 && !(new SideEffect() instanceof SideEffect)\n" //
 				+ "                || b1 && new SideEffect() instanceof Object;\n" //
 				+ "        boolean newBoolean2 = b1 && new SideEffect() instanceof SideEffect\n" //
