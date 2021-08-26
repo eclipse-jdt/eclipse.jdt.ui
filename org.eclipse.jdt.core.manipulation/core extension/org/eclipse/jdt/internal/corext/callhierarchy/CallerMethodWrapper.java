@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
@@ -100,7 +100,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 	protected Map<String, MethodCall> findChildren(IProgressMonitor progressMonitor) {
 		try {
 
-			IProgressMonitor monitor= new SubProgressMonitor(progressMonitor, 95, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
+			SubMonitor monitor = SubMonitor.convert(progressMonitor,"" , 95); //$NON-NLS-1$
 
 			checkCanceled(progressMonitor);
 
