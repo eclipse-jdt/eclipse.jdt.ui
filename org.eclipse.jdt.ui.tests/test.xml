@@ -44,7 +44,14 @@
     <property name="jdt-folder" value="${eclipse-home}/jdt_folder"/>
 
     <delete dir="${jdt-folder}" quiet="true"/>
-    <condition property="java9vmargs" value="
+  	
+  	<property name="javavmargs" value="" />
+  	
+    <condition property="javavmargs" value="--add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/jdk.internal.icu.impl=ALL-UNNAMED --add-opens java.base/jdk.internal.icu.text=ALL-UNNAMED --illegal-access=permit" else="">
+    	<javaversion atleast="9"/>
+    </condition>
+  	
+    <condition property="javavmargs" value="
     	--add-modules ALL-SYSTEM
     	--add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED
     	--add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED
@@ -323,17 +330,37 @@
     	--add-opens java.desktop/com.sun.beans=ALL-UNNAMED
     	--add-opens java.desktop/java.beans=ALL-UNNAMED
     	--add-opens java.logging/java.util.logging=ALL-UNNAMED
+    	--add-opens java.management/com.sun.jmx.defaults=ALL-UNNAMED
+    	--add-opens java.management/com.sun.jmx.interceptor=ALL-UNNAMED
+    	--add-opens java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED
+    	--add-opens java.management/com.sun.jmx.remote.internal=ALL-UNNAMED
+    	--add-opens java.management/com.sun.jmx.remote.security=ALL-UNNAMED
+    	--add-opens java.management/com.sun.jmx.remote.util=ALL-UNNAMED
+    	--add-opens java.management/java.lang.management=ALL-UNNAMED
+    	--add-opens java.management/javax.management=ALL-UNNAMED
+    	--add-opens java.management/javax.management.loading=ALL-UNNAMED
+    	--add-opens java.management/javax.management.modelmbean=ALL-UNNAMED
+    	--add-opens java.management/javax.management.monitor=ALL-UNNAMED
+    	--add-opens java.management/javax.management.openmbean=ALL-UNNAMED
+    	--add-opens java.management/javax.management.relation=ALL-UNNAMED
+    	--add-opens java.management/javax.management.remote=ALL-UNNAMED
+    	--add-opens java.management/javax.management.timer=ALL-UNNAMED
+    	--add-opens java.management/sun.management=ALL-UNNAMED
+    	--add-opens java.management/sun.management.counter=ALL-UNNAMED
+    	--add-opens java.management/sun.management.counter.perf=ALL-UNNAMED
+    	--add-opens java.management/sun.management.spi=ALL-UNNAMED
+    	--add-opens jdk.management/com.sun.management=ALL-UNNAMED
+    	--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
     	--illegal-access=permit
-    	" 
-    	else="">
-    	<javaversion atleast="9"/>
+    	">
+    	<javaversion atleast="17"/>
     </condition>
     
 	<ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="data-dir" value="${jdt-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.LeakTestSuite"/>
-      <property name="vmargs" value="${java9vmargs}" />
+      <property name="vmargs" value="${javavmargs}" />
     </ant>
   </target>
   
