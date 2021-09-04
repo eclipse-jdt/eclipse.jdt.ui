@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 IBM Corporation and others.
+ * Copyright (c) 2016, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,12 +31,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
@@ -274,8 +276,8 @@ public class JUnit5TestFinder implements ITestFinder {
 			parser.setResolveBindings(true);
 			CompilationUnit root= (CompilationUnit) parser.createAST(monitor);
 			ASTNode node= root.findDeclaringNode(type.getKey());
-			if (node instanceof TypeDeclaration) {
-				ITypeBinding binding= ((TypeDeclaration) node).resolveBinding();
+			if (node instanceof TypeDeclaration || node instanceof RecordDeclaration) {
+				ITypeBinding binding= ((AbstractTypeDeclaration) node).resolveBinding();
 				if (binding != null) {
 					return isTest(binding);
 				}
