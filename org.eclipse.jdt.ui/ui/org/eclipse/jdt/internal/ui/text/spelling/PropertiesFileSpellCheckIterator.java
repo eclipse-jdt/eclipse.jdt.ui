@@ -17,6 +17,8 @@ import java.util.Locale;
 
 import com.ibm.icu.text.BreakIterator;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
@@ -29,8 +31,8 @@ import org.eclipse.jface.text.IRegion;
  */
 public class PropertiesFileSpellCheckIterator extends SpellCheckIterator {
 
-	public PropertiesFileSpellCheckIterator(IDocument document, IRegion region, Locale locale) {
-		super(document, region, locale);
+	public PropertiesFileSpellCheckIterator(IDocument document, IRegion region, Locale locale, IProgressMonitor monitor) {
+		super(document, region, locale, monitor);
 	}
 
 	/*

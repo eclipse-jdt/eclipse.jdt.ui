@@ -79,10 +79,10 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 				String partitionType= partition.getType();
 				if (IPropertiesFilePartitions.COMMENT.equals(partitionType) || (!isIgnoringAmpersand && IPropertiesFilePartitions.PROPERTY_VALUE.equals(partitionType))) {
 					Locale locale= checker.getLocale();
-					checker.execute(listener, new SpellCheckIterator(document, partition, locale));
+					checker.execute(listener, new SpellCheckIterator(document, partition, locale, monitor));
 				} else if (isIgnoringAmpersand && IPropertiesFilePartitions.PROPERTY_VALUE.equals(partitionType)) {
 					Locale locale= checker.getLocale();
-					checker.execute(listener, new PropertiesFileSpellCheckIterator(document, partition, locale));
+					checker.execute(listener, new PropertiesFileSpellCheckIterator(document, partition, locale, monitor));
 				}
 			}
 		} catch (BadLocationException | AssertionFailedException x) {

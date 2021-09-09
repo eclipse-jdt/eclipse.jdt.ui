@@ -18,6 +18,9 @@ import java.util.Locale;
 
 import com.ibm.icu.text.BreakIterator;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
@@ -78,15 +81,18 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 
 	private boolean fIsIgnoringSingleLetters;
 
+	private final IProgressMonitor fMonitor;
+
 	/**
 	 * Creates a new spell check iterator.
 	 *
 	 * @param document the document containing the specified partition
 	 * @param region the region to spell check
 	 * @param locale the locale to use for spell checking
+	 * @param monitor for cancellation checks
 	 */
-	public SpellCheckIterator(IDocument document, IRegion region, Locale locale) {
-		this(document, region, locale, BreakIterator.getWordInstance(locale));
+	public SpellCheckIterator(IDocument document, IRegion region, Locale locale, IProgressMonitor monitor) {
+		this(document, region, locale, BreakIterator.getWordInstance(locale), monitor);
 	}
 
 	/**
@@ -96,11 +102,13 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	 * @param region the region to spell check
 	 * @param locale the locale to use for spell checking
 	 * @param breakIterator the break-iterator
+	 * @param monitor for cancellation checks
 	 */
-	public SpellCheckIterator(IDocument document, IRegion region, Locale locale, BreakIterator breakIterator) {
+	public SpellCheckIterator(IDocument document, IRegion region, Locale locale, BreakIterator breakIterator, IProgressMonitor monitor) {
 		fOffset= region.getOffset();
 		fWordIterator= breakIterator;
 		fDelimiter= TextUtilities.getDefaultLineDelimiter(document);
+		fMonitor = monitor == null ? new NullProgressMonitor() : monitor;
 
 		String content;
 		try {
@@ -159,7 +167,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	 */
 	@Override
 	public final boolean hasNext() {
-		return fSuccessor != BreakIterator.DONE;
+		return fSuccessor != BreakIterator.DONE && !fMonitor.isCanceled();
 	}
 
 	/**

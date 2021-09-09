@@ -56,7 +56,7 @@ public class JavaSpellingEngine extends SpellingEngine {
 					if (isIgnoringJavaStrings && IJavaPartitions.JAVA_STRING.equals(type))
 						continue;
 					if (!IDocument.DEFAULT_CONTENT_TYPE.equals(type) && !IJavaPartitions.JAVA_CHARACTER.equals(type))
-						checker.execute(listener, new SpellCheckIterator(document, partition, checker.getLocale()));
+						checker.execute(listener, new SpellCheckIterator(document, partition, checker.getLocale(), monitor));
 				}
 			}
 		} catch (BadLocationException | AssertionFailedException x) {

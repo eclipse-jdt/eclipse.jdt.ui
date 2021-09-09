@@ -41,7 +41,7 @@ public class TextSpellingEngine extends SpellingEngine {
 				return;
 			if (listener.isProblemsThresholdReached())
 				return;
-			checker.execute(listener, new SpellCheckIterator(document, region, checker.getLocale()));
+			checker.execute(listener, new SpellCheckIterator(document, region, checker.getLocale(), monitor));
 		}
 	}
 }
