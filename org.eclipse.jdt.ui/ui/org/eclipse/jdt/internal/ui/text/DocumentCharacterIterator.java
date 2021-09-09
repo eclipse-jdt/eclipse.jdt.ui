@@ -242,4 +242,10 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 			throw new IndexOutOfBoundsException();
 		}
 	}
+
+	/** @see CharSequence#toString **/
+	@Override
+	public String toString() {
+		return fDocument.get().substring(getBeginIndex(), getEndIndex());
+	}
 }
