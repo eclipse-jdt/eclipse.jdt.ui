@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -120,6 +120,9 @@ public class CallHierarchyCore {
 						if (constructors.length == 0) {
 							addRoot(member, roots, callers); // IType is a stand-in for the non-existing default constructor
 						} else {
+							if (type.isRecord()) {
+								addRoot(member, roots, callers);
+							}
 							for (IMethod constructor : constructors) {
 								addRoot(constructor, roots, callers);
 							}
@@ -309,7 +312,7 @@ public class CallHierarchyCore {
         if (element instanceof IType) {
 			IType type= (IType) element;
 			try {
-				return type.isClass() || type.isEnum();
+				return type.isClass() || type.isEnum() || type.isRecord();
 			} catch (JavaModelException e) {
 				return false;
 			}

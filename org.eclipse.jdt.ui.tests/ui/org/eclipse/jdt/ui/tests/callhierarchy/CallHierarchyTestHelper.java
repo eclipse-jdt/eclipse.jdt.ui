@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,15 +35,20 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
+import org.eclipse.jdt.ui.tests.core.rules.Java16ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
 public class CallHierarchyTestHelper {
     private static final String[] EMPTY= new String[0];
 
     private IJavaProject fJavaProject1;
     private IJavaProject fJavaProject2;
+    private IJavaProject fJavaProject3;
     private IType fType1;
     private IType fType2;
-    private IPackageFragment fPack2;
     private IPackageFragment fPack1;
+    private IPackageFragment fPack2;
+    private IPackageFragment fPack3;
 
     private IMethod fMethod1;
     private IMethod fMethod2;
@@ -55,15 +60,18 @@ public class CallHierarchyTestHelper {
     public void setUp() throws Exception {
         fJavaProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
         fJavaProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
+        fJavaProject3= JavaProjectHelper.createJavaProject("TestProject3", "bin");
         fType1= null;
         fType2= null;
         fPack1= null;
         fPack2= null;
+        fPack3= null;
     }
 
     public void tearDown() throws Exception {
         JavaProjectHelper.delete(fJavaProject1);
         JavaProjectHelper.delete(fJavaProject2);
+        JavaProjectHelper.delete(fJavaProject3);
     }
 
 
@@ -238,6 +246,51 @@ public class CallHierarchyTestHelper {
         fType1=
             cu1.createType(
                 "public class Initializer { static { someMethod(); }\n public static void someMethod() { }\n }\n",
+                null,
+                true,
+                null);
+    }
+
+    /**
+     * Creates a record class, OneRecord and sets the instance field fType1.
+     */
+    public void createRecordClasses() throws CoreException, JavaModelException {
+    	ProjectTestSetup projectsetup= new Java16ProjectTestSetup(false);
+		fJavaProject3.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJavaProject3, true);
+
+		IPackageFragmentRoot fSourceFolder= JavaProjectHelper.addSourceContainer(fJavaProject3, "src");
+
+		String MODULE_INFO_FILE_CONTENT = ""
+				+ "module test {\n"
+				+ "}\n";
+
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+
+		fPack3= fSourceFolder.createPackageFragment("test", false, null);
+
+    	JavaProjectHelper.set16CompilerOptions(fJavaProject1, true);
+
+        ICompilationUnit cu1= fPack3.getCompilationUnit("Outer.java");
+
+        fType1=
+            cu1.createType(
+                    "public class Outer {\n" +
+                    "record OneRecord(int number1, int number2) {\n" +
+                    "  OneRecord() { this(1, 2); }\n" +
+                    "}\n " +
+                    "    public static void method1() {\n" +
+                    "        new OneRecord(3, 5);\n" +
+                    "    }\n" +
+                    "    public static void method2() {\n" +
+                    "        new OneRecord();\n" +
+                    "    }\n" +
+                    "    public static void method3() {\n" +
+                    "        method1();\n" +
+                    "        method2();\n" +
+                    "    }\n" +
+                    "}\n",
                 null,
                 true,
                 null);

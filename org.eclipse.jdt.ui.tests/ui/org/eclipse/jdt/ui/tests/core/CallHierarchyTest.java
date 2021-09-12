@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -466,6 +467,20 @@ public class CallHierarchyTest {
         calls= wrapper.getCalls(new NullProgressMonitor());
         MethodWrapper recursiveMethod2Wrapper= helper.findMethodWrapper(helper.getRecursiveMethod2(), calls);
         assertEquals("Wrong line number", 12, recursiveMethod2Wrapper.getMethodCall().getFirstCallLocation().getLineNumber());
+    }
+
+    @Test
+    public void recordConstructorCallers() throws Exception {
+        helper.createRecordClasses();
+
+        checkCalls(helper.getType1().getType("OneRecord"), helper.getMethod1(), helper.getMethod2(), helper.getType1().getType("OneRecord").getMethod("OneRecord", EMPTY));
+        checkCalls(helper.getType1().getType("OneRecord").getMethod("OneRecord", EMPTY), helper.getMethod2());
+    }
+
+    private void checkCalls(IMember memberToCheck, IMethod... expectedCallers) {
+        MethodWrapper[] methodWrappers = CallHierarchy.getDefault().getCallerRoots(new IMember[] { memberToCheck });
+        MethodWrapper[] callers = methodWrappers[0].getCalls(new NullProgressMonitor());
+        helper.assertCalls(List.of(expectedCallers), callers);
     }
 
     private void assertRecursive(MethodWrapper[] callResults, boolean shouldBeRecursive) {
