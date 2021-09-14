@@ -23,11 +23,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.testplugin.util.DisplayHelper;
+
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.intro.IIntroManager;
+import org.eclipse.ui.intro.IIntroPart;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
@@ -36,39 +43,43 @@ import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyUI;
 import org.eclipse.jdt.internal.ui.callhierarchy.TreeRoot;
 
-public class CallHierarchyContentProviderTest{
-    private static final int DEFAULT_MAX_DEPTH= 10;
+public class CallHierarchyContentProviderTest {
+
+    private static final int DEFAULT_MAX_DEPTH = 10;
 
     private CallHierarchyTestHelper helper;
 
     private CallHierarchyContentProvider fProvider;
 
+	private int fOriginalMaxCallDepth;
+
     @Before
 	public void setUp() throws Exception {
-        helper= new CallHierarchyTestHelper();
-        helper.setUp();
+		if (!welcomeClosed) {
+			closeIntro(PlatformUI.getWorkbench());
+		}
+		helper= new CallHierarchyTestHelper();
+		helper.setUp();
+		fProvider= new CallHierarchyContentProvider(null);
 
-        fProvider= new CallHierarchyContentProvider(null);
-
-        CallHierarchyUI.getDefault().setMaxCallDepth(DEFAULT_MAX_DEPTH);
+		CallHierarchyUI callHierarchyUI= CallHierarchyUI.getDefault();
+		fOriginalMaxCallDepth= callHierarchyUI.getMaxCallDepth();
+		callHierarchyUI.setMaxCallDepth(DEFAULT_MAX_DEPTH);
+		DisplayHelper.driveEventQueue(Display.getDefault());
     }
 
     @After
 	public void tearDown() throws Exception {
         helper.tearDown();
         helper= null;
-
-        CallHierarchyUI.getDefault().setMaxCallDepth(DEFAULT_MAX_DEPTH);
+        CallHierarchyUI.getDefault().setMaxCallDepth(fOriginalMaxCallDepth);
     }
 
-    /**
+    /*
      * Tests getChildren and hasChildren on an "ordinary" callee tree.
-     *
-     * @throws JavaModelException
-     * @throws CoreException
      */
     @Test
-    public void testGetChildrenOfCalleeRoot() throws JavaModelException, CoreException {
+    public void testGetChildrenOfCalleeRoot() throws Exception {
         helper.createSimpleClasses();
 
         TreeRoot root= wrapCalleeRoot(helper.getMethod4());
@@ -98,14 +109,11 @@ public class CallHierarchyContentProviderTest{
         assertTrue("fourth level hasChildren", fProvider.hasChildren(fourthLevelMethodWrapper));
     }
 
-    /**
+    /*
      * Tests getChildren and hasChildren on an "ordinary" callers tree.
-     *
-     * @throws JavaModelException
-     * @throws CoreException
      */
     @Test
-    public void testGetChildrenOfCallerRoot() throws JavaModelException, CoreException {
+    public void testGetChildrenOfCallerRoot() throws Exception {
         helper.createSimpleClasses();
 
         TreeRoot root= wrapCallerRoot(helper.getMethod1());
@@ -130,14 +138,11 @@ public class CallHierarchyContentProviderTest{
         assertTrue("fourth level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
     }
 
-    /**
+    /*
      * Tests getChildren and hasChildren on an callers tree which exceeds the max call depth.
-     *
-     * @throws JavaModelException
-     * @throws CoreException
      */
     @Test
-    public void testGetChildrenOfCallerMaxDepth() throws JavaModelException, CoreException {
+    public void testGetChildrenOfCallerMaxDepth() throws Exception {
         helper.createSimpleClasses();
 
         CallHierarchyUI.getDefault().setMaxCallDepth(2);
@@ -164,14 +169,11 @@ public class CallHierarchyContentProviderTest{
         assertFalse("fourth level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
     }
 
-    /**
+    /*
      * Tests getChildren and hasChildren on an callee tree which exceeds the max call depth.
-     *
-     * @throws JavaModelException
-     * @throws CoreException
      */
     @Test
-    public void testGetChildrenOfCalleeMaxDepth() throws JavaModelException, CoreException {
+    public void testGetChildrenOfCalleeMaxDepth() throws Exception {
         helper.createSimpleClasses();
 
         CallHierarchyUI.getDefault().setMaxCallDepth(2);
@@ -203,14 +205,11 @@ public class CallHierarchyContentProviderTest{
         assertFalse("fourth level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
     }
 
-    /**
+    /*
     * Tests getChildren and hasChildren on an callers tree with recursion.
-    *
-    * @throws JavaModelException
-    * @throws CoreException
     */
     @Test
-    public void testGetChildrenOfCalleeRecursive() throws JavaModelException, CoreException {
+    public void testGetChildrenOfCalleeRecursive() throws Exception {
         helper.createSimpleClasses();
 
         TreeRoot root= wrapCalleeRoot(helper.getRecursiveMethod1());
@@ -232,14 +231,11 @@ public class CallHierarchyContentProviderTest{
         assertFalse("third level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
     }
 
-    /**
+    /*
      * Tests getChildren and hasChildren on an callees tree with recursion.
-     *
-     * @throws JavaModelException
-     * @throws CoreException
      */
     @Test
-    public void testGetChildrenOfCallerRecursive() throws JavaModelException, CoreException {
+    public void testGetChildrenOfCallerRecursive() throws Exception {
         helper.createSimpleClasses();
 
         TreeRoot root= wrapCallerRoot(helper.getRecursiveMethod1());
@@ -261,6 +257,23 @@ public class CallHierarchyContentProviderTest{
         assertFalse("third level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
     }
 
+	@Test
+	public void testLambdaCallers() throws Exception {
+		helper.createClassWithLambdaCalls();
+		TreeRoot root= wrapCallerRoot(helper.getMethod1());
+		Object[] children= fProvider.getChildren(root);
+		helper.assertCalls(new IMember[] { helper.getMethod1() }, children);
+		assertTrue("root's hasChildren", fProvider.hasChildren(root));
+
+		Object[] secondLevelChildren= fProvider.getChildren(children[0]);
+		helper.assertCalls(new IMember[] { helper.getMethod2() }, secondLevelChildren);
+
+		Object[] thirdLevelChildren= fProvider.getChildren(secondLevelChildren[0]);
+
+		assertEquals(
+				"Wrong number of third level children", 6, thirdLevelChildren.length);
+	}
+
     private void assertCalleeMethodWrapperChildren(Object[] children) {
     	for (Object child : children) {
     		assertTrue("Wrong class returned", child.getClass().getName().endsWith(".CalleeMethodWrapper"));
@@ -280,5 +293,17 @@ public class CallHierarchyContentProviderTest{
     private TreeRoot wrapCallerRoot(IMethod method) {
         return new TreeRoot(CallHierarchy.getDefault().getCallerRoots(new IMember[] { method }));
     }
+
+	private static boolean welcomeClosed;
+	private static void closeIntro(final IWorkbench wb) {
+		IWorkbenchWindow window= wb.getActiveWorkbenchWindow();
+		if (window != null) {
+			IIntroManager im= wb.getIntroManager();
+			IIntroPart intro= im.getIntro();
+			if (intro != null) {
+				welcomeClosed= im.closeIntro(intro);
+			}
+		}
+	}
 
 }

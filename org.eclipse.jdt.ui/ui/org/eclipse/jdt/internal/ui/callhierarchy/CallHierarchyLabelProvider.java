@@ -47,6 +47,11 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 
 	private static final int IMAGEFLAGS= DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS;
 
+	private static enum SpecialNodeType {
+		CONSTRUCTOR,
+		DECLARATION
+	}
+
 	private ILabelDecorator fDecorator;
 
 	CallHierarchyLabelProvider() {
@@ -89,10 +94,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			MethodWrapper wrapper= (MethodWrapper)element;
 			String decorated= getElementLabel(wrapper);
 
-			if (isSpecialConstructorNode(wrapper)) {
-				decorated= Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_constructor_label, decorated);
-			}
-			return decorated;
+			return decorateLabel(decorated, getSpecialNodeType(wrapper));
 		}
 		return getSpecialLabel(element);
 	}
@@ -105,8 +107,9 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 
 			StyledString styledLabel= super.getStyledText(wrapper.getMember());
 			StyledString styledDecorated= StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, styledLabel);
-			if (isSpecialConstructorNode(wrapper)) {
-				decorated= Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_constructor_label, decorated);
+			SpecialNodeType nodeType = getSpecialNodeType(wrapper);
+			if (nodeType != null) {
+				decorated = decorateLabel(decorated, nodeType);
 				styledDecorated= StyledCellLabelProvider.styleDecoratedString(decorated, ColoringLabelProvider.INHERITED_STYLER, styledDecorated);
 			}
 			return styledDecorated;
@@ -122,19 +125,40 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		return element instanceof MethodWrapper && ((MethodWrapper)element).getMember() != null && !(element instanceof RealCallers);
 	}
 
-	private boolean isSpecialConstructorNode(MethodWrapper wrapper) {
+	private SpecialNodeType getSpecialNodeType(MethodWrapper wrapper) {
 		MethodWrapper parentWrapper= wrapper.getParent();
 		if (!CallHierarchyContentProvider.isExpandWithConstructors(parentWrapper))
-			return false;
+			return null;
 
 		IMember member= wrapper.getMember();
 		if (member instanceof IType)
-			return true;
+			return SpecialNodeType.CONSTRUCTOR;
 
 		try {
-			return member instanceof IMethod && ((IMethod)member).isConstructor();
+			if (member instanceof IMethod && ((IMethod)member).isConstructor()) {
+				return SpecialNodeType.CONSTRUCTOR;
+			} else {
+				IMember parentMember = parentWrapper.getMember();
+				if (parentMember instanceof IMethod && ((IMethod)parentMember).isLambdaMethod()) {
+					return SpecialNodeType.DECLARATION;
+				}
+				return null;
+			}
 		} catch (JavaModelException e) {
-			return false; // assume it's not a constructor
+			return null; // assume it's not a constructor
+		}
+	}
+
+	private String decorateLabel(String label, SpecialNodeType nodeType) {
+		switch (nodeType) {
+			case CONSTRUCTOR : {
+				return Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_constructor_label, label);
+			}
+			case DECLARATION: {
+				return Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_declaration_label, label);
+			}
+			default:
+				return label;
 		}
 	}
 

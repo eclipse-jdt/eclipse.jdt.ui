@@ -17,6 +17,7 @@ package org.eclipse.jdt.ui.tests.callhierarchy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.Assert;
 
@@ -24,20 +25,25 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java16ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java17ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
+@SuppressWarnings("javadoc")
 public class CallHierarchyTestHelper {
     private static final String[] EMPTY= new String[0];
 
@@ -61,6 +67,9 @@ public class CallHierarchyTestHelper {
         fJavaProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
         fJavaProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
         fJavaProject3= JavaProjectHelper.createJavaProject("TestProject3", "bin");
+        assertBuildWithoutErrors(fJavaProject1);
+        assertBuildWithoutErrors(fJavaProject2);
+        assertBuildWithoutErrors(fJavaProject3);
         fType1= null;
         fType2= null;
         fPack1= null;
@@ -78,7 +87,7 @@ public class CallHierarchyTestHelper {
     /**
      * Creates two simple classes, A and B. Sets the instance fields fType1 and fType2.
      */
-    public void createSimpleClasses() throws CoreException, JavaModelException {
+    public void createSimpleClasses() throws Exception {
         createPackages();
 
 
@@ -112,12 +121,15 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
+
+        assertBuildWithoutErrors(fJavaProject1);
+        assertBuildWithoutErrors(fJavaProject2);
     }
 
     /**
      * Creates two simple classes, A and its subclass B, where B calls A's implicit constructor explicitly. Sets the instance fields fType1 and fType2.
      */
-    public void createImplicitConstructorClasses() throws CoreException, JavaModelException {
+    public void createImplicitConstructorClasses() throws Exception {
         createPackages();
 
         ICompilationUnit cu1= fPack1.getCompilationUnit("A.java");
@@ -135,6 +147,7 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
+        assertBuildWithoutErrors(fPack1);
     }
 
     /**
@@ -154,6 +167,7 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
+        assertBuildWithoutErrors(fPack1);
     }
 
     /**
@@ -207,7 +221,7 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
-
+        assertBuildWithoutErrors(fPack1);
     }
 
     /**
@@ -233,8 +247,55 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
-
+        assertBuildWithoutErrors(fPack1);
     }
+
+	/**
+	 * Creates a class with various lambda function definitions and calls
+	 */
+	public void createClassWithLambdaCalls() throws Exception {
+		createPackages();
+
+		ICompilationUnit cu= fPack1.getCompilationUnit("Snippet.java");
+		fType1= cu.createType("public class Snippet {\n"
+				+ "	static Function<? super String, ? extends String> mapper1 = y -> transform(y);\n"
+				+ "	Function<? super String, ? extends String> mapper2 = y -> transform(y);\n"
+				+ "\n"
+				+ "	static {\n"
+				+ "		 mapper1 = y -> transform(y);\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	public Snippet() {\n"
+				+ "		mapper2 = y -> transform(y);\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	public static void main(String[] args) {\n"
+				+ "		mapper1 = y -> transform(y);\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	Object[] funcCall() {\n"
+				+ "		return List.of(\"aaa\").stream().map(y -> transform(y)).toArray();\n"
+				+ "	}\n"
+				+ "\n"
+				+ "	static String transform(String s) {\n"
+				+ "     x();\n"
+				+ "		return s.toUpperCase();\n"
+				+ "	}\n"
+				+ " static String x() {"
+				+ "     return null;\n"
+				+ "}\n"
+				+ "}",
+				null,
+				true,
+				null);
+		cu.createImport("java.util.List", fType1, null);
+		cu.createImport("java.util.function.Function", fType1, null);
+		fMethod1= fType1.getMethod("x", EMPTY);
+		fMethod2= fType1.getMethod("transform", new String[] { "QString;" });
+		Assert.assertNotNull(fMethod1);
+		Assert.assertNotNull(fMethod2);
+		assertBuildWithoutErrors(fPack1);
+	}
 
     /**
      * Creates a class with a static initializer and sets the class attribute fType1.
@@ -249,15 +310,16 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
+        assertBuildWithoutErrors(fPack1);
     }
 
     /**
      * Creates a record class, OneRecord and sets the instance field fType1.
      */
-    public void createRecordClasses() throws CoreException, JavaModelException {
-    	ProjectTestSetup projectsetup= new Java16ProjectTestSetup(false);
+    public void createRecordClasses() throws Exception {
+    	ProjectTestSetup projectsetup= new Java17ProjectTestSetup(false);
 		fJavaProject3.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set16CompilerOptions(fJavaProject3, true);
+		JavaProjectHelper.set17CompilerOptions(fJavaProject3, false);
 
 		IPackageFragmentRoot fSourceFolder= JavaProjectHelper.addSourceContainer(fJavaProject3, "src");
 
@@ -294,23 +356,82 @@ public class CallHierarchyTestHelper {
                 null,
                 true,
                 null);
+        assertBuildWithoutErrors(fJavaProject3);
     }
 
     /**
      * Creates two packages (pack1 and pack2) in different projects. Sets the
      * instance fields fPack1 and fPack2.
      */
-    public void createPackages() throws CoreException, JavaModelException {
-        JavaProjectHelper.addRTJar(fJavaProject1);
+    public void createPackages() throws Exception {
+        JavaProjectHelper.addRTJar9(fJavaProject1);
 
         IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
         fPack1= root1.createPackageFragment("pack1", true, null);
+        assertBuildWithoutErrors(fPack1);
 
-        JavaProjectHelper.addRTJar(fJavaProject2);
+        JavaProjectHelper.addRTJar9(fJavaProject2);
         JavaProjectHelper.addRequiredProject(fJavaProject2, fJavaProject1);
 
         IPackageFragmentRoot root2= JavaProjectHelper.addSourceContainer(fJavaProject2, "src");
         fPack2= root2.createPackageFragment("pack2", true, null);
+        assertBuildWithoutErrors(fPack2);
+    }
+
+    /**
+     * Returns all error markers on given resource, recursively
+     */
+    public List<IMarker> getErrorMarkers(IResource resource) throws CoreException {
+        IMarker[] markers = resource.findMarkers(null, true, IResource.DEPTH_INFINITE);
+        List<IMarker> errorMarkers = new ArrayList<>();
+        for (IMarker marker : markers) {
+            if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR) {
+                errorMarkers.add(marker);
+            }
+        }
+        return errorMarkers;
+    }
+
+    public static List<String> convertMarkers(IMarker [] markers) throws Exception {
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < markers.length; i++) {
+            IMarker marker = markers[i];
+            StringBuilder sb = new StringBuilder("Marker #");
+            sb.append(i).append("[");
+            sb.append(marker.getAttribute("message", null));
+            sb.append(" at line: ").append(marker.getAttribute("lineNumber", 0));
+            sb.append("], ");
+            result.add(sb.toString());
+        }
+        return result;
+    }
+
+    /**
+     * Verifies that no error markers exist in the given resource.
+     * <p>
+     *
+     * @param element
+     *            The resource that is searched for error markers
+     */
+    protected void assertBuildWithoutErrors(IJavaElement element) throws Exception {
+    	IResource resource= element.getResource();
+    	Assert.assertNotNull("Given element has no resource: " + element, resource);
+    	resource.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		assertNoErrorMarkers(resource);
+    }
+
+    /**
+     * Verifies that no error markers exist in the given resource.
+     * <p>
+     *
+     * @param resource
+     *            The resource that is searched for error markers
+     */
+    protected void assertNoErrorMarkers(IResource resource) throws Exception {
+        List<IMarker> errorMarkers = getErrorMarkers(resource);
+        List<String> messages = convertMarkers(errorMarkers.toArray(new IMarker[errorMarkers.size()]));
+        Assert.assertEquals("No error marker expected, but found markers with messages: " + messages.toString(), 0,
+                errorMarkers.size());
     }
 
     /**
@@ -376,7 +497,7 @@ public class CallHierarchyTestHelper {
     /**
      * @return
      */
-    public IType getType1() {
+	public IType getType1() {
         return fType1;
     }
 

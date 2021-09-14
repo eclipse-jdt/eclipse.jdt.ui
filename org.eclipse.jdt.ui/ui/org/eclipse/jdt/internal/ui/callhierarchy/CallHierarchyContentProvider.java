@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.progress.DeferredTreeContentManager;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -128,6 +129,13 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 								MethodCall anonymousConstructor= new MethodCall(anonymousClass);
 								CallerMethodWrapper anonymousWrapper= (CallerMethodWrapper)caller.createMethodWrapper(anonymousConstructor);
 								return new Object[] { anonymousWrapper, new RealCallers(methodWrapper, caller.getMethodCall()) };
+							} if (type.isLambda()) {
+								IJavaElement definingMethod = type.getParent();
+								if (definingMethod instanceof IMember) {
+									MethodCall methodCall = new MethodCall((IMember) definingMethod);
+									MethodWrapper wrapper = caller.createMethodWrapper(methodCall);
+									return new Object [] { wrapper, new RealCallers(methodWrapper, caller.getMethodCall()) };
+								}
 							} else {
 								IMember[] constructors= JavaElementUtil.getAllConstructors(type);
 								if (constructors.length == 0) {
@@ -178,7 +186,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 					boolean withConstructors= false;
 					if (type != null) {
 						boolean anonymousPref= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS);
-						if ((anonymousPref && type.isAnonymous())
+						if ((anonymousPref && (type.isAnonymous() || type.isLambda()))
 								|| isInTheDefaultExpandWithConstructorList(method)) {
 							withConstructors= true;
 						}
