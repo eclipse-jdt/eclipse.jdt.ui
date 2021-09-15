@@ -380,6 +380,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(CaseDefaultExpression node) {
+		return visit((Expression)node);
+	}
+
+	@Override
+	public void endVisit(CaseDefaultExpression node) {
+		endVisit((Expression)node);
+	}
+
+	@Override
 	public boolean visit(CastExpression node) {
 		return visit((Expression)node);
 	}
@@ -602,6 +612,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	//---- End Name Hierarchy ------------------------------------
 
 	@Override
+	public boolean visit(GuardedPattern node) {
+		return visit((Pattern)node);
+	}
+
+	@Override
+	public void endVisit(GuardedPattern node) {
+		endVisit((Pattern)node);
+	}
+
+	@Override
 	public boolean visit(NullLiteral node) {
 		return visit((Expression)node);
 	}
@@ -612,12 +632,30 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(NullPattern node) {
+		return visit((Pattern)node);
+	}
+
+	@Override
+	public void endVisit(NullPattern node) {
+		endVisit((Pattern)node);
+	}
+
+	@Override
 	public boolean visit(NumberLiteral node) {
 		return visit((Expression)node);
 	}
 
 	@Override
 	public void endVisit(NumberLiteral node) {
+		endVisit((Expression)node);
+	}
+
+	public boolean visit(Pattern node) {
+		return visit((Expression)node);
+	}
+
+	public void endVisit(Pattern node) {
 		endVisit((Expression)node);
 	}
 
@@ -709,6 +747,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(TypeLiteral node) {
 		endVisit((Expression)node);
+	}
+
+	@Override
+	public boolean visit(TypePattern node) {
+		return visit((Pattern)node);
+	}
+
+	@Override
+	public void endVisit(TypePattern node) {
+		endVisit((Pattern)node);
 	}
 
 	@Override

@@ -32,6 +32,7 @@ public class ASTHelper {
 	public static final int JLS14 = AST.JLS14;
 	public static final int JLS15 = AST.JLS15;
 	public static final int JLS16 = AST.JLS16;
+	public static final int JLS17 = AST.JLS17;
 
 	private static boolean isNodeTypeSupportedInAST(AST ast, int nodeType) {
 		switch (nodeType) {
@@ -44,6 +45,8 @@ public class ASTHelper {
 			case ASTNode.RECORD_DECLARATION:
 			case ASTNode.INSTANCEOF_EXPRESSION:
 				return ast.apiLevel() >= JLS16;
+			case ASTNode.TYPE_PATTERN:
+				return ast.isPreviewEnabled();
 			default:
 				break;
 		}
@@ -54,7 +57,7 @@ public class ASTHelper {
 		switch (modifier) {
 			case Modifier.SEALED:
 			case Modifier.NON_SEALED:
-				return ast.isPreviewEnabled();
+				return ast.apiLevel() >= JLS17;
 			default:
 				break;
 		}
@@ -87,6 +90,10 @@ public class ASTHelper {
 
 	public static boolean isInstanceofExpressionPatternSupported(AST ast) {
 		return isNodeTypeSupportedInAST(ast, ASTNode.INSTANCEOF_EXPRESSION);
+	}
+
+	public static boolean isPatternSupported(AST ast) {
+		return isNodeTypeSupportedInAST(ast, ASTNode.TYPE_PATTERN);
 	}
 
 }

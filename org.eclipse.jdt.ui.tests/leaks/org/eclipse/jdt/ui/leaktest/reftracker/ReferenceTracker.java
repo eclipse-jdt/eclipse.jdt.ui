@@ -110,7 +110,7 @@ public final class ReferenceTracker {
 			}
 			return isAccessible;
 		} catch (RuntimeException ex) {
-			throw new RuntimeException("JVM settings `--add-modules ALL-SYSTEM --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED --add-opens java.base/jdk.internal.icu.impl=ALL-UNNAMED --add-opens java.base/jdk.internal.icu.text=ALL-UNNAMED --illegal-access=permit` are probably missing.\nException : \n" + ex.getMessage(), ex);
+			throw new RuntimeException("JVM settings for --add-modules, --add-opens, and --illegal-access are probably missing.\nException : \n" + ex.getMessage(), ex);
 		}
 	}
 

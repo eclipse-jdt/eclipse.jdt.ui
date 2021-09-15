@@ -105,6 +105,7 @@ public class JavaProjectHelper {
 	public static final IPath RT_STUBS14= new Path("testresources/rtstubs14.jar");
 	public static final IPath RT_STUBS15= new Path("testresources/rtstubs_15.jar");
 	public static final IPath RT_STUBS16= new Path("testresources/rtstubs_16.jar");
+	public static final IPath RT_STUBS17= new Path("testresources/rtstubs_17.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 
@@ -314,7 +315,7 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Sets the compiler options to 15 for the given project.
+	 * Sets the compiler options to 16 for the given project.
 	 *
 	 * @param project the java project
 	 * @param enable_preview_feature sets enable-preview compliance project option based on the
@@ -323,6 +324,23 @@ public class JavaProjectHelper {
 	public static void set16CompilerOptions(IJavaProject project, boolean enable_preview_feature) {
 		Map<String, String> options= project.getOptions(false);
 		set16_CompilerOptions(options);
+		if (enable_preview_feature) {
+			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		}
+		project.setOptions(options);
+	}
+
+	/**
+	 * Sets the compiler options to 17 for the given project.
+	 *
+	 * @param project the java project
+	 * @param enable_preview_feature sets enable-preview compliance project option based on the
+	 *            value specified.
+	 */
+	public static void set17CompilerOptions(IJavaProject project, boolean enable_preview_feature) {
+		Map<String, String> options= project.getOptions(false);
+		set17_CompilerOptions(options);
 		if (enable_preview_feature) {
 			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
@@ -453,6 +471,15 @@ public class JavaProjectHelper {
 	 */
 	public static void set16_CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_16, options);
+	}
+
+	/**
+	 * Sets the compiler options to 17.
+	 *
+	 * @param options the compiler options to configure
+	 */
+	public static void set17_CompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_17, options);
 	}
 
 	/**
