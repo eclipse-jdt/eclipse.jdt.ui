@@ -86,6 +86,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -169,6 +170,7 @@ import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFix;
 import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFix;
@@ -204,6 +206,7 @@ import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoWhileRatherThanWhileCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
@@ -323,6 +326,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getNewImplementationProposal(context, coveringNode, null)
 					|| getAddStaticImportProposals(context, coveringNode, null)
 					|| getDoWhileRatherThanWhileProposal(context, coveringNode, null)
+					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null);
 		}
 		return false;
@@ -393,6 +397,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
+				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -4385,6 +4390,41 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		options.put(CleanUpConstants.DO_WHILE_RATHER_THAN_WHILE, CleanUpOptions.TRUE);
 		ICleanUp cleanUp= new DoWhileRatherThanWhileCleanUp(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.DO_WHILE_RATHER_THAN_WHILE, image, context);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean getStringConcatToTextBlockProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+		ASTNode exp= null;
+		if (node instanceof Assignment
+				|| node instanceof VariableDeclarationFragment
+				|| node instanceof FieldDeclaration
+				|| node instanceof InfixExpression) {
+			exp= node;
+		} else {
+			ASTNode parent= node.getParent();
+			if (parent instanceof Assignment
+					|| parent instanceof VariableDeclarationFragment
+					|| parent instanceof FieldDeclaration
+					|| parent instanceof InfixExpression) {
+				exp= parent;
+			}
+		}
+		if (exp == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		IProposableFix fix= StringConcatToTextBlockFixCore.createStringConcatToTextBlockFix(exp);
+		if (fix == null)
+			return false;
+
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Map<String, String> options= new HashMap<>();
+		options.put(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK, CleanUpOptions.TRUE);
+		ICleanUp cleanUp= new StringConcatToTextBlockCleanUp(options);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_TO_TEXT_BLOCK, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}

@@ -7175,15 +7175,20 @@
             id="org.eclipse.jdt.ui.cleanup.stringbuilder"
             runAfter="org.eclipse.jdt.ui.cleanup.static_inner_class">
       </cleanUp>
-       <cleanUp
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StringBufferToStringBuilderCleanUp"
             id="org.eclipse.jdt.ui.cleanup.stringbuffertostringbuilder"
             runAfter="org.eclipse.jdt.ui.cleanup.stringbuilder">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.stringconcattotextblock"
+            runAfter="org.eclipse.jdt.ui.cleanup.stringbuffertostringbuilder">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp"
             id="org.eclipse.jdt.ui.cleanup.plain_replacement"
-            runAfter="org.eclipse.jdt.ui.cleanup.stringbuffertostringbuilder">
+            runAfter="org.eclipse.jdt.ui.cleanup.stringconcattotextblock">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UseStringIsBlankCleanUp"

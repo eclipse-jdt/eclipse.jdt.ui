@@ -1226,6 +1226,16 @@ public class CleanUpConstants {
 	public static final String STRINGBUFFER_TO_STRINGBUILDER= "cleanup.stringbuffer_to_stringbuilder"; //$NON-NLS-1$
 
 	/**
+	 * Replaces String concatenation by Text Block for Java 15 and higher.
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.22
+	 */
+
+	public static final String STRINGCONCAT_TO_TEXTBLOCK= "cleanup.stringconcat_to_textblock"; //$NON-NLS-1$
+
+	/**
 	 * Only replace local var StringBuffer uses with StringBuilder.
 	 *
 	 * @see CleanUpOptionsCore#TRUE
