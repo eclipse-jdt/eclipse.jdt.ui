@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 
@@ -76,7 +77,8 @@ public class EnumConstructorTargetFinderTest {
 	}
 
 	private OccurrenceLocation getTarget(CompilationUnit root, int offset, int length) throws Exception {
-		return JavaElementHyperlinkDetector.findEnumConstructorTarget(root.getTypeRoot(), new Region(offset, length));
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(root.getTypeRoot(), SharedASTProviderCore.WAIT_YES, null);
+		return JavaElementHyperlinkDetector.findEnumConstructorTarget(astRoot, new Region(offset, length));
 	}
 
 	private void checkSelection(CompilationUnit root, int offset, int length, OccurrenceLocation expected) throws Exception {

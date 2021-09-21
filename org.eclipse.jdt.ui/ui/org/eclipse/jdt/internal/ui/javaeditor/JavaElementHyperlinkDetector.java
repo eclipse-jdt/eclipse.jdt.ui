@@ -296,14 +296,18 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 * @since 3.22
 	 */
 	public static OccurrenceLocation findEnumConstructorTarget(ITypeRoot input, IRegion region) {
-		CompilationUnit astRoot= SharedASTProviderCore.getAST(input, SharedASTProviderCore.WAIT_YES, null);
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(input, SharedASTProviderCore.WAIT_NO, null);
+		return findEnumConstructorTarget(astRoot, region);
+	}
+
+	public static OccurrenceLocation findEnumConstructorTarget(CompilationUnit astRoot, IRegion region) {
 		if (astRoot == null) {
 			return null;
 		}
 
 		ASTNode node= NodeFinder.perform(astRoot, region.getOffset(), region.getLength());
-		if (node == null 
-				|| node.getParent() == null 
+		if (node == null
+				|| node.getParent() == null
 				|| node.getParent().getNodeType() != ASTNode.ENUM_CONSTANT_DECLARATION) {
 			return null;
 		}
