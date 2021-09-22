@@ -214,7 +214,6 @@ public class JavaStringDoubleClickStrategyTest {
 
 	@Test
 	public void testLineTerminator() {
-		assertDoubleClick("\"\"\"\nbye\\\n\"\"\"", 8, null, null, 3);
 		assertDoubleClick("\"\"\"\nbye\\\n\"\"\"", 7, new Region(4, 3), null, 3);
 	}
 
