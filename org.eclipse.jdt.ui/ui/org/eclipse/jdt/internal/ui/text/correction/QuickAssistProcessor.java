@@ -785,7 +785,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return null;
 
 		IMethodBinding functionalMethod= targetTypeBinding.getFunctionalInterfaceMethod();
-		if (functionalMethod.isSynthetic()) {
+		if (functionalMethod != null && functionalMethod.isSynthetic()) {
 			functionalMethod= Bindings.findOverriddenMethodInType(functionalMethod.getDeclaringClass(), functionalMethod);
 		}
 		return functionalMethod;
