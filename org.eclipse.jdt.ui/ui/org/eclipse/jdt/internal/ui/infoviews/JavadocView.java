@@ -1355,9 +1355,8 @@ public class JavadocView extends AbstractInfoView {
 			return null;
 		}
 
-		IVariableBinding variableBinding= (IVariableBinding) createBindings[0];
-		if (variableBinding != null)
-			return variableBinding.getConstantValue();
+		if (createBindings[0] instanceof IVariableBinding)
+			return ((IVariableBinding) createBindings[0]).getConstantValue();
 
 		return null;
 	}

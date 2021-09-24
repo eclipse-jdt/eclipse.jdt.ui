@@ -32,6 +32,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
@@ -114,5 +115,29 @@ public class JavadocHoverTests extends CoreTests {
 			// value should be expanded:
 			assertTrue(actualHtmlContent, actualHtmlContent.contains("&lt;script&gt;"));
 		}
+	}
+
+	@Test
+	public void testEnumWithAnonymousClass() throws Exception {
+		String myEnumSource = "package test;\n"
+				+ "public enum MyEnum {\n"
+				+ "	ENUM1 {\n"
+				+ "		@Override\n"
+				+ "		public String get() {\n"
+				+ "			return \"ENUM1\";\n"
+				+ "		}\n"
+				+ "	};\n"
+				+ "	public abstract String get();\n"
+				+ "}\n"
+				+ "";
+		ICompilationUnit myEnumCu= getWorkingCopy("/TestSetupProject/src/test/MyEnum.java", myEnumSource, null);
+		assertNotNull("MyEnum.java", myEnumCu);
+
+		IType type= myEnumCu.getType("MyEnum");
+		IField field = type.getField("ENUM1");
+		IJavaElement[] elements= { field };
+		ISourceRange range= ((ISourceReference) field).getNameRange();
+		// Should not throw ClassCastException
+		JavadocHover.getHoverInfo(elements, myEnumCu, new Region(range.getOffset(), range.getLength()), null);
 	}
 }
