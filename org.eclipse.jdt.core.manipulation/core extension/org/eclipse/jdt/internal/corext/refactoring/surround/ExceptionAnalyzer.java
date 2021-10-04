@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.surround;
 
@@ -43,8 +44,11 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
 
-import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessorUtil;
 
+/**
+ * @since 1.16
+ */
 public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
 	private Selection fSelection;
@@ -207,7 +211,7 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		IMethodBinding referredMethodBinding= node.resolveMethodBinding();
 		if (referredMethodBinding == null)
 			return false;
-		IMethodBinding functionalMethod= QuickAssistProcessor.getFunctionalMethodForMethodReference(node);
+		IMethodBinding functionalMethod= QuickAssistProcessorUtil.getFunctionalMethodForMethodReference(node);
 		if (functionalMethod == null || functionalMethod.isGenericMethod()) { // generic lambda expressions are not allowed
 			return false;
 		}

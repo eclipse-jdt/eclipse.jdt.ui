@@ -86,7 +86,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoringCore;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -291,7 +291,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			List<ITypeBinding> mustRethrowList= new ArrayList<>();
 
 			if (fTypeBinding != null) {
-				IMethodBinding close= SurroundWithTryWithResourcesRefactoring.findAutocloseMethod(fTypeBinding);
+				IMethodBinding close= SurroundWithTryWithResourcesRefactoringCore.findAutocloseMethod(fTypeBinding);
 				if (close != null) {
 					for (ITypeBinding exceptionType : close.getExceptionTypes()) {
 						if (!allExceptions.contains(exceptionType)) {

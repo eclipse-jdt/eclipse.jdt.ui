@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -80,7 +80,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
 
-import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessorUtil;
 
 /**
  * Surround a set of statements with a try/catch block or a try/multi-catch block.
@@ -380,10 +380,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 			if (selectedNode instanceof MethodReference) {
 				MethodReference methodReference= (MethodReference) selectedNode;
-				IMethodBinding functionalMethod= QuickAssistProcessor.getFunctionalMethodForMethodReference(methodReference);
+				IMethodBinding functionalMethod= QuickAssistProcessorUtil.getFunctionalMethodForMethodReference(methodReference);
 				// functionalMethod is non-null and non-generic. See ExceptionAnalyzer.handleMethodReference(MethodReference node).
 				Assert.isTrue(functionalMethod != null && !functionalMethod.isGenericMethod());
-				LambdaExpression lambda= QuickAssistProcessor.convertMethodRefernceToLambda(methodReference, functionalMethod, fRootNode, fRewriter, null, true);
+				LambdaExpression lambda= QuickAssistProcessorUtil.convertMethodRefernceToLambda(methodReference, functionalMethod, fRootNode, fRewriter, null, true);
 				ASTNode statementInBlock= (ASTNode) ((Block) lambda.getBody()).statements().get(0);
 				fRewriter.replace(statementInBlock, replacementNode, null);
 				statements.insertLast(statementInBlock, null);
@@ -392,7 +392,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 			LambdaExpression enclosingLambda= ASTResolving.findEnclosingLambdaExpression(selectedNode);
 			if (enclosingLambda != null && selectedNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY && enclosingLambda.resolveMethodBinding() != null) {
-				QuickAssistProcessor.changeLambdaBodyToBlock(enclosingLambda, getAST(), fRewriter);
+				QuickAssistProcessorUtil.changeLambdaBodyToBlock(enclosingLambda, getAST(), fRewriter);
 				Block blockBody= (Block) fRewriter.get(enclosingLambda, LambdaExpression.BODY_PROPERTY);
 				ASTNode statementInBlock= (ASTNode) blockBody.statements().get(0);
 				fRewriter.replace(statementInBlock, replacementNode, null);
