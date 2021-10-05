@@ -1089,6 +1089,9 @@ public class UnresolvedElementsSubProcessor {
 
 					if ((kind & TypeKinds.CLASSES) != 0) {
 						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_CLASS, enclosing, rel+3));
+						if (canUseRecord(cu.getJavaProject(), refNode)) {
+							proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_RECORD, enclosing, rel + 3));
+						}
 					}
 					if ((kind & TypeKinds.INTERFACES) != 0) {
 						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_INTERFACE, enclosing, rel+2));
@@ -1136,6 +1139,27 @@ public class UnresolvedElementsSubProcessor {
 				}
 			}
 		}
+	}
+
+	private static boolean canUseRecord(IJavaProject project, Name refNode) {
+		boolean canUseRecord= false;
+		if (project != null
+				&& JavaModelUtil.is16OrHigher(project)
+				&& refNode != null) {
+			canUseRecord= true;
+			Type type= ASTNodes.getParent(refNode, Type.class);
+			TypeDeclaration typeDecl= ASTNodes.getParent(refNode, TypeDeclaration.class);
+			if (type != null && typeDecl != null) {
+				StructuralPropertyDescriptor locationInParent= type.getLocationInParent();
+				if (locationInParent == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
+					canUseRecord= false;
+				} else if (locationInParent == TypeDeclaration.PERMITS_TYPES_PROPERTY
+						&& !typeDecl.isInterface()) {
+					canUseRecord= false;
+				}
+			}
+		}
+		return canUseRecord;
 	}
 
 	public static void addRequiresModuleProposals(ICompilationUnit cu, Name node, int relevance, Collection<ICommandAccess> proposals, boolean isOnDemand) throws CoreException {

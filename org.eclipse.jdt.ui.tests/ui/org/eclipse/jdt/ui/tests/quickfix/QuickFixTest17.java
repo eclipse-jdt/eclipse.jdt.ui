@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.core.internal.expressions.Messages;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -33,6 +35,8 @@ import org.eclipse.jdt.ui.tests.core.rules.Java17ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class QuickFixTest17 extends QuickFixTest {
 
@@ -593,6 +597,68 @@ public class QuickFixTest17 extends QuickFixTest {
 				"}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testAddRecordAsSubType() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test=  "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface IShape permits Circle, Square {\\n" +
+				"\n" +
+				"}\n" +
+				"\n" +
+				"class Circle implements IShape {\n" +
+				"    \n" +
+				"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
+		String expectedProposal= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_description, "Square");
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
+		assertProposalExists(proposals, expectedProposal);
+	}
+
+	@Test
+	public void testDoNotAddRecordAsSubType() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed class Shape permits Circle, Square {\\n" +
+				"\n" +
+				"}\n" +
+				"\n" +
+				"class Circle extends Shape {\n" +
+				"    \n" +
+				"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", test, false, null);
+		String expectedProposal= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_description, "Square");
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
+		assertProposalDoesNotExist(proposals, expectedProposal);
 	}
 
 }

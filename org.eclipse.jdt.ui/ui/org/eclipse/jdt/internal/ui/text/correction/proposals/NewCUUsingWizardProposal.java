@@ -67,6 +67,7 @@ import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
 import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
 import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;
 import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
+import org.eclipse.jdt.ui.wizards.NewRecordWizardPage;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -80,6 +81,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewEnumCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewRecordCreationWizard;
 
 
 /**
@@ -96,6 +98,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	public static final int K_INTERFACE= 2;
 	public static final int K_ENUM= 3;
 	public static final int K_ANNOTATION= 4;
+	public static final int K_RECORD= 5;
 
 	private Name fNode;
 	private ICompilationUnit fCompilationUnit;
@@ -214,6 +217,26 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 					setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewannotation_inpackage_description, containerLabel));
 				}
 				break;
+			case K_RECORD:
+				setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_RECORD));
+				if (fNode != null) {
+					if (isInnerType) {
+						if (containerName.length() == 0) {
+							setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createinnerrecord_description, typeLabel));
+						} else {
+							setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createinnerrecord_intype_description, new String[] { typeLabel, containerLabel }));
+						}
+					} else {
+						if (containerName.length() == 0) {
+							setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_description, typeLabel));
+						} else {
+							setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_inpackage_description, new String[] { typeLabel, containerLabel }));
+						}
+					}
+				} else {
+					setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, containerLabel));
+				}
+				break;
 			default:
 				throw new IllegalArgumentException("Unknown type kind"); //$NON-NLS-1$
 		}
@@ -330,6 +353,12 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				page.init(selection);
 				configureWizardPage(page);
 				return new NewAnnotationCreationWizard(page, true);
+			}
+			case K_RECORD: {
+				NewRecordWizardPage page= new NewRecordWizardPage();
+				page.init(selection);
+				configureWizardPage(page);
+				return new NewRecordCreationWizard(page, true);
 			}
 		}
 		throw new IllegalArgumentException();
