@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2021 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -80,12 +80,12 @@ public class TemplateCompletionTests {
 
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "new_class", completionIndex);
-
+		String lineSeparator= System.lineSeparator();
 		StringBuffer expected= new StringBuffer();
-		expected.append("   package test;\n" +
-				"\n" +
-				"public class EmptyFile  {\n" +
-				"\n" +
+		expected.append("   package test;" + lineSeparator +
+				lineSeparator +
+				"public class EmptyFile  {" + lineSeparator +
+				lineSeparator +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
