@@ -569,6 +569,7 @@
             name="%perspectiveName"
             icon="$nl$/icons/full/eview16/jperspective.png"
             class="org.eclipse.jdt.internal.ui.JavaPerspectiveFactory"
+            defaultShowIn="org.eclipse.jdt.ui.PackageExplorer"
             id="org.eclipse.jdt.ui.JavaPerspective">
          <description>
             %java.perspective.description
