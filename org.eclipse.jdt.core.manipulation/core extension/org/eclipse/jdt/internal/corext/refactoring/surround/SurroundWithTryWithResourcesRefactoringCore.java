@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -370,7 +371,8 @@ public class SurroundWithTryWithResourcesRefactoringCore extends Refactoring {
 
 			Selection nodesInRangeSelection= fAnalyzer.getSelection();
 			if (!fAutoClosableNodes.isEmpty()) {
-				ASTNode parentBodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
+				ASTNode parentBodyDeclaration= (node instanceof Block || node instanceof BodyDeclaration) ?
+						node : ASTNodes.getFirstAncestorOrNull(node, Block.class,  BodyDeclaration.class);
 				int start= fAutoClosableNodes.get(0).getStartPosition();
 				ASTNode lastSelectedNode= fSelectedNodes[fSelectedNodes.length - 1];
 				int end= lastSelectedNode.getStartPosition() + lastSelectedNode.getLength();
@@ -643,27 +645,12 @@ public class SurroundWithTryWithResourcesRefactoringCore extends Refactoring {
 				int post= postNode.getStartPosition() + postNode.getLength();
 				if (pre >= start && post <= end) {
 					Statement statement= ASTResolving.findParentStatement(postNode);
-					loop: while (statement != null) {
-						if (statement.getParent() instanceof Statement) {
-							Statement pStatement= (Statement) statement.getParent();
-							switch (pStatement.getNodeType()) {
-								case ASTNode.BLOCK:
-									if (pStatement.getParent().getNodeType() != ASTNode.METHOD_DECLARATION &&
-									pStatement.getParent().getNodeType() != ASTNode.TRY_STATEMENT) {
-										statement= pStatement;
-										continue;
-									} else {
-										break loop;
-									}
-								case ASTNode.METHOD_DECLARATION:
-									break loop;
-								default:
-									break;
-							}
-							statement= pStatement;
-						} else {
-							break;
+					while (statement != null && statement.getParent() != astNode) {
+						ASTNode parent= statement.getParent();
+						if (parent == null) {
+							return;
 						}
+						statement= ASTResolving.findParentStatement(parent);
 					}
 					if (statement != null && !nodesInRange.contains(statement)) {
 						nodesInRange.add(statement);
@@ -683,7 +670,6 @@ public class SurroundWithTryWithResourcesRefactoringCore extends Refactoring {
 				result.add(parent);
 		}
 		return result;
-
 	}
 
 	private Statement getCatchBody(String type, String name, String lineSeparator) throws CoreException {

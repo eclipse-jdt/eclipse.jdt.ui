@@ -3054,8 +3054,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	@SuppressWarnings({ "null" })
-	private static boolean getTryWithResourceProposals(IInvocationContext context, ASTNode node, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections)
+	public static boolean getTryWithResourceProposals(IInvocationContext context, ASTNode node, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections)
 			throws IllegalArgumentException, CoreException {
+		if (!JavaModelUtil.is1d8OrHigher(context.getCompilationUnit().getJavaProject()))
+			return false;
 
 		ASTNode parentStatement= ASTResolving.findAncestor(node, ASTNode.VARIABLE_DECLARATION_STATEMENT);
 		if (!(parentStatement instanceof VariableDeclarationStatement) &&
@@ -3083,7 +3085,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		BodyDeclaration parentBodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
+		ASTNode parentBodyDeclaration= (node instanceof Block || node instanceof BodyDeclaration)
+				? node
+						: ASTNodes.getFirstAncestorOrNull(node, Block.class, BodyDeclaration.class);
+
 		int start= coveredAutoClosableNodes.get(0).getStartPosition();
 		int end= start;
 

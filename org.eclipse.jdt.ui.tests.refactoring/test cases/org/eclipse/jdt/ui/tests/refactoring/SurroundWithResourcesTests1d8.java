@@ -95,6 +95,16 @@ public class SurroundWithResourcesTests1d8 extends AbstractJunit4SelectionTestCa
 	}
 
 	@Test
+	public void testSimple5() throws Exception {
+		tryResourcesTest();
+	}
+
+	@Test
+	public void testAnonymous1() throws Exception {
+		tryResourcesTest();
+	}
+
+	@Test
 	public void testNonClosableInserted1() throws Exception {
 		tryResourcesTest();
 	}

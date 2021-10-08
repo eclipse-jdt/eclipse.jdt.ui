@@ -60,6 +60,7 @@ public class SurroundWithTryWithResourcesAnalyzer extends SurroundWithAnalyzer {
 	}
 
 	public ITypeBinding[] getExceptions(Selection selection) {
+		fExceptions= new ITypeBinding[0];
 		if (fEnclosingNode != null && !getStatus().hasFatalError()) {
 			fExceptions= ExceptionAnalyzer.perform(fEnclosingNode, selection, false);
 			if (fExceptions == null || fExceptions.length == 0) {
@@ -110,25 +111,27 @@ public class SurroundWithTryWithResourcesAnalyzer extends SurroundWithAnalyzer {
 
 	public ITypeBinding[] getThrownExceptions() {
 		List<ITypeBinding> exceptions= new ArrayList<>();
-		if (fEnclosingNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
-			List<Type> thrownExceptions= ((MethodDeclaration) fEnclosingNode).thrownExceptionTypes();
-			for (Type type : thrownExceptions) {
-				ITypeBinding thrownException= type.resolveBinding();
-				if (thrownException != null) {
-					exceptions.add(thrownException);
+		if (fEnclosingNode != null) {
+			if (fEnclosingNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
+				List<Type> thrownExceptions= ((MethodDeclaration) fEnclosingNode).thrownExceptionTypes();
+				for (Type type : thrownExceptions) {
+					ITypeBinding thrownException= type.resolveBinding();
+					if (thrownException != null) {
+						exceptions.add(thrownException);
+					}
 				}
-			}
-		} else {
-			ITypeBinding typeBinding= null;
-			if (fEnclosingNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
-				typeBinding= ((LambdaExpression) fEnclosingNode.getParent()).resolveTypeBinding();
-			} else if (fEnclosingNode instanceof MethodReference) {
-				typeBinding= ((MethodReference) fEnclosingNode).resolveTypeBinding();
-			}
-			if (typeBinding != null) {
-				IMethodBinding methodBinding= typeBinding.getFunctionalInterfaceMethod();
-				if (methodBinding != null) {
-					Collections.addAll(exceptions, methodBinding.getExceptionTypes());
+			} else {
+				ITypeBinding typeBinding= null;
+				if (fEnclosingNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+					typeBinding= ((LambdaExpression) fEnclosingNode.getParent()).resolveTypeBinding();
+				} else if (fEnclosingNode instanceof MethodReference) {
+					typeBinding= ((MethodReference) fEnclosingNode).resolveTypeBinding();
+				}
+				if (typeBinding != null) {
+					IMethodBinding methodBinding= typeBinding.getFunctionalInterfaceMethod();
+					if (methodBinding != null) {
+						Collections.addAll(exceptions, methodBinding.getExceptionTypes());
+					}
 				}
 			}
 		}
