@@ -318,10 +318,10 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_DELAY, 4, 20);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJava;
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 100, 4, 20);
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 100, 0, 20);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJavaDoc;
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 100, 4, 20);
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 100, 0, 20);
 	}
 
 
@@ -354,8 +354,12 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		if (modelTextLimit != 0)
 			textBox.setTextLimit(modelTextLimit);
 
-		if (fieldTextLimit != 0)
+		if (fieldTextLimit != 0) {
 			data.widthHint= pixelConverter.convertWidthInCharsToPixels(fieldTextLimit + 1);
+			data.horizontalAlignment = SWT.BEGINNING;
+		} else {
+			data.grabExcessHorizontalSpace = true;
+		}
 
 		data.horizontalSpan= 2;
 		textBox.setLayoutData(data);
