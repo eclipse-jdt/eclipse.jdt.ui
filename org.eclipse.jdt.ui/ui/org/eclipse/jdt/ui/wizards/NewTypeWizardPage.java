@@ -2181,7 +2181,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			// accept the empty field (stands for java.lang.Object)
 			return status;
 		}
-
+		if (fSuperClass != null) {
+			try {
+				if (fSuperClass.isRecord()) {
+					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperClassRecord, BasicElementLabels.getJavaElementName(sclassName)));
+					return status;
+				}
+			} catch (JavaModelException e) {
+				//do nothing
+			}
+		}
 		if (root != null) {
 			Type type= TypeContextChecker.parseSuperClass(sclassName);
 			if (type == null) {

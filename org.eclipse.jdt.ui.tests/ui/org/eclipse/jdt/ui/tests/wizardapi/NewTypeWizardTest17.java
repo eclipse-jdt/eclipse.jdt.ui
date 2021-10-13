@@ -42,14 +42,16 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.Java17ProjectTestSetup;
@@ -1145,6 +1147,43 @@ public class NewTypeWizardTest17 {
 		assertTrue(NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentModule.equals(status.getMessage()));
 	}
 
+	@Test
+	public void testAddRecordSuperClassError1() throws Exception {
+		fJProject1= projectSetup.getProject();
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public record Rec1(int x){\n" +
+				"}\n";
+		ICompilationUnit superClsUnit= fpack1.createCompilationUnit("Rec1.java", test, false, null);
+		ITypeBinding superCls= getTypeBinding(superClsUnit);
+
+		NewClassWizardPage wizardPage= new NewClassWizardPage();
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(fpack1, true);
+		wizardPage.setEnclosingTypeSelection(false, true);
+		wizardPage.setTypeName("E", true);
+
+		wizardPage.setSuperClass(superCls, true);
+
+		List<ITypeBinding> interfaces= new ArrayList<>();
+		wizardPage.setSuperInterfacesList(interfaces, true);
+
+		wizardPage.setMethodStubSelection(false, false, false, true);
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+
+		String sclassName= wizardPage.getSuperClass();
+		String expected= Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperClassRecord, BasicElementLabels.getJavaElementName(sclassName));
+
+		IStatus status= wizardPage.getSuperClassStatus();
+		assertNotNull(status);
+		assertTrue(status.getSeverity() == IStatus.ERROR);
+		assertTrue(expected.equals(status.getMessage()));
+	}
+
 	protected static CompilationUnit getASTRoot(ICompilationUnit cu) {
 		return ASTResolving.createQuickFixAST(cu, null);
 	}
@@ -1154,8 +1193,8 @@ public class NewTypeWizardTest17 {
 		ITypeBinding tBinding= null;
 		if (compUnit != null) {
 			Object typeDecl= compUnit.types().get(0);
-			if (typeDecl instanceof TypeDeclaration) {
-				tBinding= ((TypeDeclaration) typeDecl).resolveBinding();
+			if (typeDecl instanceof AbstractTypeDeclaration) {
+				tBinding= ((AbstractTypeDeclaration) typeDecl).resolveBinding();
 			}
 		}
 		return tBinding;

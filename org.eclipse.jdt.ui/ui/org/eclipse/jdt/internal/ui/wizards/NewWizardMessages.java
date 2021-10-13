@@ -159,6 +159,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_warning_TypeNameDiscouraged;
 	public static String NewTypeWizardPage_error_TypeParameters;
 	public static String NewTypeWizardPage_error_InvalidSuperClassName;
+	public static String NewTypeWizardPage_error_InvalidSuperClassRecord;
 	public static String NewTypeWizardPage_error_SuperClassNotParameterized;
 	public static String NewTypeWizardPage_error_InvalidSuperInterfaceName;
 	public static String NewTypeWizardPage_error_SuperInterfaceNotParameterized;
