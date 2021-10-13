@@ -1188,7 +1188,7 @@ public class NewTypeWizardTest17 {
 		return ASTResolving.createQuickFixAST(cu, null);
 	}
 
-	public static ITypeBinding getTypeBinding(ICompilationUnit cu) {
+	private static ITypeBinding getTypeBinding(ICompilationUnit cu) {
 		CompilationUnit compUnit= ASTResolving.createQuickFixAST(cu, null);
 		ITypeBinding tBinding= null;
 		if (compUnit != null) {

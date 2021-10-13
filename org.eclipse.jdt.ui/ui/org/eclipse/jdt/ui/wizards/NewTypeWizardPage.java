@@ -1664,7 +1664,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Sets the super class name.
 	 *
 	 * @param type the binding of superclass
-	 * @param canBeModified if <code>true</code> the superclass name field is editable; 
+	 * @param canBeModified if <code>true</code> the superclass name field is editable;
 	 * otherwise it is read-only.
 	 * @since 3.25
 	 */
@@ -2186,6 +2186,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (fSuperClass.isRecord()) {
 					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperClassRecord, BasicElementLabels.getJavaElementName(sclassName)));
 					return status;
+				} else {
+					int flags= fSuperClass.getFlags();
+					if (Flags.isFinal(flags)) {
+						status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidFinalSuperClass, BasicElementLabels.getJavaElementName(sclassName)));
+						return status;
+					}
 				}
 			} catch (JavaModelException e) {
 				//do nothing

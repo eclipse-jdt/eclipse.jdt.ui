@@ -17,6 +17,8 @@
 package org.eclipse.jdt.ui.tests.wizardapi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -31,6 +33,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -43,10 +47,16 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
@@ -58,6 +68,7 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
  *
@@ -796,5 +807,49 @@ public class NewTypeWizardTest {
 		// Foo3.java can still be unique in test1
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getElementName();
 		assertEquals("Foo3.java", actual);
+	}
+
+	@Test
+	public void testAddFinalSuperClassError1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String test= "" +
+				"package test1;\n" +
+				"\n" +
+				"public final class A{\n" +
+				"}\n";
+		ICompilationUnit superClsUnit= pack1.createCompilationUnit("A.java", test, false, null);
+		ITypeBinding superCls= getTypeBinding(superClsUnit);
+
+		NewClassWizardPage wizardPage= new NewClassWizardPage();
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(pack1, true);
+		wizardPage.setTypeName("E", true);
+		wizardPage.setSuperClass(superCls, true);
+
+		List<String> interfaces= new ArrayList<>();
+		wizardPage.setSuperInterfaces(interfaces, true);
+
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+
+		String sclassName= wizardPage.getSuperClass();
+		String expected= Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidFinalSuperClass, BasicElementLabels.getJavaElementName(sclassName));
+
+		IStatus status= wizardPage.getSuperClassStatus();
+		assertNotNull(status);
+		assertTrue(status.getSeverity() == IStatus.ERROR);
+		assertTrue(expected.equals(status.getMessage()));
+	}
+
+	private static ITypeBinding getTypeBinding(ICompilationUnit cu) {
+		CompilationUnit compUnit= ASTResolving.createQuickFixAST(cu, null);
+		ITypeBinding tBinding= null;
+		if (compUnit != null) {
+			Object typeDecl= compUnit.types().get(0);
+			if (typeDecl instanceof AbstractTypeDeclaration) {
+				tBinding= ((AbstractTypeDeclaration) typeDecl).resolveBinding();
+			}
+		}
+		return tBinding;
 	}
 }
