@@ -210,12 +210,5 @@
                 <message_argument value="fSealedSuperInterfacesStatus"/>
             </message_arguments>
         </filter>
-        <filter id="640712815">
-            <message_arguments>
-                <message_argument value="IType"/>
-                <message_argument value="NewTypeWizardPage"/>
-                <message_argument value="isSealed()"/>
-            </message_arguments>
-        </filter>
     </resource>
 </component>

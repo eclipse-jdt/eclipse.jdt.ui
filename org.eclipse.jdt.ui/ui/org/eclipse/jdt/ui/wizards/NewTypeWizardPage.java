@@ -2227,7 +2227,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (fSealedSuperClassStatus != null && fSealedSuperClassStatus.isOK()
 						&& fSealedSuperInterfacesStatus != null && fSealedSuperInterfacesStatus.isOK()
 						&& isSuperTypeSealed()) {
-					if (!this.isValidSealedFlagSelected()) {
+					if (!fSealedMdfButtons.isEnabled(NON_SEALED_INDEX)) {
 						fSealedMdfButtons.enableSelectionButton(NON_SEALED_INDEX, true);
 					}
 				} else {
@@ -2242,12 +2242,33 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	private void setSealedModifiersButtonDefault() {
 		if (fSealedMdfButtons != null) {
+			if (isSealedButtonSelected(NON_SEALED_INDEX)) {
+				fSealedMdfButtons.setSelection(0, true);
+			}
 			fSealedMdfButtons.enableSelectionButton(NON_SEALED_INDEX, false);
 			fSealedMdfButtons.setSelection(NON_SEALED_INDEX, false);
-			fSealedMdfButtons.enableSelectionButton(SEALED_INDEX, true);
-			fSealedMdfButtons.setSelection(SEALED_INDEX, false);
-			fSealedMdfButtons.setSelection(0, true);
+			if (!fIsSealedSupported && isSealedButtonSelected(SEALED_INDEX)) {
+				fSealedMdfButtons.enableSelectionButton(SEALED_INDEX, false);
+				fSealedMdfButtons.setSelection(SEALED_INDEX, false);
+				fSealedMdfButtons.setSelection(0, true);
+			}
 		}
+	}
+
+	private boolean isSealedButtonSelected(int index) {
+		boolean selected= false;
+		if (fSealedMdfButtons != null) {
+			try {
+				Button button= fSealedMdfButtons.getSelectionButton(index);
+				if (button != null && button.isEnabled() && button.getSelection())  {
+					selected= true;
+				}
+			} catch (NullPointerException npe) {
+				//This will be hit when fSealedMdfButtons is not yet initialized.
+				//do nothing
+			}
+		}
+		return selected;
 	}
 
 	private StatusInfo canSuperTypeBeExtended(IType type) {
