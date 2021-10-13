@@ -16,8 +16,11 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jface.text.link.LinkedPositionGroup;
@@ -25,6 +28,8 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
@@ -37,6 +42,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodReference;
@@ -53,12 +59,14 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 
@@ -383,6 +391,89 @@ public class QuickAssistProcessorUtil {
 		Expression bodyExpr= (Expression) rewrite.createMoveTarget(lambda.getBody());
 		Block blockBody= getBlockBodyForLambda(bodyExpr, lambda.resolveMethodBinding().getReturnType(), ast);
 		rewrite.set(lambda, LambdaExpression.BODY_PROPERTY, blockBody, null);
+	}
+
+	/**
+	 * Return the first auto closable nodes. When a node that isn't Autoclosable is found the method
+	 * returns.
+	 *
+	 * @param astNodes The nodes covered.
+	 * @return List of the first AutoClosable nodes found
+	 */
+	public static List<ASTNode> getCoveredAutoClosableNodes(List<ASTNode> astNodes) {
+		List<ASTNode> autoClosableNodes= new ArrayList<>();
+		for (ASTNode astNode : astNodes) {
+			if (isAutoClosable(astNode)) {
+				autoClosableNodes.add(astNode);
+			} else {
+				return autoClosableNodes;
+			}
+		}
+		return autoClosableNodes;
+	}
+
+	public static int findEndPostion(ASTNode node) {
+		int end= node.getStartPosition() + node.getLength();
+		Map<SimpleName, IVariableBinding> nodeSimpleNameBindings= getVariableStatementBinding(node);
+		List<SimpleName> nodeNames= new ArrayList<>(nodeSimpleNameBindings.keySet());
+		if (nodeNames.isEmpty()) {
+			return -1;
+		}
+		SimpleName nodeSimpleName= nodeNames.get(0);
+		SimpleName[] coveredNodeBindings= LinkedNodeFinder.findByNode(node.getRoot(), nodeSimpleName);
+		if (coveredNodeBindings.length == 0) {
+			return -1;
+		}
+		for (ASTNode astNode : coveredNodeBindings) {
+			end= Math.max(end, (astNode.getStartPosition() + astNode.getLength()));
+		}
+		return end;
+	}
+
+	public static Map<SimpleName, IVariableBinding> getVariableStatementBinding(ASTNode astNode) {
+		Map<SimpleName, IVariableBinding> variableBindings= new HashMap<>();
+		astNode.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(VariableDeclarationStatement node) {
+				for (Object o : node.fragments()) {
+					if (o instanceof VariableDeclarationFragment) {
+						VariableDeclarationFragment vdf= (VariableDeclarationFragment) o;
+						SimpleName name= vdf.getName();
+						IBinding binding= name.resolveBinding();
+						if (binding instanceof IVariableBinding) {
+							variableBindings.put(name, (IVariableBinding) binding);
+							break;
+						}
+					}
+				}
+				return false;
+			}
+		});
+		return variableBindings;
+	}
+
+	public static boolean isAutoClosable(ITypeBinding typeBinding) {
+		return Bindings.findTypeInHierarchy(typeBinding, "java.lang.AutoCloseable") != null; //$NON-NLS-1$
+	}
+
+	public static boolean isAutoClosable(ASTNode astNode) {
+		Map<SimpleName, IVariableBinding> simpleNames= getVariableStatementBinding(astNode);
+		for (Entry<SimpleName, IVariableBinding> entry : simpleNames.entrySet()) {
+			ITypeBinding typeBinding= null;
+			switch (entry.getKey().getParent().getNodeType()) {
+				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+				case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+				case ASTNode.ASSIGNMENT:
+					typeBinding= entry.getValue().getType();
+					break;
+				default:
+					continue;
+			}
+			if (typeBinding != null && isAutoClosable(typeBinding)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

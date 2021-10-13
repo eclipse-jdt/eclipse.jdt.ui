@@ -2443,6 +2443,18 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+	public static void getTryWithResourceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
+		if (coveringNode != null) {
+			try {
+				ArrayList<ASTNode> coveredNodes= AdvancedQuickAssistProcessor.getFullyCoveredNodes(context, coveringNode);
+				QuickAssistProcessor.getTryWithResourceProposals(context, coveringNode, coveredNodes, proposals);
+			} catch (IllegalArgumentException | CoreException e) {
+				// do nothing
+			}
+		}
+	}
+
 	public static void getConvertLambdaToAnonymousClassCreationsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		if (coveringNode != null) {

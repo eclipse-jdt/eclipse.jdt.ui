@@ -320,6 +320,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.FeatureNotSupported:
 			case IProblem.SwitchExpressionsReturnWithinSwitchExpression:
 			case IProblem.DanglingReference:
+			case IProblem.UnclosedCloseable:
+			case IProblem.PotentiallyUnclosedCloseable:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -903,6 +905,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SwitchExpressionsReturnWithinSwitchExpression:
 				ReturnTypeSubProcessor.replaceReturnWithYieldStatementProposals(context, problem, proposals);
 				break;
+			case IProblem.UnclosedCloseable:
+			case IProblem.PotentiallyUnclosedCloseable:
+				LocalCorrectionsSubProcessor.getTryWithResourceProposals(context, problem, proposals);
+			    break;
 			default:
 		}
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {

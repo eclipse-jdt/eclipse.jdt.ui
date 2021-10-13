@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2020 IBM Corporation and others.
+ * Copyright (c) 2013, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
@@ -70,7 +71,6 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, JavaCore.DO_NOT_INSERT);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ANNOTATIONS_ON_LOCAL_VARIABLE, DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT));
-
 
 		JavaCore.setOptions(options);
 
@@ -2370,6 +2370,142 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("");
 		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected});
+	}
+
+	// bug 576502 : try-with-resources quick fix should be offered for resource leaks
+	@Test
+	public void testBug576502_potentiallyUnclosedCloseable() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(CompilerOptions.OPTION_ReportPotentiallyUnclosedCloseable, CompilerOptions.ERROR);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.FileReader;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("class E {\n");
+		buf.append("    public void foo() throws IOException {\n");
+		buf.append("        final File file = new File(\"somefile\");\n");
+		buf.append("        FileReader fileReader = new FileReader(file);\n");
+		buf.append("        char[] in = new char[50];\n");
+		buf.append("        fileReader.read(in);\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() { \n");
+		buf.append("                try {\n");
+		buf.append("                    fileReader.close();\n");
+		buf.append("                } catch (IOException ex) { /* nop */ }\n");
+		buf.append("            }}.run();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+
+
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.FileReader;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("class E {\n");
+		buf.append("    public void foo() throws IOException {\n");
+		buf.append("        final File file = new File(\"somefile\");\n");
+		buf.append("        try (FileReader fileReader = new FileReader(file)) {\n");
+		buf.append("            char[] in = new char[50];\n");
+		buf.append("            fileReader.read(in);\n");
+		buf.append("            new Runnable() {\n");
+		buf.append("                public void run() { \n");
+		buf.append("                    try {\n");
+		buf.append("                        fileReader.close();\n");
+		buf.append("                    } catch (IOException ex) { /* nop */ }\n");
+		buf.append("                }}.run();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected});
+	}
+
+	// bug 576502 : try-with-resources quick fix should be offered for resource leaks
+	@Test
+	public void testBug576502_unclosedCloseable() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(CompilerOptions.OPTION_ReportUnclosedCloseable, CompilerOptions.ERROR);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.FileReader;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("class E {\n");
+		buf.append("    public void foo(boolean f1, boolean f2) throws IOException {\n");
+		buf.append("        File file = new File(\"somefile\");\n");
+		buf.append("        if (f1) {\n");
+		buf.append("            FileReader fileReader = new FileReader(file); // err: not closed\n");
+		buf.append("            char[] in = new char[50];\n");
+		buf.append("            fileReader.read(in);\n");
+		buf.append("            while (true) {\n");
+		buf.append("                FileReader loopReader = new FileReader(file); // don't warn, properly closed\n");
+		buf.append("                loopReader.close();\n");
+		buf.append("                break;\n");
+		buf.append("            }\n");
+		buf.append("        } else {\n");
+		buf.append("            FileReader fileReader = new FileReader(file); // warn: not closed on all paths\n");
+		buf.append("            if (f2)\n");
+		buf.append("                fileReader.close();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+
+
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.FileReader;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("class E {\n");
+		buf.append("    public void foo(boolean f1, boolean f2) throws IOException {\n");
+		buf.append("        File file = new File(\"somefile\");\n");
+		buf.append("        if (f1) {\n");
+		buf.append("            try (FileReader fileReader = new FileReader(file)) {\n");
+		buf.append("                char[] in = new char[50];\n");
+		buf.append("                fileReader.read(in);\n");
+		buf.append("            }\n");
+		buf.append("            while (true) {\n");
+		buf.append("                FileReader loopReader = new FileReader(file); // don't warn, properly closed\n");
+		buf.append("                loopReader.close();\n");
+		buf.append("                break;\n");
+		buf.append("            }\n");
+		buf.append("        } else {\n");
+		buf.append("            FileReader fileReader = new FileReader(file); // warn: not closed on all paths\n");
+		buf.append("            if (f2)\n");
+		buf.append("                fileReader.close();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+		String expected= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected});
 	}

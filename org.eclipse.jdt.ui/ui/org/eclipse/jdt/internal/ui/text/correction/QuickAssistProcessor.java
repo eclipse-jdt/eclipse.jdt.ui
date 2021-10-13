@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -2227,7 +2226,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		localProposal.setCommandId(ASSIGN_TO_LOCAL_ID);
 		resultingCollections.add(localProposal);
 
-		if (isAutoClosable(typeBinding)) {
+		if (QuickAssistProcessorUtil.isAutoClosable(typeBinding)) {
 			AssignToVariableAssistProposal tryWithResourcesProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.TRY_WITH_RESOURCES, expressionStatement, typeBinding,
 					IProposalRelevance.ASSIGN_IN_TRY_WITH_RESOURCES);
 			tryWithResourcesProposal.setCommandId(ASSIGN_IN_TRY_WITH_RESOURCES_ID);
@@ -3080,7 +3079,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				}
 			}
 		}
-		List<ASTNode> coveredAutoClosableNodes= getCoveredAutoClosableNodes(coveredStatements);
+		List<ASTNode> coveredAutoClosableNodes= QuickAssistProcessorUtil.getCoveredAutoClosableNodes(coveredStatements);
 		if (coveredAutoClosableNodes.isEmpty()) {
 			return false;
 		}
@@ -3093,7 +3092,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		int end= start;
 
 		for (ASTNode astNode : coveredAutoClosableNodes) {
-			int endPosition= findEndPostion(astNode);
+			int endPosition= QuickAssistProcessorUtil.findEndPostion(astNode);
 			end= Math.max(end, endPosition);
 		}
 
@@ -3103,7 +3102,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		while (true) {
 			int newEnd= oldEnd;
 			for (ASTNode astNode : nodesInRange) {
-				int endPosition= findEndPostion(astNode);
+				int endPosition= QuickAssistProcessorUtil.findEndPostion(astNode);
 				newEnd= Math.max(newEnd, endPosition);
 			}
 			if (newEnd > oldEnd) {
@@ -3300,89 +3299,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		resultingCollections.add(proposal);
 		return true;
-	}
-
-	private static int findEndPostion(ASTNode node) {
-		int end= node.getStartPosition() + node.getLength();
-		Map<SimpleName, IVariableBinding> nodeSimpleNameBindings= getVariableStatementBinding(node);
-		List<SimpleName> nodeNames= new ArrayList<>(nodeSimpleNameBindings.keySet());
-		if (nodeNames.isEmpty()) {
-			return -1;
-		}
-		SimpleName nodeSimpleName= nodeNames.get(0);
-		SimpleName[] coveredNodeBindings= LinkedNodeFinder.findByNode(node.getRoot(), nodeSimpleName);
-		if (coveredNodeBindings.length == 0) {
-			return -1;
-		}
-		for (ASTNode astNode : coveredNodeBindings) {
-			end= Math.max(end, (astNode.getStartPosition() + astNode.getLength()));
-		}
-		return end;
-	}
-
-	/**
-	 * Return the first auto closable nodes. When a node that isn't Autoclosable is found the method
-	 * returns.
-	 *
-	 * @param astNodes The nodes covered.
-	 * @return List of the first AutoClosable nodes found
-	 */
-	private static List<ASTNode> getCoveredAutoClosableNodes(List<ASTNode> astNodes) {
-		List<ASTNode> autoClosableNodes= new ArrayList<>();
-		for (ASTNode astNode : astNodes) {
-			if (isAutoClosable(astNode)) {
-				autoClosableNodes.add(astNode);
-			} else {
-				return autoClosableNodes;
-			}
-		}
-		return autoClosableNodes;
-	}
-
-	private static boolean isAutoClosable(ASTNode astNode) {
-		Map<SimpleName, IVariableBinding> simpleNames= getVariableStatementBinding(astNode);
-		for (Entry<SimpleName, IVariableBinding> entry : simpleNames.entrySet()) {
-			ITypeBinding typeBinding= null;
-			switch (entry.getKey().getParent().getNodeType()) {
-				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
-				case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-				case ASTNode.ASSIGNMENT:
-					typeBinding= entry.getValue().getType();
-					break;
-				default:
-					continue;
-			}
-			if (typeBinding != null && isAutoClosable(typeBinding)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static boolean isAutoClosable(ITypeBinding typeBinding) {
-		return Bindings.findTypeInHierarchy(typeBinding, "java.lang.AutoCloseable") != null; //$NON-NLS-1$
-	}
-
-	private static Map<SimpleName, IVariableBinding> getVariableStatementBinding(ASTNode astNode) {
-		Map<SimpleName, IVariableBinding> variableBindings= new HashMap<>();
-		astNode.accept(new ASTVisitor() {
-			@Override
-			public boolean visit(VariableDeclarationStatement node) {
-				for (Object o : node.fragments()) {
-					if (o instanceof VariableDeclarationFragment) {
-						VariableDeclarationFragment vdf= (VariableDeclarationFragment) o;
-						SimpleName name= vdf.getName();
-						IBinding binding= name.resolveBinding();
-						if (binding instanceof IVariableBinding) {
-							variableBindings.put(name, (IVariableBinding) binding);
-							break;
-						}
-					}
-				}
-				return false;
-			}
-		});
-		return variableBindings;
 	}
 
 	private static boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
