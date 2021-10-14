@@ -74,4 +74,15 @@ public class MethodCall {
 
         fCallLocations.add(location);
     }
+
+	@Override
+	public String toString() {
+		StringBuilder builder= new StringBuilder();
+		builder.append("MethodCall ["); //$NON-NLS-1$
+		if (fMember != null) {
+			builder.append(fMember);
+		}
+		builder.append("]"); //$NON-NLS-1$
+		return builder.toString();
+	}
 }

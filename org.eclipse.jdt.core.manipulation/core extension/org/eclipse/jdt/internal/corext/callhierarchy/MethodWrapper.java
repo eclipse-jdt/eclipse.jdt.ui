@@ -332,4 +332,20 @@ public abstract class MethodWrapper extends PlatformObject {
 		fElements= null;
 		fMethodCache.remove(getMethodCall().getKey());
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder= new StringBuilder();
+		builder.append("MethodWrapper ["); //$NON-NLS-1$
+		if (fMethodCall != null) {
+			builder.append(fMethodCall);
+		}
+		if (fParent != null) {
+			builder.append(", "); //$NON-NLS-1$
+			builder.append("parent="); //$NON-NLS-1$
+			builder.append(fParent);
+		}
+		builder.append("]"); //$NON-NLS-1$
+		return builder.toString();
+	}
 }
