@@ -2435,6 +2435,74 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return concatenation.toString();\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public String refactorConcatenationWithCharVariable(String[] titles, char delimiter) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String title : titles) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(delimiter);\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(title);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithCharacterWrapper(String[] titles, Character delimiter) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String title : titles) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(delimiter);\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(title);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithEscapedChar(String[] titles) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String title : titles) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append('\\n');\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(title);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithInt(String[] titles) {\n" //
+				+ "        boolean isFirst = true;\n" //
+				+ "        StringBuilder concatenation = new StringBuilder();\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        for (String title : titles) {\n" //
+				+ "            if (isFirst) {\n" //
+				+ "                isFirst = false;\n" //
+				+ "            } else {\n" //
+				+ "                concatenation.append(123);\n" //
+				+ "            }\n" //
+				+ "            concatenation.append(title);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return concatenation.toString();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public String refactorConcatenationWithHardCodedDelimiter(String[] texts) {\n" //
 				+ "        boolean isFirst = true;\n" //
 				+ "        StringBuilder concatenation = new StringBuilder();\n" //
@@ -2871,7 +2939,43 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        \n" //
 				+ "\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String concatenation = String.join(String.valueOf(','), titles);\n" //
+				+ "        String concatenation = String.join(\",\", titles);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithCharVariable(String[] titles, char delimiter) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(String.valueOf(delimiter), titles);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithCharacterWrapper(String[] titles, Character delimiter) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(String.valueOf(delimiter), titles);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithEscapedChar(String[] titles) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(\"\\n\", titles);\n" //
+				+ "\n" //
+				+ "        return concatenation;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String refactorConcatenationWithInt(String[] titles) {\n" //
+				+ "        \n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String concatenation = String.join(String.valueOf(123), titles);\n" //
 				+ "\n" //
 				+ "        return concatenation;\n" //
 				+ "    }\n" //

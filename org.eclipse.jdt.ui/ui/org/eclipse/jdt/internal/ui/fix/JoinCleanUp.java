@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -50,6 +51,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -324,7 +326,7 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 
 						if (emptyLength != null
 								&& ASTNodes.usesGivenSignature(emptyLength.getFirstOperand(), CharSequence.class.getCanonicalName(), "length") //$NON-NLS-1$
-								&& ASTNodes.as(emptyLength.getFirstOperand().getExpression(), SimpleName.class) != null) {
+								&& ASTNodes.is(emptyLength.getFirstOperand().getExpression(), SimpleName.class)) {
 							Long literal= ASTNodes.getIntegerLiteral(emptyLength.getSecondOperand());
 
 							if (Long.valueOf(0L).equals(literal) && Arrays.asList(InfixExpression.Operator.NOT_EQUALS, InfixExpression.Operator.GREATER).contains(emptyLength.getOperator())
@@ -521,14 +523,26 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 				private Expression getDelimiterAppend(final String builderClass, final Statement appendDelimiter, final Set<SimpleName> builderUses) {
 					MethodInvocation appendInvocation= getAppendInvocation(ASTNodes.as(appendDelimiter, ExpressionStatement.class), builderClass, builderUses);
 
-					if (ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", char.class.getCanonicalName()) //$NON-NLS-1$
-							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", Character.class.getCanonicalName()) //$NON-NLS-1$
-							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", String.class.getCanonicalName())) { //$NON-NLS-1$
-						Expression delimiter= (Expression) appendInvocation.arguments().get(0);
-
-						if (ASTNodes.isHardCoded(delimiter)) {
-							return delimiter;
-						}
+					if (ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", String.class.getCanonicalName()) //$NON-NLS-1$
+							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", char.class.getCanonicalName()) //$NON-NLS-1$
+							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", int.class.getCanonicalName()) //$NON-NLS-1$
+							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", long.class.getCanonicalName()) //$NON-NLS-1$
+							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", double.class.getCanonicalName()) //$NON-NLS-1$
+							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", byte.class.getCanonicalName()) //$NON-NLS-1$
+							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", short.class.getCanonicalName()) //$NON-NLS-1$
+							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", float.class.getCanonicalName()) //$NON-NLS-1$
+							|| ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", boolean.class.getCanonicalName()) //$NON-NLS-1$
+							|| (ASTNodes.usesGivenSignature(appendInvocation, builderClass, "append", Object.class.getCanonicalName()) //$NON-NLS-1$
+									&& ASTNodes.hasType((Expression) appendInvocation.arguments().get(0),
+											Character.class.getCanonicalName(),
+											Integer.class.getCanonicalName(),
+											Long.class.getCanonicalName(),
+											Double.class.getCanonicalName(),
+											Byte.class.getCanonicalName(),
+											Short.class.getCanonicalName(),
+											Float.class.getCanonicalName(),
+											Boolean.class.getCanonicalName()))) {
+						return (Expression) appendInvocation.arguments().get(0);
 					}
 
 					return null;
@@ -540,7 +554,7 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 
 					if (changeBoolean != null
 							&& ASTNodes.hasOperator(changeBoolean, Assignment.Operator.ASSIGN)
-							&& ASTNodes.as(changeBoolean.getLeftHandSide(), SimpleName.class) != null) {
+							&& ASTNodes.is(changeBoolean.getLeftHandSide(), SimpleName.class)) {
 						Boolean booleanInstantiation= ASTNodes.getBooleanLiteral(changeBoolean.getRightHandSide());
 
 						if (booleanInstantiation != null && isInitializedToTrue != booleanInstantiation) {
@@ -719,7 +733,11 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 
 			Expression copyOfDelimiter= ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(delimiter));
 
-			if (!ASTNodes.hasType(delimiter, String.class.getCanonicalName())) {
+			if (ASTNodes.hasType(delimiter, char.class.getCanonicalName()) && ASTNodes.is(delimiter, CharacterLiteral.class)) {
+				StringLiteral delimiterAsStringLiteral= ast.newStringLiteral();
+				delimiterAsStringLiteral.setLiteralValue(String.valueOf(ASTNodes.as(delimiter, CharacterLiteral.class).charValue()));
+				copyOfDelimiter= delimiterAsStringLiteral;
+			} else if (!ASTNodes.hasType(delimiter, String.class.getCanonicalName())) {
 				MethodInvocation valueOfMethod= ast.newMethodInvocation();
 				valueOfMethod.setExpression(ast.newSimpleName(String.class.getSimpleName()));
 				valueOfMethod.setName(ast.newSimpleName("valueOf")); //$NON-NLS-1$
