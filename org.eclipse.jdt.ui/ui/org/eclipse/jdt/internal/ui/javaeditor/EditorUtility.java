@@ -892,4 +892,18 @@ public class EditorUtility {
 	private EditorUtility() {
 	}
 
+	/**
+	 * Returns the currently active java editor, or <code>null</code> if it
+	 * cannot be determined.
+	 *
+	 * @return  the currently active java editor, or <code>null</code>
+	 */
+	public static JavaEditor getActiveJavaEditor() {
+		IEditorPart part= JavaPlugin.getActivePage().getActiveEditor();
+		if (part instanceof JavaEditor)
+			return (JavaEditor) part;
+		else
+			return null;
+	}
+
 }

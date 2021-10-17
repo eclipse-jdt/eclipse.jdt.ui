@@ -20,6 +20,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Hashtable;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,6 +69,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.java.JavaLambdaCompletionProposal;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -970,6 +973,217 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			buf.append("public class A {\n");
 			buf.append("    void lambda(Object o) {\n");
 			buf.append("        Runnable r = () -> ((Strong))\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEquals(buf.toString(), doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+
+	@Test
+	public void testBug443091_expectLambdaExpressionCompletion_onArgumentAssignment() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("public class Bug443091 {\n");
+		buf.append("	void foo(Consumer<Integer> c){}\n");
+		buf.append("    void test() {\n");
+		buf.append("        this.foo()\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Bug443091.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "this.foo(";
+
+			int offset= contents.indexOf(str) + str.length();
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+			Optional<IJavaCompletionProposal> result = Stream.of(proposals).filter(JavaLambdaCompletionProposal.class::isInstance).findFirst();
+			assertTrue("doesn't contain JavaLambdaCompletionProposal", result.isPresent());
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			IJavaCompletionProposal proposal= result.get();
+			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
+			proposal.apply(doc);
+
+			buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.util.function.Consumer;\n");
+			buf.append("public class Bug443091 {\n");
+			buf.append("	void foo(Consumer<Integer> c){}\n");
+			buf.append("    void test() {\n");
+			buf.append("        this.foo(arg0 -> )\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEquals(buf.toString(), doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+
+	@Test
+	public void testBug443091_expectLambdaExpressionCompletion_onVariableAssignment() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("public class Bug443091 {\n");
+		buf.append("    void test() {\n");
+		buf.append("        Consumer<Integer> c =\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Bug443091.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "Consumer<Integer> c =";
+
+			int offset= contents.indexOf(str) + str.length();
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+			Optional<IJavaCompletionProposal> result = Stream.of(proposals).filter(JavaLambdaCompletionProposal.class::isInstance).findFirst();
+			assertTrue("doesn't contain JavaLambdaCompletionProposal", result.isPresent());
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			IJavaCompletionProposal proposal= result.get();
+			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
+			proposal.apply(doc);
+
+			buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.util.function.Consumer;\n");
+			buf.append("public class Bug443091 {\n");
+			buf.append("    void test() {\n");
+			buf.append("        Consumer<Integer> c =arg0 -> \n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEquals(buf.toString(), doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+
+	@Test
+	public void testBug443091_expectZeroArgLambdaExpressionCompletion_onVariableAssignment() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Bug443091 {\n");
+		buf.append("    void test() {\n");
+		buf.append("        Runnable run =\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Bug443091.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "Runnable run =";
+
+			int offset= contents.indexOf(str) + str.length();
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+			Optional<IJavaCompletionProposal> result = Stream.of(proposals).filter(JavaLambdaCompletionProposal.class::isInstance).findFirst();
+			assertTrue("doesn't contain JavaLambdaCompletionProposal", result.isPresent());
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			IJavaCompletionProposal proposal= result.get();
+			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
+			proposal.apply(doc);
+
+			buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("public class Bug443091 {\n");
+			buf.append("    void test() {\n");
+			buf.append("        Runnable run =() -> \n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEquals(buf.toString(), doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+	@Test
+	public void testBug443091_expectMultiArgLambdaExpressionCompletion_onVariableAssignment() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.function.BiConsumer;\n");
+		buf.append("public class Bug443091 {\n");
+		buf.append("    void test() {\n");
+		buf.append("        BiConsumer<Integer, String> bi =\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Bug443091.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "BiConsumer<Integer, String> bi =";
+
+			int offset= contents.indexOf(str) + str.length();
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+			Optional<IJavaCompletionProposal> result = Stream.of(proposals).filter(JavaLambdaCompletionProposal.class::isInstance).findFirst();
+			assertTrue("doesn't contain JavaLambdaCompletionProposal", result.isPresent());
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			IJavaCompletionProposal proposal= result.get();
+			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
+			proposal.apply(doc);
+
+			buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.util.function.BiConsumer;\n");
+			buf.append("public class Bug443091 {\n");
+			buf.append("    void test() {\n");
+			buf.append("        BiConsumer<Integer, String> bi =(arg0, arg1) -> \n");
 			buf.append("    }\n");
 			buf.append("}\n");
 			assertEquals(buf.toString(), doc.get());

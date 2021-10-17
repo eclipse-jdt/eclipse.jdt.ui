@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.ui.text.java.FieldProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.GetterSetterCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaFieldWithCastedReceiverCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.JavaLambdaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
@@ -480,6 +481,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return createJavadocSimpleProposal(proposal);
 			case CompletionProposal.JAVADOC_INLINE_TAG:
 				return createJavadocInlineTagProposal(proposal);
+			case CompletionProposal.LAMBDA_EXPRESSION:
+				return createLambdaProposal(proposal);
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 			default:
 				return null;
@@ -627,6 +630,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.JAVADOC_FIELD_REF:
 			case CompletionProposal.JAVADOC_VALUE_REF:
+			case CompletionProposal.LAMBDA_EXPRESSION:
 				char[] declaration= proposal.getDeclarationSignature();
 				// special methods may not have a declaring type: methods defined on arrays etc.
 				// Currently known: class literals don't have a declaring type - use Object
@@ -875,4 +879,11 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		adaptLength(proposal, typeProposal);
 		return proposal;
 	}
+
+	private IJavaCompletionProposal createLambdaProposal(CompletionProposal orginal) {
+		LazyJavaCompletionProposal proposal= new JavaLambdaCompletionProposal(orginal, getInvocationContext());
+		adaptLength(proposal, orginal);
+		return proposal;
+	}
+
 }

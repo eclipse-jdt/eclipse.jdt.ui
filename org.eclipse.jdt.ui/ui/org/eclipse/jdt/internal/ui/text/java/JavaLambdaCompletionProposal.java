@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2021 Gayan Perera and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,12 +9,11 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     Gayan Perera - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -30,6 +29,7 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -38,22 +38,73 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-/**
- * A method proposal with filled in argument names.
- */
-public class FilledArgumentNamesMethodProposal extends JavaMethodCompletionProposal {
-
-	private IRegion fSelectedRegion; // initialized by apply()
-	private int[] fArgumentOffsets;
+public class JavaLambdaCompletionProposal extends LazyJavaCompletionProposal {
 	private int[] fArgumentLengths;
 
-	public FilledArgumentNamesMethodProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+	private int[] fArgumentOffsets;
+
+	private IRegion fSelectedRegion;
+
+
+	public JavaLambdaCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		super(proposal, context);
 	}
 
-	/*
-	 * @see ICompletionProposalExtension#apply(IDocument, char)
-	 */
+	protected boolean needsLinkedMode() {
+		return getParameterCount() > 0;
+	}
+
+	private int getParameterCount() {
+		return Signature.getParameterCount(this.fProposal.getSignature());
+	}
+
+	@Override
+	protected String computeReplacementString() {
+		StringBuilder buffer= new StringBuilder();
+		FormatterPrefs prefs= getFormatterPrefs();
+
+		final int parameterCount= getParameterCount();
+		this.fArgumentLengths= new int[parameterCount];
+		this.fArgumentOffsets= new int[parameterCount];
+
+		if (parameterCount > 1 || parameterCount == 0) {
+			buffer.append(LPAREN);
+		}
+
+		if (parameterCount > 0) {
+			appendParameterNames(buffer, prefs);
+		}
+
+		if (parameterCount > 1 || parameterCount == 0) {
+			buffer.append(RPAREN);
+		}
+		buffer.append(SPACE);
+		buffer.append(this.fProposal.getCompletion());
+		buffer.append(SPACE);
+		return buffer.toString();
+	}
+
+	private void appendParameterNames(StringBuilder buffer, FormatterPrefs prefs) {
+		char[][] parameterNames= this.fProposal.findParameterNames(null);
+
+		for (int i= 0; i < parameterNames.length; i++) {
+			char[] pname= parameterNames[i];
+
+			if (i != 0) {
+				if (prefs.beforeComma) {
+					buffer.append(SPACE);
+				}
+				buffer.append(COMMA);
+				if (prefs.afterComma) {
+					buffer.append(SPACE);
+				}
+			}
+			this.fArgumentOffsets[i]= buffer.length();
+			buffer.append(pname);
+			this.fArgumentLengths[i]= pname.length;
+		}
+	}
+
 	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		super.apply(document, trigger, offset);
@@ -77,7 +128,7 @@ public class FilledArgumentNamesMethodProposal extends JavaMethodCompletionPropo
 
 				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
 				ui.setExitPosition(getTextViewer(), baseOffset + replacement.length(), 0, Integer.MAX_VALUE);
-				ui.setExitPolicy(new ExitPolicy(')', document));
+				ui.setExitPolicy(new ExitPolicy('}', document));
 				ui.setDoContextInfo(true);
 				ui.setCyclingMode(LinkedModeUI.CYCLE_WHEN_NO_PARENT);
 				ui.enter();
@@ -86,73 +137,14 @@ public class FilledArgumentNamesMethodProposal extends JavaMethodCompletionPropo
 
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);
-				openErrorDialog(e);
+				MessageDialog.openError(getTextViewer().getTextWidget().getShell(), JavaTextMessages.FilledArgumentNamesMethodProposal_error_msg,
+						e.getMessage());
 			}
 		} else {
 			fSelectedRegion= new Region(baseOffset + replacement.length(), 0);
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal#needsLinkedMode()
-	 */
-	@Override
-	protected boolean needsLinkedMode() {
-		return false; // we handle it ourselves
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
-	 */
-	@Override
-	protected String computeReplacementString() {
-
-		if (!hasParameters() || !hasArgumentList())
-			return super.computeReplacementString();
-
-		StringBuffer buffer= new StringBuffer();
-		appendMethodNameReplacement(buffer);
-
-		char[][] parameterNames= fProposal.findParameterNames(null);
-		int count= parameterNames.length;
-		fArgumentOffsets= new int[count];
-		fArgumentLengths= new int[count];
-
-		FormatterPrefs prefs= getFormatterPrefs();
-
-		setCursorPosition(buffer.length());
-
-		if (prefs.afterOpeningParen)
-			buffer.append(SPACE);
-
-		for (int i= 0; i != count; i++) {
-			if (i != 0) {
-				if (prefs.beforeComma)
-					buffer.append(SPACE);
-				buffer.append(COMMA);
-				if (prefs.afterComma)
-					buffer.append(SPACE);
-			}
-
-			fArgumentOffsets[i]= buffer.length();
-			buffer.append(parameterNames[i]);
-			fArgumentLengths[i]= parameterNames[i].length;
-		}
-
-		if (prefs.beforeClosingParen)
-			buffer.append(SPACE);
-
-		buffer.append(RPAREN);
-
-		if (canAutomaticallyAppendSemicolon())
-			buffer.append(SEMICOLON);
-
-		return buffer.toString();
-	}
-
-	/*
-	 * @see ICompletionProposal#getSelection(IDocument)
-	 */
 	@Override
 	public Point getSelection(IDocument document) {
 		if (fSelectedRegion == null)
@@ -160,10 +152,4 @@ public class FilledArgumentNamesMethodProposal extends JavaMethodCompletionPropo
 
 		return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
 	}
-
-	private void openErrorDialog(BadLocationException e) {
-		Shell shell= getTextViewer().getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTextMessages.FilledArgumentNamesMethodProposal_error_msg, e.getMessage());
-	}
-
 }

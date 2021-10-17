@@ -548,6 +548,30 @@ public class CompletionProposalLabelProvider {
 		return Strings.markJavaElementLabelLTR(buffer);
 	}
 
+	private StyledString createLambdaProposalLabel(CompletionProposal proposal) {
+		StyledString nameBuffer= new StyledString();
+
+		// lambda parameters
+		nameBuffer.append('(');
+		appendUnboundedParameterList(nameBuffer, proposal);
+		nameBuffer.append(')');
+
+		nameBuffer.append(" -> "); //$NON-NLS-1$
+
+		// return type of the lambda
+		char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(proposal.getSignature()))));
+		nameBuffer.append(RETURN_TYPE_SEPARATOR);
+		nameBuffer.append(returnType);
+
+		// functional interface declaring type
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
+		String declaringType= extractDeclaringTypeFQN(proposal);
+
+		declaringType= Signature.getSimpleName(declaringType);
+		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
+		return org.eclipse.jdt.internal.corext.util.Strings.markJavaElementLabelLTR(nameBuffer);
+	}
+
 	/**
 	 * Creates the display label for a given <code>CompletionProposal</code>.
 	 *
@@ -608,6 +632,8 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.KEYWORD:
 			case CompletionProposal.LABEL_REF:
 				return createSimpleLabel(proposal);
+			case CompletionProposal.LAMBDA_EXPRESSION:
+				return createLambdaProposalLabel(proposal);
 			default:
 				Assert.isTrue(false);
 				return null;
@@ -634,6 +660,7 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
 			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
+			case CompletionProposal.LAMBDA_EXPRESSION:
 				descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, flags);
 				break;
 			case CompletionProposal.TYPE_REF:

@@ -48,6 +48,7 @@ public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposal
 		collector.setIgnored(CompletionProposal.MODULE_DECLARATION, false);
 		collector.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, false);
 		collector.setIgnored(CompletionProposal.VARIABLE_DECLARATION, false);
+		collector.setIgnored(CompletionProposal.LAMBDA_EXPRESSION, false);
 		return collector;
 	}
 
