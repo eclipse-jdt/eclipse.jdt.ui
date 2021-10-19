@@ -14,16 +14,12 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
@@ -34,16 +30,16 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 
+import org.eclipse.jface.util.Throttler;
+
 import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.UIJob;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitAnnotationModelEvent;
 
 /**
@@ -111,7 +107,7 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 	private Set<IResource> fResourcesWithMarkerChanges;
 	private Set<IResource> fResourcesWithAnnotationChanges;
 
-	private UIJob fNotifierJob;
+	private final Throttler throttledUpdates= new Throttler(PlatformUI.getWorkbench().getDisplay(), Duration.ofMillis(250), this::runPendingUpdates);
 
 	public ProblemMarkerManager() {
 		fListeners= new ListenerList<>();
@@ -198,24 +194,7 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 	}
 
 	private void fireChanges() {
-		Display display= PlatformUI.getWorkbench().getDisplay();
-		if (display != null && !display.isDisposed()) {
-			postAsyncUpdate(display);
-		}
-	}
-
-	private void postAsyncUpdate(final Display display) {
-		if (fNotifierJob == null) {
-			fNotifierJob= new UIJob(display, JavaUIMessages.ProblemMarkerManager_problem_marker_update_job_description) {
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					runPendingUpdates();
-					return Status.OK_STATUS;
-				}
-			};
-			fNotifierJob.setSystem(true);
-		}
-		fNotifierJob.schedule();
+		throttledUpdates.throttledExec();
 	}
 
 	/**
