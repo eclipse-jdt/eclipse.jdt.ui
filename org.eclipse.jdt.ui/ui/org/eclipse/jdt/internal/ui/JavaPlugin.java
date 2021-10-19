@@ -211,7 +211,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	private static final String CODE_ASSIST_MIGRATED= "code_assist_migrated"; //$NON-NLS-1$
 
-	private static final String TYPEFILTER_MIGRATED= "typefilter_migrated"; //$NON-NLS-1$
+	private static final String TYPEFILTER_MIGRATED= "typefilter_migrated_2"; //$NON-NLS-1$
 
 	/**
 	 * @deprecated to avoid deprecation warning
@@ -1122,12 +1122,13 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		enabledFiltersToAdd.add("com.sun.*"); //$NON-NLS-1$
 		enabledFiltersToAdd.add("sun.*"); //$NON-NLS-1$
 		enabledFiltersToAdd.add("jdk.*"); //$NON-NLS-1$
-		enabledFiltersToAdd.add("org.graalvm.*"); //$NON-NLS-1$
-		enabledFiltersToAdd.add("java.awt.*"); //$NON-NLS-1$
 		enabledFiltersToAdd.add("io.micrometer.shaded.*"); //$NON-NLS-1$
+		enabledFiltersToAdd.add("java.awt.List"); //$NON-NLS-1$
 
 		Set<String> disabledFiltersToAdd= new LinkedHashSet<>();
 		disabledFiltersToAdd.add("java.rmi.*"); //$NON-NLS-1$
+		disabledFiltersToAdd.add("org.graalvm.*"); //$NON-NLS-1$
+		disabledFiltersToAdd.add("java.awt.*"); //$NON-NLS-1$
 
 		// default value - enabled
 		Set<String> defaultEnabled= new LinkedHashSet<>();
@@ -1153,6 +1154,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		Set<String> currentEnabled= new LinkedHashSet<>();
 		String currentEnabledString= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.TYPEFILTER_ENABLED);
 		currentEnabled.addAll(Arrays.asList(currentEnabledString.split(";"))); //$NON-NLS-1$
+		currentEnabled.remove("org.graalvm.*"); //$NON-NLS-1$
+		currentEnabled.remove("java.awt.*"); //$NON-NLS-1$
 
 		Set<String> currentDisabled= new LinkedHashSet<>();
 		String currentDisabledString= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.TYPEFILTER_DISABLED);
@@ -1165,11 +1168,13 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		disabledFiltersToAdd.removeAll(currentDisabled);
 
 		if (!enabledFiltersToAdd.isEmpty()) {
+			currentEnabledString = currentEnabled.stream().collect(Collectors.joining(";")); //$NON-NLS-1$
 			String newEnabledString= currentEnabledString + ";" + enabledFiltersToAdd.stream().collect(Collectors.joining(";")); //$NON-NLS-1$ //$NON-NLS-2$
 			PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.TYPEFILTER_ENABLED, newEnabledString);
 		}
 
 		if (!disabledFiltersToAdd.isEmpty()) {
+			currentDisabledString = currentDisabled.stream().collect(Collectors.joining(";")); //$NON-NLS-1$
 			String newDisabledString= currentDisabledString + ";" + disabledFiltersToAdd.stream().collect(Collectors.joining(";")); //$NON-NLS-1$ //$NON-NLS-2$
 			PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.TYPEFILTER_DISABLED, newDisabledString);
 		}
