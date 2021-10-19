@@ -353,6 +353,20 @@ public class QuickFixTest {
 		return proposals;
 	}
 
+	protected static final ArrayList<IJavaCompletionProposal> collectAssistsWithProblems(IInvocationContext context) throws CoreException {
+		ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
+		IProblem[] problems= context.getASTRoot().getProblems();
+		IProblemLocation firstProblemLocation= new ProblemLocation(problems[0]);
+		IStatus status= JavaCorrectionProcessor.collectAssists(context, new IProblemLocation[] { firstProblemLocation }, proposals);
+		assertStatusOk(status);
+
+		if (!proposals.isEmpty()) {
+			assertTrue("should be marked as 'has assist'", JavaCorrectionProcessor.hasAssists(context));
+		}
+
+		return proposals;
+	}
+
 	private static boolean isFiltered(Object curr, Class<?>[] filteredTypes) {
 		for (Class<?> filteredType : filteredTypes) {
 			if (filteredType.isInstance(curr)) {

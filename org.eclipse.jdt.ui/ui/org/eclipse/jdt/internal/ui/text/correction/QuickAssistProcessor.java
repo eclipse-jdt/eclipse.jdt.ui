@@ -354,7 +354,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getPickoutTypeFromMulticatchProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getConvertToMultiCatchProposals(context, coveringNode, resultingCollections);
 				getUnrollMultiCatchProposals(context, coveringNode, resultingCollections);
-				getTryWithResourceProposals(context, coveringNode, coveredNodes, resultingCollections);
+				getTryWithResourceAssistProposals(locations, context, coveringNode, coveredNodes, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
 				getSplitVariableProposals(context, coveringNode, resultingCollections);
@@ -3050,6 +3050,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 		return false;
+	}
+
+	public static boolean getTryWithResourceAssistProposals(IProblemLocation[] locations, IInvocationContext context, ASTNode node,
+			ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) throws IllegalArgumentException, CoreException {
+		for (IProblemLocation location : locations) {
+			if ((location.getProblemId() == IProblem.UnclosedCloseable ||
+					location.getProblemId() == IProblem.PotentiallyUnclosedCloseable) &&
+					JavaCore.getOptionForConfigurableSeverity(location.getProblemId()) != "ignore") { //$NON-NLS-1$
+				return false;
+			}
+		}
+		return getTryWithResourceProposals(context, node, coveredNodes, resultingCollections);
 	}
 
 	@SuppressWarnings({ "null" })

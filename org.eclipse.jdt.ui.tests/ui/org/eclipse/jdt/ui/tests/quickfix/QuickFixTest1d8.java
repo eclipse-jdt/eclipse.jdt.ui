@@ -52,6 +52,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -2474,6 +2475,9 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+        String str= "fileReader";
+        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2507,7 +2511,11 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		buf.append("");
 		String expected= buf.toString();
 
+		// bug 576701 - ensure we don't duplicate try-with-resources as assist as well
 		assertExpectedExistInProposals(proposals, new String[] {expected});
+
+		List<IJavaCompletionProposal> assists= collectAssistsWithProblems(context);
+		assertProposalDoesNotExist(assists, CorrectionMessages.QuickAssistProcessor_convert_to_try_with_resource);
 	}
 
 }
