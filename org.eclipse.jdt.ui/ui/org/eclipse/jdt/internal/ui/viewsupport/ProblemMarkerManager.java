@@ -15,8 +15,10 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
@@ -102,17 +104,14 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		}
 	}
 
-	private ListenerList<IProblemChangedListener> fListeners;
+	private final ListenerList<IProblemChangedListener> fListeners= new ListenerList<>();
 
-	private Set<IResource> fResourcesWithMarkerChanges;
-	private Set<IResource> fResourcesWithAnnotationChanges;
+	private final Set<IResource> fResourcesWithMarkerChanges= ConcurrentHashMap.newKeySet();
+	private final Set<IResource> fResourcesWithAnnotationChanges= ConcurrentHashMap.newKeySet();
 
 	private final Throttler throttledUpdates= new Throttler(PlatformUI.getWorkbench().getDisplay(), Duration.ofMillis(250), this::runPendingUpdates);
 
 	public ProblemMarkerManager() {
-		fListeners= new ListenerList<>();
-		fResourcesWithMarkerChanges= new HashSet<>();
-		fResourcesWithAnnotationChanges= new HashSet<>();
 	}
 
 	/*
@@ -130,19 +129,8 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 			JavaPlugin.log(e.getStatus());
 		}
 
-		if (!changedElements.isEmpty()) {
-			boolean hasChanges= false;
-			synchronized (this) {
-				if (fResourcesWithMarkerChanges.isEmpty()) {
-					fResourcesWithMarkerChanges= changedElements;
-					hasChanges= true;
-				} else {
-					hasChanges= fResourcesWithMarkerChanges.addAll(changedElements);
-				}
-			}
-			if (hasChanges) {
-				fireChanges();
-			}
+		if (fResourcesWithMarkerChanges.addAll(changedElements)) {
+			fireChanges();
 		}
 	}
 
@@ -156,12 +144,8 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		if (event instanceof CompilationUnitAnnotationModelEvent) {
 			CompilationUnitAnnotationModelEvent cuEvent= (CompilationUnitAnnotationModelEvent) event;
 			if (cuEvent.includesProblemMarkerAnnotationChanges()) {
-				boolean hasChanges= false;
-				synchronized (this) {
-					IResource changedResource= cuEvent.getUnderlyingResource();
-					hasChanges= fResourcesWithAnnotationChanges.add(changedResource);
-				}
-				if (hasChanges) {
+				IResource changedResource= cuEvent.getUnderlyingResource();
+				if (fResourcesWithAnnotationChanges.add(changedResource)) {
 					fireChanges();
 				}
 			}
@@ -201,23 +185,17 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 	 * Notify all IProblemChangedListener. Must be called in the display thread.
 	 */
 	private void runPendingUpdates() {
-		IResource[] markerResources= null;
-		IResource[] annotationResources= null;
-		synchronized (this) {
-			if (!fResourcesWithMarkerChanges.isEmpty()) {
-				markerResources= fResourcesWithMarkerChanges.toArray(new IResource[fResourcesWithMarkerChanges.size()]);
-				fResourcesWithMarkerChanges.clear();
-			}
-			if (!fResourcesWithAnnotationChanges.isEmpty()) {
-				annotationResources= fResourcesWithAnnotationChanges.toArray(new IResource[fResourcesWithAnnotationChanges.size()]);
-				fResourcesWithAnnotationChanges.clear();
-			}
-		}
+		ArrayList<IResource> resourcesWithMarkerChanges= new ArrayList<>();
+		ArrayList<IResource> resourcesWithAnnotationChanges= new ArrayList<>();
+		fResourcesWithMarkerChanges.removeIf(e -> resourcesWithMarkerChanges.add(e));
+		fResourcesWithAnnotationChanges.removeIf(e -> resourcesWithAnnotationChanges.add(e));
+		IResource[] markerResources= resourcesWithMarkerChanges.toArray(IResource[]::new);
+		IResource[] annotationResources= resourcesWithAnnotationChanges.toArray(IResource[]::new);
 		for (IProblemChangedListener curr : fListeners) {
-			if (markerResources != null) {
+			if (markerResources.length != 0) {
 				curr.problemsChanged(markerResources, true);
 			}
-			if (annotationResources != null) {
+			if (annotationResources.length != 0) {
 				curr.problemsChanged(annotationResources, false);
 			}
 		}
