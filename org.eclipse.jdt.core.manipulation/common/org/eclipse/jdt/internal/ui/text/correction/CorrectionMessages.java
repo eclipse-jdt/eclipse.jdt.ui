@@ -216,6 +216,7 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_changetype_description;
 	public static String UnresolvedElementsSubProcessor_changetype_nopack_description;
 	public static String UnresolvedElementsSubProcessor_importtype_description;
+	public static String UnresolvedElementsSubProcessor_change_to_qualified_description;
 	public static String UnresolvedElementsSubProcessor_changevariable_description;
 	public static String UnresolvedElementsSubProcessor_createfield_description;
 	public static String UnresolvedElementsSubProcessor_createfield_other_description;

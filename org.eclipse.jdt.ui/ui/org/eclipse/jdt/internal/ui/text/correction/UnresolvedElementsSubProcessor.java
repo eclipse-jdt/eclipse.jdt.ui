@@ -162,6 +162,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.NewAnnotationMember
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.QualifyTypeProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameNodeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -970,6 +971,20 @@ public class UnresolvedElementsSubProcessor {
 
 		ASTRewriteCorrectionProposal proposal;
 		if (importRewrite != null && node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
+			// check first that we aren't doing an import of a nested class in this cu - bug 321464
+			// in which case we should just change the reference to a qualified name
+			try {
+				IType[] types= cu.getAllTypes();
+				for (IType type : types) {
+					if (type.getFullyQualifiedName('.').equals(fullName)) {
+						String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_change_to_qualified_description, fullName);
+						proposal= new QualifyTypeProposal(label, cu, relevance + 100, (SimpleName)node, fullName);
+						return proposal;
+					}
+				}
+			} catch (JavaModelException e) {
+				return null;
+			}
 			// import only
 			String[] arg= { BasicElementLabels.getJavaElementName(simpleName), BasicElementLabels.getJavaElementName(packName) };
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importtype_description, arg);

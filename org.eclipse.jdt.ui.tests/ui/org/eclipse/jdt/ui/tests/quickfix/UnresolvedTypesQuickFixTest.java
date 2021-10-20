@@ -1642,4 +1642,35 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot, 2, 1);
 		assertFalse(proposals.stream().anyMatch(p -> "Import 'Tests' (pt)".equals(p.getDisplayString())));
 	}
+
+	@Test
+	public void testBug321464() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("class E<T extends StaticInner> {\n");
+		buf.append("    public static class StaticInner {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
+
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuilder();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("class E<T extends pack.E.StaticInner> {\n");
+		buf.append("    public static class StaticInner {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 }
