@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 IBM Corporation and others.
+ * Copyright (c) 2006, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -131,6 +131,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnitPlatformLauncherLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitPlatformRunnerLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitPlatformSuiteApiLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformSuiteCommonsLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitVintageEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitApiGuardianLibraryEntry());
@@ -252,6 +253,8 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_RUNNER_JAVADOC;
 				} else if (lastSegment.contains("platform.suite.api")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC;
+				} else if (lastSegment.contains("platform.suite.commons")) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC;
 				} else if (lastSegment.contains("vintage.engine")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC;
 				} else if (lastSegment.contains("opentest4j")) { //$NON-NLS-1$

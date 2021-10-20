@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -123,6 +123,11 @@ public class JUnitPreferencesConstants {
 	 * Javadoc location for org.junit.platform.suite.api (JUnit 5)
 	 */
 	public static final String JUNIT_PLATFORM_SUITE_API_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.suite.api.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform.suite.commons (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.suite.commons.javadoclocation"; //$NON-NLS-1$
 
 	/**
 	 * Javadoc location for org.junit.vintage.engine (JUnit 5)

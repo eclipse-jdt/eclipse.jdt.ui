@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,6 +57,7 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_LAUNCHER_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_RUNNER_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC, "http://ota4j-team.github.io/opentest4j/docs/current/api/"); //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC, "https://apiguardian-team.github.io/apiguardian/docs/current/api/"); //$NON-NLS-1$
