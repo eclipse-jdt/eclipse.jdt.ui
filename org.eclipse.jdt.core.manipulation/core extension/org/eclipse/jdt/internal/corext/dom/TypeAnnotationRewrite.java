@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Till Brychcy and others.
+ * Copyright (c) 2017, 2021 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Till Brychcy - initial API and implementation
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -30,15 +31,14 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Rewrite helper for type annotations.
  *
- * @see JDTUIHelperClasses
  * @since 3.13
  */
+// @see JDTUIHelperClasses
 public class TypeAnnotationRewrite {
 
 	/**
