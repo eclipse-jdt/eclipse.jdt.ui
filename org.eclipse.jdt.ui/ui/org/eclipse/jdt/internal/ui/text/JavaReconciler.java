@@ -390,14 +390,16 @@ public class JavaReconciler extends MonoReconciler {
 		strategy.notifyListeners(false);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#aboutToReconcile()
-	 * @since 3.0
-	 */
 	@Override
 	protected void aboutToBeReconciled() {
 		JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.aboutToBeReconciled();
+	}
+
+	@Override
+	protected void aboutToWork() {
+		JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
+		strategy.aboutToWork(this);
 	}
 
 	/*
