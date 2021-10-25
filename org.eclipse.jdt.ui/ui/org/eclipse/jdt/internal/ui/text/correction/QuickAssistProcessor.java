@@ -3056,8 +3056,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) throws IllegalArgumentException, CoreException {
 		for (IProblemLocation location : locations) {
 			if ((location.getProblemId() == IProblem.UnclosedCloseable ||
-					location.getProblemId() == IProblem.PotentiallyUnclosedCloseable) &&
-					JavaCore.getOptionForConfigurableSeverity(location.getProblemId()) != "ignore") { //$NON-NLS-1$
+					location.getProblemId() == IProblem.PotentiallyUnclosedCloseable)) {
 				return false;
 			}
 		}
