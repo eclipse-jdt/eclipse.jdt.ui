@@ -57,6 +57,7 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_LAUNCHER_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_RUNNER_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_ENGINE_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC, "http://ota4j-team.github.io/opentest4j/docs/current/api/"); //$NON-NLS-1$

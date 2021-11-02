@@ -339,6 +339,10 @@ public class BuildPathSupport {
 			"org.junit.platform.suite.api", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.suite.api_1.*.jar", "org.junit.platform.suite.api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC);
 
+	public static final JUnitPluginDescription JUNIT_PLATFORM_SUITE_ENGINE_PLUGIN= new JUnitPluginDescription(
+			"org.junit.platform.suite.engine", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.suite.engine_1.*.jar", "org.junit.platform.suite.engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_ENGINE_JAVADOC);
+
 	public static final JUnitPluginDescription JUNIT_PLATFORM_SUITE_COMMONS_PLUGIN= new JUnitPluginDescription(
 			"org.junit.platform.suite.commons", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.suite.commons_1.*.jar", "org.junit.platform.suite.commons.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC);
@@ -478,6 +482,13 @@ public class BuildPathSupport {
 	 */
 	public static IClasspathEntry getJUnitPlatformSuiteApiLibraryEntry() {
 		return JUNIT_PLATFORM_SUITE_API_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.platform.suite.api library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnitPlatformSuiteEngineLibraryEntry() {
+		return JUNIT_PLATFORM_SUITE_ENGINE_PLUGIN.getLibraryEntry();
 	}
 
 	/**

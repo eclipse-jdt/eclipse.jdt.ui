@@ -125,6 +125,11 @@ public class JUnitPreferencesConstants {
 	public static final String JUNIT_PLATFORM_SUITE_API_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.suite.api.javadoclocation"; //$NON-NLS-1$
 
 	/**
+	 * Javadoc location for org.junit.platform.suite.engine (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_SUITE_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.suite.engine.javadoclocation"; //$NON-NLS-1$
+
+	/**
 	 * Javadoc location for org.junit.platform.suite.commons (JUnit 5)
 	 */
 	public static final String JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.suite.commons.javadoclocation"; //$NON-NLS-1$

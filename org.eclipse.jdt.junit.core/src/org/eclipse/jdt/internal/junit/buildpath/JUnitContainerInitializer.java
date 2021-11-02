@@ -131,6 +131,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnitPlatformLauncherLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitPlatformRunnerLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitPlatformSuiteApiLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformSuiteEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitPlatformSuiteCommonsLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitVintageEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
@@ -253,6 +254,8 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_RUNNER_JAVADOC;
 				} else if (lastSegment.contains("platform.suite.api")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC;
+				} else if (lastSegment.contains("platform.suite.engine")) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_ENGINE_JAVADOC;
 				} else if (lastSegment.contains("platform.suite.commons")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC;
 				} else if (lastSegment.contains("vintage.engine")) { //$NON-NLS-1$
