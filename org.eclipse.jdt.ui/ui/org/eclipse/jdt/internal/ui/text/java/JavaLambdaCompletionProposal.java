@@ -111,7 +111,7 @@ public class JavaLambdaCompletionProposal extends LazyJavaCompletionProposal {
 		int baseOffset= getReplacementOffset();
 		String replacement= getReplacementString();
 
-		if (fArgumentOffsets != null && getTextViewer() != null) {
+		if (fArgumentOffsets != null && fArgumentOffsets.length > 0 && getTextViewer() != null) {
 			try {
 				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != fArgumentOffsets.length; i++) {
