@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -37,6 +38,7 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
@@ -47,9 +49,11 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -72,6 +76,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -79,6 +84,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessorUtil;
 
@@ -375,7 +381,50 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		} else {
 			replacementNode= fRewriter.createGroupNode(result.toArray(new ASTNode[result.size()]));
 		}
-		if (fSelectedNodes.length == 1) {
+		ASTNode node= fSelectedNodes[0];
+		List<ASTNode> nodesInRange= new ArrayList<>();
+
+		// for JVM 16 or higher, check if we have any variables declared via Pattern instanceof that
+		// need references added inside try/catch statement
+		if (JavaModelUtil.is16OrHigher(fCUnit.getJavaProject())) {
+			if (node instanceof Block || node.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+				ASTNode parentBodyDeclaration= (node instanceof Block) ?
+						node : ASTNodes.getFirstAncestorOrNull(node, Block.class);
+				int start= fSelectedNodes[0].getStartPosition();
+				ASTNode lastSelectedNode= fSelectedNodes[fSelectedNodes.length - 1];
+				int end= lastSelectedNode.getStartPosition() + lastSelectedNode.getLength();
+
+				for (ASTNode astNode : fSelectedNodes) {
+					if (!variableDeclarations.contains(astNode)) {
+						int endPosition= findEndPosition(astNode);
+						end= Math.max(end, endPosition);
+					}
+				}
+
+				// recursive loop to find all nodes affected by wrapping in try block
+				nodesInRange= findNodesInRange(parentBodyDeclaration, start, end);
+				int oldEnd= end;
+				int newEnd= end;
+				while (true) {
+					newEnd= oldEnd;
+					for (ASTNode astNode : nodesInRange) {
+						if (!variableDeclarations.contains(astNode)) {
+							int endPosition= findEndPosition(astNode);
+							newEnd= Math.max(newEnd, endPosition);
+						}
+					}
+					if (newEnd > oldEnd) {
+						oldEnd= newEnd;
+						nodesInRange= findNodesInRange(parentBodyDeclaration, start, newEnd);
+						continue;
+					}
+					break;
+				}
+				nodesInRange.removeAll(Arrays.asList(fSelectedNodes));
+			}
+		}
+
+		if (fSelectedNodes.length == 1 && nodesInRange.isEmpty()) {
 			ASTNode selectedNode= fSelectedNodes[0];
 
 			if (selectedNode instanceof MethodReference) {
@@ -412,10 +461,62 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				fSelectedNodes[0].getParent(),
 				(ChildListPropertyDescriptor)fSelectedNodes[0].getLocationInParent());
 			ASTNode toMove= source.createMoveTarget(
-				fSelectedNodes[0], fSelectedNodes[fSelectedNodes.length - 1],
+				fSelectedNodes[0], (nodesInRange.isEmpty() ? fSelectedNodes[fSelectedNodes.length - 1] : nodesInRange.get(nodesInRange.size()-1)),
 				replacementNode, null);
 			statements.insertLast(toMove, null);
 		}
+	}
+
+	private int findEndPosition(ASTNode node) {
+		int end= node.getStartPosition() + node.getLength();
+		Map<SimpleName, IVariableBinding> nodeSimpleNameBindings= fAnalyzer.getVariableStatementBinding(node);
+		List<SimpleName> nodeNames= new ArrayList<>(nodeSimpleNameBindings.keySet());
+		if (nodeNames.isEmpty()) {
+			return -1;
+		}
+		SimpleName nodeSimpleName= nodeNames.get(0);
+		SimpleName[] coveredNodeBindings= LinkedNodeFinder.findByNode(node.getRoot(), nodeSimpleName);
+		if (coveredNodeBindings.length == 0) {
+			return -1;
+		}
+		for (ASTNode astNode : coveredNodeBindings) {
+			end= Math.max(end, (astNode.getStartPosition() + astNode.getLength()));
+		}
+		return end;
+	}
+
+	// find all nodes (statements) that are within the start/end positions
+	public static List<ASTNode> findNodesInRange(ASTNode astNode, final int start, final int end) {
+		List<ASTNode> nodesInRange= new ArrayList<>();
+		astNode.accept(new ASTVisitor() {
+			int pre= start;
+
+			@Override
+			public void preVisit(ASTNode preNode) {
+				pre= preNode.getStartPosition();
+				super.preVisit(preNode);
+			}
+
+			@Override
+			public void postVisit(ASTNode postNode) {
+				int post= postNode.getStartPosition() + postNode.getLength();
+				if (pre >= start && post <= end) {
+					Statement statement= ASTResolving.findParentStatement(postNode);
+					while (statement != null && statement.getParent() != astNode) {
+						ASTNode parent= statement.getParent();
+						if (parent == null) {
+							return;
+						}
+						statement= ASTResolving.findParentStatement(parent);
+					}
+					if (statement != null && !nodesInRange.contains(statement)) {
+						nodesInRange.add(statement);
+					}
+				}
+				super.postVisit(postNode);
+			}
+		});
+		return nodesInRange;
 	}
 
 	public static List<ITypeBinding> filterSubtypeExceptions(ITypeBinding[] exceptions) {

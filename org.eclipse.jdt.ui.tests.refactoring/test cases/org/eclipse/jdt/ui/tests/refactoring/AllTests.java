@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
 	SurroundWithTests.class,
 	SurroundWithTests1d7.class,
 	SurroundWithTests1d8.class,
+	SurroundWithTests16.class,
 	SurroundWithResourcesTests1d8.class,
 })
 public class AllTests {
