@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -94,9 +95,11 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -3278,6 +3281,187 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns if another method or constructor has the given signature.
+	 * It is useful to know if a refactoring of the given method or constructor is possible without conflict.
+	 * The method or constructor in parameter does not need to match this signature (usually not).
+	 *
+	 * @param methodOrConstructor A method, super method, constructor or super constructor
+	 * @param methodOrConstructorBinding The associated binding
+	 * @param expectedArgumentTypes The argument types that should match
+	 * @return True if another method or constructor has the given signature
+	 */
+	public static boolean hasConflictingMethodOrConstructor(
+			final ASTNode methodOrConstructor,
+			final IMethodBinding methodOrConstructorBinding,
+			final ITypeBinding[] expectedArgumentTypes) {
+		TypeDeclaration typeDeclaration= getTypedAncestor(methodOrConstructor, TypeDeclaration.class);
+
+		if (typeDeclaration == null) {
+			return true;
+		}
+
+		ITypeBinding type= typeDeclaration.resolveBinding();
+
+		if (type == null) {
+			return true;
+		}
+
+		boolean inSameClass= true;
+		// Figure out the type where we need to start looking at methods in the hierarchy.
+		// If we have a new class instance or super method call or this expression or
+		// we have a static call that is qualified, we use the referenced class as the starting point.
+		// If we have a non-qualified method call, we use the class containing the call.
+		// Otherwise, we bail on the clean-up.
+		if (methodOrConstructor instanceof ClassInstanceCreation) {
+			type= ((ClassInstanceCreation) methodOrConstructor).resolveTypeBinding();
+			inSameClass= type.isNested();
+		} else if (methodOrConstructor instanceof MethodInvocation) {
+			MethodInvocation methodInvocation= (MethodInvocation) methodOrConstructor;
+			Expression expression= methodInvocation.getExpression();
+
+			if (expression == null) {
+				ASTNode root= methodOrConstructor.getRoot();
+
+				if (root instanceof CompilationUnit) {
+					CompilationUnit compilationUnit= (CompilationUnit) root;
+					List<ImportDeclaration> imports= compilationUnit.imports();
+					String localPackage= null;
+
+					if (compilationUnit.getPackage() != null && compilationUnit.getPackage().getName() != null) {
+						localPackage= compilationUnit.getPackage().getName().getFullyQualifiedName();
+					}
+
+					for (ImportDeclaration oneImport : imports) {
+						if (oneImport.isStatic()
+								&& !oneImport.isOnDemand()
+								&& oneImport.getName() instanceof QualifiedName) {
+							QualifiedName methodName= (QualifiedName) oneImport.getName();
+							String methodIdentifier= methodName.getName().getIdentifier();
+							ITypeBinding conflictingType= methodName.getQualifier().resolveTypeBinding();
+
+							if (conflictingType == null) {
+								return true; // Error on side of caution
+							}
+
+							String importPackage= null;
+
+							if (conflictingType.getPackage() != null) {
+								importPackage= conflictingType.getPackage().getName();
+							}
+
+							boolean inSamePackage= Objects.equals(localPackage, importPackage);
+
+							for (IMethodBinding declaredMethod : conflictingType.getDeclaredMethods()) {
+								if (methodIdentifier.equals(declaredMethod.getName())
+										&& isMethodMatching(expectedArgumentTypes, methodOrConstructorBinding, false, inSamePackage, declaredMethod)) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+
+				if (Modifier.isStatic(methodOrConstructorBinding.getModifiers())) {
+					inSameClass= methodOrConstructorBinding.getDeclaringClass().isEqualTo(type);
+					type= methodOrConstructorBinding.getDeclaringClass();
+				}
+			} else if (!(expression instanceof ThisExpression)) {
+				inSameClass= methodOrConstructorBinding.getDeclaringClass().isEqualTo(type);
+				type= expression.resolveTypeBinding();
+			}
+		} else if (methodOrConstructor instanceof SuperMethodInvocation) {
+			inSameClass= type.isNested();
+			type= type.getSuperclass();
+		} else {
+			return true; // Error on side of caution
+		}
+
+		if (type == null) {
+			return true;
+		}
+
+		return hasEquivalentMethodForInheritedTypes(expectedArgumentTypes, methodOrConstructorBinding, type, type, inSameClass);
+	}
+
+	private static boolean hasEquivalentMethodForInheritedTypes(
+			final ITypeBinding[] parameterTypesForConflictingMethod,
+			final IMethodBinding binding,
+			final ITypeBinding type,
+			final ITypeBinding origType,
+			final boolean wasInSameClass) {
+		ITypeBinding superType= type;
+		boolean inSameClass= wasInSameClass;
+
+		while (superType != null) {
+			IPackageBinding packageBinding= superType.getPackage();
+			boolean inSamePackage= packageBinding.isEqualTo(origType.getPackage());
+
+			if (hasEquivalentMethodForOneType(parameterTypesForConflictingMethod, binding, superType, inSameClass, inSamePackage)) {
+				return true;
+			}
+
+			if (superType.isNested()) {
+				if (hasEquivalentMethodForInheritedTypes(parameterTypesForConflictingMethod, binding, superType.getDeclaringClass(), origType, inSameClass)) {
+					return true;
+				}
+
+				superType= superType.getSuperclass();
+				inSameClass&= superType.isNested();
+			} else {
+				superType= superType.getSuperclass();
+				inSameClass= false;
+			}
+		}
+
+		return false;
+	}
+
+	private static boolean hasEquivalentMethodForOneType(
+			final ITypeBinding[] parameterTypesForConflictingMethod,
+			final IMethodBinding binding,
+			final ITypeBinding type,
+			final boolean inSameClass,
+			final boolean inSamePackage) {
+		for (IMethodBinding method : type.getDeclaredMethods()) {
+			if (isMethodMatching(parameterTypesForConflictingMethod, binding, inSameClass, inSamePackage, method)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static boolean isMethodMatching(
+			final ITypeBinding[] parameterTypesForConflictingMethod,
+			final IMethodBinding binding,
+			final boolean inSameClass,
+			final boolean inSamePackage,
+			final IMethodBinding testedMethod) {
+		int methodModifiers= testedMethod.getModifiers();
+		ITypeBinding[] parameterTypes= testedMethod.getParameterTypes();
+
+		if (!binding.isEqualTo(testedMethod)
+				&& parameterTypesForConflictingMethod.length == parameterTypes.length
+				&& binding.getName().equals(testedMethod.getName())
+				&& (inSameClass || Modifier.isPublic(methodModifiers) || Modifier.isProtected(methodModifiers)
+						|| (inSamePackage && !Modifier.isPrivate(methodModifiers)))) {
+			for (int i= 0; i < parameterTypesForConflictingMethod.length; i++) {
+				if (parameterTypesForConflictingMethod[i] == null || parameterTypes[i] == null) {
+					return true;
+				}
+
+				if (!parameterTypesForConflictingMethod[i].isAssignmentCompatible(parameterTypes[i])) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Returns whether the provided method invocation invokes a method with the
 	 * provided method signature. The method signature is compared against the
 	 * erasure of the invoked method.
@@ -3997,5 +4181,4 @@ public class ASTNodes {
 		}
 		return comments;
 	}
-
 }
