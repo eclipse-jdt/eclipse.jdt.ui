@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -210,7 +210,18 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 							throw new CoreException(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
 						}
 					}
-				}
+					if (!Arrays.stream(classpath).anyMatch(s -> s.contains("junit-jupiter-engine") || s.contains("org.junit.jupiter.engine"))) { //$NON-NLS-1$ //$NON-NLS-2$
+						try {
+							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("org.junit.jupiter.engine", null); //$NON-NLS-1$
+							String entryString= new ClasspathLocalizer(Platform.inDevelopmentMode()).entryString(x);
+							int length= classpath.length;
+							System.arraycopy(classpath, 0, classpath= new String[length + 1], 0, length);
+							classpath[length]= entryString;
+						} catch (IOException | URISyntaxException e) {
+							throw new CoreException(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
+						}
+					}
+			}
 			}
 
 			// Create VM config

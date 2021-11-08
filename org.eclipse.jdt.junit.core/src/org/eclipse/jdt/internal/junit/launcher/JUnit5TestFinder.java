@@ -53,6 +53,8 @@ public class JUnit5TestFinder implements ITestFinder {
 
 		private static final Annotation TEST_4= new Annotation("org.junit.Test"); //$NON-NLS-1$
 
+		private static final Annotation SUITE= new Annotation("org.junit.platform.suite.api.Suite"); //$NON-NLS-1$
+
 		private static final Annotation TESTABLE= new Annotation(JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
 
 		private static final Annotation NESTED= new Annotation(JUnitCorePlugin.JUNIT5_JUPITER_NESTED_ANNOTATION_NAME);
@@ -297,6 +299,7 @@ public class JUnit5TestFinder implements ITestFinder {
 			return false;
 
 		if (Annotation.RUN_WITH.annotatesTypeOrSuperTypes(binding)
+				|| Annotation.SUITE.annotatesTypeOrSuperTypes(binding)
 				|| Annotation.TEST_4.annotatesAtLeastOneMethod(binding)
 				|| Annotation.TESTABLE.annotatesAtLeastOneMethod(binding)
 				|| Annotation.TESTABLE.annotatesTypeOrSuperTypes(binding)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -64,6 +64,7 @@ public class JUnitCorePlugin extends Plugin {
 	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
 
 	public final static String JUNIT5_TESTABLE_ANNOTATION_NAME= "org.junit.platform.commons.annotation.Testable"; //$NON-NLS-1$
+	public final static String JUNIT5_SUITE_ANNOTATION_NAME= "org.junit.platform.suite.api.Suite"; //$NON-NLS-1$
 	public final static String JUNIT5_JUPITER_TEST_ANNOTATION_NAME= "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	public final static String JUNIT5_JUPITER_NESTED_ANNOTATION_NAME= "org.junit.jupiter.api.Nested"; //$NON-NLS-1$
 
