@@ -59,6 +59,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest14;
 import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
 import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
+import org.eclipse.jdt.ui.wizards.NewRecordWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -1182,6 +1183,110 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertTrue(status.getSeverity() == IStatus.ERROR);
 		assertTrue(expected.equals(status.getMessage()));
+	}
+
+	@Test
+	public void testCreateRecordWithAbstractMethodStubs() throws Exception {
+		fJProject1= projectSetup.getProject();
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		NewRecordWizardPage wizardPage= new NewRecordWizardPage();
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(fpack1, true);
+		wizardPage.setEnclosingTypeSelection(false, true);
+		wizardPage.setTypeName("Rec1", true);
+
+		wizardPage.setMethodStubSelection(true, true);
+
+		List<ITypeBinding> interfaces= new ArrayList<>();
+		wizardPage.setSuperInterfacesList(interfaces, true);
+
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+
+		wizardPage.createType(null);
+
+		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
+
+		String expected= "" +
+				"/**\n" +
+				" * File\n" +
+				" */\n" +
+				"package test1;\n" +
+				"\n" +
+				"/**\n" +
+				" * Type\n" +
+				" */\n" +
+				"public record Rec1() {\n" +
+				"\n" +
+				"    /**\n" +
+				"     * Overridden\n" +
+				"     */\n" +
+				"    @Override\n" +
+				"    public boolean equals(Object arg0) {\n" +
+				"        return false;\n" +
+				"    }\n" +
+				"\n" +
+				"    /**\n" +
+				"     * Overridden\n" +
+				"     */\n" +
+				"    @Override\n" +
+				"    public int hashCode() {\n" +
+				"        return 0;\n" +
+				"    }\n" +
+				"\n" +
+				"    /**\n" +
+				"     * Overridden\n" +
+				"     */\n" +
+				"    @Override\n" +
+				"    public String toString() {\n" +
+				"        return null;\n" +
+				"    }\n" +
+				"\n" +
+				"}" ;
+
+		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
+	}
+
+	@Test
+	public void testCreateRecordWithOutAbstractMethodStubs() throws Exception {
+		fJProject1= projectSetup.getProject();
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		NewRecordWizardPage wizardPage= new NewRecordWizardPage();
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(fpack1, true);
+		wizardPage.setEnclosingTypeSelection(false, true);
+		wizardPage.setTypeName("Rec1", true);
+
+		wizardPage.setMethodStubSelection(false, true);
+
+		List<ITypeBinding> interfaces= new ArrayList<>();
+		wizardPage.setSuperInterfacesList(interfaces, true);
+
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+
+		wizardPage.createType(null);
+
+		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
+
+		String expected= "" +
+				"/**\n" +
+				" * File\n" +
+				" */\n" +
+				"package test1;\n" +
+				"\n" +
+				"/**\n" +
+				" * Type\n" +
+				" */\n" +
+				"public record Rec1() {\n" +
+				"\n" +
+				"}" ;
+
+		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
 	protected static CompilationUnit getASTRoot(ICompilationUnit cu) {

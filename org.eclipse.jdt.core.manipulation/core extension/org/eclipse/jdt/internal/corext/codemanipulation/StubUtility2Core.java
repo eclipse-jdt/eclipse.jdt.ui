@@ -826,7 +826,8 @@ public final class StubUtility2Core {
 
 		for (IMethodBinding curr : typeBinding.getDeclaredMethods()) {
 			int modifiers= curr.getModifiers();
-			if (!curr.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
+			if (!curr.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)
+					&& !curr.isSyntheticRecordMethod()) {
 				allMethods.add(curr);
 			}
 		}
