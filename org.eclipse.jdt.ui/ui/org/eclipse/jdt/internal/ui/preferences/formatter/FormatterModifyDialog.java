@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1054,7 +1054,9 @@ public class FormatterModifyDialog extends ModifyDialog {
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_brace_of_a_class, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_TYPE_DECLARATION)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_brace_of_anon_class, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANONYMOUS_TYPE_DECLARATION)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_comma_implements, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_implements, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES))
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_implements, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_comma_in_permits, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PERMITTED_TYPES)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_in_permits, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PERMITTED_TYPES))
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_fields, "-fields", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_comma_fields, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_fields, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS))

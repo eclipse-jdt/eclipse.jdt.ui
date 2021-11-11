@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -319,6 +319,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_case_expressions;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_method_args;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_params;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_permits;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_qalloc;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_record_components;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_throws;
@@ -367,6 +368,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_case_expressions;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_method_args;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_params;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_permits;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_qalloc;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_record_components;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_throws;
