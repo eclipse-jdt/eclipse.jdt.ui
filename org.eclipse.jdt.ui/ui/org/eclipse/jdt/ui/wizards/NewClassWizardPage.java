@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,8 +32,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -265,25 +263,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		createInheritedMethods(type, doConstr, doInherited, imports, new SubProgressMonitor(monitor, 1));
 
 		if (doMain) {
-			StringBuilder buf= new StringBuilder();
-			final String lineDelim= "\n"; // OK, since content is formatted afterwards //$NON-NLS-1$
-			if (isAddComments()) {
-				String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", new String[] { "args" }, new String[0], Signature.createTypeSignature("void", true), null, lineDelim); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				if (comment != null) {
-					buf.append(comment);
-					buf.append(lineDelim);
-				}
-			}
-			buf.append("public static void main("); //$NON-NLS-1$
-			buf.append(imports.addImport("java.lang.String")); //$NON-NLS-1$
-			buf.append("[] args) {"); //$NON-NLS-1$
-			buf.append(lineDelim);
-			final String content= CodeGeneration.getMethodBodyContent(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", false, "", lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
-			if (content != null && content.length() != 0)
-				buf.append(content);
-			buf.append(lineDelim);
-			buf.append("}"); //$NON-NLS-1$
-			type.createMethod(buf.toString(), null, false, null);
+			createMainMethod(type, imports);
 		}
 
 		IDialogSettings dialogSettings= getDialogSettings();

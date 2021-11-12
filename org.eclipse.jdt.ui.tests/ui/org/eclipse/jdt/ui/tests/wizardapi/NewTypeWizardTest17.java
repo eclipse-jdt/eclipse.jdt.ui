@@ -1197,7 +1197,7 @@ public class NewTypeWizardTest17 {
 		wizardPage.setEnclosingTypeSelection(false, true);
 		wizardPage.setTypeName("Rec1", true);
 
-		wizardPage.setMethodStubSelection(true, true);
+		wizardPage.setMethodStubSelection(false, true, true);
 
 		List<ITypeBinding> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfacesList(interfaces, true);
@@ -1250,7 +1250,7 @@ public class NewTypeWizardTest17 {
 	}
 
 	@Test
-	public void testCreateRecordWithOutAbstractMethodStubs() throws Exception {
+	public void testCreateRecordWithOutAbstractMethodStubsAndMain() throws Exception {
 		fJProject1= projectSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1261,7 +1261,7 @@ public class NewTypeWizardTest17 {
 		wizardPage.setEnclosingTypeSelection(false, true);
 		wizardPage.setTypeName("Rec1", true);
 
-		wizardPage.setMethodStubSelection(false, true);
+		wizardPage.setMethodStubSelection(false, false, true);
 
 		List<ITypeBinding> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfacesList(interfaces, true);
@@ -1283,6 +1283,123 @@ public class NewTypeWizardTest17 {
 				" * Type\n" +
 				" */\n" +
 				"public record Rec1() {\n" +
+				"\n" +
+				"}" ;
+
+		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
+	}
+
+	@Test
+	public void testCreateRecordWithMain() throws Exception {
+		fJProject1= projectSetup.getProject();
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		NewRecordWizardPage wizardPage= new NewRecordWizardPage();
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(fpack1, true);
+		wizardPage.setEnclosingTypeSelection(false, true);
+		wizardPage.setTypeName("Rec1", true);
+
+		wizardPage.setMethodStubSelection(true, false, true);
+
+		List<ITypeBinding> interfaces= new ArrayList<>();
+		wizardPage.setSuperInterfacesList(interfaces, true);
+
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+
+		wizardPage.createType(null);
+
+		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
+
+		String expected= "" +
+				"/**\n" +
+				" * File\n" +
+				" */\n" +
+				"package test1;\n" +
+				"\n" +
+				"/**\n" +
+				" * Type\n" +
+				" */\n" +
+				"public record Rec1() {\n" +
+				"\n" +
+				"    /**\n" +
+				"     * Method\n" +
+				"     */\n" +
+				"    public static void main(String[] args) {\n" +
+				"\n" +
+				"    }\n" +
+				"\n" +
+				"}" ;
+
+		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
+	}
+
+	@Test
+	public void testCreateRecordWithAbstractMethodStubsAndMain() throws Exception {
+		fJProject1= projectSetup.getProject();
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		NewRecordWizardPage wizardPage= new NewRecordWizardPage();
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(fpack1, true);
+		wizardPage.setEnclosingTypeSelection(false, true);
+		wizardPage.setTypeName("Rec1", true);
+
+		wizardPage.setMethodStubSelection(true, true, true);
+
+		List<ITypeBinding> interfaces= new ArrayList<>();
+		wizardPage.setSuperInterfacesList(interfaces, true);
+
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+
+		wizardPage.createType(null);
+
+		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
+
+		String expected= "" +
+				"/**\n" +
+				" * File\n" +
+				" */\n" +
+				"package test1;\n" +
+				"\n" +
+				"/**\n" +
+				" * Type\n" +
+				" */\n" +
+				"public record Rec1() {\n" +
+				"\n" +
+				"    /**\n" +
+				"     * Overridden\n" +
+				"     */\n" +
+				"    @Override\n" +
+				"    public boolean equals(Object arg0) {\n" +
+				"        return false;\n" +
+				"    }\n" +
+				"\n" +
+				"    /**\n" +
+				"     * Overridden\n" +
+				"     */\n" +
+				"    @Override\n" +
+				"    public int hashCode() {\n" +
+				"        return 0;\n" +
+				"    }\n" +
+				"\n" +
+				"    /**\n" +
+				"     * Overridden\n" +
+				"     */\n" +
+				"    @Override\n" +
+				"    public String toString() {\n" +
+				"        return null;\n" +
+				"    }\n\n" +
+				"    /**\n" +
+				"     * Method\n" +
+				"     */\n" +
+				"    public static void main(String[] args) {\n" +
+				"\n" +
+				"    }\n" +
 				"\n" +
 				"}" ;
 

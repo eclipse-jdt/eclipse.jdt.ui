@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3265,6 +3265,39 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return null;
 	}
 
+	/**
+	 * Creates the stub for 'public static void main(String[] args)' method
+	 *
+	 * @param type the type for which the main method is to be created
+	 * @param imports an import manager to add all needed import statements
+	 * @return the created method.
+	 * @throws CoreException thrown when the creation fails.
+	 * @since 3.25
+	 */
+	protected IMethod createMainMethod(IType type, ImportsManager imports) throws CoreException{
+		if (type != null ) {
+			StringBuilder buf= new StringBuilder();
+			final String lineDelim= "\n"; // OK, since content is formatted afterwards //$NON-NLS-1$
+			if (isAddComments()) {
+				String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", new String[] { "args" }, new String[0], Signature.createTypeSignature("void", true), null, lineDelim); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				if (comment != null) {
+					buf.append(comment);
+					buf.append(lineDelim);
+				}
+			}
+			buf.append("public static void main("); //$NON-NLS-1$
+			buf.append(imports.addImport("java.lang.String")); //$NON-NLS-1$
+			buf.append("[] args) {"); //$NON-NLS-1$
+			buf.append(lineDelim);
+			final String content= CodeGeneration.getMethodBodyContent(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", false, "", lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+			if (content != null && content.length() != 0)
+				buf.append(content);
+			buf.append(lineDelim);
+			buf.append("}"); //$NON-NLS-1$
+			return type.createMethod(buf.toString(), null, false, null);
+		}
+		return null;
+	}
 
 	/**
 	 * Creates the bodies of all unimplemented methods and constructors and adds them to the type.

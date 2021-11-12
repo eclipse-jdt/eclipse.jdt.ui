@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,9 +45,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
  * To implement a different kind of a new record wizard page, extend <code>NewTypeWizardPage</code>.
  * </p>
  *
- *
  * @noextend This class is not intended to be subclassed by clients.
- * @noreference This class is not intended to be referenced by clients.
  */
 public class NewRecordWizardPage extends NewTypeWizardPage {
 
@@ -59,6 +57,7 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 
 	/**
 	 * Creates a new <code>NewRecordWizardPage</code>
+	 * @since 3.25
 	 */
 	public NewRecordWizardPage() {
 		super(TYPE, PAGE_NAME);
@@ -67,6 +66,7 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 		setDescription(NewWizardMessages.NewRecordWizardPage_description);
 
 		String[] buttonNames= new String[] {
+				NewWizardMessages.NewClassWizardPage_methods_main,
 				NewWizardMessages.NewRecordWizardPage_methods_inherited
 		};
 		fMethodStubsButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames, 1);
@@ -81,6 +81,7 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 	 * page.
 	 *
 	 * @param selection used to initialize the fields
+	 * @since 3.25
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);
@@ -88,7 +89,8 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 		initTypePage(jelem);
 		doStatusUpdate();
 
-		boolean createUnimplemented= true;
+		boolean createUnimplemented= false;
+		boolean createMain= false;
 		IDialogSettings dialogSettings= getDialogSettings();
 		if (dialogSettings != null) {
 			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
@@ -97,7 +99,7 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 			}
 		}
 
-		setMethodStubSelection(createUnimplemented, true);
+		setMethodStubSelection(createMain, createUnimplemented, true);
 	}
 
 	// ------ validation --------
@@ -130,9 +132,6 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 
 	// ------ UI --------
 
-	/*
-	 * @see WizardPage#createControl
-	 */
 	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
@@ -192,12 +191,15 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 	/**
 	 * Sets the selection state of the method stub checkboxes.
 	 *
+	 * @param createMain initial selection state of the 'Create Main' checkbox.
 	 * @param createInherited initial selection state of the 'Create inherited abstract methods' checkbox.
 	 * @param canBeModified if <code>true</code> the method stub checkboxes can be changed by
 	 * the user. If <code>false</code> the buttons are "read-only"
+	 * @since 3.25
 	 */
-	public void setMethodStubSelection(boolean createInherited, boolean canBeModified) {
-		fMethodStubsButtons.setSelection(0, createInherited);
+	public void setMethodStubSelection(boolean createMain, boolean createInherited, boolean canBeModified) {
+		fMethodStubsButtons.setSelection(0, createMain);
+		fMethodStubsButtons.setSelection(1, createInherited);
 
 		fMethodStubsButtons.setEnabled(canBeModified);
 	}
@@ -207,32 +209,48 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 	 * checkbox.
 	 *
 	 * @return the selection state of the 'Create inherited abstract methods' checkbox
+	 * @since 3.25
 	 */
 	public boolean isCreateInherited() {
+		return fMethodStubsButtons.isSelected(1);
+	}
+
+	/**
+	 * Returns the current selection state of the 'Create Main' checkbox.
+	 *
+	 * @return the selection state of the 'Create Main' checkbox
+	 * @since 3.25
+	 */
+	public boolean isCreateMain() {
 		return fMethodStubsButtons.isSelected(0);
 	}
 
 	// ---- creation ----------------
 
-		/*
-		 * @see NewTypeWizardPage#createTypeMembers
-		 */
-		@Override
-		protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
-			boolean doInherited= isCreateInherited();
-			createInheritedMethods(type, false, doInherited, imports, SubMonitor.convert(monitor, 1));
+	/*
+	 * @see NewTypeWizardPage#createTypeMembers
+	 */
+	@Override
+	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
+		boolean doInherited= isCreateInherited();
+		boolean doMain= isCreateMain();
+		createInheritedMethods(type, false, doInherited, imports, SubMonitor.convert(monitor, 1));
 
-			IDialogSettings dialogSettings= getDialogSettings();
-			if (dialogSettings != null) {
-				IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
-				if (section == null) {
-					section= dialogSettings.addNewSection(PAGE_NAME);
-				}
-				section.put(SETTINGS_CREATEUNIMPLEMENTED, doInherited);
-			}
-
-			if (monitor != null) {
-				monitor.done();
-			}
+		if (doMain) {
+			createMainMethod(type, imports);
 		}
+
+		IDialogSettings dialogSettings= getDialogSettings();
+		if (dialogSettings != null) {
+			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+			if (section == null) {
+				section= dialogSettings.addNewSection(PAGE_NAME);
+			}
+			section.put(SETTINGS_CREATEUNIMPLEMENTED, doInherited);
+		}
+
+		if (monitor != null) {
+			monitor.done();
+		}
+	}
 }
