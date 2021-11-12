@@ -67,6 +67,7 @@ import org.junit.runners.Suite;
 	MoveInnerToTopLevelTests16.class,
 	MoveInnerToNewTests16.class,
 	UseSupertypeWherePossibleTests.class,
+	UseSupertypeWherePossibleTests16.class,
 	ExtractClassTests.class,
 
 	//-- generics
