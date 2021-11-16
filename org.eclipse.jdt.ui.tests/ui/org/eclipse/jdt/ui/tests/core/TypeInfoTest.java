@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -243,6 +243,9 @@ public class TypeInfoTest {
 		assertEquals("java.lang.Throwable", TypeInfoFilter.simplifySearchText(" at java.lang.Throwable.fillInStackTrace ()"));
 		assertEquals("java.io.FileOutputStream", TypeInfoFilter.simplifySearchText(" at java.io.FileOutputStream.<init> ()"));
 		assertEquals("java.util.Map.Entry", TypeInfoFilter.simplifySearchText(" at java.util.Map$Entry.anything() (x.java:1)"));
+		assertEquals("*.Map.Entry", TypeInfoFilter.simplifySearchText("Map$Entry"));
+		assertEquals("org.eclipse.jdt.ui.tests.core.Main.Runner.Executor", TypeInfoFilter.simplifySearchText("org.eclipse.jdt.ui.tests.core.Main$Runner$Executor.exec(Main.java:10)"));
+		assertEquals("*.Main.Runner.Executor", TypeInfoFilter.simplifySearchText("Main$Runner$Executor.exec(Main.java:10)"));
 		assertEquals("java.io.FileOutputStream", TypeInfoFilter.simplifySearchText(" at java.io.FileOutputStream$1.close ()"));
 		assertEquals("org.eclipse.swt.internal.win32.OS", TypeInfoFilter.simplifySearchText(" at org.eclipse.swt.internal.win32.OS.WaitMessage(Native Method)"));
 
@@ -266,6 +269,8 @@ public class TypeInfoTest {
 		// convert inner types to qualified name:
 		assertEquals("java.lang.ref.ReferenceQueue.Lock", TypeInfoFilter.simplifySearchText(" at java.lang.ref.ReferenceQueue$Lock "));
 		assertEquals("java.util.concurrent.ThreadPoolExecutor.Worker", TypeInfoFilter.simplifySearchText(" at java.util.concurrent.ThreadPoolExecutor$Worker.run(java.base@16.0.2/ThreadPoolExecutor.java:630) "));
+		assertEquals("*.DebugPlugin.EventDispatchJob",TypeInfoFilter.simplifySearchText("\"C:\\org.eclipse.debug.core\\bin\\org\\eclipse\\debug\\core\\DebugPlugin$EventDispatchJob.class\""));
+
 
 		/** possible future features if useful: **/
 //		// locks from thread dumps:

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -84,16 +84,27 @@ public class TypeInfoFilter {
 			// skip $1, $2 ... - typenames cannot start with a number
 			s= skipSynthetic(s);
 			// binary name of Inner Class to qualified name
-			s= s.replace('$', '.');
+			int inner= countContains(s, '$');
+			if (inner > 0) {
+				s= s.replace('$', '.');
+			}
 			if (s.isEmpty()) {
 				// oversimplified
 				return input;
+			}
+			// partially qualified names need a asterisk wildcard to be found by Open Type dialog:
+			if (inner > 0 && !input.trim().equals(s.trim()) && countContains(s, '.') == inner && !s.contains("*")) { //$NON-NLS-1$
+				s= "*." + s; //$NON-NLS-1$
 			}
 		} catch (Exception e) {
 			// just in case anything bad happened:
 			return input;
 		}
 		return s;
+	}
+
+	private static int countContains(String s, char c) {
+		return (int) s.chars().filter(i -> c == (char) i).count();
 	}
 
 	private static String skipBefore(String s, String skip) {
