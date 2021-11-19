@@ -31,14 +31,18 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.osgi.util.NLS;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.preferences.WorkingCopyManager;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
@@ -185,6 +189,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -207,7 +213,10 @@ import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteRemoveImportsCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AddStaticFavoriteProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposal;
@@ -322,6 +331,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getAddStaticImportProposals(context, coveringNode, null)
 					|| getDoWhileRatherThanWhileProposal(context, coveringNode, null)
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
+					|| getAddStaticMemberFavoritesProposals(context, coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null);
 		}
 		return false;
@@ -390,6 +400,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertVarTypeToResolvedTypeProposal(context, coveringNode, resultingCollections);
 				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, resultingCollections);
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
+				getAddStaticMemberFavoritesProposals(context, coveringNode, resultingCollections);
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
@@ -3543,6 +3554,63 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INVERT_EQUALS, image);
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static boolean getAddStaticMemberFavoritesProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+		if (!(node instanceof ImportDeclaration)) {
+			node= ASTNodes.getFirstAncestorOrNull(node, ImportDeclaration.class);
+		}
+		if (!(node instanceof ImportDeclaration)) {
+			return false;
+		}
+		ImportDeclaration decl= (ImportDeclaration)node;
+		if (!decl.isStatic()) {
+			return false;
+		}
+		Name name= decl.getName();
+		String importName= name.getFullyQualifiedName();
+		OptionsConfigurationBlock.Key prefKey= new Key(JavaUI.ID_PLUGIN, PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+		String favoritesRaw= prefKey.getStoredValue(InstanceScope.INSTANCE, new WorkingCopyManager());
+		String[] existingFavorites= new String[0];
+		if (favoritesRaw != null) {
+			existingFavorites= deserializeFavorites(favoritesRaw);
+		}
+		boolean foundMember= false;
+		for (String favorite : existingFavorites) {
+			if (favorite.endsWith(".*")) { //$NON-NLS-1$
+				String trimmedFavorite= favorite.substring(0, favorite.length() - 2);
+				if (importName.startsWith(trimmedFavorite) && (trimmedFavorite.length() == importName.length() ||
+						importName.charAt(trimmedFavorite.length()) == '.')) {
+					return false;
+				}
+			} else {
+				if (favorite.equals(importName)) {
+					foundMember= true;
+				}
+			}
+		}
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+		String desc= CorrectionMessages.QuickAssistProcessor_modify_favorites_desc;
+		if (decl.isOnDemand()) {
+			String favorite= importName + ".*"; //$NON-NLS-1$
+			String label= NLS.bind(CorrectionMessages.QuickAssistProcessor_modify_favorites, favorite);
+			resultingCollections.add(new AddStaticFavoriteProposal(favorite, label, desc, image, IProposalRelevance.ADD_STATIC_FAVORITE));
+		} else {
+			String label= ""; //$NON-NLS-1$
+			if (!foundMember) {
+				label= NLS.bind(CorrectionMessages.QuickAssistProcessor_modify_favorites, importName);
+				resultingCollections.add(new AddStaticFavoriteProposal(importName, label, desc, image, IProposalRelevance.ADD_STATIC_FAVORITE));
+			}
+			int lastDot= importName.lastIndexOf('.');
+			String favorite= importName.substring(0, lastDot) + ".*"; //$NON-NLS-1$
+			label= NLS.bind(CorrectionMessages.QuickAssistProcessor_modify_favorites, favorite);
+			resultingCollections.add(new AddStaticFavoriteProposal(favorite, label, desc, image, IProposalRelevance.ADD_STATIC_FAVORITE));
+		}
+		return true;
+	}
+
+	private static String[] deserializeFavorites(String str) {
+		return str.split(";"); //$NON-NLS-1$
 	}
 
 	private static boolean getArrayInitializerToArrayCreation(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {

@@ -19,6 +19,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -39,6 +42,11 @@ import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.ISourceViewer;
+
+import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -50,12 +58,14 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.NewJUnitTestCaseProposal;
@@ -10311,7 +10321,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, selection.length());
 		proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 0);
 		assertProposalDoesNotExist(proposals, "Convert to static import");
 		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
 	}
@@ -10414,7 +10423,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, "Convert to static import");
 		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
 
@@ -10424,7 +10432,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 0);
 		assertProposalDoesNotExist(proposals, "Convert to static import");
 		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
 	}
@@ -10781,6 +10788,155 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
+	@Test
+	public void testAddStaticFavoritesImportBothMemberAndType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("    public static void foo() { };\n");
+		buf.append("    public static void bar() { };\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import static test1.T.foo;");
+		buf.append("public class E {\n");
+		buf.append("    public void x() {\n");
+		buf.append("        foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String string= "import";
+		int offset= buf.toString().indexOf(string);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		JavaEditor javaEditor= (JavaEditor) part;
+		ISourceViewer viewer= javaEditor.getViewer();
+		AssistContext context= new AssistContext(cu, viewer, offset, string.length());
+
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		String orig= store.getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+
+		try {
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+			assertNumberOfProposals(proposals, 2);
+			assertProposalExists(proposals, Messages.format(CorrectionMessages.QuickAssistProcessor_modify_favorites, "test1.T.foo"));
+			assertProposalExists(proposals, Messages.format(CorrectionMessages.QuickAssistProcessor_modify_favorites, "test1.T.*"));
+
+			assertFalse(orig.contains("test1.T"));
+
+			IJavaCompletionProposal prop= proposals.get(0);
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			prop.apply(doc);
+			String newValue= store.getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+
+			assertTrue(newValue.contains("test1.T.foo"));
+			assertFalse(newValue.contains("test1.T.*"));
+
+			prop= proposals.get(1);
+			prop.apply(context.getSourceViewer().getDocument());
+			newValue= store.getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+
+			assertTrue(newValue.contains("test1.T.foo"));
+			assertTrue(newValue.contains("test1.T.*"));
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+			store.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, orig);
+		}
+	}
+
+	@Test
+	public void testAddStaticFavoritesMemberAlreadyImported() throws Exception {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "test1.T.foo");
+
+		String orig= store.getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuilder buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("public class T {\n");
+			buf.append("    public static void foo() { };\n");
+			buf.append("    public static void bar() { };\n");
+			buf.append("}\n");
+			pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+			buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("import static test1.T.foo;");
+			buf.append("public class E {\n");
+			buf.append("    public void x() {\n");
+			buf.append("        foo();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+			IEditorPart part= JavaUI.openInEditor(cu);
+			JavaEditor javaEditor= (JavaEditor) part;
+			ISourceViewer viewer= javaEditor.getViewer();
+
+			String string= "import";
+			int offset= buf.toString().indexOf(string);
+			AssistContext context= new AssistContext(cu, viewer, offset, string.length());
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+			assertNumberOfProposals(proposals, 1);
+			assertProposalExists(proposals, Messages.format(CorrectionMessages.QuickAssistProcessor_modify_favorites, "test1.T.*"));
+
+			assertFalse(orig.contains("test1.T.*"));
+
+			IJavaCompletionProposal prop= proposals.get(0);
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			prop.apply(doc);
+			String newValue= store.getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+
+			assertTrue(newValue.contains("test1.T.*"));
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+			store.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, orig);
+		}
+	}
+
+	@Test
+	public void testAddStaticFavoritesNoNeedToImport() throws Exception {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "test1.T.*");
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuilder buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("public class T {\n");
+			buf.append("    public static void foo() { };\n");
+			buf.append("    public static void bar() { };\n");
+			buf.append("}\n");
+			pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+			buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("import static test1.T.foo;");
+			buf.append("public class E {\n");
+			buf.append("    public void x() {\n");
+			buf.append("        foo();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+			String string= "import";
+			int offset= buf.toString().indexOf(string);
+			AssistContext context= getCorrectionContext(cu, offset, string.length());
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+			assertProposalDoesNotExist(proposals, Messages.format(CorrectionMessages.QuickAssistProcessor_modify_favorites, "test1.T.*"));
+			assertProposalDoesNotExist(proposals, Messages.format(CorrectionMessages.QuickAssistProcessor_modify_favorites, "test1.T.foo"));
+		} finally {
+			store.setToDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+		}
 	}
 
 }
