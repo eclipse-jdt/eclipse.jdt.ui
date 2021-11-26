@@ -9,3 +9,4 @@ Bug 566668 - Comparator errors in I20200904-0210
 Comparator errors in I20201204-0340
 Bug 574012 - Comparator errors in I20210604-0350
 Bug 574522 - 4.21 I-Build: I20210628-1800 - Comparator Errors Found
+Bug 577483 - Comparator errors in I20211126-0230
