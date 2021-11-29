@@ -2,13 +2,13 @@
 <feature
       id="org.eclipse.jdt.astview.feature"
       label="AST View"
-      version="1.1.13.qualifier"
+      version="1.1.14.qualifier"
       provider-name="Eclipse.org"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
 
    <description>
-      AST View for Eclipse 2020-12 and later (jdt.core 3.24)
+      AST View for Eclipse 2021-12 and later (jdt.core 3.28)
    </description>
 
    <license url="%licenseURL">
@@ -20,8 +20,8 @@
    </url>
 
    <requires>
-      <import plugin="org.eclipse.jdt.core" version="3.24.0" match="compatible"/>
-      <import plugin="org.eclipse.jdt.ui" version="3.22.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.core" version="3.28.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.ui" version="3.25.0" match="compatible"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.views"/>
