@@ -277,4 +277,27 @@ public class TypeInfoTest {
 //		assertEquals("sun.nio.ch.WindowsSelectorImpl", TypeInfoFilter.simplifySearchText(" - locked <0x0000000087428348> (a sun.nio.ch.WindowsSelectorImpl) "));
 		// "- waiting to re-lock in wait() <0x00000007005919b0> (a java.lang.ref.ReferenceQueue$Lock)"
 	}
+
+    @Test
+    public void testBug578547() {
+    	IJavaElement[] elements= new IJavaElement[] { fJProject1 };
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
+
+		TypeInfoFilter filter= new TypeInfoFilter("TestInner1.TestInner2", scope, 0, null);
+		assertEquals("TestInner2", filter.getNamePattern());
+		assertEquals("*TestInner1*", filter.getPackagePattern());
+
+		filter= new TypeInfoFilter("TestInner1.TestInner2.TestInner3", scope, 0, null);
+		assertEquals("TestInner3", filter.getNamePattern());
+		assertEquals("*TestInner1.TestInner2*", filter.getPackagePattern());
+
+		filter= new TypeInfoFilter("org.eclipse.jdt.IProblemInfo", scope, 0, null);
+		assertEquals("IProblemInfo", filter.getNamePattern());
+		assertEquals("org*.eclipse*.jdt*", filter.getPackagePattern());
+
+		filter= new TypeInfoFilter("Test", scope, 0, null);
+		assertEquals("Test", filter.getNamePattern());
+		assertEquals(null, filter.getPackagePattern());
+   }
+
 }

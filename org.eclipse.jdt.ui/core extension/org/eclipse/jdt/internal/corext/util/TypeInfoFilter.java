@@ -146,7 +146,12 @@ public class TypeInfoFilter {
 			fNameMatcher= new PatternMatcher(text);
 			fPackageMatcher= null;
 		} else {
-			fPackageMatcher= new PatternMatcher(evaluatePackagePattern(text.substring(0, index)));
+			if (Character.isUpperCase(text.charAt(0))) {
+				// might be referring to class so add wild-card at front
+				fPackageMatcher= new PatternMatcher(evaluatePackagePattern("*" + text.substring(0, index))); //$NON-NLS-1$
+			} else {
+				fPackageMatcher= new PatternMatcher(evaluatePackagePattern(text.substring(0, index)));
+			}
 			String name= text.substring(index + 1);
 			if (name.length() == 0)
 				name= "*"; //$NON-NLS-1$
