@@ -166,7 +166,7 @@ import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
-import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFix;
+import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFix;
 import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
@@ -415,29 +415,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static int getIndex(int offset, List<Statement> statements) {
-		for (int i= 0; i < statements.size(); i++) {
-			Statement s= statements.get(i);
-			if (offset <= s.getStartPosition()) {
-				return i;
-			}
-			if (offset < s.getStartPosition() + s.getLength()) {
-				return -1;
-			}
-		}
-		return statements.size();
-	}
-
 	private static boolean getExtractMethodProposal(IInvocationContext context, ASTNode coveringNode, boolean problemsAtLocation, Collection<ICommandAccess> proposals) throws CoreException {
 		if (!(coveringNode instanceof Expression) && !(coveringNode instanceof Statement) && !(coveringNode instanceof Block)) {
 			return false;
 		}
 		if (coveringNode instanceof Block) {
 			List<Statement> statements= ((Block) coveringNode).statements();
-			int startIndex= getIndex(context.getSelectionOffset(), statements);
+			int startIndex= QuickAssistProcessorUtil.getIndex(context.getSelectionOffset(), statements);
 			if (startIndex == -1)
 				return false;
-			int endIndex= getIndex(context.getSelectionOffset() + context.getSelectionLength(), statements);
+			int endIndex= QuickAssistProcessorUtil.getIndex(context.getSelectionOffset() + context.getSelectionLength(), statements);
 			if (endIndex == -1 || endIndex <= startIndex)
 				return false;
 		}
@@ -732,7 +719,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	private static boolean getConvertToSwitchExpressionProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (covering instanceof Block) {
 			List<Statement> statements= ((Block) covering).statements();
-			int startIndex= getIndex(context.getSelectionOffset(), statements);
+			int startIndex= QuickAssistProcessorUtil.getIndex(context.getSelectionOffset(), statements);
 			if (startIndex == -1 || startIndex >= statements.size()) {
 				return false;
 			}
@@ -751,7 +738,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		IProposableFix fix= SwitchExpressionsFix.createConvertToSwitchExpressionFix(switchStatement);
+		IProposableFix fix= SwitchExpressionsFixCore.createConvertToSwitchExpressionFix(switchStatement);
 		if (fix == null)
 			return false;
 

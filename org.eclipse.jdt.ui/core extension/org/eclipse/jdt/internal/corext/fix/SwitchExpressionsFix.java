@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.SwitchStatement;
 
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore.SwitchExpressionsFixOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -38,19 +37,6 @@ public class SwitchExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 		CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[operations.size()]);
 		return new SwitchExpressionsFix(FixMessages.SwitchExpressionsFix_convert_to_switch_expression, compilationUnit, ops);
-	}
-
-	public static SwitchExpressionsFix createConvertToSwitchExpressionFix(SwitchStatement switchStatement) {
-		CompilationUnit root= (CompilationUnit) switchStatement.getRoot();
-		if (!JavaModelUtil.is14OrHigher(root.getJavaElement().getJavaProject()))
-			return null;
-
-		List<SwitchExpressionsFixOperation> operations= new ArrayList<>();
-		SwitchExpressionsFixCore.SwitchStatementsFinder finder= new SwitchExpressionsFixCore.SwitchStatementsFinder(operations);
-		switchStatement.accept(finder);
-		if (operations.isEmpty())
-			return null;
-		return new SwitchExpressionsFix(FixMessages.SwitchExpressionsFix_convert_to_switch_expression, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operations.get(0) });
 	}
 
 	protected SwitchExpressionsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations) {
