@@ -4536,25 +4536,31 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		try {
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getCompilationUnit(), true);
-			ImportRewrite importRewriteReplaceAllOccurences= StubUtility.createImportRewrite(context.getCompilationUnit(), true);
 			ASTRewrite astRewrite= ASTRewrite.create(node.getAST());
 			ASTRewrite astRewriteReplaceAllOccurrences= ASTRewrite.create(node.getAST());
 
-			int[] allReferencesToDeclaringClass= new int[1];
-			allReferencesToDeclaringClass[0]= 0;
-			int[] referencesFromOtherOccurences= new int[1];
-			referencesFromOtherOccurences[0]= 0;
+			ImportRemover remover= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
+			ImportRemover removerAllOccurences= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
 			MethodInvocation mi= null;
 			QualifiedName qn= null;
 			if (name.getParent() instanceof MethodInvocation) {
 				mi= (MethodInvocation) name.getParent();
 				// convert the method invocation
 				astRewrite.remove(mi.getExpression(), null);
-				mi.typeArguments().forEach(type -> astRewrite.remove((Type) type, null));
+				remover.registerRemovedNode(mi.getExpression());
+				removerAllOccurences.registerRemovedNode(mi.getExpression());
+				mi.typeArguments().forEach(typeObject -> {
+					Type type= (Type) typeObject;
+					astRewrite.remove(type, null);
+					remover.registerRemovedNode(type);
+					removerAllOccurences.registerRemovedNode(type);
+				});
 			} else if (name.getParent() instanceof QualifiedName) {
 				qn= (QualifiedName) name.getParent();
 				// convert the field access
 				astRewrite.replace(qn, ASTNodeFactory.newName(node.getAST(), name.getFullyQualifiedName()), null);
+				remover.registerRemovedNode(qn);
+				removerAllOccurences.registerRemovedNode(qn);
 			} else {
 				return false;
 			}
@@ -4573,21 +4579,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 						if (miFinal != null &&
 								miFinal.getExpression() instanceof Name && ((Name) miFinal.getExpression()).getFullyQualifiedName().equals(fullyQualifiedName)
 								&& miFinal.getName().getIdentifier().equals(methodInvocation.getName().getIdentifier())) {
-							methodInvocation.typeArguments().forEach(type -> astRewriteReplaceAllOccurrences.remove((Type) type, null));
+							methodInvocation.typeArguments().forEach(type -> {
+								astRewriteReplaceAllOccurrences.remove((Type) type, null);
+								removerAllOccurences.registerRemovedNode((Type) type);
+							});
 							astRewriteReplaceAllOccurrences.remove(methodInvocationExpression, null);
-							allReferencesToDeclaringClass[0]++;
-						} else if (declaringClass.getName().equals(fullyQualifiedName)) {
-							allReferencesToDeclaringClass[0]++;
-							referencesFromOtherOccurences[0]++;
-						}
-					} else if (methodInvocationExpression instanceof ClassInstanceCreation) {
-						ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) methodInvocationExpression;
-						if (classInstanceCreation.getType() instanceof SimpleType) {
-							String typeName= ((SimpleType) classInstanceCreation.getType()).getName().getFullyQualifiedName();
-							if (typeName.equals(declaringClass.getName())) {
-								allReferencesToDeclaringClass[0]++;
-								referencesFromOtherOccurences[0]++;
-							}
+							removerAllOccurences.registerRemovedNode(methodInvocationExpression);
 						}
 					}
 
@@ -4601,35 +4598,24 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					if (qnFinal != null &&
 							qualifiedName.getFullyQualifiedName().equals(qnFinal.getFullyQualifiedName())) {
 						astRewriteReplaceAllOccurrences.replace(qualifiedName, ASTNodeFactory.newName(node.getAST(), name.getFullyQualifiedName()), null);
-						allReferencesToDeclaringClass[0]++;
-					} else if (declaringClass.getName().equals(qualifiedName.getQualifier().getFullyQualifiedName())) {
-						allReferencesToDeclaringClass[0]++;
-						referencesFromOtherOccurences[0]++;
+						removerAllOccurences.registerRemovedNode(qualifiedName);
 					}
 					return super.visit(qualifiedName);
 				}
 			});
 
-			// add the static import
 			if (needImport) {
 				importRewrite.addStaticImport(binding);
-				if (allReferencesToDeclaringClass[0] == 1) { // If there are exactly 1 visits, the import can be removed
-					importRewrite.removeImport(declaringClass.getQualifiedName());
-				}
-				importRewriteReplaceAllOccurences.addStaticImport(binding);
-				if (referencesFromOtherOccurences[0] == 0) {
-					importRewriteReplaceAllOccurences.removeImport(declaringClass.getQualifiedName());
-				}
 			}
-
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(CorrectionMessages.QuickAssistProcessor_convert_to_static_import, context.getCompilationUnit(), astRewrite,
+			ASTRewriteRemoveImportsCorrectionProposal proposal= new ASTRewriteRemoveImportsCorrectionProposal(CorrectionMessages.QuickAssistProcessor_convert_to_static_import, context.getCompilationUnit(), astRewrite,
 					IProposalRelevance.ADD_STATIC_IMPORT, image);
 			proposal.setImportRewrite(importRewrite);
+			proposal.setImportRemover(remover);
 			proposals.add(proposal);
-			ASTRewriteCorrectionProposal proposalReplaceAllOccurrences= new ASTRewriteCorrectionProposal(CorrectionMessages.QuickAssistProcessor_convert_to_static_import_replace_all,
-					context.getCompilationUnit(), astRewriteReplaceAllOccurrences,
+			ASTRewriteRemoveImportsCorrectionProposal proposalReplaceAllOccurrences= new ASTRewriteRemoveImportsCorrectionProposal(CorrectionMessages.QuickAssistProcessor_convert_to_static_import_replace_all, context.getCompilationUnit(), astRewriteReplaceAllOccurrences,
 					IProposalRelevance.ADD_STATIC_IMPORT, image);
-			proposalReplaceAllOccurrences.setImportRewrite(importRewriteReplaceAllOccurences);
+			proposalReplaceAllOccurrences.setImportRewrite(importRewrite);
+			proposalReplaceAllOccurrences.setImportRemover(removerAllOccurences);
 			proposals.add(proposalReplaceAllOccurrences);
 		} catch (IllegalArgumentException e) {
 			// Wrong use of ASTRewrite or ImportRewrite API, see bug 541586
