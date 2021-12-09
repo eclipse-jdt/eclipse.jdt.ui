@@ -327,4 +327,14 @@ public class ExtractMethodTests1d8 extends ExtractMethodTests {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Test
+	public void test328() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	@Test
+	public void test329() throws Exception {
+		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
 }

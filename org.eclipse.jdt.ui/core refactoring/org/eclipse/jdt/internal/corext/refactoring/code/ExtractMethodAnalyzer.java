@@ -921,7 +921,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		int bodyExclusiveEnd= bodyStart + body.getLength();
 
 		boolean isValidSelection= false;
-		if ((body instanceof Block) && (bodyStart < selectionStart && selectionExclusiveEnd <= bodyExclusiveEnd)) {
+		if ((body instanceof Block) && (bodyStart <= selectionStart && selectionExclusiveEnd <= bodyExclusiveEnd)) {
 			// if selection is inside lambda body's block
 			isValidSelection= true;
 		} else if (body instanceof Expression) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -77,6 +77,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -1243,9 +1244,25 @@ public class ExtractMethodRefactoring extends Refactoring {
 					fAnalyzer.getReturnTypeBinding().equals(fAST.resolveWellKnownType("void")); //$NON-NLS-1$
 			if (selectedNodes.length == 1) {
 				if (!isReturnVoid) {
-					statements.insertLast(fRewriter.createMoveTarget(selectedNodes[0]), substitute);
+					if (selectedNodes[0] instanceof Block) {
+						Block block= (Block)selectedNodes[0];
+						List<Statement> blockStatements= block.statements();
+						for (Statement blockStatement : blockStatements) {
+							statements.insertLast(fRewriter.createMoveTarget(blockStatement), substitute);
+						}
+					} else {
+						statements.insertLast(fRewriter.createMoveTarget(selectedNodes[0]), substitute);
+					}
 				}
-				fRewriter.replace(selectedNodes[0], replacementNode, substitute);
+				if (selectedNodes[0].getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+					if (replacementNode instanceof ExpressionStatement) {
+						fRewriter.replace(selectedNodes[0], ((ExpressionStatement)replacementNode).getExpression(), substitute);
+					} else if (replacementNode instanceof ReturnStatement) {
+						fRewriter.replace(selectedNodes[0], ((ReturnStatement)replacementNode).getExpression(), substitute);
+					}
+				} else {
+					fRewriter.replace(selectedNodes[0], replacementNode, substitute);
+				}
 			} else if (selectedNodes.length > 1) {
 				if (isReturnVoid) {
 					fRewriter.remove(selectedNodes[selectedNodes.length - 1], substitute);

@@ -6,8 +6,6 @@ public class A_test402 {
 	}
 
 	protected void extracted() {
-		/*[*/{
-			foo();
-		}/*]*/
+		foo();
 	} 
 }

@@ -10,8 +10,6 @@ public class A_test804{
 	}
 
 	protected void extracted() {
-		/*[*/{
-			System.out.println("Hello world");
-		}/*]*/
+		System.out.println("Hello world");
 	}
 }
