@@ -306,6 +306,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getUnnecessaryArrayCreationProposal(context, coveringNode, null)
 					|| getExtractVariableProposal(context, false, null)
 					|| getExtractMethodProposal(context, coveringNode, false, null)
+					|| getExtractMethodFromLambdaProposal(context, coveringNode, false, null)
 					|| getInlineLocalProposal(context, coveringNode, null)
 					|| getConvertLocalToFieldProposal(context, coveringNode, null)
 					|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
@@ -376,6 +377,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
 				getExtractVariableProposal(context, problemsAtLocation, resultingCollections);
 				getExtractMethodProposal(context, coveringNode, problemsAtLocation, resultingCollections);
+				getExtractMethodFromLambdaProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
 				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
@@ -462,7 +464,35 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	private static boolean getExtractMethodFromLambdaProposal(IInvocationContext context, ASTNode coveringNode, boolean problemsAtLocation, Collection<ICommandAccess> proposals) throws CoreException {
+		if (coveringNode instanceof Block && coveringNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+			return false;
+		}
+		ASTNode node= ASTNodes.getFirstAncestorOrNull(coveringNode, LambdaExpression.class, BodyDeclaration.class);
+		if (!(node instanceof LambdaExpression)) {
+			return false;
+		}
+		ASTNode body= ((LambdaExpression)node).getBody();
+		final ICompilationUnit cu= context.getCompilationUnit();
+		final ExtractMethodRefactoring extractMethodRefactoring= new ExtractMethodRefactoring(context.getASTRoot(), body.getStartPosition(), body.getLength());
+		extractMethodRefactoring.setMethodName("extracted"); //$NON-NLS-1$
+		if (extractMethodRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			if (proposals == null) {
+				return true;
+			}
+			String label= CorrectionMessages.QuickAssistProcessor_extractmethod_from_lambda_description;
+			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
 
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+			int relevance= problemsAtLocation ? IProposalRelevance.EXTRACT_METHOD_ERROR : IProposalRelevance.EXTRACT_LAMBDA_BODY_TO_METHOD;
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractMethodRefactoring, relevance, image);
+			proposal.setLinkedProposalModel(linkedProposalModel);
+			proposals.add(proposal);
+			return true;
+		}
+		return false;
+	}
 
 	private static boolean getExtractVariableProposal(IInvocationContext context, boolean problemsAtLocation, Collection<ICommandAccess> proposals) throws CoreException {
 
