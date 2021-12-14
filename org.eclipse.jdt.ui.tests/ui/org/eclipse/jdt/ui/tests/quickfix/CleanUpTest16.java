@@ -630,4 +630,32 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu0, cu1 }, new String[] { expected0, expected1 }, null);
 	}
 
+	@Test
+	public void testDoNotRemoveParenthesesFromPatternInstanceof() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class TestParenthesesRemoval {\n" //
+				+ "        public static void doNotChangeParenthesesForInstanceof(Object o) {\n" //
+				+ "            if (!(o instanceof String)) {\n" //
+				+ "                System.out.println(\"not a String\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        public static void doNotChangeParenthesesForPatternInstanceof(Object o) {\n" //
+				+ "            if (!(o instanceof String s)) {\n" //
+				+ "                System.out.println(\"not a String\");\n" //
+				+ "            } else {\n" //
+				+ "                System.out.println(\"String length is \" + s.length());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestParenthesesRemoval.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
 }

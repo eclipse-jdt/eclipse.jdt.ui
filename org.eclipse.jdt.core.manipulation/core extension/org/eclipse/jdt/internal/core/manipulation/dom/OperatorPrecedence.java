@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 
@@ -73,7 +74,7 @@ public class OperatorPrecedence {
 			return ASSIGNMENT;
 		} else if (expression instanceof ConditionalExpression) {
 			return CONDITIONAL;
-		} else if (expression instanceof InstanceofExpression) {
+		} else if (expression instanceof InstanceofExpression || expression instanceof PatternInstanceofExpression) {
 			return RELATIONAL;
 		} else if (expression instanceof CastExpression) {
 			return TYPEGENERATION;
