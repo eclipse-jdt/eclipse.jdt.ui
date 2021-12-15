@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1587,6 +1587,11 @@ public class PullUpTests extends GenericRefactoringTest {
 	@Test
 	public void testFieldMethod4() throws Exception {
 		fieldMethodHelper2(new String[] { "c" }, new String[] {}, new String[][] { new String[0] }, true, false);
+	}
+
+	@Test
+	public void testFieldMethod5() throws Exception {
+		fieldMethodHelper2(new String[] {}, new String[] {"m"}, new String[][] { new String[0] }, true, false);
 	}
 
 	//----

@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
@@ -88,6 +89,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -116,6 +118,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -238,6 +241,29 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 
 		@Override
+		public final boolean visit(final SimpleType node) {
+			if (node.getName().isSimpleName()) {
+				ITypeBinding binding= node.resolveBinding();
+				if (binding == null) {
+					return false;
+				}
+				CheckTypeNameInTarget check= new CheckTypeNameInTarget(binding);
+				try {
+					fTargetRewriter.getRoot().accept(check);
+				} catch (AbortSearchException e) {
+					// do nothing
+				}
+				if (check.isQualificationRequired() && binding.getPackage() != null && !binding.getPackage().getName().isEmpty()) {
+					String newName= binding.getPackage().getName() + "."  + node.getName().getFullyQualifiedName(); //$NON-NLS-1$
+					QualifiedType newQualifiedType= (QualifiedType)fRewrite.createStringPlaceholder(newName, ASTNode.QUALIFIED_TYPE);
+					fRewrite.replace(node, newQualifiedType, null);
+					return false;
+				}
+			}
+			return false;
+		}
+
+		@Override
 		public final boolean visit(final SuperMethodInvocation node) {
 			if (!fAnonymousClassDeclaration && !fTypeDeclarationStatement) {
 				final IBinding superBinding= node.getName().resolveBinding();
@@ -277,6 +303,35 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		public final boolean visit(final TypeDeclarationStatement node) {
 			fTypeDeclarationStatement= true;
 			return super.visit(node);
+		}
+
+		private class CheckTypeNameInTarget extends ASTVisitor {
+
+			private final ITypeBinding fBinding;
+			private boolean fQualificationRequired;
+
+			public CheckTypeNameInTarget(ITypeBinding binding) {
+				this.fBinding= binding;
+			}
+
+			@Override
+			public boolean visit(SimpleType node) {
+				if (!node.getName().isSimpleName() || !node.getName().getFullyQualifiedName().equals(fBinding.getName())) {
+					return false;
+				}
+				ITypeBinding binding= node.resolveBinding();
+				if (binding != null) {
+					if (!binding.isEqualTo(fBinding)) {
+						fQualificationRequired= true;
+						throw new AbortSearchException();
+					}
+				}
+				return false;
+			}
+
+			public boolean isQualificationRequired() {
+				return fQualificationRequired;
+			}
 		}
 	}
 
