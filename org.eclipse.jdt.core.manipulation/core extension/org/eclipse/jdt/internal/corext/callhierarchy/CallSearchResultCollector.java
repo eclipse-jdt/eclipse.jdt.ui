@@ -43,21 +43,23 @@ class CallSearchResultCollector {
     }
 
     protected void addMember(IMember member, IMember calledMember, int start, int end) {
-        addMember(member, calledMember, start, end, CallLocation.UNKNOWN_LINE_NUMBER);
+        addMember(member, calledMember, start, end, CallLocation.UNKNOWN_LINE_NUMBER, false);
     }
 
-    protected void addMember(IMember member, IMember calledMember, int start, int end, int lineNumber) {
+    protected void addMember(IMember member, IMember calledMember, int start, int end, int lineNumber, boolean potential) {
         if ((member != null) && (calledMember != null)) {
             if (!isIgnored(calledMember)) {
                 MethodCall methodCall = fCalledMembers.get(calledMember.getHandleIdentifier());
 
                 if (methodCall == null) {
-                    methodCall = new MethodCall(calledMember);
+                    methodCall = new MethodCall(calledMember, potential);
                     fCalledMembers.put(calledMember.getHandleIdentifier(), methodCall);
                 }
 
-                methodCall.addCallLocation(new CallLocation(member, calledMember, start,
-                        end, lineNumber));
+                if(start > -1 && end > -1) {
+                    methodCall.addCallLocation(new CallLocation(member, calledMember, start,
+                            end, lineNumber));
+                }
             }
         }
     }

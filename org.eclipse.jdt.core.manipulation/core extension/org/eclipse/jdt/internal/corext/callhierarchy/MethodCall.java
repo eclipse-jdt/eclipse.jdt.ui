@@ -23,13 +23,26 @@ import org.eclipse.jdt.core.IMember;
 public class MethodCall {
     private IMember fMember;
     private List<CallLocation> fCallLocations;
+    private boolean potential;
 
     /**
      * @param enclosingElement
      */
     public MethodCall(IMember enclosingElement) {
-        this.fMember = enclosingElement;
+    	this(enclosingElement, false);
     }
+
+	/**
+	 * @param enclosingElement enclosing member of this call object
+	 * @param potential indicate whether this call object is a potential item in the hierarchy. A
+	 *            item is considered as potential when there is no direct reference, like methods on
+	 *            a implementation class which are referred through the interface in actual code.
+	 */
+	public MethodCall(IMember enclosingElement, boolean potential) {
+		this.fMember= enclosingElement;
+		this.potential = potential;
+	}
+
 
     /**
      *
@@ -75,6 +88,16 @@ public class MethodCall {
         fCallLocations.add(location);
     }
 
+	/**
+	 * Returns if this is a potential call object.
+	 *
+	 * @return <code>true</code> if its potential.
+	 * @see #MethodCall(IMember, boolean)
+	 */
+	public boolean isPotential() {
+		return potential;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder= new StringBuilder();
@@ -82,6 +105,7 @@ public class MethodCall {
 		if (fMember != null) {
 			builder.append(fMember);
 		}
+		builder.append(',').append(potential);
 		builder.append("]"); //$NON-NLS-1$
 		return builder.toString();
 	}

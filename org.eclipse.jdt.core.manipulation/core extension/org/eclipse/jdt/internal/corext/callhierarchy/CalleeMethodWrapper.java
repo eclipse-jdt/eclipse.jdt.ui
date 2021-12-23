@@ -96,7 +96,7 @@ class CalleeMethodWrapper extends MethodWrapper {
 		    }
 
 			if (cu != null) {
-				CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor(member, cu, progressMonitor);
+				CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor(this.getMethodCall().getFirstCallLocation(), member, cu, progressMonitor);
 
 				cu.accept(visitor);
 				return visitor.getCallees();

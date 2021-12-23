@@ -81,6 +81,7 @@ public final class CallHierarchyMessages extends NLS {
 	public static String CallHierarchyLabelProvider_noMethodSelected;
 	public static String CallHierarchyLabelProvider_updatePending;
 	public static String CallHierarchyLabelProvider_matches;
+	public static String CallHierarchyLabelProvider_potential;
 	public static String CallHierarchyViewPart_empty;
 	public static String CallHierarchyViewPart_callsToConstructors;
 	public static String CallHierarchyViewPart_callsToField;

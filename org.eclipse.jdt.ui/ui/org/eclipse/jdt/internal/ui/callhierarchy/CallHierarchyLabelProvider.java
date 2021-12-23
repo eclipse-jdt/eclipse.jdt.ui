@@ -112,6 +112,11 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 				decorated = decorateLabel(decorated, nodeType);
 				styledDecorated= StyledCellLabelProvider.styleDecoratedString(decorated, ColoringLabelProvider.INHERITED_STYLER, styledDecorated);
 			}
+			if(wrapper.getMethodCall().isPotential()) {
+				decorated = Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_potential, decorated);
+				styledDecorated= StyledCellLabelProvider.styleDecoratedString(decorated,
+						StyledString.COUNTER_STYLER, styledDecorated);
+			}
 			return styledDecorated;
 		}
 
