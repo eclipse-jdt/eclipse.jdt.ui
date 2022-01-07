@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18559,6 +18559,58 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testAddParenthesesBug578081() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i) {\n" //
+				+ "        if (i == 0 || i == 1 /* i is 0 or 1 */) // if comment\n" //
+				+ "            /* additional if comment */\n"
+				+ "            System.out.println(i);\n" //
+				+ "        \n" //
+				+ "        while (i > 0 && i < 10 /* i gt 0 and lt 10 */) // while comment\n" //
+				+ "            /* additional while comment */\n"
+				+ "            System.out.println(1);\n" //
+				+ "        \n" //
+				+ "        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n" //
+				+ "        \n" //
+				+ "        do ; while (i > 5 && b || i < 100 && i > 90);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i) {\n" //
+				+ "        if (i == 0 || i == 1 /* i is 0 or 1 */) { // if comment\n" //
+				+ "        \t/* additional if comment */\n"
+				+ "        \tSystem.out.println(i);\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        while (i > 0 && i < 10 /* i gt 0 and lt 10 */) { // while comment\n" //
+				+ "        \t/* additional while comment */\n"
+				+ "        \tSystem.out.println(1);\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n" //
+				+ "        \n" //
+				+ "        do {\n" //
+				+ "            ;\n" //
+				+ "        } while (i > 5 && b || i < 100 && i > 90);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test

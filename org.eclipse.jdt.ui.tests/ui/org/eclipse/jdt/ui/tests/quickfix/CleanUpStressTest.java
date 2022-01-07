@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -309,7 +309,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Extract the class name from a String in VA/Java style\n");
         buf.append("     */\n");
         buf.append("    public String extractClassName(final String className) {\n");
-        buf.append("        if (className.startsWith(\"Default package for\")) {\n");
+        buf.append("        if (className.startsWith(\"Default package for\")) { // $NON-NLS-1$\n");
         buf.append("            return className.substring(className.lastIndexOf(\".\") + 1); //$NON-NLS-1$\n");
         buf.append("        }\n");
         buf.append("        return className;\n");
@@ -1797,7 +1797,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("            if (key.startsWith(\"excluded.\")) { //$NON-NLS-1$\n");
         buf.append("                String path = p.getProperty(key);\n");
         buf.append("                path = path.trim();\n");
-        buf.append("                if (path.endsWith(\"*\")) {\n");
+        buf.append("                if (path.endsWith(\"*\")) { //$NON-NLS-1$\n");
         buf.append("                    path = path.substring(0, path.length() - 1);\n");
         buf.append("                }\n");
         buf.append("                if (path.length() > 0) {\n");
@@ -2439,7 +2439,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("                Assert.failNotEquals(message, new Double(expected),\n");
         buf.append("                        new Double(actual));\n");
         buf.append("            }\n");
-        buf.append("        } else if (!(Math.abs(expected - actual) <= delta)) {\n");
+        buf.append("        } else if (!(Math.abs(expected - actual) <= delta)) { // Because\n");
+        buf.append("                                                              // comparison with\n");
+        buf.append("                                                              // NaN always\n");
+        buf.append("                                                              // returns false\n");
         buf.append("            Assert.failNotEquals(message, new Double(expected),\n");
         buf.append("                    new Double(actual));\n");
         buf.append("        }\n");
@@ -2698,7 +2701,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        final String s = classFileName.substring(0,\n");
         buf.append("                classFileName.length() - ClassPathTestCollector.SUFFIX_LENGTH);\n");
         buf.append("        final String s2 = s.replace(File.separatorChar, '.');\n");
-        buf.append("        if (s2.startsWith(\".\")) {\n");
+        buf.append("        if (s2.startsWith(\".\")) { //$NON-NLS-1$\n");
         buf.append("            return s2.substring(1);\n");
         buf.append("        }\n");
         buf.append("        return s2;\n");
@@ -3081,19 +3084,19 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        boolean wait = false;\n");
         buf.append("\n");
         buf.append("        for (int i = 0; i < args.length; i++) {\n");
-        buf.append("            if (args[i].equals(\"-wait\")) {\n");
+        buf.append("            if (args[i].equals(\"-wait\")) { //$NON-NLS-1$\n");
         buf.append("                wait = true;\n");
-        buf.append("            } else if (args[i].equals(\"-c\")) {\n");
+        buf.append("            } else if (args[i].equals(\"-c\")) { //$NON-NLS-1$\n");
         buf.append("                testCase = this.extractClassName(args[++i]);\n");
-        buf.append("            } else if (args[i].equals(\"-v\")) {\n");
+        buf.append("            } else if (args[i].equals(\"-v\")) { //$NON-NLS-1$\n");
         buf.append("                System.err.println(\"JUnit \" + Version.id() //$NON-NLS-1$\n");
         buf.append("                        + \" by Kent Beck and Erich Gamma\"); //$NON-NLS-1$\n");
-        buf.append("            } else {\n");
+        buf.append("            } else { // $NON-NLS-1$\n");
         buf.append("                testCase = args[i];\n");
         buf.append("            }\n");
         buf.append("        }\n");
         buf.append("\n");
-        buf.append("        if (testCase.equals(\"\")) {\n");
+        buf.append("        if (testCase.equals(\"\")) { // $NON-NLS-1$\n");
         buf.append("            throw new Exception(\n");
         buf.append("                    \"Usage: TestRunner [-wait] testCaseName, where name is the name of the TestCase class\"); //$NON-NLS-1$\n");
         buf.append("        }\n");
