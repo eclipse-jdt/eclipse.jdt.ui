@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -521,7 +521,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		}
 
 		public static ModifyAll<Spinner> addModifyAll(Section section, final Images images) {
-			return new ModifyAll<Spinner>(section, images) {
+			return new ModifyAll<>(section, images) {
 
 				private Label fLabel;
 				private ToolItem fRemoveLinesItem;
@@ -1425,7 +1425,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_record_constructor_declaration_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_RECORD_CONSTRUCTOR_ON_ONE_LINE)
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_annotation_declaration_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ANNOTATION_DECLARATION_ON_ONE_LINE);
 
-		return fTree.new SimpleTreeBuilder<PreferenceTreeNode<?>>(null, null, null) {
+		return fTree.new SimpleTreeBuilder<>(null, null, null) {
 			@Override
 			protected PreferenceTreeNode<?> build(Section parent, PreferenceBuilder ignored) {
 				return sectionBuilder.build(parent, prefBuilder);
@@ -1467,7 +1467,12 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_superinterfaces, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_RECORD_DECLARATION))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_function_calls, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION)
-						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_qualified_invocations, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SELECTOR_IN_METHOD_INVOCATION)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_qualified_invocations, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SELECTOR_IN_METHOD_INVOCATION, p -> {
+							CheckboxPreference child= fTree.addCheckbox(p, FormatterMessages.FormatterModifyDialog_lineWrap_pref_qualified_invocations_indent_from_base_expression_first_line,
+									DefaultCodeFormatterConstants.FORMATTER_ALIGN_SELECTOR_IN_METHOD_INVOCATION_ON_EXPRESSION_FIRST_LINE, CheckboxPreference.FALSE_TRUE);
+							p.addDependant(child, v -> DefaultCodeFormatterConstants.getWrappingStyle(v) != DefaultCodeFormatterConstants.WRAP_NO_SPLIT
+									&& DefaultCodeFormatterConstants.getIndentStyle(v) != DefaultCodeFormatterConstants.INDENT_ON_COLUMN);
+						})
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_explicit_constructor_invocations, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_object_allocation_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_qualified_object_allocation_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_QUALIFIED_ALLOCATION_EXPRESSION))
@@ -1672,7 +1677,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 			}
 		}
 
-		return fTree.new SimpleTreeBuilder<PreferenceTreeNode<?>>(null, null, null) {
+		return fTree.new SimpleTreeBuilder<>(null, null, null) {
 
 			@Override
 			protected PreferenceTreeNode<?> build(Section parent, PreferenceBuilder prefBuilder) {

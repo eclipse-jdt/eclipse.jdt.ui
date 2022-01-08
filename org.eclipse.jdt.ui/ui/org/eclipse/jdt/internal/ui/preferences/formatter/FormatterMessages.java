@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -179,6 +179,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_lineWrap_pref_param_type_ref;
 	public static String FormatterModifyDialog_lineWrap_pref_parameters;
 	public static String FormatterModifyDialog_lineWrap_pref_qualified_invocations;
+	public static String FormatterModifyDialog_lineWrap_pref_qualified_invocations_indent_from_base_expression_first_line;
 	public static String FormatterModifyDialog_lineWrap_pref_qualified_object_allocation_arguments;
 	public static String FormatterModifyDialog_lineWrap_pref_record_components;
 	public static String FormatterModifyDialog_lineWrap_pref_relational_operators;

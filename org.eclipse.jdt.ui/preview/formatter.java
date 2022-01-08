@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Mateusz Matela and others.
+ * Copyright (c) 2018, 2022 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -884,7 +884,11 @@ nested(200,
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_arguments_in_method_invocation
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation
-class Example {int foo(Some a) {return a.getFirst();}}
+class Example {
+	String foo() {
+		return new StringBuilder(Arrays.asList(11111111, 22222222, 3333333, 44444444)).append("TextTextText").append(11111111 + 2222222 + 33333333).toStrinig();
+	}
+}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_arguments_in_explicit_constructor_call
