@@ -738,6 +738,12 @@ public class ProfileVersionerCore {
 
 		private static void version21to22(Map<String, String> oldSettings) {
 			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGN_SELECTOR_IN_METHOD_INVOCATION_ON_EXPRESSION_FIRST_LINE, DefaultCodeFormatterConstants.FALSE);
+			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SWITCH_CASE_WITH_ARROW,
+					DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_SWITCH_CASE_WITH_ARROW,
+					DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_SWITCH_CASE_WITH_COLON,
+					DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
 		}
 
 		/* old format constant values */

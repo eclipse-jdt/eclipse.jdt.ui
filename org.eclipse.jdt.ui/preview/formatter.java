@@ -1010,9 +1010,36 @@ class Example {int foo(int argument) {  while(!stop)doSomething();  for(String s
 class Example {void foo() {try (FileReader reader1 = new FileReader("file1");   FileReader reader2 = new FileReader("file2")) {}}}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_resources_in_try
 
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_switch_case_with_arrow
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_expressions_in_switch_case_with_arrow
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_expressions_in_switch_case_with_colon
+class Example {
+	boolean foo(Color color) {
+		boolean b = switch (color) {
+			case RED, GREEN, BLACK, BLUE, CYAN, ORANGE, WHITE, PINK -> true;
+			default -> false;
+		};
+		switch (color) {
+			case RED, GREEN, BLACK, BLUE, CYAN, ORANGE, WHITE, PINK: return true;
+			default: return false;
+		}
+	}
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_switch_case_with_arrow
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_expressions_in_switch_case_with_arrow
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_expressions_in_switch_case_with_colon
+
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_union_type_in_multicatch
 class Example {void foo() {try {} catch (IllegalArgumentException | NullPointerException | ClassCastException e) {  e.printStackTrace();}}}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_union_type_in_multicatch
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
+class Example {
+	void foo() {
+		assert this.field : "field does not have expected value - please investigate";
+	}
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_parameterized_type_references
 class Example {
@@ -1090,14 +1117,6 @@ module example.module0 {
 	provides example.other.module1.SomeService with example.module0.Service1, example.module0.Service2;
 }
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_module_statements
-
-//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
-class Example {
-	void foo() {
-		assert this.field : "field does not have expected value - please investigate";
-	}
-}
-//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
 
 }
 

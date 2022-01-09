@@ -165,6 +165,8 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_lineWrap_pref_default_indent_array;
 	public static String FormatterModifyDialog_lineWrap_pref_default_indent_wrapped;
 	public static String FormatterModifyDialog_lineWrap_pref_explicit_constructor_invocations;
+	public static String FormatterModifyDialog_lineWrap_pref_expressions_in_switch_case_with_arrow;
+	public static String FormatterModifyDialog_lineWrap_pref_expressions_in_switch_case_with_colon;
 	public static String FormatterModifyDialog_lineWrap_pref_extends_clause;
 	public static String FormatterModifyDialog_lineWrap_pref_for;
 	public static String FormatterModifyDialog_lineWrap_pref_implements_clause;
@@ -186,6 +188,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_lineWrap_pref_shift_operators;
 	public static String FormatterModifyDialog_lineWrap_pref_string_concatenation;
 	public static String FormatterModifyDialog_lineWrap_pref_superinterfaces;
+	public static String FormatterModifyDialog_lineWrap_pref_switch_case_with_arrow;
 	public static String FormatterModifyDialog_lineWrap_pref_throws_clause;
 	public static String FormatterModifyDialog_lineWrap_pref_try;
 	public static String FormatterModifyDialog_lineWrap_pref_wrap_outer_expressions_when_nested;
