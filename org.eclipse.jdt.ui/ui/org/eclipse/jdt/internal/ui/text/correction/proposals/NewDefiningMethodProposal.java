@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,7 +35,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -148,6 +150,23 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 
 			for (String proposedName : proposedNames) {
 				addLinkedPositionProposal(groupId, proposedName, null);
+			}
+		}
+		if (params.isEmpty() || bindings.length == 0) {
+			return;
+		}
+		if (fMethod.isVarargs()) {
+			// only last parameter can be vararg
+			SingleVariableDeclaration singleVariableDeclaration= params.get(bindings.length - 1);
+			singleVariableDeclaration.setVarargs(true);
+			Type type= singleVariableDeclaration.getType();
+			if (type != null && type.isArrayType()) {
+				List<Dimension> dimensions= ((ArrayType) type).dimensions();
+				if (dimensions.isEmpty()) {
+					return;
+				}
+				// remove last dimension added by vararg conversion
+				dimensions.remove(dimensions.size() - 1);
 			}
 		}
 	}
