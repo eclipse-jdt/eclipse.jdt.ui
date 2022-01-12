@@ -11647,6 +11647,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = (i1 == i2) && (i3 <= i4) || !(i1 == i2) && !(i4 >= i3);\n" //
 				+ "        boolean newBoolean3 = (i1 == i2) && (i3 != i4) || (i2 != i1) && (i3 == i4);\n" //
 				+ "        boolean newBoolean4 = (i1 == i2) && (i3 < i4) || (i1 != i2) && (i4 <= i3);\n" //
+				+ "        boolean newBoolean5 = (i1 == i2 && i3 != i4) || (i2 != i1 && i3 == i4);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceDuplicateConditionsWithFields() {\n" //
@@ -11715,6 +11716,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = (i1 == i2) == (i3 <= i4);\n" //
 				+ "        boolean newBoolean3 = (i1 == i2) == (i3 != i4);\n" //
 				+ "        boolean newBoolean4 = (i1 == i2) == (i3 < i4);\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) == (i3 != i4);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceDuplicateConditionsWithFields() {\n" //
