@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Hofmann, Google <eclipse@tom.eicher.name> - [hovering] NPE when hovering over @value reference within a type's javadoc - https://bugs.eclipse.org/bugs/show_bug.cgi?id=320084
@@ -1483,6 +1487,7 @@ public class JavadocContentAccess2 {
 		boolean isLiteral= TagElement.TAG_LITERAL.equals(name);
 		boolean isSummary = TagElement.TAG_SUMMARY.equals(name);
 		boolean isIndex = TagElement.TAG_INDEX.equals(name);
+		boolean isSnippet = TagElement.TAG_SNIPPET.equals(name);
 
 		if (isLiteral || isCode || isSummary || isIndex)
 			fLiteralContent++;
@@ -1497,6 +1502,9 @@ public class JavadocContentAccess2 {
 			handleIndex(node.fragments());
 		else if (isCode || isLiteral)
 			handleContentElements(node.fragments(), true);
+		else if (isSnippet) {
+			handleSnippet(node.fragments());
+		}
 		else if (handleInheritDoc(node) || handleDocRoot(node)) {
 			// Handled
 		} else {
@@ -1508,6 +1516,8 @@ public class JavadocContentAccess2 {
 
 		if (isLink || isCode)
 			fBuf.append("</code>"); //$NON-NLS-1$
+		if (isSnippet)
+			fBuf.append("</code></pre>"); //$NON-NLS-1$
 		if (isLiteral || isCode)
 			fLiteralContent--;
 
@@ -1904,6 +1914,21 @@ public class JavadocContentAccess2 {
 				fBuf.append(BlOCK_TAG_TITLE_START + "Summary: " + memberRef.getText() + BlOCK_TAG_TITLE_END); //$NON-NLS-1$
 				return;
 			}
+		}
+	}
+
+	private void handleSnippet(List<? extends ASTNode> fragments) {
+		int fs= fragments.size();
+		if (fs > 0) {
+			fBuf.append("<pre><code>"); //$NON-NLS-1$
+			fBuf.append(BlOCK_TAG_ENTRY_START);
+			for(ASTNode fragment : fragments) {
+				if (fragment instanceof  TextElement) {
+					TextElement memberRef= (TextElement) fragment;
+					fBuf.append(memberRef.getText());
+				}
+			}
+			fBuf.append(BlOCK_TAG_ENTRY_END);
 		}
 	}
 
