@@ -864,6 +864,84 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUnusedCodeBug578169() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static class Point {\n" //
+				+ "        int x, y;\n" //
+		        + "        public int getX() {\n" //
+		        + "            return x;\n" //
+		        + "        }\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    static class Rect {\n" //
+		        + "        Point loc;\n" //
+		        + "        int w, h;\n" //
+		        + "        public Point getLoc() {\n" //
+		        + "            return loc;\n" //
+		        + "        }\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    Rect getRect() {\n" //
+		        + "        return new Rect();\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    void test() {\n" //
+		        + "        int x;\n" //
+		        + "        int y;\n" //
+		        + "        int z;\n" //
+		        + "        int k = getRect().loc.getX();\n" //
+		        + "        x = getRect().getLoc().x;\n" //
+		        + "        y = getRect().loc.y;\n" //
+		        + "        System.out.println(y);\n" //
+		        + "        z = getRect().loc.x;\n" //
+		        + "        k = getRect().loc.getX();\n" //
+		        + "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static class Point {\n" //
+				+ "        int x, y;\n" //
+		        + "        public int getX() {\n" //
+		        + "            return x;\n" //
+		        + "        }\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    static class Rect {\n" //
+		        + "        Point loc;\n" //
+		        + "        int w, h;\n" //
+		        + "        public Point getLoc() {\n" //
+		        + "            return loc;\n" //
+		        + "        }\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    Rect getRect() {\n" //
+		        + "        return new Rect();\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    void test() {\n" //
+		        + "        int y;\n" //
+		        + "        getRect().loc.getX();\n" //
+		        + "        getRect().getLoc();\n" //
+		        + "        y = getRect().loc.y;\n" //
+		        + "        System.out.println(y);\n" //
+		        + "        getRect();\n" //
+		        + "        getRect().loc.getX();\n" //
+		        + "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
+	}
+
+	@Test
 	public void testUnusedCodeBug123766() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

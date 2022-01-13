@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -487,7 +487,12 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				removeStatement(rewrite, statementNode, group);
 				fRemovedAssignmentsCount++;
 			} else {
-				ASTNode initNode = rewrite.createMoveTarget(initializerNode);
+				// Can't create a field access expression statement so remove right-hand field accesses
+				ASTNode nodeToMove= initializerNode;
+				while (nodeToMove instanceof FieldAccess) {
+					nodeToMove= ((FieldAccess)nodeToMove).getExpression();
+				}
+				ASTNode initNode = rewrite.createMoveTarget(nodeToMove);
 				ExpressionStatement statement = rewrite.getAST().newExpressionStatement((Expression) initNode);
 				rewrite.replace(statementNode, statement, null);
 				fAlteredAssignmentsCount++;
