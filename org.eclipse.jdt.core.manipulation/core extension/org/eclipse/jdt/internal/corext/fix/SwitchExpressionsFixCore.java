@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2022 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -260,38 +260,60 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			Expression newSwitchExpressionExpression= (Expression)rewrite.createCopyTarget(switchStatement.getExpression());
 			newSwitchExpression.setExpression(newSwitchExpressionExpression);
 			SwitchCase lastSwitchCase= null;
+
+			boolean forceOldStyle= false;
+			// if there are comments at end of case statements, we have to use old style cases
+			for (Map.Entry<SwitchCase, List<Statement>> entry : caseMap.entrySet()) {
+				SwitchCase oldSwitchCase= entry.getKey();
+				List<Comment> trailingComments= ASTNodes.getTrailingComments(oldSwitchCase);
+				if (trailingComments != null && !trailingComments.isEmpty()) {
+					forceOldStyle= true;
+					break;
+				}
+			}
+
 			// build switch expression
 			for (Map.Entry<SwitchCase, List<Statement>> entry : caseMap.entrySet()) {
 				SwitchCase oldSwitchCase= entry.getKey();
 				List<Statement> oldStatements= entry.getValue();
 				if (oldStatements.isEmpty()) {
-					// fall-through, want all fall-through labels in single case
-					if (lastSwitchCase == null) {
-						lastSwitchCase= ast.newSwitchCase();
-						lastSwitchCase.setSwitchLabeledRule(true);
-						newSwitchExpression.statements().add(lastSwitchCase);
-					}
-					for (Object obj : oldSwitchCase.expressions()) {
-						Expression oldExpression= (Expression)obj;
-						Expression newExpression= (Expression)rewrite.createCopyTarget(oldExpression);
-						lastSwitchCase.expressions().add(newExpression);
+					if (forceOldStyle) {
+						SwitchCase newSwitchCase= (SwitchCase)rewrite.createCopyTarget(oldSwitchCase);
+						newSwitchExpression.statements().add(newSwitchCase);
+					} else {
+						// fall-through, want all fall-through labels in single case
+						if (lastSwitchCase == null) {
+							lastSwitchCase= ast.newSwitchCase();
+							lastSwitchCase.setSwitchLabeledRule(true);
+							newSwitchExpression.statements().add(lastSwitchCase);
+						}
+						for (Object obj : oldSwitchCase.expressions()) {
+							Expression oldExpression= (Expression)obj;
+							Expression newExpression= (Expression)rewrite.createCopyTarget(oldExpression);
+							lastSwitchCase.expressions().add(newExpression);
+						}
 					}
 					continue;
 				}
 				SwitchCase switchCase= null;
-				if (lastSwitchCase == null) {
-					SwitchCase newSwitchCase= ast.newSwitchCase();
+				if (forceOldStyle) {
+					SwitchCase newSwitchCase= (SwitchCase)rewrite.createCopyTarget(oldSwitchCase);
 					newSwitchExpression.statements().add(newSwitchCase);
-					newSwitchCase.setSwitchLabeledRule(true);
-					switchCase= newSwitchCase;
 				} else {
-					switchCase= lastSwitchCase;
-				}
-				lastSwitchCase= null;
-				for (Object obj : oldSwitchCase.expressions()) {
-					Expression oldExpression= (Expression)obj;
-					Expression newExpression= (Expression)rewrite.createCopyTarget(oldExpression);
-					switchCase.expressions().add(newExpression);
+					if (lastSwitchCase == null) {
+						SwitchCase newSwitchCase= ast.newSwitchCase();
+						newSwitchExpression.statements().add(newSwitchCase);
+						newSwitchCase.setSwitchLabeledRule(true);
+						switchCase= newSwitchCase;
+					} else {
+						switchCase= lastSwitchCase;
+					}
+					lastSwitchCase= null;
+					for (Object obj : oldSwitchCase.expressions()) {
+						Expression oldExpression= (Expression)obj;
+						Expression newExpression= (Expression)rewrite.createCopyTarget(oldExpression);
+						switchCase.expressions().add(newExpression);
+					}
 				}
 				if (oldStatements.size() == 1 && oldStatements.get(0) instanceof Block) {
 					oldStatements= ((Block)oldStatements.get(0)).statements();
@@ -302,19 +324,10 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					if (oldStatement instanceof ThrowStatement) {
 						ThrowStatement throwStatement= (ThrowStatement)oldStatement;
 						newStatement= (Statement)rewrite.createCopyTarget(throwStatement);
+					} else if (forceOldStyle) {
+						newStatement= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatement);
 					} else {
-						ExpressionStatement oldExpStatement= (ExpressionStatement)oldStatement;
-						Assignment oldAssignment= (Assignment)oldExpStatement.getExpression();
-						Expression rhs= oldAssignment.getRightHandSide();
-						// Ugly hack to tack on trailing comments
-						IBuffer buffer= cuRewrite.getCu().getBuffer();
-						StringBuilder b= new StringBuilder();
-						b.append(buffer.getText(rhs.getStartPosition(), rhs.getLength()) + ";"); //$NON-NLS-1$
-						List<Comment> trailingComments= ASTNodes.getTrailingComments(oldExpStatement);
-						for (Comment comment : trailingComments) {
-							b.append(" " + buffer.getText(comment.getStartPosition(), comment.getLength())); //$NON-NLS-1$
-						}
-						newStatement= (Statement) rewrite.createStringPlaceholder(b.toString(), ASTNode.EXPRESSION_STATEMENT);
+						newStatement= getNewStatementForCase(cuRewrite, rewrite, oldStatement);
 					}
 					newSwitchExpression.statements().add(newStatement);
 				} else {
@@ -324,25 +337,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						Statement oldSwitchCaseStatement= oldStatements.get(i);
 						newBlock.statements().add(rewrite.createCopyTarget(oldSwitchCaseStatement));
 					}
-					ExpressionStatement oldExpStatement= (ExpressionStatement)oldStatements.get(statementsLen - 1);
-					Assignment oldAssignment= (Assignment)oldExpStatement.getExpression();
-					Expression rhs= oldAssignment.getRightHandSide();
-					IBuffer buffer= cuRewrite.getCu().getBuffer();
-					StringBuilder b= new StringBuilder();
-					List<Comment> leadingComments= ASTNodes.getLeadingComments(oldExpStatement);
-					for (Comment comment : leadingComments) {
-						b.append(buffer.getText(comment.getStartPosition(), comment.getLength()) + "\n"); //$NON-NLS-1$
-					}
-					b.append("yield "); //$NON-NLS-1$
-					List<Comment> trailingComments= ASTNodes.getTrailingComments(oldExpStatement);
-					b.append(buffer.getText(rhs.getStartPosition(), rhs.getLength()) + ";"); //$NON-NLS-1$
-					for (Comment comment : trailingComments) {
-						b.append(" " + buffer.getText(comment.getStartPosition(), comment.getLength())); //$NON-NLS-1$
-					}
-
-					YieldStatement newYield = (YieldStatement)rewrite.createStringPlaceholder(b.toString(), ASTNode.YIELD_STATEMENT);
-					Expression newYieldExpression= (Expression) rewrite.createStringPlaceholder(b.toString(), rhs.getNodeType());
-					newYield.setExpression(newYieldExpression);
+					YieldStatement newYield= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatements.get(statementsLen-1));
 					newBlock.statements().add(newYield);
 					newSwitchExpression.statements().add(newBlock);
 				}
@@ -411,6 +406,45 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			} else {
 				rewrite.replace(switchStatement, newExpressionStatement, group);
 			}
+		}
+
+		private Statement getNewStatementForCase(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, Statement oldStatement) throws JavaModelException {
+			Statement newStatement;
+			ExpressionStatement oldExpStatement= (ExpressionStatement)oldStatement;
+			Assignment oldAssignment= (Assignment)oldExpStatement.getExpression();
+			Expression rhs= oldAssignment.getRightHandSide();
+			// Ugly hack to tack on trailing comments
+			IBuffer buffer= cuRewrite.getCu().getBuffer();
+			StringBuilder b= new StringBuilder();
+			b.append(buffer.getText(rhs.getStartPosition(), rhs.getLength()) + ";"); //$NON-NLS-1$
+			List<Comment> trailingComments= ASTNodes.getTrailingComments(oldExpStatement);
+			for (Comment comment : trailingComments) {
+				b.append(" " + buffer.getText(comment.getStartPosition(), comment.getLength())); //$NON-NLS-1$
+			}
+			newStatement= (Statement) rewrite.createStringPlaceholder(b.toString(), ASTNode.EXPRESSION_STATEMENT);
+			return newStatement;
+		}
+
+		private YieldStatement getNewYieldStatement(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, ExpressionStatement oldExpStatement) throws JavaModelException {
+			Assignment oldAssignment= (Assignment)oldExpStatement.getExpression();
+			Expression rhs= oldAssignment.getRightHandSide();
+			IBuffer buffer= cuRewrite.getCu().getBuffer();
+			StringBuilder b= new StringBuilder();
+			List<Comment> leadingComments= ASTNodes.getLeadingComments(oldExpStatement);
+			for (Comment comment : leadingComments) {
+				b.append(buffer.getText(comment.getStartPosition(), comment.getLength()) + "\n"); //$NON-NLS-1$
+			}
+			b.append("yield "); //$NON-NLS-1$
+			List<Comment> trailingComments= ASTNodes.getTrailingComments(oldExpStatement);
+			b.append(buffer.getText(rhs.getStartPosition(), rhs.getLength()) + ";"); //$NON-NLS-1$
+			for (Comment comment : trailingComments) {
+				b.append(" " + buffer.getText(comment.getStartPosition(), comment.getLength())); //$NON-NLS-1$
+			}
+
+			YieldStatement newYield = (YieldStatement)rewrite.createStringPlaceholder(b.toString(), ASTNode.YIELD_STATEMENT);
+			Expression newYieldExpression= (Expression) rewrite.createStringPlaceholder(b.toString(), rhs.getNodeType());
+			newYield.setExpression(newYieldExpression);
+			return newYield;
 		}
 
 		private void replaceWithLeadingComments(CompilationUnitRewrite cuRewrite, ListRewrite listRewrite,
