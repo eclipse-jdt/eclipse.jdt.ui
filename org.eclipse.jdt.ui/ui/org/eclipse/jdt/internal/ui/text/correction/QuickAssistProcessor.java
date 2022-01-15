@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -223,6 +223,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssi
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewInterfaceImplementationProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
@@ -329,6 +330,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getInferDiamondArgumentsProposal(context, coveringNode, null, null)
 					|| getJUnitTestCaseProposal(context, coveringNode, null)
 					|| getNewImplementationProposal(context, coveringNode, null)
+					|| getNewInterfaceImplementationProposal(context, coveringNode, null)
 					|| getAddStaticImportProposals(context, coveringNode, null)
 					|| getDoWhileRatherThanWhileProposal(context, coveringNode, null)
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
@@ -356,6 +358,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getGenerateForLoopProposals(context, coveringNode, locations, resultingCollections);
 			getJUnitTestCaseProposal(context, coveringNode, resultingCollections);
 			getNewImplementationProposal(context, coveringNode, resultingCollections);
+			getNewInterfaceImplementationProposal(context, coveringNode, resultingCollections);
 			getSplitSwitchLabelProposal(context, coveringNode, resultingCollections);
 			getAddMethodDeclaration(context, coveringNode, resultingCollections);
 
@@ -4725,6 +4728,31 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	private boolean getNewInterfaceImplementationProposal(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+		if (coveringNode instanceof SimpleName && coveringNode.getParent() instanceof TypeDeclaration) {
+			TypeDeclaration typeDecl= ((TypeDeclaration)coveringNode.getParent());
+			boolean isInterface= typeDecl.isInterface();
+
+			if (!isInterface) {
+				return false;
+			}
+
+			SimpleName name= (SimpleName) coveringNode;
+			String idName= name.getIdentifier() + JavaModelUtil.DEFAULT_CU_SUFFIX;
+			String unitName= context.getCompilationUnit().getElementName();
+			if (unitName.equals(idName)) {
+				if (resultingCollections != null) {
+					Image image= JavaPlugin.getImageDescriptorRegistry().get(JavaPluginImages.DESC_TOOL_NEWCLASS);
+					String label= Messages.format(CorrectionMessages.QuickAssistProcessor_create_new_interface_impl, unitName);
+					Change change= new NullChange(CorrectionMessages.QuickAssistProcessor_create_new_interface_impl_desc);
+					NewInterfaceImplementationProposal proposal= new NewInterfaceImplementationProposal(label, change, IProposalRelevance.CREATE_IMPLEMENTATION_FROM_INTERFACE, image, context.getCompilationUnit());
+					resultingCollections.add(proposal);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
 	private boolean getSplitSwitchLabelProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals) {
 		AST ast= coveringNode.getAST();
 		// Only continue if AST has preview enabled and selected node, or its parent is a SwitchCase
