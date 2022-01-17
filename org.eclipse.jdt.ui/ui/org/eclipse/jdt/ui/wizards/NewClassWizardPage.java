@@ -134,6 +134,13 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 
+		// disable creation of main if enclosing type is selected but not static modifier, otherwise this creates compilation error
+		if (isEnclosingTypeSelected() && !((getModifiers() & F_STATIC) > 0)) {
+			fMethodStubsButtons.setSelection(0, false);
+			fMethodStubsButtons.enableSelectionButton(0, false);
+		} else {
+			fMethodStubsButtons.enableSelectionButton(0, true);
+		}
 		doStatusUpdate();
 	}
 
