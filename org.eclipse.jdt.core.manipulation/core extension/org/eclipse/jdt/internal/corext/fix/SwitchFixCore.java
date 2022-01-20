@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2022 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -39,11 +38,11 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
@@ -160,7 +159,6 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				List<SwitchCaseSection> cases= new ArrayList<>();
 				Statement remainingStatement= null;
 
-				Set<SimpleName> variableDeclarationIds= new HashSet<>();
 				IfStatement ifStatement= visited;
 				boolean isFallingThrough= true;
 
@@ -168,11 +166,6 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 					IfStatement currentNode= ifStatement;
 
 					while (ASTNodes.isSameVariable(switchExpression, variable.name)) {
-						if (detectDeclarationConflicts(currentNode.getThenStatement(), variableDeclarationIds)) {
-							// Cannot declare two variables with the same name in two cases
-							return true;
-						}
-
 						cases.add(new SwitchCaseSection(variable.constantValues,
 								ASTNodes.asList(currentNode.getThenStatement())));
 
@@ -224,25 +217,6 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				HasUnlabeledBreakVisitor hasUnlabeledBreakVisitor= new HasUnlabeledBreakVisitor();
 				hasUnlabeledBreakVisitor.traverseNodeInterruptibly(node);
 				return hasUnlabeledBreakVisitor.hasUnlabeledBreak;
-			}
-
-			private boolean detectDeclarationConflicts(final Statement statement, final Set<SimpleName> variableDeclarationIds) {
-				Set<SimpleName> varNames= ASTNodes.getLocalVariableIdentifiers(statement, false);
-				boolean hasConflict= containsAny(variableDeclarationIds, varNames);
-				variableDeclarationIds.addAll(varNames);
-				return hasConflict;
-			}
-
-			private boolean containsAny(final Set<SimpleName> variableDeclarations, final Set<SimpleName> varNames) {
-				for (SimpleName varName : varNames) {
-					for (SimpleName variableDeclaration : variableDeclarations) {
-						if (varName.getIdentifier() != null && Objects.equals(varName.getIdentifier(), variableDeclaration.getIdentifier())) {
-							return true;
-						}
-					}
-				}
-
-				return false;
 			}
 
 			/**
@@ -406,12 +380,19 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				switchStatements.add(ast.newSwitchCase());
 			}
 
+			List<Statement> statementsList= switchStatement.statements();
 			boolean isBreakNeeded= true;
+			boolean needBlock= checkForLocalDeclarations(innerStatements);
+			Block block= null;
+			if (needBlock) {
+				block= ast.newBlock();
+				statementsList= block.statements();
+			}
 
 			// Add the statement(s) for this case(s)
 			if (!innerStatements.isEmpty()) {
 				for (Statement statement : innerStatements) {
-					switchStatements.add(ASTNodes.createMoveTarget(rewrite, statement));
+					statementsList.add(ASTNodes.createMoveTarget(rewrite, statement));
 				}
 
 				isBreakNeeded= !ASTNodes.fallsThrough(innerStatements.get(innerStatements.size() - 1));
@@ -419,8 +400,21 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 			// When required: end with a break
 			if (isBreakNeeded) {
-				switchStatements.add(ast.newBreakStatement());
+				statementsList.add(ast.newBreakStatement());
 			}
+
+			if (needBlock) {
+				switchStatements.add(block);
+			}
+		}
+
+		private boolean checkForLocalDeclarations(final List<Statement> statements) {
+			for (Statement statement : statements) {
+				if (statement instanceof VariableDeclarationStatement) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
@@ -468,5 +462,6 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			this.literalExpressions= literalExpressions;
 			this.statements= statements;
 		}
+
 	}
 }
