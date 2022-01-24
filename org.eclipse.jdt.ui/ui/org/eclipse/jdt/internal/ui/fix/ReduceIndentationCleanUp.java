@@ -190,6 +190,13 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 		unit.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(final IfStatement visited) {
+				// The parsing crashes when there are two embedded lone ifs with an end of line comment at the right of the statement
+				// So we disable the rule on double lone if
+				if (!(visited.getElseStatement() instanceof Block)
+						&& !ASTNodes.canHaveSiblings(visited)) {
+					return true;
+				}
+
 				if (visited.getElseStatement() != null && !ASTNodes.isInElse(visited)) {
 					if (ASTNodes.fallsThrough(visited.getThenStatement())) {
 						if (ASTNodes.fallsThrough(visited.getElseStatement())) {

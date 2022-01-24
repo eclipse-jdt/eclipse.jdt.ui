@@ -18180,6 +18180,17 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return -1;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public int reduceWithUnbrackettedThenAndParent(boolean isValid, boolean isActive) {\n" //
+				+ "        if (isValid)\n" //
+				+ "            if (isActive)\n" //
+				+ "                return 0; // This kind of comment is correctly handled\n" //
+				+ "            else {\n" //
+				+ "                System.out.println(\"Valid and active\");\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public int refactorElseInSwitch(int discriminant, boolean isVisible) {\n" //
 				+ "        switch (discriminant) {\n" //
 				+ "        case 0:\n" //
@@ -18487,6 +18498,16 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return -1;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public int reduceWithUnbrackettedThenAndParent(boolean isValid, boolean isActive) {\n" //
+				+ "        if (isValid) {\n" //
+				+ "            if (isActive)\n" //
+				+ "                return 0; // This kind of comment is correctly handled\n" //
+				+ "            System.out.println(\"Valid and active\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public int refactorElseInSwitch(int discriminant, boolean isVisible) {\n" //
 				+ "        switch (discriminant) {\n" //
 				+ "        case 0:\n" //
@@ -18686,6 +18707,16 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "\n" //
 				+ "        return i;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int doNotRefactorWithUnbrackettedNodeAndParent(boolean isValid, boolean isActive) {\n" //
+				+ "        if (isValid)\n" //
+				+ "            if (isActive) {\n" //
+				+ "                System.out.println(\"Valid and active\");\n" //
+				+ "            } else\n" //
+				+ "                return 0; // This kind of comment is badly handled\n" //
+				+ "\n" //
+				+ "        return -1;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
