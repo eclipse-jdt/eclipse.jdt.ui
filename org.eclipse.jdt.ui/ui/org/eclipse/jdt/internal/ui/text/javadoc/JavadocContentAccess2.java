@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -96,6 +98,7 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TagProperty;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
@@ -1926,10 +1929,152 @@ public class JavadocContentAccess2 {
 				if (fragment instanceof  TextElement) {
 					TextElement memberRef= (TextElement) fragment;
 					fBuf.append(memberRef.getText());
+				} else if (fragment instanceof TagElement) {
+					TagElement tagElem= (TagElement) fragment;
+					String name= tagElem.getTagName();
+					boolean isHighlight = TagElement.TAG_HIGHLIGHT.equals(name);
+					if (isHighlight) {
+						handleSnippetHighlight(tagElem.fragments(), tagElem.tagProperties());
+					}
 				}
 			}
 			fBuf.append(BlOCK_TAG_ENTRY_END);
 		}
+	}
+
+	private void handleSnippetHighlight(List<? extends ASTNode> fragments, List<? extends ASTNode> tagProperties) {
+		int fs= fragments.size();
+		String defHighlight= getHighlightHtmlTag(tagProperties);
+		String startDefHighlight = '<' + defHighlight + '>';
+		String endDefHighlight = "</" + defHighlight + '>'; //$NON-NLS-1$
+		boolean process = true;
+		if (defHighlight.length() == 0 || !arePropertyValuesStringLiterals(tagProperties)) {
+			process = false;
+		}
+		String regExValue = getHighlightPropertyValue("regex", tagProperties); //$NON-NLS-1$
+		String subStringValue = getHighlightPropertyValue("substring", tagProperties); //$NON-NLS-1$
+		int additionalLength = startDefHighlight.length() + endDefHighlight.length();
+		Pattern regexPattern = null;
+		if (regExValue != null) {
+			regexPattern = Pattern.compile(regExValue);
+		}
+		if (fs > 0) {
+			for(ASTNode fragment : fragments) {
+				if (fragment instanceof  TextElement) {
+					TextElement memberRef= (TextElement) fragment;
+					String modifiedText = memberRef.getText();
+					if (process) {
+						if (regexPattern != null && process) {
+							Matcher matcher = regexPattern.matcher(modifiedText);
+							StringBuilder strBuild= new StringBuilder();
+							int finalMatchIndex = 0;
+							while (matcher.find()) {
+								finalMatchIndex = matcher.end();
+								String replacementStr= startDefHighlight + modifiedText.substring(matcher.start(), matcher.end()) + endDefHighlight;
+								matcher.appendReplacement(strBuild, replacementStr);
+							}
+							modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
+						} else if (subStringValue != null) {
+							int startIndex = 0;
+							while (true) {
+								startIndex = modifiedText.indexOf(subStringValue, startIndex);
+								if (startIndex == -1) {
+									break;
+								} else {
+									modifiedText = modifiedText.substring(0, startIndex) + startDefHighlight + subStringValue + endDefHighlight + modifiedText.substring(startIndex + subStringValue.length());
+									startIndex = startIndex + subStringValue.length() + additionalLength;
+								}
+							}
+						} else {
+							modifiedText = startDefHighlight + modifiedText + endDefHighlight;
+						}
+					}
+					fBuf.append(modifiedText);
+				}
+			}
+		}
+	}
+
+	private String getHighlightHtmlTag(List<? extends ASTNode> tagProperties) {
+		String defaultTag= "b"; //$NON-NLS-1$
+		if (tagProperties != null) {
+			for (ASTNode node : tagProperties) {
+				if (node instanceof TagProperty) {
+					TagProperty tagProp = (TagProperty) node;
+					if ("type".equals(tagProp.getName())) { //$NON-NLS-1$
+						String tagValue = stripQuotes(tagProp.getValue());
+						switch (tagValue) {
+							case "bold" :  //$NON-NLS-1$
+								defaultTag= "b"; //$NON-NLS-1$
+								break;
+							case "italic" :  //$NON-NLS-1$
+								defaultTag= "i"; //$NON-NLS-1$
+								break;
+							case "highlighted" :  //$NON-NLS-1$
+								defaultTag= "mark"; //$NON-NLS-1$
+								break;
+							default :
+								defaultTag= ""; //$NON-NLS-1$
+								break;
+						}
+						break;
+					}
+				}
+			}
+		}
+		return defaultTag;
+	}
+
+	private boolean arePropertyValuesStringLiterals(List<? extends ASTNode> tagProperties) {
+		boolean val= true;
+		if (tagProperties != null) {
+			final String SUBSTRING = "substring"; //$NON-NLS-1$
+			final String REGEX = "regex"; //$NON-NLS-1$
+			final String TYPE = "type"; //$NON-NLS-1$
+			for (ASTNode node : tagProperties) {
+				if (node instanceof TagProperty) {
+					TagProperty tagProp = (TagProperty) node;
+					String propName = tagProp.getName();
+					if (SUBSTRING.equals(propName)
+							|| REGEX.equals(propName)
+							|| TYPE.equals(propName)) {
+						String value= tagProp.getValue();
+						String changed= stripQuotes(value);
+						if (changed.equals(value)) {
+							val= false;
+							break;
+						}
+					}
+				}
+			}
+		}
+		return val;
+	}
+	private String getHighlightPropertyValue(String property, List<? extends ASTNode> tagProperties) {
+		String defaultTag= null;
+		if (tagProperties != null && property!= null) {
+			for (ASTNode node : tagProperties) {
+				if (node instanceof TagProperty) {
+					TagProperty tagProp = (TagProperty) node;
+					if (property.equals(tagProp.getName())) {
+						defaultTag= stripQuotes(tagProp.getValue());
+						break;
+					}
+				}
+			}
+		}
+		return defaultTag;
+	}
+
+	private String stripQuotes (String str) {
+		String newStr = str;
+		if (str != null && str.length() > 2) {
+			int length = str.length();
+			if (str.charAt(0) == '"' && str.charAt(length-1) == '"') {
+				newStr = str.substring(1, length-1);
+			}
+		}
+		return newStr;
 	}
 
 	private void handleIndex(List<? extends ASTNode> fragments) {
