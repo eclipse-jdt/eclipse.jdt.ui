@@ -379,6 +379,120 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToSwitchExpressionBug578129_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+			    + "    public void foo(String[] args) throws Exception {\n" //
+			    + "        boolean isWhiteSpace;\n" //
+			    + "        switch (args[0].charAt(0)) {\n" //
+			    + "            case 10:\n" //
+			    + "            case 12:\n" //
+			    + "            case 13:\n" //
+			    + "            case 32:\n" //
+			    + "            case 9:\n" //
+			    + "                isWhiteSpace = true; /* comment x */\n" //
+			    + "                break;\n" //
+			    + "            case 0:\n" //
+			    + "            	   throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
+			    + "            case 95:\n" //
+			    + "            default:\n" //
+			    + "                isWhiteSpace = false;\n" //
+			    + "        }\n" //
+			    + "        System.out.println(isWhiteSpace);\n" //
+			    + "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+			    + "    public void foo(String[] args) throws Exception {\n" //
+			    + "        boolean isWhiteSpace = switch (args[0].charAt(0)) {\n" //
+			    + "            case 10, 12, 13, 32, 9 -> true; /* comment x */\n" //
+			    + "            case 0 -> throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
+			    + "            case 95 -> false;\n" //
+			    + "            default -> false;\n" //
+			    + "        };\n" //
+			    + "        System.out.println(isWhiteSpace);\n" //
+			    + "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testConvertToSwitchExpressionBug578129_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+			    + "    public void foo(String[] args) throws Exception {\n" //
+			    + "        boolean isWhiteSpace;\n" //
+			    + "        switch (args[0].charAt(0)) {\n" //
+			    + "            case 10:\n" //
+			    + "            case 12:\n" //
+			    + "            case 13:\n" //
+			    + "            case 32:\n" //
+			    + "            case 9:\n" //
+			    + "                isWhiteSpace = true; /* comment x */\n" //
+			    + "                break;\n" //
+			    + "            case 0:\n" //
+			    + "            	   throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
+			    + "            case 95:\n" //
+			    + "            default: {\n" //
+			    + "                System.out.println(\"non-whitespace\");\n" //
+			    + "                isWhiteSpace = false;\n" //
+			    + "            }\n" //
+			    + "        }\n" //
+			    + "        System.out.println(isWhiteSpace);\n" //
+			    + "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+			    + "    public void foo(String[] args) throws Exception {\n" //
+			    + "        boolean isWhiteSpace = switch (args[0].charAt(0)) {\n" //
+			    + "            case 10, 12, 13, 32, 9 -> true; /* comment x */\n" //
+			    + "            case 0 -> throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
+			    + "            case 95 -> {\n" //
+			    + "                System.out.println(\"non-whitespace\");\n" //
+			    + "                yield false;\n" //
+			    + "            }\n" //
+			    + "            default -> {\n" //
+			    + "                System.out.println(\"non-whitespace\");\n" //
+			    + "                yield false;\n" //
+			    + "            }\n" //
+			    + "        };\n" //
+			    + "        System.out.println(isWhiteSpace);\n" //
+			    + "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
 	public void testDoNotConvertToSwitchExpressionNoBreak() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

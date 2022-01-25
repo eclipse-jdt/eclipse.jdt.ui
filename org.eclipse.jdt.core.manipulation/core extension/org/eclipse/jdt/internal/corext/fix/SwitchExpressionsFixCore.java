@@ -296,6 +296,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					continue;
 				}
 				SwitchCase switchCase= null;
+				boolean needDuplicateDefault= false;
 				if (forceOldStyle) {
 					SwitchCase newSwitchCase= (SwitchCase)rewrite.createCopyTarget(oldSwitchCase);
 					newSwitchExpression.statements().add(newSwitchCase);
@@ -308,6 +309,14 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					} else {
 						switchCase= lastSwitchCase;
 					}
+					if (lastSwitchCase != null
+							&& oldSwitchCase.expressions().isEmpty()) {
+						// Original switch had fall-through into default case so
+						// we will need to duplicate the statements from the default case
+						// to a new case statement that has all fall-through expressions
+						// and to a new default case that uses new syntax
+						needDuplicateDefault= true;
+					}
 					lastSwitchCase= null;
 					for (Object obj : oldSwitchCase.expressions()) {
 						Expression oldExpression= (Expression)obj;
@@ -315,31 +324,43 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						switchCase.expressions().add(newExpression);
 					}
 				}
-				if (oldStatements.size() == 1 && oldStatements.get(0) instanceof Block) {
-					oldStatements= ((Block)oldStatements.get(0)).statements();
-				}
-				if (oldStatements.size() == 1) {
-					Statement oldStatement= oldStatements.get(0);
-					Statement newStatement= null;
-					if (oldStatement instanceof ThrowStatement) {
-						ThrowStatement throwStatement= (ThrowStatement)oldStatement;
-						newStatement= (Statement)rewrite.createCopyTarget(throwStatement);
-					} else if (forceOldStyle) {
-						newStatement= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatement);
+
+				while (true) {
+					if (oldStatements.size() == 1 && oldStatements.get(0) instanceof Block) {
+						oldStatements= ((Block)oldStatements.get(0)).statements();
+					}
+					if (oldStatements.size() == 1) {
+						Statement oldStatement= oldStatements.get(0);
+						Statement newStatement= null;
+						if (oldStatement instanceof ThrowStatement) {
+							ThrowStatement throwStatement= (ThrowStatement)oldStatement;
+							newStatement= (Statement)rewrite.createCopyTarget(throwStatement);
+						} else if (forceOldStyle) {
+							newStatement= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatement);
+						} else {
+							newStatement= getNewStatementForCase(cuRewrite, rewrite, oldStatement);
+						}
+						newSwitchExpression.statements().add(newStatement);
 					} else {
-						newStatement= getNewStatementForCase(cuRewrite, rewrite, oldStatement);
+						Block newBlock= ast.newBlock();
+						int statementsLen= oldStatements.size();
+						for (int i= 0; i < statementsLen - 1; ++i) {
+							Statement oldSwitchCaseStatement= oldStatements.get(i);
+							newBlock.statements().add(rewrite.createCopyTarget(oldSwitchCaseStatement));
+						}
+						YieldStatement newYield= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatements.get(statementsLen-1));
+						newBlock.statements().add(newYield);
+						newSwitchExpression.statements().add(newBlock);
 					}
-					newSwitchExpression.statements().add(newStatement);
-				} else {
-					Block newBlock= ast.newBlock();
-					int statementsLen= oldStatements.size();
-					for (int i= 0; i < statementsLen - 1; ++i) {
-						Statement oldSwitchCaseStatement= oldStatements.get(i);
-						newBlock.statements().add(rewrite.createCopyTarget(oldSwitchCaseStatement));
+					if (needDuplicateDefault) {
+						needDuplicateDefault= false;
+						SwitchCase newSwitchCase= ast.newSwitchCase();
+						newSwitchExpression.statements().add(newSwitchCase);
+						newSwitchCase.setSwitchLabeledRule(true);
+						switchCase= newSwitchCase;
+					} else {
+						break;
 					}
-					YieldStatement newYield= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatements.get(statementsLen-1));
-					newBlock.statements().add(newYield);
-					newSwitchExpression.statements().add(newBlock);
 				}
 			}
 
