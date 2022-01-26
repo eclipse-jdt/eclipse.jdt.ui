@@ -715,4 +715,39 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
+	public void testDoNotConvertToSwitchExpressionBug578128() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+			    + "    public static void main(String[] args) {\n" //
+			    + "        boolean rulesOK = true;\n" //
+			    + "        switch (args[0].charAt(0)) {\n" //
+			    + "            case '+':\n" //
+			    + "                args[0] = \"+\";\n" //
+			    + "                break;\n" //
+			    + "            case '~':\n" //
+			    + "                args[0] = \"~\";\n" //
+			    + "                break;\n" //
+			    + "            case '-':\n" //
+			    + "                args[0] = \"-\";\n" //
+			    + "                break;\n" //
+			    + "            case '?':\n" //
+			    + "                args[0] = \"?\";\n" //
+			    + "                break;\n" //
+			    + "            default:\n" //
+			    + "                rulesOK = false;\n" //
+			    + "        }\n" //
+			    + "        System.out.println(rulesOK);\n" //
+			    + "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
 }

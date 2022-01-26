@@ -199,6 +199,8 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					if (exp instanceof Name) {
 						commonAssignmentName= ((Name)exp).getFullyQualifiedName();
 						assignmentBinding= ((Name) exp).resolveBinding();
+					} else {
+						return null;
 					}
 				} else {
 					Expression exp= assignment.getLeftHandSide();
@@ -207,6 +209,8 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						if (!name.getFullyQualifiedName().equals(commonAssignmentName)) {
 							return null;
 						}
+					} else {
+						return null;
 					}
 				}
 			}
