@@ -125,6 +125,7 @@
 
             <adapter type="org.eclipse.jdt.internal.ui.IResourceLocator"/>
             <adapter type="org.eclipse.team.ui.history.IHistoryPageSource"/>
+            <adapter type="org.eclipse.core.resources.IProject"/>
 		</factory>
 
 		<factory
