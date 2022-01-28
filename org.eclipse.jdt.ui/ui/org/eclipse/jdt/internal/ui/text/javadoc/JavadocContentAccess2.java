@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -1932,9 +1933,10 @@ public class JavadocContentAccess2 {
 				} else if (fragment instanceof TagElement) {
 					TagElement tagElem= (TagElement) fragment;
 					String name= tagElem.getTagName();
-					boolean isHighlight = TagElement.TAG_HIGHLIGHT.equals(name);
-					if (isHighlight) {
+					if (TagElement.TAG_HIGHLIGHT.equals(name)) {
 						handleSnippetHighlight(tagElem.fragments(), tagElem.tagProperties());
+					} else if (TagElement.TAG_REPLACE.equals(name)) {
+						handleSnippetReplace(tagElem.fragments(), tagElem.tagProperties());
 					}
 				}
 			}
@@ -1942,56 +1944,111 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private void handleSnippetHighlight(List<? extends ASTNode> fragments, List<? extends ASTNode> tagProperties) {
-		int fs= fragments.size();
-		String defHighlight= getHighlightHtmlTag(tagProperties);
-		String startDefHighlight = '<' + defHighlight + '>';
-		String endDefHighlight = "</" + defHighlight + '>'; //$NON-NLS-1$
-		boolean process = true;
-		if (defHighlight.length() == 0 || !arePropertyValuesStringLiterals(tagProperties)) {
-			process = false;
-		}
-		String regExValue = getHighlightPropertyValue("regex", tagProperties); //$NON-NLS-1$
-		String subStringValue = getHighlightPropertyValue("substring", tagProperties); //$NON-NLS-1$
-		int additionalLength = startDefHighlight.length() + endDefHighlight.length();
-		Pattern regexPattern = null;
-		if (regExValue != null) {
-			regexPattern = Pattern.compile(regExValue);
-		}
-		if (fs > 0) {
-			for(ASTNode fragment : fragments) {
-				if (fragment instanceof  TextElement) {
-					TextElement memberRef= (TextElement) fragment;
-					String modifiedText = memberRef.getText();
-					if (process) {
-						if (regexPattern != null && process) {
-							Matcher matcher = regexPattern.matcher(modifiedText);
-							StringBuilder strBuild= new StringBuilder();
-							int finalMatchIndex = 0;
-							while (matcher.find()) {
-								finalMatchIndex = matcher.end();
-								String replacementStr= startDefHighlight + modifiedText.substring(matcher.start(), matcher.end()) + endDefHighlight;
-								matcher.appendReplacement(strBuild, replacementStr);
-							}
-							modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
-						} else if (subStringValue != null) {
-							int startIndex = 0;
-							while (true) {
-								startIndex = modifiedText.indexOf(subStringValue, startIndex);
-								if (startIndex == -1) {
-									break;
-								} else {
-									modifiedText = modifiedText.substring(0, startIndex) + startDefHighlight + subStringValue + endDefHighlight + modifiedText.substring(startIndex + subStringValue.length());
-									startIndex = startIndex + subStringValue.length() + additionalLength;
+	private void handleSnippetReplace(List<? extends ASTNode> fragments, List<? extends ASTNode> tagProperties) {
+		try {
+			int fs= fragments.size();
+			boolean process = arePropertyValuesStringLiterals(tagProperties) ? true : false;
+			String regExValue = getPropertyValue("regex", tagProperties); //$NON-NLS-1$
+			String subStringValue = getPropertyValue("substring", tagProperties); //$NON-NLS-1$
+			String substitution = getPropertyValue("replacement", tagProperties); //$NON-NLS-1$
+			substitution = stripQuotes(substitution);
+			Pattern regexPattern = null;
+			if (regExValue != null) {
+				regexPattern = Pattern.compile(regExValue);
+			}
+			if (fs > 0) {
+				for(ASTNode fragment : fragments) {
+					if (fragment instanceof  TextElement) {
+						TextElement memberRef= (TextElement) fragment;
+						String modifiedText = memberRef.getText();
+						if (process) {
+							if (regexPattern != null && process) {
+								Matcher matcher = regexPattern.matcher(modifiedText);
+								StringBuilder strBuild= new StringBuilder();
+								int finalMatchIndex = 0;
+								while (matcher.find()) {
+									finalMatchIndex = matcher.end();
+									matcher.appendReplacement(strBuild, substitution);
 								}
+								modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
+							} else if (subStringValue != null) {
+								int startIndex = 0;
+								while (true) {
+									startIndex = modifiedText.indexOf(subStringValue, startIndex);
+									if (startIndex == -1) {
+										break;
+									} else {
+										modifiedText = modifiedText.substring(0, startIndex) + substitution + modifiedText.substring(startIndex + subStringValue.length());
+										startIndex = startIndex + substitution.length() ;
+									}
+								}
+							} else {
+								modifiedText = substitution;
 							}
-						} else {
-							modifiedText = startDefHighlight + modifiedText + endDefHighlight;
 						}
+						fBuf.append(modifiedText);
 					}
-					fBuf.append(modifiedText);
 				}
 			}
+		} catch (PatternSyntaxException e) {
+			// do nothing
+		}
+	}
+
+	private void handleSnippetHighlight(List<? extends ASTNode> fragments, List<? extends ASTNode> tagProperties) {
+		try {
+			int fs= fragments.size();
+			String defHighlight= getHighlightHtmlTag(tagProperties);
+			String startDefHighlight = '<' + defHighlight + '>';
+			String endDefHighlight = "</" + defHighlight + '>'; //$NON-NLS-1$
+			boolean process = true;
+			if (defHighlight.length() == 0 || !arePropertyValuesStringLiterals(tagProperties)) {
+				process = false;
+			}
+			String regExValue = getPropertyValue("regex", tagProperties); //$NON-NLS-1$
+			String subStringValue = getPropertyValue("substring", tagProperties); //$NON-NLS-1$
+			int additionalLength = startDefHighlight.length() + endDefHighlight.length();
+			Pattern regexPattern = null;
+			if (regExValue != null) {
+				regexPattern = Pattern.compile(regExValue);
+			}
+			if (fs > 0) {
+				for(ASTNode fragment : fragments) {
+					if (fragment instanceof  TextElement) {
+						TextElement memberRef= (TextElement) fragment;
+						String modifiedText = memberRef.getText();
+						if (process) {
+							if (regexPattern != null && process) {
+								Matcher matcher = regexPattern.matcher(modifiedText);
+								StringBuilder strBuild= new StringBuilder();
+								int finalMatchIndex = 0;
+								while (matcher.find()) {
+									finalMatchIndex = matcher.end();
+									String replacementStr= startDefHighlight + modifiedText.substring(matcher.start(), matcher.end()) + endDefHighlight;
+									matcher.appendReplacement(strBuild, replacementStr);
+								}
+								modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
+							} else if (subStringValue != null) {
+								int startIndex = 0;
+								while (true) {
+									startIndex = modifiedText.indexOf(subStringValue, startIndex);
+									if (startIndex == -1) {
+										break;
+									} else {
+										modifiedText = modifiedText.substring(0, startIndex) + startDefHighlight + subStringValue + endDefHighlight + modifiedText.substring(startIndex + subStringValue.length());
+										startIndex = startIndex + subStringValue.length() + additionalLength;
+									}
+								}
+							} else {
+								modifiedText = startDefHighlight + modifiedText + endDefHighlight;
+							}
+						}
+						fBuf.append(modifiedText);
+					}
+				}
+			}
+		} catch (PatternSyntaxException e) {
+			// do nothing
 		}
 	}
 
@@ -2050,7 +2107,7 @@ public class JavadocContentAccess2 {
 		}
 		return val;
 	}
-	private String getHighlightPropertyValue(String property, List<? extends ASTNode> tagProperties) {
+	private String getPropertyValue(String property, List<? extends ASTNode> tagProperties) {
 		String defaultTag= null;
 		if (tagProperties != null && property!= null) {
 			for (ASTNode node : tagProperties) {
@@ -2068,7 +2125,7 @@ public class JavadocContentAccess2 {
 
 	private String stripQuotes (String str) {
 		String newStr = str;
-		if (str != null && str.length() > 2) {
+		if (str != null && str.length() >= 2) {
 			int length = str.length();
 			if (str.charAt(0) == '"' && str.charAt(length-1) == '"') {
 				newStr = str.substring(1, length-1);
