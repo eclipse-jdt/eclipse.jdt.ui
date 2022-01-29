@@ -723,6 +723,25 @@ class Example {
 }
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_lambda_body_block_on_one_line
 
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_switch_body_block_on_one_line
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_switch_case_with_arrow_on_one_line
+class Example { void example(int empty, int tiny, int small, int notSoSmall) {
+	switch (empty) {}
+	switch (tiny) { case 1 -> {} }
+	switch (tiny) {
+		case 2 -> {
+			doSomething();
+		}
+	}
+	switch (small) { case 1 -> {} case 2 -> { doSomething(); } }
+	switch (notSoSmall) { case tiny -> { doSomething(); } case small -> { doFirstThing(); doSecondThing(); } }
+	return switch (tiny) {
+		default -> "result";
+	};
+}}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_switch_body_block_on_one_line
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_switch_case_with_arrow_on_one_line
+
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_code_block_on_one_line
 class Example {
 	static {

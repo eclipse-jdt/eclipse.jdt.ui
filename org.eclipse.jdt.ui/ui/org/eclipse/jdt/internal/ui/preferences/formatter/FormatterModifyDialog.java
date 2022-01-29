@@ -1410,6 +1410,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 					pref.addDependant(guardianPref, valueAcceptor(oneLineOptions[0], oneLineOptions[1], oneLineOptions[4]));
 				})
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_lambda_body_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_LAMBDA_BODY_BLOCK_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_switch_case_with_arrow_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SWITCH_CASE_WITH_ARROW_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_switch_body_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SWITCH_BODY_BLOCK_ON_ONE_LINE)
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_code_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_CODE_BLOCK_ON_ONE_LINE)
 				.gap()
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_method_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_METHOD_BODY_ON_ONE_LINE, pref -> {
