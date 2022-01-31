@@ -632,7 +632,11 @@ public class CPListElement {
 
 	@Override
 	public String toString() {
-		return getClasspathEntry().toString();
+		IClasspathEntry classpathEntry= getClasspathEntry();
+		if (classpathEntry != null) {
+			return classpathEntry.toString();
+		}
+		return "null"; //$NON-NLS-1$
 	}
 
 	/**
