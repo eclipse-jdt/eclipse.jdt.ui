@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -59,6 +59,10 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.launching.AbstractVMInstall;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -378,10 +382,10 @@ public class JavaDocLocations {
 		IModuleDescription moduleDescription= null;
 		/*
 		 * The Javadoc tool for Java SE 11 uses module name in the created URL.
-		 * We can't know what format is required, so we just guess by the project's compiler compliance.
+		 * We can't know what format is required, so we just guess by the project's execution environment or compiler compliance.
 		 */
 		IJavaProject javaProject= pack.getJavaProject();
-		if (javaProject != null && JavaModelUtil.is11OrHigher(javaProject)) {
+		if (javaProject != null && is11OrHigher(javaProject)) {
 			if (pack.isReadOnly()) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 				if (root != null) {
@@ -396,6 +400,30 @@ public class JavaDocLocations {
 			}
 		}
 		return moduleDescription;
+	}
+
+	/**
+	 * This function finds out which jvm/source compliance is being used to see if its version 11 or higher.
+	 * @param javaProject the java project for which the version number is to be verified.
+	 * @return <i>true</i> if the jvm used is version 11 or higher (If no jvm is found then the source compliance is used)
+	 * else returns <i>false</i>
+	 */
+	private static boolean is11OrHigher(IJavaProject javaProject) {
+		boolean is11orHigher= false;
+		if (javaProject != null) {
+			try {
+				IVMInstall install= JavaRuntime.getVMInstall(javaProject);
+				if (install instanceof AbstractVMInstall) {
+					String vmver = ((AbstractVMInstall)install).getJavaVersion();
+					is11orHigher= JavaModelUtil.is11OrHigher(vmver);
+				} else {
+					is11orHigher= JavaModelUtil.is11OrHigher(javaProject);
+				}
+			} catch (CoreException e) {
+				is11orHigher= JavaModelUtil.is11OrHigher(javaProject);
+			}
+		}
+		return is11orHigher;
 	}
 
 	private static void appendFieldReference(IField field, StringBuffer buf) {
