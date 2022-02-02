@@ -1951,7 +1951,6 @@ public class JavadocContentAccess2 {
 			String regExValue = getPropertyValue("regex", tagProperties); //$NON-NLS-1$
 			String subStringValue = getPropertyValue("substring", tagProperties); //$NON-NLS-1$
 			String substitution = getPropertyValue("replacement", tagProperties); //$NON-NLS-1$
-			substitution = stripQuotes(substitution);
 			Pattern regexPattern = null;
 			if (regExValue != null) {
 				regexPattern = Pattern.compile(regExValue);
@@ -2127,7 +2126,8 @@ public class JavadocContentAccess2 {
 		String newStr = str;
 		if (str != null && str.length() >= 2) {
 			int length = str.length();
-			if (str.charAt(0) == '"' && str.charAt(length-1) == '"') {
+			if ((str.charAt(0) == '"' && str.charAt(length-1) == '"')
+					|| (str.charAt(0) == '\'' && str.charAt(length-1) == '\'')) {
 				newStr = str.substring(1, length-1);
 			}
 		}
