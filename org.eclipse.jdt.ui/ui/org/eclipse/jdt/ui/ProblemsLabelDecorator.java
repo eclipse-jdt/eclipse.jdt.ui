@@ -549,7 +549,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	}
 
 	private int computeContainerAdornmentFlags(IResource resource) {
-		if (resource == null || !resource.isAccessible()) {
+		if (resource == null) {
 			return 0;
 		}
 		Integer cachedAdornment = AdornmentCacheManager.getAdornment(resource);
