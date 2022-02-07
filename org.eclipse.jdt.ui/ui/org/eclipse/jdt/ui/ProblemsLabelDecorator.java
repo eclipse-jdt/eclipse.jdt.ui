@@ -316,7 +316,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			List<IResource> changed = new ArrayList<>(queue);
 			queue.removeAll(changed);
 			IResource[] changes = changed.toArray(IResource[]::new);
-			if (changes.length > 0) {
+			if (changes.length > 0 && !monitor.isCanceled()) {
 				if (DEBUG) {
 					String prefix = ProblemsLabelDecorator.this.toString();
 					prefix = prefix.substring(prefix.lastIndexOf('.') + 1);
@@ -772,6 +772,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		if (fRegistry != null && fUseNewRegistry) {
 			fRegistry.dispose();
+		}
+		if (fListeners != null) {
+			fListeners.clear();
 		}
 		AdornmentCacheManager.deregister(this);
 		adornmentUpdateJob.cancel();
