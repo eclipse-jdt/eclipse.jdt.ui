@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2022 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,16 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.Collections;
 import java.util.Map;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
-
-import org.eclipse.jdt.ui.cleanup.CleanUpContext;
-import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
-import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
-import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 /**
  * A fix that fixes <code>Comparable.compareTo()</code> usage:
@@ -31,39 +23,13 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
  * <li>Beware! The behavior may change if you implement a custom comparator!</li>
  * </ul>
  */
-public class StandardComparisonCleanUp extends AbstractCleanUp {
-	private StandardComparisonCleanUpCore coreCleanUp= new StandardComparisonCleanUpCore();
+public class StandardComparisonCleanUp extends AbstractCleanUpCoreWrapper<StandardComparisonCleanUpCore> {
 
 	public StandardComparisonCleanUp(final Map<String, String> options) {
-		setOptions(options);
+		super(options, new StandardComparisonCleanUpCore());
 	}
 
 	public StandardComparisonCleanUp() {
-	}
-
-	@Override
-	public void setOptions(final CleanUpOptions options) {
-		coreCleanUp.setOptions(options);
-	}
-
-	@Override
-	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(coreCleanUp.getRequirementsCore());
-	}
-
-	@Override
-	public ICleanUpFix createFix(final CleanUpContext context) throws CoreException {
-		ICleanUpFixCore fixCore= coreCleanUp.createFixCore(context);
-		return fixCore != null ? new CleanUpFixWrapper(fixCore) : null;
-	}
-
-	@Override
-	public String[] getStepDescriptions() {
-		return coreCleanUp.getStepDescriptions();
-	}
-
-	@Override
-	public String getPreview() {
-		return coreCleanUp.getPreview();
+		this(Collections.EMPTY_MAP);
 	}
 }

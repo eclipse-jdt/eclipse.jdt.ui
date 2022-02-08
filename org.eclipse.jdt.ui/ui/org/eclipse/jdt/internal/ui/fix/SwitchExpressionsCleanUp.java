@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,54 +14,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.Collections;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
+public class SwitchExpressionsCleanUp extends AbstractCleanUpCoreWrapper<SwitchExpressionsCleanUpCore> {
 
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
-
-import org.eclipse.jdt.ui.cleanup.CleanUpContext;
-import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
-import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
-import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-
-public class SwitchExpressionsCleanUp extends AbstractCleanUp {
-
-	private SwitchExpressionsCleanUpCore coreCleanUp= new SwitchExpressionsCleanUpCore();
-
-	public SwitchExpressionsCleanUp(Map<String, String> options) {
-		super();
-		setOptions(options);
+	public SwitchExpressionsCleanUp(final Map<String, String> options) {
+		super(options, new SwitchExpressionsCleanUpCore());
 	}
 
 	public SwitchExpressionsCleanUp() {
-		super();
+		this(Collections.EMPTY_MAP);
 	}
-
-	@Override
-	public void setOptions(CleanUpOptions options) {
-		coreCleanUp.setOptions(options);
-	}
-
-	@Override
-	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(coreCleanUp.getRequirementsCore());
-	}
-
-	@Override
-	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
-		ICleanUpFixCore fixCore= coreCleanUp.createFixCore(context);
-		return fixCore == null ? null : new CleanUpFixWrapper(fixCore);
-	}
-
-	@Override
-	public String[] getStepDescriptions() {
-		return coreCleanUp.getStepDescriptions();
-	}
-
-	@Override
-	public String getPreview() {
-		return coreCleanUp.getPreview();
-	}
-
 }

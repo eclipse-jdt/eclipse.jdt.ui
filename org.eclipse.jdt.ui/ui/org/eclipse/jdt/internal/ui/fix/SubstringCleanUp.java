@@ -14,24 +14,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
-
-import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
-import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
-import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * A fix that removes the second <code>substring()</code> parameter if this parameter is the length of the string:
@@ -40,67 +24,13 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * <li>The expression must be passive.</li>
  * </ul>
  */
-public class SubstringCleanUp extends AbstractMultiFix {
-
-	private final SubstringCleanUpCore cleanUpCore;
+public class SubstringCleanUp extends AbstractMultiFixCoreWrapper<SubstringCleanUpCore> {
 
 	public SubstringCleanUp(final Map<String, String> options) {
-		this.cleanUpCore= new SubstringCleanUpCore();
-		setOptions(options);
+		super(options, new SubstringCleanUpCore());
 	}
 
 	public SubstringCleanUp() {
 		this(Collections.EMPTY_MAP);
-	}
-
-	@Override
-	public void setOptions(CleanUpOptions options) {
-		cleanUpCore.setOptions(options);
-	}
-
-	@Override
-	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(cleanUpCore.getRequirementsCore());
-	}
-
-	@Override
-	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
-		ICleanUpFixCore fix= cleanUpCore.createFix(compilationUnit);
-		return fix == null ? null : new CleanUpFixWrapper(fix);
-	}
-
-	@Override
-	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-        IProblemLocationCore[] problemsCore= null;
-		if (problems != null) {
-			List<IProblemLocationCore> problemsList= new ArrayList<>();
-			for (IProblemLocation problem : problems) {
-				problemsList.add((ProblemLocation)problem);
-			}
-			problemsCore= problemsList.toArray(new IProblemLocationCore[0]);
-		}
-		ICleanUpFixCore fix= cleanUpCore.createFix(compilationUnit, problemsCore);
-		return fix == null ? null : new CleanUpFixWrapper(fix);
-	}
-
-	@Override
-	public String[] getStepDescriptions() {
-		return cleanUpCore.getStepDescriptions();
-	}
-
-	@Override
-	public String getPreview() {
-		return cleanUpCore.getPreview();
-	}
-
-	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
-		IProblemLocationCore problemLocation= (ProblemLocation)problem;
-		return cleanUpCore.canFix(compilationUnit, problemLocation);
-	}
-
-	@Override
-	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
-		return cleanUpCore.computeNumberOfFixes(compilationUnit);
 	}
 }
