@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -158,7 +158,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
 						if (semanticHighlighting instanceof RestrictedIdentifiersHighlighting) {
 							addPosition(offset, length, fJobHighlightings[i]);
-							return false;
+							return true;
 						}
 					}
 				}
