@@ -27958,4 +27958,55 @@ public class CleanUpTest extends CleanUpTestCase {
 						Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
 				})));
 	}
+
+	@Test
+	public void testRemoveParenthesesBug438266_1() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= ""
+				+ "package test1;\n" //
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        Integer b = (Integer) (-1);\n"
+				+ "        System.out.println(b);\n"
+				+ "    }\n"
+				+ "}";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		String expected= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
+
+	@Test
+	public void testRemoveParenthesesBug438266_2() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= ""
+				+ "package test1;\n" //
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        Integer b = (int) (-1);\n"
+				+ "        System.out.println(b);\n"
+				+ "    }\n"
+				+ "}";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		String expected= ""
+				+ "package test1;\n" //
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        Integer b = (int) -1;\n"
+				+ "        System.out.println(b);\n"
+				+ "    }\n"
+				+ "}";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
 }
