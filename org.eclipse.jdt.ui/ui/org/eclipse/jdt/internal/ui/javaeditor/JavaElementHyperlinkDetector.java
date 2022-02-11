@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
+import org.eclipse.jdt.internal.core.manipulation.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -55,7 +56,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
-import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
@@ -283,7 +283,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			return null;
 		}
 
-		String description= Messages.format(SearchMessages.BreakContinueTargetFinder_occurrence_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(caseNode)));
+		String description= Messages.format(org.eclipse.jdt.internal.core.manipulation.search.SearchMessages.BreakContinueTargetFinder_occurrence_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(caseNode)));
 		return new OccurrenceLocation(switchNode.getStartPosition(), 6, 0, description); // '6' is the length of 'switch'
 	}
 

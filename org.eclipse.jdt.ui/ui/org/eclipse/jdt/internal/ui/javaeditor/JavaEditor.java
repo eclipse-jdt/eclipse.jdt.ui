@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -189,8 +189,12 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.core.util.IModifierConstants;
 
+import org.eclipse.jdt.internal.core.manipulation.search.BreakContinueTargetFinder;
+import org.eclipse.jdt.internal.core.manipulation.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
+import org.eclipse.jdt.internal.core.manipulation.search.ImplementOccurrencesFinder;
+import org.eclipse.jdt.internal.core.manipulation.search.MethodExitsFinder;
 import org.eclipse.jdt.internal.core.manipulation.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -224,10 +228,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHi
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
-import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
-import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
-import org.eclipse.jdt.internal.ui.search.ImplementOccurrencesFinder;
-import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
