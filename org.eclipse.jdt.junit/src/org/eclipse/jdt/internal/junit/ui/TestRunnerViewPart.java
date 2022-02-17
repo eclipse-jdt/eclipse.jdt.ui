@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1670,18 +1670,11 @@ action enablement
 	}
 
 	private void updateRerunFailedFirstAction() {
-		boolean state= !isJUnit5() && hasErrorsOrFailures() && fTestRunSession.getLaunch() != null;
+		boolean state= hasErrorsOrFailures() && fTestRunSession.getLaunch() != null;
 		fRerunFailedFirstAction.setEnabled(state);
 	}
 
-	private boolean isJUnit5() {
-		if (fTestRunSession == null) {
-			return false;
-		}
-		return TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId());
-	}
-
-    /**
+	/**
      * @return the display name of the current test run sessions kind, or <code>null</code>
      */
     public String getTestKindDisplayName() {

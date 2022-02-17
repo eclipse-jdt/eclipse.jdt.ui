@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2019 IBM Corporation and others.
+ * Copyright (c) 2016, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - add failures first support
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit5.runner;
 
@@ -31,6 +32,8 @@ import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 
 public class JUnit5TestLoader implements ITestLoader {
 
+	public final static String FAILURE_NAMES= "org.eclipse.jdt.junit5.runtime.failureNames"; //$NON-NLS-1$
+
 	private Launcher fLauncher= LauncherFactory.create();
 
 	private RemoteTestRunner fRemoteTestRunner;
@@ -50,20 +53,20 @@ public class JUnit5TestLoader implements ITestLoader {
 		} else {
 			refs= new ITestReference[testClasses.length];
 			for (int i= 0; i < testClasses.length; i++) {
-				refs[i]= createTest(testClasses[i], testName, includeExcludeTags);
+				refs[i]= createTest(testClasses[i], testName, includeExcludeTags, failureNames);
 			}
 		}
 		return refs;
 	}
 
-	private ITestReference createTest(Class<?> clazz, String testName, String[][] includeExcludeTags) {
+	private ITestReference createTest(Class<?> clazz, String testName, String[][] includeExcludeTags, String[] failureNames) {
 		if (clazz == null) {
 			return null;
 		}
 		if (testName != null) {
 			return createFilteredTest(clazz, testName, includeExcludeTags);
 		}
-		return createUnfilteredTest(clazz, includeExcludeTags);
+		return createUnfilteredTest(clazz, includeExcludeTags, failureNames);
 	}
 
 	private ITestReference createFilteredTest(Class<?> clazz, String testName, String[][] includeExcludeTags) {
@@ -71,8 +74,17 @@ public class JUnit5TestLoader implements ITestLoader {
 		return new JUnit5TestReference(request, fLauncher, fRemoteTestRunner);
 	}
 
-	private ITestReference createUnfilteredTest(Class<?> clazz, String[][] includeExcludeTags) {
-		LauncherDiscoveryRequest request= LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectClass(clazz)).filters(getTagFilters(includeExcludeTags)).build();
+	private ITestReference createUnfilteredTest(Class<?> clazz, String[][] includeExcludeTags, String[] failureNames) {
+		LauncherDiscoveryRequestBuilder requestBuilder= LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectClass(clazz)).filters(getTagFilters(includeExcludeTags));
+		if (failureNames != null && failureNames.length > 0) {
+			String failureNamesString= ""; //$NON-NLS-1$
+			for (String failureName : failureNames) {
+				failureNamesString += failureName + ";"; //$NON-NLS-1$
+			}
+			requestBuilder.configurationParameter(FAILURE_NAMES, failureNamesString);
+			requestBuilder.configurationParameter("junit.jupiter.testmethod.order.default", FailuresFirstMethodOrderer.class.getName()); //$NON-NLS-1$
+		}
+		LauncherDiscoveryRequest request= requestBuilder.build();
 		return new JUnit5TestReference(request, fLauncher, fRemoteTestRunner);
 	}
 
