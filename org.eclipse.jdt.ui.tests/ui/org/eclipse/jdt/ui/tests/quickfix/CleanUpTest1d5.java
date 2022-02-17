@@ -2343,12 +2343,30 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testDoNotUseAutoboxingOnString() throws Exception {
+	public void testDoNotUseAutoboxing() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
 				+ "package test1;\n" //
 				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
 				+ "public class E1 {\n" //
+				+ "    public static int dummyMethod(Byte byObject) {\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static int dummyMethod(byte byPrimitive) {\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotCleanupOnConflictingMethod(byte byPrimitive) {\n" //
+				+ "        dummyMethod(Byte.valueOf(byPrimitive));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotCleanupOnOverloadedMethod(List<Integer> integers, int notAnIndex) {\n" //
+				+ "        integers.remove(Integer.valueOf(notAnIndex));\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static void doNotUseAutoboxingOnString() {\n" //
 				+ "        Integer i = Integer.valueOf(\"1\");\n" //
 				+ "        Long l = Long.valueOf(\"1\");\n" //
@@ -2612,6 +2630,22 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E1 {\n" //
+				+ "    public static int dummyMethod(Byte byObject) {\n" //
+				+ "        return 1;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static int dummyMethod(byte byPrimitive) {\n" //
+				+ "        return 2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotCleanupOnConflictingMethod(Byte byObject) {\n" //
+				+ "        dummyMethod(byObject.byteValue());\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotCleanupOnOverloadedMethod(StringBuilder builder, Character optimizedObject) {\n" //
+				+ "        builder.append(optimizedObject.charValue());\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static void doNotUseUnboxingOnNarrowingType(Character cObject, Byte byObject,\n" //
 				+ "            Integer iObject, Short sObject, Float fObject) {\n" //
 				+ "        int c = cObject.charValue();\n" //

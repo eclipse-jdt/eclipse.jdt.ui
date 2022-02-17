@@ -52,6 +52,13 @@ public class CallHierarchyTestHelper {
     private IJavaProject fJavaProject3;
     private IType fType1;
     private IType fType2;
+    private IType fTypeP;
+	private IType fFooImplAType;
+	private IType fFooImplBType;
+	private IType fFooType;
+	private IType fAbsType;
+	private IType fAbsI1Type;
+	private IType fAbsI2Type;
     private IPackageFragment fPack1;
     private IPackageFragment fPack2;
     private IPackageFragment fPack3;
@@ -62,6 +69,14 @@ public class CallHierarchyTestHelper {
     private IMethod fMethod4;
     private IMethod fRecursiveMethod1;
     private IMethod fRecursiveMethod2;
+	private IMethod fCalleeMethod;
+	private IMethod fAbsCalleeMethod;
+	private IMethod fFooMethod;
+	private IMethod fFooImplMethod_A;
+	private IMethod fFooImplMethod_B;
+	private IMethod fAbsFooMethod;
+	private IMethod fAbsI1FooMethod;
+	private IMethod fAbsI2FooMethod;
 
     public void setUp() throws Exception {
         fJavaProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
@@ -72,6 +87,13 @@ public class CallHierarchyTestHelper {
         assertBuildWithoutErrors(fJavaProject3);
         fType1= null;
         fType2= null;
+        fTypeP= null;
+        fFooImplAType= null;
+        fFooImplBType= null;
+        fAbsI1Type= null;
+        fAbsI2Type= null;
+        fAbsType= null;
+        fFooType= null;
         fPack1= null;
         fPack2= null;
         fPack3= null;
@@ -359,6 +381,81 @@ public class CallHierarchyTestHelper {
         assertBuildWithoutErrors(fJavaProject3);
     }
 
+    public void createCalleeClasses() throws Exception {
+        createPackages();
+
+        ICompilationUnit cu3= fPack2.getCompilationUnit("P.java");
+        fTypeP=
+        		cu3.createType(
+                    "public class P {\n"
+                    + "  private A handler;\n"
+                    + "  private Abs absHandler;\n"
+                    + "\n"
+                    + "  public void callFoo() {\n"
+                    + "     handler.foo();\n"
+                    + "  }\n"
+                    + "  public void callAbsFoo() {\n"
+                    + "     absHandler.absFoo();\n"
+                    + "  }\n"
+                    + "\n"
+                    + "}",
+                    null,
+                    true,
+                    null);
+
+        ICompilationUnit cu4= fPack2.getCompilationUnit("A.java");
+        fFooType= cu4.createType(
+        		"public interface A {\n"
+                + "   void foo();\n"
+                + "}\n"
+                , null, true, null);
+
+
+        ICompilationUnit cu5= fPack2.getCompilationUnit("AImpl.java");
+        fFooImplAType= cu5.createType(
+                "public class AImpl implements A {\n"
+                + "  public void foo() {\n"
+                + "      System.out.println();\n"
+                + "  }\n"
+                + "}\n"
+                , null, true, null);
+
+        ICompilationUnit cu6= fPack2.getCompilationUnit("BImpl.java");
+        fFooImplBType= cu6.createType(
+                "public class BImpl implements A {\n"
+                + "  public void foo() {\n"
+                + "      System.out.printf(\"\");\n"
+                + "  }\n"
+                + "}\n"
+                , null, true, null);
+
+
+        ICompilationUnit cu7= fPack2.getCompilationUnit("Abs.java");
+        fAbsType= cu7.createType(
+        		"public abstract class Abs {\n"
+                + "   abstract void absFoo();\n"
+                + "}\n"
+                , null, true, null);
+
+        ICompilationUnit cu8= fPack2.getCompilationUnit("AbsI1.java");
+        fAbsI1Type= cu8.createType(
+        		"public class AbsI1 extends Abs {\n"
+                + "   void absFoo() {}\n"
+                + "}\n"
+                , null, true, null);
+
+        ICompilationUnit cu9= fPack2.getCompilationUnit("AbsI2.java");
+        fAbsI2Type= cu9.createType(
+        		"public class AbsI2 extends Abs {\n"
+                + "   void absFoo() {}\n"
+                + "}\n"
+                , null, true, null);
+
+        assertBuildWithoutErrors(fJavaProject1);
+        assertBuildWithoutErrors(fJavaProject2);
+
+    }
+
     /**
      * Creates two packages (pack1 and pack2) in different projects. Sets the
      * instance fields fPack1 and fPack2.
@@ -508,6 +605,34 @@ public class CallHierarchyTestHelper {
         return fType2;
     }
 
+    public IType getTypeP() {
+    	return fTypeP;
+    }
+
+    public IType getFooImplAType() {
+		return fFooImplAType;
+	}
+
+    public IType getFooImplBType() {
+		return fFooImplBType;
+	}
+
+    public IType getFooType() {
+		return fFooType;
+	}
+
+    public IType getAbsType() {
+		return fAbsType;
+	}
+
+    public IType getAbsI1Type() {
+		return fAbsI1Type;
+	}
+
+    public IType getAbsI2Type() {
+		return fAbsI2Type;
+	}
+
     public IMethod getMethod1() {
         if (fMethod1 == null) {
             fMethod1= getType1().getMethod("method1", EMPTY);
@@ -549,4 +674,60 @@ public class CallHierarchyTestHelper {
         }
         return fRecursiveMethod2;
     }
+
+    public IMethod getCalleeMethod() {
+        if (fCalleeMethod == null) {
+            fCalleeMethod= getTypeP().getMethod("callFoo", EMPTY);
+        }
+        return fCalleeMethod;
+    }
+
+    public IMethod getAbsCalleeMethod() {
+        if (fAbsCalleeMethod == null) {
+        	fAbsCalleeMethod= getTypeP().getMethod("callAbsFoo", EMPTY);
+        }
+        return fAbsCalleeMethod;
+    }
+
+	public IMethod getFooImplMethod_A() {
+        if (fFooImplMethod_A == null) {
+        	fFooImplMethod_A= getFooImplAType().getMethod("foo", EMPTY);
+        }
+        return fFooImplMethod_A;
+	}
+
+	public IMethod getFooImplMethod_B() {
+        if (fFooImplMethod_B == null) {
+        	fFooImplMethod_B= getFooImplBType().getMethod("foo", EMPTY);
+        }
+        return fFooImplMethod_B;
+	}
+
+	public IMethod getFooMethod() {
+        if (fFooMethod == null) {
+        	fFooMethod= getFooType().getMethod("foo", EMPTY);
+        }
+        return fFooMethod;
+	}
+
+	public IMethod getAbsFooMethod() {
+        if (fAbsFooMethod == null) {
+        	fAbsFooMethod= getAbsType().getMethod("absFoo", EMPTY);
+        }
+        return fAbsFooMethod;
+	}
+
+	public IMethod getAbsI1FooMethod() {
+        if (fAbsI1FooMethod == null) {
+        	fAbsI1FooMethod= getAbsI1Type().getMethod("absFoo", EMPTY);
+        }
+        return fAbsI1FooMethod;
+	}
+
+	public IMethod getAbsI2FooMethod() {
+        if (fAbsI2FooMethod == null) {
+        	fAbsI2FooMethod= getAbsI2Type().getMethod("absFoo", EMPTY);
+        }
+        return fAbsI2FooMethod;
+	}
 }

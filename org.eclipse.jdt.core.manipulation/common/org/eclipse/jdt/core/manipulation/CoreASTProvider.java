@@ -62,6 +62,7 @@ public final class CoreASTProvider {
 	private Object fReconcileLock= new Object();
 	private Object fWaitLock= new Object();
 	private volatile boolean fIsReconciling;
+	private volatile Runnable fFinishReconciling;
 
 	/**
 	 * Wait flag class.
@@ -166,6 +167,7 @@ public final class CoreASTProvider {
 
 		if (isReconciling) {
 			try {
+				notifyReconciler();
 				// Wait for AST
 				synchronized (fWaitLock) {
 					if (isReconciling(input)) {
@@ -215,6 +217,13 @@ public final class CoreASTProvider {
 		return ast;
 	}
 
+	private void notifyReconciler() {
+		Runnable finishReconciling= fFinishReconciling;
+		if (finishReconciling!=null) {
+			finishReconciling.run();
+		}
+	}
+
 	/**
 	 * Informs that reconciling for the given element is about to be started.
 	 *
@@ -222,6 +231,18 @@ public final class CoreASTProvider {
 	 * See org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 */
 	public void aboutToBeReconciled(ITypeRoot javaElement) {
+		aboutToBeReconciled(javaElement, null);
+	}
+
+	/**
+	 * Informs that reconciling for the given element is about to be started.
+	 *
+	 * @param javaElement the Java element
+	 * @param finishReconciling Runnable to be run.
+	 * see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled(JavaReconciler)
+	 * @since 1.16
+	 */
+	public void aboutToBeReconciled(ITypeRoot javaElement, Runnable finishReconciling) {
 
 		if (javaElement == null)
 			return;
@@ -232,6 +253,7 @@ public final class CoreASTProvider {
 		synchronized (fReconcileLock) {
 			fReconcilingJavaElement= javaElement;
 			fIsReconciling= true;
+			this.fFinishReconciling = finishReconciling;
 		}
 		cache(null, javaElement);
 	}
@@ -302,6 +324,7 @@ public final class CoreASTProvider {
 
 		synchronized (fReconcileLock) {
 			fIsReconciling= false;
+			fFinishReconciling= null;
 			if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
 
 				if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
@@ -498,6 +521,7 @@ public final class CoreASTProvider {
 		synchronized (fReconcileLock) {
 			fIsReconciling = false;
 			fReconcilingJavaElement = null;
+			fFinishReconciling = null;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,9 +20,12 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -33,6 +36,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -181,18 +185,82 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			String label;
+			ASTNode expression= null;
+			int statementType= -1;
 			if (fBodyProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
 				label = FixMessages.CodeStyleFix_ChangeIfToBlock_desription;
+				expression= ((IfStatement)fControlStatement).getExpression();
+				if (((IfStatement)fControlStatement).getElseStatement() == null) {
+					statementType= ASTNode.IF_STATEMENT;
+				}
 			} else if (fBodyProperty == IfStatement.ELSE_STATEMENT_PROPERTY) {
 				label = FixMessages.CodeStyleFix_ChangeElseToBlock_description;
+				expression= ((IfStatement)fControlStatement).getExpression();
 			} else {
 				label = FixMessages.CodeStyleFix_ChangeControlToBlock_description;
+				if (fBodyProperty == WhileStatement.BODY_PROPERTY) {
+					expression= ((WhileStatement)fControlStatement).getExpression();
+					statementType= ASTNode.WHILE_STATEMENT;
+				} else if (fBodyProperty == ForStatement.BODY_PROPERTY) {
+					expression= ((ForStatement)fControlStatement).getExpression();
+					statementType= ASTNode.FOR_STATEMENT;
+				} else if (fBodyProperty == EnhancedForStatement.BODY_PROPERTY) {
+					expression= ((EnhancedForStatement)fControlStatement).getExpression();
+					statementType= ASTNode.ENHANCED_FOR_STATEMENT;
+				}
 			}
 
 			TextEditGroup group= createTextEditGroup(label, cuRewrite);
-			ASTNode moveTarget= rewrite.createMoveTarget(fBody);
-			Block replacingBody= cuRewrite.getRoot().getAST().newBlock();
-			replacingBody.statements().add(moveTarget);
+			List<Comment> commentsToPreserve= new ArrayList<>();
+			CompilationUnit cuRoot= cuRewrite.getRoot();
+			int controlStatementLine= cuRoot.getLineNumber(fControlStatement.getStartPosition());
+			int bodyLine= cuRoot.getLineNumber(fBody.getStartPosition());
+			// If single body statement is on next line, we need to preserve any comments pertaining to the
+			// control statement (e.g. NLS comment for if expression)
+			if (controlStatementLine != bodyLine) {
+				int startPosition= expression == null ? fControlStatement.getStartPosition() : (expression.getStartPosition() + cuRoot.getExtendedLength(expression));
+				List<Comment> comments= cuRoot.getCommentList();
+				for (Comment comment : comments) {
+					int commentLine= cuRoot.getLineNumber(comment.getStartPosition());
+					if (commentLine == controlStatementLine && comment.getStartPosition() > startPosition &&
+							comment.getStartPosition() < fBody.getStartPosition()) {
+						commentsToPreserve.add(comment);
+					}
+				}
+			}
+			String blockString= "{"; //$NON-NLS-1$
+			IBuffer cuBuffer= cuRewrite.getCu().getBuffer();
+			Block replacingBody= null;
+			String blockPosition= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK);
+			boolean blockEndOfLine= blockPosition.equals(DefaultCodeFormatterConstants.END_OF_LINE);
+			if (!commentsToPreserve.isEmpty()) {
+				// Get extended body text and convert multiple indent tabs to be just one tab as they will be relative to control statement
+				String bodyString= cuBuffer.getText(cuRoot.getExtendedStartPosition(fBody), cuRoot.getExtendedLength(fBody))
+						.replaceAll("\\r\\n|\\r|\\n(\\t|\\s)*", System.lineSeparator() + "\t"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (blockEndOfLine || statementType == -1) {
+					// To ensure the comments to preserve end up on same line as the control statement, we need
+					// to build the block manually as a string and then create a Block placeholder from it
+					for (Comment comment : commentsToPreserve) {
+						String commentString= cuBuffer.getText(comment.getStartPosition(), comment.getLength());
+						blockString += " " + commentString; //$NON-NLS-1$
+					}
+					blockString += System.lineSeparator() + "\t" + bodyString + System.lineSeparator() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+					replacingBody= (Block)rewrite.createStringPlaceholder(blockString, ASTNode.BLOCK);
+				} else {
+					Comment lastComment= commentsToPreserve.get(commentsToPreserve.size()-1);
+					String newControlStatement= cuBuffer.getText(cuRoot.getExtendedStartPosition(fControlStatement),
+							lastComment.getStartPosition() + lastComment.getLength() - cuRoot.getExtendedStartPosition(fControlStatement));
+					newControlStatement += System.lineSeparator() + "{" + System.lineSeparator(); //$NON-NLS-1$
+					newControlStatement += "\t" + bodyString + System.lineSeparator() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+					Statement newStatement= (Statement)rewrite.createStringPlaceholder(newControlStatement, statementType);
+					rewrite.replace(fControlStatement, newStatement, group);
+					return;
+				}
+			} else {
+				ASTNode moveTarget= rewrite.createMoveTarget(fBody);
+				replacingBody= cuRewrite.getRoot().getAST().newBlock();
+				replacingBody.statements().add(moveTarget);
+			}
 			rewrite.set(fControlStatement, fBodyProperty, replacingBody, group);
 		}
 

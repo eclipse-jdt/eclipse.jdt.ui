@@ -78,7 +78,7 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.core.filesystem.win32.x86",
 			"org.eclipse.core.resources.compatibility",
 			"org.eclipse.core.resources.win32",
-			"org.eclipse.debug.ui",
+//			"org.eclipse.debug.ui", bug 507546: debug code minings
 			"org.eclipse.equinox.http.jetty",
 			"org.eclipse.equinox.http.registry",
 			"org.eclipse.equinox.http.servlet",
@@ -92,8 +92,8 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.jdt.apt.ui",
 			"org.eclipse.jdt.compiler.apt",
 			"org.eclipse.jdt.compiler.tool",
-			"org.eclipse.jdt.debug",
-			"org.eclipse.jdt.debug.ui",
+//			"org.eclipse.jdt.debug", bug 507546: debug code minings
+//			"org.eclipse.jdt.debug.ui", bug 507546: debug code minings
 			"org.eclipse.jdt.doc.isv",
 			"org.eclipse.jdt.doc.user",
 			"org.eclipse.jdt.junit",
@@ -130,7 +130,7 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.text",
 			"org.eclipse.text.tests",
 			"org.eclipse.ui.cheatsheets",
-			"org.eclipse.ui.console",
+//			"org.eclipse.ui.console", bug 507546: debug code minings
 			"org.eclipse.ui.editors.tests",
 			"org.eclipse.ui.examples.javaeditor",
 			"org.eclipse.ui.examples.rcp.texteditor",

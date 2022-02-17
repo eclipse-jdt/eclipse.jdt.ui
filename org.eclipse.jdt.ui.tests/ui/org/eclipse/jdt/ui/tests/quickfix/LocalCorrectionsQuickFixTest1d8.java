@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2020 IBM Corporation and others.
+ * Copyright (c) 2014, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1214,6 +1214,204 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testCreateMethodInSuperTypeQuickFix1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(int... i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(int... i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("\n");
+		buf.append("    void foo(int... i);\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodInSuperTypeQuickFix2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(int[]... i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(int[]... i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("\n");
+		buf.append("    void foo(int[]... i);\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodInSuperTypeQuickFix3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(double d, int[]... i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo(double d, int[]... i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("\n");
+		buf.append("    void foo(double d, int[]... i);\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodInSuperTypeQuickFix4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    <T> void foo(T t) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    <T> void foo(T t) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("\n");
+		buf.append("    <T> void foo(T t);\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodInSuperTypeQuickFix5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    <T> void foo(T... t) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    <T> void foo(T... t) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("\n");
+		buf.append("    <T> void foo(T... t);\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodInSuperTypeQuickFix6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    <T> void foo(T[]... t) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("class E implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    <T> void foo(T[]... t) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("\n");
+		buf.append("    <T> void foo(T[]... t);\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
 	}
 
 	@Test

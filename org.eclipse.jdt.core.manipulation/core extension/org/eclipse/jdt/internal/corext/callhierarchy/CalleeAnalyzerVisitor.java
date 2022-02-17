@@ -15,13 +15,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -39,8 +42,10 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
@@ -55,9 +60,11 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     private final IProgressMonitor fProgressMonitor;
     private int fMethodEndPosition;
     private int fMethodStartPosition;
+	private CallLocation fCalledAt;
 
-    CalleeAnalyzerVisitor(IMember member, CompilationUnit compilationUnit, IProgressMonitor progressMonitor) {
-        fSearchResults = new CallSearchResultCollector();
+    CalleeAnalyzerVisitor(CallLocation calledAt, IMember member, CompilationUnit compilationUnit, IProgressMonitor progressMonitor) {
+		fSearchResults = new CallSearchResultCollector();
+        this.fCalledAt= calledAt;
         this.fMember = member;
         this.fCompilationUnit= compilationUnit;
         this.fProgressMonitor = progressMonitor;
@@ -145,6 +152,10 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     @Override
 	public boolean visit(MethodDeclaration node) {
         progressMonitorWorked(1);
+        if(Modifier.isAbstract(node.getModifiers()) ||
+        		((node.getParent() instanceof TypeDeclaration) && ((TypeDeclaration)node.getParent()).isInterface())) {
+    		addMethodCall(node.resolveBinding(), node);
+        }
         return isFurtherTraversalNecessary(node);
     }
 
@@ -253,23 +264,41 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
                 IMethod calledMethod = findIncludingSupertypes(calledMethodBinding,
                         calledType, fProgressMonitor);
 
-                IMember referencedMember= null;
+                List<IMember> referencedMembers= new ArrayList<>();
+                boolean implementationResults = false;
                 if (calledMethod == null) {
                     if (calledMethodBinding.isConstructor() && calledMethodBinding.getParameterTypes().length == 0) {
-                        referencedMember= calledType;
+                    	referencedMembers.add(calledType);
                     }
                 } else {
-                    if (calledType.isInterface()) {
-                        calledMethod = findImplementingMethods(calledMethod);
-                    }
-
-                    if (!isIgnoredBySearchScope(calledMethod)) {
-                        referencedMember= calledMethod;
+                	// only find implementations if we are handling a method declaration.
+                    if (node instanceof MethodDeclaration && (calledType.isInterface() || Flags.isAbstract(calledType.getFlags()))) {
+                        Collection<IJavaElement> implementingMethods= CallHierarchyCore.getDefault().getImplementingMethods(calledMethod);
+                        implementationResults = true;
+                        for (IJavaElement element : implementingMethods) {
+							if(element instanceof IMethod) {
+								if(!isIgnoredBySearchScope((IMethod) element)) {
+									referencedMembers.add((IMethod) element);
+								}
+							} else if(element instanceof IMember) {
+								referencedMembers.add((IMember) element);
+							}
+						}
+                    } else {
+                    	referencedMembers.add(calledMethod);
                     }
                 }
-                final int position= node.getStartPosition();
-				final int number= fCompilationUnit.getLineNumber(position);
-				fSearchResults.addMember(fMember, referencedMember, position, position + node.getLength(), number < 1 ? 1 : number);
+
+                Optional<CallLocation> calledAt= Optional.ofNullable(fCalledAt);
+                Integer ignore = Integer.valueOf(-1);
+				final int position= implementationResults ? calledAt.map(CallLocation::getStart).orElse(ignore).intValue() : node.getStartPosition();
+				final int number= implementationResults ? calledAt.map(CallLocation::getLineNumber).orElse(ignore).intValue() : fCompilationUnit.getLineNumber(position);
+				final int length = implementationResults ? calledAt.map(c -> Integer.valueOf(c.getEnd() - position)).orElse(ignore).intValue() : node.getLength();
+				final IMember member = implementationResults ? calledAt.map(CallLocation::getMember).orElse(fMember) : fMember;
+				final boolean potential = implementationResults;
+				referencedMembers.forEach(m -> {
+					fSearchResults.addMember(member, m, position, position + length, number < 1 ? 1 : number, potential);
+				});
             }
         } catch (JavaModelException jme) {
             JavaManipulationPlugin.log(jme);
@@ -328,17 +357,6 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
 
     private boolean isFurtherTraversalNecessary(ASTNode node) {
         return isNodeWithinMethod(node) || isNodeEnclosingMethod(node);
-    }
-
-    private IMethod findImplementingMethods(IMethod calledMethod) {
-        Collection<IJavaElement> implementingMethods = CallHierarchyCore.getDefault()
-                                                        .getImplementingMethods(calledMethod);
-
-        if ((implementingMethods.isEmpty()) || (implementingMethods.size() > 1)) {
-            return calledMethod;
-        } else {
-            return (IMethod) implementingMethods.iterator().next();
-        }
     }
 
     private void progressMonitorWorked(int work) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 IBM Corporation and others.
+ * Copyright (c) 2011, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.AssertStatement;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
@@ -60,6 +62,7 @@ public class NecessaryParenthesesChecker {
 				|| type == ASTNode.POSTFIX_EXPRESSION
 				|| type == ASTNode.CAST_EXPRESSION
 				|| type == ASTNode.INSTANCEOF_EXPRESSION
+				|| type == ASTNode.PATTERN_INSTANCEOF_EXPRESSION
 				|| type == ASTNode.ARRAY_CREATION
 				|| type == ASTNode.ASSIGNMENT;
 	}
@@ -404,6 +407,13 @@ public class NecessaryParenthesesChecker {
 					(expressionOperator == PrefixExpression.Operator.MINUS || expressionOperator == PrefixExpression.Operator.DECREMENT)) {
 				return true;
 			}
+		} else if (parentExpression instanceof CastExpression) {
+			CastExpression castExp= (CastExpression) parentExpression;
+			Type type= castExp.getType();
+			if (type != null && type.isPrimitiveType()) {
+				return false;
+			}
+			return true;
 		}
 		return false;
 	}

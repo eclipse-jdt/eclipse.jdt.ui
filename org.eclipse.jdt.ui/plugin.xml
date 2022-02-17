@@ -125,6 +125,7 @@
 
             <adapter type="org.eclipse.jdt.internal.ui.IResourceLocator"/>
             <adapter type="org.eclipse.team.ui.history.IHistoryPageSource"/>
+            <adapter type="org.eclipse.core.resources.IProject"/>
 		</factory>
 
 		<factory
@@ -7797,5 +7798,12 @@
            needsSortingAfterFiltering="false"
            requiresUIThread="false">
      </javaCompletionProposalComputer>
+  </extension>
+  <extension
+        point="org.eclipse.core.contenttype.contentTypes">
+     <file-association
+           content-type="org.eclipse.jdt.core.javaClass"
+           file-extensions="class without source">
+     </file-association>
   </extension>
 </plugin>

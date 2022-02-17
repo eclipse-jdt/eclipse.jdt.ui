@@ -85,6 +85,11 @@ public class EnumConstructorTargetFinder extends ASTVisitor {
 		return location;
 	}
 
+	private enum CheckEnum {
+		EXACT,
+		UNBOXED,
+		ASSIGNEMENT_COMPATIBLE
+	}
 	private ASTNode findEnumConstructor(CompilationUnit cu, EnumConstantDeclaration enumNode) {
 		ASTNode enumDeclarationNode= ASTResolving.findParentType(enumNode);
 		if (enumDeclarationNode == null) {
@@ -97,6 +102,18 @@ public class EnumConstructorTargetFinder extends ASTVisitor {
 		List<ASTNode> enumNodeArguments= enumNode.arguments();
 		List<ASTNode> enumBodyDeclarations= enumDeclaration.bodyDeclarations();
 
+		ASTNode foundEnumDeclaration= findEnumDeclaration(cu, enumDeclaration, enumNodeArguments, enumBodyDeclarations, CheckEnum.EXACT);
+		if (foundEnumDeclaration == null) {
+			foundEnumDeclaration= findEnumDeclaration(cu, enumDeclaration, enumNodeArguments, enumBodyDeclarations, CheckEnum.UNBOXED);
+		}
+		if (foundEnumDeclaration == null) {
+			foundEnumDeclaration= findEnumDeclaration(cu, enumDeclaration, enumNodeArguments, enumBodyDeclarations, CheckEnum.ASSIGNEMENT_COMPATIBLE);
+		}
+		return foundEnumDeclaration;
+	}
+
+	private ASTNode findEnumDeclaration(CompilationUnit cu, EnumDeclaration enumDeclaration,
+			List<ASTNode> enumNodeArguments, List<ASTNode> enumBodyDeclarations, CheckEnum checkEnum) {
 		declarationLoop: for (ASTNode enumBodyDeclarationNode : enumBodyDeclarations) {
 			if (enumBodyDeclarationNode.getNodeType() != ASTNode.METHOD_DECLARATION) {
 				continue;
@@ -107,16 +124,14 @@ public class EnumConstructorTargetFinder extends ASTVisitor {
 			}
 
 			List<SingleVariableDeclaration> enumBodyDeclarationNodeParameters= enumMethodDeclaration.parameters();
-			if (enumBodyDeclarationNodeParameters.size() != enumNodeArguments.size()) {
+			if (!enumMethodDeclaration.isVarargs()
+					&& enumBodyDeclarationNodeParameters.size() != enumNodeArguments.size()) {
 				continue;
 			}
 
 			for (int i= 0; i < enumBodyDeclarationNodeParameters.size(); i++) {
 				ASTNode nodeArgument= enumNodeArguments.get(i);
 				SingleVariableDeclaration singleVariableDeclaration= enumBodyDeclarationNodeParameters.get(i);
-				if(singleVariableDeclaration.isVarargs()) {
-					continue declarationLoop;
-				}
 				Type parameterType= singleVariableDeclaration.getType();
 				if (parameterType == null) {
 					continue declarationLoop;
@@ -139,7 +154,11 @@ public class EnumConstructorTargetFinder extends ASTVisitor {
 					if (parameterTypes.length != enumBodyDeclarationNodeParameters.size()) {
 						continue declarationLoop;
 					}
-					nodeTypeArgument= parameterTypes[i];
+					if (singleVariableDeclaration.isVarargs()) {
+						nodeTypeArgument= parameterTypes[i].getElementType();
+					} else {
+						nodeTypeArgument= parameterTypes[i];
+					}
 				}
 				if (nodeTypeArgument == null) {
 					nodeTypeArgument= ASTResolving.guessBindingForReference(nodeArgument);
@@ -148,13 +167,29 @@ public class EnumConstructorTargetFinder extends ASTVisitor {
 					continue declarationLoop;
 				}
 
-				if (Bindings.equals(nodeTypeArgument, nodeTypeParameter)) {
-					continue;
-				}
 				ITypeBinding unboxedTypeArgument= Bindings.getUnboxedTypeBinding(nodeTypeArgument, cu.getAST());
 				ITypeBinding unboxedTypeParameter= Bindings.getUnboxedTypeBinding(nodeTypeParameter, cu.getAST());
-				if (Bindings.equals(unboxedTypeArgument, unboxedTypeParameter)) {
-					continue;
+				switch (checkEnum) {
+					case EXACT:
+						if (Bindings.equals(nodeTypeArgument, nodeTypeParameter)) {
+							continue;
+						}
+						break;
+					case UNBOXED:
+						if (Bindings.equals(unboxedTypeArgument, unboxedTypeParameter)) {
+							continue;
+						}
+						break;
+					case ASSIGNEMENT_COMPATIBLE:
+						if (nodeTypeArgument.isAssignmentCompatible(nodeTypeParameter)) {
+							continue;
+						}
+						if (unboxedTypeArgument.isAssignmentCompatible(unboxedTypeParameter)) {
+							continue;
+						}
+						break;
+					default:
+						break;
 				}
 				continue declarationLoop;
 			} // for all enum constructor parameters

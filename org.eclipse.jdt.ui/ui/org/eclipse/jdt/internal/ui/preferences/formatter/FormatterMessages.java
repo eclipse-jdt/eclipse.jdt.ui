@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -165,6 +165,8 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_lineWrap_pref_default_indent_array;
 	public static String FormatterModifyDialog_lineWrap_pref_default_indent_wrapped;
 	public static String FormatterModifyDialog_lineWrap_pref_explicit_constructor_invocations;
+	public static String FormatterModifyDialog_lineWrap_pref_expressions_in_switch_case_with_arrow;
+	public static String FormatterModifyDialog_lineWrap_pref_expressions_in_switch_case_with_colon;
 	public static String FormatterModifyDialog_lineWrap_pref_extends_clause;
 	public static String FormatterModifyDialog_lineWrap_pref_for;
 	public static String FormatterModifyDialog_lineWrap_pref_implements_clause;
@@ -179,12 +181,14 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_lineWrap_pref_param_type_ref;
 	public static String FormatterModifyDialog_lineWrap_pref_parameters;
 	public static String FormatterModifyDialog_lineWrap_pref_qualified_invocations;
+	public static String FormatterModifyDialog_lineWrap_pref_qualified_invocations_indent_from_base_expression_first_line;
 	public static String FormatterModifyDialog_lineWrap_pref_qualified_object_allocation_arguments;
 	public static String FormatterModifyDialog_lineWrap_pref_record_components;
 	public static String FormatterModifyDialog_lineWrap_pref_relational_operators;
 	public static String FormatterModifyDialog_lineWrap_pref_shift_operators;
 	public static String FormatterModifyDialog_lineWrap_pref_string_concatenation;
 	public static String FormatterModifyDialog_lineWrap_pref_superinterfaces;
+	public static String FormatterModifyDialog_lineWrap_pref_switch_case_with_arrow;
 	public static String FormatterModifyDialog_lineWrap_pref_throws_clause;
 	public static String FormatterModifyDialog_lineWrap_pref_try;
 	public static String FormatterModifyDialog_lineWrap_pref_wrap_outer_expressions_when_nested;
@@ -246,6 +250,8 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_newLines_pref_keep_record_constructor_declaration_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_record_declaration_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_simple_getter_setter_on_one_line;
+	public static String FormatterModifyDialog_newLines_pref_keep_switch_body_block_on_one_line;
+	public static String FormatterModifyDialog_newLines_pref_keep_switch_case_with_arrow_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_type_declaration_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_local_variables;
 	public static String FormatterModifyDialog_newLines_pref_methods;
@@ -319,6 +325,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_case_expressions;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_method_args;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_params;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_permits;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_qalloc;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_record_components;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_throws;
@@ -367,6 +374,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_case_expressions;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_method_args;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_params;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_permits;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_qalloc;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_record_components;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_throws;

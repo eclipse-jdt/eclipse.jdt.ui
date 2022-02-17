@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -424,16 +424,19 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					// Allow invocation on super methods calls. makes sense as other
 					// calls or even only the declaration can be updated.
 					targetMethodBinding= ((SuperMethodInvocation) selectionNode).resolveMethodBinding();
-				} else {
+				}
+				if (targetMethodBinding != null) {
+					fTargetMethodBinding= targetMethodBinding.getMethodDeclaration(); // resolve generics
+					if (fTargetMethodBinding != null) {
+						fTargetMethod= (IMethod) fTargetMethodBinding.getJavaElement();
+						//allow single updating mode if an invocation was selected and the invocation can be updated
+						if (selectionNode instanceof MethodInvocation && fSelectionCompilationUnit != null)
+							fSelectionMethodInvocation= (MethodInvocation) selectionNode;
+					}
+				}
+				if (targetMethodBinding == null || fTargetMethodBinding == null) {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_not_available_on_this_selection);
 				}
-				fTargetMethodBinding= targetMethodBinding.getMethodDeclaration(); // resolve generics
-				fTargetMethod= (IMethod) fTargetMethodBinding.getJavaElement();
-
-				//allow single updating mode if an invocation was selected and the invocation can be updated
-				if (selectionNode instanceof MethodInvocation && fSelectionCompilationUnit != null)
-					fSelectionMethodInvocation= (MethodInvocation) selectionNode;
-
 			} else {
 				// (2) invoked on an IMethod: Source may not be available
 

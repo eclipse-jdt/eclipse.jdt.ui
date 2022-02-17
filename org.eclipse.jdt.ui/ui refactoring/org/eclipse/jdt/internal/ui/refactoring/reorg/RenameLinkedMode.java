@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2021 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
@@ -212,10 +213,25 @@ public class RenameLinkedMode {
 
 			fLinkedPositionGroup= new LinkedPositionGroup();
 			ASTNode selectedNode= NodeFinder.perform(root, fOriginalSelection.x, fOriginalSelection.y);
-			if (! (selectedNode instanceof SimpleName)) {
+
+			Name nameNode= null;
+			if (! (selectedNode instanceof Name)) {
 				return; // TODO: show dialog
+			} else if (this.fJavaElement != null &&
+					this.fJavaElement.getElementType() ==  IJavaElement.JAVA_MODULE) {
+				nameNode= (Name) selectedNode;
+				ASTNode parent = nameNode.getParent();
+				while(parent instanceof Name) {
+					nameNode = (Name) parent;
+					parent = nameNode.getParent();
+				}
+				fOriginalName= nameNode.getFullyQualifiedName();
+			} else if (! (selectedNode instanceof SimpleName)) {
+				return; // TODO: show dialog
+			} else {
+				nameNode = (SimpleName)selectedNode;
+				fOriginalName= ((SimpleName)nameNode).getIdentifier();
 			}
-			SimpleName nameNode= (SimpleName) selectedNode;
 
 			if (viewer instanceof ITextViewerExtension6) {
 				IUndoManager undoManager= ((ITextViewerExtension6)viewer).getUndoManager();
@@ -227,7 +243,6 @@ public class RenameLinkedMode {
 				}
 			}
 
-			fOriginalName= nameNode.getIdentifier();
 			final int pos= nameNode.getStartPosition();
 			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
 

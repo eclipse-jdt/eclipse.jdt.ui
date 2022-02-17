@@ -283,12 +283,108 @@ public class EnumConstructorTargetFinderTest {
 		{
 			int offset= s.indexOf("A1(\"\")");
 			int targetOffset= s.indexOf("A(String s)");
-			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1 /* 'A' */, 0, "A(String s)"));
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1, 0, "A(String s)"));
 		}
 		{
 			int offset= s.indexOf("A2(\"\",\"\")");
-			int targetOffset= s.indexOf("A2(\"\",\"\")");
-			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 2 /* 'A2' */, 0, "A2(\"\",\"\")"));
+			int targetOffset= s.indexOf("A(String ... strings)");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1, 0, "A(String ... strings)"));
+		}
+	}
+
+	@Test
+	public void testEnumConstructorFinder_6() throws Exception {
+		String s= "" +
+				"package test1;\n" +
+				"class E {\n" +
+
+				"   public enum A {\n" +
+				"      A1(\"\"),\n" +
+				"      A2(new Object());\n" +
+				"      A(String s) {\n" +
+				"      }\n" +
+				"      A(Object o) {\n" +
+				"      }\n" +
+				"   }\n" +
+
+				"}\n";
+
+		CompilationUnit root= createCompilationUnit(s);
+
+		{
+			int offset= s.indexOf("A1");
+			int targetOffset= s.indexOf("A(String");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1 /* 'A' */, 0, "A(String"));
+		}
+		{
+			int offset= s.indexOf("A2");
+			int targetOffset= s.indexOf("A(Object");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1 /* 'A' */, 0, "A(Object"));
+		}
+	}
+
+	@Test
+	public void testEnumConstructorFinder_7() throws Exception {
+		String s= "" +
+				"package test1;\n" +
+				"class E {\n" +
+
+				"   public enum A {\n" +
+				"      A1(1L),\n" +
+				"      A2(new Long(1)),\n" +
+				"      A3(new Long(1), 1L),\n" +
+				"      A4(Long.valueOf(1)),\n" +
+				"      A5(Long.parseLong(\"1\")),\n" +
+				"      A6(1L, 2.0),\n" +
+				"      A7(Long.valueOf(1), Double.valueOf(2.0));\n" +
+				"      A(long l) {\n" +
+				"      }\n" +
+				"      A(Long l) {\n" +
+				"      }\n" +
+				"      A(long l, double d) {\n" +
+				"      }\n" +
+				"      A(Long l, Double d) {\n" +
+				"      }\n" +
+				"   }\n" +
+
+				"}\n";
+
+		CompilationUnit root= createCompilationUnit(s);
+
+		{
+			int offset= s.indexOf("A1");
+			int targetOffset= s.indexOf("A(long l)");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1, 0, "A(long l)"));
+		}
+		{
+			int offset= s.indexOf("A2");
+			int targetOffset= s.indexOf("A(Long l)");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1, 0, "A(Long l)"));
+		}
+		{
+			int offset= s.indexOf("A3");
+			int targetOffset= s.indexOf("A(long l, double d)");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1, 0, "A(long l, double d)"));
+		}
+		{
+			int offset= s.indexOf("A4");
+			int targetOffset= s.indexOf("A(Long l)");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1, 0, "A(Long l)"));
+		}
+		{
+			int offset= s.indexOf("A5");
+			int targetOffset= s.indexOf("A(long l)");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1, 0, "A(long l)"));
+		}
+		{
+			int offset= s.indexOf("A6");
+			int targetOffset= s.indexOf("A(long l, double d)");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1, 0, "A(long l, double d)"));
+		}
+		{
+			int offset= s.indexOf("A7");
+			int targetOffset= s.indexOf("A(Long l, Double d)");
+			checkSelection(root, offset, 0, new OccurrenceLocation(targetOffset, 1, 0, "A(Long l, Double d)"));
 		}
 	}
 }

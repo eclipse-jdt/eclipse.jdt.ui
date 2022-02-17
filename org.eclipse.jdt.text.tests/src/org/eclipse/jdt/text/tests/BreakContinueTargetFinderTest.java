@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2020 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,11 +34,10 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.core.manipulation.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-
-import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 
 /**
  * Tests for the BreakContinueTargerFinder class.

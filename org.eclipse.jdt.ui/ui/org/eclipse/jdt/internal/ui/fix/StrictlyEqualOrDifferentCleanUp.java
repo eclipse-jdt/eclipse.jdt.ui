@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2022 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
@@ -227,8 +228,20 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.StrictlyEqualOrDifferentCleanUp_description, cuRewrite);
 
 			InfixExpression newInfixExpression= ast.newInfixExpression();
-			newInfixExpression.setLeftOperand(ASTNodes.createMoveTarget(rewrite, firstExpression));
-			newInfixExpression.setRightOperand(ASTNodes.createMoveTarget(rewrite, secondExpression));
+			if (firstExpression instanceof InfixExpression) {
+				ParenthesizedExpression pexp= ast.newParenthesizedExpression();
+				pexp.setExpression(ASTNodes.createMoveTarget(rewrite, firstExpression));
+				newInfixExpression.setLeftOperand(pexp);
+			} else {
+				newInfixExpression.setLeftOperand(ASTNodes.createMoveTarget(rewrite, firstExpression));
+			}
+			if (secondExpression instanceof InfixExpression) {
+				ParenthesizedExpression pexp= ast.newParenthesizedExpression();
+				pexp.setExpression(ASTNodes.createMoveTarget(rewrite, secondExpression));
+				newInfixExpression.setRightOperand(pexp);
+			} else {
+				newInfixExpression.setRightOperand(ASTNodes.createMoveTarget(rewrite, secondExpression));
+			}
 
 			if (isEquality) {
 				newInfixExpression.setOperator(InfixExpression.Operator.EQUALS);

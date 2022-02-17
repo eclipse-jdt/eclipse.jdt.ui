@@ -125,7 +125,7 @@ public abstract class AbstractSerialVersionOperationCore extends CompilationUnit
 			}
 
 			final String comment= CodeGeneration.getFieldComment(fUnit, declaration.getType().toString(), NAME_FIELD, StubUtility.getLineDelimiterUsed(fUnit));
-			if (comment != null && comment.length() > 0 && !"/**\n *\n */\n".equals(comment)) { //$NON-NLS-1$
+			if (comment != null && comment.length() > 0 && !comment.matches("[/\\* \t\n]*")) { //$NON-NLS-1$
 				final Javadoc doc= (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
 				declaration.setJavadoc(doc);
 			}

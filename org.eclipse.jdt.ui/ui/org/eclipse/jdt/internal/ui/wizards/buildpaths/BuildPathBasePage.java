@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -309,15 +309,19 @@ public abstract class BuildPathBasePage {
 	 * @param changeNodeDirection indicate in which direction the element should be moved
 	 */
 	protected void moveCPElementAcrossNode(TreeListDialogField<CPListElement> listField, CPListElement selElement, RootNodeChange changeNodeDirection) {
+		boolean firedDialogFieldChanged= false;
 		List<CPListElement> elements= listField.getElements();
 		//remove from module node or classnode
+		int indexOfSelElement = -1;
 		for (CPListElement cpListElement : elements) {
 			if (cpListElement.isRootNodeForPath()) {
 				RootCPListElement rootElement= (RootCPListElement) cpListElement;
 				if (rootElement.isSourceRootNode(changeNodeDirection) && rootElement.getChildren().contains(selElement)) {
+					List<?> children = rootElement.getChildren();
+					indexOfSelElement = children.indexOf(selElement);
 					rootElement.removeCPListElement(selElement);
 					listField.getTreeViewer().remove(selElement);
-					listField.dialogFieldChanged();
+					break;
 				}
 			}
 		}
@@ -328,16 +332,25 @@ public abstract class BuildPathBasePage {
 				if (rootCPListElement.isTargetRootNode(changeNodeDirection)) {
 					if (rootCPListElement.getChildren().contains(selElement))
 						break;
-					rootCPListElement.addCPListElement(selElement);
+					if (indexOfSelElement != -1) {
+						rootCPListElement.getChildren().add(indexOfSelElement, selElement);
+					} else {
+						rootCPListElement.addCPListElement(selElement);
+					}
 					List<CPListElement> all= listField.getElements();
-					listField.removeAllElements();
 					listField.setElements(all);
 					listField.refresh();
+					listField.dialogFieldChanged();
+					firedDialogFieldChanged = true;
 					listField.getTreeViewer().expandToLevel(2);
 					listField.postSetSelection(new StructuredSelection(selElement));
 					break;
 				}
 			}
+		}
+		// we found no other root container to move to, fire a change event
+		if (!firedDialogFieldChanged) {
+			listField.dialogFieldChanged();
 		}
 	}
 

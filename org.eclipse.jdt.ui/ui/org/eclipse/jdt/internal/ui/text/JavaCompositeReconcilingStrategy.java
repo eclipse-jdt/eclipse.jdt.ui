@@ -158,6 +158,10 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 
 	}
 
+	public void aboutToWork(JavaReconciler javaReconciler) {
+		fJavaStrategy.aboutToWork(javaReconciler);
+	}
+
 	/**
 	 * Called when reconcile has finished.
 	 *

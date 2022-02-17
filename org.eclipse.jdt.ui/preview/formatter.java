@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2019 Mateusz Matela and others.
+ * Copyright (c) 2018, 2022 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -376,6 +376,8 @@ class DECLARATIONS{
 //--PREVIEW--START--section-whitespace-declarations-classes
 class MyClass implements I0, I1, I2 {}
 
+public sealed class W permits X, Y, Z {}
+
 AnonClass object= new AnonClass() {void foo(Some s) { }};
 //--PREVIEW--END--section-whitespace-declarations-classes
 
@@ -721,6 +723,25 @@ class Example {
 }
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_lambda_body_block_on_one_line
 
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_switch_body_block_on_one_line
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_switch_case_with_arrow_on_one_line
+class Example { void example(int empty, int tiny, int small, int notSoSmall) {
+	switch (empty) {}
+	switch (tiny) { case 1 -> {} }
+	switch (tiny) {
+		case 2 -> {
+			doSomething();
+		}
+	}
+	switch (small) { case 1 -> {} case 2 -> { doSomething(); } }
+	switch (notSoSmall) { case tiny -> { doSomething(); } case small -> { doFirstThing(); doSecondThing(); } }
+	return switch (tiny) {
+		default -> "result";
+	};
+}}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_switch_body_block_on_one_line
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_switch_case_with_arrow_on_one_line
+
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_code_block_on_one_line
 class Example {
 	static {
@@ -882,7 +903,11 @@ nested(200,
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_arguments_in_method_invocation
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation
-class Example {int foo(Some a) {return a.getFirst();}}
+class Example {
+	String foo() {
+		return new StringBuilder(Arrays.asList(11111111, 22222222, 3333333, 44444444)).append("TextTextText").append(11111111 + 2222222 + 33333333).toStrinig();
+	}
+}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_arguments_in_explicit_constructor_call
@@ -1004,9 +1029,36 @@ class Example {int foo(int argument) {  while(!stop)doSomething();  for(String s
 class Example {void foo() {try (FileReader reader1 = new FileReader("file1");   FileReader reader2 = new FileReader("file2")) {}}}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_resources_in_try
 
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_switch_case_with_arrow
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_expressions_in_switch_case_with_arrow
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_expressions_in_switch_case_with_colon
+class Example {
+	boolean foo(Color color) {
+		boolean b = switch (color) {
+			case RED, GREEN, BLACK, BLUE, CYAN, ORANGE, WHITE, PINK -> true;
+			default -> false;
+		};
+		switch (color) {
+			case RED, GREEN, BLACK, BLUE, CYAN, ORANGE, WHITE, PINK: return true;
+			default: return false;
+		}
+	}
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_switch_case_with_arrow
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_expressions_in_switch_case_with_arrow
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_expressions_in_switch_case_with_colon
+
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_union_type_in_multicatch
 class Example {void foo() {try {} catch (IllegalArgumentException | NullPointerException | ClassCastException e) {  e.printStackTrace();}}}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_union_type_in_multicatch
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
+class Example {
+	void foo() {
+		assert this.field : "field does not have expected value - please investigate";
+	}
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_parameterized_type_references
 class Example {
@@ -1084,14 +1136,6 @@ module example.module0 {
 	provides example.other.module1.SomeService with example.module0.Service1, example.module0.Service2;
 }
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_module_statements
-
-//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
-class Example {
-	void foo() {
-		assert this.field : "field does not have expected value - please investigate";
-	}
-}
-//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
 
 }
 

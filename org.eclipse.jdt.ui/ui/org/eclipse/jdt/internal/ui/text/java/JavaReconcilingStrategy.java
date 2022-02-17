@@ -38,12 +38,13 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 
 public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
@@ -205,6 +206,11 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	public void aboutToBeReconciled() {
 		if (fIsJavaReconcilingListener)
 			fJavaReconcilingListener.aboutToBeReconciled();
+	}
+
+	public void aboutToWork(JavaReconciler javaReconciler) {
+		if (fIsJavaReconcilingListener)
+			fJavaReconcilingListener.aboutToWork(javaReconciler);
 	}
 
 	/**

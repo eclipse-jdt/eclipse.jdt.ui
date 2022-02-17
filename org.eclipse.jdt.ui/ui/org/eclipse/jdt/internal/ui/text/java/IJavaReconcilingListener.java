@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
+
 
 /**
  * Interface of an object listening to Java reconciling.
@@ -29,6 +31,16 @@ public interface IJavaReconcilingListener {
 	 * Called before reconciling is started.
 	 */
 	void aboutToBeReconciled();
+
+	/**
+	 * Called before reconciling is working.
+	 *
+	 * @param javaReconciler The JavaReconciler that starts reconciling
+	 */
+	default void aboutToWork(JavaReconciler javaReconciler) {
+		// do nothing by default.
+	}
+
 
 	/**
 	 * Called after reconciling has been finished.

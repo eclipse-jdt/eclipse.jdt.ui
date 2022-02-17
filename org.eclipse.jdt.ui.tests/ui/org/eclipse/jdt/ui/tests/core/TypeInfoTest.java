@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -243,6 +243,9 @@ public class TypeInfoTest {
 		assertEquals("java.lang.Throwable", TypeInfoFilter.simplifySearchText(" at java.lang.Throwable.fillInStackTrace ()"));
 		assertEquals("java.io.FileOutputStream", TypeInfoFilter.simplifySearchText(" at java.io.FileOutputStream.<init> ()"));
 		assertEquals("java.util.Map.Entry", TypeInfoFilter.simplifySearchText(" at java.util.Map$Entry.anything() (x.java:1)"));
+		assertEquals("*.Map.Entry", TypeInfoFilter.simplifySearchText("Map$Entry"));
+		assertEquals("org.eclipse.jdt.ui.tests.core.Main.Runner.Executor", TypeInfoFilter.simplifySearchText("org.eclipse.jdt.ui.tests.core.Main$Runner$Executor.exec(Main.java:10)"));
+		assertEquals("*.Main.Runner.Executor", TypeInfoFilter.simplifySearchText("Main$Runner$Executor.exec(Main.java:10)"));
 		assertEquals("java.io.FileOutputStream", TypeInfoFilter.simplifySearchText(" at java.io.FileOutputStream$1.close ()"));
 		assertEquals("org.eclipse.swt.internal.win32.OS", TypeInfoFilter.simplifySearchText(" at org.eclipse.swt.internal.win32.OS.WaitMessage(Native Method)"));
 
@@ -266,10 +269,35 @@ public class TypeInfoTest {
 		// convert inner types to qualified name:
 		assertEquals("java.lang.ref.ReferenceQueue.Lock", TypeInfoFilter.simplifySearchText(" at java.lang.ref.ReferenceQueue$Lock "));
 		assertEquals("java.util.concurrent.ThreadPoolExecutor.Worker", TypeInfoFilter.simplifySearchText(" at java.util.concurrent.ThreadPoolExecutor$Worker.run(java.base@16.0.2/ThreadPoolExecutor.java:630) "));
+		assertEquals("*.DebugPlugin.EventDispatchJob",TypeInfoFilter.simplifySearchText("\"C:\\org.eclipse.debug.core\\bin\\org\\eclipse\\debug\\core\\DebugPlugin$EventDispatchJob.class\""));
+
 
 		/** possible future features if useful: **/
 //		// locks from thread dumps:
 //		assertEquals("sun.nio.ch.WindowsSelectorImpl", TypeInfoFilter.simplifySearchText(" - locked <0x0000000087428348> (a sun.nio.ch.WindowsSelectorImpl) "));
 		// "- waiting to re-lock in wait() <0x00000007005919b0> (a java.lang.ref.ReferenceQueue$Lock)"
 	}
+
+    @Test
+    public void testBug578547() {
+    	IJavaElement[] elements= new IJavaElement[] { fJProject1 };
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
+
+		TypeInfoFilter filter= new TypeInfoFilter("TestInner1.TestInner2", scope, 0, null);
+		assertEquals("TestInner2", filter.getNamePattern());
+		assertEquals("*TestInner1*", filter.getPackagePattern());
+
+		filter= new TypeInfoFilter("TestInner1.TestInner2.TestInner3", scope, 0, null);
+		assertEquals("TestInner3", filter.getNamePattern());
+		assertEquals("*TestInner1.TestInner2*", filter.getPackagePattern());
+
+		filter= new TypeInfoFilter("org.eclipse.jdt.IProblemInfo", scope, 0, null);
+		assertEquals("IProblemInfo", filter.getNamePattern());
+		assertEquals("org*.eclipse*.jdt*", filter.getPackagePattern());
+
+		filter= new TypeInfoFilter("Test", scope, 0, null);
+		assertEquals("Test", filter.getNamePattern());
+		assertEquals(null, filter.getPackagePattern());
+   }
+
 }

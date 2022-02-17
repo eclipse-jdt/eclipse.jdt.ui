@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.PreferenceConstantsCore;
 
 public class ProfileVersionerCore {
 
-	private static final int CURRENT_VERSION= 21;
+	private static final int CURRENT_VERSION= 22;
 
 	public static int getFirstVersion() {
 		return 1;
@@ -93,6 +93,9 @@ public class ProfileVersionerCore {
 			//$FALL-THROUGH$
 		case 20:
 			version20to21(oldSettings);
+			//$FALL-THROUGH$
+		case 21:
+			version21to22(oldSettings);
 			//$FALL-THROUGH$
 		default:
 			for (Map.Entry<String, String> entry : oldSettings.entrySet()) {
@@ -731,6 +734,16 @@ public class ProfileVersionerCore {
 						splitAnnotations ? DefaultCodeFormatterConstants.WRAP_ONE_PER_LINE : DefaultCodeFormatterConstants.WRAP_NO_SPLIT);
 				oldSettings.put(derivation[1], wrapSetting);
 			}
+		}
+
+		private static void version21to22(Map<String, String> oldSettings) {
+			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGN_SELECTOR_IN_METHOD_INVOCATION_ON_EXPRESSION_FIRST_LINE, DefaultCodeFormatterConstants.FALSE);
+			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SWITCH_CASE_WITH_ARROW,
+					DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_SWITCH_CASE_WITH_ARROW,
+					DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_SWITCH_CASE_WITH_COLON,
+					DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
 		}
 
 		/* old format constant values */

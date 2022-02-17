@@ -22,6 +22,7 @@ import java.util.Collection;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -68,7 +69,7 @@ public class Implementors {
                     IMember member = (IMember) element;
                     IType type = member.getDeclaringType();
 
-                    if (type.isInterface()) {
+                    if (type.isInterface() || Flags.isAbstract(type.getFlags())) {
                         IType[] implementingTypes = findImplementingTypes(type,
                                 progressMonitor);
 
@@ -181,6 +182,12 @@ public class Implementors {
 
         try {
             for (IType type : types) {
+            	// we don't want the type we start the searched on be searched again. This happens when
+            	// searching for abstract method implementations on abstract classes.
+            	if(method.getDeclaringType().equals(type)) {
+            		continue;
+            	}
+
                 IMethod[] methods = type.findMethods(method);
 
                 if (methods != null) {

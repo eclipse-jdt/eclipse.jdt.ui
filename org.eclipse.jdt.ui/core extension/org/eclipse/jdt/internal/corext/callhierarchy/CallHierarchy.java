@@ -63,7 +63,7 @@ public class CallHierarchy {
         return settings.getBoolean(PREF_USE_IMPLEMENTORS);
     }
 
-    public void setSearchUsingImplementorsEnabled(boolean enabled) {
+    public static void setSearchUsingImplementorsEnabled(boolean enabled) {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
 
         settings.setValue(PREF_USE_IMPLEMENTORS, enabled);

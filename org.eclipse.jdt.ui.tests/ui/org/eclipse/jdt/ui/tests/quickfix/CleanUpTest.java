@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -861,6 +861,84 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected2= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2}, null);
+	}
+
+	@Test
+	public void testUnusedCodeBug578169() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static class Point {\n" //
+				+ "        int x, y;\n" //
+		        + "        public int getX() {\n" //
+		        + "            return x;\n" //
+		        + "        }\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    static class Rect {\n" //
+		        + "        Point loc;\n" //
+		        + "        int w, h;\n" //
+		        + "        public Point getLoc() {\n" //
+		        + "            return loc;\n" //
+		        + "        }\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    Rect getRect() {\n" //
+		        + "        return new Rect();\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    void test() {\n" //
+		        + "        int x;\n" //
+		        + "        int y;\n" //
+		        + "        int z;\n" //
+		        + "        int k = getRect().loc.getX();\n" //
+		        + "        x = getRect().getLoc().x;\n" //
+		        + "        y = getRect().loc.y;\n" //
+		        + "        System.out.println(y);\n" //
+		        + "        z = getRect().loc.x;\n" //
+		        + "        k = getRect().loc.getX();\n" //
+		        + "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    static class Point {\n" //
+				+ "        int x, y;\n" //
+		        + "        public int getX() {\n" //
+		        + "            return x;\n" //
+		        + "        }\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    static class Rect {\n" //
+		        + "        Point loc;\n" //
+		        + "        int w, h;\n" //
+		        + "        public Point getLoc() {\n" //
+		        + "            return loc;\n" //
+		        + "        }\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    Rect getRect() {\n" //
+		        + "        return new Rect();\n" //
+		        + "    }\n" //
+		        + "\n" //
+		        + "    void test() {\n" //
+		        + "        int y;\n" //
+		        + "        getRect().loc.getX();\n" //
+		        + "        getRect().getLoc();\n" //
+		        + "        y = getRect().loc.y;\n" //
+		        + "        System.out.println(y);\n" //
+		        + "        getRect();\n" //
+		        + "        getRect().loc.getX();\n" //
+		        + "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -11647,6 +11725,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = (i1 == i2) && (i3 <= i4) || !(i1 == i2) && !(i4 >= i3);\n" //
 				+ "        boolean newBoolean3 = (i1 == i2) && (i3 != i4) || (i2 != i1) && (i3 == i4);\n" //
 				+ "        boolean newBoolean4 = (i1 == i2) && (i3 < i4) || (i1 != i2) && (i4 <= i3);\n" //
+				+ "        boolean newBoolean5 = (i1 == i2 && i3 != i4) || (i2 != i1 && i3 == i4);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceDuplicateConditionsWithFields() {\n" //
@@ -11715,6 +11794,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = (i1 == i2) == (i3 <= i4);\n" //
 				+ "        boolean newBoolean3 = (i1 == i2) == (i3 != i4);\n" //
 				+ "        boolean newBoolean4 = (i1 == i2) == (i3 < i4);\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) == (i3 != i4);\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void replaceDuplicateConditionsWithFields() {\n" //
@@ -18559,6 +18639,58 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testAddParenthesesBug578081() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i) {\n" //
+				+ "        if (i == 0 || i == 1 /* i is 0 or 1 */) // if comment\n" //
+				+ "            /* additional if comment */\n"
+				+ "            System.out.println(i);\n" //
+				+ "        \n" //
+				+ "        while (i > 0 && i < 10 /* i gt 0 and lt 10 */) // while comment\n" //
+				+ "            /* additional while comment */\n"
+				+ "            System.out.println(1);\n" //
+				+ "        \n" //
+				+ "        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n" //
+				+ "        \n" //
+				+ "        do ; while (i > 5 && b || i < 100 && i > 90);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int i) {\n" //
+				+ "        if (i == 0 || i == 1 /* i is 0 or 1 */) { // if comment\n" //
+				+ "        \t/* additional if comment */\n"
+				+ "        \tSystem.out.println(i);\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        while (i > 0 && i < 10 /* i gt 0 and lt 10 */) { // while comment\n" //
+				+ "        \t/* additional while comment */\n"
+				+ "        \tSystem.out.println(1);\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n" //
+				+ "        \n" //
+				+ "        do {\n" //
+				+ "            ;\n" //
+				+ "        } while (i > 5 && b || i < 100 && i > 90);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
 
 	@Test
@@ -27825,5 +27957,56 @@ public class CleanUpTest extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(new String[] {
 						Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
 				})));
+	}
+
+	@Test
+	public void testRemoveParenthesesBug438266_1() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= ""
+				+ "package test1;\n" //
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        Integer b = (Integer) (-1);\n"
+				+ "        System.out.println(b);\n"
+				+ "    }\n"
+				+ "}";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		String expected= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
+
+	@Test
+	public void testRemoveParenthesesBug438266_2() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= ""
+				+ "package test1;\n" //
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        Integer b = (int) (-1);\n"
+				+ "        System.out.println(b);\n"
+				+ "    }\n"
+				+ "}";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		String expected= ""
+				+ "package test1;\n" //
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        Integer b = (int) -1;\n"
+				+ "        System.out.println(b);\n"
+				+ "    }\n"
+				+ "}";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
 }

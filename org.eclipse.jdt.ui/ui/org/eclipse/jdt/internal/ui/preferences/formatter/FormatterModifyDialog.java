@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -521,7 +521,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		}
 
 		public static ModifyAll<Spinner> addModifyAll(Section section, final Images images) {
-			return new ModifyAll<Spinner>(section, images) {
+			return new ModifyAll<>(section, images) {
 
 				private Label fLabel;
 				private ToolItem fRemoveLinesItem;
@@ -1054,7 +1054,9 @@ public class FormatterModifyDialog extends ModifyDialog {
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_brace_of_a_class, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_TYPE_DECLARATION)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_brace_of_anon_class, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_ANONYMOUS_TYPE_DECLARATION)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_comma_implements, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_implements, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES))
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_implements, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_comma_in_permits, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PERMITTED_TYPES)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_in_permits, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PERMITTED_TYPES))
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_fields, "-fields", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_comma_fields, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_fields, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS))
@@ -1408,6 +1410,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 					pref.addDependant(guardianPref, valueAcceptor(oneLineOptions[0], oneLineOptions[1], oneLineOptions[4]));
 				})
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_lambda_body_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_LAMBDA_BODY_BLOCK_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_switch_case_with_arrow_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SWITCH_CASE_WITH_ARROW_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_switch_body_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SWITCH_BODY_BLOCK_ON_ONE_LINE)
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_code_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_CODE_BLOCK_ON_ONE_LINE)
 				.gap()
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_method_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_METHOD_BODY_ON_ONE_LINE, pref -> {
@@ -1423,7 +1427,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_record_constructor_declaration_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_RECORD_CONSTRUCTOR_ON_ONE_LINE)
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_annotation_declaration_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ANNOTATION_DECLARATION_ON_ONE_LINE);
 
-		return fTree.new SimpleTreeBuilder<PreferenceTreeNode<?>>(null, null, null) {
+		return fTree.new SimpleTreeBuilder<>(null, null, null) {
 			@Override
 			protected PreferenceTreeNode<?> build(Section parent, PreferenceBuilder ignored) {
 				return sectionBuilder.build(parent, prefBuilder);
@@ -1465,7 +1469,12 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_superinterfaces, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_RECORD_DECLARATION))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_function_calls, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION)
-						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_qualified_invocations, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SELECTOR_IN_METHOD_INVOCATION)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_qualified_invocations, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SELECTOR_IN_METHOD_INVOCATION, p -> {
+							CheckboxPreference child= fTree.addCheckbox(p, FormatterMessages.FormatterModifyDialog_lineWrap_pref_qualified_invocations_indent_from_base_expression_first_line,
+									DefaultCodeFormatterConstants.FORMATTER_ALIGN_SELECTOR_IN_METHOD_INVOCATION_ON_EXPRESSION_FIRST_LINE, CheckboxPreference.FALSE_TRUE);
+							p.addDependant(child, v -> DefaultCodeFormatterConstants.getWrappingStyle(v) != DefaultCodeFormatterConstants.WRAP_NO_SPLIT
+									&& DefaultCodeFormatterConstants.getIndentStyle(v) != DefaultCodeFormatterConstants.INDENT_ON_COLUMN);
+						})
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_explicit_constructor_invocations, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_object_allocation_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_qualified_object_allocation_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_QUALIFIED_ALLOCATION_EXPRESSION))
@@ -1488,6 +1497,9 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_compact_loops, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_LOOP)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_try, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RESOURCES_IN_TRY)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_catch, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_UNION_TYPE_IN_MULTICATCH)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_switch_case_with_arrow, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SWITCH_CASE_WITH_ARROW)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_expressions_in_switch_case_with_arrow, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_SWITCH_CASE_WITH_ARROW)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_expressions_in_switch_case_with_colon, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_SWITCH_CASE_WITH_COLON)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_assertion_message, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSERTION_MESSAGE))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_parameterized_types, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_param_type_ref, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERIZED_TYPE_REFERENCES)
@@ -1537,6 +1549,9 @@ public class FormatterModifyDialog extends ModifyDialog {
 							break;
 						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSIGNMENT:
 							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_ASSIGNMENT_OPERATOR;
+							break;
+						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SWITCH_CASE_WITH_ARROW:
+							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_SWITCH_CASE_ARROW_OPERATOR;
 							break;
 						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSERTION_MESSAGE:
 							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_ASSERTION_MESSAGE_OPERATOR;
@@ -1670,7 +1685,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 			}
 		}
 
-		return fTree.new SimpleTreeBuilder<PreferenceTreeNode<?>>(null, null, null) {
+		return fTree.new SimpleTreeBuilder<>(null, null, null) {
 
 			@Override
 			protected PreferenceTreeNode<?> build(Section parent, PreferenceBuilder prefBuilder) {

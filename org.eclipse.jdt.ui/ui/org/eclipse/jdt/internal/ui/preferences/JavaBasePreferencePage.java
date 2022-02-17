@@ -70,6 +70,9 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private static final String DOUBLE_CLICK_GOES_INTO= PreferenceConstants.DOUBLE_CLICK_GOES_INTO;
 	private static final String DOUBLE_CLICK_EXPANDS= PreferenceConstants.DOUBLE_CLICK_EXPANDS;
 
+    private static final String OPEN_CALL_HIERARCHY_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$ //org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy.PREF_USE_IMPLEMENTORS
+
+
 	private ArrayList<Button> fCheckBoxes;
 	private ArrayList<Button> fRadioButtons;
 	private ArrayList<Text> fTextControls;
@@ -168,6 +171,12 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		typeHierarchyGroup.setText(PreferencesMessages.JavaBasePreferencePage_openTypeHierarchy);
 		addRadioButton(typeHierarchyGroup, PreferencesMessages.JavaBasePreferencePage_inPerspective, OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);
 		addRadioButton(typeHierarchyGroup, PreferencesMessages.JavaBasePreferencePage_inView, OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
+
+		Group callHierarchyGroup= new Group(result, SWT.NONE);
+		callHierarchyGroup.setLayout(new GridLayout());
+		callHierarchyGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		callHierarchyGroup.setText(PreferencesMessages.JavaBasePreferencePage_openCallHierarchy);
+		addCheckBox(callHierarchyGroup, PreferencesMessages.JavaBasePreferencePage_showCalleeImplementations, null, OPEN_CALL_HIERARCHY_IMPLEMENTORS);
 
 		Group refactoringGroup= new Group(result, SWT.NONE);
 		refactoringGroup.setLayout(new GridLayout());

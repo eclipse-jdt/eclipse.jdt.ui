@@ -223,6 +223,8 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_smartAutoIndentAfterNewLine;
 	public static String JavaEditorColoringConfigurationBlock_link;
 	public static String JavaBasePreferencePage_openTypeHierarchy;
+	public static String JavaBasePreferencePage_openCallHierarchy;
+	public static String JavaBasePreferencePage_showCalleeImplementations;
 	public static String JavaBasePreferencePage_inView;
 	public static String JavaBasePreferencePage_inPerspective;
 	public static String JavaEditorPreferencePage_quickassist_lightbulb;

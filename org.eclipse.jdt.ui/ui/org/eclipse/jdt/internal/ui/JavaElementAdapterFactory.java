@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
@@ -39,6 +40,7 @@ import org.eclipse.search.ui.ISearchPageScoreComputer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
@@ -56,6 +58,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
 public class JavaElementAdapterFactory implements IAdapterFactory, IContributorResourceAdapter2 {
 
 	private static Class<?>[] ADAPTER_LIST= new Class[] {
+		IProject.class,
 		IPropertySource.class,
 		IResource.class,
 		IWorkbenchAdapter.class,
@@ -91,7 +94,9 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		updateLazyLoadedAdapters();
 		IJavaElement java= getJavaElement(element);
 
-		if (IPropertySource.class.equals(key)) {
+		if (IProject.class.equals(key)) {
+			return (T) getProject(java);
+		} if (IPropertySource.class.equals(key)) {
 			return (T) getProperties(java);
 		} if (IResource.class.equals(key)) {
 			return (T) getResource(java);
@@ -113,6 +118,16 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			return (T) getJavaElementContainmentAdapter();
 		} if (fIsTeamUILoaded && IHistoryPageSource.class.equals(key) && JavaElementHistoryPageSource.hasEdition(java)) {
 			return (T) JavaElementHistoryPageSource.getInstance();
+		}
+		return null;
+	}
+
+	private IProject getProject(IJavaElement element) {
+		if (element != null) {
+			IJavaProject javaProject = element.getJavaProject();
+			if (javaProject != null) {
+				return javaProject.getProject();
+			}
 		}
 		return null;
 	}

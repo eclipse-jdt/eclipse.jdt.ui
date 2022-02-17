@@ -13,7 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -21,13 +31,19 @@ import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -42,6 +58,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.progress.WorkbenchJob;
 
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
@@ -122,12 +139,17 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	private static final int ERRORTICK_IGNORE_OPTIONAL_PROBLEMS= JavaElementImageDescriptor.IGNORE_OPTIONAL_PROBLEMS;
 	private static final int ERRORTICK_INFO= JavaElementImageDescriptor.INFO;
 
+	static final boolean DEBUG = false;
+
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fUseNewRegistry= false;
 	private IProblemChangedListener fProblemChangedListener;
 
 	private ListenerList<ILabelProviderListener> fListeners;
 	private ISourceRange fCachedRange;
+
+	/** job to update adornments for container resources in UI thread */
+	private final AdornmentUpdateJob adornmentUpdateJob;
 
 	/**
 	 * Creates a new <code>ProblemsLabelDecorator</code>.
@@ -146,7 +168,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	 */
 	public ProblemsLabelDecorator(ImageDescriptorRegistry registry) {
 		fRegistry= registry;
-		fProblemChangedListener= null;
+		adornmentUpdateJob = new AdornmentUpdateJob();
+		AdornmentCacheManager.register(this);
 	}
 
 	private ImageDescriptorRegistry getRegistry() {
@@ -192,7 +215,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					case IJavaElement.JAVA_MODEL:
 					case IJavaElement.JAVA_PROJECT:
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-						int flags= getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_INFINITE, null);
+						int flags= computeContainerAdornmentFlags(element.getResource());
 						switch (type) {
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 								IPackageFragmentRoot root= (IPackageFragmentRoot) element;
@@ -212,7 +235,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 						return getPackageErrorTicksFromMarkers((IPackageFragment) element);
 					case IJavaElement.COMPILATION_UNIT:
 					case IJavaElement.CLASS_FILE:
-						return getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_ONE, null);
+						return getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_ONE);
 					case IJavaElement.PACKAGE_DECLARATION:
 					case IJavaElement.IMPORT_DECLARATION:
 					case IJavaElement.IMPORT_CONTAINER:
@@ -231,7 +254,11 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 								// open in Java editor: look at annotation model
 								result= getErrorTicksFromAnnotationModel(model, ref);
 							} else {
-								result= getErrorTicksFromMarkers(cu.getResource(), IResource.DEPTH_ONE, ref);
+								if (ref == null) {
+									result= getErrorTicksFromMarkers(cu.getResource(), IResource.DEPTH_ONE);
+								} else {
+									result= getErrorTicksFromMarkers(cu.getResource(), IResource.DEPTH_ONE, ref);
+								}
 							}
 							fCachedRange= null;
 							return result;
@@ -240,7 +267,17 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					default:
 				}
 			} else if (obj instanceof IResource) {
-				return getErrorTicksFromMarkers((IResource) obj, IResource.DEPTH_INFINITE, null);
+				if (obj instanceof IProject || obj instanceof IWorkspaceRoot) {
+					return computeContainerAdornmentFlags((IResource) obj);
+				}
+				if (obj instanceof IFolder) {
+					IFolder folder = (IFolder) obj;
+					// Only cache top level directories to avoid caching everything
+					if (folder.getParent() instanceof IProject) {
+						return computeContainerAdornmentFlags((IResource) obj);
+					}
+				}
+				return getErrorTicksFromMarkers((IResource) obj, IResource.DEPTH_INFINITE);
 			}
 		} catch (CoreException e) {
 			if (e instanceof JavaModelException) {
@@ -256,6 +293,269 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			JavaPlugin.log(e);
 		}
 		return 0;
+	}
+
+	final class AdornmentUpdateJob extends WorkbenchJob {
+
+		private final Set<IResource> queue;
+
+		public AdornmentUpdateJob() {
+			super("Java problems decoration update..."); //$NON-NLS-1$
+			this.queue = ConcurrentHashMap.newKeySet();
+			setSystem(true);
+			setPriority(DECORATE);
+		}
+
+		@Override
+		public boolean belongsTo(Object family) {
+			return ProblemsLabelDecorator.class == family;
+		}
+
+		@Override
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			List<IResource> changed = new ArrayList<>(queue);
+			queue.removeAll(changed);
+			IResource[] changes = changed.toArray(IResource[]::new);
+			if (changes.length > 0 && !monitor.isCanceled()) {
+				if (DEBUG) {
+					String prefix = ProblemsLabelDecorator.this.toString();
+					prefix = prefix.substring(prefix.lastIndexOf('.') + 1);
+					System.err.println(prefix + " : " + " :show: " + Arrays.toString(changes)); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				fireProblemsChanged(changes, true);
+			}
+			if (monitor.isCanceled()) {
+				queue.clear();
+				return Status.CANCEL_STATUS;
+			} else if (!queue.isEmpty()) {
+				schedule(100);
+			}
+			return Status.OK_STATUS;
+		}
+
+		void schedule(Set<IResource> tasks) {
+			if (queue.addAll(tasks)) {
+				schedule(100);
+			}
+		}
+	}
+
+	static final class AdornmentCacheManager {
+
+		static final AdornmentCacheManager instance = new AdornmentCacheManager();
+
+		final Set<ProblemsLabelDecorator> listeners;
+
+		/**
+		 * Cache for projects and source folders status, key is resource, value is known adornment flags
+		 */
+		final Map<IResource, Integer> adornmentCache;
+
+		/** Job to compute adornments for container resources in background */
+		final AdornmentCalculationJob adornmentJob;
+
+		public AdornmentCacheManager() {
+			adornmentCache = new ConcurrentHashMap<>();
+			adornmentJob = new AdornmentCalculationJob();
+			listeners = Collections.synchronizedSet(new LinkedHashSet<>());
+		}
+
+		static void scheduleTask(IResource resource, AdornmentUpdateJob uiUpdate) {
+			instance.adornmentJob.schedule(new AdornmentTask(resource), uiUpdate);
+		}
+
+		static Integer getAdornment(IResource resource) {
+			return instance.adornmentCache.get(resource);
+		}
+
+		static Integer setAdornment(IResource resource, int adornment) {
+			return instance.adornmentCache.put(resource, Integer.valueOf(adornment));
+		}
+
+		static void register(ProblemsLabelDecorator decorator) {
+			instance.listeners.add(decorator);
+		}
+
+		static void deregister(ProblemsLabelDecorator decorator) {
+			instance.listeners.remove(decorator);
+			if(instance.listeners.isEmpty()) {
+				instance.adornmentJob.cancel();
+				instance.adornmentCache.clear();
+			}
+		}
+	}
+
+	static final class AdornmentCalculationJob extends Job {
+
+		private final LinkedHashMap<AdornmentTask, Set<AdornmentUpdateJob>> queue;
+
+		public AdornmentCalculationJob() {
+			super("Java problems decoration calculation..."); //$NON-NLS-1$
+			this.queue = new LinkedHashMap<>();
+			setSystem(true);
+			setPriority(DECORATE);
+		}
+
+		@Override
+		public boolean belongsTo(Object family) {
+			return ProblemsLabelDecorator.class == family;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			Map<AdornmentUpdateJob, Set<IResource>> changed = new LinkedHashMap<>();
+			Entry<AdornmentTask, Set<AdornmentUpdateJob>> next;
+			while ((next = poll()) != null && !monitor.isCanceled()) {
+				AdornmentTask task = next.getKey();
+				task.run();
+				if (DEBUG) {
+					System.out.println("calc : " + AdornmentCacheManager.instance.adornmentCache.size() + " : " + task.resource); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+
+				if (task.isAdornmentChanged()) {
+					final IResource resource = task.resource;
+					Set<AdornmentUpdateJob> jobs = next.getValue();
+					for (AdornmentUpdateJob job : jobs) {
+						changed.compute(job, (k, v) -> {
+							if(v == null) {
+								v = new LinkedHashSet<>();
+							}
+							v.add(resource);
+							return v;
+						});
+					}
+				}
+			}
+			if (!changed.isEmpty() && !monitor.isCanceled()) {
+				for (Entry<AdornmentUpdateJob, Set<IResource>> entry : changed.entrySet()) {
+					AdornmentUpdateJob job = entry.getKey();
+					Set<IResource> resources = entry.getValue();
+					job.schedule(resources);
+				}
+			}
+			synchronized (queue) {
+				if (monitor.isCanceled()) {
+					queue.clear();
+					return Status.CANCEL_STATUS;
+				} else if (!queue.isEmpty()) {
+					schedule(100);
+				}
+			}
+			return Status.OK_STATUS;
+		}
+
+		private Entry<AdornmentTask, Set<AdornmentUpdateJob>> poll() {
+			Entry<AdornmentTask, Set<AdornmentUpdateJob>> next = null;
+			synchronized (queue) {
+				if (!queue.isEmpty()) {
+					Iterator<Entry<AdornmentTask, Set<AdornmentUpdateJob>>> iterator = queue.entrySet().iterator();
+					next = iterator.next();
+					iterator.remove();
+				}
+			}
+			return next;
+		}
+
+		void schedule(AdornmentTask task, AdornmentUpdateJob job) {
+			synchronized (queue) {
+				queue.compute(task, (k,v) -> {
+					if (v == null) {
+						v = new LinkedHashSet<>();
+					}
+					if (v.add(job)) {
+						schedule(100);
+					}
+					return v;
+				});
+			}
+		}
+	}
+
+	static final class AdornmentTask {
+
+		final IResource resource;
+		volatile int oldAdornment;
+		volatile int newAdornment;
+
+		public AdornmentTask(IResource resource){
+			this.resource = resource;
+		}
+
+		@Override
+		public int hashCode() {
+			return resource.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (!(obj instanceof AdornmentTask)) {
+				return false;
+			}
+			AdornmentTask other = (AdornmentTask) obj;
+			return resource.equals(other.resource);
+		}
+
+		void run() {
+			try {
+				newAdornment = getErrorTicksFromMarkers(resource, IResource.DEPTH_INFINITE);
+			} catch (CoreException e) {
+				boolean shouldLog = true;
+				if (e instanceof JavaModelException) {
+					if (((JavaModelException) e).isDoesNotExist()) {
+						newAdornment = 0;
+						shouldLog = false;
+					}
+				} else {
+					int errorCode = e.getStatus().getCode();
+					if (errorCode == IResourceStatus.MARKER_NOT_FOUND || errorCode == IResourceStatus.RESOURCE_NOT_FOUND) {
+						newAdornment = 0;
+						shouldLog = false;
+					}
+				}
+				if (shouldLog) {
+					JavaPlugin.log(e);
+				}
+			} finally {
+				Integer old = AdornmentCacheManager.setAdornment(resource, newAdornment);
+				if (old != null) {
+					oldAdornment = old.intValue();
+				}
+			}
+		}
+
+		boolean isAdornmentChanged() {
+			return newAdornment != oldAdornment;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("AdornmentTask ["); //$NON-NLS-1$
+			if (resource != null) {
+				builder.append("resource="); //$NON-NLS-1$
+				builder.append(resource);
+				builder.append(", "); //$NON-NLS-1$
+			}
+			builder.append("newAdornment="); //$NON-NLS-1$
+			builder.append(newAdornment);
+			builder.append(", oldAdornment="); //$NON-NLS-1$
+			builder.append(oldAdornment);
+			builder.append("]"); //$NON-NLS-1$
+			return builder.toString();
+		}
+	}
+
+	private int computeContainerAdornmentFlags(IResource resource) {
+		if (resource == null) {
+			return 0;
+		}
+		Integer cachedAdornment = AdornmentCacheManager.getAdornment(resource);
+		int adornment = cachedAdornment != null ? cachedAdornment.intValue() : 0;
+		AdornmentCacheManager.scheduleTask(resource, adornmentUpdateJob);
+		return adornment;
 	}
 
 	private boolean isIgnoringOptionalProblems(IClasspathEntry entry) {
@@ -279,37 +579,46 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		return false;
 	}
 
+	private static int getErrorTicksFromMarkers(IResource res, int depth) throws CoreException {
+		if (res == null || !res.isAccessible()) {
+			return 0;
+		}
+		int severity= -1;
+		if (res instanceof IProject) {
+			severity= res.findMaxProblemSeverity(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER, true, IResource.DEPTH_ZERO);
+			if (severity == IMarker.SEVERITY_ERROR) {
+				return ERRORTICK_BUILDPATH_ERROR;
+			}
+			severity= res.findMaxProblemSeverity(JavaRuntime.JRE_CONTAINER_MARKER, true, IResource.DEPTH_ZERO);
+			if (severity == IMarker.SEVERITY_ERROR) {
+				return ERRORTICK_BUILDPATH_ERROR;
+			}
+		}
+		severity= res.findMaxProblemSeverity(IMarker.PROBLEM, true, depth);
+		return convertToTick(severity);
+	}
+
 	private int getErrorTicksFromMarkers(IResource res, int depth, ISourceReference sourceElement) throws CoreException {
 		if (res == null || !res.isAccessible()) {
 			return 0;
 		}
 		int severity= -1;
-		if (sourceElement == null) {
-			if (res instanceof IProject) {
-				severity= res.findMaxProblemSeverity(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER, true, IResource.DEPTH_ZERO);
-				if (severity == IMarker.SEVERITY_ERROR) {
-					return ERRORTICK_BUILDPATH_ERROR;
-				}
-				severity= res.findMaxProblemSeverity(JavaRuntime.JRE_CONTAINER_MARKER, true, IResource.DEPTH_ZERO);
-				if (severity == IMarker.SEVERITY_ERROR) {
-					return ERRORTICK_BUILDPATH_ERROR;
-				}
-			}
-			severity= res.findMaxProblemSeverity(IMarker.PROBLEM, true, depth);
-		} else {
-			IMarker[] markers= res.findMarkers(IMarker.PROBLEM, true, depth);
-			if (markers != null && markers.length > 0) {
-				for (int i= 0; i < markers.length && (severity != IMarker.SEVERITY_ERROR); i++) {
-					IMarker curr= markers[i];
-					if (isMarkerInRange(curr, sourceElement)) {
-						int val= curr.getAttribute(IMarker.SEVERITY, -1);
-						if (val == IMarker.SEVERITY_INFO || val == IMarker.SEVERITY_WARNING || val == IMarker.SEVERITY_ERROR) {
-							severity= Math.max(severity, val);
-						}
+		IMarker[] markers= res.findMarkers(IMarker.PROBLEM, true, depth);
+		if (markers != null && markers.length > 0) {
+			for (int i= 0; i < markers.length && (severity != IMarker.SEVERITY_ERROR); i++) {
+				IMarker curr= markers[i];
+				if (isMarkerInRange(curr, sourceElement)) {
+					int val= curr.getAttribute(IMarker.SEVERITY, -1);
+					if (val == IMarker.SEVERITY_INFO || val == IMarker.SEVERITY_WARNING || val == IMarker.SEVERITY_ERROR) {
+						severity= Math.max(severity, val);
 					}
 				}
 			}
 		}
+		return convertToTick(severity);
+	}
+
+	private static int convertToTick(int severity) {
 		switch (severity) {
 		case IMarker.SEVERITY_ERROR:
 			return ERRORTICK_ERROR;
@@ -464,6 +773,11 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		if (fRegistry != null && fUseNewRegistry) {
 			fRegistry.dispose();
 		}
+		if (fListeners != null) {
+			fListeners.clear();
+		}
+		AdornmentCacheManager.deregister(this);
+		adornmentUpdateJob.cancel();
 	}
 
 	@Override

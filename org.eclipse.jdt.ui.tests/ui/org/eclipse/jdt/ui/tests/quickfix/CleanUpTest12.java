@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2022 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -453,6 +453,23 @@ public class CleanUpTest12 extends CleanUpTestCase {
 				+ "        return 155;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWhenVariableTypesConflict(int i1) {\n" //
+				+ "        int i = 0;\n" //
+				+ "        if (i1 == 0) {\n" //
+				+ "            int integer1 = 0;\n" //
+				+ "            i = integer1;\n" //
+				+ "        } else if (i1 == 2) {\n" //
+				+ "            char integer1 = 'a';\n" //
+				+ "            i = integer1;\n" //
+				+ "        } else if (i1 == 3) {\n" //
+				+ "            char c = 'a';\n" //
+				+ "            i = c;\n" //
+				+ "        } else {\n" //
+				+ "            char c = 'b';\n" //
+				+ "            i = c;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public int replaceMeltCases(int i1) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (i1 == 0) {\n" //
@@ -760,7 +777,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 				+ "            case 0 :\n" //
 				+ "                j = 0;\n" //
 				+ "                break;\n" //
-				+ "            case 1 :\n" //
+				+ "            case 1 : {\n" //
 				+ "                j = 10;\n" //
 				+ "                short k = 0;\n" //
 				+ "                do {\n" //
@@ -770,6 +787,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 				+ "                    k++;\n" //
 				+ "                } while (k < j);\n" //
 				+ "                break;\n" //
+				+ "            }\n" //
 				+ "            case 2 :\n" //
 				+ "                j = 20;\n" //
 				+ "                for (short l = 0; l < j; l++) {\n" //
@@ -778,7 +796,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 				+ "                    }\n" //
 				+ "                }\n" //
 				+ "                break;\n" //
-				+ "            case 3 :\n" //
+				+ "            case 3 : {\n" //
 				+ "                j = 25;\n" //
 				+ "                j = 30;\n" //
 				+ "                short m = 0;\n" //
@@ -789,6 +807,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 				+ "                    m++;\n" //
 				+ "                }\n" //
 				+ "                break;\n" //
+				+ "            }\n" //
 				+ "            case 4 :\n" //
 				+ "                j = 40;\n" //
 				+ "                for (short o : new short[] { 1, 2, 3 }) {\n" //
@@ -816,18 +835,21 @@ public class CleanUpTest12 extends CleanUpTestCase {
 				+ "    public void replaceIfWhenNoVariableNameConflictExists(int i1) {\n" //
 				+ "        int i = 0;\n" //
 				+ "        switch (i1) {\n" //
-				+ "            case 0 :\n" //
+				+ "            case 0 : {\n" //
 				+ "                int newVariable1 = 0;\n" //
 				+ "                i = newVariable1;\n" //
 				+ "                break;\n" //
-				+ "            case 1 :\n" //
+				+ "            }\n" //
+				+ "            case 1 : {\n" //
 				+ "                int newVariable2 = 10;\n" //
 				+ "                i = newVariable2;\n" //
 				+ "                break;\n" //
-				+ "            case 2 :\n" //
+				+ "            }\n" //
+				+ "            case 2 : {\n" //
 				+ "                char newVariable3 = 'a';\n" //
 				+ "                i = newVariable3;\n" //
 				+ "                break;\n" //
+				+ "            }\n" //
 				+ "            default :\n" //
 				+ "                break;\n" //
 				+ "        }\n" //
@@ -842,14 +864,16 @@ public class CleanUpTest12 extends CleanUpTestCase {
 				+ "                    i = integer1;\n" //
 				+ "                }\n" //
 				+ "                break;\n" //
-				+ "            case 1 :\n" //
+				+ "            case 1 : {\n" //
 				+ "                int integer1 = 10;\n" //
 				+ "                i = integer1;\n" //
 				+ "                break;\n" //
-				+ "            case 2 :\n" //
+				+ "            }\n" //
+				+ "            case 2 : {\n" //
 				+ "                int i2 = 20;\n" //
 				+ "                i = i2;\n" //
 				+ "                break;\n" //
+				+ "            }\n" //
 				+ "            default :\n" //
 				+ "                break;\n" //
 				+ "        }\n" //
@@ -978,6 +1002,32 @@ public class CleanUpTest12 extends CleanUpTestCase {
 				+ "        return 155;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceWhenVariableTypesConflict(int i1) {\n" //
+				+ "        int i = 0;\n" //
+				+ "        switch (i1) {\n" //
+				+ "            case 0 : {\n" //
+				+ "                int integer1 = 0;\n" //
+				+ "                i = integer1;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            case 2 : {\n" //
+				+ "                char integer1 = 'a';\n" //
+				+ "                i = integer1;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            case 3 : {\n" //
+				+ "                char c = 'a';\n" //
+				+ "                i = c;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "            default : {\n" //
+				+ "                char c = 'b';\n" //
+				+ "                i = c;\n" //
+				+ "                break;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public int replaceMeltCases(int i1) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        switch (i1) {\n" //
@@ -1048,34 +1098,6 @@ public class CleanUpTest12 extends CleanUpTestCase {
 				+ "                j = 50;\n" //
 				+ "                break;\n" //
 				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotReplaceWhenVariableNameConflicts(int number) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (number == 0) {\n" //
-				+ "            int integer1 = 0;\n" //
-				+ "            i = integer1;\n" //
-				+ "        } else if (number == 1) {\n" //
-				+ "            int integer1 = 10;\n" //
-				+ "            i = integer1;\n" //
-				+ "        } else if (number == 2) {\n" //
-				+ "            int i2 = 20;\n" //
-				+ "            i = i2;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotReplaceWhenVariableTypesConflict(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            int integer1 = 0;\n" //
-				+ "            i = integer1;\n" //
-				+ "        } else if (i1 == 2) {\n" //
-				+ "            char integer1 = 'a';\n" //
-				+ "            i = integer1;\n" //
-				+ "        } else if (i1 == 3) {\n" //
-				+ "            char c = 'a';\n" //
-				+ "            i = c;\n" //
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "\n" //

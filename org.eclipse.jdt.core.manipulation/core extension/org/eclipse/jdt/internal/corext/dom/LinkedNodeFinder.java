@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.ModuleDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -226,6 +228,21 @@ public class LinkedNodeFinder  {
 		return new SimpleName[] { name };
 	}
 
+	public static Name[] findByNode(ASTNode root, Name name) {
+		Name[] names= findByProblems(root, name);
+		if (names != null) {
+			return names;
+		}
+		int parentKind= name.getParent().getNodeType();
+		if (parentKind == ASTNode.LABELED_STATEMENT || parentKind == ASTNode.BREAK_STATEMENT || parentKind == ASTNode.CONTINUE_STATEMENT) {
+			ArrayList<Name> res= new ArrayList<>();
+			QLabelFinder nodeFinder= new QLabelFinder(name, res);
+			root.accept(nodeFinder);
+			return res.toArray(new Name[res.size()]);
+		}
+		return new Name[] { name };
+	}
+
 
 
 	private static final int FIELD= 1;
@@ -252,6 +269,21 @@ public class LinkedNodeFinder  {
 	}
 
 	private static int getNameNodeProblemKind(IProblem[] problems, SimpleName nameNode) {
+		int nameOffset= nameNode.getStartPosition();
+		int nameInclEnd= nameOffset + nameNode.getLength() - 1;
+
+		for (IProblem curr : problems) {
+			if (curr.getSourceStart() == nameOffset && curr.getSourceEnd() == nameInclEnd) {
+				int kind= getProblemKind(curr);
+				if (kind != 0) {
+					return kind;
+				}
+			}
+		}
+		return 0;
+	}
+
+	private static int getNameNodeProblemKind(IProblem[] problems, Name nameNode) {
 		int nameOffset= nameNode.getStartPosition();
 		int nameInclEnd= nameOffset + nameNode.getLength() - 1;
 
@@ -308,6 +340,42 @@ public class LinkedNodeFinder  {
 		return res.toArray(new SimpleName[res.size()]);
 	}
 
+	public static Name[] findByProblems(ASTNode parent, Name nameNode) {
+		ArrayList<Name> res= new ArrayList<>();
+
+		ASTNode astRoot = parent.getRoot();
+		if (!(astRoot instanceof CompilationUnit)) {
+			return null;
+		}
+
+		IProblem[] problems= ((CompilationUnit) astRoot).getProblems();
+		int nameNodeKind= getNameNodeProblemKind(problems, nameNode);
+		if (nameNodeKind == 0) { // no problem on node
+			return null;
+		}
+
+		int bodyStart= parent.getStartPosition();
+		int bodyEnd= bodyStart + parent.getLength();
+
+		String name= nameNode.getFullyQualifiedName();
+
+		for (IProblem curr : problems) {
+			int probStart= curr.getSourceStart();
+			int probEnd= curr.getSourceEnd() + 1;
+
+			if (probStart > bodyStart && probEnd < bodyEnd) {
+				int currKind= getProblemKind(curr);
+				if ((nameNodeKind & currKind) != 0) {
+					ASTNode node= NodeFinder.perform(parent, probStart, (probEnd - probStart));
+					if (node instanceof Name && name.equals(((Name) node).getFullyQualifiedName())) {
+						res.add((Name) node);
+					}
+				}
+			}
+		}
+		return res.toArray(new Name[res.size()]);
+	}
+
 	private static class LabelFinder extends ASTVisitor {
 
 		private SimpleName fLabel;
@@ -353,6 +421,37 @@ public class LinkedNodeFinder  {
 				}
 			}
 			node.getBody().accept(this);
+			return false;
+		}
+	}
+
+	private static class QLabelFinder extends ASTVisitor {
+
+		private Name fLabel;
+		private ASTNode fDefiningLabel;
+		private ArrayList<Name> fResult;
+
+		public QLabelFinder(Name label, ArrayList<Name> result) {
+			super(true);
+			fLabel= label;
+			fResult= result;
+			fDefiningLabel= null;
+		}
+
+		private boolean isSameLabel(Name label) {
+			return label != null && fLabel.getFullyQualifiedName().equals(label.getFullyQualifiedName());
+		}
+
+		@Override
+		public boolean visit(ModuleDeclaration node) {
+			if (fDefiningLabel == null) {
+				Name label= node.getName();
+				if (fLabel == label || isSameLabel(label) && ASTNodes.isParent(fLabel, node)) {
+					fDefiningLabel= node;
+					fResult.add(label);
+				}
+			}
+			node.getName().accept(this);
 			return false;
 		}
 	}
