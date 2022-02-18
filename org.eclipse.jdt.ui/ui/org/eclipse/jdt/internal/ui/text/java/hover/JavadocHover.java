@@ -928,7 +928,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	private static String getImageURL(IJavaElement element) {
 		String imageName= null;
-		URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element);
+		URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element, 200);
 		if (imageUrl != null) {
 			imageName= imageUrl.toExternalForm();
 		}

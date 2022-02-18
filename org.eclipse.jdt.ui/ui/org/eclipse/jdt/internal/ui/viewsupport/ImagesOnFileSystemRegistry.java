@@ -81,13 +81,22 @@ public class ImagesOnFileSystemRegistry {
 	}
 
 	public URL getImageURL(IJavaElement element) {
+		return getImageURL(element,100);
+	}
+
+	public URL getImageURL(IJavaElement element, int zoom) {
 		ImageDescriptor descriptor= fImageProvider.getJavaImageDescriptor(element, JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS);
 		if (descriptor == null)
 			return null;
-		return getImageURL(descriptor);
+		return getImageURL(descriptor, zoom);
 	}
 
+
 	public URL getImageURL(ImageDescriptor descriptor) {
+		return getImageURL(descriptor,100);
+	}
+
+	public URL getImageURL(ImageDescriptor descriptor, int zoom) {
 		if (fTempDir == null)
 			return null;
 
@@ -96,7 +105,7 @@ public class ImagesOnFileSystemRegistry {
 			return url;
 
 		File imageFile= getNewFile();
-		ImageData imageData= descriptor.getImageData();
+		ImageData imageData= descriptor.getImageData(zoom);
 		if (imageData == null) {
 			return null;
 		}
