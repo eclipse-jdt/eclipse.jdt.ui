@@ -2058,7 +2058,7 @@ public class JavadocContentAccess2 {
 				if (node instanceof TagProperty) {
 					TagProperty tagProp = (TagProperty) node;
 					if ("type".equals(tagProp.getName())) { //$NON-NLS-1$
-						String tagValue = stripQuotes(tagProp.getValue());
+						String tagValue = stripQuotes(tagProp.getStringValue());
 						switch (tagValue) {
 							case "bold" :  //$NON-NLS-1$
 								defaultTag= "b"; //$NON-NLS-1$
@@ -2094,7 +2094,7 @@ public class JavadocContentAccess2 {
 					if (SUBSTRING.equals(propName)
 							|| REGEX.equals(propName)
 							|| TYPE.equals(propName)) {
-						String value= tagProp.getValue();
+						String value= tagProp.getStringValue();
 						String changed= stripQuotes(value);
 						if (changed.equals(value)) {
 							val= false;
@@ -2113,7 +2113,7 @@ public class JavadocContentAccess2 {
 				if (node instanceof TagProperty) {
 					TagProperty tagProp = (TagProperty) node;
 					if (property.equals(tagProp.getName())) {
-						defaultTag= stripQuotes(tagProp.getValue());
+						defaultTag= stripQuotes(tagProp.getStringValue());
 						break;
 					}
 				}
