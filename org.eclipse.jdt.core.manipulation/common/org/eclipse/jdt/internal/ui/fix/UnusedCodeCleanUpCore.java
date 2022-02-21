@@ -64,11 +64,12 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS) ||
 				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES) ||
-				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
+				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS) ||
+				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS);
 	}
 
 	@Override
-	protected ICleanUpFixCore createFix(CompilationUnit compilationUnit) throws CoreException {
+	public ICleanUpFixCore createFix(CompilationUnit compilationUnit) throws CoreException {
 		boolean removeUnuseMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 
 		return UnusedCodeFixCore.createCleanUp(compilationUnit,
@@ -78,11 +79,12 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 				removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES),
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES),
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS),
-				false);
+				false,
+				true);
 	}
 
 	@Override
-	protected ICleanUpFixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
+	public ICleanUpFixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 
 		return UnusedCodeFixCore.createCleanUp(compilationUnit, problems,
@@ -92,7 +94,8 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES),
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES),
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS),
-				false);
+				false,
+				true);
 	}
 
 	public Map<String, String> getRequiredOptions() {
@@ -112,6 +115,10 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES))
 			result.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.WARNING);
 
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS)) {
+			result.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.WARNING);
+		}
+
 		return result;
 	}
 
@@ -130,7 +137,9 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES))
 			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
-		return result.toArray(new String[0]);
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS))
+			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedParameter_description);
+			return result.toArray(new String[0]);
 	}
 
 	@Override
@@ -159,6 +168,29 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 			buf.append("        int i= 10;\n"); //$NON-NLS-1$
 		}
 		buf.append("    }\n"); //$NON-NLS-1$
+
+
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS)) {
+			String code= "    public void zoz() {\n" //$NON-NLS-1$
+					+ "        zozo();\n" //$NON-NLS-1$
+					+ "    }\n" //$NON-NLS-1$
+					+ "\n" //$NON-NLS-1$
+					+ "    private void zozo() {\n" //$NON-NLS-1$
+					+ "        System.out.println(\"\");\n" //$NON-NLS-1$
+					+ "    };\n"; //$NON-NLS-1$
+
+			buf.append(code);
+		} else {
+			String code= "    public void zoz() {\n" //$NON-NLS-1$
+					+ "        zozo(34);\n" //$NON-NLS-1$
+					+ "    }\n" //$NON-NLS-1$
+					+ "\n" //$NON-NLS-1$
+					+ "    private void zozo(int k) {\n" //$NON-NLS-1$
+					+ "        System.out.println(\"\");\n" //$NON-NLS-1$
+					+ "    };\n"; //$NON-NLS-1$
+			buf.append(code);
+		}
+
 		buf.append("}\n"); //$NON-NLS-1$
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS)) {
@@ -202,6 +234,10 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 
+		if (UnusedCodeFixCore.isUnusedParameter(problem)) {
+			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS);
+		}
+
 		return false;
 	}
 
@@ -227,6 +263,8 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 			result+= getNumberOfProblems(problems, IProblem.UnusedPrivateField);
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES))
 			result+= getNumberOfProblems(problems, IProblem.LocalVariableIsNeverUsed);
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS))
+			result+= getNumberOfProblems(problems, IProblem.ArgumentIsNeverUsed);
 		return result;
 	}
 }

@@ -165,6 +165,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedLocalVariables;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedMembers;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedMethods;
+	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedParameters;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedTypes;
 	public static String UnnecessaryCodeTabPage_GroupName_UnnecessaryCode;
 	public static String UnnecessaryCodeTabPage_GroupName_UnusedCode;

@@ -59,7 +59,8 @@ public class UnnecessaryCodeCleanUpCore extends AbstractMultiFixCore {
 				false,
 				false,
 				false,
-				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
+				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS),
+				false);
 	}
 
 	@Override
@@ -71,7 +72,8 @@ public class UnnecessaryCodeCleanUpCore extends AbstractMultiFixCore {
 				false,
 				false,
 				false,
-				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
+				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS),
+				false);
 	}
 
 	private Map<String, String> getRequiredOptions() {
@@ -79,6 +81,10 @@ public class UnnecessaryCodeCleanUpCore extends AbstractMultiFixCore {
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
 			result.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.WARNING);
+
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS)) {
+			result.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.WARNING);
+		}
 
 		return result;
 	}

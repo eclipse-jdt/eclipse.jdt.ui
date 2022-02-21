@@ -914,6 +914,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		if (problemId == IProblem.ArgumentIsNeverUsed) {
+			addProposal(context, proposals, UnusedCodeFix.createUnusedParameterFix(context.getASTRoot(), problem));
 			JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterOrExceptionProposals(context, problem, proposals);
 		}
 

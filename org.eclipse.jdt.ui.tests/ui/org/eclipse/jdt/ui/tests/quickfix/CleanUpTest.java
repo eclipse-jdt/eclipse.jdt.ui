@@ -865,6 +865,91 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUnusedCode12() throws Exception {
+		// don't clean up parameters in public methods
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n"
+				+ "	   public void bla() {\n"
+				+ "        foo(83);\n"
+				+ "    }\n" //
+				+ "    private void foo(int zoz) {\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n"
+				+ "	   public void bla() {\n"
+				+ "        foo();\n"
+				+ "    }\n" //
+				+ "    private void foo() {\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		sample= "" //
+				+ "package test1;\n"
+				+ "class E3 {\n"
+				+ "    protected void foo(int subu, Object[] gork) {\n"
+				+ "        System.out.println(gork.length + subu);\n"
+				+ "    }\n"
+				+ "}\n" //
+				+ "public class E2 extends E3 {\n"
+				+ "	   public void bla() {\n"
+				+ "        foo(null, 83, null);\n"
+				+ "    }\n" //
+				+ "    private void foo(String bubu, int zoz, Object... gork) {\n" //
+				+ "        System.out.println(gork.length + bubu.length());\n"
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample, false, null);
+
+		String expected2= "" //
+				+ "package test1;\n" //
+				+ "class E3 {\n"
+				+ "    protected void foo(int subu, Object[] gork) {\n"
+				+ "        System.out.println(gork.length + subu);\n"
+				+ "    }\n"
+				+ "}\n" //
+				+ "public class E2 extends E3 {\n"
+				+ "	   public void bla() {\n"
+				+ "        foo1(null, null);\n"
+				+ "    }\n" //
+				+ "    private void foo1(String bubu, Object... gork) {\n" //
+				+ "        System.out.println(gork.length + bubu.length());\n"
+				+ "    }\n" //
+				+ "}\n";
+
+
+		sample = ""
+				+ "package test1;\n"
+				+ "\n"
+				+ "public class E4<K> {\n"
+				+ "	\n"
+				+ "	private <T> void foo(int one, K kay, int two, T tee) {\n"
+				+ "		System.out.println(one + two);\n"
+				+ "	}\n"
+				+ "}\n";
+		ICompilationUnit cu3= pack1.createCompilationUnit("E4.java", sample, false, null);
+
+		String expected3= ""
+				+ "package test1;\n"
+				+ "\n"
+				+ "public class E4<K> {\n"
+				+ "	\n"
+				+ "	private <T> void foo(int one, int two) {\n"
+				+ "		System.out.println(one + two);\n"
+				+ "	}\n"
+				+ "}\n";
+
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS);
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2, cu3}, new String[] {expected1, expected2, expected3}, null);
+	}
+
+	@Test
 	public void testUnusedCodeBug578906_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -931,6 +1016,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
 	}
+
 
 	@Test
 	public void testUnusedCodeBug578169() throws Exception {

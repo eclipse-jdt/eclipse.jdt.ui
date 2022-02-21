@@ -81,10 +81,12 @@ public final class FixMessages extends NLS {
 	public static String UnusedCodeFix_RemoveConstructor_description;
 	public static String UnusedCodeFix_RemoveType_description;
 	public static String UnusedCodeFix_RemoveImport_description;
+	public static String UnusedCodeFix_RemoveParameter_description;
 	public static String UnusedCodeFix_RemoveCast_description;
 	public static String UnusedCodeFix_RemoveUnusedType_description;
 	public static String UnusedCodeFix_RemoveUnusedTypeParameter_description;
 	public static String UnusedCodeFix_RemoveUnusedConstructor_description;
+	public static String UnusedCodeFix_RemoveUnusedMethodParameter_description;
 	public static String UnusedCodeFix_RemoveUnusedPrivateMethod_description;
 	public static String UnusedCodeFix_RemoveUnusedField_description;
 	public static String UnusedCodeFix_RemoveUnusedVariabl_description;

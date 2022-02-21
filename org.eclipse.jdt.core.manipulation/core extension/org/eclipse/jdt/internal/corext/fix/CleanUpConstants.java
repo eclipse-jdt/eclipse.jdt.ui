@@ -1356,6 +1356,21 @@ public class CleanUpConstants {
 	public static final String REMOVE_UNUSED_CODE_PRIVATE_METHODS= "cleanup.remove_unused_private_methods"; //$NON-NLS-1$
 
 	/**
+	 * Removes unused parameters for private methods. <br>
+	 *
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 *
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 3.3
+	 */
+	public static final String REMOVE_UNUSED_CODE_METHOD_PARAMETERS= "cleanup.remove_unused_method_parameters"; //$NON-NLS-1$
+
+
+	/**
 	 * Removes unused local variables. <br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
