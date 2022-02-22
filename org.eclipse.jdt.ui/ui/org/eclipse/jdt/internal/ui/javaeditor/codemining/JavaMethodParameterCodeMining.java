@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Angelo Zerr and others.
+ * Copyright (c) 2018 Angelo Zerr and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,7 +31,7 @@ public class JavaMethodParameterCodeMining extends LineContentCodeMining {
 		try {
 			text.append(method.getParameterNames()[parameterIndex]);
 			if (isVarargs && parameterIndex == method.getParameterNames().length - 1) {
-				text.append("…"); //$NON-NLS-1$
+				text.append('…');
 			}
 			text.append(": "); //$NON-NLS-1$
 			setLabel(text.toString());
