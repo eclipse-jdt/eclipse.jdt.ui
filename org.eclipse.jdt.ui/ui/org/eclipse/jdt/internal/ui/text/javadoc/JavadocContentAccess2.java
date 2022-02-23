@@ -1507,7 +1507,7 @@ public class JavadocContentAccess2 {
 		else if (isCode || isLiteral)
 			handleContentElements(node.fragments(), true);
 		else if (isSnippet) {
-			handleSnippet(node.fragments());
+			handleSnippet(node);
 		}
 		else if (handleInheritDoc(node) || handleDocRoot(node)) {
 			// Handled
@@ -1921,27 +1921,40 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private void handleSnippet(List<? extends ASTNode> fragments) {
-		int fs= fragments.size();
-		if (fs > 0) {
-			fBuf.append("<pre><code>"); //$NON-NLS-1$
-			fBuf.append(BlOCK_TAG_ENTRY_START);
-			for(ASTNode fragment : fragments) {
-				if (fragment instanceof  TextElement) {
-					TextElement memberRef= (TextElement) fragment;
-					fBuf.append(memberRef.getText());
-				} else if (fragment instanceof TagElement) {
-					TagElement tagElem= (TagElement) fragment;
-					String name= tagElem.getTagName();
-					if (TagElement.TAG_HIGHLIGHT.equals(name)) {
-						handleSnippetHighlight(tagElem.fragments(), tagElem.tagProperties());
-					} else if (TagElement.TAG_REPLACE.equals(name)) {
-						handleSnippetReplace(tagElem.fragments(), tagElem.tagProperties());
+	private void handleSnippet(TagElement node) {
+		if (node != null) {
+			Object val = node.getProperty(TagProperty.TAG_PROPERTY_SNIPPET_IS_VALID);
+			if (val instanceof Boolean
+					&& ((Boolean)val).booleanValue()) {
+				int fs= node.fragments().size();
+				if (fs > 0) {
+					fBuf.append("<pre><code>"); //$NON-NLS-1$
+					fBuf.append(BlOCK_TAG_ENTRY_START);
+					for(Object fragment : node.fragments()) {
+						if (fragment instanceof  TextElement) {
+							TextElement memberRef= (TextElement) fragment;
+							fBuf.append(memberRef.getText());
+						} else if (fragment instanceof TagElement) {
+							TagElement tagElem= (TagElement) fragment;
+							String name= tagElem.getTagName();
+							if (TagElement.TAG_HIGHLIGHT.equals(name)) {
+								handleSnippetHighlight(tagElem.fragments(), tagElem.tagProperties());
+							} else if (TagElement.TAG_REPLACE.equals(name)) {
+								handleSnippetReplace(tagElem.fragments(), tagElem.tagProperties());
+							}
+						}
 					}
+					fBuf.append(BlOCK_TAG_ENTRY_END);
 				}
+			} else {
+				handleInvalidSnippet();
 			}
-			fBuf.append(BlOCK_TAG_ENTRY_END);
 		}
+	}
+
+	private void handleInvalidSnippet() {
+		fBuf.append("<pre><code>\n"); //$NON-NLS-1$
+		fBuf.append("<mark>invalid @Snippet</mark>"); //$NON-NLS-1$
 	}
 
 	private void handleSnippetReplace(List<? extends ASTNode> fragments, List<? extends ASTNode> tagProperties) {
