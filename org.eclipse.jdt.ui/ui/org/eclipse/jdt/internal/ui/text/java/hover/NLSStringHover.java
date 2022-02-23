@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -169,7 +171,25 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 			identifier= ((StringLiteral)node).getLiteralValue();
 		} else if (!usedFullyQualifiedName && node.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
 			identifier= ((SimpleName)node).getIdentifier();
-		} else {
+			try {
+				IBinding nodeBinding= ((SimpleName)node).resolveBinding();
+				if (nodeBinding != null) {
+					IJavaElement nodeElement= nodeBinding.getJavaElement();
+					if (nodeElement instanceof IMember) {
+						IType nodeDeclaringType= ((IMember)nodeElement).getDeclaringType();
+						if (nodeDeclaringType != null) {
+							String nodeParentTypeName= nodeDeclaringType.getSuperclassName();
+							if (!"org.eclipse.osgi.util.NLS".equals(nodeParentTypeName)) { //$NON-NLS-1$
+								identifier= null;
+							}
+						}
+					}
+				}
+			} catch (JavaModelException e1) {
+				// ignore
+			}
+		}
+		if (identifier == null) {
 			try {
 				if (containingClassBinding == null)
 					return null;
