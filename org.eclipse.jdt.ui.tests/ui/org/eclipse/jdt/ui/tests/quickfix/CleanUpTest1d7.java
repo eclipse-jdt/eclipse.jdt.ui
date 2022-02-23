@@ -1180,4 +1180,39 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
+
+	@Test
+	public void testInstanceVarToLocal() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= ""
+				+ "package test1;\n"
+				+ "\n"
+				+ "public class Bar {\n"
+				+ "    private transient int zoz=38, fubu;\n"
+				+ "    \n"
+				+ "    public void baz() {\n"
+				+ "        zoz = 37;\n"
+				+ "        System.out.println(zoz);\n"
+				+ "    }\n"
+				+ "}\n";
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("Bar.java", sample, false, null);
+
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+
+		String expected=  ""
+				+ "package test1;\n"
+				+ "\n"
+				+ "public class Bar {\n"
+				+ "    private transient int fubu;\n"
+				+ "    \n"
+				+ "    public void baz() {\n"
+				+ "        int zoz = 37;\n"
+				+ "        System.out.println(zoz);\n"
+				+ "    }\n"
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
 }

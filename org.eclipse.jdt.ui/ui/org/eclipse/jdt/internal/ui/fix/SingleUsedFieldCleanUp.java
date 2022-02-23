@@ -429,8 +429,8 @@ public class SingleUsedFieldCleanUp extends AbstractMultiFix {
 			for (IExtendedModifier iExtendedModifier : modifiers) {
 				Modifier modifier= (Modifier) iExtendedModifier;
 
-				if (!modifier.isPrivate() && !modifier.isStatic()) {
-					newModifiers.add(isFieldKept ? ASTNodes.createMoveTarget(rewrite, modifier) : (Modifier) rewrite.createCopyTarget(modifier));
+				if (!modifier.isPrivate() && !modifier.isStatic() && !modifier.isTransient()) {
+					newModifiers.add((Modifier) rewrite.createCopyTarget(modifier));
 				}
 			}
 
