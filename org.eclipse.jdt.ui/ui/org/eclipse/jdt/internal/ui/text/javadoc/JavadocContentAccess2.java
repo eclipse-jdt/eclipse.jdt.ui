@@ -90,6 +90,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.JavaDocRegion;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodRef;
@@ -1936,12 +1937,12 @@ public class JavadocContentAccess2 {
 							fBuf.append(memberRef.getText());
 						} else if (fragment instanceof TagElement) {
 							TagElement tagElem= (TagElement) fragment;
-							String name= tagElem.getTagName();
-							if (TagElement.TAG_HIGHLIGHT.equals(name)) {
-								handleSnippetHighlight(tagElem.fragments(), tagElem.tagProperties());
-							} else if (TagElement.TAG_REPLACE.equals(name)) {
-								handleSnippetReplace(tagElem.fragments(), tagElem.tagProperties());
-							}
+							String str= getSnippetTagElementString(tagElem);
+							fBuf.append(str);
+						} else if (fragment instanceof JavaDocRegion) {
+							JavaDocRegion region= (JavaDocRegion) fragment;
+							String str = getJavadocRegionString(region);
+							fBuf.append(str);
 						}
 					}
 					fBuf.append(BlOCK_TAG_ENTRY_END);
@@ -1952,14 +1953,65 @@ public class JavadocContentAccess2 {
 		}
 	}
 
+	private String getSnippetTagElementString(TagElement tagElem) {
+		String str= ""; //$NON-NLS-1$
+		if (tagElem != null) {
+			List<Object> fragments = tagElem.fragments();
+			for (Object fragment : fragments) {
+				if (fragment instanceof TextElement) {
+					str += ((TextElement)fragment).getText();
+				}
+			}
+			String name= tagElem.getTagName();
+			if (TagElement.TAG_HIGHLIGHT.equals(name)) {
+				str= handleSnippetHighlight(str, tagElem.tagProperties());
+			} else if (TagElement.TAG_REPLACE.equals(name)) {
+				str= handleSnippetReplace(str, tagElem.tagProperties());
+			}
+		}
+		return str;
+	}
+
+	private String getJavadocRegionString(JavaDocRegion region) {
+		String str= ""; //$NON-NLS-1$
+		if (region != null) {
+			List<Object> tags = region.tags();
+			List<Object> fragments = region.fragments();
+			if (fragments.size() == 0) {
+				return str;
+			}
+			for (Object fragment: fragments) {
+				if (fragment instanceof TextElement) {
+					str += ((TextElement)fragment).getText();
+				}
+				if (fragment instanceof JavaDocRegion) {
+					str += getJavadocRegionString((JavaDocRegion)fragment);
+				}
+			}
+			if (str.length() > 0 && tags.size() > 0)  {
+				for (Object tag : tags) {
+					if (tag instanceof TagElement) {
+						TagElement tagElem= (TagElement) tag;
+						String name= tagElem.getTagName();
+						if (TagElement.TAG_HIGHLIGHT.equals(name)) {
+							str= handleSnippetHighlight(str, tagElem.tagProperties());
+						} else if (TagElement.TAG_REPLACE.equals(name)) {
+							str= handleSnippetReplace(str, tagElem.tagProperties());
+						}
+					}
+				}
+			}
+		}
+		return str;
+	}
+
 	private void handleInvalidSnippet() {
 		fBuf.append("<pre><code>\n"); //$NON-NLS-1$
 		fBuf.append("<mark>invalid @Snippet</mark>"); //$NON-NLS-1$
 	}
 
-	private void handleSnippetReplace(List<? extends ASTNode> fragments, List<? extends ASTNode> tagProperties) {
+	private String handleSnippetReplace(String text, List<? extends ASTNode> tagProperties) {
 		try {
-			int fs= fragments.size();
 			boolean process = arePropertyValuesStringLiterals(tagProperties) ? true : false;
 			String regExValue = getPropertyValue("regex", tagProperties); //$NON-NLS-1$
 			String subStringValue = getPropertyValue("substring", tagProperties); //$NON-NLS-1$
@@ -1968,48 +2020,41 @@ public class JavadocContentAccess2 {
 			if (regExValue != null) {
 				regexPattern = Pattern.compile(regExValue);
 			}
-			if (fs > 0) {
-				for(ASTNode fragment : fragments) {
-					if (fragment instanceof  TextElement) {
-						TextElement memberRef= (TextElement) fragment;
-						String modifiedText = memberRef.getText();
-						if (process) {
-							if (regexPattern != null && process) {
-								Matcher matcher = regexPattern.matcher(modifiedText);
-								StringBuilder strBuild= new StringBuilder();
-								int finalMatchIndex = 0;
-								while (matcher.find()) {
-									finalMatchIndex = matcher.end();
-									matcher.appendReplacement(strBuild, substitution);
-								}
-								modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
-							} else if (subStringValue != null) {
-								int startIndex = 0;
-								while (true) {
-									startIndex = modifiedText.indexOf(subStringValue, startIndex);
-									if (startIndex == -1) {
-										break;
-									} else {
-										modifiedText = modifiedText.substring(0, startIndex) + substitution + modifiedText.substring(startIndex + subStringValue.length());
-										startIndex = startIndex + substitution.length() ;
-									}
-								}
-							} else {
-								modifiedText = substitution;
-							}
-						}
-						fBuf.append(modifiedText);
+			String modifiedText = text;
+			if (process) {
+				if (regexPattern != null && process) {
+					Matcher matcher = regexPattern.matcher(modifiedText);
+					StringBuilder strBuild= new StringBuilder();
+					int finalMatchIndex = 0;
+					while (matcher.find()) {
+						finalMatchIndex = matcher.end();
+						matcher.appendReplacement(strBuild, substitution);
 					}
+					modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
+				} else if (subStringValue != null) {
+					int startIndex = 0;
+					while (true) {
+						startIndex = modifiedText.indexOf(subStringValue, startIndex);
+						if (startIndex == -1) {
+							break;
+						} else {
+							modifiedText = modifiedText.substring(0, startIndex) + substitution + modifiedText.substring(startIndex + subStringValue.length());
+							startIndex = startIndex + substitution.length() ;
+						}
+					}
+				} else {
+					modifiedText = substitution;
 				}
 			}
+			return modifiedText;
 		} catch (PatternSyntaxException e) {
 			// do nothing
 		}
+		return text;
 	}
 
-	private void handleSnippetHighlight(List<? extends ASTNode> fragments, List<? extends ASTNode> tagProperties) {
+	private String handleSnippetHighlight(String text, List<? extends ASTNode> tagProperties) {
 		try {
-			int fs= fragments.size();
 			String defHighlight= getHighlightHtmlTag(tagProperties);
 			String startDefHighlight = '<' + defHighlight + '>';
 			String endDefHighlight = "</" + defHighlight + '>'; //$NON-NLS-1$
@@ -2024,44 +2069,38 @@ public class JavadocContentAccess2 {
 			if (regExValue != null) {
 				regexPattern = Pattern.compile(regExValue);
 			}
-			if (fs > 0) {
-				for(ASTNode fragment : fragments) {
-					if (fragment instanceof  TextElement) {
-						TextElement memberRef= (TextElement) fragment;
-						String modifiedText = memberRef.getText();
-						if (process) {
-							if (regexPattern != null && process) {
-								Matcher matcher = regexPattern.matcher(modifiedText);
-								StringBuilder strBuild= new StringBuilder();
-								int finalMatchIndex = 0;
-								while (matcher.find()) {
-									finalMatchIndex = matcher.end();
-									String replacementStr= startDefHighlight + modifiedText.substring(matcher.start(), matcher.end()) + endDefHighlight;
-									matcher.appendReplacement(strBuild, replacementStr);
-								}
-								modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
-							} else if (subStringValue != null) {
-								int startIndex = 0;
-								while (true) {
-									startIndex = modifiedText.indexOf(subStringValue, startIndex);
-									if (startIndex == -1) {
-										break;
-									} else {
-										modifiedText = modifiedText.substring(0, startIndex) + startDefHighlight + subStringValue + endDefHighlight + modifiedText.substring(startIndex + subStringValue.length());
-										startIndex = startIndex + subStringValue.length() + additionalLength;
-									}
-								}
-							} else {
-								modifiedText = startDefHighlight + modifiedText + endDefHighlight;
-							}
-						}
-						fBuf.append(modifiedText);
+			String modifiedText = text;
+			if (process) {
+				if (regexPattern != null && process) {
+					Matcher matcher = regexPattern.matcher(modifiedText);
+					StringBuilder strBuild= new StringBuilder();
+					int finalMatchIndex = 0;
+					while (matcher.find()) {
+						finalMatchIndex = matcher.end();
+						String replacementStr= startDefHighlight + modifiedText.substring(matcher.start(), matcher.end()) + endDefHighlight;
+						matcher.appendReplacement(strBuild, replacementStr);
 					}
+					modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
+				} else if (subStringValue != null) {
+					int startIndex = 0;
+					while (true) {
+						startIndex = modifiedText.indexOf(subStringValue, startIndex);
+						if (startIndex == -1) {
+							break;
+						} else {
+							modifiedText = modifiedText.substring(0, startIndex) + startDefHighlight + subStringValue + endDefHighlight + modifiedText.substring(startIndex + subStringValue.length());
+							startIndex = startIndex + subStringValue.length() + additionalLength;
+						}
+					}
+				} else {
+					modifiedText = startDefHighlight + modifiedText + endDefHighlight;
 				}
 			}
+			return modifiedText;
 		} catch (PatternSyntaxException e) {
 			// do nothing
 		}
+		return text;
 	}
 
 	private String getHighlightHtmlTag(List<? extends ASTNode> tagProperties) {
