@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2020 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -262,7 +262,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				list= astRewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
 				for (Expression expression : fOccurrences) {
 					Statement parent= ASTNodes.getParent(expression, Statement.class);
-					if (parent != null && list.getRewrittenList().contains(parent)) {
+					if (parent != null && parent.getParent() instanceof Block) {
+						ListRewrite innerList= astRewrite.getListRewrite(parent.getParent(), Block.STATEMENTS_PROPERTY);
 						List<ASTNode> newComments= new ArrayList<>();
 						for (Comment comment : commentList) {
 							CompilationUnit cu= (CompilationUnit)parent.getRoot();
@@ -275,14 +276,14 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						}
 						if (!newComments.isEmpty()) {
 							ASTNode lastComment= newComments.get(0);
-							list.replace(parent, lastComment, group);
+							innerList.replace(parent, lastComment, group);
 							for (int i= 1; i < newComments.size(); ++i) {
 								ASTNode nextComment= newComments.get(i);
-								list.insertAfter(nextComment, lastComment, group);
+								innerList.insertAfter(nextComment, lastComment, group);
 								lastComment= nextComment;
 							}
 						} else {
-							list.remove(parent, group);
+							innerList.remove(parent, group);
 						}
 						remover.registerRemovedNode(parent);
 					}

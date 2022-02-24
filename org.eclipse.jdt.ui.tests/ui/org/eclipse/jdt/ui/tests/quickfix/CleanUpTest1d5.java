@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 IBM Corporation and others.
+ * Copyright (c) 2019, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1226,6 +1226,75 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testJava50ForLoopBug578910() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public void foo(Map<String, String> extensionMap) {\n" //
+				+ "	       for (Iterator<String> iterator = extensionMap.keySet().iterator(); iterator.hasNext();) {\n" //
+				+ "	   	       try {\n" //
+				+ "	               String expression = iterator.next();\n" //
+				+ "	               System.out.println(expression);\n" //
+				+ "	           } catch (Exception e) {\n" //
+				+ "	           }\n" //
+				+ "	       }\n" //
+				+ "	       int j = 7;\n" //
+				+ "	       for (Iterator<String> iterator = extensionMap.keySet().iterator(); iterator.hasNext();) {\n" //
+				+ "	           do {\n" //
+				+ "	               String expression = iterator.next();\n" //
+				+ "	               System.out.println(expression);\n" //
+				+ "	           } while (j-- > 0);\n" //
+				+ "	       }\n" //
+				+ "	       for (Iterator<String> iterator = extensionMap.keySet().iterator(); iterator.hasNext();) {\n" //
+				+ "	           String expression = null;\n" //
+				+ "	           if (extensionMap != null) {\n" //
+				+ "	               expression = iterator.next();\n" //
+				+ "            }\n" //
+				+ "	           System.out.println(expression);\n" //
+				+ "	       }\n" //
+				+ "    }\n" //
+				+ "}";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public void foo(Map<String, String> extensionMap) {\n" //
+				+ "	       for (String expression : extensionMap.keySet()) {\n" //
+				+ "	   	       try {\n" //
+				+ "	               System.out.println(expression);\n" //
+				+ "	           } catch (Exception e) {\n" //
+				+ "	           }\n" //
+				+ "	       }\n" //
+				+ "	       int j = 7;\n" //
+				+ "	       for (String expression : extensionMap.keySet()) {\n" //
+				+ "	           do {\n" //
+				+ "	               System.out.println(expression);\n" //
+				+ "	           } while (j-- > 0);\n" //
+				+ "	       }\n" //
+				+ "	       for (String expression : extensionMap.keySet()) {\n" //
+				+ "	           if (extensionMap != null) {\n" //
+				+ "            }\n" //
+				+ "	           System.out.println(expression);\n" //
+				+ "	       }\n" //
+				+ "    }\n" //
+				+ "}";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
