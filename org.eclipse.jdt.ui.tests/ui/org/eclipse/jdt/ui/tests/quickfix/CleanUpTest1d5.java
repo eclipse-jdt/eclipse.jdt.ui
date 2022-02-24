@@ -2724,6 +2724,16 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "        double f = fObject.floatValue();\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public static void doNotUseUnboxingOnCastCalls(Character cObject, Byte byObject,\n" //
+				+ "            Integer iObject, Short sObject, Float fObject, Object unknown) {\n" //
+				+ "        int c = (int)cObject.charValue();\n" //
+				+ "        int by = (int)byObject.byteValue();\n" //
+				+ "        long i = (long)iObject.intValue();\n" //
+				+ "        int s = (int)sObject.shortValue();\n" //
+				+ "        double f = (double)fObject.floatValue();\n" //
+				+ "        byte b = (byte)((Integer)unknown).intValue();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static void doNotUseUnboxingWhenTypesDontMatch(Byte byObject,\n" //
 				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
 				+ "        short by = byObject.shortValue();\n" //

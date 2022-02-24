@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Fabrice TIERCELIN and others.
+ * Copyright (c) 2019, 2022 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,12 +25,14 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -116,6 +118,13 @@ public class UnboxingCleanUp extends AbstractMultiFix {
 		unit.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(MethodInvocation visited) {
+				ASTNode parent= visited.getParent();
+				while (parent != null && parent instanceof ParenthesizedExpression) {
+					parent= parent.getParent();
+				}
+				if (parent instanceof CastExpression) {
+					return true;
+				}
 				if (visited.getExpression() != null) {
 					ITypeBinding nodeBinding= visited.getExpression().resolveTypeBinding();
 
@@ -131,7 +140,7 @@ public class UnboxingCleanUp extends AbstractMultiFix {
 						final ITypeBinding actualResultType= ASTNodes.getTargetType(visited);
 
 						if (actualResultType != null && actualResultType.isAssignmentCompatible(visited.resolveTypeBinding())) {
-							ASTNode parent= visited.getParent();
+							parent= visited.getParent();
 
 							if (parent instanceof ClassInstanceCreation
 									&& visited.getLocationInParent() == ClassInstanceCreation.ARGUMENTS_PROPERTY) {
