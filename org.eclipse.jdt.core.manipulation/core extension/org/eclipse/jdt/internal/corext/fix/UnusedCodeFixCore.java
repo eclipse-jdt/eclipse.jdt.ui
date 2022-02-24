@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -74,6 +75,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.NecessaryParenthesesChecke
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.ReplaceRewrite;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -366,6 +368,16 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 						return;
 					}
 					if (sideEffectInitializer) {
+						if (varDecl.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY) {
+							Expression[] exps= new Expression[sideEffects.size()];
+							for (int i= 0; i < exps.length; i++) {
+								Expression sideEffect= sideEffects.get(i);
+								Expression movedInit= (Expression) rewrite.createMoveTarget(sideEffect);
+								exps[i]= movedInit;
+							}
+							ReplaceRewrite replaceRewrite= ReplaceRewrite.create(rewrite, new ASTNode[] { varDecl });
+							replaceRewrite.replace(exps, group);
+						} else {
 						Statement[] wrapped= new Statement[sideEffects.size()];
 						for (int i= 0; i < wrapped.length; i++) {
 							Expression sideEffect= sideEffects.get(i);
@@ -374,6 +386,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 						}
 						StatementRewrite statementRewrite= new StatementRewrite(rewrite, new ASTNode[] { varDecl });
 						statementRewrite.replace(wrapped, group);
+						}
 					} else {
 						rewrite.remove(varDecl, group);
 					}

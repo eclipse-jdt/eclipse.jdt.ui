@@ -864,6 +864,74 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUnusedCodeBug578906_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<String> resultHints, List<String> results) {\n" //
+				+ "        Iterator<String> it = results.iterator();\n" //
+				+ "        for (int j = resultHints.size();it.hasNext();j++) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<String> resultHints, List<String> results) {\n" //
+				+ "        Iterator<String> it = results.iterator();\n" //
+				+ "        for (resultHints.size();it.hasNext();) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
+	}
+
+	@Test
+	public void testUnusedCodeBug578906_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<String> resultHints, List<String> results) {\n" //
+				+ "        Iterator<String> it = results.iterator();\n" //
+				+ "        for (int j = resultHints.size() + resultHints.hashCode();it.hasNext();j++) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<String> resultHints, List<String> results) {\n" //
+				+ "        Iterator<String> it = results.iterator();\n" //
+				+ "        for (resultHints.size(), resultHints.hashCode();it.hasNext();) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
+	}
+
+	@Test
 	public void testUnusedCodeBug578169() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
