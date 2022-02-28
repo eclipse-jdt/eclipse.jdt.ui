@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -29,6 +33,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTagElement;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -127,6 +132,24 @@ public class HierarchicalASTVisitorTest {
 		}
 		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(AbstractTypeDeclaration node) {
+			super.visit(node);
+		}
+
+		@Override
+		public boolean visit(AbstractTagElement node) {
+			registerCall(AbstractTagElement.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(AbstractTagElement node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(AbstractTagElement node) {
+			registerCall(AbstractTagElement.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(AbstractTagElement node) {
 			super.visit(node);
 		}
 
