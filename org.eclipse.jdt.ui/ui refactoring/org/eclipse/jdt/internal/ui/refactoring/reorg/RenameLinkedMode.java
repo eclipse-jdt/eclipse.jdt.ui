@@ -214,23 +214,28 @@ public class RenameLinkedMode {
 			fLinkedPositionGroup= new LinkedPositionGroup();
 			ASTNode selectedNode= NodeFinder.perform(root, fOriginalSelection.x, fOriginalSelection.y);
 
-			Name nameNode= null;
+			final int pos;
+			ASTNode[] sameNodes;
 			if (! (selectedNode instanceof Name)) {
 				return; // TODO: show dialog
 			} else if (this.fJavaElement != null &&
 					this.fJavaElement.getElementType() ==  IJavaElement.JAVA_MODULE) {
-				nameNode= (Name) selectedNode;
+				Name nameNode = (Name) selectedNode;
 				ASTNode parent = nameNode.getParent();
 				while(parent instanceof Name) {
 					nameNode = (Name) parent;
 					parent = nameNode.getParent();
 				}
 				fOriginalName= nameNode.getFullyQualifiedName();
+				pos= nameNode.getStartPosition();
+				sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
 			} else if (! (selectedNode instanceof SimpleName)) {
 				return; // TODO: show dialog
 			} else {
-				nameNode = (SimpleName)selectedNode;
-				fOriginalName= ((SimpleName)nameNode).getIdentifier();
+				SimpleName nameNode = (SimpleName)selectedNode;
+				fOriginalName = nameNode.getIdentifier();
+				pos = nameNode.getStartPosition();
+				sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
 			}
 
 			if (viewer instanceof ITextViewerExtension6) {
@@ -242,9 +247,6 @@ public class RenameLinkedMode {
 					fStartingUndoOperation= operationHistory.getUndoOperation(undoContext);
 				}
 			}
-
-			final int pos= nameNode.getStartPosition();
-			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
 
 			//TODO: copied from LinkedNamesAssistProposal#apply(..):
 			// sort for iteration order, starting with the node @ offset
