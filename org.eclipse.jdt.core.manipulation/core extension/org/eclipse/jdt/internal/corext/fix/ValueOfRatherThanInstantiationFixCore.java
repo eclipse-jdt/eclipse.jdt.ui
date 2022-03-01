@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
@@ -122,10 +123,40 @@ public class ValueOfRatherThanInstantiationFixCore extends CompilationUnitRewrit
 			MethodInvocation valueOfMethod= ast.newMethodInvocation();
 			valueOfMethod.setExpression(ASTNodeFactory.newName(ast, typeBinding.getName()));
 			valueOfMethod.setName(ast.newSimpleName("valueOf")); //$NON-NLS-1$
-			CastExpression newCastExpression= ast.newCastExpression();
-			newCastExpression.setType(ast.newPrimitiveType(PrimitiveType.FLOAT));
-			newCastExpression.setExpression(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(arg0)));
-			valueOfMethod.arguments().add(newCastExpression);
+
+			// remove all casts and parentheses from the argument
+			Expression newArgument= arg0;
+			while (true) {
+				if (newArgument instanceof CastExpression) {
+					newArgument= ((CastExpression) newArgument).getExpression();
+					continue;
+				}
+				if (newArgument instanceof ParenthesizedExpression) {
+					newArgument= ((ParenthesizedExpression) newArgument).getExpression();
+					continue;
+				}
+				break;
+			}
+
+			if (!ASTNodes.hasType(newArgument, float.class.getSimpleName())) {
+				CastExpression newCastExpression= ast.newCastExpression();
+				newCastExpression.setType(ast.newPrimitiveType(PrimitiveType.FLOAT));
+
+				Expression moveTarget= ASTNodes.createMoveTarget(rewrite, newArgument);
+
+				if (newArgument.getNodeType() == ASTNode.INFIX_EXPRESSION || newArgument.getNodeType() == ASTNode.ASSIGNMENT) {
+					// those expressions could be numeric and have less precedence than a cast, so need to put parens
+					ParenthesizedExpression parens= ast.newParenthesizedExpression();
+					parens.setExpression(moveTarget);
+					moveTarget= parens;
+				}
+
+				newCastExpression.setExpression(moveTarget);
+				newArgument= newCastExpression;
+			}
+			valueOfMethod.arguments().add(newArgument);
+
+
 
 			ASTNodes.replaceButKeepComment(rewrite, visited, valueOfMethod, group);
 		}

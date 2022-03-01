@@ -5219,6 +5219,8 @@ public class CleanUpTest extends CleanUpTestCase {
 						MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_valueof)));
 	}
 
+
+
 	@Test
 	public void testDoNotUseValueOfRatherThanInstantiation() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -5237,6 +5239,40 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.VALUEOF_RATHER_THAN_INSTANTIATION);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testValueOfRatherThanInstantiationBug578917() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n"
+				+ "\n" //
+				+ "public class E {\n"
+				+ "    public static void replaceWrapperConstructorsWithValueOf() {\n"
+				+ "        double k= 33;\n"
+				+ "        Float f= new Float(((k= (4 * 3f / 72d))))"
+				+ "    }\n"
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void replaceWrapperConstructorsWithValueOf() {\n"
+				+ "        double k= 33;\n"
+				+ "        Float f= Float.valueOf((float) (k= (4 * 3f / 72d)))" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.VALUEOF_RATHER_THAN_INSTANTIATION);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.ValueOfRatherThanInstantiationCleanup_description_float_with_float_value)));
 	}
 
 	@Test
