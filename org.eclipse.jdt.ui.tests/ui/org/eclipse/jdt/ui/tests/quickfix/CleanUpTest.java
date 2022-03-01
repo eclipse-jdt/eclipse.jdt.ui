@@ -21631,7 +21631,24 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.jar.Attributes.Name;\n" //
 				+ "import java.util.List;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
+				+ "public final class E {\n" //
+				+ "    public RefactorThisInnerClass keepInnerInstanciation() {\n" //
+				+ "        return new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public RefactorThisInnerClass rewriteInnerInstanciation() {\n" //
+				+ "        return this.new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public RefactorThisInnerClass rewriteQualifiedInnerInstanciation() {\n" //
+				+ "        return test1.E.this.new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static RefactorThisInnerClass rewriteInnerInstanciationOnTopLevelObject() {\n" //
+				+ "        E object = new E();\n" //
+				+ "        return object.new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public class RefactorThisInnerClass {\n" //
 				+ "        int i;\n" //
 				+ "\n" //
@@ -21833,7 +21850,24 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.util.jar.Attributes.Name;\n" //
 				+ "import java.util.List;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
+				+ "public final class E {\n" //
+				+ "    public RefactorThisInnerClass keepInnerInstanciation() {\n" //
+				+ "        return new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public RefactorThisInnerClass rewriteInnerInstanciation() {\n" //
+				+ "        return new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public RefactorThisInnerClass rewriteQualifiedInnerInstanciation() {\n" //
+				+ "        return new test1.E.RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static RefactorThisInnerClass rewriteInnerInstanciationOnTopLevelObject() {\n" //
+				+ "        E object = new E();\n" //
+				+ "        return new test1.E.RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public static class RefactorThisInnerClass {\n" //
 				+ "        int i;\n" //
 				+ "\n" //
@@ -22035,6 +22069,118 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testStaticInnerClassOnGenricTopLevelClass() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E<T> {\n" //
+				+ "    public RefactorThisInnerClass rewriteInnerInstanciationOnTopLevelObject(E<String> parameterizedObject) {\n" //
+				+ "        return parameterizedObject.new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E<T> {\n" //
+				+ "    public RefactorThisInnerClass rewriteInnerInstanciationOnTopLevelObject(E<String> parameterizedObject) {\n" //
+				+ "        return new test1.E.RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.STATIC_INNER_CLASS);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StaticInnerClassCleanUp_description)));
+	}
+
+	@Test
+	public void testStaticInnerClassOnPrivateInnerClass() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public RefactorThisInnerClass keepInnerInstanciation() {\n" //
+				+ "        return new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public RefactorThisInnerClass rewriteInnerInstanciation() {\n" //
+				+ "        return this.new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public RefactorThisInnerClass rewriteQualifiedInnerInstanciation() {\n" //
+				+ "        return test1.E.this.new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public RefactorThisInnerClass keepInnerInstanciation() {\n" //
+				+ "        return new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public RefactorThisInnerClass rewriteInnerInstanciation() {\n" //
+				+ "        return new RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public RefactorThisInnerClass rewriteQualifiedInnerInstanciation() {\n" //
+				+ "        return new test1.E.RefactorThisInnerClass();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static class RefactorThisInnerClass {\n" //
+				+ "        int i;\n" //
+				+ "\n" //
+				+ "        public boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.STATIC_INNER_CLASS);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.StaticInnerClassCleanUp_description)));
+	}
+
+	@Test
 	public void testDoNotUseStaticInnerClass() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -22043,7 +22189,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "import java.sql.DriverPropertyInfo;\n" //
 				+ "import org.junit.jupiter.api.Nested;\n" //
 				+ "\n" //
-				+ "public class E<T> {\n" //
+				+ "public final class E<T> {\n" //
 				+ "    public interface DoNotRefactorInnerInterface {\n" //
 				+ "        boolean anotherMethod();\n" //
 				+ "    }\n" //
@@ -22153,6 +22299,26 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    @Nested\n" //
 				+ "    public class DoNotRefactorInnerClassWithJunitNestedAnnotation {\n" //
 				+ "        public int a;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.STATIC_INNER_CLASS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testDoNotUseStaticInnerClassOnNotFinalTopLevelClass() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E<T> {\n" //
+				+ "    public class DoNotRefactorInnerInheritableClass {\n" //
+				+ "        boolean anotherMethod() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);

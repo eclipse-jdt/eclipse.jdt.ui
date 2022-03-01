@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -62,9 +63,11 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * A fix that makes inner <code>class</code> static:
+ * A fix that makes inner class <code>static</code>:
  * <ul>
- * <li>It should not use top level <code>class</code> members</li>
+ * <li>It should not use top level class members</li>
+ * <li>Inner class instantiation from top level class object are rewritten without top level class object access</li>
+ * <li>The top level class should not be inheritable or the inner class must be <code>private</code></li>
  * </ul>
  */
 public class StaticInnerClassCleanUp extends AbstractMultiFix {
@@ -218,9 +221,39 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 				}
 			}
 
+			class DynamicClassInstanceCreationVisitor extends ASTVisitor {
+				private final ITypeBinding innerClass;
+				private final List<ClassInstanceCreation> dynamicClassInstanceCreations = new ArrayList<>();
+
+				public DynamicClassInstanceCreationVisitor(final ITypeBinding innerClass) {
+					this.innerClass= innerClass;
+				}
+
+				public List<ClassInstanceCreation> getDynamicClassInstanceCreations() {
+					return dynamicClassInstanceCreations;
+				}
+
+				@Override
+				public boolean visit(final ClassInstanceCreation node) {
+					if (innerClass.getErasure().isEqualTo(node.getType().resolveBinding().getErasure())
+							&& node.getExpression() != null) {
+						dynamicClassInstanceCreations.add(node);
+					}
+
+					return true;
+				}
+
+				@Override
+				public boolean visit(final TypeDeclaration node) {
+					return !innerClass.getErasure().isEqualTo(node.resolveBinding().getErasure());
+				}
+			}
+
 			@Override
 			public boolean visit(final TypeDeclaration visited) {
-				if (!visited.isInterface() && !Modifier.isStatic(visited.getModifiers())) {
+				if (!visited.isInterface()
+						&& !Modifier.isStatic(visited.getModifiers())
+						&& visited.resolveBinding() != null) {
 					Set<ITypeBinding> genericityTypes= new HashSet<>();
 					ASTNode enclosingType= ASTNodes.getFirstAncestorOrNull(visited, TypeDeclaration.class, MethodDeclaration.class);
 
@@ -247,6 +280,13 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 
 					while (enclosingType instanceof TypeDeclaration) {
 						topLevelClass= (TypeDeclaration) enclosingType;
+
+						if (!Modifier.isPrivate(visited.getModifiers()) && !Modifier.isFinal(topLevelClass.getModifiers())) {
+							// An inherited class could use this syntax:
+							// this.new InnerClass()
+							return true;
+						}
+
 						ITypeBinding topLevelClassBinding= topLevelClass.resolveBinding();
 
 						if (topLevelClassBinding == null) {
@@ -266,7 +306,10 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 						topLevelClassMemberVisitor.traverseNodeInterruptibly(visited);
 
 						if (!topLevelClassMemberVisitor.isTopLevelClassMemberUsed()) {
-							rewriteOperations.add(new StaticInnerClassOperation(visited));
+							DynamicClassInstanceCreationVisitor dynamicClassInstanceCreationVisitor= new DynamicClassInstanceCreationVisitor(visited.resolveBinding());
+							topLevelClass.accept(dynamicClassInstanceCreationVisitor);
+
+							rewriteOperations.add(new StaticInnerClassOperation(visited, dynamicClassInstanceCreationVisitor.getDynamicClassInstanceCreations()));
 							return false;
 						}
 					}
@@ -314,9 +357,11 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 
 	private static class StaticInnerClassOperation extends CompilationUnitRewriteOperation {
 		private final TypeDeclaration visited;
+		private final List<ClassInstanceCreation> dynamicClassInstanceCreations;
 
-		public StaticInnerClassOperation(final TypeDeclaration visited) {
+		public StaticInnerClassOperation(final TypeDeclaration visited, final List<ClassInstanceCreation> dynamicClassInstanceCreations) {
 			this.visited= visited;
+			this.dynamicClassInstanceCreations= dynamicClassInstanceCreations;
 		}
 
 		@Override
@@ -325,6 +370,41 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 			ListRewrite listRewrite= rewrite.getListRewrite(visited, TypeDeclaration.MODIFIERS2_PROPERTY);
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.StaticInnerClassCleanUp_description, cuRewrite);
+
+			for (ClassInstanceCreation dynamicClassInstanceCreation : dynamicClassInstanceCreations) {
+				if (!dynamicClassInstanceCreation.getType().isQualifiedType()
+						&& dynamicClassInstanceCreation.getType().resolveBinding() != null) {
+					ThisExpression thisExpression= ASTNodes.as(dynamicClassInstanceCreation.getExpression(), ThisExpression.class);
+
+					if (thisExpression != null) {
+						if (thisExpression.getQualifier() != null) {
+							SimpleName newSimpleName= ast.newSimpleName(dynamicClassInstanceCreation.getType().resolveBinding().getName());
+							QualifiedName newQualifiedName= ast.newQualifiedName(ASTNodes.createMoveTarget(rewrite, thisExpression.getQualifier()), newSimpleName);
+							Type newType= ast.newSimpleType(newQualifiedName);
+							rewrite.replace(dynamicClassInstanceCreation.getType(), newType, group);
+						}
+					} else {
+						String qualifiedName= dynamicClassInstanceCreation.getExpression().resolveTypeBinding().getErasure().getQualifiedName();
+						String[] qualifiedNameTokens= qualifiedName.split("\\."); //$NON-NLS-1$
+						Name newQualifiedName= null;
+
+						for (String qualifiedNameToken : qualifiedNameTokens) {
+							if (newQualifiedName == null) {
+								newQualifiedName= ast.newSimpleName(qualifiedNameToken);
+							} else {
+								newQualifiedName= ast.newQualifiedName(newQualifiedName, ast.newSimpleName(qualifiedNameToken));
+							}
+						}
+
+						SimpleName newSimpleName= ast.newSimpleName(dynamicClassInstanceCreation.getType().resolveBinding().getName());
+						newQualifiedName= ast.newQualifiedName(newQualifiedName, newSimpleName);
+						Type newType= ast.newSimpleType(newQualifiedName);
+						rewrite.replace(dynamicClassInstanceCreation.getType(), newType, group);
+					}
+				}
+
+				rewrite.set(dynamicClassInstanceCreation, ClassInstanceCreation.EXPRESSION_PROPERTY, null, group);
+			}
 
 			List<IExtendedModifier> modifiers= visited.modifiers();
 			Modifier static0= ast.newModifier(ModifierKeyword.STATIC_KEYWORD);
