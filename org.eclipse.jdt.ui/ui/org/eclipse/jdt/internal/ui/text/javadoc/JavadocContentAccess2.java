@@ -1934,15 +1934,17 @@ public class JavadocContentAccess2 {
 					for(Object fragment : node.fragments()) {
 						if (fragment instanceof  TextElement) {
 							TextElement memberRef= (TextElement) fragment;
-							fBuf.append(memberRef.getText());
+							fBuf.append(getTextElementString(node, memberRef));
 						} else if (fragment instanceof TagElement) {
 							TagElement tagElem= (TagElement) fragment;
-							String str= getSnippetTagElementString(tagElem);
+							String str= getSnippetTagElementString(node, tagElem);
 							fBuf.append(str);
 						} else if (fragment instanceof JavaDocRegion) {
 							JavaDocRegion region= (JavaDocRegion) fragment;
-							String str = getJavadocRegionString(region);
-							fBuf.append(str);
+							if (region.isDummyRegion()) {
+								String str = getDummyJavadocRegionString(region, node);
+								fBuf.append(str);
+							}
 						}
 					}
 					fBuf.append(BlOCK_TAG_ENTRY_END);
@@ -1953,52 +1955,136 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private String getSnippetTagElementString(TagElement tagElem) {
+	private String getTextElementString(TagElement snippetTag, TextElement textElem) {
+		String text = textElem.getText();
+		String changedText = text;
+		List<JavaDocRegion> regions= snippetTag.tagRegionsContainingTextElement(textElem);
+		for (JavaDocRegion region : regions) {
+			changedText = getJavaDocRegionString(region, changedText);
+		}
+		return changedText;
+	}
+
+	private String getJavaDocRegionString(JavaDocRegion region, String str) {
+		String changedText = ""; //$NON-NLS-1$
+		if (region != null && str != null) {
+			changedText = str;
+			List<Object> tags= region.tags();
+			for (Object tag : tags) {
+				if (tag instanceof TagElement) {
+					TagElement tagElem = (TagElement) tag;
+					String name= tagElem.getTagName();
+					if (TagElement.TAG_HIGHLIGHT.equals(name)) {
+						changedText= handleSnippetHighlight(changedText, tagElem.tagProperties());
+					} else if (TagElement.TAG_REPLACE.equals(name)) {
+						changedText= handleSnippetReplace(changedText, tagElem.tagProperties());
+					}
+				}
+			}
+		}
+		return changedText;
+	}
+
+	private String getSnippetTagElementString(TagElement snippetTag, TagElement tagElem) {
 		String str= ""; //$NON-NLS-1$
 		if (tagElem != null) {
 			List<Object> fragments = tagElem.fragments();
 			for (Object fragment : fragments) {
 				if (fragment instanceof TextElement) {
-					str += ((TextElement)fragment).getText();
+					str = ((TextElement)fragment).getText();
+					List<JavaDocRegion> regions= getRegionsBeforeASTNode(snippetTag,(TextElement)fragment, tagElem);
+					for (JavaDocRegion region : regions) {
+						str = getJavaDocRegionString(region, str);
+					}
+					String name= tagElem.getTagName();
+					if (TagElement.TAG_HIGHLIGHT.equals(name)) {
+						str= handleSnippetHighlight(str, tagElem.tagProperties());
+					} else if (TagElement.TAG_REPLACE.equals(name)) {
+						str= handleSnippetReplace(str, tagElem.tagProperties());
+					}
+					regions= getRegionsAfterASTNode(snippetTag,(TextElement)fragment, tagElem);
+					for (JavaDocRegion region : regions) {
+						str = getJavaDocRegionString(region, str);
+					}
 				}
 			}
-			String name= tagElem.getTagName();
-			if (TagElement.TAG_HIGHLIGHT.equals(name)) {
-				str= handleSnippetHighlight(str, tagElem.tagProperties());
-			} else if (TagElement.TAG_REPLACE.equals(name)) {
-				str= handleSnippetReplace(str, tagElem.tagProperties());
-			}
+
 		}
 		return str;
 	}
 
-	private String getJavadocRegionString(JavaDocRegion region) {
+	private List<JavaDocRegion> getRegionsBeforeASTNode(TagElement snippetTag,TextElement textElement, ASTNode node) {
+		List<JavaDocRegion> regions= snippetTag.tagRegionsContainingTextElement(textElement);
+		List<JavaDocRegion> regionsBefore = new ArrayList<>();
+		int nodeStart = node.getStartPosition();
+		for (JavaDocRegion region : regions) {
+			for (Object tagObj : region.tags()) {
+				if (tagObj instanceof TagElement) {
+					int start = ((TagElement)tagObj).getStartPosition();
+					if (start < nodeStart) {
+						regionsBefore.add(region);
+						break;
+					}
+				}
+			}
+		}
+		return regionsBefore;
+	}
+
+	private List<JavaDocRegion> getRegionsAfterASTNode(TagElement snippetTag,TextElement textElement, ASTNode node) {
+		List<JavaDocRegion> regions= snippetTag.tagRegionsContainingTextElement(textElement);
+		List<JavaDocRegion> regionsAfter = new ArrayList<>();
+		int nodeStart = node.getStartPosition();
+		for (JavaDocRegion region : regions) {
+			for (Object tagObj : region.tags()) {
+				if (tagObj instanceof TagElement) {
+					int start = ((TagElement)tagObj).getStartPosition();
+					if (start > nodeStart) {
+						regionsAfter.add(region);
+						break;
+					}
+				}
+			}
+		}
+		return regionsAfter;
+	}
+
+	private String getDummyJavadocRegionString(JavaDocRegion jregion, TagElement snippetTag) {
 		String str= ""; //$NON-NLS-1$
-		if (region != null) {
-			List<Object> tags = region.tags();
-			List<Object> fragments = region.fragments();
+		if (jregion != null) {
+			List<Object> tags = jregion.tags();
+			List<Object> fragments = jregion.fragments();
 			if (fragments.size() == 0) {
 				return str;
 			}
 			for (Object fragment: fragments) {
 				if (fragment instanceof TextElement) {
-					str += ((TextElement)fragment).getText();
-				}
-				if (fragment instanceof JavaDocRegion) {
-					str += getJavadocRegionString((JavaDocRegion)fragment);
-				}
-			}
-			if (str.length() > 0 && tags.size() > 0)  {
-				for (Object tag : tags) {
-					if (tag instanceof TagElement) {
-						TagElement tagElem= (TagElement) tag;
-						String name= tagElem.getTagName();
-						if (TagElement.TAG_HIGHLIGHT.equals(name)) {
-							str= handleSnippetHighlight(str, tagElem.tagProperties());
-						} else if (TagElement.TAG_REPLACE.equals(name)) {
-							str= handleSnippetReplace(str, tagElem.tagProperties());
+					String textStr = ((TextElement)fragment).getText();
+					List<JavaDocRegion> regions= getRegionsBeforeASTNode(snippetTag,(TextElement)fragment, jregion);
+					for (JavaDocRegion region : regions) {
+						textStr = getJavaDocRegionString(region, textStr);
+					}
+					if (textStr.length() > 0 && tags.size() > 0)  {
+						for (Object tag : tags) {
+							if (tag instanceof TagElement) {
+								TagElement tagElem= (TagElement) tag;
+								String name= tagElem.getTagName();
+								if (TagElement.TAG_HIGHLIGHT.equals(name)) {
+									textStr= handleSnippetHighlight(textStr, tagElem.tagProperties());
+								} else if (TagElement.TAG_REPLACE.equals(name)) {
+									textStr= handleSnippetReplace(textStr, tagElem.tagProperties());
+								}
+							}
 						}
 					}
+					regions= getRegionsAfterASTNode(snippetTag,(TextElement)fragment, jregion);
+					for (JavaDocRegion region : regions) {
+						textStr = getJavaDocRegionString(region, textStr);
+					}
+					str += textStr;
+				}
+				if (fragment instanceof JavaDocRegion) {
+					str += getDummyJavadocRegionString((JavaDocRegion)fragment, snippetTag);
 				}
 			}
 		}
