@@ -1978,6 +1978,8 @@ public class JavadocContentAccess2 {
 						changedText= handleSnippetHighlight(changedText, tagElem.tagProperties());
 					} else if (TagElement.TAG_REPLACE.equals(name)) {
 						changedText= handleSnippetReplace(changedText, tagElem.tagProperties());
+					} else if (TagElement.TAG_LINK.equals(name)) {
+						changedText= handleSnippetLink(changedText, tagElem.tagProperties());
 					}
 				}
 			}
@@ -2001,6 +2003,8 @@ public class JavadocContentAccess2 {
 						str= handleSnippetHighlight(str, tagElem.tagProperties());
 					} else if (TagElement.TAG_REPLACE.equals(name)) {
 						str= handleSnippetReplace(str, tagElem.tagProperties());
+					}  else if (TagElement.TAG_LINK.equals(name)) {
+						str= handleSnippetLink(str, tagElem.tagProperties());
 					}
 					regions= getRegionsAfterASTNode(snippetTag,(TextElement)fragment, tagElem);
 					for (JavaDocRegion region : regions) {
@@ -2073,6 +2077,8 @@ public class JavadocContentAccess2 {
 									textStr= handleSnippetHighlight(textStr, tagElem.tagProperties());
 								} else if (TagElement.TAG_REPLACE.equals(name)) {
 									textStr= handleSnippetReplace(textStr, tagElem.tagProperties());
+								} else if (TagElement.TAG_LINK.equals(name)) {
+									textStr= handleSnippetLink(textStr, tagElem.tagProperties());
 								}
 							}
 						}
@@ -2189,6 +2195,113 @@ public class JavadocContentAccess2 {
 		return text;
 	}
 
+	private String handleSnippetLink(String text, List<? extends ASTNode> tagProperties) {
+		try {
+			String regExValue = getPropertyValue("regex", tagProperties); //$NON-NLS-1$
+			String subStringValue = getPropertyValue("substring", tagProperties); //$NON-NLS-1$
+			String additionalStartTag= getLinkHtmlTag(tagProperties);
+			String additionalEndTag= ""; //$NON-NLS-1$
+			if (additionalStartTag.length() > 0) {
+				additionalEndTag= "</" + additionalStartTag + '>'; //$NON-NLS-1$
+				additionalStartTag= '<' + additionalStartTag + '>';
+			}
+			ASTNode target = getPropertyNodeValue("target", tagProperties); //$NON-NLS-1$
+			String linkRefTxt = getLinkRef(target);
+			String startDefLink = linkRefTxt + additionalStartTag;
+			String endDefLink = additionalEndTag+"</a>"; //$NON-NLS-1$
+			int additionalLength = startDefLink.length() + endDefLink.length();
+			Pattern regexPattern = null;
+			if (regExValue != null) {
+				regexPattern = Pattern.compile(regExValue);
+			}
+			String modifiedText = text;
+			if (regexPattern != null) {
+				Matcher matcher = regexPattern.matcher(modifiedText);
+				StringBuilder strBuild= new StringBuilder();
+				int finalMatchIndex = 0;
+				while (matcher.find()) {
+					finalMatchIndex = matcher.end();
+					String replacementStr= startDefLink + modifiedText.substring(matcher.start(), matcher.end()) + endDefLink;
+					matcher.appendReplacement(strBuild, replacementStr);
+				}
+				modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
+			} else if (subStringValue != null) {
+				int startIndex = 0;
+				while (true) {
+					startIndex = modifiedText.indexOf(subStringValue, startIndex);
+					if (startIndex == -1) {
+						break;
+					} else {
+						modifiedText = modifiedText.substring(0, startIndex) + startDefLink + subStringValue + endDefLink + modifiedText.substring(startIndex + subStringValue.length());
+						startIndex = startIndex + subStringValue.length() + additionalLength;
+					}
+				}
+			} else {
+				String subText = modifiedText.trim();
+				String pre = ""; //$NON-NLS-1$
+				String post = ""; //$NON-NLS-1$
+				if (subText.length() < text.length()) {
+					int index = text.indexOf(subText);
+					if (index > 0) {
+						pre = text.substring(0, index);
+						post = text.substring(index + subText.length());
+					}
+				}
+				modifiedText = pre + startDefLink + subText + endDefLink + post;
+			}
+			return modifiedText;
+		} catch (PatternSyntaxException e) {
+			// do nothing
+		}
+		return text;
+	}
+
+	private String getLinkRef(ASTNode node) {
+		String str= ""; //$NON-NLS-1$
+		String refTypeName= null;
+		String refMemberName= null;
+		String[] refMethodParamTypes= null;
+		String[] refMethodParamNames= null;
+		if (node instanceof Name) {
+			Name name = (Name) node;
+			refTypeName= name.getFullyQualifiedName();
+		} else if (node instanceof MemberRef) {
+			MemberRef memberRef= (MemberRef) node;
+			Name qualifier= memberRef.getQualifier();
+			refTypeName= qualifier == null ? "" : qualifier.getFullyQualifiedName(); //$NON-NLS-1$
+			refMemberName= memberRef.getName().getIdentifier();
+		} else if (node instanceof MethodRef) {
+			MethodRef methodRef= (MethodRef) node;
+			Name qualifier= methodRef.getQualifier();
+			refTypeName= qualifier == null ? "" : qualifier.getFullyQualifiedName(); //$NON-NLS-1$
+			refMemberName= methodRef.getName().getIdentifier();
+			List<MethodRefParameter> params= methodRef.parameters();
+			int ps= params.size();
+			refMethodParamTypes= new String[ps];
+			refMethodParamNames= new String[ps];
+			for (int i= 0; i < ps; i++) {
+				MethodRefParameter param= params.get(i);
+				refMethodParamTypes[i]= ASTNodes.asString(param.getType());
+				SimpleName paramName= param.getName();
+				if (paramName != null)
+					refMethodParamNames[i]= paramName.getIdentifier();
+			}
+		}
+
+		if (refTypeName != null) {
+			str +="<a href='"; //$NON-NLS-1$
+			try {
+				String scheme= JavaElementLinks.JAVADOC_SCHEME;
+				String uri= JavaElementLinks.createURI(scheme, fElement, refTypeName, refMemberName, refMethodParamTypes);
+				str += uri;
+			} catch (URISyntaxException e) {
+				JavaPlugin.log(e);
+			}
+			str += "'>"; //$NON-NLS-1$
+		}
+		return str;
+	}
+
 	private String getHighlightHtmlTag(List<? extends ASTNode> tagProperties) {
 		String defaultTag= "b"; //$NON-NLS-1$
 		if (tagProperties != null) {
@@ -2209,6 +2322,29 @@ public class JavadocContentAccess2 {
 								break;
 							default :
 								defaultTag= ""; //$NON-NLS-1$
+								break;
+						}
+						break;
+					}
+				}
+			}
+		}
+		return defaultTag;
+	}
+
+	private String getLinkHtmlTag(List<? extends ASTNode> tagProperties) {
+		String defaultTag= "code"; //$NON-NLS-1$
+		if (tagProperties != null) {
+			for (ASTNode node : tagProperties) {
+				if (node instanceof TagProperty) {
+					TagProperty tagProp = (TagProperty) node;
+					if ("type".equals(tagProp.getName())) { //$NON-NLS-1$
+						String tagValue = stripQuotes(tagProp.getStringValue());
+						switch (tagValue) {
+							case "linkplain" :  //$NON-NLS-1$
+								defaultTag= ""; //$NON-NLS-1$
+								break;
+							default:
 								break;
 						}
 						break;
@@ -2252,6 +2388,21 @@ public class JavadocContentAccess2 {
 					TagProperty tagProp = (TagProperty) node;
 					if (property.equals(tagProp.getName())) {
 						defaultTag= stripQuotes(tagProp.getStringValue());
+						break;
+					}
+				}
+			}
+		}
+		return defaultTag;
+	}
+	private ASTNode getPropertyNodeValue(String property, List<? extends ASTNode> tagProperties) {
+		ASTNode defaultTag= null;
+		if (tagProperties != null && property!= null) {
+			for (ASTNode node : tagProperties) {
+				if (node instanceof TagProperty) {
+					TagProperty tagProp = (TagProperty) node;
+					if (property.equals(tagProp.getName())) {
+						defaultTag= tagProp.getNodeValue();
 						break;
 					}
 				}
