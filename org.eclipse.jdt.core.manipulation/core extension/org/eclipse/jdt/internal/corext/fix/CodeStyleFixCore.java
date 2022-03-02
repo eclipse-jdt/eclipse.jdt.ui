@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -711,7 +712,19 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 			ITypeBinding declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
 			if (declaringTypeBinding != null) {
 				declaringTypeBinding= declaringTypeBinding.getTypeDeclaration(); // use generic to avoid any type arguments
-
+				int modifiers= declaringTypeBinding.getModifiers();
+				if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers) && !Modifier.isPrivate(modifiers)) {
+					PackageDeclaration packageDecl= astRoot.getPackage();
+					if (packageDecl == null) {
+						if (declaringTypeBinding.getPackage() != null) {
+							return null;
+						}
+					} else {
+					    if (!declaringTypeBinding.getPackage().isEqualTo(packageDecl.resolveBinding())) {
+					    	return null;
+					    }
+					}
+				}
 				declaring= new ToStaticAccessOperation(declaringTypeBinding, qualifier, createdBlocks);
 			}
 			ToStaticAccessOperation instance= null;

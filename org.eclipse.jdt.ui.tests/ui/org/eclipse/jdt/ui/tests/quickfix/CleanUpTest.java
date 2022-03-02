@@ -3541,6 +3541,36 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testCodeStyleBug579044() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "class E1 {public static String FOO = \"FOO\";}\n";
+		pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E2 extends E1 {}\n";
+		pack1.createCompilationUnit("E2.java", sample, false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test1.E2;\n" //
+				+ "public class E3 {\n" //
+				+ "    public String foo() {\n" //
+				+ "        return E2.FOO;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack2.createCompilationUnit("E3.java", sample, false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+	}
+
+	@Test
 	public void testCodeStyleBug189398() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
