@@ -10,3 +10,4 @@ Comparator errors in I20201204-0340
 Bug 574012 - Comparator errors in I20210604-0350
 Bug 574522 - 4.21 I-Build: I20210628-1800 - Comparator Errors Found
 Bug 577483 - Comparator errors in I20211126-0230
+Bug 579126 - 4.24 I-Build: I20220307-0340 - Comparator Errors Found
