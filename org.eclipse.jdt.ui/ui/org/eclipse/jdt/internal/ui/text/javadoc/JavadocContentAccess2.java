@@ -34,9 +34,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -90,7 +87,6 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.JavaDocRegion;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodRef;
@@ -461,6 +457,8 @@ public class JavadocContentAccess2 {
 	 */
 	private final IJavaElement fElement;
 
+	private final JavaDocSnippetStringEvaluator fSnippetStringEvaluator;
+
 	/**
 	 * The method, or <code>null</code> if {@link #fElement} is not a method where @inheritDoc could
 	 * work.
@@ -482,6 +480,7 @@ public class JavadocContentAccess2 {
 		Assert.isNotNull(element);
 		Assert.isTrue(element instanceof IMethod || element instanceof ILocalVariable || element instanceof ITypeParameter);
 		fElement= element;
+		fSnippetStringEvaluator= new JavaDocSnippetStringEvaluator(fElement);
 		fMethod= (IMethod) ((element instanceof ILocalVariable || element instanceof ITypeParameter) ? element.getParent() : element);
 		fJavadoc= javadoc;
 		fSource= source;
@@ -491,6 +490,7 @@ public class JavadocContentAccess2 {
 	private JavadocContentAccess2(IJavaElement element, Javadoc javadoc, String source) {
 		Assert.isTrue(element instanceof IMember || element instanceof IPackageFragment || element instanceof ILocalVariable || element instanceof ITypeParameter);
 		fElement= element;
+		fSnippetStringEvaluator= new JavaDocSnippetStringEvaluator(fElement);
 		fMethod= null;
 		fJavadoc= javadoc;
 		fSource= source;
@@ -1931,22 +1931,7 @@ public class JavadocContentAccess2 {
 				if (fs > 0) {
 					fBuf.append("<pre><code>"); //$NON-NLS-1$
 					fBuf.append(BlOCK_TAG_ENTRY_START);
-					for(Object fragment : node.fragments()) {
-						if (fragment instanceof  TextElement) {
-							TextElement memberRef= (TextElement) fragment;
-							fBuf.append(getTextElementString(node, memberRef));
-						} else if (fragment instanceof TagElement) {
-							TagElement tagElem= (TagElement) fragment;
-							String str= getSnippetTagElementString(node, tagElem);
-							fBuf.append(str);
-						} else if (fragment instanceof JavaDocRegion) {
-							JavaDocRegion region= (JavaDocRegion) fragment;
-							if (region.isDummyRegion()) {
-								String str = getDummyJavadocRegionString(region, node);
-								fBuf.append(str);
-							}
-						}
-					}
+					fSnippetStringEvaluator.AddTagElementString(node, fBuf);
 					fBuf.append(BlOCK_TAG_ENTRY_END);
 				}
 			} else {
@@ -1955,472 +1940,9 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private String getTextElementString(TagElement snippetTag, TextElement textElem) {
-		String text = textElem.getText();
-		String changedText = text;
-		List<JavaDocRegion> regions= snippetTag.tagRegionsContainingTextElement(textElem);
-		for (JavaDocRegion region : regions) {
-			changedText = getJavaDocRegionString(region, changedText);
-		}
-		return changedText;
-	}
-
-	private String getJavaDocRegionString(JavaDocRegion region, String str) {
-		String changedText = ""; //$NON-NLS-1$
-		if (region != null && str != null) {
-			changedText = str;
-			List<Object> tags= region.tags();
-			for (Object tag : tags) {
-				if (tag instanceof TagElement) {
-					TagElement tagElem = (TagElement) tag;
-					String name= tagElem.getTagName();
-					if (TagElement.TAG_HIGHLIGHT.equals(name)) {
-						changedText= handleSnippetHighlight(changedText, tagElem.tagProperties());
-					} else if (TagElement.TAG_REPLACE.equals(name)) {
-						changedText= handleSnippetReplace(changedText, tagElem.tagProperties());
-					} else if (TagElement.TAG_LINK.equals(name)) {
-						changedText= handleSnippetLink(changedText, tagElem.tagProperties());
-					}
-				}
-			}
-		}
-		return changedText;
-	}
-
-	private String getSnippetTagElementString(TagElement snippetTag, TagElement tagElem) {
-		String str= ""; //$NON-NLS-1$
-		if (tagElem != null) {
-			List<Object> fragments = tagElem.fragments();
-			for (Object fragment : fragments) {
-				if (fragment instanceof TextElement) {
-					str = ((TextElement)fragment).getText();
-					List<JavaDocRegion> regions= getRegionsBeforeASTNode(snippetTag,(TextElement)fragment, tagElem);
-					for (JavaDocRegion region : regions) {
-						str = getJavaDocRegionString(region, str);
-					}
-					String name= tagElem.getTagName();
-					if (TagElement.TAG_HIGHLIGHT.equals(name)) {
-						str= handleSnippetHighlight(str, tagElem.tagProperties());
-					} else if (TagElement.TAG_REPLACE.equals(name)) {
-						str= handleSnippetReplace(str, tagElem.tagProperties());
-					}  else if (TagElement.TAG_LINK.equals(name)) {
-						str= handleSnippetLink(str, tagElem.tagProperties());
-					}
-					regions= getRegionsAfterASTNode(snippetTag,(TextElement)fragment, tagElem);
-					for (JavaDocRegion region : regions) {
-						str = getJavaDocRegionString(region, str);
-					}
-				}
-			}
-
-		}
-		return str;
-	}
-
-	private List<JavaDocRegion> getRegionsBeforeASTNode(TagElement snippetTag,TextElement textElement, ASTNode node) {
-		List<JavaDocRegion> regions= snippetTag.tagRegionsContainingTextElement(textElement);
-		List<JavaDocRegion> regionsBefore = new ArrayList<>();
-		int nodeStart = node.getStartPosition();
-		for (JavaDocRegion region : regions) {
-			for (Object tagObj : region.tags()) {
-				if (tagObj instanceof TagElement) {
-					int start = ((TagElement)tagObj).getStartPosition();
-					if (start < nodeStart) {
-						regionsBefore.add(region);
-						break;
-					}
-				}
-			}
-		}
-		return regionsBefore;
-	}
-
-	private List<JavaDocRegion> getRegionsAfterASTNode(TagElement snippetTag,TextElement textElement, ASTNode node) {
-		List<JavaDocRegion> regions= snippetTag.tagRegionsContainingTextElement(textElement);
-		List<JavaDocRegion> regionsAfter = new ArrayList<>();
-		int nodeStart = node.getStartPosition();
-		for (JavaDocRegion region : regions) {
-			for (Object tagObj : region.tags()) {
-				if (tagObj instanceof TagElement) {
-					int start = ((TagElement)tagObj).getStartPosition();
-					if (start > nodeStart) {
-						regionsAfter.add(region);
-						break;
-					}
-				}
-			}
-		}
-		return regionsAfter;
-	}
-
-	private String getDummyJavadocRegionString(JavaDocRegion jregion, TagElement snippetTag) {
-		String str= ""; //$NON-NLS-1$
-		if (jregion != null) {
-			List<Object> tags = jregion.tags();
-			List<Object> fragments = jregion.fragments();
-			if (fragments.size() == 0) {
-				return str;
-			}
-			for (Object fragment: fragments) {
-				if (fragment instanceof TextElement) {
-					String textStr = ((TextElement)fragment).getText();
-					List<JavaDocRegion> regions= getRegionsBeforeASTNode(snippetTag,(TextElement)fragment, jregion);
-					for (JavaDocRegion region : regions) {
-						textStr = getJavaDocRegionString(region, textStr);
-					}
-					if (textStr.length() > 0 && tags.size() > 0)  {
-						for (Object tag : tags) {
-							if (tag instanceof TagElement) {
-								TagElement tagElem= (TagElement) tag;
-								String name= tagElem.getTagName();
-								if (TagElement.TAG_HIGHLIGHT.equals(name)) {
-									textStr= handleSnippetHighlight(textStr, tagElem.tagProperties());
-								} else if (TagElement.TAG_REPLACE.equals(name)) {
-									textStr= handleSnippetReplace(textStr, tagElem.tagProperties());
-								} else if (TagElement.TAG_LINK.equals(name)) {
-									textStr= handleSnippetLink(textStr, tagElem.tagProperties());
-								}
-							}
-						}
-					}
-					regions= getRegionsAfterASTNode(snippetTag,(TextElement)fragment, jregion);
-					for (JavaDocRegion region : regions) {
-						textStr = getJavaDocRegionString(region, textStr);
-					}
-					str += textStr;
-				}
-				if (fragment instanceof JavaDocRegion) {
-					str += getDummyJavadocRegionString((JavaDocRegion)fragment, snippetTag);
-				}
-			}
-		}
-		return str;
-	}
-
 	private void handleInvalidSnippet() {
 		fBuf.append("<pre><code>\n"); //$NON-NLS-1$
 		fBuf.append("<mark>invalid @Snippet</mark>"); //$NON-NLS-1$
-	}
-
-	private String handleSnippetReplace(String text, List<? extends ASTNode> tagProperties) {
-		try {
-			boolean process = arePropertyValuesStringLiterals(tagProperties) ? true : false;
-			String regExValue = getPropertyValue("regex", tagProperties); //$NON-NLS-1$
-			String subStringValue = getPropertyValue("substring", tagProperties); //$NON-NLS-1$
-			String substitution = getPropertyValue("replacement", tagProperties); //$NON-NLS-1$
-			Pattern regexPattern = null;
-			if (regExValue != null) {
-				regexPattern = Pattern.compile(regExValue);
-			}
-			String modifiedText = text;
-			if (process) {
-				if (regexPattern != null && process) {
-					Matcher matcher = regexPattern.matcher(modifiedText);
-					StringBuilder strBuild= new StringBuilder();
-					int finalMatchIndex = 0;
-					while (matcher.find()) {
-						finalMatchIndex = matcher.end();
-						matcher.appendReplacement(strBuild, substitution);
-					}
-					modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
-				} else if (subStringValue != null) {
-					int startIndex = 0;
-					while (true) {
-						startIndex = modifiedText.indexOf(subStringValue, startIndex);
-						if (startIndex == -1) {
-							break;
-						} else {
-							modifiedText = modifiedText.substring(0, startIndex) + substitution + modifiedText.substring(startIndex + subStringValue.length());
-							startIndex = startIndex + substitution.length() ;
-						}
-					}
-				} else {
-					modifiedText = substitution;
-				}
-			}
-			return modifiedText;
-		} catch (PatternSyntaxException e) {
-			// do nothing
-		}
-		return text;
-	}
-
-	private String handleSnippetHighlight(String text, List<? extends ASTNode> tagProperties) {
-		try {
-			String defHighlight= getHighlightHtmlTag(tagProperties);
-			String startDefHighlight = '<' + defHighlight + '>';
-			String endDefHighlight = "</" + defHighlight + '>'; //$NON-NLS-1$
-			boolean process = true;
-			if (defHighlight.length() == 0 || !arePropertyValuesStringLiterals(tagProperties)) {
-				process = false;
-			}
-			String regExValue = getPropertyValue("regex", tagProperties); //$NON-NLS-1$
-			String subStringValue = getPropertyValue("substring", tagProperties); //$NON-NLS-1$
-			int additionalLength = startDefHighlight.length() + endDefHighlight.length();
-			Pattern regexPattern = null;
-			if (regExValue != null) {
-				regexPattern = Pattern.compile(regExValue);
-			}
-			String modifiedText = text;
-			if (process) {
-				if (regexPattern != null && process) {
-					Matcher matcher = regexPattern.matcher(modifiedText);
-					StringBuilder strBuild= new StringBuilder();
-					int finalMatchIndex = 0;
-					while (matcher.find()) {
-						finalMatchIndex = matcher.end();
-						String replacementStr= startDefHighlight + modifiedText.substring(matcher.start(), matcher.end()) + endDefHighlight;
-						matcher.appendReplacement(strBuild, replacementStr);
-					}
-					modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
-				} else if (subStringValue != null) {
-					int startIndex = 0;
-					while (true) {
-						startIndex = modifiedText.indexOf(subStringValue, startIndex);
-						if (startIndex == -1) {
-							break;
-						} else {
-							modifiedText = modifiedText.substring(0, startIndex) + startDefHighlight + subStringValue + endDefHighlight + modifiedText.substring(startIndex + subStringValue.length());
-							startIndex = startIndex + subStringValue.length() + additionalLength;
-						}
-					}
-				} else {
-					modifiedText = startDefHighlight + modifiedText + endDefHighlight;
-				}
-			}
-			return modifiedText;
-		} catch (PatternSyntaxException e) {
-			// do nothing
-		}
-		return text;
-	}
-
-	private String handleSnippetLink(String text, List<? extends ASTNode> tagProperties) {
-		try {
-			String regExValue = getPropertyValue("regex", tagProperties); //$NON-NLS-1$
-			String subStringValue = getPropertyValue("substring", tagProperties); //$NON-NLS-1$
-			String additionalStartTag= getLinkHtmlTag(tagProperties);
-			String additionalEndTag= ""; //$NON-NLS-1$
-			if (additionalStartTag.length() > 0) {
-				additionalEndTag= "</" + additionalStartTag + '>'; //$NON-NLS-1$
-				additionalStartTag= '<' + additionalStartTag + '>';
-			}
-			ASTNode target = getPropertyNodeValue("target", tagProperties); //$NON-NLS-1$
-			String linkRefTxt = getLinkRef(target);
-			String startDefLink = linkRefTxt + additionalStartTag;
-			String endDefLink = additionalEndTag+"</a>"; //$NON-NLS-1$
-			int additionalLength = startDefLink.length() + endDefLink.length();
-			Pattern regexPattern = null;
-			if (regExValue != null) {
-				regexPattern = Pattern.compile(regExValue);
-			}
-			String modifiedText = text;
-			if (regexPattern != null) {
-				Matcher matcher = regexPattern.matcher(modifiedText);
-				StringBuilder strBuild= new StringBuilder();
-				int finalMatchIndex = 0;
-				while (matcher.find()) {
-					finalMatchIndex = matcher.end();
-					String replacementStr= startDefLink + modifiedText.substring(matcher.start(), matcher.end()) + endDefLink;
-					matcher.appendReplacement(strBuild, replacementStr);
-				}
-				modifiedText = strBuild.toString() + modifiedText.substring(finalMatchIndex);
-			} else if (subStringValue != null) {
-				int startIndex = 0;
-				while (true) {
-					startIndex = modifiedText.indexOf(subStringValue, startIndex);
-					if (startIndex == -1) {
-						break;
-					} else {
-						modifiedText = modifiedText.substring(0, startIndex) + startDefLink + subStringValue + endDefLink + modifiedText.substring(startIndex + subStringValue.length());
-						startIndex = startIndex + subStringValue.length() + additionalLength;
-					}
-				}
-			} else {
-				String subText = modifiedText.trim();
-				String pre = ""; //$NON-NLS-1$
-				String post = ""; //$NON-NLS-1$
-				if (subText.length() < text.length()) {
-					int index = text.indexOf(subText);
-					if (index > 0) {
-						pre = text.substring(0, index);
-						post = text.substring(index + subText.length());
-					}
-				}
-				modifiedText = pre + startDefLink + subText + endDefLink + post;
-			}
-			return modifiedText;
-		} catch (PatternSyntaxException e) {
-			// do nothing
-		}
-		return text;
-	}
-
-	private String getLinkRef(ASTNode node) {
-		String str= ""; //$NON-NLS-1$
-		String refTypeName= null;
-		String refMemberName= null;
-		String[] refMethodParamTypes= null;
-		String[] refMethodParamNames= null;
-		if (node instanceof Name) {
-			Name name = (Name) node;
-			refTypeName= name.getFullyQualifiedName();
-		} else if (node instanceof MemberRef) {
-			MemberRef memberRef= (MemberRef) node;
-			Name qualifier= memberRef.getQualifier();
-			refTypeName= qualifier == null ? "" : qualifier.getFullyQualifiedName(); //$NON-NLS-1$
-			refMemberName= memberRef.getName().getIdentifier();
-		} else if (node instanceof MethodRef) {
-			MethodRef methodRef= (MethodRef) node;
-			Name qualifier= methodRef.getQualifier();
-			refTypeName= qualifier == null ? "" : qualifier.getFullyQualifiedName(); //$NON-NLS-1$
-			refMemberName= methodRef.getName().getIdentifier();
-			List<MethodRefParameter> params= methodRef.parameters();
-			int ps= params.size();
-			refMethodParamTypes= new String[ps];
-			refMethodParamNames= new String[ps];
-			for (int i= 0; i < ps; i++) {
-				MethodRefParameter param= params.get(i);
-				refMethodParamTypes[i]= ASTNodes.asString(param.getType());
-				SimpleName paramName= param.getName();
-				if (paramName != null)
-					refMethodParamNames[i]= paramName.getIdentifier();
-			}
-		}
-
-		if (refTypeName != null) {
-			str +="<a href='"; //$NON-NLS-1$
-			try {
-				String scheme= JavaElementLinks.JAVADOC_SCHEME;
-				String uri= JavaElementLinks.createURI(scheme, fElement, refTypeName, refMemberName, refMethodParamTypes);
-				str += uri;
-			} catch (URISyntaxException e) {
-				JavaPlugin.log(e);
-			}
-			str += "'>"; //$NON-NLS-1$
-		}
-		return str;
-	}
-
-	private String getHighlightHtmlTag(List<? extends ASTNode> tagProperties) {
-		String defaultTag= "b"; //$NON-NLS-1$
-		if (tagProperties != null) {
-			for (ASTNode node : tagProperties) {
-				if (node instanceof TagProperty) {
-					TagProperty tagProp = (TagProperty) node;
-					if ("type".equals(tagProp.getName())) { //$NON-NLS-1$
-						String tagValue = stripQuotes(tagProp.getStringValue());
-						switch (tagValue) {
-							case "bold" :  //$NON-NLS-1$
-								defaultTag= "b"; //$NON-NLS-1$
-								break;
-							case "italic" :  //$NON-NLS-1$
-								defaultTag= "i"; //$NON-NLS-1$
-								break;
-							case "highlighted" :  //$NON-NLS-1$
-								defaultTag= "mark"; //$NON-NLS-1$
-								break;
-							default :
-								defaultTag= ""; //$NON-NLS-1$
-								break;
-						}
-						break;
-					}
-				}
-			}
-		}
-		return defaultTag;
-	}
-
-	private String getLinkHtmlTag(List<? extends ASTNode> tagProperties) {
-		String defaultTag= "code"; //$NON-NLS-1$
-		if (tagProperties != null) {
-			for (ASTNode node : tagProperties) {
-				if (node instanceof TagProperty) {
-					TagProperty tagProp = (TagProperty) node;
-					if ("type".equals(tagProp.getName())) { //$NON-NLS-1$
-						String tagValue = stripQuotes(tagProp.getStringValue());
-						switch (tagValue) {
-							case "linkplain" :  //$NON-NLS-1$
-								defaultTag= ""; //$NON-NLS-1$
-								break;
-							default:
-								break;
-						}
-						break;
-					}
-				}
-			}
-		}
-		return defaultTag;
-	}
-
-	private boolean arePropertyValuesStringLiterals(List<? extends ASTNode> tagProperties) {
-		boolean val= true;
-		if (tagProperties != null) {
-			final String SUBSTRING = "substring"; //$NON-NLS-1$
-			final String REGEX = "regex"; //$NON-NLS-1$
-			final String TYPE = "type"; //$NON-NLS-1$
-			for (ASTNode node : tagProperties) {
-				if (node instanceof TagProperty) {
-					TagProperty tagProp = (TagProperty) node;
-					String propName = tagProp.getName();
-					if (SUBSTRING.equals(propName)
-							|| REGEX.equals(propName)
-							|| TYPE.equals(propName)) {
-						String value= tagProp.getStringValue();
-						String changed= stripQuotes(value);
-						if (changed.equals(value)) {
-							val= false;
-							break;
-						}
-					}
-				}
-			}
-		}
-		return val;
-	}
-	private String getPropertyValue(String property, List<? extends ASTNode> tagProperties) {
-		String defaultTag= null;
-		if (tagProperties != null && property!= null) {
-			for (ASTNode node : tagProperties) {
-				if (node instanceof TagProperty) {
-					TagProperty tagProp = (TagProperty) node;
-					if (property.equals(tagProp.getName())) {
-						defaultTag= stripQuotes(tagProp.getStringValue());
-						break;
-					}
-				}
-			}
-		}
-		return defaultTag;
-	}
-	private ASTNode getPropertyNodeValue(String property, List<? extends ASTNode> tagProperties) {
-		ASTNode defaultTag= null;
-		if (tagProperties != null && property!= null) {
-			for (ASTNode node : tagProperties) {
-				if (node instanceof TagProperty) {
-					TagProperty tagProp = (TagProperty) node;
-					if (property.equals(tagProp.getName())) {
-						defaultTag= tagProp.getNodeValue();
-						break;
-					}
-				}
-			}
-		}
-		return defaultTag;
-	}
-
-	private String stripQuotes (String str) {
-		String newStr = str;
-		if (str != null && str.length() >= 2) {
-			int length = str.length();
-			if ((str.charAt(0) == '"' && str.charAt(length-1) == '"')
-					|| (str.charAt(0) == '\'' && str.charAt(length-1) == '\'')) {
-				newStr = str.substring(1, length-1);
-			}
-		}
-		return newStr;
 	}
 
 	private void handleIndex(List<? extends ASTNode> fragments) {
