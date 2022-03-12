@@ -1229,6 +1229,37 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUnusedCodeBug578911() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(Integer o1, Integer o2) {\n" //
+				+ "        o1 = (Integer)o1;\n" //
+				+ "        o2 = (((Integer)o2));\n" //
+				+ "        o1 = (Integer)o2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo(Integer o1, Integer o2) {\n" //
+				+ "        o1 = o2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
 	public void testUnusedCodeBug335173_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

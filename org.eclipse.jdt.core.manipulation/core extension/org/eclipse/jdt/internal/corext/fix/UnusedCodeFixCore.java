@@ -34,6 +34,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -616,6 +617,21 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				}
 			}
 
+			Expression exp= cast;
+			while (exp.getParent() instanceof ParenthesizedExpression) {
+				exp= (Expression)exp.getParent();
+			}
+			if (exp.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+				Assignment assignment= (Assignment)exp.getParent();
+				if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+					ExpressionStatement stmt= (ExpressionStatement)assignment.getParent();
+					Expression lexp= assignment.getLeftHandSide();
+					if (lexp.subtreeMatch(new ASTMatcher(), expression)) {
+						rewrite.remove(stmt, group);
+						return;
+					}
+				}
+			}
 			replaceCast(cast, expression, rewrite, group);
 		}
 	}
@@ -664,6 +680,22 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 						}
 					} else {
 						break;
+					}
+				}
+
+				Expression exp= castExpression;
+				while (exp.getParent() instanceof ParenthesizedExpression) {
+					exp= (Expression)exp.getParent();
+				}
+				if (exp.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+					Assignment assignment= (Assignment)exp.getParent();
+					if (assignment.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+						ExpressionStatement stmt= (ExpressionStatement)assignment.getParent();
+						Expression lexp= assignment.getLeftHandSide();
+						if (lexp.subtreeMatch(new ASTMatcher(), downChild)) {
+							rewrite.remove(stmt, group);
+							continue;
+						}
 					}
 				}
 
