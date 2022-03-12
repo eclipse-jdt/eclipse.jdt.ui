@@ -1929,7 +1929,13 @@ public class JavadocContentAccess2 {
 					&& ((Boolean)val).booleanValue()) {
 				int fs= node.fragments().size();
 				if (fs > 0) {
-					fBuf.append("<pre><code>"); //$NON-NLS-1$
+					fBuf.append("<pre>"); //$NON-NLS-1$
+					Object valID = node.getProperty(TagProperty.TAG_PROPERTY_SNIPPET_ID);
+					if (valID instanceof String && !valID.toString().isBlank()) {
+						fBuf.append("<code id=" +valID.toString()+">" ); //$NON-NLS-1$ //$NON-NLS-2$
+					} else {
+						fBuf.append("<code>") ;//$NON-NLS-1$
+					}
 					fBuf.append(BlOCK_TAG_ENTRY_START);
 					fSnippetStringEvaluator.AddTagElementString(node, fBuf);
 					fBuf.append(BlOCK_TAG_ENTRY_END);
