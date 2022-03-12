@@ -18454,6 +18454,16 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        } else {\n" //
 				+ "        }\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorNegativeCondition(Date date) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (!(date != null)) {\n" //
+				+ "            System.out.println(\"null args: we should not be here\");\n" //
+				+ "        } else {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        return;\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -18760,6 +18770,15 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        if (dates.isEmpty()) {\n" //
 				+ "            return;\n" //
 				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void refactorNegativeCondition(Date date) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (date != null) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        System.out.println(\"null args: we should not be here\");\n" //
+				+ "        return;\n" //
 				+ "    }\n" //
 				+ "}\n";
 

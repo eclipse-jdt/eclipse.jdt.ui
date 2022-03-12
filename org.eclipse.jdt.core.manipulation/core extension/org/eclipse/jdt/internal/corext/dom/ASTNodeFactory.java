@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -187,6 +187,31 @@ public class ASTNodeFactory {
 	 * @return the negated expression, as move or copy
 	 */
 	public static Expression negate(final AST ast, final ASTRewrite rewrite, final Expression booleanExpression, final boolean isMove) {
+		return negateAndUnwrap(ast, rewrite, booleanExpression, isMove, false);
+	}
+
+	/**
+	 * Negates the provided expression and applies the provided copy operation on
+	 * the returned expression and unwraps parentheses of result (e.g. !(x > 2) => x > 2:
+	 *
+	 * isValid  =>  !isValid
+	 * !isValid =>  isValid
+	 * true                           =>  false
+	 * false                          =>  true
+	 * i > 0                          =>  i <= 0
+	 * isValid || isEnabled           =>  !isValid && !isEnabled
+	 * !isValid || !isEnabled         =>  isValid && isEnabled
+	 * isValid ? (i > 0) : !isEnabled =>  isValid ? (i <= 0) : isEnabled
+	 *
+	 * @param ast The AST to create the resulting node with.
+	 * @param rewrite the rewrite
+	 * @param booleanExpression the expression to negate
+	 * @param isMove False if the returned nodes need to be new nodes
+	 * @param unWrap True if the expression being negated should remove parentheses of result
+	 * @return the negated expression, as move or copy
+	 */
+	public static Expression negateAndUnwrap(final AST ast, final ASTRewrite rewrite, final Expression booleanExpression,
+			final boolean isMove, final boolean unWrap) {
 		Expression unparenthesedExpression= ASTNodes.getUnparenthesedExpression(booleanExpression);
 
 		if (unparenthesedExpression instanceof PrefixExpression) {
@@ -200,6 +225,10 @@ public class ASTNodeFactory {
 					return negate(ast, rewrite, otherPrefixExpression.getOperand(), isMove);
 				}
 
+				if (unWrap) {
+					otherExpression= ASTNodes.getUnparenthesedExpression(otherExpression);
+				}
+
 				return isMove ? ASTNodes.createMoveTarget(rewrite, otherExpression) : ((Expression) rewrite.createCopyTarget(otherExpression));
 			}
 		} else if (unparenthesedExpression instanceof InfixExpression) {
@@ -207,7 +236,7 @@ public class ASTNodeFactory {
 			InfixExpression.Operator negatedOperator= ASTNodes.negatedInfixOperator(booleanOperation.getOperator());
 
 			if (negatedOperator != null) {
-				return getNegatedOperation(ast, rewrite, booleanOperation, negatedOperator, isMove);
+				return getNegatedOperation(ast, rewrite, booleanOperation, negatedOperator, isMove, unWrap);
 			}
 		} else if (unparenthesedExpression instanceof ConditionalExpression) {
 			ConditionalExpression aConditionalExpression= (ConditionalExpression) unparenthesedExpression;
@@ -232,7 +261,8 @@ public class ASTNodeFactory {
 		return not(ast, (Expression) rewrite.createCopyTarget(unparenthesedExpression));
 	}
 
-	private static Expression getNegatedOperation(final AST ast, final ASTRewrite rewrite, final InfixExpression booleanOperation, final InfixExpression.Operator negatedOperator, final boolean isMove) {
+	private static Expression getNegatedOperation(final AST ast, final ASTRewrite rewrite, final InfixExpression booleanOperation, final InfixExpression.Operator negatedOperator,
+			final boolean isMove, final boolean unWrap) {
 		List<Expression> allOperands= ASTNodes.allOperands(booleanOperation);
 		List<Expression> allTargetOperands;
 
@@ -270,6 +300,10 @@ public class ASTNodeFactory {
 		newInfixExpression.setRightOperand(allTargetOperands.remove(0));
 		newInfixExpression.extendedOperands().addAll(allTargetOperands);
 
+		if (unWrap) {
+			return newInfixExpression;
+		}
+		// otherwise, put parentheses around expression
 		ParenthesizedExpression parenthesizedExpression= ast.newParenthesizedExpression();
 		parenthesizedExpression.setExpression(newInfixExpression);
 		return parenthesizedExpression;
