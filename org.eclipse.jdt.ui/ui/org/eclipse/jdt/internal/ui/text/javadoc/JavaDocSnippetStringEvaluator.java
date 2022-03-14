@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Copyright (c) 2022 IBM Corporation and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import java.net.URISyntaxException;
@@ -573,7 +590,7 @@ public class JavaDocSnippetStringEvaluator {
 				if (node instanceof TagProperty) {
 					TagProperty tagProp = (TagProperty) node;
 					if ("type".equals(tagProp.getName())) { //$NON-NLS-1$
-						String tagValue = stripQuotes(tagProp.getStringValue());
+						String tagValue = tagProp.getStringValue();
 						switch (tagValue) {
 							case "linkplain" :  //$NON-NLS-1$
 								defaultTag= ""; //$NON-NLS-1$
@@ -596,7 +613,7 @@ public class JavaDocSnippetStringEvaluator {
 				if (node instanceof TagProperty) {
 					TagProperty tagProp = (TagProperty) node;
 					if (property.equals(tagProp.getName())) {
-						defaultTag= stripQuotes(tagProp.getStringValue());
+						defaultTag= tagProp.getStringValue();
 						break;
 					}
 				}
@@ -620,18 +637,6 @@ public class JavaDocSnippetStringEvaluator {
 		return defaultTag;
 	}
 
-	private String stripQuotes (String str) {
-		String newStr = str;
-		if (str != null && str.length() >= 2) {
-			int length = str.length();
-			if ((str.charAt(0) == '"' && str.charAt(length-1) == '"')
-					|| (str.charAt(0) == '\'' && str.charAt(length-1) == '\'')) {
-				newStr = str.substring(1, length-1);
-			}
-		}
-		return newStr;
-	}
-
 	private String getHighlightHtmlTag(List<? extends ASTNode> tagProperties) {
 		String defaultTag= "b"; //$NON-NLS-1$
 		if (tagProperties != null) {
@@ -639,7 +644,7 @@ public class JavaDocSnippetStringEvaluator {
 				if (node instanceof TagProperty) {
 					TagProperty tagProp = (TagProperty) node;
 					if ("type".equals(tagProp.getName())) { //$NON-NLS-1$
-						String tagValue = stripQuotes(tagProp.getStringValue());
+						String tagValue = tagProp.getStringValue();
 						switch (tagValue) {
 							case "bold" :  //$NON-NLS-1$
 								defaultTag= "b"; //$NON-NLS-1$
