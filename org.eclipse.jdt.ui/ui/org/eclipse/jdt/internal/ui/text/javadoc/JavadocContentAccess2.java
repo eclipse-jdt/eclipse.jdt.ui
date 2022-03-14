@@ -1925,8 +1925,9 @@ public class JavadocContentAccess2 {
 	private void handleSnippet(TagElement node) {
 		if (node != null) {
 			Object val = node.getProperty(TagProperty.TAG_PROPERTY_SNIPPET_IS_VALID);
+			Object valError = node.getProperty(TagProperty.TAG_PROPERTY_SNIPPET_ERROR);
 			if (val instanceof Boolean
-					&& ((Boolean)val).booleanValue()) {
+					&& ((Boolean)val).booleanValue() && valError == null) {
 				int fs= node.fragments().size();
 				if (fs > 0) {
 					fBuf.append("<pre>"); //$NON-NLS-1$
@@ -1941,14 +1942,21 @@ public class JavadocContentAccess2 {
 					fBuf.append(BlOCK_TAG_ENTRY_END);
 				}
 			} else {
-				handleInvalidSnippet();
+				handleInvalidSnippet(node);
 			}
 		}
 	}
 
-	private void handleInvalidSnippet() {
+	private void handleInvalidSnippet(TagElement node) {
 		fBuf.append("<pre><code>\n"); //$NON-NLS-1$
 		fBuf.append("<mark>invalid @Snippet</mark>"); //$NON-NLS-1$
+		Object val = node.getProperty(TagProperty.TAG_PROPERTY_SNIPPET_ERROR);
+		if (val instanceof String) {
+			fBuf.append("<br><p>"+val+"</p>"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		}
+
+
 	}
 
 	private void handleIndex(List<? extends ASTNode> fragments) {
