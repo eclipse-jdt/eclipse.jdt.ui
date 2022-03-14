@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Optional;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -105,16 +106,17 @@ public class BuildPathSupport {
 					return null;
 				}
 				resolvedVersion = bestMatch.getVersion().toString();
-				try {
-					if (bundleRoot == null) {
-						return new Path(FileLocator.getBundleFile(bestMatch).getAbsolutePath());
-					} else { // need the exploded jar
-						URL rootUrl= bestMatch.getEntry("/"); //$NON-NLS-1$
+				if (bundleRoot == null) {
+					Optional<File> bundleFile= FileLocator.getBundleFileLocation(bestMatch);
+					return bundleFile.isPresent() ? new Path(bundleFile.get().getAbsolutePath()) : null;
+				} else { // need the exploded jar
+					URL rootUrl= bestMatch.getEntry("/"); //$NON-NLS-1$
+					try {
 						URL fileRootUrl= FileLocator.toFileURL(rootUrl);
 						return new Path(fileRootUrl.getPath());
+					} catch (IOException ex) {
+						JUnitCorePlugin.log(ex);
 					}
-				} catch (IOException ex) {
-					JUnitCorePlugin.log(ex);
 				}
 			}
 			return null;

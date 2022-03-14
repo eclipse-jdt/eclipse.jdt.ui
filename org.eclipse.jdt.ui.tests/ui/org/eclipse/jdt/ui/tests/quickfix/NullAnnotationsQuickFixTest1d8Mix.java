@@ -96,7 +96,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		if (ANNOTATION_JAR_PATH == null) {
 			String version= "[1.1.0,2.0.0)"; // tests run at 1.8, but still use "old" null annotations
 			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
-			File bundleFile= FileLocator.getBundleFile(bundles[0]);
+			File bundleFile= FileLocator.getBundleFileLocation(bundles[0]).get();
 			if (bundleFile.isDirectory())
 				ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
 			else

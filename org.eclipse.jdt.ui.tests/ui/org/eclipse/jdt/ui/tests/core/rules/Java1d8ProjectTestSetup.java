@@ -18,7 +18,6 @@
 package org.eclipse.jdt.ui.tests.core.rules;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.osgi.framework.Bundle;
 
@@ -40,9 +39,9 @@ public class Java1d8ProjectTestSetup extends ProjectTestSetup {
 		super("TestSetupProject1d8", JavaProjectHelper.RT_STUBS_18);
 	}
 
-	public static String getJdtAnnotations20Path() throws IOException {
+	public static String getJdtAnnotations20Path() {
 		Bundle[] annotationsBundles= JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", "2.0.0"); //$NON-NLS-1$
-		File bundleFile= FileLocator.getBundleFile(annotationsBundles[0]);
+		File bundleFile= FileLocator.getBundleFileLocation(annotationsBundles[0]).get();
 		String path= bundleFile.getPath();
 		if (bundleFile.isDirectory()) {
 			path= bundleFile.getPath() + "/bin";

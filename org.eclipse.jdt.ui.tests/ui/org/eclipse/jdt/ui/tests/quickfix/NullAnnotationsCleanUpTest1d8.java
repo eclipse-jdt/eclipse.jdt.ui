@@ -78,7 +78,7 @@ public class NullAnnotationsCleanUpTest1d8 extends CleanUpTestCase {
 		if (this.ANNOTATION_JAR_PATH == null) {
 			String version= "[2.0.0,3.0.0)"; // tests run at 1.8, need the "new" null annotations
 			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
-			File bundleFile= FileLocator.getBundleFile(bundles[0]);
+			File bundleFile= FileLocator.getBundleFileLocation(bundles[0]).get();
 			if (bundleFile.isDirectory())
 				this.ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
 			else

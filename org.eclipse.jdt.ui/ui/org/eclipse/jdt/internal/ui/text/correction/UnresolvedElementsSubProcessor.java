@@ -20,13 +20,13 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Optional;
 
 import org.osgi.framework.Bundle;
 
@@ -775,13 +775,11 @@ public class UnresolvedElementsSubProcessor {
 
 	private static void addCopyAnnotationsJarProposal(final ICompilationUnit cu, final Name name, final String fullyQualifiedName, Bundle annotationsBundle, Collection<ICommandAccess> proposals) {
 		final IJavaProject javaProject= cu.getJavaProject();
-		final File bundleFile;
-		try {
-			bundleFile= FileLocator.getBundleFile(annotationsBundle);
-		} catch (IOException e) {
-			JavaPlugin.log(e);
+		Optional<File> bundleFileLocation= FileLocator.getBundleFileLocation(annotationsBundle);
+		if (bundleFileLocation.isEmpty()) {
 			return;
 		}
+		File bundleFile= bundleFileLocation.get();
 		if (!bundleFile.isFile() || !bundleFile.canRead())
 			return; // we only support a JAR'd bundle, so this won't work in the runtime if you have org.eclipse.jdt.annotation in source.
 
