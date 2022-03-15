@@ -230,7 +230,6 @@ public class JavaDocSnippetStringEvaluator {
 		while (iterator.hasNext()) {
 			ActionElement elem= iterator.next();
 			ReplacementStringIntervalStatus intervalStatus= elem.getIntervalStatus(replacementIntervalStart, relacementIntervalEnd);
-			int endDiff = relacementIntervalEnd - elem.end;
 			switch(intervalStatus) {
 				case AFTER:
 					//do nothing., nothing needs to be done here
@@ -254,10 +253,10 @@ public class JavaDocSnippetStringEvaluator {
 				case WITHIN:
 					// modify the old ActionElement to end before the replacement string start
 					// Create a new Element element to start from the replacement string end
-					int oldEnd = elem.end;
+					int newEnd = elem.end + diff;
 					elem.end= replacementIntervalStart;
-					int newStart = oldEnd + endDiff + diff;
-					ActionElement newElem= new  ActionElement(newStart, oldEnd, elem.startTag, elem.endTag);
+					int newStart = relacementIntervalEnd + diff;
+					ActionElement newElem= new  ActionElement(newStart, newEnd, elem.startTag, elem.endTag);
 					iterator.add(newElem);
 					break;
 				case DEFAULT:
