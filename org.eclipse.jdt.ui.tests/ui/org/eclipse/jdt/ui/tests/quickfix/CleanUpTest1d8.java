@@ -763,6 +763,123 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToLambdaNoRenameLocals() throws CoreException {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String original= ""
+				+ "package test;\n"
+				+ "\n"
+				+ "interface FI {\n"
+				+ "    void doIt(String p);\n"
+				+ "}\n"
+				+ "public class C1 {\n"
+				+ "    public void foo() {\n"
+				+ "        FI fi= new FI() {\n"
+				+ "            @Override\n"
+				+ "            public void doIt(String e) {\n"
+				+ "                if (e != null) {\n"
+				+ "                    int i= 0;\n"
+				+ "                    System.out.println(i);\n"
+				+ "                } else {\n"
+				+ "                    int i= 0;\n"
+				+ "                    System.out.println(i);\n"
+				+ "                }\n"
+				+ "            }\n"
+				+ "        };\n"
+				+ "    }\n"
+				+ "}\n";
+
+		String fixed= ""
+				+ "package test;\n"
+				+ "\n"
+				+ "interface FI {\n"
+				+ "    void doIt(String p);\n"
+				+ "}\n"
+				+ "public class C1 {\n"
+				+ "    public void foo() {\n"
+				+ "        FI fi= e -> {\n"
+				+ "            if (e != null) {\n"
+				+ "                int i= 0;\n"
+				+ "                System.out.println(i);\n"
+				+ "            } else {\n"
+				+ "                int i= 0;\n"
+				+ "                System.out.println(i);\n"
+				+ "            }\n"
+				+ "        };\n"
+				+ "    }\n"
+				+ "}\n";
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+		ICompilationUnit cu= pack.createCompilationUnit("C1.java", original, false, null);
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { fixed }, null);
+	}
+
+	@Test
+	public void testConvertToLambdaWithRenameLocals() throws CoreException {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String original= ""
+				+ "package test1;\n"
+				+ "interface FI {\n"
+				+ "    void doIt(String p);\n"
+				+ "}\n"
+				+ "public class C1 {\n"
+				+ "    public void foo() {\n"
+				+ "        int i= 33;\n"
+				+ "        FI fi = new FI() {\n"
+				+ "            @Override\n"
+				+ "            public void doIt(String e) {\n"
+				+ "                FI fi = new FI() {\n"
+				+ "                    @Override\n"
+				+ "                    public void doIt(String e) {\n"
+				+ "                        int i1= 37;\n"
+				+ "                        if (e != null) {\n"
+				+ "                            int i = 0;\n"
+				+ "                            System.out.println(i);\n"
+				+ "                        } else {\n"
+				+ "                            int i = 0;\n"
+				+ "                            System.out.println(i);\n"
+				+ "                        }\n"
+				+ "                    }\n"
+				+ "                };\n"
+				+ "            }\n"
+				+ "        };\n"
+				+ "    }\n"
+				+ "}\n";
+
+
+		String fixed= ""
+				+ "package test1;\n"
+				+ "interface FI {\n"
+				+ "    void doIt(String p);\n"
+				+ "}\n"
+				+ "public class C1 {\n"
+				+ "    public void foo() {\n"
+				+ "        int i= 33;\n"
+				+ "        FI fi = e -> {\n"
+				+ "            FI fi1 = e1 -> {\n"
+				+ "                int i1= 37;\n"
+				+ "                if (e1 != null) {\n"
+				+ "                    int i2 = 0;\n"
+				+ "                    System.out.println(i2);\n"
+				+ "                } else {\n"
+				+ "                    int i3 = 0;\n"
+				+ "                    System.out.println(i3);\n"
+				+ "                }\n"
+				+ "            };\n"
+				+ "        };\n"
+				+ "    }\n"
+				+ "}\n";
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+		ICompilationUnit cu= pack.createCompilationUnit("C1.java", original, false, null);
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { fixed }, null);
+
+	}
+
+	@Test
 	public void testConvertToLambdaWithMethodAnnotations() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
