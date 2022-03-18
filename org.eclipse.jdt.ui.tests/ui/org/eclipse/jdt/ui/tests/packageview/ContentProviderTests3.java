@@ -32,6 +32,7 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -98,6 +99,7 @@ public class ContentProviderTests3{
 	private ICompilationUnit fCU3;
 	private IFile fFile1;
 	private IFile fFile2;
+	private IFolder dotSettings;
 
 	private IWorkbenchPage page;
 	private IPackageFragmentRoot jdk;
@@ -107,7 +109,7 @@ public class ContentProviderTests3{
 
 	@Test
 	public void testGetChildrenProjectWithSourceFolders() throws Exception{
-		Object[] expectedChildren= new Object[]{fRoot1, fFile1, fFile2, jdk};
+		Object[] expectedChildren= new Object[]{fRoot1, fFile1, fFile2, dotSettings, jdk};
 		Object[] children= fProvider.getChildren(fJProject2);
 		assertTrue("Wrong children found for project with folding", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
@@ -317,10 +319,16 @@ public class ContentProviderTests3{
 					fFile1= file;
 				else if (".project".equals(file.getName()))//$NON-NLS-1$
 					fFile2= file;
+			} else if (object instanceof IFolder) {
+				IFolder folder= (IFolder) object;
+				if(".settings".equals(folder.getName())) {
+					dotSettings= folder;
+				}
 			}
 		}
 		assertNotNull(fFile1);
 		assertNotNull(fFile2);
+		assertNotNull(dotSettings);
 
 		//set up project #1 : External Jar and zip file
 		jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$

@@ -31,6 +31,7 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -84,6 +85,7 @@ public class ContentProviderTests2{
 	private IPackageFragment fY;
 	private IFile fFile1;
 	private IFile fFile2;
+	private IFolder dotSettings;
 	private ICompilationUnit fCU1;
 	private ICompilationUnit fCU2;
 	private IClassFile fYClassFile;
@@ -93,7 +95,7 @@ public class ContentProviderTests2{
 
 	@Test
 	public void testGetChildrenProject() throws Exception{
-		Object[] expectedChildren= new Object[]{fPack1, fPack2, fPack3, fRoot1.getPackageFragment(""), fFile1, fFile2,fInternalRoot1,jdk}; //$NON-NLS-1$
+		Object[] expectedChildren= new Object[]{fPack1, fPack2, fPack3, fRoot1.getPackageFragment(""), fFile1, fFile2, dotSettings, fInternalRoot1,jdk}; //$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fJProject3);
 		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
@@ -213,10 +215,16 @@ public class ContentProviderTests2{
 					fFile1= file;
 				else if (".project".equals(file.getName())) //$NON-NLS-1$
 					fFile2= file;
+			} else if (object instanceof IFolder) {
+				IFolder folder= (IFolder) object;
+				if(".settings".equals(folder.getName())) {
+					dotSettings= folder;
+				}
 			}
 		}
 		assertNotNull(fFile1);
 		assertNotNull(fFile2);
+		assertNotNull(dotSettings);
 
 		//add rt.jar
 		jdk= JavaProjectHelper.addVariableRTJar(fJProject3, "JRE_LIB_TEST", null, null); //$NON-NLS-1$

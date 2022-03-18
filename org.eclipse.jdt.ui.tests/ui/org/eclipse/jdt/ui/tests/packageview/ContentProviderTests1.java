@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -82,6 +83,7 @@ public class ContentProviderTests1 {
 	private IPackageFragment fPack5;
 	private IPackageFragment fPack6;
 	private IFile fDotClasspathFile;
+	private IFolder dotSettings;
 	private IFile fDotProjectFile;
 	private ICompilationUnit fCUIMoney;
 	private ICompilationUnit fCUMoney;
@@ -101,7 +103,7 @@ public class ContentProviderTests1 {
 	//---------Test for getChildren-------------------
 	@Test
 	public void testGetChildrenProjectWithSourceFolders() throws Exception {
-		Object[] expectedChildren= new Object[]{fRoot1, fDotClasspathFile, fDotProjectFile};
+		Object[] expectedChildren= new Object[]{fRoot1, fDotClasspathFile, dotSettings, fDotProjectFile};
 		Object[] actualChildren= fProvider.getChildren(fJProject2);
 		assertTrue("Wrong children found for project", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
 	}
@@ -347,10 +349,16 @@ public class ContentProviderTests1 {
 					fDotClasspathFile= file;
 				else if (".project".equals(file.getName()))//$NON-NLS-1$
 					fDotProjectFile= file;
+			} else if (object instanceof IFolder) {
+				IFolder folder= (IFolder) object;
+				if(".settings".equals(folder.getName())) {
+					dotSettings= folder;
+				}
 			}
 		}
 		assertNotNull(fDotClasspathFile);
 		assertNotNull(fDotProjectFile);
+		assertNotNull(dotSettings);
 
 		// Set up project #1 : External Jar and zip file
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$

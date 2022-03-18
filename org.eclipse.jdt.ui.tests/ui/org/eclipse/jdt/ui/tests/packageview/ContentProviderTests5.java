@@ -74,6 +74,7 @@ public class ContentProviderTests5{
 
 	private IJavaProject fJProject;
 	private IFile fDotClasspath;
+	private IFolder dotSettings;
 	private IFile fDotProject;
 	private IPackageFragmentRoot jdk;
 
@@ -98,10 +99,16 @@ public class ContentProviderTests5{
 					fDotClasspath = file;
 				else if (".project".equals(file.getName()))
 					fDotProject = file;
+			} else if (object instanceof IFolder) {
+				IFolder folder= (IFolder) object;
+				if(".settings".equals(folder.getName())) {
+					dotSettings= folder;
+				}
 			}
 		}
 		assertNotNull(fDotClasspath);
 		assertNotNull(fDotProject);
+		assertNotNull(dotSettings);
 
 		//add rt.jar
 		jdk= JavaProjectHelper.addVariableRTJar(fJProject, "JRE_LIB_TEST", null, null);
@@ -182,7 +189,7 @@ public class ContentProviderTests5{
 		IPackageFragment zPackage= root.createPackageFragment("z", true, null);
 		ICompilationUnit Z= zPackage.createCompilationUnit("Z.java", "package z;public class Z{}", true, null);
 
-		assertEqualElements(new Object[] {defaultPackage, exclInclPackage, xPackage, zPackage, jdk, ab, excl, y, fDotClasspath, fDotProject},
+		assertEqualElements(new Object[] {defaultPackage, exclInclPackage, xPackage, zPackage, jdk, ab, excl, y, fDotClasspath, dotSettings, fDotProject},
 				fProvider.getChildren(fJProject));
 		assertEqualElements(new Object[0], fProvider.getChildren(defaultPackage));
 		assertEqualElements(new Object[] {In},	fProvider.getChildren(exclInclPackage));
@@ -221,7 +228,7 @@ public class ContentProviderTests5{
 		ICompilationUnit b= defaultAbab.createCompilationUnit("B.java", "public class B {}", true, null);
 
 
-		assertEqualElements(new Object[] {src, srcabab, jdk, fDotClasspath, fDotProject}, fProvider.getChildren(fJProject));
+		assertEqualElements(new Object[] {src, srcabab, jdk, fDotClasspath, dotSettings, fDotProject}, fProvider.getChildren(fJProject));
 		assertEqualElements(new Object[] {defaultSrc, p, ab}, fProvider.getChildren(src));
 		assertEqualElements(new Object[] {}, fProvider.getChildren(defaultSrc));
 		assertEqualElements(new Object[] {file}, fProvider.getChildren(p));
@@ -249,7 +256,7 @@ public class ContentProviderTests5{
 		IContainer b= d.getParent().getParent();
 		IContainer a= b.getParent();
 
-		assertEqualElements(new Object[] {src, jdk, fDotClasspath, fDotProject}, fProvider.getChildren(fJProject));
+		assertEqualElements(new Object[] {src, jdk, fDotClasspath, dotSettings, fDotProject}, fProvider.getChildren(fJProject));
 		assertEqualElements(new Object[] {abc, a}, fProvider.getChildren(src));
 		assertEqualElements(new Object[] {x, d}, fProvider.getChildren(abc));
 		assertEqualElements(new Object[] {dTxt}, fProvider.getChildren(d));
