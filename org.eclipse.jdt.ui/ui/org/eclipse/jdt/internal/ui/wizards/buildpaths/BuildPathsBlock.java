@@ -605,7 +605,6 @@ public class BuildPathsBlock {
 		CPListElement entryMissing= null;
 		CPListElement entryDeprecated= null;
 		int nEntriesMissing= 0;
-		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
 			CPListElement currElement= elements.get(i);
@@ -621,7 +620,6 @@ public class BuildPathsBlock {
 				currElement.setExported(isChecked);
 			}
 
-			entries[i]= currElement.getClasspathEntry();
 			if (currElement.isMissing()) {
 				nEntriesMissing++;
 				if (entryMissing == null) {
@@ -643,10 +641,6 @@ public class BuildPathsBlock {
 			fClassPathStatus.setInfo(entryDeprecated.getDeprecationMessage());
 		}
 
-/*		if (fCurrJProject.hasClasspathCycle(entries)) {
-			fClassPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.CycleInClassPath")); //$NON-NLS-1$
-		}
-*/
 		updateBuildPathStatus();
 	}
 
