@@ -23,6 +23,7 @@ import org.eclipse.jdt.ui.tests.core.source.SourceActionTests;
 AddImportTest.class,
 SourceActionTests.class,
 ASTNodesInsertTest.class,
+BindingsHierarchyTest.class,
 BindingsNameTest.class,
 CallHierarchyTest.class,
 ClassPathDetectorTest.class,

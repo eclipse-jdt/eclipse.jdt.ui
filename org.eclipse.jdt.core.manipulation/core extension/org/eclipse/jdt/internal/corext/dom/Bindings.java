@@ -603,21 +603,11 @@ public class Bindings {
 	 */
 	public static ITypeBinding[] getAllSuperTypes(ITypeBinding type) {
 		Set<ITypeBinding> result= new HashSet<>();
-		collectSuperTypes(type, result);
-		result.remove(type);
+		visitHierarchy(type, t -> {
+			result.add(t);
+			return true;
+		});
 		return result.toArray(new ITypeBinding[result.size()]);
-	}
-
-	private static void collectSuperTypes(ITypeBinding curr, Set<ITypeBinding> collection) {
-		if (collection.add(curr)) {
-			for (ITypeBinding intf : curr.getInterfaces()) {
-				collectSuperTypes(intf, collection);
-			}
-			ITypeBinding superClass= curr.getSuperclass();
-			if (superClass != null) {
-				collectSuperTypes(superClass, collection);
-			}
-		}
 	}
 
 	/**
@@ -631,11 +621,33 @@ public class Bindings {
 	 *         method returned <code>false</code> for a type
 	 */
 	public static boolean visitHierarchy(ITypeBinding type, TypeBindingVisitor visitor) {
-		boolean result= visitSuperclasses(type, visitor);
-		if (result) {
-			result= visitInterfaces(type, visitor);
+		return visitSuperTypes(type, new TypeBindingVisitor() {
+
+			@Override
+			public boolean visit(ITypeBinding t) {
+				if (t == type) {
+					return true;
+				}
+				return visitor.visit(t);
+			}
+		}, new HashSet<ITypeBinding>());
+	}
+
+	private static boolean visitSuperTypes(ITypeBinding type, TypeBindingVisitor visitor, HashSet<ITypeBinding> visited) {
+		if (type != null && visited.add(type)) {
+			if (!visitor.visit(type)) {
+				return false;
+			}
+			if (!visitSuperTypes(type.getSuperclass(), visitor, visited)) {
+				return false;
+			}
+			for (ITypeBinding itfc : type.getInterfaces()) {
+				if (!visitSuperTypes(itfc, visitor, visited)) {
+					return false;
+				}
+			}
 		}
-		return result;
+		return true;
 	}
 
 	/**
