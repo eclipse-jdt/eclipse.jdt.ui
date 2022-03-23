@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 IBM Corporation and others.
+ * Copyright (c) 2020, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1588,6 +1588,80 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testBug579393() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "import java.util.stream.Stream;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "        new A() {\n" //
+				+ "        };\n" //
+				+ "        get();\n" //
+				+ "        System.out.println(\"done\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static A get(B<?>... sources) {\n" //
+				+ "        return Stream.of(sources)\n" //
+				+ "                .map(B::getT)\n" //
+				+ "                .filter(x -> x.exists_testOpen())\n"  //
+				+ "                .findFirst()\n"  //
+				+ "                .orElse(null);\n" //
+			    + "    }\n" //
+			    + "\n" //
+			    + "    public interface B<T extends A> extends A {\n" //
+				+ "        T getT();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public interface A {\n" //
+				+ "        default boolean exists_testOpen() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		String expected= "" //
+				+ "import java.util.stream.Stream;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "        new A() {\n" //
+				+ "        };\n" //
+				+ "        get();\n" //
+				+ "        System.out.println(\"done\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static A get(B<?>... sources) {\n" //
+				+ "        return Stream.of(sources)\n" //
+				+ "                .map(B::getT)\n" //
+				+ "                .filter(A::exists_testOpen)\n"  //
+				+ "                .findFirst()\n"  //
+				+ "                .orElse(null);\n" //
+			    + "    }\n" //
+			    + "\n" //
+			    + "    public interface B<T extends A> extends A {\n" //
+				+ "        T getT();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public interface A {\n" //
+				+ "        default boolean exists_testOpen() {\n" //
+				+ "            return true;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
 	}
 
 	@Test

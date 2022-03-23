@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2022 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -504,7 +504,16 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 			ITypeBinding modifiedType;
 
 			if (typeBinding.getTypeParameters().length == 0) {
-				modifiedType= typeBinding.getErasure();
+				if (typeBinding.isCapture()) {
+					ITypeBinding[] bounds= typeBinding.getTypeBounds();
+					if (bounds.length > 0) {
+						modifiedType= bounds[0];
+					} else {
+						modifiedType= typeBinding.getErasure();
+					}
+				} else {
+					modifiedType= typeBinding.getErasure();
+				}
 			} else {
 				modifiedType= typeBinding;
 			}
