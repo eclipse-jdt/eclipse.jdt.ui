@@ -14,7 +14,6 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Rule;
@@ -28,7 +27,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java17ProjectTestSetup;
@@ -59,10 +57,6 @@ public class QuickFixTest17 extends QuickFixTest {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -120,10 +114,6 @@ public class QuickFixTest17 extends QuickFixTest {
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
-
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
@@ -168,11 +158,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddSealedAsDirectSuperTypeProposal1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -219,11 +205,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddSealedAsDirectSuperTypeProposal2() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -270,11 +252,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddSealedAsDirectSuperTypeProposal3() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -321,11 +299,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddSealedAsDirectSuperTypeProposal4() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -383,11 +357,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddSealedAsDirectSuperInterface1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -430,11 +400,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddSealedAsDirectSuperInterface2() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -477,11 +443,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddSealedAsDirectSuperInterface3() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -505,11 +467,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddSealedAsDirectSuperInterface4() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -556,11 +514,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddSealedAsDirectSuperClass1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -603,11 +557,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testAddRecordAsSubType() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -634,11 +584,7 @@ public class QuickFixTest17 extends QuickFixTest {
 	public void testDoNotAddRecordAsSubType() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
-
-		Map<String, String> options= fJProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		fJProject1.setOptions(options);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);

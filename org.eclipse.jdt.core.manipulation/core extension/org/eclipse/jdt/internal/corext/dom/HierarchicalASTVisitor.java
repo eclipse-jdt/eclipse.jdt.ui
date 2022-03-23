@@ -1167,14 +1167,22 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 
 //---- End Statement Hierarchy ----------------------------------
 
+	public boolean visit(AbstractTagElement node) {
+		return visit((ASTNode)node);
+	}
+
+	public void endVisit(AbstractTagElement node) {
+		endVisit((ASTNode)node);
+	}
+
 	@Override
 	public boolean visit(TagElement node) {
-		return visit((ASTNode)node);
+		return visit((AbstractTagElement)node);
 	}
 
 	@Override
 	public void endVisit(TagElement node) {
-		endVisit((ASTNode)node);
+		endVisit((AbstractTagElement)node);
 	}
 
 	@Override
@@ -1187,6 +1195,25 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 		endVisit((ASTNode)node);
 	}
 
+	@Override
+	public boolean visit(TagProperty node) {
+		return visit((ASTNode)node);
+	}
+
+	@Override
+	public void endVisit(TagProperty node) {
+		endVisit((ASTNode)node);
+	}
+
+	@Override
+	public boolean visit(JavaDocRegion node) {
+		return visit((AbstractTagElement)node);
+	}
+
+	@Override
+	public void endVisit(JavaDocRegion node) {
+		endVisit((AbstractTagElement)node);
+	}
 
 //---- Begin Type Hierarchy --------------------------------------
 	public boolean visit(Type node) {
