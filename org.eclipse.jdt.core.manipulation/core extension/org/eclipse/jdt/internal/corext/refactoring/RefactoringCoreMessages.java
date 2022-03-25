@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,8 @@
  *     Yves Joan <yves.joan@oracle.com> - [reorg] Copy action should NOT add 'copy of' prefix - https://bugs.eclipse.org/bugs/show_bug.cgi?id=151668
  *     Red Hat Inc. - copied to jdt.core.manipulation
  *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
- *******************************************************************************/
+ *     Nikolay Metchev - <nikolaymetchev@gmail.com> - [inline] Inline Local Variable does not qualify accesses to obscured types - https://bugs.eclipse.org/367536
+ ********************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import org.eclipse.osgi.util.NLS;
@@ -885,6 +886,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_select_temp;
 
 	public static String InlineTemRefactoring_error_message_fieldsCannotBeInlined;
+
+	public static String InlineTemRefactoring_error_message_inliningClashes;
 
 	public static String IntroduceFactory_addFactoryMethod;
 

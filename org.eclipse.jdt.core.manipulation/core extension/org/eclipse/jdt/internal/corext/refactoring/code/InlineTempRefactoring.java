@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,19 @@
  *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
  *     Microsoft Corporation - copied to jdt.core.manipulation
  *     Microsoft Corporation - read formatting options from the compilation unit
- *******************************************************************************/
+ *     Nikolay Metchev - <nikolaymetchev@gmail.com> - [inline] Inline Local Variable does not qualify accesses to obscured types - https://bugs.eclipse.org/367536
+ ********************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.Assert;
@@ -50,7 +58,9 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -59,8 +69,10 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -69,10 +81,12 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -95,6 +109,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -225,10 +240,36 @@ public class InlineTempRefactoring extends Refactoring {
 
 			result.merge(checkSelection(selected, declaration));
 
+			result.merge(checkClashes(declaration));
+
 			return result;
 		} finally {
 			pm.done();
 		}
+	}
+
+	private RefactoringStatus checkClashes(VariableDeclaration declaration) {
+		for (SimpleName reference : getReferences()) {
+			Set<IVariableBinding> newVariables= getNewVariables(reference);
+			final List<Name> initializerNames= getInitializerNames(declaration.getInitializer());
+			for (Name name : initializerNames) {
+				if (clashesWithNewVariables(newVariables, name)) {
+					List<Expression> alternativeQualifications= getAlternativeQualifications(reference, name);
+					boolean inlinable= false;
+					for (Expression alternative : alternativeQualifications) {
+						if (!clashesWithNewVariables(newVariables, alternative)) {
+							inlinable= true;
+							break;
+						}
+					}
+					if (!inlinable) {
+						return RefactoringStatus.createFatalErrorStatus(
+								Messages.format(RefactoringCoreMessages.InlineTemRefactoring_error_message_inliningClashes, name));
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	private RefactoringStatus checkSelection(ASTNode selectedNode, VariableDeclaration decl) {
@@ -344,7 +385,7 @@ public class InlineTempRefactoring extends Refactoring {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
 		for (SimpleName curr : getReferences()) {
-			ASTNode initializerCopy= getInitializerSource(cuRewrite, curr);
+			ASTNode initializerCopy= getInitializerSource(cuRewrite, curr, groupDesc);
 			rewrite.replace(curr, initializerCopy, groupDesc);
 		}
 	}
@@ -365,8 +406,8 @@ public class InlineTempRefactoring extends Refactoring {
 		}
 	}
 
-	private Expression getInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference) throws JavaModelException {
-		Expression copy= getModifiedInitializerSource(rewrite, reference);
+	private Expression getInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference, TextEditGroup groupDesc) throws JavaModelException {
+		Expression copy= getModifiedInitializerSource(rewrite, reference, groupDesc);
 		if (NecessaryParenthesesChecker.needsParentheses(copy, reference.getParent(), reference.getLocationInParent())) {
 			ParenthesizedExpression parentExpr= rewrite.getAST().newParenthesizedExpression();
 			parentExpr.setExpression(copy);
@@ -375,10 +416,16 @@ public class InlineTempRefactoring extends Refactoring {
 		return copy;
 	}
 
-	private Expression getModifiedInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference) throws JavaModelException {
+	private Expression getModifiedInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference, TextEditGroup groupDesc) throws JavaModelException {
 		VariableDeclaration varDecl= getVariableDeclaration();
 		Expression initializer= varDecl.getInitializer();
-
+		List<Name> initializerNames= getInitializerNames(initializer);
+		if (!initializerNames.isEmpty()) {
+			Map<Name, Expression> replacements= getClashingReplacements(reference, initializerNames);
+			if (!replacements.isEmpty()) {
+				return replaceClashingNames(rewrite, groupDesc, initializer, replacements);
+			}
+		}
 		ASTNode referenceContext= reference.getParent();
 		if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
 			if (!(referenceContext instanceof VariableDeclarationFragment)
@@ -422,6 +469,236 @@ public class InlineTempRefactoring extends Refactoring {
 			return newArrayCreation;
 		}
 		return copy;
+	}
+
+	private List<Name> getInitializerNames(final Expression initializer) {
+		ScopeAnalyzer scopeAnalyzer= new ScopeAnalyzer(fASTRoot);
+		VariableDeclaration var= getVariableDeclaration();
+		int end = var.getStartPosition();
+		final Set<IBinding> declarationsAtInitializer= new HashSet<>(Arrays.asList(scopeAnalyzer.getDeclarationsInScope(end, ScopeAnalyzer.VARIABLES)));
+		final List<Name> initializerNames= new ArrayList<>();
+		if (initializer != null) {
+			initializer.accept(new ASTVisitor() {
+				@Override
+				public boolean visit(QualifiedName node) {
+					IBinding binding= node.resolveBinding();
+					if (binding instanceof IVariableBinding) {
+						initializerNames.add(node);
+					}
+					return false;
+				}
+
+				@Override
+				public boolean visit(SimpleName node) {
+					IBinding binding= node.resolveBinding();
+					if (binding instanceof IVariableBinding) {
+						if (declarationsAtInitializer.contains(binding)) {
+							initializerNames.add(node);
+						}
+					}
+					return false;
+				}
+			});
+		}
+		return initializerNames;
+	}
+
+	private Expression replaceClashingNames(final CompilationUnitRewrite rewrite, final TextEditGroup groupDesc, Expression initializer, final Map<Name, Expression> replacements) {
+		final Expression copyOfInitializer= (Expression) ASTNode.copySubtree(fASTRoot.getAST(), initializer);
+		final ASTMatcher astMatcher= new ASTMatcher();
+		copyOfInitializer.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(QualifiedName copyOfInitializerNode) {
+				return replace(copyOfInitializerNode);
+			}
+
+			@Override
+			public boolean visit(SimpleName node) {
+				return replace(node);
+			}
+
+			private boolean replace(Name copyOfInitializerNode) {
+				Set<Entry<Name, Expression>> replacementKeySet= replacements.entrySet();
+				for (Iterator<Entry<Name, Expression>> replacementIterator= replacementKeySet.iterator(); replacementIterator.hasNext();) {
+					Entry<Name, Expression> replacement= replacementIterator.next();
+					Name key= replacement.getKey();
+					if (key instanceof QualifiedName && astMatcher.match((QualifiedName) key, copyOfInitializerNode) ||
+							key instanceof SimpleName && astMatcher.match((SimpleName) key, copyOfInitializerNode)) {
+						if (copyOfInitializerNode != copyOfInitializer) {
+							rewrite.getASTRewrite().replace(copyOfInitializerNode, replacement.getValue(), groupDesc);
+							replacementIterator.remove();
+						}
+						return false;
+					}
+				}
+				return false;
+			}
+		});
+		if (!replacements.isEmpty()) { // the whole initializer was replaced
+			return replacements.values().iterator().next();
+		}
+		return copyOfInitializer;
+	}
+
+	private Map<Name, Expression> getClashingReplacements(SimpleName reference, List<Name> initializerNames) {
+		Set<IVariableBinding> newVariables= getNewVariables(reference);
+		final Map<Name, Expression> replacements= new HashMap<>();
+		for (Name initializerName : initializerNames) {
+			if (clashesWithNewVariables(newVariables, initializerName)) {
+				List<Expression> alternativeQualifications= getAlternativeQualifications(reference, initializerName);
+				for (Expression alternative : alternativeQualifications) {
+					if (!clashesWithNewVariables(newVariables, alternative)) {
+						replacements.put(initializerName, alternative);
+						break;
+					}
+				}
+			}
+		}
+		return replacements;
+	}
+
+	private List<Expression> getAlternativeQualifications(SimpleName reference, Name initializerName) {
+		List<Expression> ans= new ArrayList<>();
+		if (initializerName instanceof SimpleName) {
+			SimpleName simpleNameInitializer= ((SimpleName) initializerName);
+			IBinding resolveBinding= simpleNameInitializer.resolveBinding();
+			if (resolveBinding instanceof IVariableBinding) {
+				IVariableBinding resolvedVariableBinding= (IVariableBinding) resolveBinding;
+				boolean isStatic= Modifier.isStatic(resolvedVariableBinding.getModifiers());
+				if (isStatic) {
+					ans.add(createFullyQualifiedName(simpleNameInitializer, resolvedVariableBinding.getDeclaringClass(), false));
+					ans.add(createFullyQualifiedName(simpleNameInitializer, resolvedVariableBinding.getDeclaringClass(), true));
+				} else {
+					AST ast= fASTRoot.getAST();
+					FieldAccess newFieldAccess= ast.newFieldAccess();
+					newFieldAccess.setExpression(ast.newThisExpression());
+					newFieldAccess.setName((SimpleName) ASTNode.copySubtree(ast, simpleNameInitializer));
+					ans.add(newFieldAccess);
+				}
+			}
+		} else if (initializerName instanceof QualifiedName){
+			QualifiedName initializerQualifiedName = (QualifiedName) initializerName;
+			SimpleName simpleName= initializerQualifiedName.getName();
+			int i= findCommonDeclaringClassIndex(reference, initializerQualifiedName);
+			ITypeBinding initializerQualifiedNameTypeBinding= initializerQualifiedName.getQualifier().resolveTypeBinding();
+			ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, false));
+			ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, i, false));
+			ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, true));
+			ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, i, true));
+		}
+		return ans;
+	}
+
+	/**
+	 * @param reference the reference being inlined
+	 * @param initializerQualifiedName the qualified name from the initializer being inlined
+	 * @return the number of declaring classes to skip from the fully qualified name of
+	 *         initializerQualifiedName in order to get to the declaring class of the passed in
+	 *         reference.
+	 */
+	private int findCommonDeclaringClassIndex(SimpleName reference, QualifiedName initializerQualifiedName) {
+		final List<SimpleName> initializerSimpleNames= new ArrayList<>();
+		initializerQualifiedName.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(QualifiedName qualifiedName) {
+				initializerSimpleNames.add(0, qualifiedName.getName());
+				qualifiedName.getQualifier().accept(this);
+				return false;
+			}
+
+			@Override
+			public boolean visit(SimpleName simpleName) {
+				initializerSimpleNames.add(0, simpleName);
+				return false;
+			}
+		});
+		TypeDeclaration typeDeclaration= (TypeDeclaration) ASTNodes.getParent(reference, ASTNode.TYPE_DECLARATION);
+		ITypeBinding declaringClassBinding= typeDeclaration.resolveBinding();
+		int i= 1;
+		while (i < initializerSimpleNames.size() && declaringClassBinding != getDeclaringClass(initializerSimpleNames.get(i))) {
+			i++;
+		}
+		return i;
+	}
+
+	private ITypeBinding getDeclaringClass(SimpleName simpleName) {
+		IBinding resolveBinding= simpleName.resolveBinding();
+		if (resolveBinding instanceof ITypeBinding) {
+			return ((ITypeBinding) resolveBinding).getDeclaringClass();
+		} else if (resolveBinding instanceof IVariableBinding) {
+			return ((IVariableBinding) resolveBinding).getDeclaringClass();
+		}
+		return null;
+	}
+
+	private boolean clashesWithNewVariables(Set<IVariableBinding> newVariables, Expression name) {
+		if (name instanceof QualifiedName) {
+			return clashesWithNewVariables(newVariables, (QualifiedName) name);
+		} else if (name instanceof SimpleName) {
+			return clashesWithNewVariables(newVariables, (SimpleName) name);
+		}
+		return false;
+	}
+
+	private boolean clashesWithNewVariables(Set<IVariableBinding> newVariables, QualifiedName qualifiedName) {
+		return clashesWithNewVariables(newVariables, ASTNodes.getLeftMostSimpleName(qualifiedName));
+	}
+
+	private boolean clashesWithNewVariables(Set<IVariableBinding> newVariables, SimpleName leftMostSimpleName) {
+		String leftMostSimpleNameIdentifier= leftMostSimpleName.getIdentifier();
+		for (IVariableBinding newVariable : newVariables) {
+			if (newVariable.getName().equals(leftMostSimpleNameIdentifier)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @param reference the reference being inlined
+	 * @return A set of bindings representing any variables that have come into scope for the
+	 *         variable declaration after it has been inlined to the passed in reference.
+	 */
+	private Set<IVariableBinding> getNewVariables(SimpleName reference) {
+		ScopeAnalyzer scopeAnalyzer= new ScopeAnalyzer(fASTRoot);
+		IBinding[] declarationsAtReference= scopeAnalyzer.getDeclarationsInScope(reference.getStartPosition(), ScopeAnalyzer.VARIABLES);
+		Set<IVariableBinding> newVariables= new HashSet<>(declarationsAtReference.length);
+		for (IBinding newVariable : declarationsAtReference) {
+			newVariables.add((IVariableBinding) newVariable);
+		}
+		VariableDeclaration var= getVariableDeclaration();
+		int endPosition= var.getStartPosition() + var.getLength();
+		for (IBinding oldVariable : scopeAnalyzer.getDeclarationsInScope(endPosition, ScopeAnalyzer.VARIABLES)) {
+			newVariables.remove(oldVariable);
+		}
+		return newVariables;
+	}
+
+	private Name createFullyQualifiedName(SimpleName simpleName, ITypeBinding declaringClass, boolean addPackage) {
+		return createFullyQualifiedName(simpleName, declaringClass, 0, addPackage);
+	}
+
+	private Name createFullyQualifiedName(SimpleName simpleName, ITypeBinding declaringClass, int numberOfClassesToSkip, boolean addPackage) {
+		AST ast= fASTRoot.getAST();
+		List<ITypeBinding> declaringClasses = new ArrayList<>();
+		while (declaringClass != null) {
+			declaringClasses.add(declaringClass);
+			declaringClass= declaringClass.getDeclaringClass();
+		}
+		for (int i= 0; i < numberOfClassesToSkip; i++) {
+			declaringClasses.remove(declaringClasses.size() - 1);
+		}
+		StringBuilder qualifiedName = new StringBuilder();
+		if (addPackage && declaringClasses.size() > 0) {
+			qualifiedName.append(declaringClasses.get(declaringClasses.size() - 1).getPackage().getName());
+			qualifiedName.append('.');
+		}
+		for (int i= declaringClasses.size() - 1; i >= 0; i--) {
+			qualifiedName.append(declaringClasses.get(i).getName());
+			qualifiedName.append('.');
+		}
+		qualifiedName.append(simpleName.getFullyQualifiedName());
+		return ast.newName(qualifiedName.toString());
 	}
 
 	private String createParameterizedInvocation(Expression invocation, ITypeBinding[] typeArguments, CompilationUnitRewrite cuRewrite) throws JavaModelException {
