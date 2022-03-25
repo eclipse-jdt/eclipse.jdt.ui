@@ -63,22 +63,23 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "    public void testTrailingSpacesAndInnerNewlines() {\n"
 				+ "        String x = \"\" +\n" //
     	        + "            \"public \\nvoid foo() {  \\n\" +\n" //
-    	        + "            \"    System.out.println(\\\"abc\\\");\\n\" +\n" //
+    	        + "            \"    System.out.println\\\\(\\\"abc\\\");\\n\" +\n" //
     	        + "            \"}\\n\";\n" //
     	        + "    }\n" //
     	        + "\n" //
     	        + "    public void testLineContinuationAndTripleQuotes() {\n" //
 				+ "        String x = \"\" +\n" //
     	        + "            \"abcdef\" +\n" //
-    	        + "            \"ghijkl\\\"\\\"\\\"123\\\"\\\"\\\"\" +\n" //
-    	        + "            \"mnop\";\n" //
+    	        + "            \"ghijkl\\\"\\\"\\\"\\\"123\\\"\\\"\\\"\" +\n" //
+    	        + "            \"mnop\\\\\";\n" //
     	        + "    }\n" //
 				+ "}\n";
+
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK);
 
-		sample= "" //
+		String expected1= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -93,8 +94,9 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "\n" //
 				+ "    public void testTrailingSpacesAndInnerNewlines() {\n" //
 				+ "        String x = \"\"\"\n" //
-    	        + "        \tpublic \\nvoid foo() {\\s\\s\n" //
-    	        + "        \t    System.out.println(\"abc\");\n" //
+    	        + "        \tpublic\\s\n"
+    	        + "        \tvoid foo() {\\s\\s\n" //
+    	        + "        \t    System.out.println\\\\(\"abc\");\n" //
     	        + "        \t}\n" //
     	        + "        \t\"\"\";\n" //
     	        + "    }\n" //
@@ -102,11 +104,10 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "    public void testLineContinuationAndTripleQuotes() {\n" //
 				+ "        String x = \"\"\"\n" //
     	        + "        \tabcdef\\\n" //
-    	        + "        \tghijkl\\\"\"\"123\\\"\"\"\\\n" //
-    	        + "        \tmnop\"\"\";\n" //
+    	        + "        \tghijkl\\\"\"\"\\\"123\\\"\"\"\\\n" //
+    	        + "        \tmnop\\\\\"\"\";\n" //
     	        + "    }\n" //
 				+ "}\n";
-		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
