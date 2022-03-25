@@ -10,12 +10,15 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [rename] https://bugs.eclipse.org/99622
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -37,6 +40,7 @@ import org.eclipse.core.commands.operations.OperationHistoryFactory;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -71,6 +75,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -80,6 +86,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -215,12 +222,12 @@ public class RenameLinkedMode {
 			ASTNode selectedNode= NodeFinder.perform(root, fOriginalSelection.x, fOriginalSelection.y);
 
 			final int pos;
-			ASTNode[] sameNodes;
+			Name nameNode= null;
 			if (! (selectedNode instanceof Name)) {
 				return; // TODO: show dialog
 			} else if (this.fJavaElement != null &&
 					this.fJavaElement.getElementType() ==  IJavaElement.JAVA_MODULE) {
-				Name nameNode = (Name) selectedNode;
+				nameNode = (Name) selectedNode;
 				ASTNode parent = nameNode.getParent();
 				while(parent instanceof Name) {
 					nameNode = (Name) parent;
@@ -228,14 +235,12 @@ public class RenameLinkedMode {
 				}
 				fOriginalName= nameNode.getFullyQualifiedName();
 				pos= nameNode.getStartPosition();
-				sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
 			} else if (! (selectedNode instanceof SimpleName)) {
 				return; // TODO: show dialog
 			} else {
-				SimpleName nameNode = (SimpleName)selectedNode;
-				fOriginalName = nameNode.getIdentifier();
+				nameNode = (SimpleName)selectedNode;
+				fOriginalName = ((SimpleName)nameNode).getIdentifier();
 				pos = nameNode.getStartPosition();
-				sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
 			}
 
 			if (viewer instanceof ITextViewerExtension6) {
@@ -248,9 +253,7 @@ public class RenameLinkedMode {
 				}
 			}
 
-			//TODO: copied from LinkedNamesAssistProposal#apply(..):
-			// sort for iteration order, starting with the node @ offset
-			Arrays.sort(sameNodes, new Comparator<ASTNode>() {
+			Set<ASTNode> sameNodes= new TreeSet<>(new Comparator<ASTNode>() {
 				@Override
 				public int compare(ASTNode o1, ASTNode o2) {
 					return rank(o1) - rank(o2);
@@ -270,12 +273,33 @@ public class RenameLinkedMode {
 						return relativeRank;
 				}
 			});
-			for (int i= 0; i < sameNodes.length; i++) {
-				ASTNode elem= sameNodes[i];
+			sameNodes.add(nameNode);
+			IBinding resolvedNameNode= nameNode.resolveBinding();
+			if (resolvedNameNode != null && resolvedNameNode instanceof IMethodBinding) {
+				IJavaElement javaElement= resolvedNameNode.getJavaElement();
+				if (javaElement instanceof IMethod) {
+					IMethod[] relatedMethods= RippleMethodFinder2.getRelatedMethodsInCompilationUnit((IMethod) javaElement, new NullProgressMonitor(), null);
+					for (IMethod iMethod : relatedMethods) {
+						sameNodes.add(NodeFinder.perform(root, iMethod.getNameRange()));
+					}
+				}
+			}
+			for (ASTNode astNode : new ArrayList<>(sameNodes)) {
+				if (astNode instanceof SimpleName) {
+					for (SimpleName sameNode : LinkedNodeFinder.findByNode(root, (SimpleName) astNode)) {
+						sameNodes.add(sameNode);
+					}
+				}
+			}
+			//TODO: copied from LinkedNamesAssistProposal#apply(..):
+			// sort for iteration order, starting with the node @ offset
+			int i=0;
+			for (ASTNode elem : sameNodes) {
 				LinkedPosition linkedPosition= new LinkedPosition(document, elem.getStartPosition(), elem.getLength(), i);
 				if (i == 0)
 					fNamePosition= linkedPosition;
 				fLinkedPositionGroup.addPosition(linkedPosition);
+				i++;
 			}
 
 			fLinkedModeModel= new LinkedModeModel();
@@ -300,7 +324,7 @@ public class RenameLinkedMode {
 //			startAnimation();
 			fgActiveLinkedMode= this;
 
-		} catch (BadLocationException e) {
+		} catch (BadLocationException | CoreException e) {
 			JavaPlugin.log(e);
 		}
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [rename] https://bugs.eclipse.org/99622
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -493,6 +494,38 @@ public class RenameVirtualMethodInClassTests extends GenericRefactoringTest {
 	@Test
 	public void test22() throws Exception{
 		helper2();
+	}
+
+	public void test41() throws Exception {
+		helper2_0("m", "k", new String[] { "QI;" });
+	}
+
+	public void test42() throws Exception {
+		helper2_0("m", "k", new String[] { "QT;" });
+	}
+
+	public void test43() throws Exception {
+		helper2_0("m", "k", new String[] { "QObject;" });
+	}
+
+	public void test44() throws Exception {
+		helper2_0("m", "k", new String[] { "QE;" });
+	}
+
+	public void test45() throws Exception {
+		helper2_0("m", "k", new String[] { "QT;" });
+	}
+
+	public void test46() throws Exception {
+		helper2_0("m", "k", new String[] { "[QE;" });
+	}
+
+	public void test47() throws Exception {
+		helper2_0("m", "k", new String[] { "[QString;" });
+	}
+
+	public void test48() throws Exception {
+		helper2_0("m", "k", new String[] { "[QString;" });
 	}
 
 	//anonymous inner class

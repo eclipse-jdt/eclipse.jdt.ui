@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [rename] https://bugs.eclipse.org/99622
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
@@ -28,10 +29,10 @@ import java.util.stream.Stream;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
@@ -50,14 +51,15 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class RippleMethodFinder2 {
 
 	private final IMethod fMethod;
-	private List<IMethod> fDeclarations;
+	private Set<IMethod> fDeclarations;
 	private ITypeHierarchy fHierarchy;
-	private Map<IType, IMethod> fTypeToMethod;
+	private MultiMap<IType, IMethod> fTypeToMethod;
 	private Set<IType> fRootTypes;
 	private MultiMap<IType, IType> fRootReps;
 	private Map<IType, ITypeHierarchy> fRootHierarchies;
@@ -66,6 +68,7 @@ public class RippleMethodFinder2 {
 	private final boolean fExcludeBinaries;
 	private final ReferencesInBinaryContext fBinaryRefs;
 	private Map<IMethod, SearchMatch> fDeclarationToMatch;
+	private boolean fSearchOnlyInCompilationUnit = false;
 
 	private static class MultiMap<K, V> {
 		HashMap<K, Collection<V>> fImplementation= new HashMap<>();
@@ -131,9 +134,10 @@ public class RippleMethodFinder2 {
 	}
 
 
-	private RippleMethodFinder2(IMethod method, boolean excludeBinaries){
+	private RippleMethodFinder2(IMethod method, boolean excludeBinaries, boolean searchOnlyInCompilationUnit){
 		fMethod= method;
 		fExcludeBinaries= excludeBinaries;
+		fSearchOnlyInCompilationUnit= searchOnlyInCompilationUnit;
 		fBinaryRefs= null;
 	}
 
@@ -149,7 +153,17 @@ public class RippleMethodFinder2 {
 			if (! MethodChecks.isVirtual(method))
 				return new IMethod[]{ method };
 
-			return new RippleMethodFinder2(method, excludeBinaries).getAllRippleMethods(pm, owner);
+			return new RippleMethodFinder2(method, excludeBinaries, false).getAllRippleMethods(pm, owner);
+		} finally{
+			pm.done();
+		}
+	}
+	public static IMethod[] getRelatedMethodsInCompilationUnit(IMethod method, NullProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
+		try{
+			if (! MethodChecks.isVirtual(method))
+				return new IMethod[]{ method };
+
+			return new RippleMethodFinder2(method, true, true).getAllRippleMethods(pm, owner);
 		} finally{
 			pm.done();
 		}
@@ -198,6 +212,7 @@ public class RippleMethodFinder2 {
 			Assert.isTrue(false, "Search for method declaration did not find original element: " + fMethod.toString()); //$NON-NLS-1$
 
 		createHierarchyOfDeclarations(new SubProgressMonitor(pm, 1), owner);
+		addMissedSuperTypes();
 		createTypeToMethod();
 		createUnionFind();
 		checkCanceled(pm);
@@ -206,7 +221,7 @@ public class RippleMethodFinder2 {
 		fRootTypes= null;
 
 		Map<IType, List<IType>> partitioning= new HashMap<>();
-		for (IType type : fTypeToMethod.keySet()) {
+		for (IType type : fTypeToMethod.fImplementation.keySet()) {
 			IType rep= fUnionFind.find(type);
 			List<IType> types= partitioning.get(rep);
 			if (types == null)
@@ -225,7 +240,7 @@ public class RippleMethodFinder2 {
 		boolean hasRelatedInterfaces= false;
 		List<IMethod> relatedMethods= new ArrayList<>();
 		for (IType relatedType : relatedTypes) {
-			relatedMethods.add(fTypeToMethod.get(relatedType));
+			relatedMethods.addAll(fTypeToMethod.get(relatedType));
 			if (relatedType.isInterface())
 				hasRelatedInterfaces= true;
 		}
@@ -283,15 +298,17 @@ public class RippleMethodFinder2 {
 			HashSet<IType> marriedAlienTypeReps= new HashSet<>();
 			for (IType alienType : alienTypes) {
 				checkCanceled(pm);
-				IMethod alienMethod= fTypeToMethod.get(alienType);
-				ITypeHierarchy hierarchy= hierarchy(pm, owner, alienType);
+				Collection<IMethod> alienMethods= fTypeToMethod.get(alienType);
+				for (IMethod alienMethod : alienMethods) {
+					ITypeHierarchy hierarchy= hierarchy(pm, owner, alienType);
 
-				for (IType subtype : hierarchy.getAllSubtypes(alienType)) {
-					if (relatedSubTypes.contains(subtype)) {
-						if (JavaModelUtil.isVisibleInHierarchy(alienMethod, subtype.getPackageFragment())) {
-							marriedAlienTypeReps.add(fUnionFind.find(alienType));
-						} else {
-							// not overridden
+					for (IType subtype : hierarchy.getAllSubtypes(alienType)) {
+						if (relatedSubTypes.contains(subtype)) {
+							if (JavaModelUtil.isVisibleInHierarchy(alienMethod, subtype.getPackageFragment())) {
+								marriedAlienTypeReps.add(fUnionFind.find(alienType));
+							} else {
+								// not overridden
+							}
 						}
 					}
 				}
@@ -303,7 +320,7 @@ public class RippleMethodFinder2 {
 			for (IType marriedAlienTypeRep : marriedAlienTypeReps) {
 				List<IType> marriedAlienTypes= partitioning.get(marriedAlienTypeRep);
 				for (IType marriedAlienInterfaceType : marriedAlienTypes) {
-					relatedMethods.add(fTypeToMethod.get(marriedAlienInterfaceType));
+					relatedMethods.addAll(fTypeToMethod.get(marriedAlienInterfaceType));
 				}
 				alienTypes.removeAll(marriedAlienTypes); //not alien any more
 				relatedTypesToProcess.addAll(marriedAlienTypes); //process freshly married types again
@@ -385,6 +402,16 @@ public class RippleMethodFinder2 {
 		return hierarchy;
 	}
 
+	private void addMissedSuperTypes() throws JavaModelException {
+		Set<IMethod> newDeclarations = new HashSet<>();
+		for (IMethod method : fDeclarations) {
+			MethodOverrideTester methodOverrideTester= new MethodOverrideTester(method.getDeclaringType(), fHierarchy);
+			newDeclarations.addAll(methodOverrideTester.findAllOverridenMethods(method));
+		}
+		fDeclarations.addAll(newDeclarations);
+
+	}
+
 	private ITypeHierarchy getCachedHierarchy(IType type, WorkingCopyOwner owner, IProgressMonitor monitor) throws JavaModelException {
 		IType rep= fUnionFind.find(type);
 		if (rep != null) {
@@ -402,7 +429,7 @@ public class RippleMethodFinder2 {
 	}
 
 	private void findAllDeclarations(IProgressMonitor monitor, WorkingCopyOwner owner) throws CoreException {
-		fDeclarations= new ArrayList<>();
+		fDeclarations= new HashSet<>();
 
 		class MethodRequestor extends SearchRequestor {
 			@Override
@@ -427,7 +454,12 @@ public class RippleMethodFinder2 {
 		int matchRule= SearchPattern.R_ERASURE_MATCH | SearchPattern.R_CASE_SENSITIVE;
 		SearchPattern pattern= SearchPattern.createPattern(fMethod, limitTo, matchRule);
 		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
-		IJavaSearchScope scope= RefactoringScopeFactory.createRelatedProjectsScope(fMethod.getJavaProject(), IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SYSTEM_LIBRARIES);
+		IJavaSearchScope scope;
+		if (fSearchOnlyInCompilationUnit) {
+			scope= RefactoringScopeFactory.create(fMethod.getCompilationUnit());
+		} else {
+			scope= RefactoringScopeFactory.createRelatedProjectsScope(fMethod.getJavaProject(), IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SYSTEM_LIBRARIES);
+		}
 		MethodRequestor requestor= new MethodRequestor();
 		SearchEngine searchEngine= owner != null ? new SearchEngine(owner) : new SearchEngine();
 
@@ -449,19 +481,19 @@ public class RippleMethodFinder2 {
 	}
 
 	private void createTypeToMethod() {
-		fTypeToMethod= new HashMap<>();
+		fTypeToMethod= new MultiMap<>();
 		for (IMethod declaration : fDeclarations) {
 			fTypeToMethod.put(declaration.getDeclaringType(), declaration);
 		}
 	}
 
 	private void createUnionFind() throws JavaModelException {
-		fRootTypes= new HashSet<>(fTypeToMethod.keySet());
+		fRootTypes= new HashSet<>(fTypeToMethod.fImplementation.keySet());
 		fUnionFind= new UnionFind();
-		for (IType type : fTypeToMethod.keySet()) {
+		for (IType type : fTypeToMethod.fImplementation.keySet()) {
 			fUnionFind.init(type);
 		}
-		for (IType type : fTypeToMethod.keySet()) {
+		for (IType type : fTypeToMethod.fImplementation.keySet()) {
 			uniteWithSupertypes(type, type);
 		}
 		fRootReps= new MultiMap<>();
@@ -481,15 +513,17 @@ public class RippleMethodFinder2 {
 				uniteWithSupertypes(anchor, supertype);
 			} else {
 				//check whether method in supertype is really overridden:
-				IMember superMethod= fTypeToMethod.get(supertype);
-				if (JavaModelUtil.isVisibleInHierarchy(superMethod, anchor.getPackageFragment())) {
-					IType rep= fUnionFind.find(anchor);
-					fUnionFind.union(rep, superRep);
-					// current type is no root anymore
-					fRootTypes.remove(anchor);
-					uniteWithSupertypes(supertype, supertype);
-				} else {
-					//Not overridden -> overriding chain ends here.
+				Collection<IMethod> superMethods= fTypeToMethod.get(supertype);
+				for (IMethod superMethod : superMethods) {
+					if (JavaModelUtil.isVisibleInHierarchy(superMethod, anchor.getPackageFragment())) {
+						IType rep= fUnionFind.find(anchor);
+						fUnionFind.union(rep, superRep);
+						// current type is no root anymore
+						fRootTypes.remove(anchor);
+						uniteWithSupertypes(supertype, supertype);
+					} else {
+						//Not overridden -> overriding chain ends here.
+					}
 				}
 			}
 		}

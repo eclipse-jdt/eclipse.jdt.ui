@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,12 +10,15 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [rename] https://bugs.eclipse.org/99622
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.corext.util;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -180,6 +183,28 @@ public class MethodOverrideTester {
 		}
 		return method;
 	}
+	
+	/**
+	 * Finds all overridden methods in a type and its super types. First the super class is examined and then the implemented interfaces.
+	 * With generics it is possible that 2 methods in the same type are overidden at the same time. In that case all overrides are returned
+	 * @param type The type to find methods in
+	 * @param overriding The overriding method
+	 * @return The overridden methods or an empty set if no method is overridden
+	 * @throws JavaModelException if a problem occurs
+	 */
+	public Set<IMethod> findAllOverriddenMethodsInHierarchy(IType type, IMethod overriding) throws JavaModelException {
+		Set<IMethod> ans = findAllOverriddenMethodsInType(type, overriding);
+		IType superClass= fHierarchy.getSuperclass(type);
+		if (superClass != null) {
+			ans.addAll(findAllOverriddenMethodsInHierarchy(superClass, overriding));
+		}
+		IType[] superInterfaces= fHierarchy.getSuperInterfaces(type);
+		for (int i= 0; i < superInterfaces.length; i++) {
+			ans.addAll(findAllOverriddenMethodsInHierarchy(superInterfaces[i], overriding));
+		}
+		return ans;
+	}
+
 
 	/**
 	 * Finds an overridden method in a type. With generics it is possible that 2 methods in the same type are overridden at the same time.
@@ -203,6 +228,33 @@ public class MethodOverrideTester {
 		}
 		return null;
 	}
+	
+	/**
+	 * Finds all overridden methods in a type. With generics it is possible that 2 methods in the same type are overridden at the same time.
+	 * In that case all overridden methods found are returned.
+	 * @param overriddenType The type to find methods in
+	 * @param overriding The overriding method
+	 * @return All overridden methods or an empty set if no method is overridden
+	 * @throws JavaModelException if a problem occurs
+	 */
+	public Set<IMethod> findAllOverriddenMethodsInType(IType overriddenType, IMethod overriding) throws JavaModelException {
+		Set<IMethod> ans = new HashSet<>();
+		int flags= overriding.getFlags();
+		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overriding.isConstructor())
+			return ans;
+		IMethod[] overriddenMethods= overriddenType.getMethods();
+		for (int i= 0; i < overriddenMethods.length; i++) {
+			IMethod overridden= overriddenMethods[i];
+			flags= overridden.getFlags();
+			if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overridden.isConstructor())
+				continue;
+			if (isSubsignature(overriding, overridden)) {
+				ans.add(overridden);
+			}
+		}
+		return ans;
+	}
+
 
 	/**
 	 * Finds an overriding method in a type.
@@ -549,4 +601,14 @@ public class MethodOverrideTester {
 		}
 	}
 
+	/**
+	 * Finds all overrides for the passed in method.
+	 * With generics it is possible that 2 methods in the same type are overridden at the same time. In that case all overrides are returned
+	 * @param overriding The overriding method
+	 * @return The overridden methods or an empty set if no method is overridden
+	 * @throws JavaModelException if a problem occurs
+	 */
+	public Set<IMethod> findAllOverridenMethods(IMethod overriding) throws JavaModelException {
+		return findAllOverriddenMethodsInHierarchy(overriding.getDeclaringType(), overriding);
+	}
 }

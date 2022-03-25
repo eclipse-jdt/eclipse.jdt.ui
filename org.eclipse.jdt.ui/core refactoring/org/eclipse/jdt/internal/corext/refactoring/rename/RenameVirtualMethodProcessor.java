@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [rename] https://bugs.eclipse.org/99622
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
@@ -46,7 +47,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 
-	private IMethod fOriginalMethod;
 	private boolean fActivationChecked;
 	private ITypeHierarchy fCachedHierarchy= null;
 
@@ -57,7 +57,6 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	 */
 	public RenameVirtualMethodProcessor(IMethod method) {
 		super(method);
-		fOriginalMethod= getMethod();
 	}
 
 	/**
@@ -71,7 +70,6 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		this(method);
 		RefactoringStatus initializeStatus= initialize(arguments);
 		status.merge(initializeStatus);
-		fOriginalMethod= getMethod();
 	}
 
 	/*
@@ -84,14 +82,9 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	 */
 	RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, ITypeHierarchy hierarchy, GroupCategorySet categorySet) {
 		super(topLevel, changeManager, categorySet);
-		fOriginalMethod= getMethod();
 		fActivationChecked= true; // is top level
 		fCachedHierarchy= hierarchy; // may be null
 		setMethodsToRename(ripples);
-	}
-
-	public IMethod getOriginalMethod() {
-		return fOriginalMethod;
 	}
 
 	private ITypeHierarchy getCachedHierarchy(IType declaring, IProgressMonitor monitor) throws JavaModelException {
@@ -117,19 +110,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			monitor.beginTask("", 3); //$NON-NLS-1$
 			if (!fActivationChecked) {
 				// the following code may change the method to be changed.
-				IMethod method= getMethod();
-				fOriginalMethod= method;
-
-				ITypeHierarchy hierarchy= null;
-				IType declaringType= method.getDeclaringType();
-				if (!declaringType.isInterface())
-					hierarchy= getCachedHierarchy(declaringType, new SubProgressMonitor(monitor, 1));
-
-				IMethod topmost= getMethod();
-				if (MethodChecks.isVirtual(topmost))
-					topmost= MethodChecks.getTopmostMethod(getMethod(), hierarchy, monitor);
-				if (topmost != null)
-					initialize(topmost);
+				initialize(getMethod());
 				fActivationChecked= true;
 			}
 		} finally{
