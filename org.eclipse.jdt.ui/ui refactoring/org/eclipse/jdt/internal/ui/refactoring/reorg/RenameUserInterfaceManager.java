@@ -45,8 +45,8 @@ public class RenameUserInterfaceManager extends UserInterfaceManager {
 		put(RenameFieldProcessor.class, RenameUserInterfaceStarter.class, RenameFieldWizard.class);
 		put(RenameEnumConstProcessor.class, RenameUserInterfaceStarter.class, RenameEnumConstWizard.class);
 		put(RenameTypeParameterProcessor.class, RenameUserInterfaceStarter.class, RenameTypeParameterWizard.class);
-		put(RenameNonVirtualMethodProcessor.class, RenameUserInterfaceStarter.class, RenameMethodWizard.class);
-		put(RenameVirtualMethodProcessor.class, RenameUserInterfaceStarter.class, RenameMethodWizard.class);
+		put(RenameNonVirtualMethodProcessor.class, RenameMethodUserInterfaceStarter.class, RenameMethodWizard.class);
+		put(RenameVirtualMethodProcessor.class, RenameMethodUserInterfaceStarter.class, RenameMethodWizard.class);
 		put(RenameLocalVariableProcessor.class, RenameUserInterfaceStarter.class, RenameLocalVariableWizard.class);
 		put(RenameModuleProcessor.class, RenameUserInterfaceStarter.class, RenameModuleWizard.class);
 	}

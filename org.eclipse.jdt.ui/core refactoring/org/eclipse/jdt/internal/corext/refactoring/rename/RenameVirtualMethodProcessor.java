@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 
+	private IMethod fOriginalMethod;
 	private boolean fActivationChecked;
 	private ITypeHierarchy fCachedHierarchy= null;
 
@@ -57,6 +58,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	 */
 	public RenameVirtualMethodProcessor(IMethod method) {
 		super(method);
+		fOriginalMethod= getMethod();
 	}
 
 	/**
@@ -70,6 +72,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		this(method);
 		RefactoringStatus initializeStatus= initialize(arguments);
 		status.merge(initializeStatus);
+		fOriginalMethod= getMethod();
 	}
 
 	/*
@@ -82,6 +85,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	 */
 	RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, ITypeHierarchy hierarchy, GroupCategorySet categorySet) {
 		super(topLevel, changeManager, categorySet);
+		fOriginalMethod= getMethod();
 		fActivationChecked= true; // is top level
 		fCachedHierarchy= hierarchy; // may be null
 		setMethodsToRename(ripples);
@@ -92,6 +96,10 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			return fCachedHierarchy;
 		fCachedHierarchy= declaring.newTypeHierarchy(new SubProgressMonitor(monitor, 1));
 		return fCachedHierarchy;
+	}
+
+	public IMethod getOriginalMethod() {
+		return fOriginalMethod;
 	}
 
 	@Override
@@ -110,7 +118,19 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			monitor.beginTask("", 3); //$NON-NLS-1$
 			if (!fActivationChecked) {
 				// the following code may change the method to be changed.
-				initialize(getMethod());
+				IMethod method= getMethod();
+				fOriginalMethod= method;
+
+				ITypeHierarchy hierarchy= null;
+				IType declaringType= method.getDeclaringType();
+				if (!declaringType.isInterface())
+					hierarchy= getCachedHierarchy(declaringType, new SubProgressMonitor(monitor, 1));
+
+				IMethod topmost= getMethod();
+				if (MethodChecks.isVirtual(topmost))
+					topmost= MethodChecks.getTopmostMethod(getMethod(), hierarchy, monitor);
+				if (topmost != null)
+					initialize(topmost);
 				fActivationChecked= true;
 			}
 		} finally{
