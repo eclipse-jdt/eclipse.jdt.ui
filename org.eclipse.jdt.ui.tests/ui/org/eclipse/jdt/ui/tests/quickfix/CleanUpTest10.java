@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2022 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
+ *     Christian Femers - Bug 579471
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -709,6 +710,29 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotUseCurlyBracesOnlyArrayInitializationForVar() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        var a = new String[0];\n" //
+				+ "        var b = new String[][]{ {\"a\", \"b\", \"c\"}, {\"d\", \"e\", \"f\"} };\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		/*
+		 * As Array initialization requires and explicit target type, the code above must not change
+		 * even if we activate the "Create array with curly if possible" cleanup.
+		 */
+		enable(CleanUpConstants.ARRAY_WITH_CURLY);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}

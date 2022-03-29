@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2022 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
+ *     Christian Femers - Bug 579471
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -28,6 +29,8 @@ import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
@@ -75,12 +78,21 @@ public class ArrayWithCurlyFixCore extends CompilationUnitRewriteOperationsFixCo
 		}
 
 		private boolean isDestinationAllowed(final ASTNode visited) {
-			int parentType= visited.getParent().getNodeType();
+			ASTNode parent= visited.getParent();
+			int parentType= parent.getNodeType();
 
-			return parentType == ASTNode.FIELD_DECLARATION
+			boolean correctParent= parentType == ASTNode.FIELD_DECLARATION
 					|| parentType == ASTNode.VARIABLE_DECLARATION_EXPRESSION
 					|| parentType == ASTNode.VARIABLE_DECLARATION_FRAGMENT
 					|| parentType == ASTNode.VARIABLE_DECLARATION_STATEMENT;
+			if (!correctParent) {
+				return false;
+			}
+			if (parent instanceof VariableDeclaration) {
+				Type type= ASTNodes.getType((VariableDeclaration) parent);
+				return type == null || !type.isVar();
+			}
+			return true;
 		}
 	}
 
