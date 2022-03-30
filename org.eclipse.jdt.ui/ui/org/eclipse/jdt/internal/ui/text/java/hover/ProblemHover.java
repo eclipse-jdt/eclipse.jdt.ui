@@ -65,9 +65,13 @@ public class ProblemHover extends AbstractAnnotationHover {
 	protected static class ProblemInfo extends AnnotationInfo {
 
 		private static final ICompletionProposal[] NO_PROPOSALS= new ICompletionProposal[0];
+		private ICompletionProposal[] computeCompletionProposals;
 
 		public ProblemInfo(Annotation annotation, Position position, ITextViewer textViewer) {
 			super(annotation, position, textViewer);
+			// precalculate proposal
+			// runs in "Text Viewer Hover Presenter" thread (org.eclipse.jface.text.TextViewerHoverManager.computeInformation())
+			computeCompletionProposals= computeCompletionProposals();
 		}
 
 		/*
@@ -75,6 +79,12 @@ public class ProblemHover extends AbstractAnnotationHover {
 		 */
 		@Override
 		public ICompletionProposal[] getCompletionProposals() {
+			// don't do heavy work here: This is running in
+			// UI thread (org.eclipse.jface.text.TextViewerHoverManager.presentInformation())
+			return computeCompletionProposals;
+		}
+
+		private ICompletionProposal[] computeCompletionProposals() {
 			if (annotation instanceof IJavaAnnotation) {
 				ICompletionProposal[] result= getJavaAnnotationFixes((IJavaAnnotation) annotation);
 				if (result.length > 0)
