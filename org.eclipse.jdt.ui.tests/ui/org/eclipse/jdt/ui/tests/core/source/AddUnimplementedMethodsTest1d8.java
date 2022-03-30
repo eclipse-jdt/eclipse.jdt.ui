@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2020 IBM Corporation and others.
+ * Copyright (c) 2015, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -88,6 +88,30 @@ public class AddUnimplementedMethodsTest1d8 {
 
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "hashCode", "equals", "clone", "toString", "finalize" }, methods);
+	}
+
+	@Test
+	public void testBug478563() throws Exception {
+		StringBuilder buf= new StringBuilder();
+		buf.append("import java.util.Optional;\n");
+		buf.append("interface I {\n");
+		buf.append("    public Optional<String> foo();\n");
+		buf.append("}\n");
+
+		fPackage.createCompilationUnit("I.java", buf.toString(), true, null);
+
+		StringBuilder buf2= new StringBuilder();
+		buf2.append("public class A implements I {\n");
+		buf2.append("}\n");
+		ICompilationUnit cu2= fPackage.createCompilationUnit("A.java", buf2.toString(), true, null);
+
+		IType testClass= cu2.createType(buf2.toString(), null, true, null);
+
+		testHelper(testClass, -1, true);
+
+		IMethod[] methods= testClass.getMethods();
+		checkMethods(new String[] { "foo", "hashCode", "equals", "clone", "toString", "finalize" }, methods);
+		assertTrue("Optional.empty method not found", cu2.getSource().contains("return Optional.empty();"));
 	}
 
 	private void testHelper(IType testClass, int insertionPos, boolean implementAllOverridable) throws JavaModelException, CoreException {

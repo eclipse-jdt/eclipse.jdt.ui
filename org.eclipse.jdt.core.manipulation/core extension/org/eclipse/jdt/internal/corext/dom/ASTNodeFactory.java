@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
@@ -43,6 +44,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -538,7 +540,8 @@ public class ASTNodeFactory {
 	 * @param ast The AST to create the expression for
 	 * @param type The type of the returned expression
 	 * @param extraDimensions Extra dimensions to the type
-	 * @return the Null-literal for reference types, a boolean-literal for a boolean type, a number
+	 * @return {@code Optional.empty()} if the type is {@code java.util.Optional},
+	 * the Null-literal for reference types, a boolean-literal for a boolean type, a number
 	 * literal for primitive types or <code>null</code> if the type is void.
 	 */
 	public static Expression newDefaultExpression(AST ast, Type type, int extraDimensions) {
@@ -552,6 +555,23 @@ public class ASTNodeFactory {
 				return ast.newNumberLiteral("0"); //$NON-NLS-1$
 			}
 		}
+		if (type.isParameterizedType()) {
+			// if the requested type is of type "java.util.Optional" don't return "null"
+			ParameterizedType parameterizedType= (ParameterizedType) type;
+			Type outerType= parameterizedType.getType();
+
+			if (outerType instanceof SimpleType) {
+				SimpleType simpleType= (SimpleType) outerType;
+				Name name= simpleType.getName();
+				String fqn= name.getFullyQualifiedName();
+				if ("java.util.Optional".equals(fqn) || "Optional".equals(fqn)) { //$NON-NLS-1$ //$NON-NLS-2$
+					MethodInvocation emptyCall= ast.newMethodInvocation();
+					emptyCall.setExpression(ASTNodeFactory.newName(ast, name.getFullyQualifiedName()));
+					emptyCall.setName(ast.newSimpleName("empty")); //$NON-NLS-1$
+					return emptyCall;
+				}
+			}
+		}
 		return ast.newNullLiteral();
 	}
 
@@ -561,7 +581,8 @@ public class ASTNodeFactory {
 	 *
 	 * @param ast The AST to create the expression for
 	 * @param type The type binding to which the returned expression is compatible to
-	 * @return the Null-literal for reference types, a boolean-literal for a boolean type, a number
+	 * @return {@code Optional.empty()} if the type is {@code java.util.Optional},
+	 * the Null-literal for reference types, a boolean-literal for a boolean type, a number
 	 * literal for primitive types or <code>null</code> if the type is void.
 	 */
 	public static Expression newDefaultExpression(AST ast, ITypeBinding type) {
@@ -579,6 +600,14 @@ public class ASTNodeFactory {
 			}
 			if (nomatch) {
 				return ast.newNumberLiteral("0");//$NON-NLS-1$
+			}
+		} else {
+			String name= type.getErasure().getQualifiedName();
+			if ("java.util.Optional".equals(name)) { //$NON-NLS-1$
+				MethodInvocation emptyCall= ast.newMethodInvocation();
+				emptyCall.setExpression(ASTNodeFactory.newName(ast, name));
+				emptyCall.setName(ast.newSimpleName("empty")); //$NON-NLS-1$
+				return emptyCall;
 			}
 		}
 		return ast.newNullLiteral();
