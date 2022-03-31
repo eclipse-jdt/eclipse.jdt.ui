@@ -164,7 +164,7 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
-import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
+import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
 import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFix;
@@ -4132,7 +4132,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null)
 			return true;
 
-		IProposableFix fix= ConvertLoopFix.createConvertForLoopToEnhancedFix(context.getASTRoot(), forStatement);
+		IProposableFix fix= ConvertLoopFixCore.createConvertForLoopToEnhancedFix(context.getASTRoot(), forStatement);
 		if (fix == null)
 			return false;
 
@@ -4155,7 +4155,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null)
 			return true;
 
-		IProposableFix fix= ConvertLoopFix.createConvertIterableLoopToEnhancedFix(context.getASTRoot(), forStatement);
+		IProposableFix fix= ConvertLoopFixCore.createConvertIterableLoopToEnhancedFix(context.getASTRoot(), forStatement);
 		if (fix == null)
 			return false;
 

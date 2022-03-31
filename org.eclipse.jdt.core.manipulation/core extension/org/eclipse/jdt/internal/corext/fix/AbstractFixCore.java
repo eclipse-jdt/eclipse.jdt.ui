@@ -17,11 +17,11 @@ package org.eclipse.jdt.internal.corext.fix;
 import org.eclipse.core.runtime.IStatus;
 
 
-public abstract class AbstractFix implements IProposableFix, ILinkedFixCore {
+public abstract class AbstractFixCore implements IProposableFix, ILinkedFixCore {
 
 	private final String fDisplayString;
 
-	protected AbstractFix(String displayString) {
+	protected AbstractFixCore(String displayString) {
 		fDisplayString= displayString;
 	}
 

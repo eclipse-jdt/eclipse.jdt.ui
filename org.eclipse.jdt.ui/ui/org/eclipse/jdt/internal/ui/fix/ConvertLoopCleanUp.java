@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
+import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
@@ -52,10 +52,7 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 		boolean convertForLoops= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		boolean checkIfLoopVarUsed= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
 
-		return ConvertLoopFix.createCleanUp(compilationUnit,
-				convertForLoops, convertForLoops,
-				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES),
-				checkIfLoopVarUsed);
+		return CleanUpFixWrapper.create(ConvertLoopFixCore.createCleanUp(compilationUnit, convertForLoops, convertForLoops, isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES), checkIfLoopVarUsed));
 	}
 
 	@Override

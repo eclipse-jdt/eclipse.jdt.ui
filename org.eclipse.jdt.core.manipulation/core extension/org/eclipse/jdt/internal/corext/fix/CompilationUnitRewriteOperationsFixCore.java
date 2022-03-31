@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
-public class CompilationUnitRewriteOperationsFixCore extends AbstractFix {
+public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
 
 	public abstract static class CompilationUnitRewriteOperation {
 

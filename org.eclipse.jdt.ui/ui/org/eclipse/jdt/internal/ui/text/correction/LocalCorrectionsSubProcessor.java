@@ -142,7 +142,7 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
+import org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
@@ -639,7 +639,7 @@ public class LocalCorrectionsSubProcessor {
 	 * Fix instance accesses and indirect (static) accesses to static fields/methods
 	 */
 	public static void addCorrectAccessToStaticProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
-		IProposableFix fix= CodeStyleFix.createIndirectAccessToStaticFix(context.getASTRoot(), problem);
+		IProposableFix fix= CodeStyleFixCore.createIndirectAccessToStaticFix(context.getASTRoot(), (IProblemLocationCore)problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new HashMap<>();
@@ -651,7 +651,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 
-		IProposableFix[] fixes= CodeStyleFix.createNonStaticAccessFixes(context.getASTRoot(), problem);
+		IProposableFix[] fixes= CodeStyleFixCore.createNonStaticAccessFixes(context.getASTRoot(), (IProblemLocationCore)problem);
 		if (fixes != null) {
 			IProposableFix fix1= fixes[0];
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -1049,7 +1049,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		IProposableFix fix= CodeStyleFix.createAddFieldQualifierFix(context.getASTRoot(), problem);
+		IProposableFix fix= CodeStyleFixCore.createAddFieldQualifierFix(context.getASTRoot(), (IProblemLocationCore) problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new HashMap<>();
