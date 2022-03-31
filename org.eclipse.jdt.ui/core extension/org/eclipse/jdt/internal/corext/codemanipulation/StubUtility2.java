@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -125,7 +125,7 @@ public final class StubUtility2 {
 
 			String bodyStatement= ""; //$NON-NLS-1$
 			if (Modifier.isAbstract(modifiers)) {
-				Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
+				Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), bindingReturnType, decl.getExtraDimensions());
 				if (expression != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(expression);

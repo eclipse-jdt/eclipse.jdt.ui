@@ -555,7 +555,7 @@ public class ASTNodeFactory {
 				return ast.newNumberLiteral("0"); //$NON-NLS-1$
 			}
 		}
-		if (type.isParameterizedType()) {
+		if (extraDimensions == 0 && type.isParameterizedType()) {
 			// if the requested type is of type "java.util.Optional" don't return "null"
 			ParameterizedType parameterizedType= (ParameterizedType) type;
 			Type outerType= parameterizedType.getType();
@@ -564,9 +564,47 @@ public class ASTNodeFactory {
 				SimpleType simpleType= (SimpleType) outerType;
 				Name name= simpleType.getName();
 				String fqn= name.getFullyQualifiedName();
-				if ("java.util.Optional".equals(fqn) || "Optional".equals(fqn)) { //$NON-NLS-1$ //$NON-NLS-2$
+				if ("java.util.Optional".equals(fqn)) { //$NON-NLS-1$
 					MethodInvocation emptyCall= ast.newMethodInvocation();
 					emptyCall.setExpression(ASTNodeFactory.newName(ast, name.getFullyQualifiedName()));
+					emptyCall.setName(ast.newSimpleName("empty")); //$NON-NLS-1$
+					return emptyCall;
+				}
+			}
+		}
+		return ast.newNullLiteral();
+	}
+
+	/**
+	 * Returns an expression that is assignable to the given type. <code>null</code> is
+	 * returned if the type is the 'void' type.
+	 *
+	 * @param ast The AST to create the expression for
+	 * @param type The type of the returned expression
+	 * @param importedTypeBinding The binding of the return type that has been added to imports
+	 * @param extraDimensions Extra dimensions to the type
+	 * @return {@code Optional.empty()} if the type is {@code java.util.Optional},
+	 * the Null-literal for reference types, a boolean-literal for a boolean type, a number
+	 * literal for primitive types or <code>null</code> if the type is void.
+	 */
+	public static Expression newDefaultExpression(AST ast, Type type, ITypeBinding importedTypeBinding, int extraDimensions) {
+		if (extraDimensions == 0 && type.isPrimitiveType()) {
+			PrimitiveType primitiveType= (PrimitiveType) type;
+			if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
+				return ast.newBooleanLiteral(false);
+			} else if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID) {
+				return null;
+			} else {
+				return ast.newNumberLiteral("0"); //$NON-NLS-1$
+			}
+		}
+		if (extraDimensions == 0 && type.isParameterizedType()) {
+			// if the requested type is of type "java.util.Optional" don't return "null"
+			if (importedTypeBinding != null) {
+				String name= importedTypeBinding.getErasure().getQualifiedName();
+				if ("java.util.Optional".equals(name)) { //$NON-NLS-1$
+					MethodInvocation emptyCall= ast.newMethodInvocation();
+					emptyCall.setExpression(ASTNodeFactory.newName(ast, "Optional")); //$NON-NLS-1$
 					emptyCall.setName(ast.newSimpleName("empty")); //$NON-NLS-1$
 					return emptyCall;
 				}
