@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -121,14 +121,18 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 		proposal.setCompletion(fullyQualifiedType.toCharArray());
 		proposal.setDeclarationSignature(type.getPackageFragment().getElementName().toCharArray());
 		proposal.setFlags(type.getFlags());
-		proposal.setRelevance(relevance);
 		proposal.setReplaceRange(context.getInvocationOffset(), context.getInvocationOffset());
 		proposal.setSignature(Signature.createTypeSignature(fullyQualifiedType, true).toCharArray());
 
-		if (shouldProposeGenerics(context.getProject()))
-			return new LazyGenericTypeProposal(proposal, context);
-		else
-			return new LazyJavaTypeCompletionProposal(proposal, context);
+		if (shouldProposeGenerics(context.getProject())) {
+			LazyGenericTypeProposal p= new LazyGenericTypeProposal(proposal, context);
+			p.setRelevance(relevance);
+			return p;
+		} else {
+			LazyJavaTypeCompletionProposal p= new LazyJavaTypeCompletionProposal(proposal, context);
+			p.setRelevance(relevance);
+			return p;
+		}
 	}
 
 	/**
