@@ -40,8 +40,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -49,6 +47,8 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -171,22 +171,20 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 			identifier= ((StringLiteral)node).getLiteralValue();
 		} else if (!usedFullyQualifiedName && node.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
 			identifier= ((SimpleName)node).getIdentifier();
-			try {
-				IBinding nodeBinding= ((SimpleName)node).resolveBinding();
-				if (nodeBinding != null) {
-					IJavaElement nodeElement= nodeBinding.getJavaElement();
-					if (nodeElement instanceof IMember) {
-						IType nodeDeclaringType= ((IMember)nodeElement).getDeclaringType();
-						if (nodeDeclaringType != null) {
-							String nodeParentTypeName= nodeDeclaringType.getSuperclassName();
-							if (!"org.eclipse.osgi.util.NLS".equals(nodeParentTypeName)) { //$NON-NLS-1$
+			IBinding nodeBinding= ((SimpleName)node).resolveBinding();
+			if (nodeBinding != null) {
+				if (nodeBinding instanceof IVariableBinding && ((IVariableBinding)nodeBinding).isField()) {
+					ITypeBinding nodeDeclaringType= ((IVariableBinding)nodeBinding).getDeclaringClass();
+					if (nodeDeclaringType != null) {
+						ITypeBinding superClass= nodeDeclaringType.getSuperclass();
+						if (superClass != null) {
+							String superClassName= superClass.getQualifiedName();
+							if (!"org.eclipse.osgi.util.NLS".equals(superClassName)) { //$NON-NLS-1$
 								identifier= null;
 							}
 						}
 					}
 				}
-			} catch (JavaModelException e1) {
-				// ignore
 			}
 		}
 		if (identifier == null) {
