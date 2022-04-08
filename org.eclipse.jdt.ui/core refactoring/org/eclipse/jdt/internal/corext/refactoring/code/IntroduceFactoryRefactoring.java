@@ -483,7 +483,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private SearchResultGroup[] searchForCallsTo(IMethodBinding methodBinding, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		IMethod method= (IMethod) methodBinding.getJavaElement();
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(createSearchPattern(method, methodBinding));
+		SearchPattern searchPattern= createSearchPattern(method, methodBinding);
+		if (searchPattern == null) {
+			return new SearchResultGroup[0];
+		}
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(searchPattern);
 		engine.setFiltering(true, true);
 		engine.setScope(createSearchScope(method, methodBinding));
 		engine.setStatus(status);
@@ -512,6 +516,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 	private IType findNonPrimaryType(String fullyQualifiedName, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		SearchPattern p= SearchPattern.createPattern(fullyQualifiedName, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (p == null) {
+			return null;
+		}
 		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(p);
 
 		engine.setFiltering(true, true);

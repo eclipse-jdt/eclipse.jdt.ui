@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.IRefactoringSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -55,7 +56,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 
@@ -80,6 +80,9 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 
 	private static SearchPattern createSearchPattern(IType type) throws JavaModelException {
 		SearchPattern pattern= SearchPattern.createPattern(type, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return null;
+		}
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
 		if (constructors.length == 0)
 			return pattern;
@@ -105,6 +108,9 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 		if (type == null)
 			return null;
 		SearchPattern pattern= createSearchPattern(type);
+		if (pattern == null) {
+			return null;
+		}
 		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
 		engine.setScope(scope);
 		engine.setWorkingCopies(copies);

@@ -736,6 +736,9 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		private SearchResultGroup[] getReferences(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs, RefactoringStatus status) throws CoreException {
 			IJavaSearchScope scope= RefactoringScopeFactory.create(fPackage, true, false);
 			SearchPattern pattern= SearchPattern.createPattern(fPackage, IJavaSearchConstants.REFERENCES);
+			if (pattern == null) {
+				return new SearchResultGroup[0];
+			}
 			CollectingSearchRequestor requestor= new CuCollectingSearchRequestor(binaryRefs);
 			return RefactoringSearchEngine.search(pattern, scope, requestor, pm, status);
 		}
@@ -902,7 +905,9 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		 */
 		private IPackageFragment[] getNamesakePackages(IJavaSearchScope scope, IProgressMonitor pm) throws CoreException {
 			SearchPattern pattern= SearchPattern.createPattern(fPackage.getElementName(), IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-
+			if (pattern == null) {
+				return new IPackageFragment[0];
+			}
 			final HashSet<IPackageFragment> packageFragments= new HashSet<>();
 			SearchRequestor requestor= new SearchRequestor() {
 				@Override

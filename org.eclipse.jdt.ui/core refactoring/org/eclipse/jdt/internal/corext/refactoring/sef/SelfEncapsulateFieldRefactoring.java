@@ -357,8 +357,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return result;
 		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_searching_for_cunits);
 		final SubProgressMonitor subPm= new SubProgressMonitor(pm, 5);
+		SearchPattern pattern= SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES);
+		if (pattern == null) {
+			return result;
+		}
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
-			SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES),
+			pattern,
 			RefactoringScopeFactory.create(fField, fConsiderVisibility),
 			subPm,
 			result, true);

@@ -1571,7 +1571,13 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 //			SearchPattern occPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			SearchPattern declPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			if (declPattern == null) {
+				return new SearchResultGroup[0];
+			}
 			SearchPattern refPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			if (refPattern == null) {
+				return new SearchResultGroup[0];
+			}
 //			pattern= SearchPattern.createOrPattern(declPattern, refPattern);
 //			pattern= occPattern;
 

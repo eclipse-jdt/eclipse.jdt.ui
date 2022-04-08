@@ -597,7 +597,11 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			engine.setFiltering(true, true);
 			engine.setStatus(status);
 			engine.setScope(RefactoringScopeFactory.create(type));
-			engine.setPattern(SearchPattern.createPattern(type, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+			SearchPattern pattern= SearchPattern.createPattern(type, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			if (pattern == null) {
+				return Map.of();
+			}
+			engine.setPattern(pattern);
 			engine.searchPattern(new SubProgressMonitor(monitor, 100));
 			@SuppressWarnings("unchecked")
 			Map<IJavaProject, Set<SearchResultGroup>> result= (Map<IJavaProject, Set<SearchResultGroup>>) engine.getAffectedProjects();

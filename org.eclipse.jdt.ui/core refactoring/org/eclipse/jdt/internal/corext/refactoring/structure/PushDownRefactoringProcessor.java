@@ -301,8 +301,12 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 	private static IJavaElement[] getReferencingElementsFromSameClass(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(member);
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member,
-				IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+		SearchPattern pattern= SearchPattern.createPattern(member,
+				IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return new IJavaElement[0];
+		}
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
 		engine.setFiltering(true, true);
 		IType declaringType= member.getDeclaringType();
 		engine.setScope(SearchEngine.createJavaSearchScope(new IJavaElement[] { declaringType }));

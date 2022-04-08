@@ -311,6 +311,9 @@ public class RenameModuleProcessor extends JavaRenameProcessor implements IRefer
 		CollectingSearchRequestor requestor= new CollectingSearchRequestor();
 
 		SearchPattern newPattern= SearchPattern.createPattern(module, IJavaSearchConstants.REFERENCES);
+		if (newPattern == null) {
+			return new SearchResultGroup[0];
+		}
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fModule, true, true);
 		return RefactoringSearchEngine.search(newPattern, owner, scope, requestor, new SubProgressMonitor(pm, 1), status);
 	}
@@ -438,7 +441,11 @@ public class RenameModuleProcessor extends JavaRenameProcessor implements IRefer
 		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getCurrentElementName()));
 		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 
-		SearchResultGroup[] result= RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(),
+		SearchPattern searchPattern= createSearchPattern();
+		if (searchPattern == null) {
+			return new SearchResultGroup[0];
+		}
+		SearchResultGroup[] result= RefactoringSearchEngine.search(searchPattern, createRefactoringScope(),
 				new CuCollectingSearchRequestor(binaryRefs), pm, status);
 		binaryRefs.addErrorIfNecessary(status);
 		return result;

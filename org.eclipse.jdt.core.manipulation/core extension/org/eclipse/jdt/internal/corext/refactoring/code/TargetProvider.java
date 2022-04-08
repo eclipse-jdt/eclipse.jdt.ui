@@ -452,6 +452,7 @@ public abstract class TargetProvider {
 			Assert.isTrue(method != null);
 
 			SearchPattern pattern= SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			Assert.isNotNull(pattern);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(method, true, false);
 			final HashSet<ICompilationUnit> affectedCompilationUnits= new HashSet<>();
 			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs) {
