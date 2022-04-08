@@ -2,6 +2,7 @@ pipeline {
 	options {
 		timeout(time: 40, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
+		timestamps
 	}
 	agent {
 		label "centos-latest"
@@ -15,10 +16,8 @@ pipeline {
 			steps {
 				wrap([$class: 'Xvnc', useXauthority: true]) {
 					sh """
-					mvn clean verify --batch-mode --fail-at-end -Dmaven.repo.local=$WORKSPACE/.m2/repository \
-						-Pbuild-individual-bundles -Pbree-libs -Papi-check \
-						-Dcompare-version-with-baselines.skip=false \
-						-Dproject.build.sourceEncoding=UTF-8 
+					mvn clean verify --batch-mode -Dmaven.repo.local=$WORKSPACE/.m2/repository \
+						-Pbuild-individual-bundles -Pbree-libs -Papi-check
 					"""
 				}
 			}
