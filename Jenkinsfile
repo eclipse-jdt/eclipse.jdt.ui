@@ -2,7 +2,7 @@ pipeline {
 	options {
 		timeout(time: 40, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
-		timestamps
+		timestamps()
 	}
 	agent {
 		label "centos-latest"
