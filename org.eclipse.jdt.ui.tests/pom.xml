@@ -41,6 +41,7 @@
             <include>org/eclipse/jdt/ui/tests/AutomatedSuite.class</include>
             <include>org/eclipse/jdt/ui/tests/LeakTestSuite.class</include>
           </includes>
+          <runOrder>reversealphabetical</runOrder>
           <dependencies>
             <dependency>
               <type>eclipse-plugin</type>
