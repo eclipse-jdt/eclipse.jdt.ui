@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -48,7 +49,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class NLSSearchQuery implements ISearchQuery {
@@ -86,6 +86,9 @@ public class NLSSearchQuery implements ISearchQuery {
 					return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_propertiesNotExists, BasicElementLabels.getResourceName(propertieFile)), null);
 
 				SearchPattern pattern= SearchPattern.createPattern(wrapperClass, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+				if (pattern == null) {
+					continue;
+				}
 				SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
 
 				NLSSearchResultRequestor requestor= new NLSSearchResultRequestor(propertieFile, fResult);

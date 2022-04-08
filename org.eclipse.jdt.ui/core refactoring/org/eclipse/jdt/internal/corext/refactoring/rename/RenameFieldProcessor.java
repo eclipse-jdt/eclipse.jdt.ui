@@ -627,6 +627,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private RefactoringStatus checkAccessorDeclarations(IProgressMonitor pm, IMethod existingAccessor) throws CoreException{
 		RefactoringStatus result= new RefactoringStatus();
 		SearchPattern pattern= SearchPattern.createPattern(existingAccessor, IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return result;
+		}
 		IJavaSearchScope scope= SearchEngine.createHierarchyScope(fField.getDeclaringType());
 		SearchResultGroup[] groupDeclarations= RefactoringSearchEngine.search(pattern, scope, pm, result);
 		Assert.isTrue(groupDeclarations.length > 0);
@@ -712,7 +715,11 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getCurrentElementName()));
 		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 
-		SearchResultGroup[] result= RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(),
+		SearchPattern searchPattern= createSearchPattern();
+		if (searchPattern == null) {
+			return new SearchResultGroup[0];
+		}
+		SearchResultGroup[] result= RefactoringSearchEngine.search(searchPattern, createRefactoringScope(),
 				new CuCollectingSearchRequestor(binaryRefs), pm, status);
 		binaryRefs.addErrorIfNecessary(status);
 		result= filterAccessorMethods(result, true);
@@ -975,6 +982,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 		IJavaSearchScope scope= RefactoringScopeFactory.create(accessor);
 		SearchPattern pattern= SearchPattern.createPattern(accessor, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return;
+		}
 		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(
 			pattern, scope, new MethodOccurenceCollector(accessor.getElementName()), pm, status);
 
@@ -1017,7 +1027,11 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getCurrentElementName()));
 		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 
-		SearchResultGroup[] result= RefactoringSearchEngine.search(createSearchPattern(), scope,
+		SearchPattern searchPattern= createSearchPattern();
+		if (searchPattern == null) {
+			return;
+		}
+		SearchResultGroup[] result= RefactoringSearchEngine.search(searchPattern, scope,
 				new CuCollectingSearchRequestor(binaryRefs), pm, status);
 		binaryRefs.addErrorIfNecessary(status);
 		result= filterAccessorMethods(result, false);
@@ -1115,6 +1129,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			requestor= new CollectingSearchRequestor();
 
 		SearchPattern newPattern= SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES);
+		if (newPattern == null) {
+			return new SearchResultGroup[0];
+		}
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fField, true, true);
 		return RefactoringSearchEngine.search(newPattern, owner, scope, requestor, new SubProgressMonitor(pm, 1), status);
 	}

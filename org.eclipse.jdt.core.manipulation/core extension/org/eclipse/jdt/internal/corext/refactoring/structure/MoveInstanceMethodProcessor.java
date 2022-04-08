@@ -1540,6 +1540,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			SearchPattern pattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			if (pattern == null) {
+				return new SearchResultGroup[0];
+			}
 			IJavaSearchScope scope= RefactoringScopeFactory.create(fMethod, true, false);
 
 			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(fMethod.getElementName()));

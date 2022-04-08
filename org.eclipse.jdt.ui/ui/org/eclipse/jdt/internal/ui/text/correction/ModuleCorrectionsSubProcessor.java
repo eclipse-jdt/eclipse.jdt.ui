@@ -212,6 +212,9 @@ public class ModuleCorrectionsSubProcessor {
 
 		SearchPattern searchPattern= SearchPattern.createPattern(node.getFullyQualifiedName(), IJavaSearchConstants.MODULE, IJavaSearchConstants.DECLARATIONS,
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		if (searchPattern == null) {
+			return;
+		}
 		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 		try {
 			new SearchEngine().search(searchPattern, participants, scope, requestor, null);

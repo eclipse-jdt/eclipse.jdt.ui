@@ -921,7 +921,11 @@ public class InlineConstantRefactoring extends Refactoring {
 	}
 
 	private SearchResultGroup[] findReferences(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES));
+		SearchPattern pattern= SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES);
+		if (pattern == null) {
+			return new SearchResultGroup[0];
+		}
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(fField));
 		engine.setStatus(status);

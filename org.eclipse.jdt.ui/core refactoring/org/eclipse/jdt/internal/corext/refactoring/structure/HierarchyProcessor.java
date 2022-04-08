@@ -666,7 +666,11 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	protected boolean hasNonMovedReferences(final IMember member, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		if (!fCachedMembersReferences.containsKey(member)) {
-			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+			SearchPattern pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			if (pattern == null) {
+				return false;
+			}
+			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
 			engine.setFiltering(true, true);
 			engine.setStatus(status);
 			engine.setOwner(fOwner);

@@ -674,10 +674,15 @@ public final class RefactoringSearchEngine2 {
 		Assert.isNotNull(elements);
 		Assert.isTrue(elements.length > 0);
 		SearchPattern pattern= SearchPattern.createPattern(elements[0], limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		Assert.isNotNull(pattern);
 		IJavaElement element= null;
 		for (int index= 1; index < elements.length; index++) {
 			element= elements[index];
-			pattern= SearchPattern.createOrPattern(pattern, SearchPattern.createPattern(element, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+			SearchPattern searchPattern= SearchPattern.createPattern(element, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			if (searchPattern == null) {
+				continue;
+			}
+			pattern= SearchPattern.createOrPattern(pattern, searchPattern);
 		}
 		setPattern(pattern);
 	}

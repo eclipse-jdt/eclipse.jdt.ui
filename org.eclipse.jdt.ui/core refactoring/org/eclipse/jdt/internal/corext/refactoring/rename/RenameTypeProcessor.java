@@ -616,6 +616,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 		try {
 			SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			Assert.isNotNull(pattern);
 
 			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(fType.getElementName()));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
@@ -981,6 +982,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
 		SearchPattern pattern= SearchPattern.createPattern(getNewElementName(),
 				IJavaSearchConstants.TYPE, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return result;
+		}
 		ICompilationUnit[] cusWithReferencesToConflictingTypes= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, scope, pm, result);
 		if (cusWithReferencesToConflictingTypes.length == 0)
 			return result;

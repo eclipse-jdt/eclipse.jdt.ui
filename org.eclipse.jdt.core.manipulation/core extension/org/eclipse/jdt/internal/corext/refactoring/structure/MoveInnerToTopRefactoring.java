@@ -1138,7 +1138,11 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private Map<ICompilationUnit, SearchMatch[]> createTypeReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return Map.of();
+		}
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(fType));
 		engine.setStatus(status);

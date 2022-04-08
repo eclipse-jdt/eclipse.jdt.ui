@@ -140,6 +140,9 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 		}
 		final AtomicLong count= new AtomicLong(0);
 		SearchPattern pattern= SearchPattern.createPattern(element, IJavaSearchConstants.REFERENCES);
+		if (pattern == null) {
+			return 0;
+		}
 		SearchEngine engine= new SearchEngine();
 		final boolean ignoreInaccurate= NewSearchUI.arePotentialMatchesIgnored();
 		engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
@@ -180,6 +183,9 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 		}
 		final SearchMatch[] matches= new SearchMatch[1];
 		SearchPattern pattern= SearchPattern.createPattern(element, IJavaSearchConstants.REFERENCES);
+		if (pattern == null) {
+			return null;
+		}
 		SearchEngine engine= new SearchEngine();
 		engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
 				createSourceSearchScope(), new SearchRequestor() {

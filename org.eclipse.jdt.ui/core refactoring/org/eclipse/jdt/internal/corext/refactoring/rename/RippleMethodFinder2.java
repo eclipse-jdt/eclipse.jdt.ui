@@ -453,6 +453,9 @@ public class RippleMethodFinder2 {
 		int limitTo= IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
 		int matchRule= SearchPattern.R_ERASURE_MATCH | SearchPattern.R_CASE_SENSITIVE;
 		SearchPattern pattern= SearchPattern.createPattern(fMethod, limitTo, matchRule);
+		if (pattern == null) {
+			return;
+		}
 		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
 		IJavaSearchScope scope;
 		if (fSearchOnlyInCompilationUnit) {

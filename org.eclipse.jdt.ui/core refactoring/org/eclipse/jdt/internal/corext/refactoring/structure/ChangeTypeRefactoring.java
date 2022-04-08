@@ -1571,6 +1571,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 			}
 			SearchPattern pattern= SearchPattern.createPattern(
 					iField, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			if (pattern == null) {
+				fAffectedUnits = new ICompilationUnit[0];
+				return fAffectedUnits;
+			}
 			IJavaSearchScope scope= RefactoringScopeFactory.create(iField);
 			CollectingSearchRequestor csr= new CollectingSearchRequestor();
 			SearchResultGroup[] groups=
