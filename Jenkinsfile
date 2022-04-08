@@ -16,8 +16,8 @@ pipeline {
 			steps {
 				wrap([$class: 'Xvnc', useXauthority: true]) {
 					sh """
-					mvn clean verify --batch-mode -Dmaven.repo.local=$WORKSPACE/.m2/repository \
-						-Pbuild-individual-bundles -Pbree-libs -Papi-check
+					mvn -f pom.xml -Dmaven.compiler.failOnWarning=true -DskipTests=false -Dcompare-version-with-baselines.skip=false -Dmaven.repo.local=$WORKSPACE/.m2/repository \
+						clean verify --batch-mode -Pbuild-individual-bundles -Pbree-libs -Papi-check
 					"""
 				}
 			}
