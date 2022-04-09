@@ -39,7 +39,7 @@
           <useUIThread>true</useUIThread>
           <includes>
             <include>org/eclipse/jdt/ui/tests/AutomatedSuite.class</include>
-            <include>org/eclipse/jdt/ui/tests/LeakTestSuite.class</include>
+            <!-- <include>org/eclipse/jdt/ui/tests/LeakTestSuite.class</include> -->
           </includes>
           <dependencies>
             <dependency>
