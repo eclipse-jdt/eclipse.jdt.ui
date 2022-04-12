@@ -905,7 +905,7 @@ nested(200,
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation
 class Example {
 	String foo() {
-		return new StringBuilder(Arrays.asList(11111111, 22222222, 3333333, 44444444)).append("TextTextText").append(11111111 + 2222222 + 33333333).toStrinig();
+		return new StringBuilder(Arrays.asList(11111111, 22222222, 3333333, 44444444)).append("TextTextText").append(11111111 + 2222222 + 33333333).toString();
 	}
 }
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation
