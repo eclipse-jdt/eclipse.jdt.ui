@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -198,6 +199,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionPro
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewProviderMethodDeclaration;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
@@ -1304,6 +1306,52 @@ public class LocalCorrectionsSubProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CHANGE_CLASS_TO_INTERFACE, image);
 			proposals.add(proposal);
 		}
+	}
+
+	public static void createNewTypeAsPermittedSubTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return;
+		}
+		if (!ASTHelper.isSealedTypeSupportedInAST(selectedNode.getAST())) {
+			return;
+		}
+
+		if (selectedNode.getParent() instanceof TypeDeclaration) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (!(selectedNode instanceof TypeDeclaration)){
+			return;
+		}
+		TypeDeclaration type= (TypeDeclaration) selectedNode;
+		IJavaElement sealedTypeElement= null;
+		ITypeBinding typeBinding= type.resolveBinding();
+		if (typeBinding != null) {
+			sealedTypeElement= typeBinding.getJavaElement();
+		}
+		if (!(sealedTypeElement instanceof IType)) {
+			return;
+		}
+		IType sealedType= (IType) sealedTypeElement;
+		if (sealedType.isBinary() || !sealedType.isSealed()) {
+			return;
+		}
+		ICompilationUnit compilationUnit= sealedType.getCompilationUnit();
+		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(compilationUnit);
+		TypeDeclaration declaration= ASTNodeSearchUtil.getTypeDeclarationNode(sealedType, cuRewrite.getRoot());
+		if (declaration == null) {
+			return;
+		}
+		IPackageFragment fragment= sealedType.getPackageFragment();
+
+		if (sealedType.isInterface()) {
+			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_INTERFACE, fragment, typeBinding, 1));
+			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_INTERFACE, sealedTypeElement,  typeBinding, 1));
+			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_RECORD, fragment,  typeBinding, 1));
+			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_RECORD, sealedTypeElement,  typeBinding, 1));
+		}
+		proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_CLASS, fragment,  typeBinding, 1));
+		proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_CLASS, sealedTypeElement,  typeBinding, 1));
 	}
 
 	public static void addTypeAsPermittedSubTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {

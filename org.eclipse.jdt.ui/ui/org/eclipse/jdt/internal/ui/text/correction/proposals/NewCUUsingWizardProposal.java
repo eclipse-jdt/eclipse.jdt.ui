@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -106,10 +106,15 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	private IJavaElement fTypeContainer; // IType or IPackageFragment
 	private String fTypeNameWithParameters;
 	private IType fCreatedType;
+	private ITypeBinding fSuperType;
 
 	private boolean fShowDialog;
 
 	public NewCUUsingWizardProposal(ICompilationUnit cu, Name node, int typeKind, IJavaElement typeContainer, int severity) {
+		this(cu, node, typeKind, typeContainer, null, severity);
+	}
+
+	public NewCUUsingWizardProposal(ICompilationUnit cu, Name node, int typeKind, IJavaElement typeContainer, ITypeBinding superType, int severity) {
 		super("", null, severity, null); //$NON-NLS-1$
 
 		fCompilationUnit= cu;
@@ -119,7 +124,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 		if (fNode != null) {
 			fTypeNameWithParameters= getTypeName(typeKind, node);
 		}
-
+		fSuperType = superType;
 		fCreatedType= null;
 
 		String containerName;
@@ -154,7 +159,11 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 						}
 					}
 				} else {
-					setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, containerLabel));
+					if (isInnerType) {
+						setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerclass_description, containerLabel));
+					} else {
+						setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, containerLabel));
+					}
 				}
 				break;
 			case K_INTERFACE:
@@ -174,7 +183,11 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 						}
 					}
 				} else {
-					setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinterface_inpackage_description, containerLabel));
+					if (isInnerType) {
+						setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerinterface_description, containerLabel));
+					} else {
+						setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinterface_inpackage_description, containerLabel));
+					}
 				}
 				break;
 			case K_ENUM:
@@ -234,7 +247,11 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 						}
 					}
 				} else {
-					setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, containerLabel));
+					if (isInnerType) {
+						setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerrecord_description, containerLabel));
+					} else {
+						setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewrecord_inpackage_description, containerLabel));
+					}
 				}
 				break;
 			default:
@@ -393,7 +410,20 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	 * @param page the wizard page.
 	 */
 	private void fillInWizardPageSuperTypes(NewTypeWizardPage page) {
-		if (fNode != null) {
+		if (fSuperType != null) {
+			if (fSuperType.isArray()) {
+				fSuperType= fSuperType.getElementType();
+			}
+			if (fSuperType.isTopLevel() || fSuperType.isMember()) {
+				if (fSuperType.isClass() && (fTypeKind == K_CLASS)) {
+					page.setSuperClass(fSuperType, true);
+				} else if (fSuperType.isInterface()) {
+					List<ITypeBinding> superInterfaces= new ArrayList<>();
+					superInterfaces.add(fSuperType);
+					page.setSuperInterfacesList(superInterfaces, true);
+				}
+			}
+		} else if (fNode != null) {
 			ITypeBinding type= getPossibleSuperTypeBinding(fNode);
 			type= Bindings.normalizeTypeBinding(type);
 			if (type != null) {
@@ -516,7 +546,13 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 			nameToHTML(fTypeNameWithParameters, buf);
 		}
 
-		ITypeBinding superclass= getPossibleSuperTypeBinding(fNode);
+		ITypeBinding superclass= null;
+		if (fSuperType == null) {
+			superclass= getPossibleSuperTypeBinding(fNode);
+		} else {
+			superclass= fSuperType;
+		}
+
 		if (superclass != null) {
 			if (superclass.isClass()) {
 				if (fTypeKind == K_CLASS) {
