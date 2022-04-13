@@ -51,11 +51,11 @@ public class FilterManager {
 		Filter[] filters = null;
 		String[] activefilters, inactivefilters;
 		if (defaults) {
-			activefilters = parseList(store.getDefaultString(activeListKey));
-			inactivefilters = parseList(store.getDefaultString(inactiveListKey));
-		} else {
 			activefilters = getDefaultActiveFilters(store);
 			inactivefilters = getDefaultInactiveFilters(store);
+		} else {
+			activefilters = getActiveList(store);
+			inactivefilters = getInactiveList(store);
 		}
 		filters = new Filter[activefilters.length + inactivefilters.length];
 		for (int i = 0; i < activefilters.length; i++) {

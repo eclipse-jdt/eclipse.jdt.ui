@@ -304,7 +304,6 @@ public class JavaFilterTable {
 		fTableViewer.setLabelProvider(new FilterLabelProvider());
 		fTableViewer.setComparator(new FilterViewerComparator());
 		fTableViewer.setContentProvider(new FilterContentProvider());
-		fTableViewer.setInput(getAllStoredFilters(false));
 		fTableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		if (fTableViewer instanceof CheckboxTableViewer) {
 			CheckboxTableViewer checkableViewer = (CheckboxTableViewer) fTableViewer;
