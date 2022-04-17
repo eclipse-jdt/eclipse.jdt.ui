@@ -42,7 +42,7 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * A simple filter text widget.
- * 
+ *
  * TODO: Remove this class once Bug 293230 is fixed
  */
 public class FilterTextControl {
@@ -98,7 +98,7 @@ public class FilterTextControl {
 		fComposite= new Composite(parent, nativeField ? SWT.NONE : SWT.BORDER);
 		if (!nativeField)
 			fComposite.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		
+
 		GridLayout filterLayout= new GridLayout(2, false);
 		filterLayout.marginHeight= 0;
 		filterLayout.marginWidth= 0;
@@ -111,7 +111,7 @@ public class FilterTextControl {
 
 	/**
 	 * Create the filter controls.
-	 * 
+	 *
 	 * @param parent parent <code>Composite</code> of the filter controls
 	 */
 	private void createControls(Composite parent) {
@@ -122,7 +122,7 @@ public class FilterTextControl {
 
 	/**
 	 * Creates the text control.
-	 * 
+	 *
 	 * @param parent <code>Composite</code> of the filter text
 	 */
 	private void createTextControl(Composite parent) {
@@ -145,7 +145,7 @@ public class FilterTextControl {
 
 	/**
 	 * Creates the button that clears the text.
-	 * 
+	 *
 	 * @param parent parent <code>Composite</code> of button
 	 */
 	private void createClearButton(Composite parent) {
@@ -246,7 +246,7 @@ public class FilterTextControl {
 
 	/**
 	 * Get the text control for the receiver, if it was created. Otherwise return <code>null</code>.
-	 * 
+	 *
 	 * @return the Text control, or null if it was not created
 	 */
 	public Text getFilterControl() {
@@ -256,7 +256,7 @@ public class FilterTextControl {
 	/**
 	 * Convenience method to return the text of the filter control. If the text widget is not
 	 * created, then null is returned.
-	 * 
+	 *
 	 * @return String in the text, or null if the text does not exist
 	 */
 	public String getFilterString() {
@@ -268,7 +268,7 @@ public class FilterTextControl {
 			fClearButton.setVisible(visible);
 		}
 	}
-	
+
 	/**
 	 * Enables the filter text control if the argument is <code>true</code>, and disables it
 	 * otherwise.

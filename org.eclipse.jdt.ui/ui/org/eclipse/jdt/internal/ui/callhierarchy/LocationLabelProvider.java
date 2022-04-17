@@ -61,7 +61,7 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
             	if (ch != ' ') {
             		ch = ' ';
             	}
-            
+
             	buf.append(ch);
             }
         }
