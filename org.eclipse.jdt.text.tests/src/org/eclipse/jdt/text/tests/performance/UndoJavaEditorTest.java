@@ -14,14 +14,14 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.PartInitException;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class UndoJavaEditorTest extends UndoEditorTest {
 

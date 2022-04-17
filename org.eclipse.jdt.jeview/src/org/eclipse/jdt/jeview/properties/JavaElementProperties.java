@@ -20,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.jeview.JEViewPlugin;
+
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -46,8 +48,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.jeview.JEViewPlugin;
 
 public class JavaElementProperties implements IPropertySource {
 

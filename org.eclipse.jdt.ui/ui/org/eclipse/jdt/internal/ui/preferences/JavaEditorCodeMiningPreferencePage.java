@@ -18,8 +18,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 /**
  * Code mining preference page.

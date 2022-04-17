@@ -14,9 +14,6 @@
 package org.eclipse.jdt.text.tests.performance;
 
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.Performance;
 
 import org.eclipse.swt.widgets.Display;
@@ -27,6 +24,9 @@ import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class DocumentLineDifferModificationTest extends AbstractDocumentLineDifferTest {
 

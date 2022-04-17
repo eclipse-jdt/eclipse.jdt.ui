@@ -14,7 +14,9 @@
 package org.eclipse.jsp.launching;
 
 import org.eclipse.jface.action.IAction;
+
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
+
 import org.eclipse.ui.texteditor.AbstractRulerActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
 

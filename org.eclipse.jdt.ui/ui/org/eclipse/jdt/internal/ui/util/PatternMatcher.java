@@ -15,8 +15,8 @@ package org.eclipse.jdt.internal.ui.util;
 
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 /**
  * A pattern matcher can match strings against various kinds of patterns supported by {@link SearchPattern}:

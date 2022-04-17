@@ -16,9 +16,6 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.util.Arrays;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -27,6 +24,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.ui.PartInitException;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 public abstract class OpenEditorTest extends TextPerformanceTestCase {

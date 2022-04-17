@@ -16,10 +16,10 @@ package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
 import org.eclipse.jface.text.source.IAnnotationAccess;
 
+import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
+
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
-
-import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
 
 /**

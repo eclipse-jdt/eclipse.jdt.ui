@@ -21,11 +21,10 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class JavaElementLine {

@@ -14,10 +14,10 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.core.runtime.CoreException;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.core.runtime.CoreException;
 
 public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 

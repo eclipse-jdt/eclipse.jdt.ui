@@ -20,14 +20,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.eclipse.jdt.jeview.JEViewPlugin;
+
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.jeview.JEViewPlugin;
 
 public class ClasspathEntryProperties implements IPropertySource {
 

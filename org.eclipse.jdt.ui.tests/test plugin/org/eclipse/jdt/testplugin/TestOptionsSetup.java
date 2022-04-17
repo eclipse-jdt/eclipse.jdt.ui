@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.testplugin;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
 
 public class TestOptionsSetup extends TestSetup {
 

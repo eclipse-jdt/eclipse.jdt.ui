@@ -15,9 +15,6 @@ package org.eclipse.jdt.ui.tests.refactoring.infra;
 
 import java.util.Hashtable;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -28,6 +25,9 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
 
 
 public class AbstractRefactoringTestSetup extends TestSetup {

@@ -14,16 +14,15 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.ITypeRoot;
-
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * @since 3.1

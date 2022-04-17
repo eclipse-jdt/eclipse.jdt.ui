@@ -18,14 +18,14 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Random;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**

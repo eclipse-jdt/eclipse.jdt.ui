@@ -32,6 +32,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
@@ -40,7 +41,6 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class CreateJarActionDelegate extends JarPackageActionDelegate {
 

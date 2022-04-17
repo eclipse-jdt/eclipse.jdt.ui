@@ -13,8 +13,9 @@
  *******************************************************************************/
 package org.eclipse.core.indexsearch;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IResource;
 
 /**
  * A <code>ISearchResultCollector</code> collects search results from a <code>search</code>

@@ -31,8 +31,6 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
-import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-
 /**
  * Wraps a scanner and offers convenient methods for finding tokens
  */

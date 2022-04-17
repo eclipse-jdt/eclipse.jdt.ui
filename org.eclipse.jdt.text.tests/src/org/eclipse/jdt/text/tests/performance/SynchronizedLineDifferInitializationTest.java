@@ -13,14 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ISynchronizable;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  *

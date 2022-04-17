@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.swt.widgets.Display;
@@ -24,6 +21,9 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDifferTest {
 	private static final Class<DocumentLineDifferInitializationTest> THIS= DocumentLineDifferInitializationTest.class;

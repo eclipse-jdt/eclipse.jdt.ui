@@ -13,10 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-
 import org.eclipse.jface.text.GapTextStore;
 import org.eclipse.jface.text.ITextStore;
+
+import junit.framework.Test;
 
 
 /**

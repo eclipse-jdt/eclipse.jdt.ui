@@ -25,12 +25,12 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IMember;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 class FocusOnSelectionAction extends Action {
 	private CallHierarchyViewPart fPart;

@@ -44,9 +44,8 @@ import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class CreateFileChange extends ResourceChange {
 

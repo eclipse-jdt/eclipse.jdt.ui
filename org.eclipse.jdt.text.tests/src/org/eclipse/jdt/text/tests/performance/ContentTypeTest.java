@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -32,6 +29,9 @@ import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**

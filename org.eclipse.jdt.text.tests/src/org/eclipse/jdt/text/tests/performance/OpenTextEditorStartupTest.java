@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.PerformanceMeter;
+
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.PerformanceMeter;
 
 
 /**

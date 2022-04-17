@@ -21,9 +21,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 
 /**

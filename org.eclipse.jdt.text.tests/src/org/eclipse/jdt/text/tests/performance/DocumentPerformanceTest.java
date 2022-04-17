@@ -13,10 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+
+import junit.framework.Test;
 
 
 /**

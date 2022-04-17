@@ -26,7 +26,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 
-
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 
 /**

@@ -14,11 +14,11 @@
 
 package org.eclipse.jdt.astview.views;
 
-import org.eclipse.jdt.core.IJavaElement;
-
 import java.util.Objects;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 

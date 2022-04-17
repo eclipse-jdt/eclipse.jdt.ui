@@ -16,14 +16,14 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.lang.reflect.Method;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.swt.events.PaintEvent;
 
 import org.eclipse.jface.text.source.AnnotationPainter;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Measure the number of invocations of {@link org.eclipse.jface.text.source.AnnotationPainter#paintControl(PaintEvent)}

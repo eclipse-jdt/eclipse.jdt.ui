@@ -14,9 +14,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -33,6 +30,9 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * This test is currently disabled because the

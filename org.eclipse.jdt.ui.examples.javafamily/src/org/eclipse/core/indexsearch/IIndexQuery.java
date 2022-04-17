@@ -14,11 +14,12 @@
 package org.eclipse.core.indexsearch;
 
 import java.io.IOException;
-import java.util.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * An IndeyQuery is used to perform a query against the indexing framework.

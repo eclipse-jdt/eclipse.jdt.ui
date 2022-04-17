@@ -13,13 +13,11 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.jdt.internal.ui.text.Chain;
-import org.eclipse.jdt.internal.ui.text.ChainElement;
-import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jface.viewers.StyledString;
+
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -29,9 +27,15 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
+import org.eclipse.jdt.internal.ui.text.Chain;
+import org.eclipse.jdt.internal.ui.text.ChainElement;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 
 /**
  * This class basically delegates all events to a {@link TemplateProposal} but provides some

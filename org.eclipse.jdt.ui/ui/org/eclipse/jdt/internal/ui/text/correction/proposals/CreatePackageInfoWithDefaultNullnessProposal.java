@@ -38,8 +38,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.InfoFilesUtil;

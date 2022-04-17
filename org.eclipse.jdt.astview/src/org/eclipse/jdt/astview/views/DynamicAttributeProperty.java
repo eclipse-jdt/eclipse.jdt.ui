@@ -14,9 +14,9 @@
 
 package org.eclipse.jdt.astview.views;
 
-import org.eclipse.jdt.core.dom.IBinding;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jdt.core.dom.IBinding;
 
 
 public abstract class DynamicAttributeProperty extends ExceptionAttribute {

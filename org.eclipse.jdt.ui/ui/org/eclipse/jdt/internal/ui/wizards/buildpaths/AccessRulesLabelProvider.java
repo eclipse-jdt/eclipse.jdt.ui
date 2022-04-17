@@ -21,8 +21,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.IAccessRule;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class AccessRulesLabelProvider extends LabelProvider implements ITableLabelProvider {

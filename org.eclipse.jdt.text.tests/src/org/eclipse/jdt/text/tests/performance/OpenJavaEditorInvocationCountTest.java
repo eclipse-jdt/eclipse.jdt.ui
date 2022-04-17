@@ -17,14 +17,14 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.lang.reflect.Method;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**

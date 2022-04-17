@@ -14,9 +14,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.swt.widgets.Shell;
@@ -26,6 +23,9 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class OpenQuickOutlineTest extends OpenQuickControlTest {
 

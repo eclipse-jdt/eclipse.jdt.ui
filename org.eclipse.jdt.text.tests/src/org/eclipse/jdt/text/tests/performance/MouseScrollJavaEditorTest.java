@@ -14,10 +14,10 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.ui.PartInitException;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.ui.PartInitException;
 
 public class MouseScrollJavaEditorTest extends MouseScrollEditorTest {
 

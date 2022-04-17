@@ -15,9 +15,6 @@
 package org.eclipse.jdt.text.tests.performance;
 
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -29,6 +26,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.manipulation.ConvertLineDelimitersOperation;
 import org.eclipse.core.filebuffers.manipulation.FileBufferOperationRunner;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Measures the time to convert line delimiters of a project.

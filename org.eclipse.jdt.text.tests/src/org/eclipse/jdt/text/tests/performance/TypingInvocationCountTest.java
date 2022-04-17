@@ -17,8 +17,6 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.lang.reflect.Method;
 
-import junit.framework.Test;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.swt.SWT;
@@ -46,6 +44,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.actions.FindAction;
 import org.eclipse.jdt.ui.actions.FindReferencesAction;
+
+import junit.framework.Test;
 
 /**
  * Counts number of repaints ({@link AnnotationPainter#paintControl(PaintEvent)})

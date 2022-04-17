@@ -15,13 +15,15 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.List;
 
-import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
-import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 
 public class NewFieldResolver extends TemplateVariableResolver {
 

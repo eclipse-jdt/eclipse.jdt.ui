@@ -23,12 +23,11 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
+import org.eclipse.jdt.internal.core.manipulation.search.SearchMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
-
-import org.eclipse.jdt.internal.core.manipulation.search.SearchMessages;
 
 class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements IStyledLabelProvider {
 

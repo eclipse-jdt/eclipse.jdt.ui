@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstantsOptions;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstantsOptions;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUpOptionsInitializer;

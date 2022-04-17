@@ -13,13 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jsp;
 
-import java.io.*;
+import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 
-import org.eclipse.core.indexsearch.*;
-import org.eclipse.core.resources.*;
+import org.eclipse.core.indexsearch.IIndex;
+import org.eclipse.core.indexsearch.IIndexer;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 /**
  * @author weinand

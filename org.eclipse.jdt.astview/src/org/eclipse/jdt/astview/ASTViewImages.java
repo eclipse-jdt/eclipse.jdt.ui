@@ -15,14 +15,14 @@ package org.eclipse.jdt.astview;
 
 import java.net.URL;
 
+import org.osgi.framework.Bundle;
+
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
-
-import org.osgi.framework.Bundle;
 
 public class ASTViewImages {
 

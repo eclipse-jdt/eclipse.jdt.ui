@@ -14,9 +14,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.swt.SWT;
@@ -28,6 +25,9 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class JavaIndenterTest extends TextPerformanceTestCase {
 

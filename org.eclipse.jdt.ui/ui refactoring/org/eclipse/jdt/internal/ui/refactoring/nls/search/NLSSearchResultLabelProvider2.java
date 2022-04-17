@@ -18,16 +18,17 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.search.TextSearchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements IStyledLabelProvider {

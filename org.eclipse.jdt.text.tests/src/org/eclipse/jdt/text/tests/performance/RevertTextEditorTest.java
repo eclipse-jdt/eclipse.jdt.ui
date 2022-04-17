@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jface.text.BadLocationException;
 
 import org.eclipse.ui.PartInitException;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**

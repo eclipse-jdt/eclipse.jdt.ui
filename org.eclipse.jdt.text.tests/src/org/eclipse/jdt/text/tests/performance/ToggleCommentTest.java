@@ -14,15 +14,15 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Measures the time to comment/uncomment a large compilation unit.

@@ -17,24 +17,25 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.core.indexsearch.ISearchResultCollector;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.core.indexsearch.ISearchResultCollector;
+import org.eclipse.text.edits.ReplaceEdit;
 
-import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
+
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 
 
 public class RenameTypeParticipant extends RenameParticipant {

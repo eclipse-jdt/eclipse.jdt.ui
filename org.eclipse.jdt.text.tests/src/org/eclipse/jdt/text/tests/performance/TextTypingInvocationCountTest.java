@@ -14,10 +14,10 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.jface.text.source.AnnotationPainter;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.jface.text.source.AnnotationPainter;
 
 /**
  * Counts number of repaints (

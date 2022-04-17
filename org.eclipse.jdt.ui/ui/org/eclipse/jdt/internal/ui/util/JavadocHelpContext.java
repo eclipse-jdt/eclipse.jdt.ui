@@ -18,10 +18,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.ibm.icu.text.BreakIterator;
-import java.util.Arrays;
 
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;

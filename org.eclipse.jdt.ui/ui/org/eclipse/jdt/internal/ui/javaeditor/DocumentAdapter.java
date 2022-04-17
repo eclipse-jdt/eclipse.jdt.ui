@@ -54,10 +54,10 @@ import org.eclipse.jface.text.RewriteSessionEditProcessor;
 
 import org.eclipse.jdt.core.BufferChangedEvent;
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IBuffer.ITextEditCapability;
 import org.eclipse.jdt.core.IBufferChangedListener;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.IBuffer.ITextEditCapability;
 
 import org.eclipse.jdt.ui.JavaUI;
 

@@ -16,7 +16,6 @@ package org.eclipse.jdt.astview.views;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.compiler.IProblem;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**

@@ -14,18 +14,22 @@
 package org.eclipse.jsp;
 
 import java.io.IOException;
-import java.util.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+
+import org.eclipse.core.indexsearch.IIndex;
+import org.eclipse.core.indexsearch.IIndexQuery;
+import org.eclipse.core.indexsearch.ISearchResultCollector;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.indexsearch.*;
-import org.eclipse.core.indexsearch.IIndexQuery;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 

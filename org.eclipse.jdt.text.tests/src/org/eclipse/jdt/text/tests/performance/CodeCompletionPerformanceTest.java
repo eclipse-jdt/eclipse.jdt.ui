@@ -17,9 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.test.performance.Dimension;
@@ -52,6 +49,9 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 

@@ -16,6 +16,7 @@ package org.eclipse.jsp;
 import org.eclipse.core.indexsearch.IIndexQuery;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
 

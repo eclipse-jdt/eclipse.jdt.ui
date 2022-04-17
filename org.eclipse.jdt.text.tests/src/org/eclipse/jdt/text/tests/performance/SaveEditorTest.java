@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -25,6 +22,9 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**

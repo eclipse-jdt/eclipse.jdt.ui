@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -41,6 +38,9 @@ import org.eclipse.ui.texteditor.spelling.SpellingService;
 import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**

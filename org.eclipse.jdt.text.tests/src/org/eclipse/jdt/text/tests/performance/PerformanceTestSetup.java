@@ -16,9 +16,6 @@ package org.eclipse.jdt.text.tests.performance;
 import java.io.IOException;
 import java.util.zip.ZipException;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 import org.eclipse.core.runtime.CoreException;
@@ -28,6 +25,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
 
 
 public class PerformanceTestSetup extends TestSetup {

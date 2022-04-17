@@ -31,8 +31,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.internal.ui.JarEntryEditorInputFactory;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+
+import org.eclipse.jdt.internal.ui.JarEntryEditorInputFactory;
 
 /**
  * An EditorInput for a JarEntryFile.

@@ -14,9 +14,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.After;
 import org.junit.Before;
-import static org.junit.Assert.*;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;

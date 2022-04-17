@@ -14,8 +14,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.text.Document;
@@ -24,6 +22,8 @@ import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WordRule;
+
+import junit.framework.Test;
 
 
 /**

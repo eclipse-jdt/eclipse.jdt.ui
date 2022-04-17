@@ -15,10 +15,6 @@
 package org.eclipse.jdt.text.tests.performance;
 
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
@@ -26,6 +22,10 @@ import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ui.PartInitException;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * @since 3.1

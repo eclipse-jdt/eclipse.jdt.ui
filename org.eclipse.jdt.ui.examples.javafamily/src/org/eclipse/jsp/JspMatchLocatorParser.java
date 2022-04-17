@@ -17,9 +17,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.indexsearch.ISearchResultCollector;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.indexsearch.*;
+
+import org.eclipse.core.resources.IFile;
 
 
 public class JspMatchLocatorParser extends AbstractJspParser {
