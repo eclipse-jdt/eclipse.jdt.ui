@@ -1121,6 +1121,32 @@ public class CleanUpConstants {
 	 * @since 4.20
 	 */
 	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN= "cleanup.system_property_boolean"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>Integer.parseInt(System.getProperty("arbitrarykey"))</code> by<p>
+	 * <code>Integer.getInteger("arbitrarykey")</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_INTEGER= "cleanup.system_property_integer"; //$NON-NLS-1$
+
+	/**
+	 * Replace <code>Long.parseLong(System.getProperty("arbitrarykey"))</code> by<p>
+	 * <code>Long.getLong("arbitrarykey")</code>
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.20
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_LONG= "cleanup.system_property_long"; //$NON-NLS-1$
 	/**
 	 * Replaces Boolean.TRUE/Boolean.FALSE by true/false when used as primitive.
 	 * <p>

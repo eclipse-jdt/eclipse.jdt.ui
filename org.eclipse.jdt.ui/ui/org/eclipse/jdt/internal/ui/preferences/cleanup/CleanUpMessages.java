@@ -233,6 +233,8 @@ public class CleanUpMessages extends NLS {
 	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_LineSeparator;
 	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_FileEncoding;
 	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_BooleanProperty;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_IntegerProperty;
+	public static String JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_LongProperty;
 
 	static {
 		// initialize resource bundle

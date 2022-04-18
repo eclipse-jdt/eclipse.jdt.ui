@@ -197,6 +197,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_INTEGER, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_LONG, CleanUpOptions.FALSE);
 
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.TRUE);
@@ -378,6 +380,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_INTEGER, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_LONG, CleanUpOptions.FALSE);
 
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);

@@ -17,13 +17,17 @@ import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR;
+import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_INTEGER;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR;
+import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LONG;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR;
 import static org.eclipse.jdt.internal.corext.fix.FixMessages.ConstantsCleanUpFix_refactor;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.BOOLEAN_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.FILE_ENCODING;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.FILE_SEPARATOR;
+import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.INTEGER_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.LINE_SEPARATOR;
+import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.LONG_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.PATH_SEPARATOR;
 import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_description;
 
@@ -108,6 +112,12 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUpCore
 		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN)) {
 			fixSet.add(BOOLEAN_PROPERTY);
 		}
+		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_INTEGER)) {
+			fixSet.add(INTEGER_PROPERTY);
+		}
+		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_LONG)) {
+			fixSet.add(LONG_PROPERTY);
+		}
 		return fixSet;
 	}
 
@@ -158,6 +168,18 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUpCore
 			sb.append("Boolean b = Boolean.getBoolean(\"arbitrarykey\")\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Boolean b = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.INTEGER_PROPERTY)) {
+			sb.append("Integer i = Integer.getInteger(\"arbitrarykey\")\n"); //$NON-NLS-1$
+		} else {
+			sb.append("Integer i = Integer.parseInt(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.LONG_PROPERTY)) {
+			sb.append("Long l = Long.getLong(\"arbitrarykey\")\n"); //$NON-NLS-1$
+		} else {
+			sb.append("Long l = Long.parseLong(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
