@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1110,7 +1110,8 @@ public class CleanUpConstants {
 	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR= "cleanup.system_property_line_separator"; //$NON-NLS-1$
 
 	/**
-	 * Replace <code>Boolean.parseBoolean(System.getProperty("arbitrarykey"))</code> by<p>
+	 * Replace Boolean/Long/Integer conversions using System properties to methods designed
+	 * for the purpose.  For example, replace: <p><code>Boolean.parseBoolean(System.getProperty("arbitrarykey"))</code></p> by<p>
 	 * <code>Boolean.getBoolean("arbitrarykey")</code>
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
@@ -1120,7 +1121,8 @@ public class CleanUpConstants {
 	 * @see CleanUpOptionsCore#FALSE
 	 * @since 4.20
 	 */
-	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN= "cleanup.system_property_boolean"; //$NON-NLS-1$
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED= "cleanup.system_property_boolean"; //$NON-NLS-1$
+
 	/**
 	 * Replaces Boolean.TRUE/Boolean.FALSE by true/false when used as primitive.
 	 * <p>
@@ -1214,7 +1216,7 @@ public class CleanUpConstants {
 	 * Replaces StringBuffer by StringBuilder.
 	 *
 	 * For detailed setting use<br>
-	 * {@link #STRINGBUILDER_FOR_LOCAL_VARS_ONLY}<br>
+	 * {@link #STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS}<br>
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
 	 * <p>
