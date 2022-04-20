@@ -261,7 +261,7 @@ public class PluginsNotLoadedTest {
 		StringBuilder buf= new StringBuilder();
 		for (String element : NOT_LOADED_BUNDLES) {
 			Bundle bundle= Platform.getBundle(element);
-			if (element.contains("org.junit"))
+			if (element.contains("org.junit") || element.startsWith("junit-"))
 				System.out.println();
 			if (bundle == null) {
 				// log bundles that cannot be found:
