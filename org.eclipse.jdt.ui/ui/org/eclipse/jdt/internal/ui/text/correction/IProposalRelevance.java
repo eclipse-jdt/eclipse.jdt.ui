@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2021 IBM Corporation and others.
+ * Copyright (c) 2012, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -137,6 +137,7 @@ public interface IProposalRelevance {
 	int CONVERT_TO_LAMBDA_EXPRESSION= 6;
 	int CONVERT_METHOD_REFERENCE_TO_LAMBDA= 6;
 	int CONVERT_TO_METHOD_REFERENCE= 6;
+	int CREATE_NEW_SUB_TYPE= 5;
 
 	int ADD_ALL_MISSING_TAGS= 5;
 	int QUALIFY_INNER_TYPE_NAME= 5;

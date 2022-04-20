@@ -1308,7 +1308,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void createNewTypeAsPermittedSubTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
+	public static void createNewTypeAsPermittedSubTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, int relevance) throws JavaModelException {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode == null) {
 			return;
@@ -1345,13 +1345,13 @@ public class LocalCorrectionsSubProcessor {
 		IPackageFragment fragment= sealedType.getPackageFragment();
 
 		if (sealedType.isInterface()) {
-			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_INTERFACE, fragment, typeBinding, 1));
-			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_INTERFACE, sealedTypeElement,  typeBinding, 1));
-			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_RECORD, fragment,  typeBinding, 1));
-			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_RECORD, sealedTypeElement,  typeBinding, 1));
+			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_INTERFACE, fragment, typeBinding, relevance + 4));
+			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_INTERFACE, sealedTypeElement,  typeBinding, relevance + 4));
+			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_RECORD, fragment,  typeBinding, relevance + 5));
+			proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_RECORD, sealedTypeElement,  typeBinding, relevance + 5));
 		}
-		proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_CLASS, fragment,  typeBinding, 1));
-		proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_CLASS, sealedTypeElement,  typeBinding, 1));
+		proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_CLASS, fragment,  typeBinding, relevance + 6));
+		proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_CLASS, sealedTypeElement,  typeBinding, relevance + 6));
 	}
 
 	public static void addTypeAsPermittedSubTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {

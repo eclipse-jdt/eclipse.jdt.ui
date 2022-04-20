@@ -486,7 +486,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addTypeAsPermittedSubTypeProposal(context, problem, proposals);
 				break;
 			case IProblem.SealedSealedTypeMissingPermits:
-				LocalCorrectionsSubProcessor.createNewTypeAsPermittedSubTypeProposal(context, problem, proposals);
+				LocalCorrectionsSubProcessor.createNewTypeAsPermittedSubTypeProposal(context, problem, proposals, IProposalRelevance.CREATE_NEW_SUB_TYPE);
 				break;
 			case IProblem.StaticMethodRequested:
 			case IProblem.NonStaticFieldFromStaticInvocation:
