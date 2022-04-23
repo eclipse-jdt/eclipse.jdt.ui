@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -605,6 +605,71 @@ public class QuickFixTest17 extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
 		assertProposalDoesNotExist(proposals, expectedProposal);
+	}
+
+	@Test
+	public void testCreatePermittedNewSubType1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed class Shape {\n" +
+				"\n" +
+				"}\n" +
+				"\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		String expectedProposal1= CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerclass_description;
+		String expectedProposal2= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, "test");
+		assertProposalExists(proposals, expectedProposal1);
+		assertProposalExists(proposals, expectedProposal2);
+	}
+
+	@Test
+	public void testCreatePermittedNewSubType2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= "" +
+				"package test;\n" +
+				"\n" +
+				"public sealed interface IShape {\n" +
+				"\n" +
+				"}\n" +
+				"\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 6);
+		assertCorrectLabels(proposals);
+		String expectedProposal1= CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerclass_description;
+		String expectedProposal2= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, "test");
+		String expectedProposal3= CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerrecord_description;
+		String expectedProposal4= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewrecord_inpackage_description, "test");
+		String expectedProposal5= CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerinterface_description;
+		String expectedProposal6= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinterface_inpackage_description, "test");
+
+		assertProposalExists(proposals, expectedProposal1);
+		assertProposalExists(proposals, expectedProposal2);
+		assertProposalExists(proposals, expectedProposal3);
+		assertProposalExists(proposals, expectedProposal4);
+		assertProposalExists(proposals, expectedProposal5);
+		assertProposalExists(proposals, expectedProposal6);
 	}
 
 }
