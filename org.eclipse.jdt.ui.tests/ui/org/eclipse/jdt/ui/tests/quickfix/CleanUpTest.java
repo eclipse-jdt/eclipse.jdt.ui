@@ -28112,6 +28112,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
 				+ "        Boolean value = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\",\"false\")); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
 				+ "        Integer intvalue = Integer.parseInt(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+intvalue); //$NON-NLS-1$\n" //
 				+ "        Long longvalue = Long.parseLong(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
@@ -28137,6 +28139,8 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        System.out.println(\"out:\"+cdn); //$NON-NLS-1$\n" //
 				+ "        String lsp = System.lineSeparator();\n" //
 				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
+				+ "        Boolean value = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
 				+ "        Boolean value = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
 				+ "        Integer intvalue = Integer.getInteger(\"arbitrarykey\"); //$NON-NLS-1$\n" //

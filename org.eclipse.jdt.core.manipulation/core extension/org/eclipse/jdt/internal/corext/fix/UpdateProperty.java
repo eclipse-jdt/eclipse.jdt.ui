@@ -249,6 +249,19 @@ public enum UpdateProperty {
 							return false;
 						}
 					}
+				} else if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName(), String.class.getCanonicalName())) {
+					Expression expression= (Expression) visited.arguments().get(0);
+					Expression expression2= (Expression) visited.arguments().get(1);
+					Object propertykey= expression.resolveConstantExpressionValue();
+					Object propertykey2= expression2.resolveConstantExpressionValue();
+					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
+						MethodInvocation parent=(MethodInvocation) visited.getParent();
+						if (ASTNodes.usesGivenSignature(parent, Boolean.class.getCanonicalName(), METHOD_PARSEBOOLEAN, String.class.getCanonicalName()) && ((String)propertykey2).toLowerCase().equals("false")) { //$NON-NLS-1$
+							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							nodesprocessed.add(visited);
+							return false;
+						}
+					}
 				}
 				return true;
 			}
