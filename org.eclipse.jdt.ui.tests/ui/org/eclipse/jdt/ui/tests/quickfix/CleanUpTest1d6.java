@@ -260,9 +260,8 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
-		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
-		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_INTEGER);
-		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LONG);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED);
+
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },

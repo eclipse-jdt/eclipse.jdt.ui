@@ -250,7 +250,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.TRUE);
-		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED, CleanUpOptions.TRUE);
 
 		storeSettings(node);
 
@@ -557,7 +557,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR, CleanUpOptions.TRUE);
-		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN, CleanUpOptions.TRUE);
+		node.put(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED, CleanUpOptions.TRUE);
 
 		storeSettings(node);
 
