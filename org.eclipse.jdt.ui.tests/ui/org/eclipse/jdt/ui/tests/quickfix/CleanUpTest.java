@@ -17420,6 +17420,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public long removeInitForLong() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        long reassignedVar = 0;\n" //
+				+ "        System.out.println();\n" //
 				+ "        reassignedVar = System.currentTimeMillis();\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
@@ -17427,6 +17428,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public String removeInitForString() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        String reassignedVar = \"\";\n" //
+				+ "        System.out.println();\n" //
 				+ "        reassignedVar = File.pathSeparator;\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
@@ -17450,29 +17452,28 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public boolean removeUselessInitialization() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean reassignedVar;\n" //
-				+ "        reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        boolean reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public long removeInitForLong() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        long reassignedVar;\n" //
+				+ "        System.out.println();\n" //
 				+ "        reassignedVar = System.currentTimeMillis();\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public String removeInitForString() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        String reassignedVar;\n" //
-				+ "        reassignedVar = File.pathSeparator;\n" //
+				+ "        String reassignedVar = File.pathSeparator;\n" //
+				+ "        System.out.println();\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public boolean removePassiveInitialization(int i) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean reassignedPassiveVar;\n" //
-				+ "        reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        boolean reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
 				+ "}\n";

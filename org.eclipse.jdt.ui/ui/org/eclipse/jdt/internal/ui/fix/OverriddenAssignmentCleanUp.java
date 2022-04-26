@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -107,7 +108,8 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 					SimpleName varName= fragment.getName();
 					IVariableBinding variable= fragment.resolveBinding();
 					Statement stmtToInspect= ASTNodes.getNextSibling(node);
-					boolean isOverridden= false;
+					Statement firstSibling= stmtToInspect;
+					Assignment overridingAssignment= null;
 
 					while (stmtToInspect != null) {
 						if (!new VarDefinitionsUsesVisitor(variable, stmtToInspect, true).getReads().isEmpty()) {
@@ -121,15 +123,15 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 								return true;
 							}
 
-							isOverridden= true;
+							overridingAssignment= assignment;
 							break;
 						}
 
 						stmtToInspect= ASTNodes.getNextSibling(stmtToInspect);
 					}
 
-					if (isOverridden) {
-						rewriteOperations.add(new OverriddenAssignmentOperation(fragment.getInitializer()));
+					if (overridingAssignment != null) {
+						rewriteOperations.add(new OverriddenAssignmentOperation(fragment.getInitializer(), overridingAssignment, firstSibling == stmtToInspect));
 						return false;
 					}
 				}
@@ -158,17 +160,28 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 
 	private static class OverriddenAssignmentOperation extends CompilationUnitRewriteOperation {
 		private final Expression nodeToReplace;
+		private final Assignment overridingAssignment;
+		private final boolean followsImmediately;
 
-		public OverriddenAssignmentOperation(final Expression expression) {
+		public OverriddenAssignmentOperation(final Expression expression, Assignment overridingAssignment, boolean followsImmediately) {
 			this.nodeToReplace= expression;
+			this.overridingAssignment= overridingAssignment;
+			this.followsImmediately= followsImmediately;
 		}
 
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.OverriddenAssignmentCleanUp_description, cuRewrite);
+			if (overridingAssignment.getParent() instanceof ExpressionStatement && (followsImmediately || ASTNodes.isPassiveWithoutFallingThrough(overridingAssignment.getRightHandSide()))) {
+				// only move initialization up if there are no side effects and the assignment is a statement
 
-			rewrite.remove(nodeToReplace, group);
+				var copy= rewrite.createCopyTarget(this.overridingAssignment.getRightHandSide());
+				rewrite.remove(overridingAssignment.getParent(), group);
+				rewrite.replace(nodeToReplace, copy , group);
+			} else {
+				rewrite.remove(nodeToReplace, group);
+			}
 		}
 	}
 }
