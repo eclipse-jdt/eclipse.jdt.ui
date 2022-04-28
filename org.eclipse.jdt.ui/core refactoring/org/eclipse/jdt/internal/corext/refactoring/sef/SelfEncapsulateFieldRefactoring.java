@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -64,6 +65,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -647,6 +649,17 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		result.parameters().add(param);
 		param.setName(ast.newSimpleName(fArgName));
 		param.setType((Type)rewriter.createCopyTarget(type));
+		List<IExtendedModifier> modifiers= field.modifiers();
+		for (IExtendedModifier modifier : modifiers) {
+			if (modifier.isAnnotation()) {
+				String annotationName= ((Annotation)modifier).getTypeName().getFullyQualifiedName();
+				if ("NonNull".equals(annotationName) || "Nullable".equals(annotationName)) { //$NON-NLS-1$ //$NON-NLS-2$
+					Annotation fieldAnnotation= (Annotation)rewriter.createCopyTarget((Annotation)modifier);
+					param.modifiers().add(fieldAnnotation);
+				}
+			}
+		}
+
 		List<Dimension> extraDimensions= DimensionRewrite.copyDimensions(fFieldDeclaration.extraDimensions(), rewriter);
 		param.extraDimensions().addAll(extraDimensions);
 
@@ -689,6 +702,16 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		MethodDeclaration result= ast.newMethodDeclaration();
 		result.setName(ast.newSimpleName(fGetterName));
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiers()));
+		List<IExtendedModifier> modifiers= field.modifiers();
+		for (IExtendedModifier modifier : modifiers) {
+			if (modifier.isAnnotation()) {
+				String annotationName= ((Annotation)modifier).getTypeName().getFullyQualifiedName();
+				if ("NonNull".equals(annotationName) || "Nullable".equals(annotationName)) { //$NON-NLS-1$ //$NON-NLS-2$
+					Annotation fieldAnnotation= (Annotation)rewriter.createCopyTarget((Annotation)modifier);
+					result.modifiers().add(fieldAnnotation);
+				}
+			}
+		}
 		Type returnType= DimensionRewrite.copyTypeAndAddDimensions(type, fFieldDeclaration.extraDimensions(), rewriter);
 		result.setReturnType2(returnType);
 
