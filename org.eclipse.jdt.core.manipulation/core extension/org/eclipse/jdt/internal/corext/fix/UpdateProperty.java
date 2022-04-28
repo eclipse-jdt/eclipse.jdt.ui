@@ -291,6 +291,19 @@ public enum UpdateProperty {
 							return false;
 						}
 					}
+				} else if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName(), String.class.getCanonicalName())) {
+					Expression expression= (Expression) visited.arguments().get(0);
+					Expression expression2= (Expression) visited.arguments().get(1);
+					Object propertykey= expression.resolveConstantExpressionValue();
+					Object propertykey2= expression2.resolveConstantExpressionValue();
+					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
+						MethodInvocation parent=(MethodInvocation) visited.getParent();
+						if (ASTNodes.usesGivenSignature(parent, Integer.class.getCanonicalName(), METHOD_PARSEINTEGER, String.class.getCanonicalName())&& ((String)propertykey2).toLowerCase().equals("0")) { //$NON-NLS-1$
+							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							nodesprocessed.add(visited);
+							return false;
+						}
+					}
 				}
 				return true;
 			}
@@ -315,6 +328,19 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName())) {
+							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							nodesprocessed.add(visited);
+							return false;
+						}
+					}
+				} else if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName(), String.class.getCanonicalName())) {
+					Expression expression= (Expression) visited.arguments().get(0);
+					Expression expression2= (Expression) visited.arguments().get(1);
+					Object propertykey= expression.resolveConstantExpressionValue();
+					Object propertykey2= expression2.resolveConstantExpressionValue();
+					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
+						MethodInvocation parent=(MethodInvocation) visited.getParent();
+						if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName()) && ((String)propertykey2).toLowerCase().equals("0")) { //$NON-NLS-1$
 							operations.add(upp.rewrite(parent, (String) propertykey,expression));
 							nodesprocessed.add(visited);
 							return false;
