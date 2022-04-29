@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -411,6 +411,10 @@ public final class IndentUtil {
 		// as opposed to commented out code, which should keep its slashes at column 0
 		if (length > 0) {
 			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, end, false);
+			if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(partition.getType())) {
+				// don't play with indentation of a Text Block
+				return false;
+			}
 			if (partition.getOffset() == end && IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(partition.getType())) {
 				commentLines[lineIndex]= true;
 			}
