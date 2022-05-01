@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
@@ -378,7 +379,7 @@ public enum UpdateProperty {
 	}
 
 	private static void boolintlongRewrite(UpdateProperty upp,final MethodInvocation visited, final String propertykey, Expression expression, final CompilationUnitRewrite cuRewrite,
-			TextEditGroup group, Object object) {
+			TextEditGroup group, Object object) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		/**
@@ -393,14 +394,20 @@ public enum UpdateProperty {
 		newMethodInvocation.setExpression(ASTNodeFactory.newName(ast, upp.alternativecl.getSimpleName()));
 		newMethodInvocation.setName(ast.newSimpleName(upp.simplename));
 		List<Expression> arguments= newMethodInvocation.arguments();
-		arguments.add(ASTNodes.createMoveTarget(cuRewrite.getASTRewrite(), ASTNodes.getUnparenthesedExpression(expression)));
 		if(object != null) {
+			StringLiteral sl= ast.newStringLiteral();
+			sl.setLiteralValue(propertykey);
+			arguments.add(sl);
 			NumberLiteral newNumberLiteral= ast.newNumberLiteral();
 			newNumberLiteral.setToken(object.toString());
 			arguments.add(newNumberLiteral);
+			ASTNode replace_with_Call= newMethodInvocation;
+			ASTNodes.replaceAndRemoveNLS(rewrite, visited, replace_with_Call, group, cuRewrite);
+		} else {
+			arguments.add(ASTNodes.createMoveTarget(cuRewrite.getASTRewrite(), ASTNodes.getUnparenthesedExpression(expression)));
+			ASTNode replace_with_Call= newMethodInvocation;
+			ASTNodes.replaceButKeepComment(rewrite, visited, replace_with_Call, group);
 		}
-		ASTNode replace_with_Call= newMethodInvocation;
-		ASTNodes.replaceButKeepComment(rewrite, visited, replace_with_Call, group);
 	}
 
 	private static void defaultRewrite(UpdateProperty upp, final MethodInvocation visited, final String propertykey, Expression expression,
