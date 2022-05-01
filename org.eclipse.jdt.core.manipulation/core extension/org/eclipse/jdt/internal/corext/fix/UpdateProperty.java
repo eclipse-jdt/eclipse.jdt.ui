@@ -32,6 +32,7 @@ import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
@@ -216,7 +218,7 @@ public enum UpdateProperty {
 					Expression expression= (Expression) visited.arguments().get(0);
 					Object propertykey= expression.resolveConstantExpressionValue();
 					if (propertykey instanceof String && upp.key.equals(propertykey)) {
-						operations.add(upp.rewrite(visited, null, expression));
+						operations.add(upp.rewrite(visited, null, expression,null));
 						nodesprocessed.add(visited);
 						return false;
 					}
@@ -244,7 +246,7 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Boolean.class.getCanonicalName(), METHOD_PARSEBOOLEAN, String.class.getCanonicalName())) {
-							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
 							nodesprocessed.add(visited);
 							return false;
 						}
@@ -257,7 +259,7 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Boolean.class.getCanonicalName(), METHOD_PARSEBOOLEAN, String.class.getCanonicalName()) && ((String)propertykey2).toLowerCase().equals("false")) { //$NON-NLS-1$
-							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
 							nodesprocessed.add(visited);
 							return false;
 						}
@@ -286,7 +288,7 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Integer.class.getCanonicalName(), METHOD_PARSEINTEGER, String.class.getCanonicalName())) {
-							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
 							nodesprocessed.add(visited);
 							return false;
 						}
@@ -299,7 +301,11 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Integer.class.getCanonicalName(), METHOD_PARSEINTEGER, String.class.getCanonicalName())&& ((String)propertykey2).toLowerCase().equals("0")) { //$NON-NLS-1$
-							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
+							nodesprocessed.add(visited);
+							return false;
+						} else if (ASTNodes.usesGivenSignature(parent, Integer.class.getCanonicalName(), METHOD_PARSEINTEGER, String.class.getCanonicalName())) {
+							operations.add(upp.rewrite(parent, (String) propertykey,expression,Integer.valueOf((String)propertykey2)));
 							nodesprocessed.add(visited);
 							return false;
 						}
@@ -328,7 +334,7 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName())) {
-							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
 							nodesprocessed.add(visited);
 							return false;
 						}
@@ -341,7 +347,11 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName()) && ((String)propertykey2).toLowerCase().equals("0")) { //$NON-NLS-1$
-							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
+							nodesprocessed.add(visited);
+							return false;
+						} else if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName())) {
+							operations.add(upp.rewrite(parent, (String) propertykey,expression,Long.valueOf((String)propertykey2)));
 							nodesprocessed.add(visited);
 							return false;
 						}
@@ -353,22 +363,22 @@ public enum UpdateProperty {
 	}
 	interface IRewriter {
 		void computeRewriter(final UpdateProperty upp,final MethodInvocation visited, final String propertykey,
-				final Expression expression, final CompilationUnitRewrite cuRewrite, final TextEditGroup group) throws CoreException;
+				final Expression expression, final CompilationUnitRewrite cuRewrite, final TextEditGroup group, Object object) throws CoreException;
 	}
 
-	CompilationUnitRewriteOperation rewrite(final MethodInvocation visited, final String propertykey, final Expression expression) {
+	CompilationUnitRewriteOperation rewrite(final MethodInvocation visited, final String propertykey, final Expression expression, final Object object) {
 		return new CompilationUnitRewriteOperation() {
 			@Override
 			public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 				TextEditGroup group= createTextEditGroup(Messages.format(ConstantsCleanUp_description,UpdateProperty.this.toString()), cuRewrite);
 				cuRewrite.getASTRewrite().setTargetSourceRangeComputer(computer);
-				myrewriter.computeRewriter(UpdateProperty.this, visited, propertykey, expression, cuRewrite, group);
+				myrewriter.computeRewriter(UpdateProperty.this, visited, propertykey, expression, cuRewrite, group, object);
 			}
 		};
 	}
 
 	private static void boolintlongRewrite(UpdateProperty upp,final MethodInvocation visited, final String propertykey, Expression expression, final CompilationUnitRewrite cuRewrite,
-			TextEditGroup group) {
+			TextEditGroup group, Object object) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		/**
@@ -382,13 +392,19 @@ public enum UpdateProperty {
 		MethodInvocation newMethodInvocation= ast.newMethodInvocation();
 		newMethodInvocation.setExpression(ASTNodeFactory.newName(ast, upp.alternativecl.getSimpleName()));
 		newMethodInvocation.setName(ast.newSimpleName(upp.simplename));
-		newMethodInvocation.arguments().add(ASTNodes.createMoveTarget(cuRewrite.getASTRewrite(), ASTNodes.getUnparenthesedExpression(expression)));
+		List<Expression> arguments= newMethodInvocation.arguments();
+		arguments.add(ASTNodes.createMoveTarget(cuRewrite.getASTRewrite(), ASTNodes.getUnparenthesedExpression(expression)));
+		if(object != null) {
+			NumberLiteral newNumberLiteral= ast.newNumberLiteral();
+			newNumberLiteral.setToken(object.toString());
+			arguments.add(newNumberLiteral);
+		}
 		ASTNode replace_with_Call= newMethodInvocation;
 		ASTNodes.replaceButKeepComment(rewrite, visited, replace_with_Call, group);
 	}
 
 	private static void defaultRewrite(UpdateProperty upp, final MethodInvocation visited, final String propertykey, Expression expression,
-			final CompilationUnitRewrite cuRewrite,final TextEditGroup group) throws CoreException {
+			final CompilationUnitRewrite cuRewrite,final TextEditGroup group, Object object) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		ASTNode replace_with_Call;
@@ -446,7 +462,7 @@ public enum UpdateProperty {
 	}
 
 	private static void pathRewrite(UpdateProperty upp, final MethodInvocation visited, final String propertykey, Expression expression,
-			final CompilationUnitRewrite cuRewrite,final TextEditGroup group) throws CoreException {
+			final CompilationUnitRewrite cuRewrite,final TextEditGroup group, Object object) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		ASTNode replace_with_Call;

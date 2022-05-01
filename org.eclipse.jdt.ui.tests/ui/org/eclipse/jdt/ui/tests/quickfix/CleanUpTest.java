@@ -28118,10 +28118,14 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        System.out.println(\"out:\"+intvalue); //$NON-NLS-1$\n" //
 				+ "        Integer intvalue2 = Integer.parseInt(System.getProperty(\"arbitrarykey\",\"0\")); //$NON-NLS-1$ //$NON-NLS-2$\n" //
 				+ "        System.out.println(\"out:\"+intvalue2); //$NON-NLS-1$\n" //
+				+ "        Integer intvalue3 = Integer.parseInt(System.getProperty(\"arbitrarykey\",\"15\")); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+intvalue3); //$NON-NLS-1$\n" //
 				+ "        Long longvalue = Long.parseLong(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+longvalue); //$NON-NLS-1$\n" //
 				+ "        Long longvalue2 = Long.parseLong(System.getProperty(\"arbitrarykey\",\"0\")); //$NON-NLS-1$ //$NON-NLS-2$\n" //
 				+ "        System.out.println(\"out:\"+longvalue2); //$NON-NLS-1$\n" //
+				+ "        Long longvalue3 = Long.parseLong(System.getProperty(\"arbitrarykey\",\"15\")); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+longvalue3); //$NON-NLS-1$\n" //
 				+ "    }\n" //
 				+ "}\n";
 
@@ -28153,11 +28157,15 @@ public class CleanUpTest extends CleanUpTestCase {
 				// second NLS comment should be removed
 				+ "        Integer intvalue2 = Integer.getInteger(\"arbitrarykey\"); //$NON-NLS-1$ //$NON-NLS-2$\n" //
 				+ "        System.out.println(\"out:\"+intvalue2); //$NON-NLS-1$\n" //
+				+ "        Integer intvalue3 = Integer.getInteger(\"arbitrarykey\", 15); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+intvalue3); //$NON-NLS-1$\n" //
 				+ "        Long longvalue = Long.getLong(\"arbitrarykey\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+longvalue); //$NON-NLS-1$\n" //
 				// second NLS comment should be removed
 				+ "        Long longvalue2 = Long.getLong(\"arbitrarykey\"); //$NON-NLS-1$ //$NON-NLS-2$\n" //
 				+ "        System.out.println(\"out:\"+longvalue2); //$NON-NLS-1$\n" //
+				+ "        Long longvalue3 = Long.getLong(\"arbitrarykey\", 15); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+longvalue3); //$NON-NLS-1$\n" //
 				+ "    }\n" //
 				+ "}\n";
 
