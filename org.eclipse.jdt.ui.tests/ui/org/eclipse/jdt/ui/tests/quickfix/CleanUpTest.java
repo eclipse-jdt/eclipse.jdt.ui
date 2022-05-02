@@ -17443,8 +17443,47 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
 
 		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT);
+		disable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL);
 
 		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean removeUselessInitialization() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long removeInitForLong() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long reassignedVar;\n" //
+				+ "        System.out.println();\n" //
+				+ "        reassignedVar = System.currentTimeMillis();\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String removeInitForString() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String reassignedVar = File.pathSeparator;\n" //
+				+ "        System.out.println();\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removePassiveInitialization(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedPassiveVar;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
+		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL);
+
+		output= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.io.File;\n" //

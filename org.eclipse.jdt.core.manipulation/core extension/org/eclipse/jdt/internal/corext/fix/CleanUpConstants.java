@@ -1780,6 +1780,19 @@ public class CleanUpConstants {
 	public static final String OVERRIDDEN_ASSIGNMENT= "cleanup.overridden_assignment"; //$NON-NLS-1$
 
 	/**
+	 * Move the declaration of the variable to the location of the overriding assignment
+	 * if necessary.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String OVERRIDDEN_ASSIGNMENT_MOVE_DECL= "cleanup.overridden_assignment_move_decl"; //$NON-NLS-1$
+
+	/**
 	 * Removes redundant semicolons.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>

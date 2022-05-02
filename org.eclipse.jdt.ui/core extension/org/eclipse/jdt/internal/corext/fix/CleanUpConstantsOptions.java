@@ -120,6 +120,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(COLLECTION_CLONING, CleanUpOptions.FALSE);
 		options.setOption(MAP_CLONING, CleanUpOptions.FALSE);
 		options.setOption(OVERRIDDEN_ASSIGNMENT, CleanUpOptions.FALSE);
+		options.setOption(OVERRIDDEN_ASSIGNMENT_MOVE_DECL, CleanUpOptions.TRUE);
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(RAISE_EMBEDDED_IF, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.TRUE);
@@ -299,6 +300,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(COLLECTION_CLONING, CleanUpOptions.FALSE);
 		options.setOption(MAP_CLONING, CleanUpOptions.FALSE);
 		options.setOption(OVERRIDDEN_ASSIGNMENT, CleanUpOptions.FALSE);
+		options.setOption(OVERRIDDEN_ASSIGNMENT_MOVE_DECL, CleanUpOptions.TRUE);
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(RAISE_EMBEDDED_IF, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.FALSE);
