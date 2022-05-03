@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -60,7 +60,7 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		boolean isTextBlock= JavaModelUtil.is15OrHigher(fProject) && fullStr.endsWith(IndentAction.TEXT_BLOCK_STR);
 		boolean isLineDelimiter= isLineDelimiter(document, command.text);
 		if (isEditorWrapStrings() && isLineDelimiter && isTextBlock) {
-			indentation= IndentAction.getTextBlockIndentationString(document, command.offset, command.offset, fProject);
+			indentation= IndentAction.getTextBlockIndentationString(document, command.offset, command.offset, -1, fProject);
 			if (hasTextBlockEnded) {
 				command.text= command.text + indentation;
 			} else {
@@ -68,7 +68,7 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 				if (isCloseStringsPreferenceSet(fProject)) {
 					command.caretOffset= command.offset + command.text.length();
 					command.shiftsCaret= false;
-					command.text= command.text + System.lineSeparator() + IndentAction.getTextBlockIndentationString(document, offset, command.offset, fProject) + IndentAction.TEXT_BLOCK_STR;
+					command.text= command.text + System.lineSeparator() + IndentAction.getTextBlockIndentationString(document, offset, command.offset, 0, fProject) + IndentAction.TEXT_BLOCK_STR;
 				}
 			}
 		} else if (command.text.length() > 1 && !isLineDelimiter && isEditorEscapeStrings()) {
