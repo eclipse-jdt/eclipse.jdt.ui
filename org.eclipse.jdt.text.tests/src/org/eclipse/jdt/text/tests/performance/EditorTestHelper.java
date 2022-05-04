@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -443,6 +443,26 @@ public class EditorTestHelper {
 	public static IJavaProject createJavaProject(String project, String externalSourceFolder, boolean linkSourceFolder) throws CoreException, JavaModelException {
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject(project, "bin");
 		Assert.assertNotNull("JRE is null", JavaProjectHelper.addRTJar(javaProject));
+		IFolder folder;
+		if (linkSourceFolder)
+			folder= ResourceHelper.createLinkedFolder((IProject) javaProject.getUnderlyingResource(), new Path("src"), JdtTextTestPlugin.getDefault(), new Path(externalSourceFolder));
+		else {
+			folder= ((IProject) javaProject.getUnderlyingResource()).getFolder("src");
+			importFilesFromDirectory(FileTool.getFileInPlugin(JdtTextTestPlugin.getDefault(), new Path(externalSourceFolder)), folder.getFullPath(), null);
+		}
+		Assert.assertNotNull(folder);
+		Assert.assertTrue(folder.exists());
+		JavaProjectHelper.addSourceContainer(javaProject, "src");
+		return javaProject;
+	}
+
+	public static IJavaProject createJavaProject15(String project, String externalSourceFolder) throws CoreException, JavaModelException {
+		return createJavaProject15(project, externalSourceFolder, false);
+	}
+
+	public static IJavaProject createJavaProject15(String project, String externalSourceFolder, boolean linkSourceFolder) throws CoreException, JavaModelException {
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject(project, "bin");
+		Assert.assertNotNull("JRE is null", JavaProjectHelper.addRTJar_15(javaProject, true));
 		IFolder folder;
 		if (linkSourceFolder)
 			folder= ResourceHelper.createLinkedFolder((IProject) javaProject.getUnderlyingResource(), new Path("src"), JdtTextTestPlugin.getDefault(), new Path(externalSourceFolder));

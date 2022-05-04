@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -180,8 +180,9 @@ public class IndentAction extends TextEditorAction {
 					JavaIndenter indenter= new JavaIndenter(document, scanner, getJavaProject());
 					final boolean multiLine= nLines > 1;
 					boolean hasChanged= false;
+					TextBlockInfo textBlockInfo= new TextBlockInfo(-1, -1);
 					for (int i= 0; i < nLines; i++) {
-						hasChanged |= indentLine(document, firstLine + i, offset, indenter, scanner, multiLine);
+						hasChanged |= indentLine(document, firstLine + i, offset, indenter, scanner, multiLine, textBlockInfo);
 					}
 
 					// update caret position: move to new position when indenting just one line
@@ -240,6 +241,32 @@ public class IndentAction extends TextEditorAction {
 
 	}
 
+	private static class TextBlockInfo {
+		private int partitionOffset;
+		private int minIndent;
+
+		public TextBlockInfo(int partitionOffset, int minIndent) {
+			this.setPartitionOffset(partitionOffset);
+			this.setMinIndent(minIndent);
+		}
+
+		public int getPartitionOffset() {
+			return partitionOffset;
+		}
+
+		public void setPartitionOffset(int partitionOffset) {
+			this.partitionOffset = partitionOffset;
+		}
+
+		public int getMinIndent() {
+			return minIndent;
+		}
+
+		public void setMinIndent(int minIndent) {
+			this.minIndent = minIndent;
+		}
+	}
+
 	/**
 	 * Indent the given <code>document</code> based on the <code>project</code> settings and
 	 * return a text edit describing the changes applied to the document. Returns <b>null</b>
@@ -272,9 +299,11 @@ public class IndentAction extends TextEditorAction {
 		int minusOne= length == 0 ? 0 : 1;
 		int numberOfLines= document.getLineOfOffset(offset + length - minusOne) - firstLine + 1;
 
+		TextBlockInfo textBlockInfo= new TextBlockInfo(-1, -1);
+
 		int shift= 0;
 		for (int i= 0; i < numberOfLines; i++) {
-			ReplaceData data= computeReplaceData(document, firstLine + i, indenter, scanner, numberOfLines > 1, false, project);
+			ReplaceData data= computeReplaceData(document, firstLine + i, indenter, scanner, numberOfLines > 1, false, textBlockInfo, project);
 
 			int replaceLength= data.end - data.offset;
 			String currentIndent= document.get(data.offset, replaceLength);
@@ -312,11 +341,12 @@ public class IndentAction extends TextEditorAction {
 	 * @param scanner the heuristic scanner
 	 * @param multiLine <code>true</code> if more than one line is being indented
 	 * @param isTabAction <code>true</code> if this action has been invoked by TAB
+	 * @param textBlockInfo info about current text block being indented if applicable
 	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
 	 * @return <code>true</code> if <code>document</code> was modified, <code>false</code> otherwise
 	 * @throws BadLocationException if the document got changed concurrently
 	 */
-	private static ReplaceData computeReplaceData(IDocument document, int line, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean multiLine, boolean isTabAction, IJavaProject project) throws BadLocationException {
+	private static ReplaceData computeReplaceData(IDocument document, int line, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean multiLine, boolean isTabAction, TextBlockInfo textBlockInfo, IJavaProject project) throws BadLocationException {
 		IRegion currentLine= document.getLineInformation(line);
 		int offset= currentLine.getOffset();
 		int wsStart= offset; // where we start searching for non-WS; after the "//" in single line comments
@@ -351,7 +381,11 @@ public class IndentAction extends TextEditorAction {
 					indent= document.get(offset, wsStart - offset) + computed;
 				}
 			} else if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(type)) {
-				indent= IndentAction.getTextBlockIndentationString(document, partition.getOffset(), currentLine.getOffset(), project);
+				if (textBlockInfo != null && textBlockInfo.getPartitionOffset() != partition.getOffset()) {
+					textBlockInfo.setPartitionOffset(partition.getOffset());
+					textBlockInfo.setMinIndent(IndentAction.getTextBlockMinIndent(document, partition.getOffset(), partition.getLength()));
+				}
+				indent= IndentAction.getTextBlockIndentationString(document, partition.getOffset(), currentLine.getOffset(), textBlockInfo.getMinIndent(), project);
 			}
 		}
 
@@ -493,12 +527,14 @@ public class IndentAction extends TextEditorAction {
 	 * @param indenter the java indenter
 	 * @param scanner the heuristic scanner
 	 * @param multiLine <code>true</code> if more than one line is being indented
+	 * @param textBlockInfo info about latest Text Block being indented
 	 * @return <code>true</code> if <code>document</code> was modified, <code>false</code> otherwise
 	 * @throws BadLocationException if the document got changed concurrently
 	 */
-	private boolean indentLine(IDocument document, int line, int caret, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean multiLine) throws BadLocationException {
+	private boolean indentLine(IDocument document, int line, int caret, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean multiLine, TextBlockInfo textBlockInfo) throws BadLocationException {
 		IJavaProject project= getJavaProject();
-		ReplaceData data= computeReplaceData(document, line, indenter, scanner, multiLine, fIsTabAction, project);
+
+		ReplaceData data= computeReplaceData(document, line, indenter, scanner, multiLine, fIsTabAction, textBlockInfo, project);
 
 		String indent= data.indent;
 		int end= data.end;
@@ -845,7 +881,31 @@ public class IndentAction extends TextEditorAction {
 		return TextSelection.emptySelection();
 	}
 
-	public static String getTextBlockIndentationString(IDocument document, int offset, int commandOffset, IJavaProject javaProject) throws BadLocationException {
+	public static int getTextBlockMinIndent(IDocument document, int offset, int length) throws BadLocationException {
+		int indent= Integer.MAX_VALUE;
+
+		int startLine= document.getLineOfOffset(offset);
+		int numLines= document.getNumberOfLines(offset, length);
+		boolean opened= false;
+		for (int i= startLine; i < startLine + numLines; ++i) {
+			IRegion line= document.getLineInformation(i);
+			String lineStr= document.get(line.getOffset(), line.getLength());
+			if (opened) {
+				String indentation= getLineIndentation(document, line.getOffset());
+				if (!indentation.equals(lineStr) && indentation.length() < indent) {
+					indent= indentation.length();
+				}
+			} else if (lineStr.trim().endsWith(IndentAction.TEXT_BLOCK_STR)) {
+				opened= true;
+			}
+		}
+		if (indent == Integer.MAX_VALUE) {
+			indent= 0;
+		}
+		return indent;
+	}
+
+	public static String getTextBlockIndentationString(IDocument document, int offset, int commandOffset, int minIndent, IJavaProject javaProject) throws BadLocationException {
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String fullStrNoTrim= document.get(line.getOffset(), commandOffset - line.getOffset());
 		if (!fullStrNoTrim.trim().endsWith(IndentAction.TEXT_BLOCK_STR)) {
@@ -923,7 +983,15 @@ public class IndentAction extends TextEditorAction {
 				}
 			}
 		}
-		return indentation;
+		String commandIndent= EMPTY_STR;
+		if (minIndent > 0) {
+			IRegion commandLine= document.getLineInformationOfOffset(commandOffset);
+			// handle extra indentation but ignore empty lines or short lines with only white-space
+			if (commandLine.getLength() > minIndent) {
+				commandIndent= getLineIndentation(document, commandLine.getOffset()).substring(minIndent);
+			}
+		}
+		return indentation + commandIndent;
 	}
 
 	public static String getIndentationAsPerTextBlockSettings(IDocument document, int offset, IJavaProject javaProject) throws BadLocationException {
