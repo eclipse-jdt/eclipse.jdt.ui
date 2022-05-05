@@ -200,7 +200,7 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 				var copy= rewrite.createCopyTarget(this.overridingAssignment.getRightHandSide());
 				rewrite.replace(fragment.getInitializer(), copy , group);
 				copy= rewrite.createCopyTarget(declaration);
-				rewrite.replace(overridingAssignment, copy, group);
+				rewrite.replace(overridingAssignment.getParent(), copy, group);
 				rewrite.remove(declaration, group);
 			} else {
 				rewrite.remove(fragment.getInitializer(), group);

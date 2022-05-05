@@ -17444,6 +17444,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT);
 		disable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL);
+		disable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
 
 		String output= "" //
 				+ "package test1;\n" //
@@ -17482,6 +17483,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
 				new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
 		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL);
+		disable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
 
 		output= "" //
 				+ "package test1;\n" //
