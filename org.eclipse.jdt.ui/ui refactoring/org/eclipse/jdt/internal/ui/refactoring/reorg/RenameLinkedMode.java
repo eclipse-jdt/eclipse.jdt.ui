@@ -280,7 +280,10 @@ public class RenameLinkedMode {
 				if (javaElement instanceof IMethod) {
 					IMethod[] relatedMethods= RippleMethodFinder2.getRelatedMethodsInCompilationUnit((IMethod) javaElement, new NullProgressMonitor(), null);
 					for (IMethod iMethod : relatedMethods) {
-						sameNodes.add(NodeFinder.perform(root, iMethod.getNameRange()));
+						ASTNode n= NodeFinder.perform(root, iMethod.getNameRange());
+						if (n != null) {
+							sameNodes.add(n);
+						}
 					}
 				}
 			}

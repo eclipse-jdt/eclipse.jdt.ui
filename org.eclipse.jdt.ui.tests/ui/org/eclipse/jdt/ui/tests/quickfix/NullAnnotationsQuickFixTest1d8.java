@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 GK Software AG and others.
+ * Copyright (c) 2017, 2022 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,6 +57,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -1206,6 +1207,39 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		buf.append("   }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
+	}
+	@Test
+	public void testBug562891() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class A {\n");
+		buf.append("    private @Nullable String foo;\n");
+		buf.append("}\n");
+		ICompilationUnit cu = pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		AssistContext context= new AssistContext(cu, buf.toString().indexOf("foo"), 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class A {\n");
+		buf.append("    private @Nullable String foo;\n");
+		buf.append("\n");
+		buf.append("    public @Nullable String getFoo() {\n");
+		buf.append("        return foo;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void setFoo(@Nullable String foo) {\n");
+		buf.append("        this.foo = foo;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
 	@Test
 	public void testBug525424() throws Exception {

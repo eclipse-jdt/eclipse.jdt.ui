@@ -152,7 +152,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		registerPreference(mapCloning);
 
 		CheckboxPreference overriddenAssignment= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_OverriddenAssignment, CleanUpConstants.OVERRIDDEN_ASSIGNMENT, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(overriddenAssignment);
+		intent(unnecessaryGroup);
+		CheckboxPreference moveDeclaration= createCheckboxPref(unnecessaryGroup, numColumns-1, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_MoveDeclaration, CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL, CleanUpModifyDialog.FALSE_TRUE);
+		registerSlavePreference(overriddenAssignment, new CheckboxPreference[] { moveDeclaration });
 
 		CheckboxPreference modifiers= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantModifiers, CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(modifiers);

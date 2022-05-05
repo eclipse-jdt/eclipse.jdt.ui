@@ -48,7 +48,6 @@ public class FilterManager {
 	}
 
 	public Filter[] getAllStoredFilters(IPreferenceStore store, boolean defaults) {
-		Filter[] filters = null;
 		String[] activefilters, inactivefilters;
 		if (defaults) {
 			activefilters = getDefaultActiveFilters(store);
@@ -57,7 +56,7 @@ public class FilterManager {
 			activefilters = getActiveList(store);
 			inactivefilters = getInactiveList(store);
 		}
-		filters = new Filter[activefilters.length + inactivefilters.length];
+		Filter[] filters = new Filter[activefilters.length + inactivefilters.length];;
 		for (int i = 0; i < activefilters.length; i++) {
 			filters[i] = new Filter(activefilters[i], true);
 		}
