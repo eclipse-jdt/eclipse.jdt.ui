@@ -2181,8 +2181,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 
-		// statement is VariableDeclarationStatement
-		Statement newStatement= null;
 		int insertIndex= list.indexOf(statement);
 		ITypeBinding binding= fragment.getInitializer().resolveTypeBinding();
 		Expression placeholder= (Expression) rewrite.createMoveTarget(fragment.getInitializer());
@@ -2204,7 +2202,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		assignment.setRightHandSide(placeholder);
 		assignment.setLeftHandSide(ast.newSimpleName(fragment.getName().getIdentifier()));
 
-		newStatement= ast.newExpressionStatement(assignment);
+		// statement is VariableDeclarationStatement
+		Statement newStatement= ast.newExpressionStatement(assignment);;
 		insertIndex+= 1; // add after declaration
 
 		if (isVarType) {

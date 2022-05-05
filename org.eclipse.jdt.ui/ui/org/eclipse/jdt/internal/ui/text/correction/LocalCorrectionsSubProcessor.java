@@ -801,8 +801,7 @@ public class LocalCorrectionsSubProcessor {
 				return;
 			}
 			Type type= vds.getType();
-			ITypeBinding binding= null;
-			binding= type == null ? null : type.resolveBinding();
+			ITypeBinding binding= type == null ? null : type.resolveBinding();
 			if (binding == null) {
 				return;
 			}
