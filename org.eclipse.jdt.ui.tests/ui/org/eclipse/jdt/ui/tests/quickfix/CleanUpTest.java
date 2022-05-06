@@ -28149,22 +28149,19 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
 				+ "        Boolean value = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
-				// second NLS comment should be removed
-				+ "        Boolean value2 = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        Boolean value2 = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+value2); //$NON-NLS-1$\n" //
 				+ "        Integer intvalue = Integer.getInteger(\"arbitrarykey\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+intvalue); //$NON-NLS-1$\n" //
-				// second NLS comment should be removed
-				+ "        Integer intvalue2 = Integer.getInteger(\"arbitrarykey\"); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        Integer intvalue2 = Integer.getInteger(\"arbitrarykey\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+intvalue2); //$NON-NLS-1$\n" //
-				+ "        Integer intvalue3 = Integer.getInteger(\"arbitrarykey\",15); //$NON-NLS-1$\n" //
+				+ "        Integer intvalue3 = Integer.getInteger(\"arbitrarykey\", 15); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+intvalue3); //$NON-NLS-1$\n" //
 				+ "        Long longvalue = Long.getLong(\"arbitrarykey\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+longvalue); //$NON-NLS-1$\n" //
-				// second NLS comment should be removed
-				+ "        Long longvalue2 = Long.getLong(\"arbitrarykey\"); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        Long longvalue2 = Long.getLong(\"arbitrarykey\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+longvalue2); //$NON-NLS-1$\n" //
-				+ "        Long longvalue3 = Long.getLong(\"arbitrarykey\",15); //$NON-NLS-1$\n" //
+				+ "        Long longvalue3 = Long.getLong(\"arbitrarykey\", 15); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+longvalue3); //$NON-NLS-1$\n" //
 				+ "    }\n" //
 				+ "}\n";

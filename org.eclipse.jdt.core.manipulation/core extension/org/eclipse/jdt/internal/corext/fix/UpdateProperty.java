@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2021, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -179,6 +179,8 @@ public enum UpdateProperty {
 			UpdateProperty::parselong_visitor,
 			UpdateProperty::boolintlongRewrite);
 
+	public static Object UNUSED= new Object();
+
 	String key;
 	Class<?> cl;
 	String simplename;
@@ -260,7 +262,7 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Boolean.class.getCanonicalName(), METHOD_PARSEBOOLEAN, String.class.getCanonicalName()) && ((String)propertykey2).toLowerCase().equals("false")) { //$NON-NLS-1$
-							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, UNUSED));
 							nodesprocessed.add(visited);
 							return false;
 						}
@@ -302,7 +304,7 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Integer.class.getCanonicalName(), METHOD_PARSEINTEGER, String.class.getCanonicalName())&& ((String)propertykey2).toLowerCase().equals("0")) { //$NON-NLS-1$
-							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, UNUSED));
 							nodesprocessed.add(visited);
 							return false;
 						} else if (ASTNodes.usesGivenSignature(parent, Integer.class.getCanonicalName(), METHOD_PARSEINTEGER, String.class.getCanonicalName())) {
@@ -348,7 +350,7 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName()) && ((String)propertykey2).toLowerCase().equals("0")) { //$NON-NLS-1$
-							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, UNUSED));
 							nodesprocessed.add(visited);
 							return false;
 						} else if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName())) {
@@ -394,13 +396,15 @@ public enum UpdateProperty {
 		newMethodInvocation.setExpression(ASTNodeFactory.newName(ast, upp.alternativecl.getSimpleName()));
 		newMethodInvocation.setName(ast.newSimpleName(upp.simplename));
 		List<Expression> arguments= newMethodInvocation.arguments();
-		if(object != null) {
+		if (object != null) {
 			StringLiteral sl= ast.newStringLiteral();
 			sl.setLiteralValue(propertykey);
 			arguments.add(sl);
-			NumberLiteral newNumberLiteral= ast.newNumberLiteral();
-			newNumberLiteral.setToken(object.toString());
-			arguments.add(newNumberLiteral);
+			if (object != UNUSED) {
+				NumberLiteral newNumberLiteral= ast.newNumberLiteral();
+				newNumberLiteral.setToken(object.toString());
+				arguments.add(newNumberLiteral);
+			}
 			ASTNode replace_with_Call= newMethodInvocation;
 			ASTNodes.replaceAndRemoveNLS(rewrite, visited, replace_with_Call, group, cuRewrite);
 		} else {
