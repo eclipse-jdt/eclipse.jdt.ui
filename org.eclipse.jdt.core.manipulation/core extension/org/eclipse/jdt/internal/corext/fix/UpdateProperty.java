@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2021, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,13 +21,18 @@ import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_DISPLA
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_GET_DEFAULT;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_GET_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_GET_SEPARATOR;
+import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_INTEGER;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_LINE_SEPARATOR;
+import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_LONG;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_PARSEBOOLEAN;
+import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_PARSEINTEGER;
+import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_PARSELONG;
 import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_description;
 
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -41,6 +46,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
@@ -138,7 +145,41 @@ public enum UpdateProperty {
 			Boolean.class,
 			null,
 			UpdateProperty::parseboolean_visitor,
-			UpdateProperty::booleanRewrite);
+			UpdateProperty::boolintlongRewrite),
+	/**
+	 * Change
+	 * <code>Integer.parseInt(System.getProperty("arbitrarykey"));</code>
+	 * to
+	 * <code>Integer.getInteger("arbitrarykey");</code>
+	 *
+	 * Currently <code>Integer.parseInt(System.getProperty("arbitrarykey", "false"))</code> is not supported
+	 */
+	INTEGER_PROPERTY(null,
+			null,
+			METHOD_INTEGER,
+			null,
+			Integer.class,
+			null,
+			UpdateProperty::parseinteger_visitor,
+			UpdateProperty::boolintlongRewrite),
+	/**
+	 * Change
+	 * <code>Long.parseLong(System.getProperty("arbitrarykey"));</code>
+	 * to
+	 * <code>Long.getLong("arbitrarykey");</code>
+	 *
+	 * Currently <code>Long.parseLong(System.getProperty("arbitrarykey", "false"))</code> is not supported
+	 */
+	LONG_PROPERTY(null,
+			null,
+			METHOD_LONG,
+			null,
+			Long.class,
+			null,
+			UpdateProperty::parselong_visitor,
+			UpdateProperty::boolintlongRewrite);
+
+	public static Object UNUSED= new Object();
 
 	String key;
 	Class<?> cl;
@@ -180,7 +221,7 @@ public enum UpdateProperty {
 					Expression expression= (Expression) visited.arguments().get(0);
 					Object propertykey= expression.resolveConstantExpressionValue();
 					if (propertykey instanceof String && upp.key.equals(propertykey)) {
-						operations.add(upp.rewrite(visited, null, expression));
+						operations.add(upp.rewrite(visited, null, expression,null));
 						nodesprocessed.add(visited);
 						return false;
 					}
@@ -208,7 +249,20 @@ public enum UpdateProperty {
 					if (propertykey instanceof String && visited.getParent() instanceof MethodInvocation) {
 						MethodInvocation parent=(MethodInvocation) visited.getParent();
 						if (ASTNodes.usesGivenSignature(parent, Boolean.class.getCanonicalName(), METHOD_PARSEBOOLEAN, String.class.getCanonicalName())) {
-							operations.add(upp.rewrite(parent, (String) propertykey,expression));
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
+							nodesprocessed.add(visited);
+							return false;
+						}
+					}
+				} else if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName(), String.class.getCanonicalName())) {
+					Expression expression= (Expression) visited.arguments().get(0);
+					Expression expression2= (Expression) visited.arguments().get(1);
+					Object propertykey= expression.resolveConstantExpressionValue();
+					Object propertykey2= expression2.resolveConstantExpressionValue();
+					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
+						MethodInvocation parent=(MethodInvocation) visited.getParent();
+						if (ASTNodes.usesGivenSignature(parent, Boolean.class.getCanonicalName(), METHOD_PARSEBOOLEAN, String.class.getCanonicalName()) && ((String)propertykey2).toLowerCase().equals("false")) { //$NON-NLS-1$
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, UNUSED));
 							nodesprocessed.add(visited);
 							return false;
 						}
@@ -219,24 +273,115 @@ public enum UpdateProperty {
 		});
 	}
 
-	interface IRewriter {
-		void computeRewriter(final UpdateProperty upp,final MethodInvocation visited, final String propertykey,
-				final Expression expression, final CompilationUnitRewrite cuRewrite, final TextEditGroup group) throws CoreException;
+	static void parseinteger_visitor(final UpdateProperty upp, final CompilationUnit compilationUnit, final Set<CompilationUnitRewriteOperation> operations, final Set<ASTNode> nodesprocessed) {
+		compilationUnit.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(final MethodInvocation visited) {
+				if(nodesprocessed.contains(visited)) {
+					return false;
+				}
+				/**
+				 * look for
+				 * <code>Integer.parseInteger(System.getProperty("arbitrarykey"));</code>
+				 * (has to be done after completing the specific search)
+				 */
+				if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName())) {
+					Expression expression= (Expression) visited.arguments().get(0);
+					Object propertykey= expression.resolveConstantExpressionValue();
+					if (propertykey instanceof String && visited.getParent() instanceof MethodInvocation) {
+						MethodInvocation parent=(MethodInvocation) visited.getParent();
+						if (ASTNodes.usesGivenSignature(parent, Integer.class.getCanonicalName(), METHOD_PARSEINTEGER, String.class.getCanonicalName())) {
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
+							nodesprocessed.add(visited);
+							return false;
+						}
+					}
+				} else if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName(), String.class.getCanonicalName())) {
+					Expression expression= (Expression) visited.arguments().get(0);
+					Expression expression2= (Expression) visited.arguments().get(1);
+					Object propertykey= expression.resolveConstantExpressionValue();
+					Object propertykey2= expression2.resolveConstantExpressionValue();
+					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
+						MethodInvocation parent=(MethodInvocation) visited.getParent();
+						if (ASTNodes.usesGivenSignature(parent, Integer.class.getCanonicalName(), METHOD_PARSEINTEGER, String.class.getCanonicalName())&& ((String)propertykey2).toLowerCase().equals("0")) { //$NON-NLS-1$
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, UNUSED));
+							nodesprocessed.add(visited);
+							return false;
+						} else if (ASTNodes.usesGivenSignature(parent, Integer.class.getCanonicalName(), METHOD_PARSEINTEGER, String.class.getCanonicalName())) {
+							operations.add(upp.rewrite(parent, (String) propertykey,expression,Integer.valueOf((String)propertykey2)));
+							nodesprocessed.add(visited);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+		});
 	}
 
-	CompilationUnitRewriteOperation rewrite(final MethodInvocation visited, final String propertykey, final Expression expression) {
+	static void parselong_visitor(final UpdateProperty upp, final CompilationUnit compilationUnit, final Set<CompilationUnitRewriteOperation> operations, final Set<ASTNode> nodesprocessed) {
+		compilationUnit.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(final MethodInvocation visited) {
+				if(nodesprocessed.contains(visited)) {
+					return false;
+				}
+				/**
+				 * look for
+				 * <code>Integer.parseInteger(System.getProperty("arbitrarykey"));</code>
+				 * (has to be done after completing the specific search)
+				 */
+				if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName())) {
+					Expression expression= (Expression) visited.arguments().get(0);
+					Object propertykey= expression.resolveConstantExpressionValue();
+					if (propertykey instanceof String && visited.getParent() instanceof MethodInvocation) {
+						MethodInvocation parent=(MethodInvocation) visited.getParent();
+						if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName())) {
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, null));
+							nodesprocessed.add(visited);
+							return false;
+						}
+					}
+				} else if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName(), String.class.getCanonicalName())) {
+					Expression expression= (Expression) visited.arguments().get(0);
+					Expression expression2= (Expression) visited.arguments().get(1);
+					Object propertykey= expression.resolveConstantExpressionValue();
+					Object propertykey2= expression2.resolveConstantExpressionValue();
+					if (propertykey instanceof String && propertykey2 instanceof String && visited.getParent() instanceof MethodInvocation) {
+						MethodInvocation parent=(MethodInvocation) visited.getParent();
+						if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName()) && ((String)propertykey2).toLowerCase().equals("0")) { //$NON-NLS-1$
+							operations.add(upp.rewrite(parent, (String) propertykey,expression, UNUSED));
+							nodesprocessed.add(visited);
+							return false;
+						} else if (ASTNodes.usesGivenSignature(parent, Long.class.getCanonicalName(), METHOD_PARSELONG, String.class.getCanonicalName())) {
+							operations.add(upp.rewrite(parent, (String) propertykey,expression,Long.valueOf((String)propertykey2)));
+							nodesprocessed.add(visited);
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+		});
+	}
+	interface IRewriter {
+		void computeRewriter(final UpdateProperty upp,final MethodInvocation visited, final String propertykey,
+				final Expression expression, final CompilationUnitRewrite cuRewrite, final TextEditGroup group, Object object) throws CoreException;
+	}
+
+	CompilationUnitRewriteOperation rewrite(final MethodInvocation visited, final String propertykey, final Expression expression, final Object object) {
 		return new CompilationUnitRewriteOperation() {
 			@Override
 			public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 				TextEditGroup group= createTextEditGroup(Messages.format(ConstantsCleanUp_description,UpdateProperty.this.toString()), cuRewrite);
 				cuRewrite.getASTRewrite().setTargetSourceRangeComputer(computer);
-				myrewriter.computeRewriter(UpdateProperty.this, visited, propertykey, expression, cuRewrite, group);
+				myrewriter.computeRewriter(UpdateProperty.this, visited, propertykey, expression, cuRewrite, group, object);
 			}
 		};
 	}
 
-	private static void booleanRewrite(UpdateProperty upp,final MethodInvocation visited, final String propertykey, Expression expression, final CompilationUnitRewrite cuRewrite,
-			TextEditGroup group) {
+	private static void boolintlongRewrite(UpdateProperty upp,final MethodInvocation visited, final String propertykey, Expression expression, final CompilationUnitRewrite cuRewrite,
+			TextEditGroup group, Object object) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		/**
@@ -250,13 +395,27 @@ public enum UpdateProperty {
 		MethodInvocation newMethodInvocation= ast.newMethodInvocation();
 		newMethodInvocation.setExpression(ASTNodeFactory.newName(ast, upp.alternativecl.getSimpleName()));
 		newMethodInvocation.setName(ast.newSimpleName(upp.simplename));
-		newMethodInvocation.arguments().add(ASTNodes.createMoveTarget(cuRewrite.getASTRewrite(), ASTNodes.getUnparenthesedExpression(expression)));
-		ASTNode replace_with_Call= newMethodInvocation;
-		ASTNodes.replaceButKeepComment(rewrite, visited, replace_with_Call, group);
+		List<Expression> arguments= newMethodInvocation.arguments();
+		if (object != null) {
+			StringLiteral sl= ast.newStringLiteral();
+			sl.setLiteralValue(propertykey);
+			arguments.add(sl);
+			if (object != UNUSED) {
+				NumberLiteral newNumberLiteral= ast.newNumberLiteral();
+				newNumberLiteral.setToken(object.toString());
+				arguments.add(newNumberLiteral);
+			}
+			ASTNode replace_with_Call= newMethodInvocation;
+			ASTNodes.replaceAndRemoveNLS(rewrite, visited, replace_with_Call, group, cuRewrite);
+		} else {
+			arguments.add(ASTNodes.createMoveTarget(cuRewrite.getASTRewrite(), ASTNodes.getUnparenthesedExpression(expression)));
+			ASTNode replace_with_Call= newMethodInvocation;
+			ASTNodes.replaceButKeepComment(rewrite, visited, replace_with_Call, group);
+		}
 	}
 
 	private static void defaultRewrite(UpdateProperty upp, final MethodInvocation visited, final String propertykey, Expression expression,
-			final CompilationUnitRewrite cuRewrite,final TextEditGroup group) throws CoreException {
+			final CompilationUnitRewrite cuRewrite,final TextEditGroup group, Object object) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		ASTNode replace_with_Call;
@@ -314,7 +473,7 @@ public enum UpdateProperty {
 	}
 
 	private static void pathRewrite(UpdateProperty upp, final MethodInvocation visited, final String propertykey, Expression expression,
-			final CompilationUnitRewrite cuRewrite,final TextEditGroup group) throws CoreException {
+			final CompilationUnitRewrite cuRewrite,final TextEditGroup group, Object object) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		ASTNode replace_with_Call;

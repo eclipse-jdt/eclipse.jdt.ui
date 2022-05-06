@@ -28112,6 +28112,20 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
 				+ "        Boolean value = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
+				+ "        Boolean value2 = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\",\"false\")); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+value2); //$NON-NLS-1$\n" //
+				+ "        Integer intvalue = Integer.parseInt(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+intvalue); //$NON-NLS-1$\n" //
+				+ "        Integer intvalue2 = Integer.parseInt(System.getProperty(\"arbitrarykey\",\"0\")); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+intvalue2); //$NON-NLS-1$\n" //
+				+ "        Integer intvalue3 = Integer.parseInt(System.getProperty(\"arbitrarykey\",\"15\")); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+intvalue3); //$NON-NLS-1$\n" //
+				+ "        Long longvalue = Long.parseLong(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+longvalue); //$NON-NLS-1$\n" //
+				+ "        Long longvalue2 = Long.parseLong(System.getProperty(\"arbitrarykey\",\"0\")); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+longvalue2); //$NON-NLS-1$\n" //
+				+ "        Long longvalue3 = Long.parseLong(System.getProperty(\"arbitrarykey\",\"15\")); //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        System.out.println(\"out:\"+longvalue3); //$NON-NLS-1$\n" //
 				+ "    }\n" //
 				+ "}\n";
 
@@ -28135,6 +28149,20 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        System.out.println(\"out:\"+lsp); //$NON-NLS-1$\n" //
 				+ "        Boolean value = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(\"out:\"+value); //$NON-NLS-1$\n" //
+				+ "        Boolean value2 = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+value2); //$NON-NLS-1$\n" //
+				+ "        Integer intvalue = Integer.getInteger(\"arbitrarykey\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+intvalue); //$NON-NLS-1$\n" //
+				+ "        Integer intvalue2 = Integer.getInteger(\"arbitrarykey\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+intvalue2); //$NON-NLS-1$\n" //
+				+ "        Integer intvalue3 = Integer.getInteger(\"arbitrarykey\", 15); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+intvalue3); //$NON-NLS-1$\n" //
+				+ "        Long longvalue = Long.getLong(\"arbitrarykey\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+longvalue); //$NON-NLS-1$\n" //
+				+ "        Long longvalue2 = Long.getLong(\"arbitrarykey\"); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+longvalue2); //$NON-NLS-1$\n" //
+				+ "        Long longvalue3 = Long.getLong(\"arbitrarykey\", 15); //$NON-NLS-1$\n" //
+				+ "        System.out.println(\"out:\"+longvalue3); //$NON-NLS-1$\n" //
 				+ "    }\n" //
 				+ "}\n";
 
@@ -28145,7 +28173,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
-		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED);
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
@@ -28154,7 +28182,9 @@ public class CleanUpTest extends CleanUpTestCase {
 						Messages.format(ConstantsCleanUp_description,UpdateProperty.PATH_SEPARATOR.toString()),
 						Messages.format(ConstantsCleanUp_description,UpdateProperty.LINE_SEPARATOR.toString()),
 						Messages.format(ConstantsCleanUp_description,UpdateProperty.FILE_ENCODING.toString()),
-						Messages.format(ConstantsCleanUp_description,UpdateProperty.BOOLEAN_PROPERTY.toString()))));
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.BOOLEAN_PROPERTY.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.INTEGER_PROPERTY.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.LONG_PROPERTY.toString()))));
 	}
 
 	@Test
@@ -28206,7 +28236,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
-		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED);
 
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
@@ -28241,7 +28271,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
-		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED);
 
 		// Then
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
