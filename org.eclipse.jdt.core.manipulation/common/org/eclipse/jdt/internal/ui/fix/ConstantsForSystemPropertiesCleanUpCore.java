@@ -159,49 +159,49 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUpCore
 		}
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.BOOLEAN_PROPERTY)) {
-			sb.append("Boolean b = Boolean.getBoolean(\"arbitrarykey\")\n"); //$NON-NLS-1$
+			sb.append("Boolean b = Boolean.getBoolean(\"arbitrarykey\");\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Boolean b = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$
 		}
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.BOOLEAN_PROPERTY)) {
-			sb.append("Boolean b2 = Boolean.getBoolean(\"arbitrarykey\")\n"); //$NON-NLS-1$
+			sb.append("Boolean b2 = Boolean.getBoolean(\"arbitrarykey\");\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Boolean b2 = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\", \"false\"));\n"); //$NON-NLS-1$
 		}
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.INTEGER_PROPERTY)) {
-			sb.append("Integer i = Integer.getInteger(\"arbitrarykey\")\n"); //$NON-NLS-1$
+			sb.append("Integer i = Integer.getInteger(\"arbitrarykey\");\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Integer i = Integer.parseInt(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$
 		}
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.INTEGER_PROPERTY)) {
-			sb.append("Integer i2 = Integer.getInteger(\"arbitrarykey\")\n"); //$NON-NLS-1$
+			sb.append("Integer i2 = Integer.getInteger(\"arbitrarykey\");\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Integer i2 = Integer.parseInt(System.getProperty(\"arbitrarykey\",\"0\"));\n"); //$NON-NLS-1$
 		}
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.INTEGER_PROPERTY)) {
-			sb.append("Integer i3 = Integer.getInteger(\"arbitrarykey\", 15)\n"); //$NON-NLS-1$
+			sb.append("Integer i3 = Integer.getInteger(\"arbitrarykey\", 15);\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Integer i3 = Integer.parseInt(System.getProperty(\"arbitrarykey\",\"15\"));\n"); //$NON-NLS-1$
 		}
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.LONG_PROPERTY)) {
-			sb.append("Long l = Long.getLong(\"arbitrarykey\")\n"); //$NON-NLS-1$
+			sb.append("Long l = Long.getLong(\"arbitrarykey\");\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Long l = Long.parseLong(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$
 		}
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.LONG_PROPERTY)) {
-			sb.append("Long l2 = Long.getLong(\"arbitrarykey\")\n"); //$NON-NLS-1$
+			sb.append("Long l2 = Long.getLong(\"arbitrarykey\");\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Long l2 = Long.parseLong(System.getProperty(\"arbitrarykey\" ,\"0\"));\n"); //$NON-NLS-1$
 		}
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.LONG_PROPERTY)) {
-			sb.append("Long l3 = Long.getLong(\"arbitrarykey\", 15)\n"); //$NON-NLS-1$
+			sb.append("Long l3 = Long.getLong(\"arbitrarykey\", 15);\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Long l3 = Long.parseLong(System.getProperty(\"arbitrarykey\" ,\"15\"));\n"); //$NON-NLS-1$
 		}
