@@ -229,6 +229,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewAnnotationWizardPage_add_target;
 	public static String NewAnnotationWizardPage_title;
 	public static String NewAnnotationWizardPage_description;
+	public static String NewAnnotationWizardPage_error_invalidTypeParameters;
 
 	public static String JavaCapabilityConfigurationPage_title;
 	public static String JavaCapabilityConfigurationPage_description;
