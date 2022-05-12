@@ -3584,6 +3584,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/**
+	 * Calls the SemanticHighlightingReconciler refresh function which does the semantic 
+	 * highlighting of the editor content
+	 * 
+	 * @since 3.26 
+	 */
+	public void refreshSemanticHighlighting() {
+		if (fSemanticManager != null) {
+			SemanticHighlightingReconciler reconciler= fSemanticManager.getReconciler();
+			if (reconciler != null) {
+				reconciler.refresh();
+			}
+		}
+	}
+
+	/**
 	 * Returns the Java element wrapped by this editors input.
 	 *
 	 * @return the Java element wrapped by this editors input.
