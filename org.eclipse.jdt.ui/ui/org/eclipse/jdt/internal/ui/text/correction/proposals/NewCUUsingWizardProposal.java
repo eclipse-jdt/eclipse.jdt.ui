@@ -72,6 +72,8 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
@@ -109,12 +111,13 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	private ITypeBinding fSuperType;
 
 	private boolean fShowDialog;
+	private boolean fCallSemanticHighlightingReconciler;
 
 	public NewCUUsingWizardProposal(ICompilationUnit cu, Name node, int typeKind, IJavaElement typeContainer, int severity) {
-		this(cu, node, typeKind, typeContainer, null, severity);
+		this(cu, node, typeKind, typeContainer, null, severity, false);
 	}
 
-	public NewCUUsingWizardProposal(ICompilationUnit cu, Name node, int typeKind, IJavaElement typeContainer, ITypeBinding superType, int severity) {
+	public NewCUUsingWizardProposal(ICompilationUnit cu, Name node, int typeKind, IJavaElement typeContainer, ITypeBinding superType, int severity, boolean callSemanticHighlightingReconciler) {
 		super("", null, severity, null); //$NON-NLS-1$
 
 		fCompilationUnit= cu;
@@ -126,6 +129,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 		}
 		fSuperType = superType;
 		fCreatedType= null;
+		fCallSemanticHighlightingReconciler= callSemanticHighlightingReconciler;
 
 		String containerName;
 		if (fNode != null) {
@@ -335,6 +339,12 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				}
 			}
 			fCreatedType= createdType;
+			if (fCallSemanticHighlightingReconciler) {
+				JavaEditor javaEditor= EditorUtility.getActiveJavaEditor();
+				if (javaEditor != null) {
+					javaEditor.refreshSemanticHighlighting();
+				}
+			}
 		}
 
 	}
