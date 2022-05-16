@@ -186,6 +186,8 @@ public class MultiFixMessages extends NLS {
 	public static String UnloopedWhileCleanUp_description;
 	public static String AddAllCleanup_description;
 	public static String ObjectsEqualsCleanup_description;
+	public static String ToolsCleanUp_description;
+	public static String ToolsCleanUpFix_refactor;
 
 	public static String OperandFactorizationCleanUp_description;
 	public static String OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp_description;
