@@ -4084,4 +4084,95 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(MultiFixMessages.StringBufferToStringBuilderCleanUp_description)));
 	}
 
+	@Test
+	public void testWhile() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n"
+		                + "import java.util.*;\n"
+		                + "public class Test {\n"
+		                + "    void m(List<String> strings) {\n"
+		                + "        Collections.reverse(strings);\n"
+		                + "        Iterator it = strings.iterator();\n"
+		                + "        while (it.hasNext()) {\n"
+		                + "            String s = (String) it.next();\n"
+		                + "            System.out.println(s);\n"
+		                + "            // OK\n"
+		                + "            System.err.println(s);\n"
+		                + "        }\n"
+		                + "        System.out.println();\n"
+		                + "    }\n"
+		                + "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n"
+                        + "import java.util.*;\n"
+                        + "public class Test {\n"
+                        + "    void m(List<String> strings) {\n"
+                        + "        Collections.reverse(strings);\n"
+                        + "        for (String s : strings) {\n"
+                        + "            System.out.println(s);\n"
+                        + "            // OK\n"
+                        + "            System.err.println(s);\n"
+                        + "        }\n"
+                        + "        System.out.println();\n"
+                        + "    }\n"
+                        + "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	@Test
+	public void testWhileNested() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test;\n"
+		                + "import java.util.*;\n"
+		                + "public class Test {\n"
+		                + "    void m(List<String> strings,List<String> strings2) {\n"
+		                + "        Collections.reverse(strings);\n"
+		                + "        Iterator it = strings.iterator();\n"
+		                + "        while (it.hasNext()) {\n"
+		                + "            String s = (String) it.next();\n"
+		                + "            Iterator it2 = strings2.iterator();\n"
+		                + "            while (it2.hasNext()) {\n"
+		                + "                String s2 = (String) it2.next();\n"
+		                + "                System.out.println(s2);\n"
+		                + "            }\n"
+		                + "            // OK\n"
+		                + "            System.err.println(s);\n"
+		                + "        }\n"
+		                + "        System.out.println();\n"
+		                + "    }\n"
+		                + "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test;\n"
+                        + "import java.util.*;\n"
+                        + "public class Test {\n"
+                        + "    void m(List<String> strings,List<String> strings2) {\n"
+                        + "        Collections.reverse(strings);\n"
+                        + "        for (String s : strings) {\n"
+                        + "            for (String s2 : strings2) {\n"
+                        + "                System.out.println(s2);\n"
+                        + "            }\n"
+                        + "            // OK\n"
+                        + "            System.err.println(s);\n"
+                        + "        }\n"
+                        + "        System.out.println();\n"
+                        + "    }\n"
+                        + "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
 }
