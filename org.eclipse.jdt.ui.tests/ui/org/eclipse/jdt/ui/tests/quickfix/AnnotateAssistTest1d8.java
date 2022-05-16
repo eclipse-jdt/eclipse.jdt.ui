@@ -17,7 +17,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,6 +29,8 @@ import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
@@ -34,12 +39,19 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.ClasspathAttribute;
+import org.eclipse.jdt.internal.core.ClasspathEntry;
+
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.examples.MyClasspathContainerInitializer;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
@@ -55,6 +67,86 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
     public ProjectTestSetup projectSetup = new Java1d8ProjectTestSetup();
 
 	protected static final String ANNOTATION_PATH= "annots";
+
+
+	/**
+	 * Initializer for a container that may provide customized content specified with source and external annotations.
+	 * (Similar to org.eclipse.jdt.core.tests.model.ExternalAnnotations18Test.TestCustomContainerInitializer)
+	 */
+	static class TestCustomContainerInitializer extends ClasspathContainerInitializer {
+
+		List<String> allEntries;
+		Map<String,String> sourceEntries;
+		Map<String,String> elementAnnotationPaths;
+
+		/**
+		 * @param elementsWithSourcesAndAnnotationPaths each triplet of entries in this array defines one classpath entry:
+		 * <ul>
+		 * 	<li>1st string specifies the entry path,
+		 *  <li>2nd string specifies source attachment
+		 *  <li>if 3nd string is "self" than the entry is "self-annotating".
+		 *  	 {@code null} is a legal value to signal "not self-annotating"
+		 *  </ul>
+		 */
+		public TestCustomContainerInitializer(String... elementsWithSourcesAndAnnotationPaths) {
+			this.allEntries = new ArrayList<>();
+			this.sourceEntries = new HashMap<>();
+			this.elementAnnotationPaths = new HashMap<>();
+			for (int i = 0; i < elementsWithSourcesAndAnnotationPaths.length; i+=3) {
+				String entryPath = elementsWithSourcesAndAnnotationPaths[i];
+				this.allEntries.add(entryPath);
+				this.sourceEntries.put(entryPath, elementsWithSourcesAndAnnotationPaths[i+1]);
+				String annotsPath = elementsWithSourcesAndAnnotationPaths[i+2];
+				if ("self".equals(annotsPath))
+					this.elementAnnotationPaths.put(entryPath, entryPath);
+				else if (annotsPath != null)
+					this.elementAnnotationPaths.put(entryPath, annotsPath);
+			}
+		}
+
+		static class TestContainer implements IClasspathContainer {
+			IPath path;
+			IClasspathEntry[] entries;
+			TestContainer(IPath path, IClasspathEntry[] entries){
+				this.path = path;
+				this.entries = entries;
+			}
+			@Override public IPath getPath() { return this.path; }
+			@Override public IClasspathEntry[] getClasspathEntries() { return this.entries;	}
+			@Override public String getDescription() { return this.path.toString(); 	}
+			@Override public int getKind() { return 0; }
+		}
+
+		@Override
+		public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
+			List<IClasspathEntry> entries = new ArrayList<>();
+			for (String entryPath : this.allEntries) {
+				String elementAnnotationPath = this.elementAnnotationPaths.get(entryPath);
+
+				IClasspathAttribute[] extraAttributes;
+				if (elementAnnotationPath != null)
+					extraAttributes = externalAnnotationExtraAttributes(elementAnnotationPath);
+				else
+					extraAttributes = ClasspathEntry.NO_EXTRA_ATTRIBUTES;
+
+				String sourcePath= this.sourceEntries.get(entryPath);
+				IPath sourceAttachment = sourcePath != null ? new Path(sourcePath) : null;
+				entries.add(JavaCore.newLibraryEntry(new Path(entryPath), sourceAttachment, null,
+						ClasspathEntry.NO_ACCESS_RULES, extraAttributes, false/*not exported*/));
+			}
+			JavaCore.setClasspathContainer(
+					containerPath,
+					new IJavaProject[]{ project },
+					new IClasspathContainer[] { new TestContainer(containerPath, entries.toArray(IClasspathEntry[]::new)) },
+					null);
+		}
+	}
+
+	static IClasspathAttribute[] externalAnnotationExtraAttributes(String path) {
+		return new IClasspathAttribute[] {
+				new ClasspathAttribute(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, path)
+		};
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -1252,6 +1344,93 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+
+	@Test
+	public void testAnnotationsInProjectReferencedViaContainer() throws Exception {
+		ClasspathContainerInitializer prev = MyClasspathContainerInitializer.initializerDelegate;
+
+		// container providing an unannotated library and a dedicated annotation project in the workspace:
+		String eeaProjectName = "my.eeas";
+		MyClasspathContainerInitializer.setInitializer(new TestCustomContainerInitializer(
+				"/TestSetupProject1d8/lib.jar", "/TestSetupProject1d8/lib.zip", null,
+				'/'+eeaProjectName, null, null));
+
+		IJavaProject eeaProject = null;
+		try {
+			// create the annotation project:
+			eeaProject = JavaProjectHelper.createJavaProject(eeaProjectName, "");
+
+			// create the library
+			String MY_MAP_PATH= "pack/age/MyMap";
+			String[] pathAndContents= new String[] {
+						MY_MAP_PATH+".java",
+						"package pack.age;\n" +
+						"public interface MyMap<K,V> {\n" +
+						"    public V get(K key);\n" +
+						"}\n"
+					};
+			createLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, JavaCore.VERSION_1_8, null);
+
+			// set the classpath:
+			IClasspathEntry[] rawClasspath= fJProject1.getRawClasspath();
+			fJProject1.setRawClasspath(new IClasspathEntry[] {
+					rawClasspath[0], // assumed to be rtstubs.jar
+					JavaCore.newSourceEntry(fJProject1.getPath().append("src")),
+					JavaCore.newContainerEntry(
+							new Path(MyClasspathContainerInitializer.CONTAINER_NAME), null/*access rules*/,
+							externalAnnotationExtraAttributes(MyClasspathContainerInitializer.CONTAINER_NAME+"/my.eeas"),
+							false/*exported*/)
+				},
+				null);
+
+			//  START of actual assist test:
+			IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
+			JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+
+			try {
+				int offset= pathAndContents[1].indexOf("V get");
+
+				List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
+				assertCorrectLabels(list);
+				assertNumberOfProposals(list, 2);
+
+				ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull V'", list);
+				String expectedInfo=
+						"<dl><dt>get</dt>" +
+						"<dd>(TK;)TV;</dd>" +
+						"<dd>(TK;)T<b>1</b>V;</dd>" + // <= 1
+						"</dl>";
+				assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+				proposal= findProposalByName("Annotate as '@Nullable V'", list);
+				expectedInfo=
+						"<dl><dt>get</dt>" +
+						"<dd>(TK;)TV;</dd>" +
+						"<dd>(TK;)T<b>0</b>V;</dd>" + // <= 0
+						"</dl>";
+				assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+				IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+				proposal.apply(document);
+
+				IFile annotationFile= eeaProject.getProject().getFile(new Path(MY_MAP_PATH + ".eea"));
+				assertTrue("Annotation file should have been created", annotationFile.exists());
+
+				String expectedContent=
+						"class pack/age/MyMap\n" +
+						"get\n" +
+						" (TK;)TV;\n" +
+						" (TK;)T0V;\n";
+				checkContentOfFile("annotation file content", annotationFile, expectedContent);
+			} finally {
+				JavaPlugin.getActivePage().closeAllEditors(false);
+			}
+		} finally {
+			MyClasspathContainerInitializer.setInitializer(prev);
+			if (eeaProject != null && eeaProject.exists())
+				eeaProject.getProject().delete(true, null);
 		}
 	}
 

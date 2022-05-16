@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,14 @@ import org.eclipse.jdt.core.JavaCore;
  */
 public class MyClasspathContainerInitializer extends ClasspathContainerInitializer {
 
+	public static ClasspathContainerInitializer initializerDelegate;
+
+	public static final String CONTAINER_NAME= "org.eclipse.jdt.EXAMPLE_CONTAINER";
+
+	public static void setInitializer(ClasspathContainerInitializer initializer) {
+		initializerDelegate = initializer;
+	}
+
 	public static class MyClasspathContainer implements IClasspathContainer {
 
 		private final IPath fPath;
@@ -55,8 +63,11 @@ public class MyClasspathContainerInitializer extends ClasspathContainerInitializ
 
 	@Override
 	public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
-		IClasspathContainer[] containers= { new MyClasspathContainer(containerPath) };
-		JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { project }, containers, null);
+		if (initializerDelegate != null) {
+			initializerDelegate.initialize(containerPath, project);
+		} else {
+			IClasspathContainer[] containers= { new MyClasspathContainer(containerPath) };
+			JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { project }, containers, null);
+		}
 	}
-
 }
