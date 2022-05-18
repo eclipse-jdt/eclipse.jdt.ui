@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -4174,5 +4175,325 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	@Test
+	public void testWhileNested2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n"
+		                + "import java.util.*;\n"
+		                + "public class Test {\n"
+		                + "    void m(List<String> strings,List<String> strings2) {\n"
+		                + "        Collections.reverse(strings);\n"
+		                + "        Iterator it = strings.iterator();\n"
+		                + "        while (it.hasNext()) {\n"
+		                + "            Iterator it2 = strings2.iterator();\n"
+		                + "            while (it2.hasNext()) {\n"
+		                + "                String s2 = (String) it2.next();\n"
+		                + "                System.out.println(s2);\n"
+		                + "            }\n"
+		                + "            // OK\n"
+		                + "            System.out.println(it.next());\n"
+		                + "        }\n"
+		                + "        System.out.println();\n"
+		                + "    }\n"
+		                + "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n"
+                        + "import java.util.*;\n"
+                        + "public class Test {\n"
+                        + "    void m(List<String> strings,List<String> strings2) {\n"
+                        + "        Collections.reverse(strings);\n"
+                        + "        for (Object string : strings) {\n"
+//                        + "        for (String string : strings) {\n"
+                        + "            for (String s2 : strings2) {\n"
+                        + "                System.out.println(s2);\n"
+                        + "            }\n"
+                        + "            // OK\n"
+                        + "            System.out.println(string);\n"
+                        + "        }\n"
+                        + "        System.out.println();\n"
+                        + "    }\n"
+                        + "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	@Test
+	public void testWhileGenericSubtype() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+		                + "import java.util.*;\n"
+		                + "public class Test {\n"
+		                + "    void m(List<ArrayList<String>> lists) {\n"
+		                + "        Iterator it = lists.iterator();\n"
+		                + "        while (it.hasNext()) {\n"
+		                + "            List<String> list = (List<String>) it.next();\n"
+		                + "            System.out.println(list);\n"
+		                + "        }\n"
+		                + "    }\n"
+		                + "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test;\n"
+                        + "import java.util.*;\n"
+                        + "public class Test {\n"
+                        + "    void m(List<ArrayList<String>> lists) {\n"
+                        + "        for (List<String> list : lists) {\n"
+                        + "            System.out.println(list);\n"
+                        + "        }\n"
+                        + "    }\n"
+                        + "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	@Test
+	public void testWhileSelf() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+		                + "import java.util.*;\n"
+		                + "public class Test extends ArrayList<String> {\n"
+		                + "    void m() {\n"
+		                + "        Iterator it = iterator();\n"
+		                + "        while (it.hasNext()) {\n"
+		                + "            String s = (String) it.next();\n"
+		                + "            System.out.println(s);\n"
+		                + "            System.err.println(s);\n"
+		                + "        }\n"
+		                + "    }\n"
+		                + "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test;\n"
+                        + "import java.util.*;\n"
+                        + "public class Test extends ArrayList<String> {\n"
+                        + "    void m() {\n"
+                        + "        for (String s : this) {\n"
+                        + "            System.out.println(s);\n"
+                        + "            System.err.println(s);\n"
+                        + "        }\n"
+                        + "    }\n"
+                        + "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	@Ignore("Stay away from refactoring when ...")
+	@Test
+	public void testDoNotWhileWarning() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    void m(List<String> strings) {\n"
+						+ "        Iterator it = strings.iterator();\n"
+						+ "        while (it.hasNext()) {\n"
+						+ "            String s = (String) it.next();\n"
+						+ "            System.out.println(s);\n"
+						+ "            System.err.println(s);\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Ignore("Stay away from refactoring when in while it.remove() is used")
+	@Test
+	public void testDoNotWhileUsedSpecially() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    void m(List<String> strings) {\n"
+						+ "        Iterator it = strings.iterator();\n"
+						+ "        while (it.hasNext()) {\n"
+						+ "            String s = (String) it.next();\n"
+						+ "            if (s.isEmpty()) {\n"
+						+ "                it.remove();\n"
+						+ "            } else {\n"
+						+ "                System.out.println(s);\n"
+						+ "            }\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Ignore("Stay away from refactoring when List type is raw")
+	@Test
+	public void testDoNotWhileRaw() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    void m(List strings) {\n"
+						+ "        Iterator it = strings.iterator();\n"
+						+ "        while (it.hasNext()) {\n"
+						+ "            String s = (String) it.next();\n"
+						+ "            System.out.println(s);\n"
+						+ "            System.err.println(s);\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Ignore("Stay away from rectoring when List type and it.next() type differ")
+	@Test
+	public void testDoNotWhileWrongType() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				        + "import java.util.*;\n"
+				        + "public class Test {\n"
+				        + "    void m(List<java.net.URL> strings) {\n"
+				        + "        Iterator it = strings.iterator();\n"
+				        + "        while (it.hasNext()) {\n"
+				        + "            String s = (String) it.next();\n"
+				        + "            System.out.println(s);\n"
+				        + "            System.err.println(s);\n"
+				        + "        }\n"
+				        + "    }\n"
+				        + "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Ignore("Stay away from rectoring when List type is raw")
+	@Test
+	public void testDoNotWhileNotRaw() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				        + "import java.util.*;\n"
+				        + "public class Test {\n"
+				        + "    void m(MyList strings) {\n"
+				        + "        Iterator it = strings.iterator();\n"
+				        + "        while (it.hasNext()) {\n"
+				        + "            String s = (String) it.next();\n"
+				        + "            System.out.println(s);\n"
+				        + "            System.err.println(s);\n"
+				        + "        }\n"
+				        + "    }\n"
+				        + "    static class MyList extends ArrayList<String> {}\n"
+				        + "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Ignore("Stay away from rectoring when List type has iterator() but is not interable")
+	@Test
+	public void testDoNotWhileNotIterable() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				        + "import java.util.*;\n"
+				        + "public class Test {\n"
+				        + "    void m(MyList strings) {\n"
+				        + "        Iterator it = strings.iterator();\n"
+				        + "        while (it.hasNext()) {\n"
+				        + "            String s = (String) it.next();\n"
+				        + "            System.out.println(s);\n"
+				        + "            System.err.println(s);\n"
+				        + "        }\n"
+				        + "    }\n"
+				        + "    interface MyList {\n"
+				        + "        Iterator<String> iterator();\n"
+				        + "    }\n"
+				        + "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Ignore("Stay away from refactoring when List type and it.next() type differ")
+	@Test
+	public void testDoNotWhileSubtype() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				        + "import java.util.*;\n"
+				        + "public class Test {\n"
+				        + "    void m(List<PropertyResourceBundle> bundles) {\n"
+				        + "        Iterator it = bundles.iterator();\n"
+				        + "        while (it.hasNext()) {\n"
+				        + "            ResourceBundle bundle = (ResourceBundle) it.next();\n"
+				        + "            System.out.println(bundle);\n"
+				        + "            System.err.println(bundle);\n"
+				        + "        }\n"
+				        + "    }\n"
+				        + "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Ignore("Stay away from refactoring when List type and it.next() type inheritage not suitable")
+	@Test
+	public void testDoNotWhileNotSubtype() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				        + "import java.util.*;\n"
+				        + "public class Test {\n"
+				        + "    void m(List<ResourceBundle> bundles) {\n"
+				        + "        Iterator it = bundles.iterator();\n"
+				        + "        while (it.hasNext()) {\n"
+				        + "            PropertyResourceBundle bundle = (PropertyResourceBundle) it.next();\n"
+				        + "            System.out.println(bundle);\n"
+				        + "            System.err.println(bundle);\n"
+				        + "        }\n"
+				        + "    }\n"
+				        + "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 }
