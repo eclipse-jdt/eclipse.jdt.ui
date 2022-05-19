@@ -4104,7 +4104,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		                + "        System.out.println();\n"
 		                + "    }\n"
 		                + "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
@@ -4151,7 +4151,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		                + "        System.out.println();\n"
 		                + "    }\n"
 		                + "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
