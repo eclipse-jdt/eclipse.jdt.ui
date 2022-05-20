@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
@@ -80,7 +84,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_18; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_19; // make sure it is not inlined
 	}
 
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
@@ -853,6 +857,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_18);
 	}
 
+	public static boolean is19OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_19);
+	}
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.2 or greater.
 	 *
@@ -1004,6 +1012,17 @@ public final class JavaModelUtil {
 		return is18OrHigher(getSourceCompliance(project));
 	}
 
+	/**
+	 * Checks if the given project or workspace has source compliance 19 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 17 or
+	 *         greater.
+	 */
+	public static boolean is19OrHigher(IJavaProject project) {
+		return is19OrHigher(getSourceCompliance(project));
+	}
+
 	public static String getSourceCompliance(IJavaProject project) {
 		return project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 	}
@@ -1102,7 +1121,9 @@ public final class JavaModelUtil {
 
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_18) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_19) != -1) {
+			return JavaCore.VERSION_19;
+		} else if (desc.indexOf(JavaCore.VERSION_18) != -1) {
 			return JavaCore.VERSION_18;
 		} else if (desc.indexOf(JavaCore.VERSION_17) != -1) {
 			return JavaCore.VERSION_17;
