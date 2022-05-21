@@ -7,6 +7,5 @@ version: 2
 updates:
   - package-ecosystem: "maven" # See documentation for possible values
     directory: "/" # Location of package manifests
-    tycho.version: "2.3.0"
     schedule:
       interval: "daily"
