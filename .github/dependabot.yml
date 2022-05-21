@@ -4,9 +4,9 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
-tycho.version: 2.3.0
 updates:
   - package-ecosystem: "maven" # See documentation for possible values
     directory: "/" # Location of package manifests
+    tycho.version: "2.3.0"
     schedule:
       interval: "daily"
