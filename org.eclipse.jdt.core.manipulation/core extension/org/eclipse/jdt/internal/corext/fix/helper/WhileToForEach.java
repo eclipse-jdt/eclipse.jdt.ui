@@ -201,7 +201,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 
 	@Override
 	public void rewrite(UseIteratorToForLoopFixCore upp, final WhileLoopToChangeHit hit, final CompilationUnitRewrite cuRewrite,
-			TextEditGroup group) {
+			TextEditGroup group_init, TextEditGroup group_while, TextEditGroup group_next) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 
@@ -256,13 +256,13 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			SimpleName createMoveTarget= ast.newSimpleName(hit.collectionsimplename.getIdentifier());
 			newEnhancedForStatement.setExpression(createMoveTarget);
 		}
-		ASTNodes.removeButKeepComment(rewrite, hit.iteratordeclaration, group);
+		ASTNodes.removeButKeepComment(rewrite, hit.iteratordeclaration, group_init);
 		if (hit.nextwithoutvariabledeclation) {
-			ASTNodes.replaceButKeepComment(rewrite, hit.loopvardeclaration, name, group);
+			ASTNodes.replaceButKeepComment(rewrite, hit.loopvardeclaration, name, group_next);
 		} else {
-			ASTNodes.removeButKeepComment(rewrite, ASTNodes.getTypedAncestor(hit.loopvardeclaration, VariableDeclarationStatement.class), group);
+			ASTNodes.removeButKeepComment(rewrite, ASTNodes.getTypedAncestor(hit.loopvardeclaration, VariableDeclarationStatement.class), group_next);
 		}
-		ASTNodes.replaceButKeepComment(rewrite, hit.whilestatement, newEnhancedForStatement, group);
+		ASTNodes.replaceButKeepComment(rewrite, hit.whilestatement, newEnhancedForStatement, group_while);
 	}
 
 	@Override

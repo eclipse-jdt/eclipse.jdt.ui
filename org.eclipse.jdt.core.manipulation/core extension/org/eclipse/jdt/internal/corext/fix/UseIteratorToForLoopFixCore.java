@@ -47,7 +47,7 @@ public enum UseIteratorToForLoopFixCore {
 		return iteratortofor.getPreview(i);
 	}
 	/**
-	 * Compute set of CompilationUnitRewriteOperation to refactor supported situations using default encoding to make use of explicit calls
+	 * Compute set of CompilationUnitRewriteOperation to refactor supported situations
 	 *
 	 * @param compilationUnit unit to search in
 	 * @param operations set of all CompilationUnitRewriteOperations created already
@@ -61,9 +61,11 @@ public enum UseIteratorToForLoopFixCore {
 		return new CompilationUnitRewriteOperation() {
 			@Override
 			public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
-				TextEditGroup group= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description, cuRewrite);
+				TextEditGroup group_init= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description+" init", cuRewrite); //$NON-NLS-1$
+				TextEditGroup group_while= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description+" while", cuRewrite); //$NON-NLS-1$
+				TextEditGroup group_next= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description+" next", cuRewrite); //$NON-NLS-1$
 				cuRewrite.getASTRewrite().setTargetSourceRangeComputer(computer);
-				iteratortofor.rewrite(UseIteratorToForLoopFixCore.this, hit, cuRewrite, group);
+				iteratortofor.rewrite(UseIteratorToForLoopFixCore.this, hit, cuRewrite, group_init, group_while, group_next);
 			}
 		};
 	}

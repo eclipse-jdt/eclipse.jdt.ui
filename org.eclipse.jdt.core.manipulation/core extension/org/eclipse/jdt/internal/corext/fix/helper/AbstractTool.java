@@ -48,7 +48,7 @@ public abstract class AbstractTool<T> {
 	public abstract void find(UseIteratorToForLoopFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed);
 
 	public abstract void rewrite(UseIteratorToForLoopFixCore useExplicitEncodingFixCore, T holder, CompilationUnitRewrite cuRewrite,
-			TextEditGroup group);
+			TextEditGroup group_init, TextEditGroup group_while, TextEditGroup group_next);
 
 	/**
 	 * Adds an import to the class. This method should be used for every class reference added to
