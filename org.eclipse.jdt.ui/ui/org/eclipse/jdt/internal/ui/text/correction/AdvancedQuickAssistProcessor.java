@@ -2111,7 +2111,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (oldIdentifier.startsWith(notString)) {
 			int notLength= notString.length();
 			if (oldIdentifier.length() > notLength) {
-				newIdentifier= Character.toLowerCase(oldIdentifier.charAt(notLength)) + oldIdentifier.substring(notLength + 1);
+				newIdentifier= oldIdentifier.substring(notLength, notLength+1).toUpperCase() + oldIdentifier.substring(notLength+1);
 			} else {
 				newIdentifier= oldIdentifier;
 			}

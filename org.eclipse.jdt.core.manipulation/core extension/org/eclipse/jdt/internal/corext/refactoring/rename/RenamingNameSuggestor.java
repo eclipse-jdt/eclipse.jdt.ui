@@ -13,10 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.text.BreakIterator;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -473,21 +472,21 @@ public class RenamingNameSuggestor {
 
 	private String getLowerCased(String name) {
 		if (name.length() > 1)
-			return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+			return name.substring(0, 1).toLowerCase() + name.substring(1);
 		else
 			return name.toLowerCase();
 	}
 
 	private String getUpperCased(String name) {
 		if (name.length() > 1)
-			return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+			return name.substring(0, 1).toUpperCase() + name.substring(1);
 		else
 			return name.toLowerCase();
 	}
 
 	private String getFirstUpperRestLowerCased(String name) {
 		if (name.length() > 1)
-			return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
+			return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
 		else
 			return name.toLowerCase();
 	}
