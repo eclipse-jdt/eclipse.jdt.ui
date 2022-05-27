@@ -4422,7 +4422,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
-	@Ignore("Stay away from rectoring when List type has iterator() but is not interable")
 	@Test
 	public void testDoNotWhileNotIterable() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);

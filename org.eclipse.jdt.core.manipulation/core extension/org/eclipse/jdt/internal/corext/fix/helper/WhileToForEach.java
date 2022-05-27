@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -60,11 +62,12 @@ public class WhileToForEach extends AbstractTool<Hit> {
 		ReferenceHolder<ASTNode, Hit> dataholder = new ReferenceHolder<>();
 		HelperVisitor.callVariableDeclarationStatementVisitor(Iterator.class, compilationUnit, dataholder,nodesprocessed,  (init_iterator,holder_a)->{
 			List<Object> computeVarName = computeVarName(init_iterator);
-			HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder,nodesprocessed, (whilestatement,holder)->{
-				String name = computeNextVarname(whilestatement);
-				if(computeVarName.get(0).equals(name)) {
-					HelperVisitor.callMethodInvocationVisitor("next", whilestatement.getBody() ,dataholder,nodesprocessed,  (mi,holder2)->{ //$NON-NLS-1$
-						Hit hit = holder2.computeIfAbsent(whilestatement, k -> new Hit());
+			if (computeVarName != null) {
+				HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder,nodesprocessed, (whilestatement,holder)->{
+					String name = computeNextVarname(whilestatement);
+					if(computeVarName.get(0).equals(name)) {
+						HelperVisitor.callMethodInvocationVisitor("next", whilestatement.getBody() ,dataholder,nodesprocessed,  (mi,holder2)->{ //$NON-NLS-1$
+							Hit hit = holder2.computeIfAbsent(whilestatement, k -> new Hit());
 							SimpleName sn= ASTNodes.as(mi.getExpression(), SimpleName.class);
 							if (sn !=null) {
 								String identifier = sn.getIdentifier();
@@ -96,11 +99,12 @@ public class WhileToForEach extends AbstractTool<Hit> {
 								holder2.remove(whilestatement);
 								return true;
 							}
-						return true;
-					});
-				}
-				return true;
-			});
+							return true;
+						});
+					}
+					return true;
+				});
+			}
 			return true;
 		});
 	}
@@ -129,6 +133,14 @@ public class WhileToForEach extends AbstractTool<Hit> {
 		Expression exp = bli.getInitializer();
 		MethodInvocation mi= ASTNodes.as(exp, MethodInvocation.class);
 		if (mi != null && mi.getName().toString().equals("iterator")) { //$NON-NLS-1$
+			ITypeBinding iterableAncestor= null;
+			IMethodBinding miBinding= mi.resolveMethodBinding();
+			if (miBinding != null) {
+				iterableAncestor= ASTNodes.findImplementedType(miBinding.getDeclaringClass(), Iterable.class.getCanonicalName());
+			}
+			if (iterableAncestor == null) {
+				return null;
+			}
 			SimpleName sn= ASTNodes.as(mi.getExpression(), SimpleName.class);
 			if (sn != null) {
 				name.add(sn);
