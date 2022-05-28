@@ -135,10 +135,11 @@ public class WhileToForEach extends AbstractTool<Hit> {
 		if (mi != null && mi.getName().toString().equals("iterator")) { //$NON-NLS-1$
 			ITypeBinding iterableAncestor= null;
 			IMethodBinding miBinding= mi.resolveMethodBinding();
+			ITypeBinding[] typeArguments= miBinding.getTypeArguments();
 			if (miBinding != null) {
 				iterableAncestor= ASTNodes.findImplementedType(miBinding.getDeclaringClass(), Iterable.class.getCanonicalName());
 			}
-			if (iterableAncestor == null) {
+			if (iterableAncestor == null || iterableAncestor.isRawType()) {
 				return null;
 			}
 			SimpleName sn= ASTNodes.as(mi.getExpression(), SimpleName.class);
