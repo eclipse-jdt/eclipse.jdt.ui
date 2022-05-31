@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Carsten Hammer.
+ * Copyright (c) 2021, 2022 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,7 +29,6 @@ import org.eclipse.jdt.internal.corext.fix.helper.AbstractTool;
 import org.eclipse.jdt.internal.corext.fix.helper.Hit;
 import org.eclipse.jdt.internal.corext.fix.helper.WhileToForEach;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -62,7 +61,7 @@ public enum UseIteratorToForLoopFixCore {
 		return new CompilationUnitRewriteOperation() {
 			@Override
 			public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
-				TextEditGroup group= createTextEditGroup(Messages.format(MultiFixMessages.ToolsCleanUp_description,new Object[] {UseIteratorToForLoopFixCore.this.toString()}), cuRewrite);
+				TextEditGroup group= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description, cuRewrite);
 				cuRewrite.getASTRewrite().setTargetSourceRangeComputer(computer);
 				iteratortofor.rewrite(UseIteratorToForLoopFixCore.this, hit, cuRewrite, group);
 			}

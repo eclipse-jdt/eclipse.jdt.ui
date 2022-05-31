@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Carsten Hammer.
+ * Copyright (c) 2021, 2022 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,7 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED;
-import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ToolsCleanUpFix_refactor;
-import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ToolsCleanUp_description;
+import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -24,7 +23,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -38,7 +36,6 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCo
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseIteratorToForLoopFixCore;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class UseIteratorToForLoopCleanUpCore extends AbstractCleanUpCore {
 	public UseIteratorToForLoopCleanUpCore(final Map<String, String> options) {
@@ -76,7 +73,7 @@ public class UseIteratorToForLoopCleanUpCore extends AbstractCleanUpCore {
 		if (operations.isEmpty()) {
 			return null;
 		}
-		return new CompilationUnitRewriteOperationsFixCore(ToolsCleanUpFix_refactor, compilationUnit,
+		return new CompilationUnitRewriteOperationsFixCore(Java50CleanUp_ConvertToEnhancedForLoop_description, compilationUnit,
 				operations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[0]));
 	}
 
@@ -84,8 +81,7 @@ public class UseIteratorToForLoopCleanUpCore extends AbstractCleanUpCore {
 	public String[] getStepDescriptions() {
 		List<String> result = new ArrayList<>();
 		if (isEnabled(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
-			result.add(Messages.format(ToolsCleanUp_description, new Object[] { String.join(",", //$NON-NLS-1$
-					computeFixSet().stream().map(UseIteratorToForLoopFixCore::toString).collect(Collectors.toList())) }));
+			result.add(Java50CleanUp_ConvertToEnhancedForLoop_description);
 		}
 		return result.toArray(new String[0]);
 	}

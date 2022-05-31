@@ -4337,9 +4337,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
-	@Ignore("Stay away from refactoring when ...")
 	@Test
-	public void testDoNotWhileWarning() throws Exception {
+	public void testWhileWithRawIterator() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
 				+ "package test;\n"
@@ -4354,14 +4353,27 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 						+ "        }\n"
 						+ "    }\n"
 						+ "}\n";
-		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("Test.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+		sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    void m(List<String> strings) {\n"
+						+ "        for (String s : strings) {\n"
+						+ "            System.out.println(s);\n"
+						+ "            System.err.println(s);\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
-	@Ignore("Stay away from refactoring when in while it.remove() is used")
 	@Test
 	public void testDoNotWhileUsedSpecially() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
@@ -4378,6 +4390,29 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 						+ "            } else {\n"
 						+ "                System.out.println(s);\n"
 						+ "            }\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testDoNotWhileWithDoubleNext() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    void m(List<String> strings) {\n"
+						+ "        Iterator it = strings.iterator();\n"
+						+ "        while (it.hasNext()) {\n"
+						+ "            String s = (String) it.next();\n"
+						+ "            String s2 = (String) it.next();\n"
+						+ "            System.out.println(s + s2);\n"
 						+ "        }\n"
 						+ "    }\n"
 						+ "}\n";

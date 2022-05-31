@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Carsten Hammer.
+ * Copyright (c) 2021, 2022 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,9 @@ package org.eclipse.jdt.internal.corext.fix.helper;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.TextEditGroup;
@@ -60,21 +62,28 @@ public class WhileToForEach extends AbstractTool<Hit> {
 	public void find(UseIteratorToForLoopFixCore fixcore, CompilationUnit compilationUnit,
 			Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed) {
 		ReferenceHolder<ASTNode, Hit> dataholder = new ReferenceHolder<>();
+		Map<ASTNode, Hit> operationsMap= new LinkedHashMap<>();
+		Hit emptyHit= new Hit();
 		HelperVisitor.callVariableDeclarationStatementVisitor(Iterator.class, compilationUnit, dataholder,nodesprocessed,  (init_iterator,holder_a)->{
 			List<Object> computeVarName = computeVarName(init_iterator);
 			if (computeVarName != null) {
-				HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder,nodesprocessed, (whilestatement,holder)->{
+				HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder, nodesprocessed, (whilestatement,holder)->{
 					String name = computeNextVarname(whilestatement);
-					if(computeVarName.get(0).equals(name)) {
-						HelperVisitor.callMethodInvocationVisitor("next", whilestatement.getBody() ,dataholder,nodesprocessed,  (mi,holder2)->{ //$NON-NLS-1$
+					if (computeVarName.get(0).equals(name)) {
+						HelperVisitor.callMethodInvocationVisitor(whilestatement.getBody(), dataholder, nodesprocessed,  (mi,holder2)->{
 							Hit hit = holder2.computeIfAbsent(whilestatement, k -> new Hit());
 							SimpleName sn= ASTNodes.as(mi.getExpression(), SimpleName.class);
 							if (sn !=null) {
 								String identifier = sn.getIdentifier();
-								if(!name.equals(identifier))
+								if (!name.equals(identifier))
 									return true;
+								String method= mi.getName().getFullyQualifiedName();
+								if (operationsMap.get(whilestatement) != null || !method.equals("next")) { //$NON-NLS-1$
+									operationsMap.put(whilestatement, emptyHit);
+									return true;
+								}
 								hit.iteratordeclaration=init_iterator;
-								if(computeVarName.size()==1) {
+								if (computeVarName.size()==1) {
 									hit.self=true;
 								} else {
 									hit.collectionsimplename=(SimpleName) computeVarName.get(1);
@@ -82,18 +91,18 @@ public class WhileToForEach extends AbstractTool<Hit> {
 								hit.whilestatement=whilestatement;
 								hit.loopvardeclaration=mi;
 								VariableDeclarationStatement typedAncestor = ASTNodes.getTypedAncestor(mi, VariableDeclarationStatement.class);
-								if(typedAncestor!=null) {
+								if (typedAncestor!=null) {
 									VariableDeclarationFragment vdf=(VariableDeclarationFragment) typedAncestor.fragments().get(0);
 									hit.loopvarname=vdf.getName().getIdentifier();
 								} else {
-									if(hit.self) {
+									if (hit.self) {
 										hit.loopvarname=ConvertLoopOperation.modifybasename("i"); //$NON-NLS-1$
-									}else {
+									} else {
 										hit.loopvarname=ConvertLoopOperation.modifybasename(hit.collectionsimplename.getIdentifier());
 									}
 									hit.nextwithoutvariabledeclation=true;
 								}
-								operations.add(fixcore.rewrite(hit));
+								operationsMap.put(whilestatement, hit);
 								HelperVisitor<ReferenceHolder<ASTNode, Hit>,ASTNode,Hit> helperVisitor = holder.getHelperVisitor();
 								helperVisitor.nodesprocessed.add(whilestatement);
 								holder2.remove(whilestatement);
@@ -107,6 +116,11 @@ public class WhileToForEach extends AbstractTool<Hit> {
 			}
 			return true;
 		});
+		for (Hit hit : operationsMap.values()) {
+			if (hit != emptyHit) {
+				operations.add(fixcore.rewrite(hit));
+			}
+		}
 	}
 
 	private static String computeNextVarname(WhileStatement whilestatement) {
@@ -135,7 +149,6 @@ public class WhileToForEach extends AbstractTool<Hit> {
 		if (mi != null && mi.getName().toString().equals("iterator")) { //$NON-NLS-1$
 			ITypeBinding iterableAncestor= null;
 			IMethodBinding miBinding= mi.resolveMethodBinding();
-			ITypeBinding[] typeArguments= miBinding.getTypeArguments();
 			if (miBinding != null) {
 				iterableAncestor= ASTNodes.findImplementedType(miBinding.getDeclaringClass(), Iterable.class.getCanonicalName());
 			}

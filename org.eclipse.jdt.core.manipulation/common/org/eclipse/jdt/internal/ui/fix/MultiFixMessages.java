@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -186,8 +186,6 @@ public class MultiFixMessages extends NLS {
 	public static String UnloopedWhileCleanUp_description;
 	public static String AddAllCleanup_description;
 	public static String ObjectsEqualsCleanup_description;
-	public static String ToolsCleanUp_description;
-	public static String ToolsCleanUpFix_refactor;
 
 	public static String OperandFactorizationCleanUp_description;
 	public static String OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp_description;
