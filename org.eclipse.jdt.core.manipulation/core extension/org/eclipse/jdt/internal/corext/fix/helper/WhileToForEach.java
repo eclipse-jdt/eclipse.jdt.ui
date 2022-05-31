@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.common.HelperVisitor;
 import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopOperation;
 import org.eclipse.jdt.internal.corext.fix.UseIteratorToForLoopFixCore;
@@ -92,6 +93,13 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 								hit.loopvardeclaration= mi;
 								VariableDeclarationStatement typedAncestor= ASTNodes.getTypedAncestor(mi, VariableDeclarationStatement.class);
 								if (typedAncestor != null) {
+									ITypeBinding iteratorTypeArgument= computeTypeArgument(init_iterator);
+									ITypeBinding varTypeBinding= typedAncestor.getType().resolveBinding();
+									if (varTypeBinding == null || iteratorTypeArgument == null ||
+											(!varTypeBinding.isEqualTo(iteratorTypeArgument) && !Bindings.isSuperType(varTypeBinding, iteratorTypeArgument))) {
+										operationsMap.put(whilestatement, emptyHit);
+										return true;
+									}
 									VariableDeclarationFragment vdf= (VariableDeclarationFragment) typedAncestor.fragments().get(0);
 									hit.loopvarname= vdf.getName().getIdentifier();
 								} else {
@@ -161,6 +169,34 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			}
 		}
 		return name;
+	}
+
+	private static ITypeBinding computeTypeArgument(VariableDeclarationStatement node_a) {
+		VariableDeclarationFragment bli= (VariableDeclarationFragment) node_a.fragments().get(0);
+		Expression exp= bli.getInitializer();
+		MethodInvocation mi= ASTNodes.as(exp, MethodInvocation.class);
+		if (mi != null && mi.getName().toString().equals("iterator")) { //$NON-NLS-1$
+			ITypeBinding iterableAncestor= null;
+			IMethodBinding miBinding= mi.resolveMethodBinding();
+			if (miBinding != null) {
+				iterableAncestor= ASTNodes.findImplementedType(miBinding.getDeclaringClass(), Iterable.class.getCanonicalName());
+			}
+			if (iterableAncestor != null) {
+				ITypeBinding[] typeArgs= iterableAncestor.getTypeArguments();
+				if (typeArgs.length > 0) {
+					return typeArgs[0];
+				}
+			}
+		} else {
+			ITypeBinding varTypeBinding= node_a.getType().resolveBinding();
+			if (varTypeBinding != null) {
+				ITypeBinding[] typeArgs= varTypeBinding.getTypeArguments();
+				if (typeArgs.length > 0) {
+					return typeArgs[0];
+				}
+			}
+		}
+		return node_a.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
 
 	@Override
