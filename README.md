@@ -1,6 +1,8 @@
 Contributing to JDT UI - Java development tools UI
 ============================================
 
+[![Java CI with Maven](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/maven.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/maven.yml)
+
 Thanks for your interest in this project.
 
 Project description:
