@@ -552,7 +552,7 @@ public enum VisitorEnum {
 	int nodetype;
 
 	VisitorEnum(int nodetype) {
-		this.nodetype = nodetype;
+		this.nodetype= nodetype;
 	}
 
 	/**
@@ -571,7 +571,7 @@ public enum VisitorEnum {
 		return Stream.of(VisitorEnum.values());
 	}
 
-	static final Map<Integer, VisitorEnum> values = Arrays.stream(VisitorEnum.values())
+	static final Map<Integer, VisitorEnum> values= Arrays.stream(VisitorEnum.values())
 			.collect(Collectors.toMap(VisitorEnum::getValue, Function.identity()));
 
 	/**

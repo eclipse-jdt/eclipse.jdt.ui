@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.helper.AbstractTool;
-import org.eclipse.jdt.internal.corext.fix.helper.Hit;
+import org.eclipse.jdt.internal.corext.fix.helper.WhileLoopToChangeHit;
 import org.eclipse.jdt.internal.corext.fix.helper.WhileToForEach;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -36,11 +36,11 @@ public enum UseIteratorToForLoopFixCore {
 
 	LOOP(new WhileToForEach());
 
-	AbstractTool<Hit> iteratortofor;
+	AbstractTool<WhileLoopToChangeHit> iteratortofor;
 
 	@SuppressWarnings("unchecked")
-	UseIteratorToForLoopFixCore(AbstractTool<? extends Hit> explicitencoding) {
-		this.iteratortofor=(AbstractTool<Hit>) explicitencoding;
+	UseIteratorToForLoopFixCore(AbstractTool<? extends WhileLoopToChangeHit> explicitencoding) {
+		this.iteratortofor=(AbstractTool<WhileLoopToChangeHit>) explicitencoding;
 	}
 
 	public String getPreview(boolean i) {
@@ -57,7 +57,7 @@ public enum UseIteratorToForLoopFixCore {
 		iteratortofor.find(this, compilationUnit, operations, nodesprocessed);
 	}
 
-	public CompilationUnitRewriteOperation rewrite(final Hit hit) {
+	public CompilationUnitRewriteOperation rewrite(final WhileLoopToChangeHit hit) {
 		return new CompilationUnitRewriteOperation() {
 			@Override
 			public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {

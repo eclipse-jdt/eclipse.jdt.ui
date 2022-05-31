@@ -56,25 +56,25 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
  * Rewrite: for(Object o:collection) { System.out.println(o); });
  *
  */
-public class WhileToForEach extends AbstractTool<Hit> {
+public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 
 	@Override
 	public void find(UseIteratorToForLoopFixCore fixcore, CompilationUnit compilationUnit,
 			Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed) {
-		ReferenceHolder<ASTNode, Hit> dataholder = new ReferenceHolder<>();
-		Map<ASTNode, Hit> operationsMap= new LinkedHashMap<>();
-		Hit emptyHit= new Hit();
-		HelperVisitor.callVariableDeclarationStatementVisitor(Iterator.class, compilationUnit, dataholder,nodesprocessed,  (init_iterator,holder_a)->{
-			List<Object> computeVarName = computeVarName(init_iterator);
+		ReferenceHolder<ASTNode, WhileLoopToChangeHit> dataholder= new ReferenceHolder<>();
+		Map<ASTNode, WhileLoopToChangeHit> operationsMap= new LinkedHashMap<>();
+		WhileLoopToChangeHit emptyHit= new WhileLoopToChangeHit();
+		HelperVisitor.callVariableDeclarationStatementVisitor(Iterator.class, compilationUnit, dataholder, nodesprocessed, (init_iterator, holder_a) -> {
+			List<Object> computeVarName= computeVarName(init_iterator);
 			if (computeVarName != null) {
-				HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder, nodesprocessed, (whilestatement,holder)->{
-					String name = computeNextVarname(whilestatement);
+				HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder, nodesprocessed, (whilestatement, holder) -> {
+					String name= computeNextVarname(whilestatement);
 					if (computeVarName.get(0).equals(name)) {
-						HelperVisitor.callMethodInvocationVisitor(whilestatement.getBody(), dataholder, nodesprocessed,  (mi,holder2)->{
-							Hit hit = holder2.computeIfAbsent(whilestatement, k -> new Hit());
+						HelperVisitor.callMethodInvocationVisitor(whilestatement.getBody(), dataholder, nodesprocessed, (mi, holder2) -> {
+							WhileLoopToChangeHit hit= holder2.computeIfAbsent(whilestatement, k -> new WhileLoopToChangeHit());
 							SimpleName sn= ASTNodes.as(mi.getExpression(), SimpleName.class);
-							if (sn !=null) {
-								String identifier = sn.getIdentifier();
+							if (sn != null) {
+								String identifier= sn.getIdentifier();
 								if (!name.equals(identifier))
 									return true;
 								String method= mi.getName().getFullyQualifiedName();
@@ -82,28 +82,28 @@ public class WhileToForEach extends AbstractTool<Hit> {
 									operationsMap.put(whilestatement, emptyHit);
 									return true;
 								}
-								hit.iteratordeclaration=init_iterator;
-								if (computeVarName.size()==1) {
-									hit.self=true;
+								hit.iteratordeclaration= init_iterator;
+								if (computeVarName.size() == 1) {
+									hit.self= true;
 								} else {
-									hit.collectionsimplename=(SimpleName) computeVarName.get(1);
+									hit.collectionsimplename= (SimpleName) computeVarName.get(1);
 								}
-								hit.whilestatement=whilestatement;
-								hit.loopvardeclaration=mi;
-								VariableDeclarationStatement typedAncestor = ASTNodes.getTypedAncestor(mi, VariableDeclarationStatement.class);
-								if (typedAncestor!=null) {
-									VariableDeclarationFragment vdf=(VariableDeclarationFragment) typedAncestor.fragments().get(0);
-									hit.loopvarname=vdf.getName().getIdentifier();
+								hit.whilestatement= whilestatement;
+								hit.loopvardeclaration= mi;
+								VariableDeclarationStatement typedAncestor= ASTNodes.getTypedAncestor(mi, VariableDeclarationStatement.class);
+								if (typedAncestor != null) {
+									VariableDeclarationFragment vdf= (VariableDeclarationFragment) typedAncestor.fragments().get(0);
+									hit.loopvarname= vdf.getName().getIdentifier();
 								} else {
 									if (hit.self) {
-										hit.loopvarname=ConvertLoopOperation.modifybasename("i"); //$NON-NLS-1$
+										hit.loopvarname= ConvertLoopOperation.modifybasename("i"); //$NON-NLS-1$
 									} else {
-										hit.loopvarname=ConvertLoopOperation.modifybasename(hit.collectionsimplename.getIdentifier());
+										hit.loopvarname= ConvertLoopOperation.modifybasename(hit.collectionsimplename.getIdentifier());
 									}
-									hit.nextwithoutvariabledeclation=true;
+									hit.nextwithoutvariabledeclation= true;
 								}
 								operationsMap.put(whilestatement, hit);
-								HelperVisitor<ReferenceHolder<ASTNode, Hit>,ASTNode,Hit> helperVisitor = holder.getHelperVisitor();
+								HelperVisitor<ReferenceHolder<ASTNode, WhileLoopToChangeHit>, ASTNode, WhileLoopToChangeHit> helperVisitor= holder.getHelperVisitor();
 								helperVisitor.nodesprocessed.add(whilestatement);
 								holder2.remove(whilestatement);
 								return true;
@@ -116,7 +116,7 @@ public class WhileToForEach extends AbstractTool<Hit> {
 			}
 			return true;
 		});
-		for (Hit hit : operationsMap.values()) {
+		for (WhileLoopToChangeHit hit : operationsMap.values()) {
 			if (hit != emptyHit) {
 				operations.add(fixcore.rewrite(hit));
 			}
@@ -124,16 +124,16 @@ public class WhileToForEach extends AbstractTool<Hit> {
 	}
 
 	private static String computeNextVarname(WhileStatement whilestatement) {
-		String name = null;
-		Expression exp = whilestatement.getExpression();
+		String name= null;
+		Expression exp= whilestatement.getExpression();
 		if (exp instanceof MethodInvocation) {
-			MethodInvocation mi = (MethodInvocation) exp;
+			MethodInvocation mi= (MethodInvocation) exp;
 			if (mi.getName().getIdentifier().equals("hasNext")) { //$NON-NLS-1$
 //				ITypeBinding resolveTypeBinding = expression.resolveTypeBinding();
 				SimpleName variable= ASTNodes.as(mi.getExpression(), SimpleName.class);
 				if (variable != null) {
-					IBinding resolveBinding = variable.resolveBinding();
-					name = resolveBinding.getName();
+					IBinding resolveBinding= variable.resolveBinding();
+					name= resolveBinding.getName();
 				}
 			}
 		}
@@ -141,10 +141,10 @@ public class WhileToForEach extends AbstractTool<Hit> {
 	}
 
 	private static List<Object> computeVarName(VariableDeclarationStatement node_a) {
-		List<Object> name = new ArrayList<>();
-		VariableDeclarationFragment bli = (VariableDeclarationFragment) node_a.fragments().get(0);
+		List<Object> name= new ArrayList<>();
+		VariableDeclarationFragment bli= (VariableDeclarationFragment) node_a.fragments().get(0);
 		name.add(bli.getName().getIdentifier());
-		Expression exp = bli.getInitializer();
+		Expression exp= bli.getInitializer();
 		MethodInvocation mi= ASTNodes.as(exp, MethodInvocation.class);
 		if (mi != null && mi.getName().toString().equals("iterator")) { //$NON-NLS-1$
 			ITypeBinding iterableAncestor= null;
@@ -164,64 +164,64 @@ public class WhileToForEach extends AbstractTool<Hit> {
 	}
 
 	@Override
-	public void rewrite(UseIteratorToForLoopFixCore upp, final Hit hit, final CompilationUnitRewrite cuRewrite,
+	public void rewrite(UseIteratorToForLoopFixCore upp, final WhileLoopToChangeHit hit, final CompilationUnitRewrite cuRewrite,
 			TextEditGroup group) {
-		ASTRewrite rewrite = cuRewrite.getASTRewrite();
-		AST ast = cuRewrite.getRoot().getAST();
+		ASTRewrite rewrite= cuRewrite.getASTRewrite();
+		AST ast= cuRewrite.getRoot().getAST();
 
-		EnhancedForStatement newEnhancedForStatement = ast.newEnhancedForStatement();
-		newEnhancedForStatement.setBody(ASTNodes.createMoveTarget(rewrite,hit.whilestatement.getBody()));
+		EnhancedForStatement newEnhancedForStatement= ast.newEnhancedForStatement();
+		newEnhancedForStatement.setBody(ASTNodes.createMoveTarget(rewrite, hit.whilestatement.getBody()));
 
-		SingleVariableDeclaration result = ast.newSingleVariableDeclaration();
+		SingleVariableDeclaration result= ast.newSingleVariableDeclaration();
 
-		SimpleName name = ast.newSimpleName(hit.loopvarname);
+		SimpleName name= ast.newSimpleName(hit.loopvarname);
 		result.setName(name);
 
-		Expression expression = hit.loopvardeclaration.getExpression();
+		Expression expression= hit.loopvardeclaration.getExpression();
 		SimpleName variable= ASTNodes.as(expression, SimpleName.class);
 		String looptargettype;
-		looptargettype=variable.resolveTypeBinding().getErasure().getQualifiedName();
-		VariableDeclarationStatement typedAncestor = ASTNodes.getTypedAncestor(hit.loopvardeclaration, VariableDeclarationStatement.class);
+		looptargettype= variable.resolveTypeBinding().getErasure().getQualifiedName();
+		VariableDeclarationStatement typedAncestor= ASTNodes.getTypedAncestor(hit.loopvardeclaration, VariableDeclarationStatement.class);
 		Type type;
-		if(hit.nextwithoutvariabledeclation) {
+		if (hit.nextwithoutvariabledeclation) {
 //			ITypeBinding o=hit.loopvardeclaration.getExpression().resolveTypeBinding();
-			type = null;
+			type= null;
 		} else {
-			type = typedAncestor.getType();
+			type= typedAncestor.getType();
 		}
-		ParameterizedType mytype = null;
-		SimpleType object = null;
-		Type type2 = null;
+		ParameterizedType mytype= null;
+		SimpleType object= null;
+		Type type2= null;
 		if (type == null) {
-			looptargettype = "java.lang.Object"; //$NON-NLS-1$
-			Type collectionType = ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
+			looptargettype= "java.lang.Object"; //$NON-NLS-1$
+			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
 			result.setType(collectionType);
 		} else if (type instanceof ParameterizedType) {
-			mytype = (ParameterizedType) type;
-			type2 = mytype.getType();
-			object = (SimpleType) mytype.typeArguments().get(0);
-			looptargettype = type2.resolveBinding().getErasure().getQualifiedName();
-			Type collectionType = ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
-			ParameterizedType genericType = ast.newParameterizedType(collectionType);
-			String fullyQualifiedName = object.getName().getFullyQualifiedName();
+			mytype= (ParameterizedType) type;
+			type2= mytype.getType();
+			object= (SimpleType) mytype.typeArguments().get(0);
+			looptargettype= type2.resolveBinding().getErasure().getQualifiedName();
+			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
+			ParameterizedType genericType= ast.newParameterizedType(collectionType);
+			String fullyQualifiedName= object.getName().getFullyQualifiedName();
 			genericType.typeArguments().add(ast.newSimpleType(ast.newName(fullyQualifiedName)));
 			result.setType(genericType);
 		} else {
-			looptargettype = type.resolveBinding().getQualifiedName();
-			Type collectionType = ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
+			looptargettype= type.resolveBinding().getQualifiedName();
+			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
 			result.setType(collectionType);
 		}
 
 		newEnhancedForStatement.setParameter(result);
 		if (hit.self) {
-			ThisExpression newThisExpression = ast.newThisExpression();
+			ThisExpression newThisExpression= ast.newThisExpression();
 			newEnhancedForStatement.setExpression(newThisExpression);
 		} else {
-			SimpleName createMoveTarget = ast.newSimpleName(hit.collectionsimplename.getIdentifier());
+			SimpleName createMoveTarget= ast.newSimpleName(hit.collectionsimplename.getIdentifier());
 			newEnhancedForStatement.setExpression(createMoveTarget);
 		}
 		ASTNodes.removeButKeepComment(rewrite, hit.iteratordeclaration, group);
-		if(hit.nextwithoutvariabledeclation) {
+		if (hit.nextwithoutvariabledeclation) {
 			ASTNodes.replaceButKeepComment(rewrite, hit.loopvardeclaration, name, group);
 		} else {
 			ASTNodes.removeButKeepComment(rewrite, ASTNodes.getTypedAncestor(hit.loopvardeclaration, VariableDeclarationStatement.class), group);
