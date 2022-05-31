@@ -34,10 +34,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -46,7 +46,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
-import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -529,15 +528,12 @@ public class ExternalNullAnnotationChangeProposals {
 		if (root != null) {
 			try {
 				IClasspathEntry resolvedClasspathEntry= root.getResolvedClasspathEntry();
-				for (IClasspathAttribute cpa : resolvedClasspathEntry.getExtraAttributes()) {
-					if (IClasspathAttribute.EXTERNAL_ANNOTATION_PATH.equals(cpa.getName())) {
-						Path annotationPath= new Path(cpa.getValue());
-						IProject project= javaProject.getProject();
-						if (project.exists(annotationPath))
-							return true;
-						IWorkspaceRoot wsRoot= project.getWorkspace().getRoot();
-						return wsRoot.exists(annotationPath);
-					}
+				IProject project= javaProject.getProject();
+				IPath externalAnnotationPath= resolvedClasspathEntry.getExternalAnnotationPath(project, false);
+				if (externalAnnotationPath != null) {
+					IWorkspaceRoot wsRoot= project.getWorkspace().getRoot();
+					if (wsRoot.exists(externalAnnotationPath))
+						return true;
 				}
 			} catch (JavaModelException jme) {
 				return false;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
@@ -100,6 +101,30 @@ public class NewEnumWizardPage extends NewTypeWizardPage {
 		doStatusUpdate();
 	}
 
+	private String getTypeNameWithoutParameters(String typeNameWithParameters) {
+		int angleBracketOffset= typeNameWithParameters.indexOf('<');
+		if (angleBracketOffset == -1) {
+			return typeNameWithParameters;
+		} else {
+			return typeNameWithParameters.substring(0, angleBracketOffset);
+		}
+	}
+
+	/**
+	 * @since 3.26
+	 */
+	@Override
+	protected IStatus typeNameChanged() {
+		StatusInfo status= new StatusInfo();
+
+		String typeName= getTypeName();
+
+		if (!typeName.isEmpty() && typeName != getTypeNameWithoutParameters(typeName)) {
+			status.setError(NewWizardMessages.NewEnumWizardPage_error_invalidTypeParameters);
+			return status;
+		}
+		return super.typeNameChanged();
+	}
 
 	// ------ UI --------
 

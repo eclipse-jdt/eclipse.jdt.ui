@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2018 IBM Corporation and others.
+ * Copyright (c) 2004, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
@@ -166,6 +167,30 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 		doStatusUpdate();
 	}
 
+	private String getTypeNameWithoutParameters(String typeNameWithParameters) {
+		int angleBracketOffset= typeNameWithParameters.indexOf('<');
+		if (angleBracketOffset == -1) {
+			return typeNameWithParameters;
+		} else {
+			return typeNameWithParameters.substring(0, angleBracketOffset);
+		}
+	}
+
+	/**
+	 * @since 3.26
+	 */
+	@Override
+	protected IStatus typeNameChanged() {
+		StatusInfo status= new StatusInfo();
+
+		String typeName= getTypeName();
+
+		if (!typeName.isEmpty() && typeName != getTypeNameWithoutParameters(typeName)) {
+			status.setError(NewWizardMessages.NewAnnotationWizardPage_error_invalidTypeParameters);
+			return status;
+		}
+		return super.typeNameChanged();
+	}
 
 	// ------ UI --------
 
