@@ -19,7 +19,7 @@
 		<property name="destdir" value="${temp.folder}/jar-in-jar-loader.zip.bin" />
 		<delete dir="${temp.folder}/jar-in-jar-loader.zip.bin" />
 		<mkdir dir="${temp.folder}/jar-in-jar-loader.zip.bin" />
-		<javac target="1.6" source="1.6" destdir="${temp.folder}/jar-in-jar-loader.zip.bin" failonerror="true" verbose="false" debug="on" includeAntRuntime="no" classpath="${basedir}/bin">
+		<javac target="1.8" source="1.8" destdir="${temp.folder}/jar-in-jar-loader.zip.bin" failonerror="true" verbose="false" debug="on" includeAntRuntime="no" classpath="${basedir}/bin">
 			<src path="jar in jar loader/" />
 		</javac>
 		<mkdir dir="${build.result.folder}" />
