@@ -2,7 +2,10 @@ Contributing to JDT UI - Java development tools UI
 ============================================
 
 [![Java CI with Maven](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/maven.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/maven.yml)
+
 [![Codacy Security Scan](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codacy.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codacy.yml)
+
+[![CodeQL](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codeql.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codeql.yml)
 
 Thanks for your interest in this project.
 
