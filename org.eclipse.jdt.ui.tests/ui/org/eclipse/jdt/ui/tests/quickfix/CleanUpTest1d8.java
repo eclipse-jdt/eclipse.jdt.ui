@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -4176,6 +4177,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
+	@Ignore("Should be of type String")
 	@Test
 	public void testWhileNested2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4208,8 +4210,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
                         + "public class Test {\n"
                         + "    void m(List<String> strings,List<String> strings2) {\n"
                         + "        Collections.reverse(strings);\n"
-                        + "        for (Object string : strings) {\n"
-//                        + "        for (String string : strings) {\n"
+//                        + "        for (Object string : strings) {\n"
+                        + "        for (String string : strings) {\n"
                         + "            for (String s2 : strings2) {\n"
                         + "                System.out.println(s2);\n"
                         + "            }\n"
@@ -4410,6 +4412,48 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
+	@Ignore("Detect and ignore or really refactor (harder as in the other cases with many other cases that have to be detected)")
+	@Test
+	public void testWhileBigChangeNeeded() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				        + "import java.util.*;\n"
+				        + "public class Test {\n"
+				        + "    void m(List<String> nodes) {\n"
+				        + "        Iterator<String> fragments= null;\n"
+				        + "        if (nodes != null) {\n"
+				        + "        		fragments= nodes.iterator();\n"
+				        + "        }\n"
+				        + "        if (fragments != null) {\n"
+				        + "        		while (fragments.hasNext()) {\n"
+				        + "        			System.out.println(fragments.next());\n"
+				        + "         	}\n"
+				        + "        }\n"
+				        + "    }\n"
+				        + "}\n";
+		ICompilationUnit cu1= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test;\n"
+				        + "import java.util.*;\n"
+				        + "public class Test {\n"
+				        + "    void m(List<String> nodes) {\n"
+				        + "        if (nodes != null) {\n"
+				        + "        		for (String fragment : nodes) {\n"
+				        + "           		 System.out.println(fragment);\n"
+				        + "       		}\n"
+				        + "        }\n"
+				        + "    }\n"
+				        + "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
 	@Test
 	public void testDoNotWhileUsedSpecially() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
@@ -4426,6 +4470,30 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 						+ "            } else {\n"
 						+ "                System.out.println(s);\n"
 						+ "            }\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Ignore("Not all values are to be processed in the loop")
+	@Test
+	public void testDoNotWhileUsedSpecially2() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    void m(List<String> strings) {\n"
+						+ "        Iterator it = strings.iterator();\n"
+						+ "        String startvalue = (String) it.next();\n"
+						+ "        while (it.hasNext()) {\n"
+						+ "            String s = (String) it.next();\n"
+						+ "            System.out.println(s);\n"
 						+ "        }\n"
 						+ "    }\n"
 						+ "}\n";
