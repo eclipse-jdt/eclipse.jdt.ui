@@ -4316,10 +4316,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		                + "        }\n"
 		                + "    }\n"
 		                + "    private ArrayList<String> factory() {\n"
-                        + "        for (String s : this) {\n"
-                        + "            System.out.println(s);\n"
-                        + "            System.err.println(s);\n"
-                        + "        }\n"
+                        + "        return new ArrayList<String>();\n"
                         + "    }\n"
 		                + "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
@@ -4337,10 +4334,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
                         + "        }\n"
                         + "    }\n"
                         + "    private ArrayList<String> factory() {\n"
-                        + "        for (String s : this) {\n"
-                        + "            System.out.println(s);\n"
-                        + "            System.err.println(s);\n"
-                        + "        }\n"
+                        + "        return new ArrayList<String>();\n"
                         + "    }\n"
                         + "}\n";
 		String expected1= sample;
