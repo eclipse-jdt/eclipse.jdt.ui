@@ -4299,6 +4299,56 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
+	@Ignore("Checking the self case is wrong")
+	@Test
+	public void testWhileNoSelf() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+		                + "import java.util.*;\n"
+		                + "public class Test {\n"
+		                + "    void m() {\n"
+		                + "        Iterator it = factory().iterator();\n"
+		                + "        while (it.hasNext()) {\n"
+		                + "            String s = (String) it.next();\n"
+		                + "            System.out.println(s);\n"
+		                + "            System.err.println(s);\n"
+		                + "        }\n"
+		                + "    }\n"
+		                + "    private ArrayList<String> factory() {\n"
+                        + "        for (String s : this) {\n"
+                        + "            System.out.println(s);\n"
+                        + "            System.err.println(s);\n"
+                        + "        }\n"
+                        + "    }\n"
+		                + "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test;\n"
+                        + "import java.util.*;\n"
+                        + "public class Test {\n"
+                        + "    void m() {\n"
+                        + "        for (String s : factory()) {\n"
+                        + "            System.out.println(s);\n"
+                        + "            System.err.println(s);\n"
+                        + "        }\n"
+                        + "    }\n"
+                        + "    private ArrayList<String> factory() {\n"
+                        + "        for (String s : this) {\n"
+                        + "            System.out.println(s);\n"
+                        + "            System.err.println(s);\n"
+                        + "        }\n"
+                        + "    }\n"
+                        + "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
 	@Test
 	public void testWhileWithNonRawSuperclass() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
