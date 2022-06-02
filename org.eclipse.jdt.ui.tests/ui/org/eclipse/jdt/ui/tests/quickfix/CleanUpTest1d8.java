@@ -4480,6 +4480,35 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
+	@Ignore("Either check exactly the data type (eg CopyOnWriteArrayList allows modifications)"
+			+ " or stay away from refactoring when deletions/additions happen."
+			+ "btw simple for loop to enhanced for loop should do the same.")
+	@Test
+	public void testDoNotConcurrentModificationException() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    List<String> strings=new ArrayList<>();\n"
+						+ "    void m(List<String> strings) {\n"
+						+ "        Iterator it = strings.iterator();\n"
+						+ "        while (it.hasNext()) {\n"
+						+ "            String s = (String) it.next();\n"
+						+ "            System.out.println(s);\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "    void outside(int x) {\n"
+						+ "        strings.remove(x);\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
 	@Ignore("Not all values are to be processed in the loop")
 	@Test
 	public void testDoNotWhileUsedSpecially2() throws Exception {
