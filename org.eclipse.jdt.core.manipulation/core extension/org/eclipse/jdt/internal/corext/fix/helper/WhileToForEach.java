@@ -220,7 +220,6 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		VariableDeclarationStatement typedAncestor= ASTNodes.getTypedAncestor(hit.loopvardeclaration, VariableDeclarationStatement.class);
 		Type type;
 		if (hit.nextwithoutvariabledeclation) {
-//			ITypeBinding o=hit.loopvardeclaration.getExpression().resolveTypeBinding();
 			type= null;
 		} else {
 			type= typedAncestor.getType();
@@ -230,6 +229,10 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		Type type2= null;
 		if (type == null) {
 			looptargettype= "java.lang.Object"; //$NON-NLS-1$
+			ITypeBinding binding= computeTypeArgument(hit.iteratordeclaration);
+			if (binding != null) {
+				looptargettype= binding.getQualifiedName();
+			}
 			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
 			result.setType(collectionType);
 		} else if (type instanceof ParameterizedType) {

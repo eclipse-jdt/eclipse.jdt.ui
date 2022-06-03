@@ -4177,7 +4177,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
-	@Ignore("Should be of type String")
 	@Test
 	public void testWhileNested2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4210,7 +4209,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
                         + "public class Test {\n"
                         + "    void m(List<String> strings,List<String> strings2) {\n"
                         + "        Collections.reverse(strings);\n"
-//                        + "        for (Object string : strings) {\n"
                         + "        for (String string : strings) {\n"
                         + "            for (String s2 : strings2) {\n"
                         + "                System.out.println(s2);\n"
