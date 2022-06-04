@@ -45,10 +45,11 @@ public abstract class AbstractTool<T> {
 		return typeBinding.getQualifiedName().equals(typename);
 	}
 
-	public abstract void find(UseIteratorToForLoopFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed);
+	public abstract void find(UseIteratorToForLoopFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations,
+			Set<ASTNode> nodesprocessed, boolean createForIfVarNotUsed);
 
 	public abstract void rewrite(UseIteratorToForLoopFixCore useExplicitEncodingFixCore, T holder, CompilationUnitRewrite cuRewrite,
-			TextEditGroup group_init, TextEditGroup group_while, TextEditGroup group_next);
+			TextEditGroup group);
 
 	/**
 	 * Adds an import to the class. This method should be used for every class reference added to

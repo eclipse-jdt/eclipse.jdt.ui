@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED;
 import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description;
 
@@ -69,7 +70,7 @@ public class UseIteratorToForLoopCleanUpCore extends AbstractCleanUpCore {
 		}
 		Set<CompilationUnitRewriteOperation> operations = new LinkedHashSet<>();
 		Set<ASTNode> nodesprocessed = new HashSet<>();
-		computeFixSet.forEach(i -> i.findOperations(compilationUnit, operations, nodesprocessed));
+		computeFixSet.forEach(i -> i.findOperations(compilationUnit, operations, nodesprocessed, isEnabled(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED)));
 		if (operations.isEmpty()) {
 			return null;
 		}

@@ -40,32 +40,33 @@ public enum UseIteratorToForLoopFixCore {
 
 	@SuppressWarnings("unchecked")
 	UseIteratorToForLoopFixCore(AbstractTool<? extends WhileLoopToChangeHit> explicitencoding) {
-		this.iteratortofor=(AbstractTool<WhileLoopToChangeHit>) explicitencoding;
+		this.iteratortofor= (AbstractTool<WhileLoopToChangeHit>) explicitencoding;
 	}
 
 	public String getPreview(boolean i) {
 		return iteratortofor.getPreview(i);
 	}
+
 	/**
 	 * Compute set of CompilationUnitRewriteOperation to refactor supported situations
 	 *
 	 * @param compilationUnit unit to search in
 	 * @param operations set of all CompilationUnitRewriteOperations created already
 	 * @param nodesprocessed list to remember nodes already processed
+	 * @param createForOnlyIfVarUsed true if for loop should be created only only if loop var used within
 	 */
-	public void findOperations(final CompilationUnit compilationUnit,final Set<CompilationUnitRewriteOperation> operations,final Set<ASTNode> nodesprocessed) {
-		iteratortofor.find(this, compilationUnit, operations, nodesprocessed);
+	public void findOperations(final CompilationUnit compilationUnit, final Set<CompilationUnitRewriteOperation> operations,
+			final Set<ASTNode> nodesprocessed, boolean createForOnlyIfVarUsed) {
+		iteratortofor.find(this, compilationUnit, operations, nodesprocessed, createForOnlyIfVarUsed);
 	}
 
 	public CompilationUnitRewriteOperation rewrite(final WhileLoopToChangeHit hit) {
 		return new CompilationUnitRewriteOperation() {
 			@Override
 			public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
-				TextEditGroup group_init= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description+" init", cuRewrite); //$NON-NLS-1$
-				TextEditGroup group_while= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description+" while", cuRewrite); //$NON-NLS-1$
-				TextEditGroup group_next= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description+" next", cuRewrite); //$NON-NLS-1$
+				TextEditGroup group= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description, cuRewrite);
 				cuRewrite.getASTRewrite().setTargetSourceRangeComputer(computer);
-				iteratortofor.rewrite(UseIteratorToForLoopFixCore.this, hit, cuRewrite, group_init, group_while, group_next);
+				iteratortofor.rewrite(UseIteratorToForLoopFixCore.this, hit, cuRewrite, group);
 			}
 		};
 	}

@@ -21,11 +21,12 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 public class WhileLoopToChangeHit {
 
 	public boolean self;
-	public VariableDeclarationStatement iteratordeclaration;
-	public SimpleName collectionsimplename;
-	public String loopvarname;
-	public MethodInvocation loopvardeclaration;
-	public WhileStatement whilestatement;
-	public boolean nextwithoutvariabledeclation;
+	public VariableDeclarationStatement iteratorDeclaration;
+	public SimpleName collectionSimplename;
+	public String loopVarName;
+	public MethodInvocation loopVarDeclaration;
+	public WhileStatement whileStatement;
+	public boolean nextWithoutVariableDeclaration;
+	public boolean nextFound;
 
 }
