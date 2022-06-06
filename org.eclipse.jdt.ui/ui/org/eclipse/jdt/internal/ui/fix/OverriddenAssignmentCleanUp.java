@@ -82,7 +82,7 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 				bld.append("String separator = System.lineSeparator();\n"); //$NON-NLS-1$
 				bld.append("long time = System.currentTimeMillis();\n"); //$NON-NLS-1$
 			} else {
-				bld.append("long time = 0;\n"); //$NON-NLS-1$
+				bld.append("long time;\n"); //$NON-NLS-1$
 				bld.append("String separator = System.lineSeparator();\n"); //$NON-NLS-1$
 				bld.append("time = System.currentTimeMillis();\n"); //$NON-NLS-1$
 			}
