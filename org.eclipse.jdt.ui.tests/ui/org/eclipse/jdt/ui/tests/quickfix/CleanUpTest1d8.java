@@ -4390,7 +4390,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
-	@Ignore("Checking the self case is wrong")
 	@Test
 	public void testWhileNoSelf() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);

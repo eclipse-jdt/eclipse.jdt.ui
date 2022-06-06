@@ -80,13 +80,17 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 							if (computeVarName.size() == 1) {
 								hit.self= true;
 							} else {
-								hit.collectionSimplename= (SimpleName) computeVarName.get(1);
+								hit.collectionExpression= (Expression) computeVarName.get(1);
 							}
 							hit.whileStatement= whilestatement;
 							if (hit.self) {
 								hit.loopVarName= ConvertLoopOperation.modifybasename("i"); //$NON-NLS-1$
 							} else {
-								hit.loopVarName= ConvertLoopOperation.modifybasename(hit.collectionSimplename.getIdentifier());
+								if (hit.collectionExpression instanceof SimpleName) {
+									hit.loopVarName= ConvertLoopOperation.modifybasename(((SimpleName)hit.collectionExpression).getIdentifier());
+								} else {
+									hit.loopVarName= ConvertLoopOperation.modifybasename("element"); //$NON-NLS-1$
+								}
 							}
 							operationsMap.put(whilestatement, hit);
 						}
@@ -114,7 +118,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 								if (computeVarName.size() == 1) {
 									hit.self= true;
 								} else {
-									hit.collectionSimplename= (SimpleName) computeVarName.get(1);
+									hit.collectionExpression= (Expression) computeVarName.get(1);
 								}
 								VariableDeclarationStatement typedAncestor= ASTNodes.getTypedAncestor(mi, VariableDeclarationStatement.class);
 								if (typedAncestor != null) {
@@ -131,7 +135,11 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 									if (hit.self) {
 										hit.loopVarName= ConvertLoopOperation.modifybasename("i"); //$NON-NLS-1$
 									} else {
-										hit.loopVarName= ConvertLoopOperation.modifybasename(hit.collectionSimplename.getIdentifier());
+										if (hit.collectionExpression instanceof SimpleName) {
+											hit.loopVarName= ConvertLoopOperation.modifybasename(((SimpleName)hit.collectionExpression).getIdentifier());
+										} else {
+											hit.loopVarName= ConvertLoopOperation.modifybasename("element"); //$NON-NLS-1$
+										}
 									}
 									hit.nextWithoutVariableDeclaration= true;
 								}
@@ -187,7 +195,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			if (iterableAncestor == null || iterableAncestor.isRawType()) {
 				return null;
 			}
-			SimpleName sn= ASTNodes.as(mi.getExpression(), SimpleName.class);
+			Expression sn= ASTNodes.as(mi.getExpression(), Expression.class);
 			if (sn != null) {
 				name.add(sn);
 			}
@@ -280,8 +288,8 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			ThisExpression newThisExpression= ast.newThisExpression();
 			newEnhancedForStatement.setExpression(newThisExpression);
 		} else {
-			SimpleName createMoveTarget= ast.newSimpleName(hit.collectionSimplename.getIdentifier());
-			newEnhancedForStatement.setExpression(createMoveTarget);
+			Expression loopExpression= (Expression)rewrite.createCopyTarget(hit.collectionExpression);
+			newEnhancedForStatement.setExpression(loopExpression);
 		}
 		ASTNodes.removeButKeepComment(rewrite, hit.iteratorDeclaration, group);
 		if (hit.nextFound) {
