@@ -76,5 +76,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.junit.jupiter.api,
  org.junit.platform.suite.api,
  org.junit.platform.suite.commons,
- org.junit.platform.suite.engine,
- org.junit.vintage.engine
+ org.junit.platform.suite.engine
