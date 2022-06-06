@@ -38,19 +38,19 @@ Public forum for Eclipse JDT users.
 
 - <http://www.eclipse.org/forums/eclipse.tools.jdt>
 
-Search for bugs:
+Search for bugs/issues:
 ----------------
 
-This project uses Bugzilla to track ongoing development and issues.
+This project uses Github issues to track ongoing development and issues.
 
-- <https://bugs.eclipse.org/bugs/buglist.cgi?product=JDT;component=UI>
+- [https://github.com/eclipse-jdt/eclipse.jdt.ui/issues](https://github.com/eclipse-jdt/eclipse.jdt.ui/issues)
 
-Create a new bug:
+Create a new bug/issue:
 -----------------
 
-Be sure to search for existing bugs before you create another one. Remember that contributions are always welcome!
+Be sure to search for existing issue before you create another one. Remember that contributions are always welcome!
 
-- <https://bugs.eclipse.org/bugs/enter_bug.cgi?product=JDT;component=UI>
+- [https://github.com/eclipse-jdt/eclipse.jdt.ui/issues](https://github.com/eclipse-jdt/eclipse.jdt.ui/issues)
 
 Contact:
 --------
