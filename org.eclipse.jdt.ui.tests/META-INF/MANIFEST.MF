@@ -74,4 +74,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Eclipse-BundleShape: dir
 Bundle-ActivationPolicy: lazy
 Import-Package: org.junit.jupiter.api,
- org.junit.platform.suite.api;version="1.8.1"
+ org.junit.platform.suite.api

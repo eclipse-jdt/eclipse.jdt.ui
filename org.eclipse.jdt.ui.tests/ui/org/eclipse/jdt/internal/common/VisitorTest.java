@@ -53,7 +53,7 @@ public class VisitorTest {
 
 	@BeforeAll
 	public static void init() {
-		ASTParser parser = ASTParser.newParser(AST.JLS_Latest);
+		ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
 		String code ="package test;\n"
 				+"import java.util.Collection;\n"
 				+ "\n"
