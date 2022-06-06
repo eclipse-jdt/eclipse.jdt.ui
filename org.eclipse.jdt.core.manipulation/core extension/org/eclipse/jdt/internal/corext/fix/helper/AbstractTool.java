@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 
 /**
  * @param <T> Type found in Visitor
+ * @since 1.17
  */
 public abstract class AbstractTool<T> {
 

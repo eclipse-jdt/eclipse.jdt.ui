@@ -18,6 +18,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+/**
+ * @since 1.17
+ */
 public class WhileLoopToChangeHit {
 
 	public boolean self;

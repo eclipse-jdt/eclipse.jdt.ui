@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
  * Find: while (it.hasNext()){ System.out.println(it.next()); }
  *
  * Rewrite: for(Object o:collection) { System.out.println(o); });
+ * @since 1.17
  *
  */
 public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
