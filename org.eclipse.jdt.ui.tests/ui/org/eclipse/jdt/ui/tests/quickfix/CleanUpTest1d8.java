@@ -4546,9 +4546,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
-	@Ignore("Ignore cases where iterator() call is within separate statement or block than while")
 	@Test
-	public void testWhileBigChangeNeeded() throws Exception {
+	public void testDoNotWhileBigChangeNeeded() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
 				+ "package test;\n"
@@ -4570,22 +4569,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		sample= "" //
-				+ "package test;\n"
-				        + "import java.util.*;\n"
-				        + "public class Test {\n"
-				        + "    void m(List<String> nodes) {\n"
-				        + "        if (nodes != null) {\n"
-				        + "        		for (String fragment : nodes) {\n"
-				        + "           		 System.out.println(fragment);\n"
-				        + "       		}\n"
-				        + "        }\n"
-				        + "    }\n"
-				        + "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
-				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
 	@Test
@@ -4643,7 +4627,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
-	@Ignore("Not all values are to be processed in the loop")
 	@Test
 	public void testDoNotWhileUsedSpecially2() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);

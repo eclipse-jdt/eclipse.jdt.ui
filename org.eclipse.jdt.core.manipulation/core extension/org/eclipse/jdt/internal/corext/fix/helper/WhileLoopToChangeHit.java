@@ -31,5 +31,15 @@ public class WhileLoopToChangeHit {
 	public WhileStatement whileStatement;
 	public boolean nextWithoutVariableDeclaration;
 	public boolean nextFound;
+	public String iteratorName;
+	public boolean isInvalid;
+
+	public WhileLoopToChangeHit(boolean isInvalid) {
+		this.isInvalid= isInvalid;
+	}
+
+	public WhileLoopToChangeHit() {
+
+	}
 
 }

@@ -9,11 +9,13 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Carsten Hammer
+ *     Carsten Hammer - initial API and implementation
+ *     Red Hat Inc. - additional support
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix.helper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -31,12 +34,15 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -67,7 +73,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed, boolean createForOnlyIfVarUsed) {
 		ReferenceHolder<ASTNode, WhileLoopToChangeHit> dataholder= new ReferenceHolder<>();
 		Map<ASTNode, WhileLoopToChangeHit> operationsMap= new LinkedHashMap<>();
-		WhileLoopToChangeHit emptyHit= new WhileLoopToChangeHit();
+		WhileLoopToChangeHit invalidHit= new WhileLoopToChangeHit(true);
 		HelperVisitor.callVariableDeclarationStatementVisitor(Iterator.class, compilationUnit, dataholder, nodesprocessed, (init_iterator, holder_a) -> {
 			List<Object> computeVarName= computeVarName(init_iterator);
 			if (computeVarName != null) {
@@ -77,6 +83,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 						WhileLoopToChangeHit hit= holder.computeIfAbsent(whilestatement, k -> new WhileLoopToChangeHit());
 						if (!createForOnlyIfVarUsed) {
 							hit.iteratorDeclaration= init_iterator;
+							hit.iteratorName= name;
 							if (computeVarName.size() == 1) {
 								hit.self= true;
 							} else {
@@ -102,16 +109,17 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 									return true;
 								String method= mi.getName().getFullyQualifiedName();
 								WhileLoopToChangeHit previousHit= operationsMap.get(whilestatement);
-								if (previousHit != null && (previousHit == emptyHit || previousHit.nextFound || !method.equals("next"))) { //$NON-NLS-1$
-									operationsMap.put(whilestatement, emptyHit);
+								if (previousHit != null && (previousHit == invalidHit || previousHit.nextFound || !method.equals("next"))) { //$NON-NLS-1$
+									operationsMap.put(whilestatement, invalidHit);
 									return true;
 								}
 								if (ASTNodes.getFirstAncestorOrNull(mi, ExpressionStatement.class) != null
 										&& createForOnlyIfVarUsed) {
-									operationsMap.put(whilestatement, emptyHit);
+									operationsMap.put(whilestatement, invalidHit);
 									return true;
 								}
 								hit.nextFound= true;
+								hit.iteratorName= name;
 								hit.iteratorDeclaration= init_iterator;
 								hit.whileStatement= whilestatement;
 								hit.loopVarDeclaration= mi;
@@ -126,7 +134,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 									ITypeBinding varTypeBinding= typedAncestor.getType().resolveBinding();
 									if (varTypeBinding == null || iteratorTypeArgument == null ||
 											(!varTypeBinding.isEqualTo(iteratorTypeArgument) && !Bindings.isSuperType(varTypeBinding, iteratorTypeArgument))) {
-										operationsMap.put(whilestatement, emptyHit);
+										operationsMap.put(whilestatement, invalidHit);
 										return true;
 									}
 									VariableDeclarationFragment vdf= (VariableDeclarationFragment) typedAncestor.fragments().get(0);
@@ -158,12 +166,57 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			return true;
 		});
 		for (WhileLoopToChangeHit hit : operationsMap.values()) {
-			if (hit != emptyHit) {
+			if (!hit.isInvalid && validate(hit)) {
 				operations.add(fixcore.rewrite(hit));
 			}
 		}
 	}
 
+	private static boolean validate(final WhileLoopToChangeHit hit) {
+		ASTNode iterDeclarationParent= hit.iteratorDeclaration.getParent();
+		List<StructuralPropertyDescriptor> descs= iterDeclarationParent.structuralPropertiesForType();
+		boolean hasStatements= false;
+		for (StructuralPropertyDescriptor desc : descs) {
+			if (desc.getId().equals("statements")) { //$NON-NLS-1$
+				hasStatements= true;
+				break;
+			}
+		}
+		if (!hasStatements) {
+			return false;
+		}
+		ReferenceHolder<ASTNode, WhileLoopToChangeHit> dataholder= new ReferenceHolder<>();
+		Set<ASTNode> nodesprocessed= new HashSet<>();
+		VariableDeclarationFragment iterDeclFragment= (VariableDeclarationFragment) hit.iteratorDeclaration.fragments().get(0);
+		IVariableBinding iterBinding= iterDeclFragment.resolveBinding();
+		if (iterBinding == null) {
+			return false;
+		}
+		HelperVisitor.callMethodInvocationVisitor(iterDeclarationParent, dataholder, nodesprocessed, (mi, holder2) -> {
+			SimpleName sn= ASTNodes.as(mi.getExpression(), SimpleName.class);
+			if (sn != null && sn.getIdentifier().equals(hit.iteratorName)) {
+				if (mi.getStartPosition() < hit.whileStatement.getStartPosition()) {
+					hit.isInvalid= true;
+					return false;
+				}
+			} else if (mi.getName().getIdentifier().equals("iterator")) { //$NON-NLS-1$
+				ASTNode assignment= ASTNodes.getFirstAncestorOrNull(mi, Assignment.class);
+				if (assignment instanceof Assignment) {
+					Expression leftSide= ((Assignment)assignment).getLeftHandSide();
+					SimpleName assignedVar= ASTNodes.as(leftSide, SimpleName.class);
+					if (assignedVar != null && assignedVar.getIdentifier().equals(hit.iteratorName)) {
+						Statement stmt= (Statement) ASTNodes.getFirstAncestorOrNull(assignment, Statement.class);
+						if (stmt == null || stmt.getParent() != hit.whileStatement.getParent()) {
+							hit.isInvalid= true;
+							return false;
+						}
+					}
+				}
+			}
+			return true;
+		});
+		return !hit.isInvalid;
+	}
 	private static String computeNextVarname(WhileStatement whilestatement) {
 		String name= null;
 		Expression exp= whilestatement.getExpression();
@@ -181,9 +234,9 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 	}
 
 	private static List<Object> computeVarName(VariableDeclarationStatement node_a) {
-		List<Object> name= new ArrayList<>();
+		List<Object> objectList= new ArrayList<>();
 		VariableDeclarationFragment bli= (VariableDeclarationFragment) node_a.fragments().get(0);
-		name.add(bli.getName().getIdentifier());
+		objectList.add(bli.getName().getIdentifier());
 		Expression exp= bli.getInitializer();
 		MethodInvocation mi= ASTNodes.as(exp, MethodInvocation.class);
 		if (mi != null && mi.getName().toString().equals("iterator")) { //$NON-NLS-1$
@@ -197,10 +250,10 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			}
 			Expression sn= ASTNodes.as(mi.getExpression(), Expression.class);
 			if (sn != null) {
-				name.add(sn);
+				objectList.add(sn);
 			}
 		}
-		return name;
+		return objectList;
 	}
 
 	private static ITypeBinding computeTypeArgument(VariableDeclarationStatement node_a) {
