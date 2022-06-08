@@ -384,4 +384,14 @@ public class DoWhileRatherThanWhileFixCore extends CompilationUnitRewriteOperati
 	protected DoWhileRatherThanWhileFixCore(final String name, final CompilationUnit compilationUnit, final CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
+
+	public static IProposableFix createDoWhileFix(WhileStatement switchStatement) {
+		CompilationUnit root= (CompilationUnit) switchStatement.getRoot();
+		List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> operations= new ArrayList<>();
+		DoWhileRatherThanWhileFinder finder= new DoWhileRatherThanWhileFinder(operations);
+		switchStatement.accept(finder);
+		if (operations.isEmpty())
+			return null;
+		return new DoWhileRatherThanWhileFixCore(FixMessages.DoWhileRatherThanWhileFix_description, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operations.get(0) });
+	}
 }

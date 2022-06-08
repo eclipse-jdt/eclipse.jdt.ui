@@ -141,7 +141,7 @@ public class TypeParametersFixCore extends CompilationUnitRewriteOperationsFixCo
 		return new TypeParametersFixCore(FixMessages.TypeParametersFix_insert_inferred_type_arguments_name, compilationUnit, new CompilationUnitRewriteOperation[] { op });
 	}
 
-	public static TypeParametersFixCore createRemoveRedundantTypeArgumentsFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static IProposableFix createRemoveRedundantTypeArgumentsFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
 		int id= problem.getProblemId();
 		if (id == IProblem.RedundantSpecificationOfTypeArguments) {
 			ParameterizedType parameterizedType= getParameterizedType(compilationUnit, problem);
