@@ -906,7 +906,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public String getModuleNameOrProjectName() {
 			String moduleName = getModuleName();
 			if (moduleName == null || moduleName.length() == 0) {
-				moduleName= fNameGroup.getName().trim();
+				moduleName= fNameGroup.getName();
 			}
 			return  moduleName;
 		}
