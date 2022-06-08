@@ -4391,6 +4391,44 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testWhileIteratorAssigned() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+		                + "import java.util.*;\n"
+		                + "public class Test extends ArrayList<String> {\n"
+		                + "    void m(ArrayList<String> strings) {\n"
+		                + "        Iterator it;\n"
+		                + "        it = strings.iterator();\n"
+		                + "        while (it.hasNext()) {\n"
+		                + "            String s = (String) it.next();\n"
+		                + "            System.out.println(s);\n"
+		                + "            System.err.println(s);\n"
+		                + "        }\n"
+		                + "    }\n"
+		                + "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test;\n"
+                        + "import java.util.*;\n"
+                        + "public class Test extends ArrayList<String> {\n"
+                        + "    void m(ArrayList<String> strings) {\n"
+                        + "        for (String s : strings) {\n"
+                        + "            System.out.println(s);\n"
+                        + "            System.err.println(s);\n"
+                        + "        }\n"
+                        + "    }\n"
+                        + "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	@Test
 	public void testWhileNoSelf() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
@@ -4641,6 +4679,79 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 						+ "            String s = (String) it.next();\n"
 						+ "            System.out.println(s);\n"
 						+ "        }\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testDoNotWhileWithIndirectIterator() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    void m() {\n"
+						+ "        Iterator it = getIterator();\n"
+						+ "        String startvalue = (String) it.next();\n"
+						+ "        while (it.hasNext()) {\n"
+						+ "            String s = (String) it.next();\n"
+						+ "            System.out.println(s);\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "    List<String> strings= new ArrayList<String>();\n"
+						+ "    public Iterator<String> getIterator() {\n"
+						+ "        return strings.iterator();\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testDoNotWhileWithIndirectIterator2() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    public static class MyIterator implements Iterator<String> {\n"
+						+ "        List<String> strings= new ArrayList<>();\n"
+						+ "        Iterator<String> iterator;\n"
+						+ "        public MyIterator() {\n"
+						+ "           iterator= strings.iterator();\n"
+						+ "        }\n"
+						+ "        @Override\n"
+						+ "        public boolean hasNext() {\n"
+						+ "            return iterator.hasNext();\n"
+						+ "        }\n"
+						+ "        @Override\n"
+						+ "        public String next() {\n"
+						+ "            return iterator.next();\n"
+						+ "        }\n"
+						+ "        @Override\n"
+						+ "        public void remove() {\n"
+						+ "           iterator.remove();\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "    void m() {\n"
+						+ "        Iterator it = new MyIterator();\n"
+						+ "        String startvalue = (String) it.next();\n"
+						+ "        while (it.hasNext()) {\n"
+						+ "            String s = (String) it.next();\n"
+						+ "            System.out.println(s);\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "    List<String> strings= new ArrayList<>();\n"
+						+ "    public Iterator<String> getIterator() {\n"
+						+ "        return strings.iterator();\n"
 						+ "    }\n"
 						+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);

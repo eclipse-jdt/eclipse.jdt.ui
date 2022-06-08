@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.corext.fix.helper;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
@@ -25,6 +26,7 @@ public class WhileLoopToChangeHit {
 
 	public boolean self;
 	public VariableDeclarationStatement iteratorDeclaration;
+	public Statement iteratorCall;
 	public Expression collectionExpression;
 	public String loopVarName;
 	public MethodInvocation loopVarDeclaration;
