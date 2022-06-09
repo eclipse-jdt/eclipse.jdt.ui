@@ -126,7 +126,6 @@ import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 public class NewJavaProjectWizardPageOne extends WizardPage {
 
 	private static String EMPTY_STR= ""; //$NON-NLS-1$
-	private static String WHITE_SPACE_STR= "\\s+"; //$NON-NLS-1$
 
 	/**
 	 * Request a project name. Fires an event whenever the text field is
