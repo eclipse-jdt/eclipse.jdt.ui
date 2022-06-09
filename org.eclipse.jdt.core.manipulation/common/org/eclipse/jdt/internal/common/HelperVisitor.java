@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Carsten Hammer.
+ * Copyright (c) 2021, 2022 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,10 +28,9 @@ import org.eclipse.jdt.core.dom.*;
  *
  * @author chammer
  *
- * @param <E>
- * @param <V>
- * @param <T>
- * @since 1.17
+ * @param <E> - type extending HelperVisitorProvider mapping V -> E entries
+ * @param <V> - key type for HelperVisitorProvider
+ * @param <T> - value type for HelperVisitorProvider
  */
 public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
@@ -67,7 +66,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @return
+	 * @return - Map of visitor kinds -> BiPredicates
 	 */
 	public Map<VisitorEnum, BiPredicate<? extends ASTNode, E>> getSuppliermap() {
 		return predicatemap;
@@ -75,7 +74,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @return
+	 * @return - Map of visitor kinds -> BiConsumers
 	 */
 	public Map<VisitorEnum, BiConsumer<? extends ASTNode, E>> getConsumermap() {
 		return consumermap;
@@ -88,7 +87,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @return
+	 * @return - set of nodes processed
 	 */
 	public Set<ASTNode> getNodesprocessed() {
 		return nodesprocessed;
@@ -96,8 +95,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param nodesprocessed
-	 * @param dataholder
+	 * @param nodesprocessed - set of nodes processed
+	 * @param dataholder - HelperVisitorProvider providing this HelperVisitor
 	 */
 	public HelperVisitor(Set<ASTNode> nodesprocessed, E dataholder) {
 		this.predicatemap= new LinkedHashMap<>();
@@ -112,8 +111,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param node
-	 * @return
+	 * @param node - ASTNode
+	 * @return - HelperVisitor
 	 */
 	public HelperVisitor<E, V, T> build(ASTNode node) {
 		return build(node, false);
@@ -121,9 +120,9 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param node
-	 * @param visitjavadoc
-	 * @return
+	 * @param node - ASTNode
+	 * @param visitjavadoc - true if Javadoc comments should be visited
+	 * @return - HelperVisitor
 	 */
 	public HelperVisitor<E, V, T> build(ASTNode node, boolean visitjavadoc) {
 		astvisitor= new LambdaASTVisitor<>(this, visitjavadoc);
@@ -132,20 +131,23 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate for visitor kind
 	 *
-	 * @param key
-	 * @param bs
-	 * @return
+	 * @param key - visitor kind
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate added or null
 	 */
 	public BiPredicate<? extends ASTNode, E> add(VisitorEnum key, BiPredicate<? extends ASTNode, E> bs) {
 		return predicatemap.put(key, bs);
 	}
 
 	/**
-	 * @param object
-	 * @param key
-	 * @param bs
-	 * @return
+	 * Add BiPrediate for visitor kind with additional Object
+	 *
+	 * @param object - additional Object to put in predicate map
+	 * @param key - visitor kind
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate added or null
 	 */
 	public BiPredicate<? extends ASTNode, E> add(Object object, VisitorEnum key, BiPredicate<? extends ASTNode, E> bs) {
 		this.predicatedata.put(key, object);
@@ -153,20 +155,22 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiConsumer for visitor kind to consumer map
 	 *
-	 * @param key
-	 * @param bc
-	 * @return
+	 * @param key - visitor kind
+	 * @param bc - BiConsumer
+	 * @return - previous BiConsumer for visitor kind or null
 	 */
 	public BiConsumer<? extends ASTNode, E> addEnd(VisitorEnum key, BiConsumer<? extends ASTNode, E> bc) {
 		return consumermap.put(key, bc);
 	}
 
 	/**
+	 * Add BiPredidate and BiConsumer to predicate and consumer maps
 	 *
-	 * @param key
-	 * @param bs
-	 * @param bc
+	 * @param key - visitor kind
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @param bc - BiConsumer
 	 */
 	public void add(VisitorEnum key, BiPredicate<ASTNode, E> bs, BiConsumer<? extends ASTNode, E> bc) {
 		predicatemap.put(key, bs);
@@ -174,8 +178,9 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Remove visitor kind entries from predicate and consumer maps
 	 *
-	 * @param ve
+	 * @param ve - visitor kind
 	 */
 	public void removeVisitor(VisitorEnum ve) {
 		this.predicatemap.remove(ve);
@@ -183,25 +188,28 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Get consumer map
 	 *
-	 * @return
+	 * @return - Map of visitor kind to consumer
 	 */
 	protected Map<VisitorEnum, Object> getConsumerData() {
 		return this.consumerdata;
 	}
 
 	/**
+	 * Get predicate map
 	 *
-	 * @return
+	 * @return - Map of visitor kind to predicate
 	 */
 	protected Map<VisitorEnum, Object> getSupplierData() {
 		return this.predicatedata;
 	}
 
 	/**
+	 * Add BiPredicate to use for AnnotationTypeDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate for annotation type declaration
 	 */
 	public BiPredicate<? extends ASTNode, E> addAnnotationTypeDeclaration(
 			BiPredicate<AnnotationTypeDeclaration, E> bs) {
@@ -209,9 +217,10 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for AnnotationTypeMemberDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addAnnotationTypeMemberDeclaration(
 			BiPredicate<AnnotationTypeMemberDeclaration, E> bs) {
@@ -219,9 +228,10 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for AnonymousClassDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addAnonymousClassDeclaration(
 			BiPredicate<AnonymousClassDeclaration, E> bs) {
@@ -229,243 +239,268 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for ArrayAccess visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addArrayAccess(BiPredicate<ArrayAccess, E> bs) {
 		return predicatemap.put(VisitorEnum.ArrayAccess, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ArrayCreation visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addArrayCreation(BiPredicate<ArrayCreation, E> bs) {
 		return predicatemap.put(VisitorEnum.ArrayCreation, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ArrayInitializer visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addArrayInitializer(BiPredicate<ArrayInitializer, E> bs) {
 		return predicatemap.put(VisitorEnum.ArrayInitializer, bs);
 	}
 
 	/**
+	 * Add BiPredicat to use for ArrayType visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addArrayType(BiPredicate<ArrayType, E> bs) {
 		return predicatemap.put(VisitorEnum.ArrayType, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for AssertStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addAssertStatement(BiPredicate<AssertStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.AssertStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for Assignment visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addAssignment(BiPredicate<Assignment, E> bs) {
 		return predicatemap.put(VisitorEnum.Assignment, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for Block visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addBlock(BiPredicate<Block, E> bs) {
 		return predicatemap.put(VisitorEnum.Block, bs);
 	}
 
 	/**
-	 *
-	 * @param bs
-	 * @return
+	 * Add BiPredicate to use for BlockComment visit
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addBlockComment(BiPredicate<BlockComment, E> bs) {
 		return predicatemap.put(VisitorEnum.BlockComment, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for BooleanLiteral visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addBooleanLiteral(BiPredicate<BooleanLiteral, E> bs) {
 		return predicatemap.put(VisitorEnum.BooleanLiteral, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for BreakStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addBreakStatement(BiPredicate<BreakStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.BreakStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for CastExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addCastExpression(BiPredicate<CastExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.CastExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for CatchClause visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addCatchClause(BiPredicate<CatchClause, E> bs) {
 		return predicatemap.put(VisitorEnum.CatchClause, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for CharacterLiteral visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addCharacterLiteral(BiPredicate<CharacterLiteral, E> bs) {
 		return predicatemap.put(VisitorEnum.CharacterLiteral, bs);
 	}
 
 	/**
-	 *
-	 * @param bs
-	 * @return
+	 * Add BiPredicate to use for ClassInstanceCreation visit
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addClassInstanceCreation(BiPredicate<ClassInstanceCreation, E> bs) {
 		return predicatemap.put(VisitorEnum.ClassInstanceCreation, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for CompilationUnit visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addCompilationUnit(BiPredicate<CompilationUnit, E> bs) {
 		return predicatemap.put(VisitorEnum.CompilationUnit, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ConditionalExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addConditionalExpression(BiPredicate<ConditionalExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.ConditionalExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ConstructorInvocation visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addConstructorInvocation(BiPredicate<ConstructorInvocation, E> bs) {
 		return predicatemap.put(VisitorEnum.ConstructorInvocation, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ContinueStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addContinueStatement(BiPredicate<ContinueStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.ContinueStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for CreationReference visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addCreationReference(BiPredicate<CreationReference, E> bs) {
 		return predicatemap.put(VisitorEnum.CreationReference, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for Dimension visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addDimension(BiPredicate<Dimension, E> bs) {
 		return predicatemap.put(VisitorEnum.Dimension, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for DoStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addDoStatement(BiPredicate<DoStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.DoStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for EmptyStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addEmptyStatement(BiPredicate<EmptyStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.EmptyStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for EnhancedForStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addEnhancedForStatement(BiPredicate<EnhancedForStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.EnhancedForStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for EnumConstantDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addEnumConstantDeclaration(BiPredicate<EnumConstantDeclaration, E> bs) {
 		return predicatemap.put(VisitorEnum.EnumConstantDeclaration, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for EnumDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addEnumDeclaration(BiPredicate<EnumDeclaration, E> bs) {
 		return predicatemap.put(VisitorEnum.EnumDeclaration, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ExportsDirective visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addExportsDirective(BiPredicate<ExportsDirective, E> bs) {
 		return predicatemap.put(VisitorEnum.ExportsDirective, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ExpressionMethodReference visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addExpressionMethodReference(
 			BiPredicate<ExpressionMethodReference, E> bs) {
@@ -473,199 +508,221 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for ExpressionStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addExpressionStatement(BiPredicate<ExpressionStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.ExpressionStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for FieldAccess visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addFieldAccess(BiPredicate<FieldAccess, E> bs) {
 		return predicatemap.put(VisitorEnum.FieldAccess, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for FieldDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addFieldDeclaration(BiPredicate<FieldDeclaration, E> bs) {
 		return predicatemap.put(VisitorEnum.FieldDeclaration, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for a ForStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addForStatement(BiPredicate<ForStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.ForStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for IfStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addIfStatement(BiPredicate<IfStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.IfStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ImportDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addImportDeclaration(BiPredicate<ImportDeclaration, E> bs) {
 		return predicatemap.put(VisitorEnum.ImportDeclaration, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for InfixExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addInfixExpression(BiPredicate<InfixExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.InfixExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for Initializer visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addInitializer(BiPredicate<Initializer, E> bs) {
 		return predicatemap.put(VisitorEnum.Initializer, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for InstanceofExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addInstanceofExpression(BiPredicate<InstanceofExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.InstanceofExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for IntersectionType visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addIntersectionType(BiPredicate<IntersectionType, E> bs) {
 		return predicatemap.put(VisitorEnum.IntersectionType, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for Javadoc visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addJavadoc(BiPredicate<Javadoc, E> bs) {
 		return predicatemap.put(VisitorEnum.Javadoc, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for LabeledStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addLabeledStatement(BiPredicate<LabeledStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.LabeledStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for LambdaExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addLambdaExpression(BiPredicate<LambdaExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.LambdaExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for LineComment visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addLineComment(BiPredicate<LineComment, E> bs) {
 		return predicatemap.put(VisitorEnum.LineComment, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for MarkerAnnotation visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addMarkerAnnotation(BiPredicate<MarkerAnnotation, E> bs) {
 		return predicatemap.put(VisitorEnum.MarkerAnnotation, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for MemberRef visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addMemberRef(BiPredicate<MemberRef, E> bs) {
 		return predicatemap.put(VisitorEnum.MemberRef, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for MemberValuePair visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addMemberValuePair(BiPredicate<MemberValuePair, E> bs) {
 		return predicatemap.put(VisitorEnum.MemberValuePair, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for MethodRef visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addMethodRef(BiPredicate<MethodRef, E> bs) {
 		return predicatemap.put(VisitorEnum.MethodRef, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for MethodRefParameter visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addMethodRefParameter(BiPredicate<MethodRefParameter, E> bs) {
 		return predicatemap.put(VisitorEnum.MethodRefParameter, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for MethodDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addMethodDeclaration(BiPredicate<MethodDeclaration, E> bs) {
 		return predicatemap.put(VisitorEnum.MethodDeclaration, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for MethodInvocation visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addMethodInvocation(BiPredicate<MethodInvocation, E> bs) {
 		return predicatemap.put(VisitorEnum.MethodInvocation, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for MethodInvocation visit where method name is specified
 	 *
 	 * @param methodname
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addMethodInvocation(String methodname,
 			BiPredicate<MethodInvocation, E> bs) {
@@ -674,108 +731,120 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for Modifier visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addModifier(BiPredicate<Modifier, E> bs) {
 		return predicatemap.put(VisitorEnum.Modifier, bs);
 	}
 
 	/**
+	 * Add BiPredicate to sue for ModuleDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addModuleDeclaration(BiPredicate<ModuleDeclaration, E> bs) {
 		return predicatemap.put(VisitorEnum.ModuleDeclaration, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ModuleModifier visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addModuleModifier(BiPredicate<ModuleModifier, E> bs) {
 		return predicatemap.put(VisitorEnum.ModuleModifier, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for NameQualifiedType visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addNameQualifiedType(BiPredicate<NameQualifiedType, E> bs) {
 		return predicatemap.put(VisitorEnum.NameQualifiedType, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for NormalAnnotation visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addNormalAnnotation(BiPredicate<NormalAnnotation, E> bs) {
 		return predicatemap.put(VisitorEnum.NormalAnnotation, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for NullLiteral visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addNullLiteral(BiPredicate<NullLiteral, E> bs) {
 		return predicatemap.put(VisitorEnum.NullLiteral, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for NumberLiteral visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addNumberLiteral(BiPredicate<NumberLiteral, E> bs) {
 		return predicatemap.put(VisitorEnum.NumberLiteral, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for OpensDirective visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addOpensDirective(BiPredicate<OpensDirective, E> bs) {
 		return predicatemap.put(VisitorEnum.OpensDirective, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for PackageDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addPackageDeclaration(BiPredicate<PackageDeclaration, E> bs) {
 		return predicatemap.put(VisitorEnum.PackageDeclaration, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ParameterizedType visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addParameterizedType(BiPredicate<ParameterizedType, E> bs) {
 		return predicatemap.put(VisitorEnum.ParameterizedType, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ParenthesizedExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addParenthesizedExpression(BiPredicate<ParenthesizedExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.ParenthesizedExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for InstanceofExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addPatternInstanceofExpression(
 			BiPredicate<PatternInstanceofExpression, E> bs) {
@@ -783,54 +852,60 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for PostfixExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addPostfixExpression(BiPredicate<PostfixExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.PostfixExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for PrefixExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addPrefixExpression(BiPredicate<PrefixExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.PrefixExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ProvidesDirective visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addProvidesDirective(BiPredicate<ProvidesDirective, E> bs) {
 		return predicatemap.put(VisitorEnum.ProvidesDirective, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for PrimitiveType visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addPrimitiveType(BiPredicate<PrimitiveType, E> bs) {
 		return predicatemap.put(VisitorEnum.PrimitiveType, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for QualifiedName visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addQualifiedName(BiPredicate<QualifiedName, E> bs) {
 		return predicatemap.put(VisitorEnum.QualifiedName, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for QualifiedType visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addQualifiedType(BiPredicate<QualifiedType, E> bs) {
 		return predicatemap.put(VisitorEnum.QualifiedType, bs);
@@ -842,9 +917,10 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 //	}
 
 	/**
+	 * Add BiPredicate to use for RequiresdDirective visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 
 	public BiPredicate<? extends ASTNode, E> addRequiresDirective(BiPredicate<RequiresDirective, E> bs) {
@@ -852,54 +928,60 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for RecordDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addRecordDeclaration(BiPredicate<RecordDeclaration, E> bs) {
 		return predicatemap.put(VisitorEnum.RecordDeclaration, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ReturnStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addReturnStatement(BiPredicate<ReturnStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.ReturnStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SimpleName visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSimpleName(BiPredicate<SimpleName, E> bs) {
 		return predicatemap.put(VisitorEnum.SimpleName, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SimpleType visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSimpleType(BiPredicate<SimpleType, E> bs) {
 		return predicatemap.put(VisitorEnum.SimpleType, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SingleMemberAnnotation visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSingleMemberAnnotation(BiPredicate<SingleMemberAnnotation, E> bs) {
 		return predicatemap.put(VisitorEnum.SingleMemberAnnotation, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SingleVariableDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSingleVariableDeclaration(
 			BiPredicate<SingleVariableDeclaration, E> bs) {
@@ -907,18 +989,20 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for StringLiteral visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addStringLiteral(BiPredicate<StringLiteral, E> bs) {
 		return predicatemap.put(VisitorEnum.StringLiteral, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SuperConstructorInvocation visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSuperConstructorInvocation(
 			BiPredicate<SuperConstructorInvocation, E> bs) {
@@ -926,189 +1010,210 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for SuperFieldAccess visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSuperFieldAccess(BiPredicate<SuperFieldAccess, E> bs) {
 		return predicatemap.put(VisitorEnum.SuperFieldAccess, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SuperMethodInvocation visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSuperMethodInvocation(BiPredicate<SuperMethodInvocation, E> bs) {
 		return predicatemap.put(VisitorEnum.SuperMethodInvocation, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SuperMethodReference visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSuperMethodReference(BiPredicate<SuperMethodReference, E> bs) {
 		return predicatemap.put(VisitorEnum.SuperMethodReference, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SwitchCase visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSwitchCase(BiPredicate<SwitchCase, E> bs) {
 		return predicatemap.put(VisitorEnum.SwitchCase, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SwitchExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSwitchExpression(BiPredicate<SwitchExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.SwitchExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SwitchStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSwitchStatement(BiPredicate<SwitchStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.SwitchStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for SynchronizedStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addSynchronizedStatement(BiPredicate<SynchronizedStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.SynchronizedStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for TagElement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addTagElement(BiPredicate<TagElement, E> bs) {
 		return predicatemap.put(VisitorEnum.TagElement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for TextBlock visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addTextBlock(BiPredicate<TextBlock, E> bs) {
 		return predicatemap.put(VisitorEnum.TextBlock, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for TextElement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addTextElement(BiPredicate<TextElement, E> bs) {
 		return predicatemap.put(VisitorEnum.TextElement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ThisExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addThisExpression(BiPredicate<ThisExpression, E> bs) {
 		return predicatemap.put(VisitorEnum.ThisExpression, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for ThrowStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addThrowStatement(BiPredicate<ThrowStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.ThrowStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for TryStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addTryStatement(BiPredicate<TryStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.TryStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for TypeDeclaration visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addTypeDeclaration(BiPredicate<TypeDeclaration, E> bs) {
 		return predicatemap.put(VisitorEnum.TypeDeclaration, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for TypeDeclarationStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addTypeDeclarationStatement(BiPredicate<TypeDeclarationStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.TypeDeclarationStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for TypeLiteral visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addTypeLiteral(BiPredicate<TypeLiteral, E> bs) {
 		return predicatemap.put(VisitorEnum.TypeLiteral, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for TypeMethodReference visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addTypeMethodReference(BiPredicate<TypeMethodReference, E> bs) {
 		return predicatemap.put(VisitorEnum.TypeMethodReference, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for TypeParameter visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addTypeParameter(BiPredicate<TypeParameter, E> bs) {
 		return predicatemap.put(VisitorEnum.TypeParameter, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for UnionType visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addUnionType(BiPredicate<UnionType, E> bs) {
 		return predicatemap.put(VisitorEnum.UnionType, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for UsesDirective visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addUsesDirective(BiPredicate<UsesDirective, E> bs) {
 		return predicatemap.put(VisitorEnum.UsesDirective, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for VariableDeclarationExpression visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addVariableDeclarationExpression(
 			BiPredicate<VariableDeclarationExpression, E> bs) {
@@ -1116,9 +1221,10 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for VariableDeclarationStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addVariableDeclarationStatement(
 			BiPredicate<VariableDeclarationStatement, E> bs) {
@@ -1126,10 +1232,11 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for VariableDeclarationStatement visit when type specified matches
 	 *
-	 * @param class1
-	 * @param bs
-	 * @return
+	 * @param class1 - specified type to match for VariableDeclarationStatement
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addVariableDeclarationStatement(Class<?> class1,
 			BiPredicate<VariableDeclarationStatement, E> bs) {
@@ -1138,9 +1245,10 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for VariableDeclarationFragment visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addVariableDeclarationFragment(
 			BiPredicate<VariableDeclarationFragment, E> bs) {
@@ -1148,27 +1256,30 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	/**
+	 * Add BiPredicate to use for WhileStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addWhileStatement(BiPredicate<WhileStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.WhileStatement, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for WildcardType visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addWildcardType(BiPredicate<WildcardType, E> bs) {
 		return predicatemap.put(VisitorEnum.WildcardType, bs);
 	}
 
 	/**
+	 * Add BiPredicate to use for YieldStatement visit
 	 *
-	 * @param bs
-	 * @return
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addYieldStatement(BiPredicate<YieldStatement, E> bs) {
 		return predicatemap.put(VisitorEnum.YieldStatement, bs);
@@ -2148,7 +2259,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addAnnotationTypeDeclaration(BiPredicate<AnnotationTypeDeclaration, E> bs,
@@ -2159,7 +2270,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addAnnotationTypeMemberDeclaration(BiPredicate<AnnotationTypeMemberDeclaration, E> bs,
@@ -2170,7 +2281,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addAnonymousClassDeclaration(BiPredicate<AnonymousClassDeclaration, E> bs,
@@ -2181,7 +2292,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addArrayAccess(BiPredicate<ArrayAccess, E> bs, BiConsumer<ArrayAccess, E> bc) {
@@ -2191,7 +2302,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addArrayCreation(BiPredicate<ArrayCreation, E> bs, BiConsumer<ArrayCreation, E> bc) {
@@ -2201,7 +2312,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addArrayInitializer(BiPredicate<ArrayInitializer, E> bs, BiConsumer<ArrayInitializer, E> bc) {
@@ -2211,7 +2322,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addArrayType(BiPredicate<ArrayType, E> bs, BiConsumer<ArrayType, E> bc) {
@@ -2221,7 +2332,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addAssertStatement(BiPredicate<AssertStatement, E> bs, BiConsumer<AssertStatement, E> bc) {
@@ -2231,7 +2342,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addAssignment(BiPredicate<Assignment, E> bs, BiConsumer<Assignment, E> bc) {
@@ -2241,7 +2352,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addBlock(BiPredicate<Block, E> bs, BiConsumer<Block, E> bc) {
@@ -2251,7 +2362,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addBlockComment(BiPredicate<BlockComment, E> bs, BiConsumer<BlockComment, E> bc) {
@@ -2261,7 +2372,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addBooleanLiteral(BiPredicate<BooleanLiteral, E> bs, BiConsumer<BooleanLiteral, E> bc) {
@@ -2271,7 +2382,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addBreakStatement(BiPredicate<BreakStatement, E> bs, BiConsumer<BreakStatement, E> bc) {
@@ -2281,7 +2392,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addCastExpression(BiPredicate<CastExpression, E> bs, BiConsumer<CastExpression, E> bc) {
@@ -2291,7 +2402,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addCatchClause(BiPredicate<CatchClause, E> bs, BiConsumer<CatchClause, E> bc) {
@@ -2301,7 +2412,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addCharacterLiteral(BiPredicate<CharacterLiteral, E> bs, BiConsumer<CharacterLiteral, E> bc) {
@@ -2311,7 +2422,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addClassInstanceCreation(BiPredicate<ClassInstanceCreation, E> bs,
@@ -2322,7 +2433,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addCompilationUnit(BiPredicate<CompilationUnit, E> bs, BiConsumer<CompilationUnit, E> bc) {
@@ -2332,7 +2443,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addConditionalExpression(BiPredicate<ConditionalExpression, E> bs,
@@ -2343,7 +2454,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addConstructorInvocation(BiPredicate<ConstructorInvocation, E> bs,
@@ -2354,7 +2465,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addContinueStatement(BiPredicate<ContinueStatement, E> bs, BiConsumer<ContinueStatement, E> bc) {
@@ -2364,7 +2475,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addCreationReference(BiPredicate<CreationReference, E> bs, BiConsumer<CreationReference, E> bc) {
@@ -2374,7 +2485,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addDimension(BiPredicate<Dimension, E> bs, BiConsumer<Dimension, E> bc) {
@@ -2384,7 +2495,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addDoStatement(BiPredicate<DoStatement, E> bs, BiConsumer<DoStatement, E> bc) {
@@ -2394,7 +2505,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addEmptyStatement(BiPredicate<EmptyStatement, E> bs, BiConsumer<EmptyStatement, E> bc) {
@@ -2404,7 +2515,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addEnhancedForStatement(BiPredicate<EnhancedForStatement, E> bs,
@@ -2415,7 +2526,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addEnumConstantDeclaration(BiPredicate<EnumConstantDeclaration, E> bs,
@@ -2426,7 +2537,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addEnumDeclaration(BiPredicate<EnumDeclaration, E> bs, BiConsumer<EnumDeclaration, E> bc) {
@@ -2436,7 +2547,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addExportsDirective(BiPredicate<ExportsDirective, E> bs, BiConsumer<ExportsDirective, E> bc) {
@@ -2446,7 +2557,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addExpressionMethodReference(BiPredicate<ExpressionMethodReference, E> bs,
@@ -2457,7 +2568,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addExpressionStatement(BiPredicate<ExpressionStatement, E> bs, BiConsumer<ExpressionStatement, E> bc) {
@@ -2467,7 +2578,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addFieldAccess(BiPredicate<FieldAccess, E> bs, BiConsumer<FieldAccess, E> bc) {
@@ -2477,7 +2588,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addFieldDeclaration(BiPredicate<FieldDeclaration, E> bs, BiConsumer<FieldDeclaration, E> bc) {
@@ -2487,7 +2598,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addForStatement(BiPredicate<ForStatement, E> bs, BiConsumer<ForStatement, E> bc) {
@@ -2497,7 +2608,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addIfStatement(BiPredicate<IfStatement, E> bs, BiConsumer<IfStatement, E> bc) {
@@ -2507,7 +2618,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addImportDeclaration(BiPredicate<ImportDeclaration, E> bs, BiConsumer<ImportDeclaration, E> bc) {
@@ -2517,7 +2628,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addInfixExpression(BiPredicate<InfixExpression, E> bs, BiConsumer<InfixExpression, E> bc) {
@@ -2527,7 +2638,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addInitializer(BiPredicate<Initializer, E> bs, BiConsumer<Initializer, E> bc) {
@@ -2537,7 +2648,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addInstanceofExpression(BiPredicate<InstanceofExpression, E> bs,
@@ -2548,7 +2659,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addIntersectionType(BiPredicate<IntersectionType, E> bs, BiConsumer<IntersectionType, E> bc) {
@@ -2558,7 +2669,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addJavadoc(BiPredicate<Javadoc, E> bs, BiConsumer<Javadoc, E> bc) {
@@ -2568,7 +2679,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addLabeledStatement(BiPredicate<LabeledStatement, E> bs, BiConsumer<LabeledStatement, E> bc) {
@@ -2578,7 +2689,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addLambdaExpression(BiPredicate<LambdaExpression, E> bs, BiConsumer<LambdaExpression, E> bc) {
@@ -2588,7 +2699,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addLineComment(BiPredicate<LineComment, E> bs, BiConsumer<LineComment, E> bc) {
@@ -2598,7 +2709,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addMarkerAnnotation(BiPredicate<MarkerAnnotation, E> bs, BiConsumer<MarkerAnnotation, E> bc) {
@@ -2608,7 +2719,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addMemberRef(BiPredicate<MemberRef, E> bs, BiConsumer<MemberRef, E> bc) {
@@ -2618,7 +2729,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addMemberValuePair(BiPredicate<MemberValuePair, E> bs, BiConsumer<MemberValuePair, E> bc) {
@@ -2628,7 +2739,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addMethodRef(BiPredicate<MethodRef, E> bs, BiConsumer<MethodRef, E> bc) {
@@ -2638,7 +2749,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addMethodRefParameter(BiPredicate<MethodRefParameter, E> bs, BiConsumer<MethodRefParameter, E> bc) {
@@ -2648,7 +2759,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addMethodDeclaration(BiPredicate<MethodDeclaration, E> bs, BiConsumer<MethodDeclaration, E> bc) {
@@ -2659,7 +2770,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	/**
 	 *
 	 * @param methodname
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addMethodInvocation(String methodname, BiPredicate<MethodInvocation, E> bs,
@@ -2671,7 +2782,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addMethodInvocation(BiPredicate<MethodInvocation, E> bs, BiConsumer<MethodInvocation, E> bc) {
@@ -2681,7 +2792,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addModifier(BiPredicate<Modifier, E> bs, BiConsumer<Modifier, E> bc) {
@@ -2691,7 +2802,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addModuleDeclaration(BiPredicate<ModuleDeclaration, E> bs, BiConsumer<ModuleDeclaration, E> bc) {
@@ -2701,7 +2812,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addModuleModifier(BiPredicate<ModuleModifier, E> bs, BiConsumer<ModuleModifier, E> bc) {
@@ -2711,7 +2822,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addNameQualifiedType(BiPredicate<NameQualifiedType, E> bs, BiConsumer<NameQualifiedType, E> bc) {
@@ -2721,7 +2832,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addNormalAnnotation(BiPredicate<NormalAnnotation, E> bs, BiConsumer<NormalAnnotation, E> bc) {
@@ -2731,7 +2842,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addNullLiteral(BiPredicate<NullLiteral, E> bs, BiConsumer<NullLiteral, E> bc) {
@@ -2741,7 +2852,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addNumberLiteral(BiPredicate<NumberLiteral, E> bs, BiConsumer<NumberLiteral, E> bc) {
@@ -2751,7 +2862,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addOpensDirective(BiPredicate<OpensDirective, E> bs, BiConsumer<OpensDirective, E> bc) {
@@ -2761,7 +2872,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addPackageDeclaration(BiPredicate<PackageDeclaration, E> bs, BiConsumer<PackageDeclaration, E> bc) {
@@ -2771,7 +2882,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addParameterizedType(BiPredicate<ParameterizedType, E> bs, BiConsumer<ParameterizedType, E> bc) {
@@ -2781,7 +2892,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addParenthesizedExpression(BiPredicate<ParenthesizedExpression, E> bs,
@@ -2792,7 +2903,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addPatternInstanceofExpression(BiPredicate<PatternInstanceofExpression, E> bs,
@@ -2803,7 +2914,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addPostfixExpression(BiPredicate<PostfixExpression, E> bs, BiConsumer<PostfixExpression, E> bc) {
@@ -2813,7 +2924,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addPrefixExpression(BiPredicate<PrefixExpression, E> bs, BiConsumer<PrefixExpression, E> bc) {
@@ -2823,7 +2934,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addProvidesDirective(BiPredicate<ProvidesDirective, E> bs, BiConsumer<ProvidesDirective, E> bc) {
@@ -2833,7 +2944,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addPrimitiveType(BiPredicate<PrimitiveType, E> bs, BiConsumer<PrimitiveType, E> bc) {
@@ -2843,7 +2954,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addQualifiedName(BiPredicate<QualifiedName, E> bs, BiConsumer<QualifiedName, E> bc) {
@@ -2853,7 +2964,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addQualifiedType(BiPredicate<QualifiedType, E> bs, BiConsumer<QualifiedType, E> bc) {
@@ -2869,7 +2980,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 
@@ -2880,7 +2991,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addRecordDeclaration(BiPredicate<RecordDeclaration, E> bs, BiConsumer<RecordDeclaration, E> bc) {
@@ -2890,7 +3001,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addReturnStatement(BiPredicate<ReturnStatement, E> bs, BiConsumer<ReturnStatement, E> bc) {
@@ -2900,7 +3011,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSimpleName(BiPredicate<SimpleName, E> bs, BiConsumer<SimpleName, E> bc) {
@@ -2910,7 +3021,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSimpleType(BiPredicate<SimpleType, E> bs, BiConsumer<SimpleType, E> bc) {
@@ -2920,7 +3031,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSingleMemberAnnotation(BiPredicate<SingleMemberAnnotation, E> bs,
@@ -2931,7 +3042,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSingleVariableDeclaration(BiPredicate<SingleVariableDeclaration, E> bs,
@@ -2942,7 +3053,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addStringLiteral(BiPredicate<StringLiteral, E> bs, BiConsumer<StringLiteral, E> bc) {
@@ -2952,7 +3063,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSuperConstructorInvocation(BiPredicate<SuperConstructorInvocation, E> bs,
@@ -2963,7 +3074,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSuperFieldAccess(BiPredicate<SuperFieldAccess, E> bs, BiConsumer<SuperFieldAccess, E> bc) {
@@ -2973,7 +3084,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSuperMethodInvocation(BiPredicate<SuperMethodInvocation, E> bs,
@@ -2984,7 +3095,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSuperMethodReference(BiPredicate<SuperMethodReference, E> bs,
@@ -2995,7 +3106,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSwitchCase(BiPredicate<SwitchCase, E> bs, BiConsumer<SwitchCase, E> bc) {
@@ -3005,7 +3116,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSwitchExpression(BiPredicate<SwitchExpression, E> bs, BiConsumer<SwitchExpression, E> bc) {
@@ -3015,7 +3126,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSwitchStatement(BiPredicate<SwitchStatement, E> bs, BiConsumer<SwitchStatement, E> bc) {
@@ -3025,7 +3136,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addSynchronizedStatement(BiPredicate<SynchronizedStatement, E> bs,
@@ -3036,7 +3147,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addTagElement(BiPredicate<TagElement, E> bs, BiConsumer<TagElement, E> bc) {
@@ -3046,7 +3157,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addTextBlock(BiPredicate<TextBlock, E> bs, BiConsumer<TextBlock, E> bc) {
@@ -3056,7 +3167,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addTextElement(BiPredicate<TextElement, E> bs, BiConsumer<TextElement, E> bc) {
@@ -3066,7 +3177,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addThisExpression(BiPredicate<ThisExpression, E> bs, BiConsumer<ThisExpression, E> bc) {
@@ -3076,7 +3187,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addThrowStatement(BiPredicate<ThrowStatement, E> bs, BiConsumer<ThrowStatement, E> bc) {
@@ -3086,7 +3197,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addTryStatement(BiPredicate<TryStatement, E> bs, BiConsumer<TryStatement, E> bc) {
@@ -3096,7 +3207,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addTypeDeclaration(BiPredicate<TypeDeclaration, E> bs, BiConsumer<TypeDeclaration, E> bc) {
@@ -3106,7 +3217,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addTypeDeclarationStatement(BiPredicate<TypeDeclarationStatement, E> bs,
@@ -3117,7 +3228,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addTypeLiteral(BiPredicate<TypeLiteral, E> bs, BiConsumer<TypeLiteral, E> bc) {
@@ -3127,7 +3238,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addTypeMethodReference(BiPredicate<TypeMethodReference, E> bs, BiConsumer<TypeMethodReference, E> bc) {
@@ -3137,7 +3248,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addTypeParameter(BiPredicate<TypeParameter, E> bs, BiConsumer<TypeParameter, E> bc) {
@@ -3147,7 +3258,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addUnionType(BiPredicate<UnionType, E> bs, BiConsumer<UnionType, E> bc) {
@@ -3157,7 +3268,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addUsesDirective(BiPredicate<UsesDirective, E> bs, BiConsumer<UsesDirective, E> bc) {
@@ -3167,7 +3278,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addVariableDeclarationExpression(BiPredicate<VariableDeclarationExpression, E> bs,
@@ -3178,7 +3289,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addVariableDeclarationStatement(BiPredicate<VariableDeclarationStatement, E> bs,
@@ -3190,7 +3301,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	/**
 	 *
 	 * @param class1
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addVariableDeclarationStatement(Class<?> class1, BiPredicate<VariableDeclarationStatement, E> bs,
@@ -3203,7 +3314,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addVariableDeclarationFragment(BiPredicate<VariableDeclarationFragment, E> bs,
@@ -3214,7 +3325,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addWhileStatement(BiPredicate<WhileStatement, E> bs, BiConsumer<WhileStatement, E> bc) {
@@ -3224,7 +3335,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addWildcardType(BiPredicate<WildcardType, E> bs, BiConsumer<WildcardType, E> bc) {
@@ -3234,7 +3345,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public void addYieldStatement(BiPredicate<YieldStatement, E> bs, BiConsumer<YieldStatement, E> bc) {
@@ -3251,8 +3362,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param cu
 	 * @param myset
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callVisitor(ASTNode cu, EnumSet<VisitorEnum> myset, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -3272,8 +3383,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param cu
 	 * @param myset
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callVisitor(ASTNode cu, EnumSet<VisitorEnum> myset, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ASTNode, ReferenceHolder<V, T>> bs) {
@@ -3292,7 +3403,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param cu
 	 * @param myset
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callVisitor(ASTNode cu, EnumSet<VisitorEnum> myset, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -3311,8 +3422,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callAnnotationTypeDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<AnnotationTypeDeclaration, ReferenceHolder<V, T>> bs) {
@@ -3328,8 +3439,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callAnnotationTypeMemberDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<AnnotationTypeMemberDeclaration, ReferenceHolder<V, T>> bs) {
@@ -3345,8 +3456,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callAnonymousClassDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<AnonymousClassDeclaration, ReferenceHolder<V, T>> bs) {
@@ -3362,8 +3473,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callArrayAccessVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ArrayAccess, ReferenceHolder<V, T>> bs) {
@@ -3379,8 +3490,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callArrayCreationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ArrayCreation, ReferenceHolder<V, T>> bs) {
@@ -3396,8 +3507,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callArrayInitializerVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ArrayInitializer, ReferenceHolder<V, T>> bs) {
@@ -3413,8 +3524,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callArrayTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ArrayType, ReferenceHolder<V, T>> bs) {
@@ -3430,8 +3541,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callAssertStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<AssertStatement, ReferenceHolder<V, T>> bs) {
@@ -3447,8 +3558,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callAssignmentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<Assignment, ReferenceHolder<V, T>> bs) {
@@ -3464,8 +3575,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callBlockVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<Block, ReferenceHolder<V, T>> bs) {
@@ -3481,8 +3592,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callBlockCommentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<BlockComment, ReferenceHolder<V, T>> bs) {
@@ -3498,8 +3609,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callBooleanLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<BooleanLiteral, ReferenceHolder<V, T>> bs) {
@@ -3515,8 +3626,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callBreakStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<BreakStatement, ReferenceHolder<V, T>> bs) {
@@ -3532,8 +3643,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callCastExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<CastExpression, ReferenceHolder<V, T>> bs) {
@@ -3549,8 +3660,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callCatchClauseVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<CatchClause, ReferenceHolder<V, T>> bs) {
@@ -3566,8 +3677,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callCharacterLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<CharacterLiteral, ReferenceHolder<V, T>> bs) {
@@ -3583,8 +3694,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callClassInstanceCreationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ClassInstanceCreation, ReferenceHolder<V, T>> bs) {
@@ -3600,8 +3711,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callCompilationUnitVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<CompilationUnit, ReferenceHolder<V, T>> bs) {
@@ -3617,8 +3728,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callConditionalExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ConditionalExpression, ReferenceHolder<V, T>> bs) {
@@ -3634,8 +3745,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callConstructorInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ConstructorInvocation, ReferenceHolder<V, T>> bs) {
@@ -3651,8 +3762,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callContinueStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ContinueStatement, ReferenceHolder<V, T>> bs) {
@@ -3668,8 +3779,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callCreationReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<CreationReference, ReferenceHolder<V, T>> bs) {
@@ -3685,8 +3796,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callDimensionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<Dimension, ReferenceHolder<V, T>> bs) {
@@ -3702,8 +3813,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callDoStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<DoStatement, ReferenceHolder<V, T>> bs) {
@@ -3719,8 +3830,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callEmptyStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<EmptyStatement, ReferenceHolder<V, T>> bs) {
@@ -3736,8 +3847,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callEnhancedForStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<EnhancedForStatement, ReferenceHolder<V, T>> bs) {
@@ -3753,8 +3864,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callEnumConstantDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<EnumConstantDeclaration, ReferenceHolder<V, T>> bs) {
@@ -3770,8 +3881,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callEnumDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<EnumDeclaration, ReferenceHolder<V, T>> bs) {
@@ -3787,8 +3898,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callExportsDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ExportsDirective, ReferenceHolder<V, T>> bs) {
@@ -3804,8 +3915,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callExpressionMethodReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ExpressionMethodReference, ReferenceHolder<V, T>> bs) {
@@ -3821,8 +3932,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callExpressionStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ExpressionStatement, ReferenceHolder<V, T>> bs) {
@@ -3838,8 +3949,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callFieldAccessVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<FieldAccess, ReferenceHolder<V, T>> bs) {
@@ -3855,8 +3966,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callFieldDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<FieldDeclaration, ReferenceHolder<V, T>> bs) {
@@ -3872,8 +3983,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callForStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ForStatement, ReferenceHolder<V, T>> bs) {
@@ -3889,8 +4000,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callIfStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<IfStatement, ReferenceHolder<V, T>> bs) {
@@ -3906,8 +4017,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callImportDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ImportDeclaration, ReferenceHolder<V, T>> bs) {
@@ -3923,8 +4034,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callInfixExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<InfixExpression, ReferenceHolder<V, T>> bs) {
@@ -3940,8 +4051,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callInitializerVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<Initializer, ReferenceHolder<V, T>> bs) {
@@ -3957,8 +4068,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callInstanceofExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<InstanceofExpression, ReferenceHolder<V, T>> bs) {
@@ -3974,8 +4085,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callIntersectionTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<IntersectionType, ReferenceHolder<V, T>> bs) {
@@ -3991,8 +4102,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callJavadocVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<Javadoc, ReferenceHolder<V, T>> bs) {
@@ -4008,8 +4119,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callLabeledStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<LabeledStatement, ReferenceHolder<V, T>> bs) {
@@ -4025,8 +4136,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callLambdaExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<LambdaExpression, ReferenceHolder<V, T>> bs) {
@@ -4042,8 +4153,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callLineCommentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<LineComment, ReferenceHolder<V, T>> bs) {
@@ -4059,8 +4170,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callMarkerAnnotationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<MarkerAnnotation, ReferenceHolder<V, T>> bs) {
@@ -4076,8 +4187,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callMemberRefVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<MemberRef, ReferenceHolder<V, T>> bs) {
@@ -4093,8 +4204,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callMemberValuePairVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<MemberValuePair, ReferenceHolder<V, T>> bs) {
@@ -4110,8 +4221,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callMethodRefVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<MethodRef, ReferenceHolder<V, T>> bs) {
@@ -4127,8 +4238,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callMethodRefParameterVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<MethodRefParameter, ReferenceHolder<V, T>> bs) {
@@ -4144,8 +4255,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callMethodDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<MethodDeclaration, ReferenceHolder<V, T>> bs) {
@@ -4161,8 +4272,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callMethodInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<MethodInvocation, ReferenceHolder<V, T>> bs) {
@@ -4179,8 +4290,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param methodname
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callMethodInvocationVisitor(String methodname, ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<MethodInvocation, ReferenceHolder<V, T>> bs) {
@@ -4196,8 +4307,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callModifierVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<Modifier, ReferenceHolder<V, T>> bs) {
@@ -4213,8 +4324,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callModuleDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ModuleDeclaration, ReferenceHolder<V, T>> bs) {
@@ -4230,8 +4341,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callModuleModifierVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ModuleModifier, ReferenceHolder<V, T>> bs) {
@@ -4247,8 +4358,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callNameQualifiedTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<NameQualifiedType, ReferenceHolder<V, T>> bs) {
@@ -4264,8 +4375,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callNormalAnnotationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<NormalAnnotation, ReferenceHolder<V, T>> bs) {
@@ -4281,8 +4392,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callNullLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<NullLiteral, ReferenceHolder<V, T>> bs) {
@@ -4298,8 +4409,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callNumberLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<NumberLiteral, ReferenceHolder<V, T>> bs) {
@@ -4315,8 +4426,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callOpensDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<OpensDirective, ReferenceHolder<V, T>> bs) {
@@ -4332,8 +4443,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callPackageDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<PackageDeclaration, ReferenceHolder<V, T>> bs) {
@@ -4349,8 +4460,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callParameterizedTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ParameterizedType, ReferenceHolder<V, T>> bs) {
@@ -4366,8 +4477,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callParenthesizedExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ParenthesizedExpression, ReferenceHolder<V, T>> bs) {
@@ -4383,8 +4494,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callPatternInstanceofExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<PatternInstanceofExpression, ReferenceHolder<V, T>> bs) {
@@ -4400,8 +4511,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callPostfixExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<PostfixExpression, ReferenceHolder<V, T>> bs) {
@@ -4417,8 +4528,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callPrefixExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<PrefixExpression, ReferenceHolder<V, T>> bs) {
@@ -4434,8 +4545,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callProvidesDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ProvidesDirective, ReferenceHolder<V, T>> bs) {
@@ -4451,8 +4562,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callPrimitiveTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<PrimitiveType, ReferenceHolder<V, T>> bs) {
@@ -4468,8 +4579,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callQualifiedNameVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<QualifiedName, ReferenceHolder<V, T>> bs) {
@@ -4485,8 +4596,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callQualifiedTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<QualifiedType, ReferenceHolder<V, T>> bs) {
@@ -4504,8 +4615,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 
 	public static <V, T> void callRequiresDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -4522,8 +4633,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callRecordDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<RecordDeclaration, ReferenceHolder<V, T>> bs) {
@@ -4539,8 +4650,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callReturnStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ReturnStatement, ReferenceHolder<V, T>> bs) {
@@ -4556,8 +4667,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSimpleNameVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SimpleName, ReferenceHolder<V, T>> bs) {
@@ -4573,8 +4684,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSimpleTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SimpleType, ReferenceHolder<V, T>> bs) {
@@ -4590,8 +4701,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSingleMemberAnnotationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SingleMemberAnnotation, ReferenceHolder<V, T>> bs) {
@@ -4607,8 +4718,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSingleVariableDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SingleVariableDeclaration, ReferenceHolder<V, T>> bs) {
@@ -4624,8 +4735,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callStringLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<StringLiteral, ReferenceHolder<V, T>> bs) {
@@ -4641,8 +4752,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSuperConstructorInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SuperConstructorInvocation, ReferenceHolder<V, T>> bs) {
@@ -4658,8 +4769,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSuperFieldAccessVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SuperFieldAccess, ReferenceHolder<V, T>> bs) {
@@ -4675,8 +4786,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSuperMethodInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SuperMethodInvocation, ReferenceHolder<V, T>> bs) {
@@ -4692,8 +4803,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSuperMethodReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SuperMethodReference, ReferenceHolder<V, T>> bs) {
@@ -4709,8 +4820,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSwitchCaseVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SwitchCase, ReferenceHolder<V, T>> bs) {
@@ -4726,8 +4837,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSwitchExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SwitchExpression, ReferenceHolder<V, T>> bs) {
@@ -4743,8 +4854,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSwitchStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SwitchStatement, ReferenceHolder<V, T>> bs) {
@@ -4760,8 +4871,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callSynchronizedStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<SynchronizedStatement, ReferenceHolder<V, T>> bs) {
@@ -4777,8 +4888,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callTagElementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<TagElement, ReferenceHolder<V, T>> bs) {
@@ -4794,8 +4905,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callTextBlockVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<TextBlock, ReferenceHolder<V, T>> bs) {
@@ -4811,8 +4922,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callTextElementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<TextElement, ReferenceHolder<V, T>> bs) {
@@ -4828,8 +4939,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callThisExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ThisExpression, ReferenceHolder<V, T>> bs) {
@@ -4845,8 +4956,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callThrowStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<ThrowStatement, ReferenceHolder<V, T>> bs) {
@@ -4862,8 +4973,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callTryStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<TryStatement, ReferenceHolder<V, T>> bs) {
@@ -4879,8 +4990,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callTypeDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<TypeDeclaration, ReferenceHolder<V, T>> bs) {
@@ -4896,8 +5007,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callTypeDeclarationStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<TypeDeclarationStatement, ReferenceHolder<V, T>> bs) {
@@ -4913,8 +5024,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callTypeLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<TypeLiteral, ReferenceHolder<V, T>> bs) {
@@ -4930,8 +5041,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callTypeMethodReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<TypeMethodReference, ReferenceHolder<V, T>> bs) {
@@ -4947,8 +5058,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callTypeParameterVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<TypeParameter, ReferenceHolder<V, T>> bs) {
@@ -4964,8 +5075,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callUnionTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<UnionType, ReferenceHolder<V, T>> bs) {
@@ -4981,8 +5092,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callUsesDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<UsesDirective, ReferenceHolder<V, T>> bs) {
@@ -4998,8 +5109,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callVariableDeclarationExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<VariableDeclarationExpression, ReferenceHolder<V, T>> bs) {
@@ -5015,8 +5126,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callVariableDeclarationStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<VariableDeclarationStatement, ReferenceHolder<V, T>> bs) {
@@ -5033,8 +5144,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param class1
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callVariableDeclarationStatementVisitor(Class<?> class1, ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<VariableDeclarationStatement, ReferenceHolder<V, T>> bs) {
@@ -5050,8 +5161,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callVariableDeclarationFragmentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<VariableDeclarationFragment, ReferenceHolder<V, T>> bs) {
@@ -5067,8 +5178,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callWhileStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<WhileStatement, ReferenceHolder<V, T>> bs) {
@@ -5084,8 +5195,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callWildcardTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<WildcardType, ReferenceHolder<V, T>> bs) {
@@ -5101,8 +5212,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 */
 	public static <V, T> void callYieldStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
 			BiPredicate<YieldStatement, ReferenceHolder<V, T>> bs) {
@@ -5118,7 +5229,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callAnnotationTypeDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5135,7 +5246,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callAnnotationTypeMemberDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5152,7 +5263,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callAnonymousClassDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5169,7 +5280,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callArrayAccessVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5186,7 +5297,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callArrayCreationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5203,7 +5314,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callArrayInitializerVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5220,7 +5331,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callArrayTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5237,7 +5348,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callAssertStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5254,7 +5365,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callAssignmentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5271,7 +5382,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callBlockVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5288,7 +5399,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callBlockCommentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5305,7 +5416,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callBooleanLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5322,7 +5433,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callBreakStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5339,7 +5450,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callCastExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5356,7 +5467,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callCatchClauseVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5373,7 +5484,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callCharacterLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5390,7 +5501,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callClassInstanceCreationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5407,7 +5518,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callCompilationUnitVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5424,7 +5535,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callConditionalExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5441,7 +5552,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callConstructorInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5458,7 +5569,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callContinueStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5475,7 +5586,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callCreationReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5492,7 +5603,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callDimensionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5509,7 +5620,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callDoStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5526,7 +5637,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callEmptyStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5543,7 +5654,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callEnhancedForStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5560,7 +5671,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callEnumConstantDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5577,7 +5688,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callEnumDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5594,7 +5705,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callExportsDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5611,7 +5722,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callExpressionMethodReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5628,7 +5739,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callExpressionStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5645,7 +5756,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callFieldAccessVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5662,7 +5773,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callFieldDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5679,7 +5790,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callForStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5696,7 +5807,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callIfStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5713,7 +5824,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callImportDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5730,7 +5841,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callInfixExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5747,7 +5858,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callInitializerVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5764,7 +5875,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callInstanceofExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5781,7 +5892,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callIntersectionTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5798,7 +5909,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callJavadocVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5815,7 +5926,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callLabeledStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5832,7 +5943,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callLambdaExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5849,7 +5960,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callLineCommentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5866,7 +5977,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callMarkerAnnotationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5883,7 +5994,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callMemberRefVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5900,7 +6011,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callMemberValuePairVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5917,7 +6028,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callMethodRefVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5934,7 +6045,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callMethodRefParameterVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5951,7 +6062,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callMethodDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5968,7 +6079,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callMethodInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -5985,7 +6096,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callModifierVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6002,7 +6113,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callModuleDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6019,7 +6130,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callModuleModifierVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6036,7 +6147,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callNameQualifiedTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6053,7 +6164,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callNormalAnnotationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6070,7 +6181,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callNullLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6087,7 +6198,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callNumberLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6104,7 +6215,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callOpensDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6121,7 +6232,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callPackageDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6138,7 +6249,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callParameterizedTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6155,7 +6266,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callParenthesizedExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6172,7 +6283,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callPatternInstanceofExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6189,7 +6300,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callPostfixExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6206,7 +6317,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callPrefixExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6223,7 +6334,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callProvidesDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6240,7 +6351,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callPrimitiveTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6257,7 +6368,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callQualifiedNameVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6274,7 +6385,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callQualifiedTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6293,7 +6404,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 
@@ -6311,7 +6422,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callRecordDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6328,7 +6439,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callReturnStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6345,7 +6456,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSimpleNameVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6362,7 +6473,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSimpleTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6379,7 +6490,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSingleMemberAnnotationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6396,7 +6507,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSingleVariableDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6413,7 +6524,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callStringLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6430,7 +6541,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSuperConstructorInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6447,7 +6558,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSuperFieldAccessVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6464,7 +6575,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSuperMethodInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6481,7 +6592,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSuperMethodReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6498,7 +6609,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSwitchCaseVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6515,7 +6626,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSwitchExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6532,7 +6643,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSwitchStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6549,7 +6660,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callSynchronizedStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6566,7 +6677,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callTagElementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6583,7 +6694,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callTextBlockVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6600,7 +6711,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callTextElementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6617,7 +6728,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callThisExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6634,7 +6745,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callThrowStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6651,7 +6762,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callTryStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6668,7 +6779,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callTypeDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6685,7 +6796,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callTypeDeclarationStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6702,7 +6813,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callTypeLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6719,7 +6830,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callTypeMethodReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6736,7 +6847,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callTypeParameterVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6753,7 +6864,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callUnionTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6770,7 +6881,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callUsesDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6787,7 +6898,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callVariableDeclarationExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6804,7 +6915,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callVariableDeclarationStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6822,7 +6933,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param class1
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callVariableDeclarationStatementVisitor(Class<?> class1, ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6839,7 +6950,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callVariableDeclarationFragmentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6856,7 +6967,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callWhileStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6873,7 +6984,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callWildcardTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6890,7 +7001,7 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
+	 * @param nodesprocessed - set of nodes processed
 	 * @param bc
 	 */
 	public static <V, T> void callYieldStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6907,8 +7018,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callAnnotationTypeDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6926,8 +7037,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callAnnotationTypeMemberDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6945,8 +7056,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callAnonymousClassDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6964,8 +7075,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callArrayAccessVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -6982,8 +7093,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callArrayCreationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7000,8 +7111,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callArrayInitializerVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7019,8 +7130,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callArrayTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7037,8 +7148,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callAssertStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7056,8 +7167,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callAssignmentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7074,8 +7185,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callBlockVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7092,8 +7203,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callBlockCommentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7110,8 +7221,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callBooleanLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7129,8 +7240,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callBreakStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7148,8 +7259,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callCastExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7167,8 +7278,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callCatchClauseVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7185,8 +7296,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callCharacterLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7204,8 +7315,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callClassInstanceCreationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7223,8 +7334,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callCompilationUnitVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7242,8 +7353,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callConditionalExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7261,8 +7372,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callConstructorInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7280,8 +7391,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callContinueStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7299,8 +7410,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callCreationReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7318,8 +7429,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callDimensionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7336,8 +7447,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callDoStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7354,8 +7465,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callEmptyStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7373,8 +7484,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callEnhancedForStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7392,8 +7503,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callEnumConstantDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7411,8 +7522,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callEnumDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7430,8 +7541,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callExportsDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7449,8 +7560,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callExpressionMethodReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7468,8 +7579,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callExpressionStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7487,8 +7598,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callFieldAccessVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7505,8 +7616,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callFieldDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7524,8 +7635,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callForStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7542,8 +7653,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callIfStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7560,8 +7671,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callImportDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7579,8 +7690,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callInfixExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7598,8 +7709,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callInitializerVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7616,8 +7727,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callInstanceofExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7635,8 +7746,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callIntersectionTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7654,8 +7765,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callJavadocVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7672,8 +7783,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callLabeledStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7691,8 +7802,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callLambdaExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7710,8 +7821,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callLineCommentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7728,8 +7839,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callMarkerAnnotationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7747,8 +7858,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callMemberRefVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7765,8 +7876,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callMemberValuePairVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7784,8 +7895,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callMethodRefVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7802,8 +7913,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callMethodRefParameterVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7821,8 +7932,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callMethodDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7840,8 +7951,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callMethodInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7859,8 +7970,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callModifierVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7877,8 +7988,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callModuleDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7896,8 +8007,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callModuleModifierVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7915,8 +8026,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callNameQualifiedTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7934,8 +8045,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callNormalAnnotationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7953,8 +8064,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callNullLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7971,8 +8082,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callNumberLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -7989,8 +8100,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callOpensDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8008,8 +8119,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callPackageDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8027,8 +8138,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callParameterizedTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8046,8 +8157,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callParenthesizedExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8065,8 +8176,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callPatternInstanceofExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8084,8 +8195,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callPostfixExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8103,8 +8214,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callPrefixExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8122,8 +8233,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callProvidesDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8141,8 +8252,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callPrimitiveTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8159,8 +8270,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callQualifiedNameVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8177,8 +8288,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callQualifiedTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8197,8 +8308,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 
@@ -8217,8 +8328,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callRecordDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8236,8 +8347,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callReturnStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8255,8 +8366,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSimpleNameVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8273,8 +8384,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSimpleTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8291,8 +8402,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSingleMemberAnnotationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8310,8 +8421,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSingleVariableDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8329,8 +8440,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callStringLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8347,8 +8458,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSuperConstructorInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8366,8 +8477,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSuperFieldAccessVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8385,8 +8496,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSuperMethodInvocationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8404,8 +8515,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSuperMethodReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8423,8 +8534,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSwitchCaseVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8441,8 +8552,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSwitchExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8460,8 +8571,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSwitchStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8479,8 +8590,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callSynchronizedStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8498,8 +8609,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callTagElementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8516,8 +8627,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callTextBlockVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8534,8 +8645,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callTextElementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8552,8 +8663,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callThisExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8571,8 +8682,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callThrowStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8590,8 +8701,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callTryStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8608,8 +8719,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callTypeDeclarationVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8627,8 +8738,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callTypeDeclarationStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8646,8 +8757,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callTypeLiteralVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8664,8 +8775,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callTypeMethodReferenceVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8683,8 +8794,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callTypeParameterVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8701,8 +8812,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callUnionTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8719,8 +8830,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callUsesDirectiveVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8737,8 +8848,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callVariableDeclarationExpressionVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8756,8 +8867,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callVariableDeclarationStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8776,8 +8887,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param class1
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callVariableDeclarationStatementVisitor(Class<?> class1, ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8795,8 +8906,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callVariableDeclarationFragmentVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8814,8 +8925,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callWhileStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8833,8 +8944,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callWildcardTypeVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
@@ -8851,8 +8962,8 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @param <T>
 	 * @param node
 	 * @param dataholder
-	 * @param nodesprocessed
-	 * @param bs
+	 * @param nodesprocessed - set of nodes processed
+	 * @param bs - BiPredicate that can be assigned a lambda expression
 	 * @param bc
 	 */
 	public static <V, T> void callYieldStatementVisitor(ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,

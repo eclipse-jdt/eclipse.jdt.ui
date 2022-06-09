@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Carsten Hammer.
+ * Copyright (c) 2021, 2022 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,26 +9,26 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Carsten Hammer
+ *     Carsten Hammer - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.common;
 
 /**
  *
  * @author chammer
- * @param <V>
- * @param <T>
- * @param <E>
- * @since 1.17
+ * @param <V> - type of key in HelperVisitor mapping
+ * @param <T> - type of value in HelperVisitor mapping
+ * @param <E> - type that extends HelperVisitorProvider providing HelperVisitor mapping V -> T
  *
  */
-public interface HelperVisitorProvider<V,T,E extends HelperVisitorProvider<V, T, E>> {
+public interface HelperVisitorProvider<V, T, E extends HelperVisitorProvider<V, T, E>> {
 	/**
-	 * @return
+	 * @return - HelperVisitor
 	 */
-	HelperVisitor<E,V,T> getHelperVisitor();
+	HelperVisitor<E, V, T> getHelperVisitor();
+
 	/**
-	 * @param hv
+	 * @param hv - HelperVisitor
 	 */
-	void setHelperVisitor(HelperVisitor<E,V,T> hv);
+	void setHelperVisitor(HelperVisitor<E, V, T> hv);
 }

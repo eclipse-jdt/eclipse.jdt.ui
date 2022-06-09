@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Carsten Hammer
+ *     Carsten Hammer - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 

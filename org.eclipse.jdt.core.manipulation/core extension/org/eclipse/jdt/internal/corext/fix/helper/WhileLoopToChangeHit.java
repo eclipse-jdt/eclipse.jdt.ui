@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Carsten Hammer
+ *     Carsten Hammer - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix.helper;
 
@@ -19,9 +19,6 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-/**
- * @since 1.17
- */
 public class WhileLoopToChangeHit {
 
 	public boolean self;

@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Carsten Hammer
+ *     Carsten Hammer - Initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -57,19 +57,19 @@ public class UseIteratorToForLoopCleanUpCore extends AbstractCleanUpCore {
 
 	@Override
 	public ICleanUpFixCore createFixCore(final CleanUpContextCore context) throws CoreException {
-		CompilationUnit compilationUnit = context.getAST();
+		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null) {
 			return null;
 		}
-		EnumSet<UseIteratorToForLoopFixCore> computeFixSet = computeFixSet();
+		EnumSet<UseIteratorToForLoopFixCore> computeFixSet= computeFixSet();
 		if (!isEnabled(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED) || computeFixSet.isEmpty()) {
 			return null;
 		}
 		if (!JavaModelUtil.is1d8OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
 			return null;
 		}
-		Set<CompilationUnitRewriteOperation> operations = new LinkedHashSet<>();
-		Set<ASTNode> nodesprocessed = new HashSet<>();
+		Set<CompilationUnitRewriteOperation> operations= new LinkedHashSet<>();
+		Set<ASTNode> nodesprocessed= new HashSet<>();
 		computeFixSet.forEach(i -> i.findOperations(compilationUnit, operations, nodesprocessed, isEnabled(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED)));
 		if (operations.isEmpty()) {
 			return null;
@@ -80,7 +80,7 @@ public class UseIteratorToForLoopCleanUpCore extends AbstractCleanUpCore {
 
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result = new ArrayList<>();
+		List<String> result= new ArrayList<>();
 		if (isEnabled(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
 			result.add(Java50CleanUp_ConvertToEnhancedForLoop_description);
 		}
@@ -89,17 +89,17 @@ public class UseIteratorToForLoopCleanUpCore extends AbstractCleanUpCore {
 
 	@Override
 	public String getPreview() {
-		StringBuilder sb = new StringBuilder();
-		EnumSet<UseIteratorToForLoopFixCore> computeFixSet = computeFixSet();
+		StringBuilder sb= new StringBuilder();
+		EnumSet<UseIteratorToForLoopFixCore> computeFixSet= computeFixSet();
 		EnumSet.allOf(UseIteratorToForLoopFixCore.class).forEach(e -> sb.append(e.getPreview(computeFixSet.contains(e))));
 		return sb.toString();
 	}
 
 	private EnumSet<UseIteratorToForLoopFixCore> computeFixSet() {
-		EnumSet<UseIteratorToForLoopFixCore> fixSet = EnumSet.noneOf(UseIteratorToForLoopFixCore.class);
+		EnumSet<UseIteratorToForLoopFixCore> fixSet= EnumSet.noneOf(UseIteratorToForLoopFixCore.class);
 
 		if (isEnabled(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
-			fixSet = EnumSet.allOf(UseIteratorToForLoopFixCore.class);
+			fixSet= EnumSet.allOf(UseIteratorToForLoopFixCore.class);
 		}
 		return fixSet;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Carsten Hammer.
+ * Copyright (c) 2021, 2022 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Carsten Hammer
+ *     Carsten Hammer - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.common;
 
@@ -19,22 +19,22 @@ import java.io.ObjectOutputStream;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This class does not allow null to be used as a key or value because it is derived from ConcurrentHashMap.
+ * This class does not allow null to be used as a key or value because it is derived from
+ * ConcurrentHashMap.
  *
  * @author chammer
  *
- * @param <V>
- * @param <T>
- * @param <E>
- * @since 1.17
+ * @param <V> - type of key in HelperVisitor map
+ * @param <T> - type of value in HelpVisitor map
  */
-public class ReferenceHolder<V,T> extends ConcurrentHashMap<V,T> implements HelperVisitorProvider<V,T,ReferenceHolder<V,T>> {
+public class ReferenceHolder<V, T> extends ConcurrentHashMap<V, T> implements HelperVisitorProvider<V, T, ReferenceHolder<V, T>> {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 1L;
-	HelperVisitor<ReferenceHolder<V,T>,V,T> hv;
+	private static final long serialVersionUID= 1L;
+
+	HelperVisitor<ReferenceHolder<V, T>, V, T> hv;
 
 	/**
 	 *
@@ -43,23 +43,23 @@ public class ReferenceHolder<V,T> extends ConcurrentHashMap<V,T> implements Help
 	}
 
 	@Override
-	public HelperVisitor<ReferenceHolder<V,T>,V,T> getHelperVisitor() {
+	public HelperVisitor<ReferenceHolder<V, T>, V, T> getHelperVisitor() {
 		return hv;
 	}
 
 	@Override
-	public void setHelperVisitor(HelperVisitor<ReferenceHolder<V,T>,V,T> hv) {
-		this.hv=hv;
+	public void setHelperVisitor(HelperVisitor<ReferenceHolder<V, T>, V, T> hv) {
+		this.hv= hv;
 	}
 
 	private void writeObject(ObjectOutputStream stream)
-	        throws IOException {
-	    stream.defaultWriteObject();
+			throws IOException {
+		stream.defaultWriteObject();
 	}
 
 	private void readObject(ObjectInputStream stream)
-	        throws IOException, ClassNotFoundException {
-	    stream.defaultReadObject();
+			throws IOException, ClassNotFoundException {
+		stream.defaultReadObject();
 	}
 
 	@Override

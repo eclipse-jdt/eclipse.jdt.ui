@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Carsten Hammer.
+ * Copyright (c) 2021, 2022 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Carsten Hammer
+ *     Carsten Hammer - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.common;
 
@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 /**
  *
  * @author chammer
- * @since 1.17
  */
 public enum VisitorEnum {
 
@@ -557,7 +556,7 @@ public enum VisitorEnum {
 
 	/**
 	 *
-	 * @return
+	 * @return - node type
 	 */
 	public int getValue() {
 		return nodetype;
@@ -565,7 +564,7 @@ public enum VisitorEnum {
 
 	/**
 	 *
-	 * @return
+	 * @return - Stream if VisitorEnum values
 	 */
 	public static Stream<VisitorEnum> stream() {
 		return Stream.of(VisitorEnum.values());
@@ -576,8 +575,8 @@ public enum VisitorEnum {
 
 	/**
 	 *
-	 * @param nodetype
-	 * @return
+	 * @param nodetype - node type
+	 * @return - corresponding VistorEnum
 	 */
 	public static VisitorEnum fromNodetype(final int nodetype) {
 		return values.get(nodetype);
@@ -585,8 +584,8 @@ public enum VisitorEnum {
 
 	/**
 	 *
-	 * @param node
-	 * @return
+	 * @param node - ASTNode
+	 * @return - corresponding VistorEnum
 	 */
 	public static VisitorEnum fromNode(ASTNode node) {
 		return fromNodetype(node.getNodeType());

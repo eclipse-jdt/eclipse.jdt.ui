@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Carsten Hammer.
+ * Copyright (c) 2021, 2022 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Carsten Hammer
+ *     Carsten Hammer - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.common;
 
@@ -22,10 +22,9 @@ import org.eclipse.jdt.core.dom.*;
  *
  * @author chammer
  *
- * @param <E>
- * @param <V>
- * @param <T>
- * @since 1.17
+ * @param <E> - type that extends HelpVisitorProvider that provides HelperVisitor<V, T>
+ * @param <V> - type that HelperVisitor uses as map key type
+ * @param <T> - type that HelperVisitor uses as map value type
  */
 @SuppressWarnings("unchecked")
 public class LambdaASTVisitor<E extends HelperVisitorProvider<V,T,E>, V, T> extends ASTVisitor {
@@ -35,7 +34,7 @@ public class LambdaASTVisitor<E extends HelperVisitorProvider<V,T,E>, V, T> exte
 	private final HelperVisitor<E,V,T> helperVisitor;
 
 	/**
-	 * @param helperVisitor
+	 * @param helperVisitor - HelperVisitor
 	 */
 	LambdaASTVisitor(HelperVisitor<E,V,T> helperVisitor) {
 		super(false);
