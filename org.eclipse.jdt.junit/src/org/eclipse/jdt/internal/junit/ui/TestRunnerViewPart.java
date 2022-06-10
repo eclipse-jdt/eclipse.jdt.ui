@@ -500,6 +500,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public ImportTestRunSessionAction(Shell shell) {
 			super(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_name);
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/import_wiz.png")); //$NON-NLS-1$
 			fShell= shell;
 		}
 
@@ -645,6 +646,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public ExportTestRunSessionAction(Shell shell, TestRunSession testRunSession) {
 			super(JUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_name);
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/export_wiz.png")); //$NON-NLS-1$
 			fShell= shell;
 			fTestRunSession= testRunSession;
 		}
@@ -910,6 +912,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private class ClearAction extends Action {
 		public ClearAction() {
 			setText(JUnitMessages.TestRunnerViewPart_clear_history_label);
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/rem_all_co.png")); //$NON-NLS-1$
 
 			boolean enabled= false;
 			List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
@@ -1031,12 +1034,15 @@ public class TestRunnerViewPart extends ViewPart {
 			switch (sortingCriterion) {
 				case SORT_BY_NAME:
 					setText(JUnitMessages.TestRunnerViewPart_toggle_name_label);
+					setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/alphab_sort_co.png")); //$NON-NLS-1$
 					break;
 				case SORT_BY_EXECUTION_ORDER:
 					setText(JUnitMessages.TestRunnerViewPart_toggle_execution_order_label);
+					setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/stckframe_running_obj.png")); //$NON-NLS-1$
 					break;
 				case SORT_BY_EXECUTION_TIME:
 					setText(JUnitMessages.TestRunnerViewPart_toggle_execution_time_label);
+					setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/time_obj.png")); //$NON-NLS-1$
 					break;
 				default:
 					break;
