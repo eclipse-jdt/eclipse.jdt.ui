@@ -29,4 +29,5 @@ public class LibStandardNames {
 	static final String METHOD_PARSELONG= "parseLong"; //$NON-NLS-1$
 	static final String FIELD_PATH_SEPARATOR= "pathSeparator"; //$NON-NLS-1$
 	static final String FIELD_SEPARATOR= "separator"; //$NON-NLS-1$
+	static final String METHOD_FOREACH= "forEach"; //$NON-NLS-1$
 }
