@@ -390,7 +390,6 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		AST ast= cuRewrite.getRoot().getAST();
 
 		EnhancedForStatement newEnhancedForStatement= ast.newEnhancedForStatement();
-		newEnhancedForStatement.setBody(ASTNodes.createMoveTarget(rewrite, hit.whileStatement.getBody()));
 
 		SingleVariableDeclaration result= ast.newSingleVariableDeclaration();
 
@@ -463,6 +462,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 				ASTNodes.removeButKeepComment(rewrite, ASTNodes.getTypedAncestor(hit.loopVarDeclaration, VariableDeclarationStatement.class), group);
 			}
 		}
+		newEnhancedForStatement.setBody(ASTNodes.createMoveTarget(rewrite, hit.whileStatement.getBody()));
 		ASTNodes.replaceButKeepComment(rewrite, hit.whileStatement, newEnhancedForStatement, group);
 	}
 
