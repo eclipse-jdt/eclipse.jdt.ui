@@ -51,7 +51,7 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 			IMethodBinding constructorBinding= constructorInvocation.resolveConstructorBinding();
 			if (constructorBinding != null) {
 				IMethod method = resolveMethodBinding(constructorBinding);
-				collectParameterNamesCodeMinings(method, arguments, constructorBinding.isVarargs());
+				collectParameterNamesCodeMinings(method, arguments, constructorBinding);
 			}
 		}
 		return super.visit(constructorInvocation);
@@ -65,7 +65,7 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 			IMethodBinding constructorBinding= classInstanceCreation.resolveConstructorBinding();
 			if (constructorBinding != null) {
 				IMethod method = resolveMethodBinding(constructorBinding);
-				collectParameterNamesCodeMinings(method, arguments, constructorBinding.isVarargs());
+				collectParameterNamesCodeMinings(method, arguments, constructorBinding);
 			}
 		}
 		return super.visit(classInstanceCreation);
@@ -78,7 +78,7 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 			IMethodBinding constructorBinding= superConstructorInvocation.resolveConstructorBinding();
 			if (constructorBinding != null) {
 				IMethod method = resolveMethodBinding(constructorBinding);
-				collectParameterNamesCodeMinings(method, arguments, constructorBinding.isVarargs());
+				collectParameterNamesCodeMinings(method, arguments, constructorBinding);
 			}
 		}
 		return super.visit(superConstructorInvocation);
@@ -91,7 +91,7 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 			IMethodBinding constructorBinding= enumConstantDeclaration.resolveConstructorBinding();
 			if (constructorBinding != null) {
 				IMethod method = resolveMethodBinding(constructorBinding);
-				collectParameterNamesCodeMinings(method, arguments, constructorBinding.isVarargs());
+				collectParameterNamesCodeMinings(method, arguments, constructorBinding);
 			}
 		}
 		return super.visit(enumConstantDeclaration);
@@ -104,23 +104,32 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
 			if (methodBinding != null) {
 				IMethod method = resolveMethodBinding(methodBinding);
-				collectParameterNamesCodeMinings(method, arguments, methodBinding.isVarargs());
+				collectParameterNamesCodeMinings(method, arguments, methodBinding);
 			}
 		}
 		return super.visit(methodInvocation);
 	}
 
-	protected void collectParameterNamesCodeMinings(IMethod method, List<?> arguments, boolean isVarargs) {
+	protected void collectParameterNamesCodeMinings(IMethod method, List<?> arguments, IMethodBinding mbinding) {
 		if (method != null) {
 			if (!skipParameterNamesCodeMinings(method)) {
 				try {
 					for (int i= 0; i < Math.min(arguments.size(), method.getParameterNames().length); i++) {
 						if (!skipParameterNameCodeMining(method, arguments, i)) {
-							minings.add(new JavaMethodParameterCodeMining((Expression)arguments.get(i), i, method, isVarargs, provider));
+							minings.add(new JavaMethodParameterCodeMining((Expression)arguments.get(i), i, method, mbinding.isVarargs(), provider));
 						}
 					}
 				} catch (Exception e) {
 					JavaPlugin.log(e);
+				}
+			}
+		} else {
+			// synthetic method of a record
+			if (mbinding.getDeclaringClass().isRecord()) {
+				for (int i= 0; i < Math.min(arguments.size(), mbinding.getParameterNames().length); i++) {
+					if (!skipParameterNameCodeMining(mbinding, arguments, i)) {
+						minings.add(new JavaMethodParameterCodeMining((Expression)arguments.get(i), i, mbinding, mbinding.isVarargs(), provider));
+					}
 				}
 			}
 		}
@@ -152,6 +161,18 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 			JavaPlugin.log(ex);
 			return false;
 		}
+	}
+
+	private boolean skipParameterNameCodeMining(IMethodBinding mbinding, List<?> arguments, int parameterIndex) {
+		if (mbinding == null) {
+			return false;
+		}
+		if (mbinding.getParameterNames().length < parameterIndex) {
+			return true;
+		}
+		String parameterName = mbinding.getParameterNames()[parameterIndex].toLowerCase();
+		String expression = arguments.get(parameterIndex).toString().toLowerCase();
+		return expression.contains(parameterName);
 	}
 
 	private boolean skipParameterNamesCodeMinings(IMethod method) {
