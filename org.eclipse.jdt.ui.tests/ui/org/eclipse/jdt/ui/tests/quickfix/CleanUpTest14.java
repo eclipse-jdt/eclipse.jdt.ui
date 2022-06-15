@@ -493,6 +493,203 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToReturnSwitchExpressionIssue104_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public enum InnerEnum {\n"
+				+ "        A, B, C, D;\n"
+				+ "    }\n"
+				+ "    public int foo(InnerEnum k) {\n"
+				+ "        switch (k) {\n"
+				+ "            case A:\n"
+				+ "            case B:\n"
+				+ "                /* comment 1 */\n"
+				+ "                return 6; /* abc */\n"
+				+ "            case C: {\n"
+				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
+				+ "                /* comment 2 */\n"
+				+ "                return 8; /* def */\n"
+				+ "            }\n"
+				+ "            case D:\n"
+				+ "                return 9;\n"
+				+ "            default:\n"
+				+ "                throw new NullPointerException();\n"
+				+ "        }\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public enum InnerEnum {\n"
+				+ "        A, B, C, D;\n"
+				+ "    }\n"
+				+ "    public int foo(InnerEnum k) {\n"
+				+ "        return switch (k) {\n"
+				+ "            case A, B -> /* comment 1 */ 6; /* abc */\n"
+				+ "            case C -> {\n"
+				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
+				+ "                /* comment 2 */\n"
+				+ "                yield 8; /* def */\n"
+				+ "            }\n"
+				+ "            case D -> 9;\n"
+				+ "            default -> throw new NullPointerException();\n"
+				+ "        };\n"
+				+ "    }\n"
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testConvertToReturnSwitchExpressionIssue104_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public enum InnerEnum {\n"
+				+ "        A, B, C, D;\n"
+				+ "    }\n"
+				+ "    public int foo(InnerEnum k) {\n"
+				+ "        switch (k) {\n"
+				+ "            case A:\n"
+				+ "            case B:\n"
+				+ "                /* comment 1 */\n"
+				+ "                return 6; /* abc */\n"
+				+ "            case C:\n"
+				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
+				+ "                /* comment 2 */\n"
+				+ "                return 8; /* def */\n"
+				+ "            case D:\n"
+				+ "                return 9;\n"
+				+ "        }\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public enum InnerEnum {\n"
+				+ "        A, B, C, D;\n"
+				+ "    }\n"
+				+ "    public int foo(InnerEnum k) {\n"
+				+ "        return switch (k) {\n"
+				+ "            case A, B -> /* comment 1 */ 6; /* abc */\n"
+				+ "            case C -> {\n"
+				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
+				+ "                /* comment 2 */\n"
+				+ "                yield 8; /* def */\n"
+				+ "            }\n"
+				+ "            case D -> 9;\n"
+				+ "        };\n"
+				+ "    }\n"
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testDoNotConvertToReturnSwitchExpressionIssue104_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public enum InnerEnum {\n"
+				+ "        A, B, C, D;\n"
+				+ "    }\n"
+				+ "    public int foo(InnerEnum k) {\n"
+				+ "        switch (k) {\n"
+				+ "            case A:\n"
+				+ "                System.out.println(\"a\");\n"
+				+ "            case B:\n"
+				+ "                /* comment 1 */\n"
+				+ "                return 6; /* abc */\n"
+				+ "            case C: {\n"
+				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
+				+ "                /* comment 2 */\n"
+				+ "                return 8; /* def */\n"
+				+ "            }\n"
+				+ "            case D:\n"
+				+ "                return 9;\n"
+				+ "            default:\n"
+				+ "                throw new NullPointerException();\n"
+				+ "        }\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotConvertToReturnSwitchExpressionIssue104_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public enum InnerEnum {\n"
+				+ "        A, B, C, D;\n"
+				+ "    }\n"
+				+ "    public int foo(InnerEnum k, int x) {\n"
+				+ "        switch (k) {\n"
+				+ "            case A:\n"
+				+ "                System.out.println(\"a\");\n"
+				+ "            case B:\n"
+				+ "                /* comment 1 */\n"
+				+ "                if (x > 3)\n"
+				+ "                    return 6; /* abc */\n"
+				+ "                else\n"
+				+ "                    return 10;\n"
+				+ "            case C: {\n"
+				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
+				+ "                /* comment 2 */\n"
+				+ "                return 8; /* def */\n"
+				+ "            }\n"
+				+ "            case D:\n"
+				+ "                return 9;\n"
+				+ "            default:\n"
+				+ "                throw new NullPointerException();\n"
+				+ "        }\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testDoNotConvertToSwitchExpressionNoBreak() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
