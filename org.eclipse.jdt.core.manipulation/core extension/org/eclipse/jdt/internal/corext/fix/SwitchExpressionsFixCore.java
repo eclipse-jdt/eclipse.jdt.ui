@@ -502,7 +502,11 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			StringBuilder b= new StringBuilder();
 			List<Comment> leadingComments= ASTNodes.getLeadingComments(oldStatement);
 			for (Comment comment : leadingComments) {
-				b.append(buffer.getText(comment.getStartPosition(), comment.getLength()) + " "); //$NON-NLS-1$
+				if (comment.isLineComment()) {
+					b.append("/*" + buffer.getText(comment.getStartPosition() + 2, comment.getLength() - 2) + " */ "); //$NON-NLS-1$ //$NON-NLS-2$
+				} else {
+					b.append(buffer.getText(comment.getStartPosition(), comment.getLength()) + " "); //$NON-NLS-1$
+				}
 			}
 			b.append(buffer.getText(exp.getStartPosition(), exp.getLength()) + ";"); //$NON-NLS-1$
 			List<Comment> trailingComments= ASTNodes.getTrailingComments(oldStatement);
@@ -523,7 +527,11 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			StringBuilder b= new StringBuilder();
 			List<Comment> leadingComments= ASTNodes.getLeadingComments(oldExpStatement);
 			for (Comment comment : leadingComments) {
-				b.append(buffer.getText(comment.getStartPosition(), comment.getLength()) + " "); //$NON-NLS-1$
+				if (comment.isLineComment()) {
+					b.append("/*" + buffer.getText(comment.getStartPosition() + 2, comment.getLength() - 2) + " */ "); //$NON-NLS-1$ //$NON-NLS-2$
+				} else {
+					b.append(buffer.getText(comment.getStartPosition(), comment.getLength()) + " "); //$NON-NLS-1$
+				}
 			}
 			b.append(buffer.getText(rhs.getStartPosition(), rhs.getLength()) + ";"); //$NON-NLS-1$
 			List<Comment> trailingComments= ASTNodes.getTrailingComments(oldExpStatement);

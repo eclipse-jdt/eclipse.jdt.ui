@@ -448,6 +448,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 			    + "            case 13:\n" //
 			    + "            case 32:\n" //
 			    + "            case 9:\n" //
+			    + "                // comment 1\n"
 			    + "                isWhiteSpace = true; /* comment x */\n" //
 			    + "                break;\n" //
 			    + "            case 0:\n" //
@@ -473,7 +474,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				+ "public class E {\n" //
 			    + "    public void foo(String[] args) throws Exception {\n" //
 			    + "        boolean isWhiteSpace = switch (args[0].charAt(0)) {\n" //
-			    + "            case 10, 12, 13, 32, 9 -> true; /* comment x */\n" //
+			    + "            case 10, 12, 13, 32, 9 -> /* comment 1 */ true; /* comment x */\n" //
 			    + "            case 0 -> throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
 			    + "            case 95 -> {\n" //
 			    + "                System.out.println(\"non-whitespace\");\n" //
@@ -516,6 +517,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				+ "                return 8; /* def */\n"
 				+ "            }\n"
 				+ "            case D:\n"
+				+ "                // comment 3\n"
 				+ "                return 9;\n"
 				+ "            default:\n"
 				+ "                throw new NullPointerException();\n"
@@ -543,7 +545,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				+ "                /* comment 2 */\n"
 				+ "                yield 8; /* def */\n"
 				+ "            }\n"
-				+ "            case D -> 9;\n"
+				+ "            case D -> /* comment 3 */ 9;\n"
 				+ "            default -> throw new NullPointerException();\n"
 				+ "        };\n"
 				+ "    }\n"
