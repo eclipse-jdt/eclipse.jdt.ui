@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,8 +27,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
@@ -53,20 +51,23 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.InfoFilesUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.CreateModuleInfoAction;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -552,14 +553,39 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		super.dispose();
 	}
 
-	private void createJavaProjectModuleInfoFile() {
+	private void createJavaProjectModuleInfoFile() throws CoreException{
 		boolean createModuleInfoFile= fFirstPage.getCreateModuleInfoFile();
-		if (createModuleInfoFile) {
-			Display.getDefault().asyncExec(() -> {
-				CreateModuleInfoAction action= new CreateModuleInfoAction();
-				action.selectionChanged(null, new StructuredSelection(getJavaProject()));
-				action.run(null);
-			});
+		IPackageFragmentRoot packageFragmentRoot= getPackageFragmentRoot();
+		IPackageFragment pkgFragment= (packageFragmentRoot == null) ? null : packageFragmentRoot.getPackageFragment(""); //$NON-NLS-1$
+		if (createModuleInfoFile && pkgFragment != null) {
+			String moduleName= fFirstPage.getModuleName();
+			String moduleContent= "module " + moduleName + " {" +  System.lineSeparator() + "}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			InfoFilesUtil.createInfoJavaFile(JavaModelUtil.MODULE_INFO_JAVA, moduleContent, pkgFragment, fFirstPage.getGenerateCommentsInModuleInfoFile(), new NullProgressMonitor());
 		}
+	}
+
+	private IPackageFragmentRoot getPackageFragmentRoot() {
+		IJavaProject javaProject= getJavaProject();
+		try {
+			IPackageFragmentRoot[] packageFragmentRoots= javaProject.getPackageFragmentRoots();
+			List<IPackageFragmentRoot> packageFragmentRootsAsList= new ArrayList<>(Arrays.asList(packageFragmentRoots));
+			for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
+				IResource res= packageFragmentRoot.getCorrespondingResource();
+				if (res == null || res.getType() != IResource.FOLDER || packageFragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE) {
+					packageFragmentRootsAsList.remove(packageFragmentRoot);
+				}
+			}
+			packageFragmentRoots= packageFragmentRootsAsList.toArray(new IPackageFragmentRoot[packageFragmentRootsAsList.size()]);
+
+			IPackageFragmentRoot targetPkgFragmentRoot= null;
+
+			if (packageFragmentRoots.length > 0) {
+				targetPkgFragmentRoot= packageFragmentRoots[0];
+			}
+			return targetPkgFragmentRoot;
+		} catch (JavaModelException e) {
+			return null;
+		}
+
 	}
 }
