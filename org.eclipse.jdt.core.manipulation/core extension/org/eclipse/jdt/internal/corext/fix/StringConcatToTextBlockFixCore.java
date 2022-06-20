@@ -92,7 +92,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		@Override
 		public boolean visit(final Assignment visited) {
 			ITypeBinding typeBinding= visited.resolveTypeBinding();
-			if (!typeBinding.getQualifiedName().equals(JAVA_STRING)) {
+			if (typeBinding == null || !typeBinding.getQualifiedName().equals(JAVA_STRING)) {
 				return false;
 			}
 			return true;

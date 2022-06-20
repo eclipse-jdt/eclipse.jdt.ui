@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -4029,7 +4029,11 @@ public class ASTNodes {
 			original= comment.matcher(original).replaceFirst(""); //$NON-NLS-1$
 			original= leadingspaces_start.matcher(original).replaceAll(""); //$NON-NLS-1$
 			original= leadingspaces.matcher(original).replaceAll("\n"); //$NON-NLS-1$
-			String originalmodified=original.replace(visited.toString(), replace_with_Call.toString());
+			String visitedString= buffer.substring(visited.getStartPosition(), visited.getStartPosition() + visited.getLength());
+			// we are using the toString() method to get string representation of replace_with_Call so tweak string to
+			// add spaces between parameters
+			String replacementCallString= replace_with_Call.toString().replaceAll(",", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+			String originalmodified= original.replace(visitedString, replacementCallString);
 			replacement= rewrite.createStringPlaceholder(originalmodified, st.getNodeType());
 			rewrite.replace(st, replacement, editGroup);
 		} catch (JavaModelException e) {

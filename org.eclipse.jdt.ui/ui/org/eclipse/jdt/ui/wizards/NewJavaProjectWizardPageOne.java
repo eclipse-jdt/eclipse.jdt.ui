@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.core.filesystem.URIUtil;
 
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -75,6 +76,7 @@ import org.eclipse.ui.dialogs.WorkingSetConfigurationBlock;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -93,6 +95,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
@@ -121,6 +124,8 @@ import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
  * @since 3.4
  */
 public class NewJavaProjectWizardPageOne extends WizardPage {
+
+	private static String EMPTY_STR= ""; //$NON-NLS-1$
 
 	/**
 	 * Request a project name. Fires an event whenever the text field is
@@ -168,6 +173,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		@Override
 		public void dialogFieldChanged(DialogField field) {
 			fireEvent();
+			fModuleGroup.updateModuleNameHintTextVisibility();
 		}
 	}
 
@@ -804,10 +810,15 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 	}
 
-	private final class ModuleGroup implements IDialogFieldListener{
+	@SuppressWarnings("deprecation")
+	private final class ModuleGroup extends Observable implements IDialogFieldListener{
 
 		private final String LAST_SELECTED_CREATE_MODULEINFO_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.create.moduleinfo"; //$NON-NLS-1$
+		private final String LAST_SELECTED_CREATE_MODULEINFO_COMMENT_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.create.moduleinfo.comments"; //$NON-NLS-1$
 		private final SelectionButtonDialogField fCreateModuleInfo;
+		private final SelectionButtonDialogField fAddCommentButton;
+		private final StringDialogField fModuleNameDialogField;
+		private final DialogField fModuleNameHintText;
 		private boolean savePreference;
 
 		public ModuleGroup() {
@@ -815,6 +826,16 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fCreateModuleInfo.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_Create_ModuleInfoFile_name);
 			fCreateModuleInfo.setDialogFieldListener(this);
 			fCreateModuleInfo.setEnabled(false);
+			fAddCommentButton= new SelectionButtonDialogField(SWT.CHECK);
+			fAddCommentButton.setLabelText(NewWizardMessages.NewTypeWizardPage_addcomment_label);
+			fAddCommentButton.setDialogFieldListener(this);
+			fAddCommentButton.setEnabled(false);
+			fModuleNameDialogField= new StringDialogField();
+			fModuleNameDialogField.setDialogFieldListener(this);
+			fModuleNameDialogField.setLabelText(NewWizardMessages.NewModuleInfoWizardPage_module_label);
+			fModuleNameDialogField.setEnabled(false);
+			fModuleNameHintText= new DialogField();
+			fModuleNameHintText.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_Module_group_empty_name);
 			savePreference= false;
 		}
 
@@ -827,12 +848,20 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 
 		public Control createControl(Composite composite) {
+			GridLayout layout= new GridLayout();
+			layout.numColumns= 2;
 			Group moduleGroup= new Group(composite, SWT.NONE);
 			moduleGroup.setFont(composite.getFont());
 			moduleGroup.setText(NewWizardMessages.NewJavaProjectWizardPageOne_Module_group);
-			moduleGroup.setLayout(new GridLayout(1, false));
+			moduleGroup.setLayout(layout);
 
-			fCreateModuleInfo.doFillIntoGrid(moduleGroup, 1);
+			fCreateModuleInfo.doFillIntoGrid(moduleGroup, 2);
+			fModuleNameDialogField.doFillIntoGrid(moduleGroup, 2);
+			fAddCommentButton.doFillIntoGrid(moduleGroup, 2);
+			fModuleNameHintText.doFillIntoGrid(moduleGroup, 2);
+			fModuleNameHintText.getLabelControl(moduleGroup).setVisible(false);
+			LayoutUtil.setHorizontalGrabbing(fModuleNameDialogField.getTextControl(null));
+
 			return moduleGroup;
 		}
 
@@ -844,27 +873,121 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				enable= true;
 			}
 			fCreateModuleInfo.setEnabled(enable);
+			fModuleNameDialogField.setEnabled(enable);
+			fAddCommentButton.setEnabled(enable);
+			fModuleNameHintText.getLabelControl(null).setVisible(false);
 			savePreference= false;
 			if (!enable) {
 				fCreateModuleInfo.setSelection(false);
 			} else if(oldValEnabled != enable) {
 				String setting=JavaPlugin.getDefault().getDialogSettings().get(LAST_SELECTED_CREATE_MODULEINFO_SETTINGS_KEY);
-				fCreateModuleInfo.setSelection((setting == null) ? true : Boolean.parseBoolean(setting));
+				boolean val= (setting == null) ? true : Boolean.parseBoolean(setting);
+				fCreateModuleInfo.setSelection(val);
 			}
+			updateModuleFields();
 			savePreference= true;
+			setChanged();
+			notifyObservers();
 		}
 
 		public boolean getCreateModuleInfoFile() {
 			return fCreateModuleInfo.isSelected();
 		}
 
+		public String getModuleName() {
+			return fModuleNameDialogField.getText().trim();
+		}
+
+		public boolean getGenerateCommentsInModuleInfoFile() {
+			return fAddCommentButton.isSelected();
+		}
+
+		public String getModuleNameOrProjectName() {
+			String moduleName = getModuleName();
+			if (moduleName == null || moduleName.length() == 0) {
+				moduleName= fNameGroup.getName();
+			}
+			return  moduleName;
+		}
+
+		public void updateModuleNameHintTextVisibility() {
+			boolean visible= false;
+			String moduleName= getModuleNameOrProjectName();
+			if (moduleName != null && moduleName.length() != 0 && fCreateModuleInfo.isEnabled() && fCreateModuleInfo.isSelected() &&fModuleNameDialogField.isEnabled()) {
+				visible= true;
+				fModuleNameHintText.setLabelText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_Module_group_empty_name, moduleName));
+			}
+			try {
+				fModuleNameHintText.getLabelControl(null).setVisible(visible);
+			} catch (AssertionFailedException e) {
+				//do nothing , the label has not yet been created.
+			}
+			setChanged();
+			notifyObservers();
+		}
+
+		private void updateModuleFields() {
+			boolean enable= false;
+			boolean commentOldVal = fAddCommentButton.isEnabled() && fAddCommentButton.isSelected();
+			boolean moduleNameDlgFieldOldVal= fModuleNameDialogField.isEnabled();
+			if (fCreateModuleInfo.isEnabled()) {
+				if (fCreateModuleInfo.isSelected()) {
+					enable= true;
+				}
+			}
+			fModuleNameDialogField.setEnabled(enable);
+			fAddCommentButton.setEnabled(enable);
+			if (moduleNameDlgFieldOldVal != enable) {
+				fModuleNameDialogField.setText(EMPTY_STR);
+			}
+			if (commentOldVal != enable) {
+				if (enable) {
+					String setting=JavaPlugin.getDefault().getDialogSettings().get(LAST_SELECTED_CREATE_MODULEINFO_COMMENT_SETTINGS_KEY);
+					boolean val= (setting == null) ? true : Boolean.parseBoolean(setting);
+					fAddCommentButton.setSelection(val);
+				} else {
+					fAddCommentButton.setSelection(enable);
+				}
+			}
+			updateModuleNameHintTextVisibility();
+		}
 
 		@Override
 		public void dialogFieldChanged(DialogField field) {
-			// TODO Auto-generated method stub
-			if (field == fCreateModuleInfo && savePreference) {
-				JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_CREATE_MODULEINFO_SETTINGS_KEY, fCreateModuleInfo.isSelected());
+			if (field == fCreateModuleInfo) {
+				updateModuleFields();
+				if (savePreference) {
+					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_CREATE_MODULEINFO_SETTINGS_KEY, fCreateModuleInfo.isSelected());
+					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_CREATE_MODULEINFO_COMMENT_SETTINGS_KEY, fCreateModuleInfo.isSelected() && fAddCommentButton.isEnabled() && fAddCommentButton.isSelected());
+				}
+			} else if (field == fAddCommentButton && savePreference){
+				JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_CREATE_MODULEINFO_COMMENT_SETTINGS_KEY, fCreateModuleInfo.isSelected() && fAddCommentButton.isEnabled() && fAddCommentButton.isSelected());
+			} else if (field == fModuleNameDialogField) {
+				updateModuleFields();
 			}
+		}
+
+		private IStatus validateModuleName(String name) {
+			String compliance= getCompliance();
+			return JavaConventions.validateModuleName(name, compliance, compliance);
+		}
+
+		public IStatus getModuleStatus() {
+			StatusInfo status= new StatusInfo();
+			if (fCreateModuleInfo.isEnabled() && fCreateModuleInfo.isSelected()) {
+				String moduleName= getModuleNameOrProjectName();
+				if (moduleName != null && moduleName.length() > 0) {
+					IStatus val= validateModuleName(moduleName);
+					if (val.getSeverity() == IStatus.ERROR) {
+						status.setError(Messages.format(NewWizardMessages.NewModuleInfoWizardPage_error_InvalidModuleName, val.getMessage()));
+					} else if (val.getSeverity() == IStatus.WARNING) {
+						status.setWarning(Messages.format(NewWizardMessages.NewModuleInfoWizardPage_warning_DiscouragedModuleName, val.getMessage()));
+					}
+				} else {
+					status.setError(NewWizardMessages.NewModuleInfoWizardPage_error_EnterName);
+				}
+			}
+			return status;
 		}
 	}
 
@@ -1118,6 +1241,19 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				setPageComplete(false);
 				return;
 			}
+			final IStatus moduleNameStatus= fModuleGroup.getModuleStatus();
+			if (!moduleNameStatus.isOK()) {
+				if (moduleNameStatus.getSeverity() == IStatus.WARNING
+						|| moduleNameStatus.getSeverity() == IStatus.INFO) {
+					setMessage(moduleNameStatus.getMessage());
+					setErrorMessage(null);
+					setPageComplete(true);
+				} else {
+					setErrorMessage(moduleNameStatus.getMessage());
+					setPageComplete(false);
+				}
+				return;
+			}
 
 			setPageComplete(true);
 
@@ -1151,6 +1287,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	/**
 	 * Creates a new {@link NewJavaProjectWizardPageOne}.
 	 */
+	@SuppressWarnings("deprecation")
 	public NewJavaProjectWizardPageOne() {
 		super(PAGE_NAME);
 		setPageComplete(false);
@@ -1179,6 +1316,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		fNameGroup.addObserver(fValidator);
 		fLocationGroup.addObserver(fValidator);
 		fJREGroup.addObserver(fValidator);
+		fModuleGroup.addObserver(fValidator);
 
 		// initialize defaults
 		setProjectName(""); //$NON-NLS-1$
@@ -1441,6 +1579,31 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	}
 
 	/**
+	 * Returns the module name given.
+	 *
+	 * @return 'Module name:' text field value, trimming the String. If empty , returns
+	 * the project name, trimming the String.
+	 * @since 3.27
+	 */
+	public String getModuleName() {
+		String moduleName = fModuleGroup.getModuleName();
+		if (moduleName == null || moduleName.length() == 0) {
+			moduleName= fNameGroup.getName().trim();
+		}
+		return  moduleName;
+	}
+
+	/**
+	 * Returns if the module-info file should have comments.
+	 *
+	 * @return 'Generate comments' has been checked or not.
+	 * @since 3.27
+	 */
+	public boolean getGenerateCommentsInModuleInfoFile() {
+		return fModuleGroup.getGenerateCommentsInModuleInfoFile();
+	}
+
+	/**
 	 * Returns the default class path entries to be added on new projects. By default this is the JRE
 	 * container as selected by the user.
 	 *
@@ -1673,6 +1836,4 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		return true;
 	}
-
-
 }

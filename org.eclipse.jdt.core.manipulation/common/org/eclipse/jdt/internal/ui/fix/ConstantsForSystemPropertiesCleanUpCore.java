@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2021, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY;
-import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN;
+import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR;
@@ -23,7 +23,9 @@ import static org.eclipse.jdt.internal.corext.fix.FixMessages.ConstantsCleanUpFi
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.BOOLEAN_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.FILE_ENCODING;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.FILE_SEPARATOR;
+import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.INTEGER_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.LINE_SEPARATOR;
+import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.LONG_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.PATH_SEPARATOR;
 import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_description;
 
@@ -105,8 +107,10 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUpCore
 		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR)) {
 			fixSet.add(LINE_SEPARATOR);
 		}
-		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN)) {
+		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED)) {
 			fixSet.add(BOOLEAN_PROPERTY);
+			fixSet.add(INTEGER_PROPERTY);
+			fixSet.add(LONG_PROPERTY);
 		}
 		return fixSet;
 	}
@@ -155,9 +159,51 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUpCore
 		}
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.BOOLEAN_PROPERTY)) {
-			sb.append("Boolean b = Boolean.getBoolean(\"arbitrarykey\")\n"); //$NON-NLS-1$
+			sb.append("Boolean b = Boolean.getBoolean(\"arbitrarykey\");\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Boolean b = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.BOOLEAN_PROPERTY)) {
+			sb.append("Boolean b2 = Boolean.getBoolean(\"arbitrarykey\");\n"); //$NON-NLS-1$
+		} else {
+			sb.append("Boolean b2 = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\", \"false\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.INTEGER_PROPERTY)) {
+			sb.append("Integer i = Integer.getInteger(\"arbitrarykey\");\n"); //$NON-NLS-1$
+		} else {
+			sb.append("Integer i = Integer.parseInt(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.INTEGER_PROPERTY)) {
+			sb.append("Integer i2 = Integer.getInteger(\"arbitrarykey\");\n"); //$NON-NLS-1$
+		} else {
+			sb.append("Integer i2 = Integer.parseInt(System.getProperty(\"arbitrarykey\",\"0\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.INTEGER_PROPERTY)) {
+			sb.append("Integer i3 = Integer.getInteger(\"arbitrarykey\", 15);\n"); //$NON-NLS-1$
+		} else {
+			sb.append("Integer i3 = Integer.parseInt(System.getProperty(\"arbitrarykey\",\"15\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.LONG_PROPERTY)) {
+			sb.append("Long l = Long.getLong(\"arbitrarykey\");\n"); //$NON-NLS-1$
+		} else {
+			sb.append("Long l = Long.parseLong(System.getProperty(\"arbitrarykey\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.LONG_PROPERTY)) {
+			sb.append("Long l2 = Long.getLong(\"arbitrarykey\");\n"); //$NON-NLS-1$
+		} else {
+			sb.append("Long l2 = Long.parseLong(System.getProperty(\"arbitrarykey\" ,\"0\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.LONG_PROPERTY)) {
+			sb.append("Long l3 = Long.getLong(\"arbitrarykey\", 15);\n"); //$NON-NLS-1$
+		} else {
+			sb.append("Long l3 = Long.parseLong(System.getProperty(\"arbitrarykey\" ,\"15\"));\n"); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}

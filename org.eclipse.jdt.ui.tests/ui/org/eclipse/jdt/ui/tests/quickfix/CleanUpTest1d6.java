@@ -260,7 +260,8 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR);
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING);
-		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOOLEAN);
+		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED);
+
 		// Then
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
@@ -268,7 +269,9 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 						Messages.format(ConstantsCleanUp_description,UpdateProperty.PATH_SEPARATOR.toString()),
 						Messages.format(ConstantsCleanUp_description,UpdateProperty.LINE_SEPARATOR.toString()),
 						Messages.format(ConstantsCleanUp_description,UpdateProperty.FILE_ENCODING.toString()),
-						Messages.format(ConstantsCleanUp_description,UpdateProperty.BOOLEAN_PROPERTY.toString()))));
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.BOOLEAN_PROPERTY.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.INTEGER_PROPERTY.toString()),
+						Messages.format(ConstantsCleanUp_description,UpdateProperty.LONG_PROPERTY.toString()))));
 	}
 
 }

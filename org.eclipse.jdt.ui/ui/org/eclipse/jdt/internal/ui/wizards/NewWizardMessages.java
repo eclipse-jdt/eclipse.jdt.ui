@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -221,6 +221,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewEnumCreationWizard_title;
 	public static String NewEnumWizardPage_title;
 	public static String NewEnumWizardPage_description;
+	public static String NewEnumWizardPage_error_invalidTypeParameters;
 
 	public static String NewAnnotationCreationWizard_title;
 	public static String NewAnnotationWizardPage_add_documented;
@@ -228,6 +229,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewAnnotationWizardPage_add_target;
 	public static String NewAnnotationWizardPage_title;
 	public static String NewAnnotationWizardPage_description;
+	public static String NewAnnotationWizardPage_error_invalidTypeParameters;
 
 	public static String JavaCapabilityConfigurationPage_title;
 	public static String JavaCapabilityConfigurationPage_description;
@@ -271,6 +273,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageOne_Message_projectAlreadyExists;
 	public static String NewJavaProjectWizardPageOne_UnknownDefaultJRE_name;
 	public static String NewJavaProjectWizardPageOne_Module_group;
+	public static String NewJavaProjectWizardPageOne_Module_group_empty_name;
 	public static String NewJavaProjectWizardPageOne_Create_ModuleInfoFile_name;
 	public static String NewJavaProjectWizardPageTwo_error_remove_message;
 	public static String NewJavaProjectWizardPageTwo_error_remove_title;
