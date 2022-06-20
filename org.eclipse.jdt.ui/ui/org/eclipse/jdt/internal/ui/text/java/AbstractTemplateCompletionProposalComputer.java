@@ -91,7 +91,9 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 
 		/* Update relevance of template proposals that match with a keyword
 		 * give those templates slightly more relevance than the keyword to
-		 * sort them first.
+		 * sort them first only if we are not in auto activated mode. In auto
+		 * activated mode a user would like to highlight what is typed most of
+		 * the time.
 		 */
 		for (TemplateProposal curr : templateProposals) {
 			String name= curr.getTemplate().getName();
@@ -100,7 +102,7 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 				if (name.startsWith(keyword)) {
 					String content= curr.getTemplate().getPattern();
 					if (content.startsWith(keyword)) {
-						curr.setRelevance(keyWordResult.getRelevance() + 1);
+						curr.setRelevance(keyWordResult.getRelevance() + (context.isAutoActivated() ? -1 : 1));
 						break;
 					}
 				}

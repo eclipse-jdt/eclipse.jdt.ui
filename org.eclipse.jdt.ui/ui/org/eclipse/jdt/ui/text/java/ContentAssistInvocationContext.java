@@ -43,13 +43,14 @@ public class ContentAssistInvocationContext {
 	private final ITextViewer fViewer;
 	private final IDocument fDocument;
 	private final int fOffset;
+	private final boolean fAutoActivated;
 
 	/* cached additional info */
 	private CharSequence fPrefix;
 
 	/**
 	 * Equivalent to
-	 * {@linkplain #ContentAssistInvocationContext(ITextViewer, int) ContentAssistInvocationContext(viewer, viewer.getSelectedRange().x)}.
+	 * {@linkplain #ContentAssistInvocationContext(ITextViewer, int, boolean) ContentAssistInvocationContext(viewer, viewer.getSelectedRange().x)}.
 	 *
 	 * @param viewer the text viewer that content assist is invoked in
 	 */
@@ -64,10 +65,22 @@ public class ContentAssistInvocationContext {
 	 * @param offset the offset into the viewer's document where content assist is invoked at
 	 */
 	public ContentAssistInvocationContext(ITextViewer viewer, int offset) {
+		this(viewer, viewer.getSelectedRange().x, false);
+	}
+
+	/**
+	 * Creates a new context for the given viewer and offset.
+	 *
+	 * @param viewer the text viewer that content assist is invoked in
+	 * @param offset the offset into the viewer's document where content assist is invoked at
+	 * @param autoActivated the current completion session is auto activated or not.
+	 */
+	public ContentAssistInvocationContext(ITextViewer viewer, int offset, boolean autoActivated) {
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
 		fDocument= null;
 		fOffset= offset;
+		fAutoActivated = autoActivated;
 	}
 
 	/**
@@ -77,6 +90,7 @@ public class ContentAssistInvocationContext {
 		fDocument= null;
 		fViewer= null;
 		fOffset= -1;
+		fAutoActivated = false;
 	}
 
 	/**
@@ -84,13 +98,15 @@ public class ContentAssistInvocationContext {
 	 *
 	 * @param document the document that content assist is invoked in
 	 * @param offset the offset into the document where content assist is invoked at
+	 * @param autoActivated the current completion session is auto activated or not.
 	 */
-	public ContentAssistInvocationContext(IDocument document, int offset) {
+	public ContentAssistInvocationContext(IDocument document, int offset, boolean autoActivated) {
 		Assert.isNotNull(document);
 		Assert.isTrue(offset >= 0);
 		fViewer= null;
 		fDocument= document;
 		fOffset= offset;
+		fAutoActivated = autoActivated;
 	}
 
 	/**
@@ -227,5 +243,12 @@ public class ContentAssistInvocationContext {
 		return null;
 	}
 
-
+	/**
+	 * Return how the current completion session was triggered.
+	 *
+	 * @return <code>true</code> if it is triggered automatically.
+	 */
+	public boolean isAutoActivated() {
+		return fAutoActivated;
+	}
 }
