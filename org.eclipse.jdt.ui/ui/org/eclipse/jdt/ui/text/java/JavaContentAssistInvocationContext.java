@@ -68,7 +68,21 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	 * @param editor the editor that content assist is invoked in
 	 */
 	public JavaContentAssistInvocationContext(ITextViewer viewer, int offset, IEditorPart editor) {
-		super(viewer, offset);
+		this(viewer, offset, editor, false);
+	}
+
+	/**
+	 * Creates a new context.
+	 *
+	 * @param viewer the viewer used by the editor
+	 * @param offset the invocation offset
+	 * @param editor the editor that content assist is invoked in
+	 * @param autoActivated the current completion session is auto activated or not.
+	 *
+	 * @since 3.28
+	 */
+	public JavaContentAssistInvocationContext(ITextViewer viewer, int offset, IEditorPart editor, boolean autoActivated) {
+		super(viewer, offset, autoActivated);
 		Assert.isNotNull(editor);
 		fEditor= editor;
 	}

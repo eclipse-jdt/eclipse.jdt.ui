@@ -117,6 +117,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 			fIterationGesture= getIterationGesture();
 			KeySequence binding= getIterationBinding();
+			fAutoActivated= event.isAutoActivated;
 
 			// This may show the warning dialog if all categories are disabled
 			setCategoryIteration();
@@ -188,6 +189,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			fSelectedProposal= null;
 			fCategoryIteration= null;
 			fRepetition= -1;
+			fAutoActivated = false;
 			fIterationGesture= null;
 			if (event.assistant instanceof IContentAssistantExtension2) {
 				IContentAssistantExtension2 extension= (IContentAssistantExtension2) event.assistant;
@@ -235,6 +237,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private ICompletionProposal fSelectedProposal;
 
 	private char[] fCompletionAutoActivationCharacters;
+	private boolean fAutoActivated = false;
 
 	/* cycling stuff */
 	private int fRepetition= -1;
@@ -282,7 +285,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		IProgressMonitor monitor= createProgressMonitor();
 		monitor.beginTask(JavaTextMessages.ContentAssistProcessor_computing_proposals, fCategories.size() + 1);
 
-		ContentAssistInvocationContext context= createContext(viewer, offset);
+		ContentAssistInvocationContext context= createContext(viewer, offset, fAutoActivated);
 		long setup= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_collecting_proposals);
@@ -383,7 +386,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 	private List<IContextInformation> collectContextInformation(ITextViewer viewer, int offset, IProgressMonitor monitor) {
 		List<IContextInformation> proposals= new ArrayList<>();
-		ContentAssistInvocationContext context= createContext(viewer, offset);
+		ContentAssistInvocationContext context= createContext(viewer, offset, fAutoActivated);
 
 		List<CompletionProposalCategory> providers= getCategories();
 		for (CompletionProposalCategory cat : providers) {
@@ -480,10 +483,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 *
 	 * @param viewer the viewer that content assist is invoked on
 	 * @param offset the content assist offset
+	 * @param autoActivated the current completion session is auto activated or not.
 	 * @return the context to be passed to the computers
 	 */
-	protected ContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
-		return new ContentAssistInvocationContext(viewer, offset);
+	protected ContentAssistInvocationContext createContext(ITextViewer viewer, int offset, boolean autoActivated) {
+		return new ContentAssistInvocationContext(viewer, offset, autoActivated);
 	}
 
 	private List<CompletionProposalCategory> getCategories() {
