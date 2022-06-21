@@ -408,7 +408,6 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			type= typedAncestor.getType();
 		}
 		ParameterizedType mytype= null;
-		SimpleType object= null;
 		Type type2= null;
 		if (type == null) {
 			looptargettype= "java.lang.Object"; //$NON-NLS-1$
@@ -421,12 +420,13 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		} else if (type instanceof ParameterizedType) {
 			mytype= (ParameterizedType) type;
 			type2= mytype.getType();
-			object= (SimpleType) mytype.typeArguments().get(0);
+			List<Type> typeArguments= mytype.typeArguments();
 			looptargettype= type2.resolveBinding().getErasure().getQualifiedName();
 			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
 			ParameterizedType genericType= ast.newParameterizedType(collectionType);
-			String fullyQualifiedName= object.getName().getFullyQualifiedName();
-			genericType.typeArguments().add(ast.newSimpleType(ast.newName(fullyQualifiedName)));
+			for (Type typeArgument : typeArguments) {
+				addGenericTypes(ast, typeArgument, genericType, cuRewrite);
+			}
 			result.setType(genericType);
 		} else {
 			looptargettype= type.resolveBinding().getQualifiedName();
@@ -464,6 +464,24 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		}
 		newEnhancedForStatement.setBody(ASTNodes.createMoveTarget(rewrite, hit.whileStatement.getBody()));
 		ASTNodes.replaceButKeepComment(rewrite, hit.whileStatement, newEnhancedForStatement, group);
+	}
+
+	private void addGenericTypes(AST ast, Type typeArgument, ParameterizedType genericType, CompilationUnitRewrite cuRewrite) {
+		if (typeArgument instanceof SimpleType) {
+			String fullyQualifiedName= ((SimpleType)typeArgument).getName().getFullyQualifiedName();
+			genericType.typeArguments().add(ast.newSimpleType(ast.newName(fullyQualifiedName)));
+		} else if (typeArgument instanceof ParameterizedType) {
+			ParameterizedType pType= (ParameterizedType)typeArgument;
+			Type pType2= pType.getType();
+			String pTypeName= pType2.resolveBinding().getErasure().getQualifiedName();
+			Type newPTypeType= ast.newSimpleType(addImport(pTypeName, cuRewrite, ast));
+			ParameterizedType newGenericType= ast.newParameterizedType(newPTypeType);
+			List<Type> pTypeArguments= pType.typeArguments();
+			for (Type pTypeArgument : pTypeArguments) {
+				addGenericTypes(ast, pTypeArgument, newGenericType, cuRewrite);
+			}
+			genericType.typeArguments().add(newGenericType);
+		}
 	}
 
 	@Override
