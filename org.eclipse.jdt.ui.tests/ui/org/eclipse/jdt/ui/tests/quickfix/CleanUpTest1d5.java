@@ -1298,6 +1298,31 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testJava50ForLoopIssue109() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        List<String> list1 = new ArrayList();\n" //
+				+ "        for (int i = 0; i < list1.size(); i++) {\n" //
+				+ "            String s1 = list1.get(i);\n" //
+				+ "            String s2 = list1.get(i);\n" //
+				+ "            System.out.println(s1 + \",\" + s2); //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testBug550726() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
