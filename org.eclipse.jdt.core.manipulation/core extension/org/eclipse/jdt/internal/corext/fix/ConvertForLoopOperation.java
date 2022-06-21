@@ -462,6 +462,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		Statement body= statement.getBody();
 		try {
 			body.accept(new GenericVisitor() {
+				private boolean fGetSeen= false;
 				@Override
 				protected boolean visitNode(ASTNode node) {
 					if (node instanceof ContinueStatement) {
@@ -567,6 +568,11 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 									!GET_QUERY.equals(methodName) &&
 									!ISEMPTY_QUERY.equals(methodName)) {
 								throw new InvalidBodyError();
+							} else if (GET_QUERY.equals(methodName)) {
+								if (fGetSeen) {
+									throw new InvalidBodyError();
+								}
+								fGetSeen= true;
 							}
 						}
 					}
