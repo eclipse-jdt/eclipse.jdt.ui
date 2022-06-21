@@ -425,16 +425,12 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			looptargettype= type2.resolveBinding().getErasure().getQualifiedName();
 			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
 			ParameterizedType genericType= ast.newParameterizedType(collectionType);
-			if(typeArguments.size()==1) {
-				object= typeArguments.get(0);
-				String fullyQualifiedName= object.getName().getFullyQualifiedName();
-				genericType.typeArguments().add(ast.newSimpleType(ast.newName(fullyQualifiedName)));
-			} else if(typeArguments.size()==2){
-				object= typeArguments.get(0);
+			object= typeArguments.get(0);
+			String fullyQualifiedName= object.getName().getFullyQualifiedName();
+			genericType.typeArguments().add(ast.newSimpleType(ast.newName(fullyQualifiedName)));
+			if(typeArguments.size()==2){
 				SimpleType object2= typeArguments.get(1);
-				String fullyQualifiedName= object.getName().getFullyQualifiedName();
 				String fullyQualifiedName2= object2.getName().getFullyQualifiedName();
-				genericType.typeArguments().add(ast.newSimpleType(ast.newName(fullyQualifiedName)));
 				genericType.typeArguments().add(ast.newSimpleType(ast.newName(fullyQualifiedName2)));
 			}
 			result.setType(genericType);
