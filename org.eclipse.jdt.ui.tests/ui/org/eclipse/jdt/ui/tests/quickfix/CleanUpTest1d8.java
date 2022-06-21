@@ -4381,7 +4381,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		                + "        }\n"
 		                + "    }\n"
 		                + "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
@@ -4398,6 +4398,48 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	/**
+	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/109
+	 *
+	 * @throws CoreException
+	 */
+	@Test
+	public void testWhileIssue109_EntrySet() throws CoreException {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				+ "import java.util.*;\n"
+				+ "import java.util.Map.Entry;\n"
+				+ "public class Test {\n"
+				+ "		void m() {\n"
+				+ "			Map<String, Object> map = Map.of(\"Hello\", new Object());\n"
+				+ "			Iterator<Entry<String, Object>> iterator = map.entrySet().iterator();\n"
+				+ "			while (iterator.hasNext()) {\n"
+				+ "				Entry<String, Object> entry = iterator.next();\n"
+				+ "				System.out.println(entry);\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		String expected= "" //
+				+ "package test;\n"
+				+ "import java.util.*;\n"
+				+ "import java.util.Map.Entry;\n"
+				+ "public class Test {\n"
+				+ "		void m() {\n"
+				+ "			Map<String, Object> map = Map.of(\"Hello\", new Object());\n"
+				+ "			for (Entry<String, Object> entry : map.entrySet()) {\n"
+				+ "				System.out.println(entry);\n"
+				+ "			}\n"
+				+ "		}\n"
+				+ "}\n";
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
