@@ -408,7 +408,6 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			type= typedAncestor.getType();
 		}
 		ParameterizedType mytype= null;
-		SimpleType object= null;
 		Type type2= null;
 		if (type == null) {
 			looptargettype= "java.lang.Object"; //$NON-NLS-1$
