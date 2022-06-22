@@ -686,7 +686,11 @@ public class InlineTempRefactoring extends Refactoring {
 			declaringClass= declaringClass.getDeclaringClass();
 		}
 		for (int i= 0; i < numberOfClassesToSkip; i++) {
-			declaringClasses.remove(declaringClasses.size() - 1);
+			if (declaringClasses.size() > 0) {
+				declaringClasses.remove(declaringClasses.size() - 1);
+			} else {
+				break;
+			}
 		}
 		StringBuilder qualifiedName = new StringBuilder();
 		if (addPackage && declaringClasses.size() > 0) {
