@@ -405,6 +405,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 
 		String looptargettype;
 		Type type;
+		ITypeBinding varBinding= null;
 		if (hit.nextWithoutVariableDeclaration || !hit.nextFound) {
 			type= null;
 		} else {
@@ -413,8 +414,9 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			looptargettype= variable.resolveTypeBinding().getErasure().getQualifiedName();
 			VariableDeclarationStatement typedAncestor= ASTNodes.getTypedAncestor(hit.loopVarDeclaration, VariableDeclarationStatement.class);
 			type= typedAncestor.getType();
+			varBinding= type.resolveBinding();
 		}
-		if (type == null) {
+		if (type == null || varBinding == null) {
 			looptargettype= "java.lang.Object"; //$NON-NLS-1$
 			ITypeBinding binding= computeTypeArgument(hit.iteratorDeclaration);
 			if (binding != null) {
@@ -423,9 +425,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
 			result.setType(collectionType);
 		} else {
-			ITypeBinding varBinding= hit.iteratorDeclaration.getType().resolveBinding();
-			ITypeBinding elementType= getElementType(varBinding, ast);
-			Type importType= importType(elementType, hit.iteratorDeclaration, importRewrite, (CompilationUnit)hit.iteratorDeclaration.getRoot(), TypeLocation.LOCAL_VARIABLE);
+			Type importType= importType(varBinding, hit.iteratorDeclaration, importRewrite, (CompilationUnit)hit.iteratorDeclaration.getRoot(), TypeLocation.LOCAL_VARIABLE);
 			remover.registerAddedImports(importType);
 
 			result.setType(importType);
@@ -494,6 +494,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 				}
 				return arg;
 			}
+			return iterator;
 		}
 		return ast.resolveWellKnownType(Object.class.getCanonicalName());
 	}
