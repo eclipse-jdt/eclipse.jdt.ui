@@ -53,7 +53,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.common.HelperVisitor;
 import org.eclipse.jdt.internal.common.ReferenceHolder;
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
@@ -473,30 +472,6 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 	private Type importType(final ITypeBinding toImport, final ASTNode accessor, ImportRewrite imports, final CompilationUnit compilationUnit, TypeLocation location) {
 		ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, accessor.getStartPosition(), imports);
 		return imports.addImport(toImport, compilationUnit.getAST(), importContext, location);
-	}
-
-	/**
-	 * Returns the type of elements returned by the iterator.
-	 *
-	 * @param iterator
-	 *            the iterator type binding, or <code>null</code>
-	 * @param ast
-	 *            the AST
-	 * @return the element type
-	 */
-	private ITypeBinding getElementType(final ITypeBinding iterator, AST ast) {
-		if (iterator != null) {
-			ITypeBinding[] bindings= iterator.getTypeArguments();
-			if (bindings.length > 0) {
-				ITypeBinding arg= bindings[0];
-				if (arg.isWildcardType()) {
-					arg= ASTResolving.normalizeWildcardType(arg, true, ast);
-				}
-				return arg;
-			}
-			return iterator;
-		}
-		return ast.resolveWellKnownType(Object.class.getCanonicalName());
 	}
 
 	@Override
