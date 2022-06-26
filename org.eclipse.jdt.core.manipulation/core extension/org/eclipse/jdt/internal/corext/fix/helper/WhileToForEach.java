@@ -36,10 +36,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -49,9 +47,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.common.HelperVisitor;
 import org.eclipse.jdt.internal.common.ReferenceHolder;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -59,6 +61,7 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCo
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopOperation;
 import org.eclipse.jdt.internal.corext.fix.UseIteratorToForLoopFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 
 /**
  * Find: while (it.hasNext()){ System.out.println(it.next()); }
@@ -390,6 +393,9 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 
+		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+		ImportRemover remover= cuRewrite.getImportRemover();
+
 		EnhancedForStatement newEnhancedForStatement= ast.newEnhancedForStatement();
 
 		SingleVariableDeclaration result= ast.newSingleVariableDeclaration();
@@ -399,6 +405,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 
 		String looptargettype;
 		Type type;
+		ITypeBinding varBinding= null;
 		if (hit.nextWithoutVariableDeclaration || !hit.nextFound) {
 			type= null;
 		} else {
@@ -407,10 +414,9 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			looptargettype= variable.resolveTypeBinding().getErasure().getQualifiedName();
 			VariableDeclarationStatement typedAncestor= ASTNodes.getTypedAncestor(hit.loopVarDeclaration, VariableDeclarationStatement.class);
 			type= typedAncestor.getType();
+			varBinding= type.resolveBinding();
 		}
-		ParameterizedType mytype= null;
-		Type type2= null;
-		if (type == null) {
+		if (type == null || varBinding == null) {
 			looptargettype= "java.lang.Object"; //$NON-NLS-1$
 			ITypeBinding binding= computeTypeArgument(hit.iteratorDeclaration);
 			if (binding != null) {
@@ -418,23 +424,12 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			}
 			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
 			result.setType(collectionType);
-		} else if (type instanceof ParameterizedType) {
-			mytype= (ParameterizedType) type;
-			type2= mytype.getType();
-			List<Type> typeArguments= mytype.typeArguments();
-			looptargettype= type2.resolveBinding().getErasure().getQualifiedName();
-			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
-			ParameterizedType genericType= ast.newParameterizedType(collectionType);
-			for (Type typeArgument : typeArguments) {
-				addGenericTypes(ast, typeArgument, genericType, cuRewrite);
-			}
-			result.setType(genericType);
 		} else {
-			looptargettype= type.resolveBinding().getQualifiedName();
-			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
-			result.setType(collectionType);
-		}
+			Type importType= importType(varBinding, hit.iteratorDeclaration, importRewrite, (CompilationUnit)hit.iteratorDeclaration.getRoot(), TypeLocation.LOCAL_VARIABLE);
+			remover.registerAddedImports(importType);
 
+			result.setType(importType);
+		}
 		newEnhancedForStatement.setParameter(result);
 		if (hit.self) {
 			ThisExpression newThisExpression= ast.newThisExpression();
@@ -444,8 +439,10 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			newEnhancedForStatement.setExpression(loopExpression);
 		}
 		ASTNodes.removeButKeepComment(rewrite, hit.iteratorDeclaration, group);
+		remover.registerRemovedNode(hit.iteratorDeclaration.getType());
 		if (hit.iteratorCall != hit.iteratorDeclaration) {
 			ASTNodes.removeButKeepComment(rewrite, hit.iteratorCall, group);
+			remover.registerRemovedNode(hit.iteratorCall);
 		}
 		if (hit.nextFound) {
 			if (hit.nextWithoutVariableDeclaration) {
@@ -456,33 +453,26 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 				}
 				if (loopVarDeclaration.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
 					rewrite.remove(loopVarDeclaration.getParent(), group);
+					remover.registerRemovedNode(loopVarDeclaration);
 				} else {
 					ASTNodes.replaceButKeepComment(rewrite, hit.loopVarDeclaration, name, group);
+					remover.registerRemovedNode(hit.loopVarDeclaration);
 				}
 			} else {
-				ASTNodes.removeButKeepComment(rewrite, ASTNodes.getTypedAncestor(hit.loopVarDeclaration, VariableDeclarationStatement.class), group);
+				ASTNode node= ASTNodes.getTypedAncestor(hit.loopVarDeclaration, VariableDeclarationStatement.class);
+				ASTNodes.removeButKeepComment(rewrite, node, group);
+				remover.registerRemovedNode(node);
 			}
 		}
 		newEnhancedForStatement.setBody(ASTNodes.createMoveTarget(rewrite, hit.whileStatement.getBody()));
 		ASTNodes.replaceButKeepComment(rewrite, hit.whileStatement, newEnhancedForStatement, group);
+		remover.registerRemovedNode(hit.whileStatement.getExpression());
+		remover.applyRemoves(importRewrite);
 	}
 
-	private void addGenericTypes(AST ast, Type typeArgument, ParameterizedType genericType, CompilationUnitRewrite cuRewrite) {
-		if (typeArgument instanceof SimpleType) {
-			String fullyQualifiedName= ((SimpleType)typeArgument).getName().getFullyQualifiedName();
-			genericType.typeArguments().add(ast.newSimpleType(ast.newName(fullyQualifiedName)));
-		} else if (typeArgument instanceof ParameterizedType) {
-			ParameterizedType pType= (ParameterizedType)typeArgument;
-			Type pType2= pType.getType();
-			String pTypeName= pType2.resolveBinding().getErasure().getQualifiedName();
-			Type newPTypeType= ast.newSimpleType(addImport(pTypeName, cuRewrite, ast));
-			ParameterizedType newGenericType= ast.newParameterizedType(newPTypeType);
-			List<Type> pTypeArguments= pType.typeArguments();
-			for (Type pTypeArgument : pTypeArguments) {
-				addGenericTypes(ast, pTypeArgument, newGenericType, cuRewrite);
-			}
-			genericType.typeArguments().add(newGenericType);
-		}
+	private Type importType(final ITypeBinding toImport, final ASTNode accessor, ImportRewrite imports, final CompilationUnit compilationUnit, TypeLocation location) {
+		ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, accessor.getStartPosition(), imports);
+		return imports.addImport(toImport, compilationUnit.getAST(), importContext, location);
 	}
 
 	@Override

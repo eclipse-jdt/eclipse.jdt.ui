@@ -462,7 +462,6 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		Statement body= statement.getBody();
 		try {
 			body.accept(new GenericVisitor() {
-				private boolean fGetSeen= false;
 				@Override
 				protected boolean visitNode(ASTNode node) {
 					if (node instanceof ContinueStatement) {
@@ -568,11 +567,6 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 									!GET_QUERY.equals(methodName) &&
 									!ISEMPTY_QUERY.equals(methodName)) {
 								throw new InvalidBodyError();
-							} else if (GET_QUERY.equals(methodName)) {
-								if (fGetSeen) {
-									throw new InvalidBodyError();
-								}
-								fGetSeen= true;
 							}
 						}
 					}
@@ -891,7 +885,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 				if (fElementDeclaration != null && node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment)node.getParent();
 					IBinding targetBinding= fragment.getName().resolveBinding();
-					if (targetBinding != null) {
+					if (targetBinding != null && fragment.getName().getFullyQualifiedName().equals(parameterName)) {
 						VariableDeclarationStatement statement= (VariableDeclarationStatement)fragment.getParent();
 
 						if (statement.fragments().size() == 1) {
