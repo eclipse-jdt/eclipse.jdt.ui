@@ -260,6 +260,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		});
 		return !hit.isInvalid;
 	}
+
 	private static String computeNextVarname(WhileStatement whilestatement) {
 		String name= null;
 		Expression exp= whilestatement.getExpression();

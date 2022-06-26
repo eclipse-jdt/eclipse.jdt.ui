@@ -5818,6 +5818,86 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testWhileIssue120_WithOptionVarUsed() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    private static <K, V> List<V> method(Map<K, List<V>> map) {\n"
+						+ "       List<V> results = new ArrayList<>();\n"
+						+ "       Iterator<List<V>> iterator = map.values().iterator();\n"
+						+ "       while (iterator.hasNext()) {\n"
+						+ "          results.addAll(iterator.next());\n"
+						+ "       }\n"
+						+ "       return results;\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu1= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED,
+				CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
+
+		sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    private static <K, V> List<V> method(Map<K, List<V>> map) {\n"
+						+ "       List<V> results = new ArrayList<>();\n"
+						+ "       Iterator<List<V>> iterator = map.values().iterator();\n"
+						+ "       while (iterator.hasNext()) {\n"
+						+ "          results.addAll(iterator.next());\n"
+						+ "       }\n"
+						+ "       return results;\n"
+						+ "    }\n"
+						+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	@Ignore("java.lang.IllegalArgumentException: Invalid identifier : >List<V><")
+	@Test
+	public void testWhileIssue120_WithoutOptionVarUsed() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    private static <K, V> List<V> method(Map<K, List<V>> map) {\n"
+						+ "       List<V> results = new ArrayList<>();\n"
+						+ "       Iterator<List<V>> iterator = map.values().iterator();\n"
+						+ "       while (iterator.hasNext()) {\n"
+						+ "          results.addAll(iterator.next());\n"
+						+ "       }\n"
+						+ "       return results;\n"
+						+ "    }\n"
+						+ "}\n";
+		ICompilationUnit cu1= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test;\n"
+						+ "import java.util.*;\n"
+						+ "public class Test {\n"
+						+ "    private static <K, V> List<V> method(Map<K, List<V>> map) {\n"
+						+ "       List<V> results = new ArrayList<>();\n"
+						+ "       Iterator<List<V>> iterator = map.values().iterator();\n"
+						+ "       while (iterator.hasNext()) {\n"
+						+ "          results.addAll(iterator.next());\n"
+						+ "       }\n"
+						+ "       return results;\n"
+						+ "    }\n"
+						+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	@Test
 	public void testWhileSubtype() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """

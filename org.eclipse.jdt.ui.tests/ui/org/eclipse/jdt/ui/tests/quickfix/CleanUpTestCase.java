@@ -153,6 +153,13 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 		commitProfile();
 	}
 
+	protected void enable(String... keys) throws CoreException {
+		for(String key:keys) {
+			fProfile.getSettings().put(key, CleanUpOptions.TRUE);
+		}
+		commitProfile();
+	}
+
 	private void commitProfile() throws CoreException {
 		List<Profile> profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
 		profiles.add(fProfile);
