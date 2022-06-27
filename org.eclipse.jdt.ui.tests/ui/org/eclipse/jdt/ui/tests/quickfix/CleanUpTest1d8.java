@@ -5857,7 +5857,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
-	@Ignore("java.lang.IllegalArgumentException: Invalid identifier : >List<V><")
 	@Test
 	public void testWhileIssue120_WithoutOptionVarUsed() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
