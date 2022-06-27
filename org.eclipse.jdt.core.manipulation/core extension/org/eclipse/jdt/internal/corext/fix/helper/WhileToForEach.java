@@ -15,6 +15,7 @@
 package org.eclipse.jdt.internal.corext.fix.helper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -36,6 +37,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -418,10 +420,16 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		if (type == null || varBinding == null) {
 			looptargettype= "java.lang.Object"; //$NON-NLS-1$
 			ITypeBinding binding= computeTypeArgument(hit.iteratorDeclaration);
+			Type collectionType= null;
 			if (binding != null) {
-				looptargettype= binding.getQualifiedName();
+				looptargettype= binding.getErasure().getQualifiedName();
+				if (binding.isParameterizedType()) {
+					collectionType= handleParametrizedType(binding, ast, cuRewrite);
+				}
 			}
-			Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
+			if (collectionType == null) {
+				collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
+			}
 			result.setType(collectionType);
 		} else {
 			Type importType= importType(varBinding, hit.iteratorDeclaration, importRewrite, (CompilationUnit)hit.iteratorDeclaration.getRoot(), TypeLocation.LOCAL_VARIABLE);
@@ -467,6 +475,29 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		ASTNodes.replaceButKeepComment(rewrite, hit.whileStatement, newEnhancedForStatement, group);
 		remover.registerRemovedNode(hit.whileStatement.getExpression());
 		remover.applyRemoves(importRewrite);
+	}
+
+	private Type handleParametrizedType(ITypeBinding binding, AST ast, CompilationUnitRewrite cuRewrite) {
+		ITypeBinding[] args= binding.getTypeArguments();
+		String looptargettype= binding.getErasure().getQualifiedName();
+		Type collectionType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
+		if (binding.isParameterizedType()) {
+			ParameterizedType pType= ast.newParameterizedType(collectionType);
+			Collection<Type> typeArgs= new ArrayList<>();
+			for (ITypeBinding arg : args) {
+				Type argType= null;
+				if (arg.isParameterizedType()) {
+					argType= handleParametrizedType(arg, ast, cuRewrite);
+				} else {
+					looptargettype= arg.getQualifiedName();
+					argType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));
+				}
+				typeArgs.add(argType);
+			}
+			pType.typeArguments().addAll(typeArgs);
+			collectionType = pType;
+		}
+		return collectionType;
 	}
 
 	private Type importType(final ITypeBinding toImport, final ASTNode accessor, ImportRewrite imports, final CompilationUnit compilationUnit, TypeLocation location) {
