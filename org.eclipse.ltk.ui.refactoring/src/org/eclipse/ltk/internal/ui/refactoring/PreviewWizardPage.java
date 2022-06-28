@@ -305,7 +305,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 */
 	public PreviewWizardPage(boolean wizard) {
 		super(PAGE_NAME, wizard);
-		setDescription(MessageFormat.format(RefactoringUIMessages.PreviewWizardPage_description,"0","","is")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		setDescription(RefactoringUIMessages.PreviewWizardPage_description_s);
 	}
 
 	/**
@@ -562,8 +562,11 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		if (fTreeViewerInputChange != null) {
 			input= AbstractChangeNode.createNode(null, fTreeViewerInputChange);
 			int filenumber= fTreeViewerInputChange.getFilenumber();
-			String fulldescription= MessageFormat.format(RefactoringUIMessages.PreviewWizardPage_description, String.valueOf(filenumber),filenumber==0?"":"s",filenumber==0?"is":"are"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			setDescription(fulldescription);
+			String fullDescription= RefactoringUIMessages.PreviewWizardPage_description_s;
+			if (filenumber > 1) {
+				fullDescription= MessageFormat.format(RefactoringUIMessages.PreviewWizardPage_description_m, String.valueOf(filenumber));
+			}
+			setDescription(fullDescription);
 		}
 		fTreeViewer.setInput(input);
 	}
