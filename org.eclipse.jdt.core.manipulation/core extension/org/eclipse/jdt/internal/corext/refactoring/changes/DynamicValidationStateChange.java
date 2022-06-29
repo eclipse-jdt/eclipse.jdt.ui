@@ -147,4 +147,10 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	public ISchedulingRule getSchedulingRule() {
 		return fSchedulingRule;
 	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(this.getFilenumber());
+	}
+
 }
