@@ -17413,7 +17413,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public boolean removeUselessInitialization() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        boolean reassignedVar = true;\n" //
-				+ "        reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        reassignedVar = \"\\n\".equals(File.pathSeparator);//$NON-NLS-1\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -17454,7 +17454,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public boolean removeUselessInitialization() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        boolean reassignedVar = \"\\n\".equals(File.pathSeparator);//$NON-NLS-1\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -17493,7 +17493,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public boolean removeUselessInitialization() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        boolean reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        boolean reassignedVar = \"\\n\".equals(File.pathSeparator);//$NON-NLS-1\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //

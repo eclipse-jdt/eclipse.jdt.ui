@@ -23,11 +23,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -36,6 +38,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
@@ -46,14 +49,16 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.C
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * A fix that removes passive assignment when the variable is reassigned before being read.
  */
-public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
+public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
+	private static final String IGNORE_LEADING_COMMENT= "ignoreLeadingComment"; //$NON-NLS-1$
+
 	public OverriddenAssignmentCleanUp() {
 		this(Collections.emptyMap());
 	}
@@ -102,10 +107,13 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		if (!isEnabled(CleanUpConstants.OVERRIDDEN_ASSIGNMENT)) {
 			return null;
 		}
+
+		ICompilationUnit cu= context.getCompilationUnit();
+		CompilationUnit unit= context.getAST();
 
 		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
 
@@ -150,7 +158,7 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 							stmtToInspect= ASTNodes.getNextSibling(stmtToInspect);
 						}
 
-						if (overridingAssignment != null) {
+						if (overridingAssignment != null && canMoveNls(node, overridingAssignment)) {
 							rewriteOperations.add(new OverriddenAssignmentOperation(node, fragment, overridingAssignment, firstSibling == stmtToInspect,
 									shouldMoveDown && isEnabled(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL)));
 							return false;
@@ -160,6 +168,44 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 
 				return true;
 			}
+
+			private boolean canMoveNls(VariableDeclarationStatement node, Assignment overridingAssignment) {
+				try {
+					return isOnOwnLine(node) && isOnOwnLine(overridingAssignment);
+				} catch (JavaModelException e) {
+					// can't guarantee correctness, so bail
+					return false;
+				}
+			}
+
+			private boolean isOnOwnLine(ASTNode node) throws JavaModelException {
+				// make sure there is only whitespace before and after the node (or a line comment)
+				int startLine= unit.getLineNumber(node.getStartPosition());
+				int endLine= unit.getLineNumber(node.getStartPosition() + node.getLength());
+				if (startLine != endLine) {
+					return false;
+				}
+				int lineStart= unit.getPosition(startLine, 0);
+				int lineEnd= unit.getPosition(startLine + 1, 0);
+				if (lineEnd < 0) {
+					lineEnd= unit.getLength();
+				}
+				String textBefore= cu.getBuffer().getText(lineStart, node.getStartPosition()-lineStart);
+				if (!textBefore.isBlank()) {
+					return false;
+				}
+
+				int nodeEnd= node.getStartPosition() + node.getLength();
+				String textAfter= cu.getBuffer().getText(nodeEnd, lineEnd - nodeEnd);
+				int i= 0;
+				while (i < textAfter.length() && (Character.isWhitespace(textAfter.charAt(i)) || textAfter.charAt(i) == ';')) {
+					i++;
+				}
+				if (i > textAfter.length() - 1) {
+					return true;
+				}
+				return textAfter.substring(i).startsWith("//"); //$NON-NLS-1$
+			}
 		});
 
 		if (rewriteOperations.isEmpty()) {
@@ -168,16 +214,6 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.OverriddenAssignmentCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
-	}
-
-	@Override
-	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocation problem) {
-		return false;
-	}
-
-	@Override
-	protected ICleanUpFix createFix(final CompilationUnit unit, final IProblemLocation[] problems) throws CoreException {
-		return null;
 	}
 
 	private static class OverriddenAssignmentOperation extends CompilationUnitRewriteOperation {
@@ -198,23 +234,33 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
+				@Override
+				public SourceRange computeSourceRange(final ASTNode nodeWithComment) {
+					if (Boolean.TRUE.equals(nodeWithComment.getProperty(IGNORE_LEADING_COMMENT))) {
+						ASTNode root= nodeWithComment.getRoot();
+						if (root instanceof CompilationUnit) {
+							CompilationUnit cu= (CompilationUnit) root;
+							int extendedEnd= cu.getExtendedStartPosition(nodeWithComment) + cu.getExtendedLength(nodeWithComment);
+
+							return new SourceRange(nodeWithComment.getStartPosition(), extendedEnd - nodeWithComment.getStartPosition());
+						}
+					}
+
+					return super.computeSourceRange(nodeWithComment);
+				}
+			});
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.OverriddenAssignmentCleanUp_description, cuRewrite);
 			boolean canMoveDown = overridingAssignment.getParent() instanceof ExpressionStatement;
 			boolean canMoveUp= followsImmediately || canMoveUp();
 
+
 			if (canMoveUp) {
-				// only move initialization up if there are no side effects and the assignment is a statement
-				var copy= rewrite.createCopyTarget(this.overridingAssignment.getRightHandSide());
-				rewrite.replace(fragment.getInitializer(), copy , group);
-				rewrite.remove(overridingAssignment.getParent(), group);
+				moveUp(cuRewrite, group);
 			} else if (canMoveDown && moveDown) {
-				var copy= rewrite.createCopyTarget(this.overridingAssignment.getRightHandSide());
-				rewrite.replace(fragment.getInitializer(), copy , group);
-				copy= rewrite.createCopyTarget(declaration);
-				rewrite.replace(overridingAssignment.getParent(), copy, group);
-				rewrite.remove(declaration, group);
+				moveDown(cuRewrite, group);
 			} else {
-				rewrite.remove(fragment.getInitializer(), group);
+				removeInitializer(cuRewrite, group);
 			}
 		}
 
@@ -248,6 +294,52 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 			visitor.traverseNodeInterruptibly(overridingAssignment.getRightHandSide());
 
 			return !visitor.preventsMoveUp;
+		}
+
+		private void removeInitializer(CompilationUnitRewrite cuRewrite, TextEditGroup group) throws JavaModelException {
+			ICompilationUnit cu= cuRewrite.getCu();
+			int nameEnd= fragment.getName().getStartPosition() + fragment.getName().getLength();
+			String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), nameEnd-declaration.getStartPosition());
+			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+			ASTNode replacementNode= astRewrite.createStringPlaceholder(declarationText+";", ASTNode.VARIABLE_DECLARATION_STATEMENT); //$NON-NLS-1$
+			declaration.setProperty(IGNORE_LEADING_COMMENT, Boolean.TRUE);
+			astRewrite.replace(declaration, replacementNode, group);
+		}
+
+		private void moveUp(final CompilationUnitRewrite cuRewrite, TextEditGroup group) throws JavaModelException {
+			ICompilationUnit cu= cuRewrite.getCu();
+
+			Expression rhs= overridingAssignment.getRightHandSide();
+			String rhsText= cu.getBuffer().getText(rhs.getStartPosition(), extendedEnd(cuRewrite.getRoot(), overridingAssignment.getParent()) - rhs.getStartPosition());
+
+			String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
+			String targetText= declarationText + rhsText;
+
+			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+			ASTNode replacementNode= astRewrite.createStringPlaceholder(targetText, ASTNode.VARIABLE_DECLARATION_STATEMENT);
+			declaration.setProperty(IGNORE_LEADING_COMMENT, Boolean.TRUE);
+			astRewrite.replace(declaration, replacementNode, group);
+			astRewrite.remove(overridingAssignment.getParent(), group);
+		}
+
+		private void moveDown(final CompilationUnitRewrite cuRewrite, TextEditGroup group) throws JavaModelException {
+			ICompilationUnit cu= cuRewrite.getCu();
+
+			Expression rhs= overridingAssignment.getRightHandSide();
+			String rhsText= cu.getBuffer().getText(rhs.getStartPosition(), extendedEnd(cuRewrite.getRoot(), overridingAssignment.getParent()) - rhs.getStartPosition());
+
+			String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
+
+			String targetText= declarationText + rhsText;
+
+			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+			ASTNode replacementNode= astRewrite.createStringPlaceholder(targetText, ASTNode.VARIABLE_DECLARATION_STATEMENT);
+			astRewrite.replace(overridingAssignment.getParent(), replacementNode, group);
+			astRewrite.remove(declaration, group);
+		}
+
+		int extendedEnd(CompilationUnit cu, ASTNode node) {
+			return cu.getExtendedStartPosition(node) + cu.getExtendedLength(node);
 		}
 	}
 }
