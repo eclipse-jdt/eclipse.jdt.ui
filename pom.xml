@@ -25,6 +25,7 @@
 
   <properties>
     <tycho.scmUrl>scm:git:https://github.com/eclipse-jdt/eclipse.jdt.ui.git</tycho.scmUrl>
+	  
   </properties>
 
   <!-- 
@@ -35,6 +36,9 @@
   <profiles>
     <profile>
       <id>build-individual-bundles</id>
+      <properties>
+      	<eclipse-p2-repo.url>http://download.eclipse.org/eclipse/updates/Y-builds</eclipse-p2-repo.url>
+      </properties>
       <repositories>
         <repository>
           <releases>
