@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -607,12 +607,12 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 			for (IExecutionEnvironment environment : environments) {
 				String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(environment);
-				if (defaultCC.endsWith(eeCompliance)) {
+				if (defaultCC.equals(eeCompliance)) {
 					return environment.getId();
 				}
 			}
 
-			return "JavaSE-1.7"; //$NON-NLS-1$
+			return "JavaSE-11"; //$NON-NLS-1$
 		}
 
 		private String getDefaultJVMLabel() {
