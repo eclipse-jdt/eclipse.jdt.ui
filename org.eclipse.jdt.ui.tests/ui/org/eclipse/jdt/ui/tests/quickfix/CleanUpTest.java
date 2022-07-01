@@ -17439,6 +17439,37 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
+				+ "    public void complexMoves(String str) {\n" //
+				+ "        String t = null;\n" //
+				+ "        String s = null;\n" //
+				+ "        // No move for multiple declarations\n" //
+				+ "        String v = \"ppp\", w = \"qqq\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        // No move for multiple statements on line\n" //
+				+ "        String k = \"rrr\"; String l = \"sss\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        int j = 7;\n" //
+				+ "        s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
+				+ "            \"xyz\" +\n" //
+				+ "            \"ghi\"; //$NON-NLS-1$\n" //
+				+ "        j = 4 +\n" //
+				+ "        	       // some comment\n" //
+				+ "        	       5 +\n" //
+				+ "        	       6;\n" //
+				+ "        t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
+				+ "        w = \"aaa\"; //$NON-NLS-1$\n" //
+				+ "        k = \"ttt\"; //$NON-NLS-1$\n" //
+				+ "        l = \"uuu\"; //$NON-NLS-1$\n" //
+				+ "        // No move when parent statement other than block is on same line\n" //
+				+ "        if (\"TRUE\".equals(str)) { var x= \"bar\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "           x = v;\n" //
+				+ "           System.out.println(x);\n" //
+				+ "        }\n" //
+				+ "        System.out.println(j);\n" //
+				+ "        System.out.println(k);\n" //
+				+ "        System.out.println(l);\n" //
+				+ "        System.out.println(s);\n" //
+				+ "        System.out.println(t);\n" //
+				+ "        System.out.println(w);\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
 
@@ -17478,6 +17509,34 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
+				+ "    public void complexMoves(String str) {\n" //
+				+ "        String t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
+				+ "        String s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
+				+ "                    \"xyz\" +\n" //
+				+ "                    \"ghi\"; //$NON-NLS-1$\n" //
+				+ "        // No move for multiple declarations\n" //
+				+ "        String v = \"ppp\", w = \"qqq\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        // No move for multiple statements on line\n" //
+				+ "        String k = \"rrr\"; String l = \"sss\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        int j = 4 +\n" //
+				+ "                \t       // some comment\n" //
+				+ "                \t       5 +\n" //
+				+ "                \t       6;\n" //
+				+ "        w = \"aaa\"; //$NON-NLS-1$\n" //
+				+ "        k = \"ttt\"; //$NON-NLS-1$\n" //
+				+ "        l = \"uuu\"; //$NON-NLS-1$\n" //
+				+ "        // No move when parent statement other than block is on same line\n" //
+				+ "        if (\"TRUE\".equals(str)) { var x= \"bar\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "           x = v;\n" //
+				+ "           System.out.println(x);\n" //
+				+ "        }\n" //
+				+ "        System.out.println(j);\n" //
+				+ "        System.out.println(k);\n" //
+				+ "        System.out.println(l);\n" //
+				+ "        System.out.println(s);\n" //
+				+ "        System.out.println(t);\n" //
+				+ "        System.out.println(w);\n" //
+				+ "    }\n" //
 				+ "}\n";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
@@ -17516,6 +17575,34 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        boolean reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
 				+ "        return reassignedPassiveVar;\n" //
+				+ "    }\n" //
+				+ "    public void complexMoves(String str) {\n" //
+				+ "        String t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
+				+ "        String s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
+				+ "                    \"xyz\" +\n" //
+				+ "                    \"ghi\"; //$NON-NLS-1$\n" //
+				+ "        // No move for multiple declarations\n" //
+				+ "        String v = \"ppp\", w = \"qqq\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        // No move for multiple statements on line\n" //
+				+ "        String k = \"rrr\"; String l = \"sss\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        int j = 4 +\n" //
+				+ "                \t       // some comment\n" //
+				+ "                \t       5 +\n" //
+				+ "                \t       6;\n" //
+				+ "        w = \"aaa\"; //$NON-NLS-1$\n" //
+				+ "        k = \"ttt\"; //$NON-NLS-1$\n" //
+				+ "        l = \"uuu\"; //$NON-NLS-1$\n" //
+				+ "        // No move when parent statement other than block is on same line\n" //
+				+ "        if (\"TRUE\".equals(str)) { var x= \"bar\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "           x = v;\n" //
+				+ "           System.out.println(x);\n" //
+				+ "        }\n" //
+				+ "        System.out.println(j);\n" //
+				+ "        System.out.println(k);\n" //
+				+ "        System.out.println(l);\n" //
+				+ "        System.out.println(s);\n" //
+				+ "        System.out.println(t);\n" //
+				+ "        System.out.println(w);\n" //
 				+ "    }\n" //
 				+ "}\n";
 

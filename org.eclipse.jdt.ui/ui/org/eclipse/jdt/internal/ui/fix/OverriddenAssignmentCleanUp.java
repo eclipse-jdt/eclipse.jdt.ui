@@ -112,7 +112,6 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 			return null;
 		}
 
-		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit unit= context.getAST();
 
 		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
@@ -158,7 +157,7 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 							stmtToInspect= ASTNodes.getNextSibling(stmtToInspect);
 						}
 
-						if (overridingAssignment != null && canMoveNls(node, overridingAssignment)) {
+						if (overridingAssignment != null && doesNotShareLines(node) && doesNotShareLines(overridingAssignment)) {
 							rewriteOperations.add(new OverriddenAssignmentOperation(node, fragment, overridingAssignment, firstSibling == stmtToInspect,
 									shouldMoveDown && isEnabled(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL)));
 							return false;
@@ -169,42 +168,39 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 				return true;
 			}
 
-			private boolean canMoveNls(VariableDeclarationStatement node, Assignment overridingAssignment) {
-				try {
-					return isOnOwnLine(node) && isOnOwnLine(overridingAssignment);
-				} catch (JavaModelException e) {
-					// can't guarantee correctness, so bail
+			/**
+			 * Check that statement containing ASTNode does not share lines with other statements
+			 *
+			 * @param node ASTNode
+			 * @return true if node's statement does not share lines with other statements otherwise false
+			 */
+			private boolean doesNotShareLines(ASTNode node) {
+				Statement stmt= null;
+				if (node instanceof Statement) {
+					stmt= (Statement)node;
+				} else {
+					stmt= (Statement)ASTNodes.getFirstAncestorOrNull(node, Statement.class);
+				}
+				if (stmt == null) {
 					return false;
 				}
-			}
+				int stmtStartLine= unit.getLineNumber(stmt.getStartPosition());
+				int stmtEndLine= unit.getLineNumber(stmt.getStartPosition() + stmt.getLength());
+				Statement prevStmt= ASTNodes.getPreviousSibling(stmt);
+				if (prevStmt == null) {
+					ASTNode parent= stmt.getParent();
+					while (parent != null && parent instanceof Block) {
+						parent= parent.getParent();
+					}
+					if (parent instanceof Statement) {
+						prevStmt= (Statement)parent;
+					}
+				}
+				Statement nextStmt= ASTNodes.getNextStatement(stmt);
+				int prevEndLine= prevStmt == null ? -1 : unit.getLineNumber(prevStmt.getStartPosition() + prevStmt.getLength());
+				int nextStartLine= nextStmt == null ? Integer.MAX_VALUE : unit.getLineNumber(nextStmt.getStartPosition());
 
-			private boolean isOnOwnLine(ASTNode node) throws JavaModelException {
-				// make sure there is only whitespace before and after the node (or a line comment)
-				int startLine= unit.getLineNumber(node.getStartPosition());
-				int endLine= unit.getLineNumber(node.getStartPosition() + node.getLength());
-				if (startLine != endLine) {
-					return false;
-				}
-				int lineStart= unit.getPosition(startLine, 0);
-				int lineEnd= unit.getPosition(startLine + 1, 0);
-				if (lineEnd < 0) {
-					lineEnd= unit.getLength();
-				}
-				String textBefore= cu.getBuffer().getText(lineStart, node.getStartPosition()-lineStart);
-				if (!textBefore.isBlank()) {
-					return false;
-				}
-
-				int nodeEnd= node.getStartPosition() + node.getLength();
-				String textAfter= cu.getBuffer().getText(nodeEnd, lineEnd - nodeEnd);
-				int i= 0;
-				while (i < textAfter.length() && (Character.isWhitespace(textAfter.charAt(i)) || textAfter.charAt(i) == ';')) {
-					i++;
-				}
-				if (i > textAfter.length() - 1) {
-					return true;
-				}
-				return textAfter.substring(i).startsWith("//"); //$NON-NLS-1$
+				return (stmtStartLine > prevEndLine) && (stmtEndLine < nextStartLine);
 			}
 		});
 
@@ -310,7 +306,7 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 			ICompilationUnit cu= cuRewrite.getCu();
 
 			Expression rhs= overridingAssignment.getRightHandSide();
-			String rhsText= cu.getBuffer().getText(rhs.getStartPosition(), extendedEnd(cuRewrite.getRoot(), overridingAssignment.getParent()) - rhs.getStartPosition());
+			String rhsText= cu.getBuffer().getText(extendedStart(cuRewrite.getRoot(), rhs), extendedEnd(cuRewrite.getRoot(), overridingAssignment.getParent()) - extendedStart(cuRewrite.getRoot(), rhs));
 
 			String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
 			String targetText= declarationText + rhsText;
@@ -340,6 +336,10 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 
 		int extendedEnd(CompilationUnit cu, ASTNode node) {
 			return cu.getExtendedStartPosition(node) + cu.getExtendedLength(node);
+		}
+
+		int extendedStart(CompilationUnit cu, ASTNode node) {
+			return cu.getExtendedStartPosition(node);
 		}
 	}
 }
