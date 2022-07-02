@@ -56,10 +56,11 @@
       <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
-          <includes>
-            <!--<include>org/eclipse/jdt/internal/common/TestJUnit5Suite.class</include>-->
+          <test>org/eclipse/jdt/internal/common/TestJUnit5Suite.class</test>
+          <!--<includes>
+            <include>org/eclipse/jdt/internal/common/TestJUnit5Suite.class</include>
             <include>org/eclipse/jdt/internal/common/VisitorTest.class</include>
-           </includes>
+           </includes>-->
           </configuration>
         </plugin>
     </plugins>
