@@ -18,6 +18,6 @@ import org.junit.platform.suite.api.Suite;
 
 @SelectPackages({"org.eclipse.jdt.internal.common"})
 @Suite
-public class JUnit5TestSuite {
+public class TestJUnit5Suite {
 
 }

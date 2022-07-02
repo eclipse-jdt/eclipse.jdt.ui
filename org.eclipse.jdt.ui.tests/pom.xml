@@ -20,7 +20,7 @@
   </parent>
   <groupId>org.eclipse.jdt</groupId>
   <artifactId>org.eclipse.jdt.ui.tests</artifactId>
-  <version>3.14.400-SNAPSHOT</version>
+  <version>3.14.500-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
   <properties>
     <defaultSigning-excludeInnerJars>true</defaultSigning-excludeInnerJars>
@@ -57,7 +57,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
           <includes>
-            <!--<include>org/eclipse/jdt/internal/common/JUnit5TestSuite.class</include>-->
+            <!--<include>org/eclipse/jdt/internal/common/TestJUnit5Suite.class</include>-->
             <include>org/eclipse/jdt/internal/common/VisitorTest.class</include>
            </includes>
           </configuration>
