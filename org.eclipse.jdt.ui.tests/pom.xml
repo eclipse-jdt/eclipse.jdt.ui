@@ -56,11 +56,12 @@
       <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
-          <test>org/eclipse/jdt/internal/common/TestJUnit5Suite.class</test>
-          <!--<includes>
-            <include>org/eclipse/jdt/internal/common/TestJUnit5Suite.class</include>
-            <include>org/eclipse/jdt/internal/common/VisitorTest.class</include>
-           </includes>-->
+        <!--  <test>org/eclipse/jdt/internal/common/TestJUnit5Suite.class</test>-->
+          <includes>
+         <!-- https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html -->
+            <include>**/TestJUnit5Suite.java</include>
+          <!--  <include>org/eclipse/jdt/internal/common/VisitorTest.class</include>-->
+           </includes>
           </configuration>
         </plugin>
     </plugins>
