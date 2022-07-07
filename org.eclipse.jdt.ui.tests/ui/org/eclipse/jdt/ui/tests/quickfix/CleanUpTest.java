@@ -17524,6 +17524,86 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoNotMoveAssignment() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean dontMoveForNestedReassignement() {\n" //
+				+ "        boolean reassignedVar= true;\n" //
+				+ "        if (System.lineSeparator()) {\n" //
+				+ "            reassignedVar = false;\n" //
+				+ "        }\n" //
+				+ "        reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E1.java", input, false, null);
+
+		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT);
+		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL);
+		disable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean dontMoveForNestedReassignement() {\n" //
+				+ "        boolean reassignedVar;\n" //
+				+ "        if (System.lineSeparator()) {\n" //
+				+ "            reassignedVar = false;\n" //
+				+ "        }\n" //
+				+ "        reassignedVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
+
+		input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E2 {\n" //
+				+ "    public boolean dontMoveForUndefinedVarst() {\n" //
+				+ "        boolean reassignedVar= true;\n" //
+				+ "        String pathSep= File.pathSeparator;\n" //
+				+ "        reassignedVar = \"\\n\".equals(pathSep);\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		cu= pack.createCompilationUnit("E2.java", input, false, null);
+
+		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT);
+		disable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL);
+		disable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
+
+		output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E2 {\n" //
+				+ "    public boolean dontMoveForUndefinedVarst() {\n" //
+				+ "        boolean reassignedVar;\n" //
+				+ "        String pathSep= File.pathSeparator;\n" //
+				+ "        reassignedVar = \"\\n\".equals(pathSep);\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
+	}
+
+	@Test
 	public void testDoNotRemoveAssignment() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
