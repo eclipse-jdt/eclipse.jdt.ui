@@ -548,6 +548,7 @@ public final class NewWizardMessages extends NLS {
 	public static String AddReadsBlock_targetModule_label;
 	//
 	public static String ModuleDependenciesPage_modules_label;
+	public static String ModuleDependenciesPage_addExport_notWith_release_info;
 	public static String ModuleDependenciesPage_addSystemModule_button;
 	public static String ModuleDependenciesPage_details_label;
 	public static String ModuleDependenciesPage_nonModularProject_dummy;
