@@ -848,6 +848,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_source;
+	public static String ComplianceConfigurationBlock_release_notWith_addExports_error;
 	public static String ProblemSeveritiesConfigurationBlock_enable_syntactic_null_analysis_for_fields;
 	public static String ProblemSeveritiesConfigurationBlock_inherit_null_annotations;
 	public static String ProblemSeveritiesConfigurationBlock_external_annotations_from_all_locations;
