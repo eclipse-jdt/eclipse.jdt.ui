@@ -23,10 +23,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
@@ -35,6 +38,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
@@ -120,10 +124,13 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 						Statement firstSibling= stmtToInspect;
 						Assignment overridingAssignment= null;
 
+						boolean shouldMoveDown= true;
 						while (stmtToInspect != null) {
-							if (!new VarDefinitionsUsesVisitor(variable, stmtToInspect, true).getReads().isEmpty()) {
+							VarDefinitionsUsesVisitor varDefinitionsUsesVisitor= new VarDefinitionsUsesVisitor(variable, stmtToInspect, true);
+							if (!varDefinitionsUsesVisitor.getReads().isEmpty()) {
 								return true;
 							}
+
 
 							Assignment assignment= ASTNodes.asExpression(stmtToInspect, Assignment.class);
 
@@ -134,6 +141,10 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 
 								overridingAssignment= assignment;
 								break;
+							} else {
+								// it's not an assignment, but it writes to the variable: for example assignments
+								// inside an if statement.
+								shouldMoveDown &= varDefinitionsUsesVisitor.getWrites().isEmpty();
 							}
 
 							stmtToInspect= ASTNodes.getNextSibling(stmtToInspect);
@@ -141,7 +152,7 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 
 						if (overridingAssignment != null) {
 							rewriteOperations.add(new OverriddenAssignmentOperation(node, fragment, overridingAssignment, firstSibling == stmtToInspect,
-									isEnabled(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL)));
+									shouldMoveDown && isEnabled(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL)));
 							return false;
 						}
 					}
@@ -189,13 +200,13 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.OverriddenAssignmentCleanUp_description, cuRewrite);
 			boolean canMoveDown = overridingAssignment.getParent() instanceof ExpressionStatement;
-			boolean canMoveUp= followsImmediately || ASTNodes.isPassiveWithoutFallingThrough(overridingAssignment.getRightHandSide());
+			boolean canMoveUp= followsImmediately || canMoveUp();
 
 			if (canMoveUp) {
 				// only move initialization up if there are no side effects and the assignment is a statement
-					var copy= rewrite.createCopyTarget(this.overridingAssignment.getRightHandSide());
-					rewrite.replace(fragment.getInitializer(), copy , group);
-					rewrite.remove(overridingAssignment.getParent(), group);
+				var copy= rewrite.createCopyTarget(this.overridingAssignment.getRightHandSide());
+				rewrite.replace(fragment.getInitializer(), copy , group);
+				rewrite.remove(overridingAssignment.getParent(), group);
 			} else if (canMoveDown && moveDown) {
 				var copy= rewrite.createCopyTarget(this.overridingAssignment.getRightHandSide());
 				rewrite.replace(fragment.getInitializer(), copy , group);
@@ -205,6 +216,38 @@ public class OverriddenAssignmentCleanUp extends AbstractMultiFix {
 			} else {
 				rewrite.remove(fragment.getInitializer(), group);
 			}
+		}
+
+		private boolean canMoveUp() {
+			if (!ASTNodes.isPassiveWithoutFallingThrough(overridingAssignment.getRightHandSide())) {
+				return false;
+			}
+
+			Block containingBlock= ASTNodes.getTypedAncestor(declaration, Block.class);
+
+			class UndefinedVarsFinder extends InterruptibleVisitor {
+				boolean preventsMoveUp= false;
+
+				@Override
+				public boolean visit(SimpleName node) {
+					IBinding usedBinding= node.resolveBinding();
+					if (usedBinding == null) {
+						this.preventsMoveUp= true;
+						return interruptVisit();
+					}
+					ASTNode usedName= ASTNodes.findDeclaration(usedBinding, containingBlock);
+					if (usedName != null && usedName.getStartPosition() > declaration.getStartPosition()) {
+						this.preventsMoveUp= true;
+						return interruptVisit();
+					}
+					return super.visit(node);
+				}
+			}
+			UndefinedVarsFinder visitor= new UndefinedVarsFinder();
+
+			visitor.traverseNodeInterruptibly(overridingAssignment.getRightHandSide());
+
+			return !visitor.preventsMoveUp;
 		}
 	}
 }
