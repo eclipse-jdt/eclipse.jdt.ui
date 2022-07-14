@@ -330,8 +330,9 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			ASTNode replacementNode= astRewrite.createStringPlaceholder(targetText, ASTNode.VARIABLE_DECLARATION_STATEMENT);
-			astRewrite.replace(overridingAssignment.getParent(), replacementNode, group);
+			overridingAssignment.getParent().setProperty(IGNORE_LEADING_COMMENT, Boolean.TRUE);
 			astRewrite.remove(declaration, group);
+			ASTNodes.replaceButKeepComment(astRewrite, overridingAssignment.getParent(), replacementNode, group);
 		}
 
 		int extendedEnd(CompilationUnit cu, ASTNode node) {

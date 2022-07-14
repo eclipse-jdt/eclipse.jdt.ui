@@ -17439,14 +17439,29 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public long moveDeclOnlyIfEnabled() {\n" //
+				+ "        // comment 1\n" //
+				+ "        long time = 0;\n" //
+				+ "        // comment 2\n" //
+				+ "        String separator = \"\";\n" //
+				+ "        separator = System.lineSeparator();\n" //
+				+ "        // comment 3\n" //
+				+ "        time = System.currentTimeMillis();\n" //
+				+ "        return time;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void complexMoves(String str) {\n" //
+				+ "        // t is a String\n" //
 				+ "        String t = null;\n" //
+				+ "        // s is a String\n" //
 				+ "        String s = null;\n" //
 				+ "        // No move for multiple declarations\n" //
 				+ "        String v = \"ppp\", w = \"qqq\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
 				+ "        // No move for multiple statements on line\n" //
 				+ "        String k = \"rrr\"; String l = \"sss\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
 				+ "        int j = 7;\n" //
+				+ "        // this comment will get lost\n" //
 				+ "        s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
 				+ "            \"xyz\" +\n" //
 				+ "            \"ghi\"; //$NON-NLS-1$\n" //
@@ -17509,8 +17524,21 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public long moveDeclOnlyIfEnabled() {\n" //
+				+ "        // comment 1\n" //
+				+ "        long time;\n" //
+				+ "        // comment 2\n" //
+				+ "        String separator = System.lineSeparator();\n" //
+				+ "        // comment 3\n" //
+				+ "        time = System.currentTimeMillis();\n" //
+				+ "        return time;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void complexMoves(String str) {\n" //
+				+ "        // t is a String\n" //
 				+ "        String t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
+				+ "        // s is a String\n" //
 				+ "        String s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
 				+ "                    \"xyz\" +\n" //
 				+ "                    \"ghi\"; //$NON-NLS-1$\n" //
@@ -17541,15 +17569,102 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
 				new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
+
+		input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class F {\n" //
+				+ "    public boolean removeUselessInitialization() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedVar = true;\n" //
+				+ "        reassignedVar = \"\\n\".equals(File.pathSeparator);//$NON-NLS-1\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long removeInitForLong() {\n" //
+				+ "        // This comment will be lost\n" //
+				+ "        long reassignedVar = 0;\n" //
+				+ "        System.out.println();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        reassignedVar = System.currentTimeMillis();\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String removeInitForString() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        String reassignedVar = \"\";\n" //
+				+ "        System.out.println();\n" //
+				+ "        reassignedVar = File.pathSeparator;\n" //
+				+ "        return reassignedVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean removePassiveInitialization(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean reassignedPassiveVar = i > 0;\n" //
+				+ "        reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
+				+ "        return reassignedPassiveVar;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public long moveDeclOnlyIfEnabled() {\n" //
+				+ "        // comment 1\n" //
+				+ "        long time = 0;\n" //
+				+ "        // comment 2\n" //
+				+ "        String separator = \"\";\n" //
+				+ "        separator = System.lineSeparator();\n" //
+				+ "        System.out.println(separator);\n" //
+				+ "        // comment 3\n" //
+				+ "        time = System.currentTimeMillis();\n" //
+				+ "        return time;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void complexMoves(String str) {\n" //
+				+ "        // t is a String\n" //
+				+ "        String t = null;\n" //
+				+ "        // s is a String\n" //
+				+ "        String s = null;\n" //
+				+ "        // No move for multiple declarations\n" //
+				+ "        String v = \"ppp\", w = \"qqq\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        // No move for multiple statements on line\n" //
+				+ "        String k = \"rrr\"; String l = \"sss\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "        int j = 7;\n" //
+				+ "        // this comment will get lost\n" //
+				+ "        s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
+				+ "            \"xyz\" +\n" //
+				+ "            \"ghi\"; //$NON-NLS-1$\n" //
+				+ "        j = 4 +\n" //
+				+ "        	       // some comment\n" //
+				+ "        	       5 +\n" //
+				+ "        	       6;\n" //
+				+ "        t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
+				+ "        w = \"aaa\"; //$NON-NLS-1$\n" //
+				+ "        k = \"ttt\"; //$NON-NLS-1$\n" //
+				+ "        l = \"uuu\"; //$NON-NLS-1$\n" //
+				+ "        // No move when parent statement other than block is on same line\n" //
+				+ "        if (\"TRUE\".equals(str)) { var x= \"bar\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
+				+ "           x = v;\n" //
+				+ "           System.out.println(x);\n" //
+				+ "        }\n" //
+				+ "        System.out.println(j);\n" //
+				+ "        System.out.println(k);\n" //
+				+ "        System.out.println(l);\n" //
+				+ "        System.out.println(s);\n" //
+				+ "        System.out.println(t);\n" //
+				+ "        System.out.println(w);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		cu= pack.createCompilationUnit("F.java", input, false, null);
+
 		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL);
-		disable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
+		enable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
 
 		output= "" //
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "import java.io.File;\n" //
 				+ "\n" //
-				+ "public class E {\n" //
+				+ "public class F {\n" //
 				+ "    public boolean removeUselessInitialization() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        boolean reassignedVar = \"\\n\".equals(File.pathSeparator);//$NON-NLS-1\n" //
@@ -17557,10 +17672,9 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public long removeInitForLong() {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        long reassignedVar;\n" //
 				+ "        System.out.println();\n" //
-				+ "        reassignedVar = System.currentTimeMillis();\n" //
+				+ "        // Keep this comment\n" //
+				+ "        long reassignedVar = System.currentTimeMillis();\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -17576,8 +17690,21 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean reassignedPassiveVar = \"\\n\".equals(File.pathSeparator);\n" //
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public long moveDeclOnlyIfEnabled() {\n" //
+				+ "        \n" //
+				+ "        // comment 2\n" //
+				+ "        String separator = System.lineSeparator();\n" //
+				+ "        System.out.println(separator);\n" //
+				+ "        // comment 3\n" //
+				+ "        long time = System.currentTimeMillis();\n" //
+				+ "        return time;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void complexMoves(String str) {\n" //
+				+ "        // t is a String\n" //
 				+ "        String t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
+				+ "        // s is a String\n" //
 				+ "        String s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
 				+ "                    \"xyz\" +\n" //
 				+ "                    \"ghi\"; //$NON-NLS-1$\n" //
