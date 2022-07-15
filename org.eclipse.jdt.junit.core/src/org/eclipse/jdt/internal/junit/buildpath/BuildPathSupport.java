@@ -358,7 +358,7 @@ public class BuildPathSupport {
 			JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_APIGUARDIAN_PLUGIN= new JUnitPluginDescription(
-			"org.apiguardian", new VersionRange("[1.0.0,2.0.0)"), null, "org.apiguardian_1.*.jar", "org.apiguardian.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"org.apiguardian.api", new VersionRange("[1.0.0,2.0.0)"), null, "org.apiguardian.api_1.*.jar", "org.apiguardian.api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT4_AS_3_PLUGIN= new JUnitPluginDescription(
