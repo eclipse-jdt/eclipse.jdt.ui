@@ -496,36 +496,49 @@ public class RenameVirtualMethodInClassTests extends GenericRefactoringTest {
 		helper2();
 	}
 
+	@Test
 	public void test41() throws Exception {
 		helper2_0("m", "k", new String[] { "QI;" });
 	}
 
+	@Test
 	public void test42() throws Exception {
 		helper2_0("m", "k", new String[] { "QT;" });
 	}
 
+	@Test
 	public void test43() throws Exception {
 		helper2_0("m", "k", new String[] { "QObject;" });
 	}
 
+	@Test
 	public void test44() throws Exception {
 		helper2_0("m", "k", new String[] { "QE;" });
 	}
 
+	@Test
 	public void test45() throws Exception {
 		helper2_0("m", "k", new String[] { "QT;" });
 	}
 
+	@Test
 	public void test46() throws Exception {
 		helper2_0("m", "k", new String[] { "[QE;" });
 	}
 
+	@Test
 	public void test47() throws Exception {
 		helper2_0("m", "k", new String[] { "[QString;" });
 	}
 
+	@Test
 	public void test48() throws Exception {
 		helper2_0("m", "k", new String[] { "[QString;" });
+	}
+
+	@Test
+	public void test49() throws Exception {
+		helper2();
 	}
 
 	//anonymous inner class
