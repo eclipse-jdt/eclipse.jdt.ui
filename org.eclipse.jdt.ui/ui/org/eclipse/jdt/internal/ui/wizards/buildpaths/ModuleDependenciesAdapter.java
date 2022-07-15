@@ -825,9 +825,9 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		}
 	}
 
-	public static void updateButtonEnablement(TreeListDialogField<?> list, boolean enableModify, boolean enableRemove, boolean enableShow) {
+	public static void updateButtonEnablement(TreeListDialogField<?> list, boolean enableModify, boolean enableRemove, boolean enableShow, boolean enableAddExport) {
 		list.enableButton(IDX_REMOVE, enableRemove);
-		list.enableButton(IDX_EXPOSE_PACKAGE, enableModify);
+		list.enableButton(IDX_EXPOSE_PACKAGE, enableModify && enableAddExport);
 		list.enableButton(IDX_READ_MODULE, enableModify);
 		list.enableButton(IDX_PATCH, enableModify);
 		list.enableButton(IDX_JPMS_OPTIONS, enableShow);
@@ -908,7 +908,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 					// no detail selected, remove the module(s) (with question):
 					fModuleDependenciesPage.removeModules();
 				} else {
-					if (getConfiguredDetails().remove(selectedElements)) {
+					if (getConfiguredDetails(true).remove(selectedElements)) {
 						field.refresh();
 					}
 				}
@@ -922,17 +922,17 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 				}
 				//$FALL-THROUGH$
 			case IDX_EXPOSE_PACKAGE:
-				if (getConfiguredDetails().addOrEditAccessiblePackage(selectedPackage, fModuleDependenciesPage.getShell())) {
+				if (getConfiguredDetails(true).addOrEditAccessiblePackage(selectedPackage, fModuleDependenciesPage.getShell())) {
 					field.refresh();
 				}
 				break;
 			case IDX_READ_MODULE:
-				if (getConfiguredDetails().addReads(fModuleDependenciesPage.getShell())) {
+				if (getConfiguredDetails(true).addReads(fModuleDependenciesPage.getShell())) {
 					field.refresh();
 				}
 				break;
 			case IDX_PATCH:
-				if (getConfiguredDetails().addPatch(fModuleDependenciesPage.getShell(), fModuleDependenciesPage.fPatchMap)) {
+				if (getConfiguredDetails(true).addPatch(fModuleDependenciesPage.getShell(), fModuleDependenciesPage.fPatchMap)) {
 					field.refresh();
 					validate();
 				}
@@ -957,18 +957,21 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		return 0;
 	}
 
-	private ConfiguredDetails getConfiguredDetails() {
+	private ConfiguredDetails getConfiguredDetails(boolean failIfMissing) {
 		for (Object object : fDetailsList.getElements()) {
 			if (object instanceof ConfiguredDetails)
 				return (ConfiguredDetails) object;
 		}
-		throw new IllegalStateException("detail list has no ConfiguredDetails element"); //$NON-NLS-1$
+		if (failIfMissing)
+			throw new IllegalStateException("detail list has no ConfiguredDetails element"); //$NON-NLS-1$
+		return null;
 	}
 
 	@Override
 	public void selectionChanged(TreeListDialogField<Object> field) {
 		List<Object> selected= fDetailsList.getSelectedElements();
 		boolean enable= false;
+		boolean disableAddExport= false;
 		if (selected.size() == 1) {
 			Object selectedNode= selected.get(0);
 			enable= isConfigurableNode(selectedNode);
@@ -977,7 +980,12 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			enable= !fDetailsList.getElements().isEmpty() && allAreConfigurable(selected);
 			fDetailsList.enableButton(IDX_EDIT, false);
 		}
-		fDetailsList.enableButton(IDX_EXPOSE_PACKAGE, enable);
+		ConfiguredDetails configuredDetails= getConfiguredDetails(false);
+		if (enable && configuredDetails != null && configuredDetails.fKind == ModuleKind.System) {
+			IJavaProject javaProject= configuredDetails.fFocusModule.getJavaProject();
+			disableAddExport= JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_RELEASE, false));
+		}
+		fDetailsList.enableButton(IDX_EXPOSE_PACKAGE, enable && !disableAddExport);
 		fDetailsList.enableButton(IDX_READ_MODULE, enable);
 		fDetailsList.enableButton(IDX_PATCH, enable);
 		if (enable) {
@@ -1034,7 +1042,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 				}
 				if (isConfigurableNode(selected)) {
 					if (selected instanceof AccessiblePackage) {
-						if (getConfiguredDetails().addOrEditAccessiblePackage((AccessiblePackage) selected, fModuleDependenciesPage.getShell())) {
+						if (getConfiguredDetails(true).addOrEditAccessiblePackage((AccessiblePackage) selected, fModuleDependenciesPage.getShell())) {
 							field.refresh();
 						}
 					}
@@ -1048,7 +1056,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		if (field == fDetailsList) {
 			if (event.character == SWT.DEL && event.stateMask == 0 && fDetailsList.getButton(IDX_REMOVE).isEnabled()) {
 				List<Object> selectedElements= field.getSelectedElements();
-				if (getConfiguredDetails().remove(selectedElements)) {
+				if (getConfiguredDetails(true).remove(selectedElements)) {
 					field.refresh();
 					validate();
 				}

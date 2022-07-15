@@ -201,7 +201,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				if (!configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_DONT_ADD_MISSING_JUNIT5_DEPENDENCY, false)) {
 					if (!Arrays.stream(classpath).anyMatch(s -> s.contains("junit-platform-launcher") || s.contains("org.junit.platform.launcher"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						try {
-							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("org.junit.platform.launcher", null); //$NON-NLS-1$
+							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("junit-platform-launcher", null); //$NON-NLS-1$
 							String entryString= new ClasspathLocalizer(Platform.inDevelopmentMode()).entryString(x);
 							int length= classpath.length;
 							System.arraycopy(classpath, 0, classpath= new String[length + 1], 0, length);
@@ -212,7 +212,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					}
 					if (!Arrays.stream(classpath).anyMatch(s -> s.contains("junit-jupiter-engine") || s.contains("org.junit.jupiter.engine"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						try {
-							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("org.junit.jupiter.engine", null); //$NON-NLS-1$
+							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("junit-jupiter-engine", null); //$NON-NLS-1$
 							String entryString= new ClasspathLocalizer(false).entryString(x);
 							int length= classpath.length;
 							System.arraycopy(classpath, 0, classpath= new String[length + 1], 0, length);
@@ -223,7 +223,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					}
 					if (!Arrays.stream(classpath).anyMatch(s -> s.contains("junit-jupiter-api") || s.contains("org.junit.jupiter.api"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						try {
-							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("org.junit.jupiter.api", null); //$NON-NLS-1$
+							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("junit-jupiter-api", null); //$NON-NLS-1$
 							String entryString= new ClasspathLocalizer(false).entryString(x);
 							int length= classpath.length;
 							System.arraycopy(classpath, 0, classpath= new String[length + 1], 0, length);

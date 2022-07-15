@@ -306,51 +306,51 @@ public class BuildPathSupport {
 			"org.hamcrest.core", new VersionRange("[1.1.0,2.0.0)"), null, "org.hamcrest.core_1.*.jar", "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
 	public static final JUnitPluginDescription JUNIT_JUPITER_API_PLUGIN= new JUnitPluginDescription(
-			"org.junit.jupiter.api", new VersionRange("[5.0.0,6.0.0)"), null, "org.junit.jupiter.api_5.*.jar", "org.junit.jupiter.api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-jupiter-api", new VersionRange("[5.0.0,6.0.0)"), null, "junit-jupiter-api_5.*.jar", "junit-jupiter-api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_JUPITER_ENGINE_PLUGIN= new JUnitPluginDescription(
-			"org.junit.jupiter.engine", new VersionRange("[5.0.0,6.0.0)"), null, "org.junit.jupiter.engine_5.*.jar", "org.junit.jupiter.engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-jupiter-engine", new VersionRange("[5.0.0,6.0.0)"), null, "junit-jupiter-engine_5.*.jar", "junit-jupiter-engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_JUPITER_MIGRATIONSUPPORT_PLUGIN= new JUnitPluginDescription(
-			"org.junit.jupiter.migrationsupport", new VersionRange("[5.0.0,6.0.0)"), null, "org.junit.jupiter.migrationsupport_5.*.jar", "org.junit.jupiter.migrationsupport.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-jupiter-migrationsupport", new VersionRange("[5.0.0,6.0.0)"), null, "junit-jupiter-migrationsupport_5.*.jar", "junit-jupiter-migrationsupport.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATIONSUPPORT_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_JUPITER_PARAMS_PLUGIN= new JUnitPluginDescription(
-			"org.junit.jupiter.params", new VersionRange("[5.0.0,6.0.0)"), null, "org.junit.jupiter.params_5.*.jar", "org.junit.jupiter.params.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-jupiter-params", new VersionRange("[5.0.0,6.0.0)"), null, "junit-jupiter-params_5.*.jar", "junit-jupiter-params.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_JUPITER_PARAMS_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_PLATFORM_COMMONS_PLUGIN= new JUnitPluginDescription(
-			"org.junit.platform.commons", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.commons_1.*.jar", "org.junit.platform.commons.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-platform-commons", new VersionRange("[1.0.0,2.0.0)"), null, "junit-platform-commons_1.*.jar", "junit-platform-commons.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_COMMONS_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_PLATFORM_ENGINE_PLUGIN= new JUnitPluginDescription(
-			"org.junit.platform.engine", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.engine_1.*.jar", "org.junit.platform.engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-platform-engine", new VersionRange("[1.0.0,2.0.0)"), null, "junit-platform-engine_1.*.jar", "junit-platform-engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_ENGINE_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_PLATFORM_LAUNCHER_PLUGIN= new JUnitPluginDescription(
-			"org.junit.platform.launcher", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.launcher_1.*.jar", "org.junit.platform.launcher.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-platform-launcher", new VersionRange("[1.0.0,2.0.0)"), null, "junit-platform-launcher_1.*.jar", "junit-platform-launcher.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_LAUNCHER_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_PLATFORM_RUNNER_PLUGIN= new JUnitPluginDescription(
-			"org.junit.platform.runner", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.runner_1.*.jar", "org.junit.platform.runner.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-platform-runner", new VersionRange("[1.0.0,2.0.0)"), null, "junit-platform-runner_1.*.jar", "junit-platform-runner.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_RUNNER_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_PLATFORM_SUITE_API_PLUGIN= new JUnitPluginDescription(
-			"org.junit.platform.suite.api", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.suite.api_1.*.jar", "org.junit.platform.suite.api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-platform-suite-api", new VersionRange("[1.0.0,2.0.0)"), null, "junit-platform-suite-api_1.*.jar", "junit-platform-suite-api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_PLATFORM_SUITE_ENGINE_PLUGIN= new JUnitPluginDescription(
-			"org.junit.platform.suite.engine", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.suite.engine_1.*.jar", "org.junit.platform.suite.engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-platform-suite-engine", new VersionRange("[1.0.0,2.0.0)"), null, "junit-platform-suite-engine_1.*.jar", "junit-platform-suite-engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_ENGINE_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_PLATFORM_SUITE_COMMONS_PLUGIN= new JUnitPluginDescription(
-			"org.junit.platform.suite.commons", new VersionRange("[1.0.0,2.0.0)"), null, "org.junit.platform.suite.commons_1.*.jar", "org.junit.platform.suite.commons.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-platform-suite-commons", new VersionRange("[1.0.0,2.0.0)"), null, "junit-platform-suite-commons_1.*.jar", "junit-platform-suite-commons.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_VINTAGE_ENGINE_PLUGIN= new JUnitPluginDescription(
-			"org.junit.vintage.engine", new VersionRange("[4.12.0,6.0.0)"), null, "org.junit.vintage.engine_5.*.jar", "org.junit.vintage.engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"junit-vintage-engine", new VersionRange("[4.12.0,6.0.0)"), null, "junit-vintage-engine_5.*.jar", "org.junit.vintage.engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_OPENTEST4J_PLUGIN= new JUnitPluginDescription(
@@ -358,7 +358,7 @@ public class BuildPathSupport {
 			JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_APIGUARDIAN_PLUGIN= new JUnitPluginDescription(
-			"org.apiguardian", new VersionRange("[1.0.0,2.0.0)"), null, "org.apiguardian_1.*.jar", "org.apiguardian.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			"org.apiguardian.api", new VersionRange("[1.0.0,2.0.0)"), null, "org.apiguardian.api_1.*.jar", "org.apiguardian.api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT4_AS_3_PLUGIN= new JUnitPluginDescription(

@@ -231,7 +231,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					if (!Arrays.stream(classpath).anyMatch(
 							s -> s.contains("junit-jupiter-engine") || s.contains("org.junit.jupiter.engine"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						try {
-							JUnitRuntimeClasspathEntry x = new JUnitRuntimeClasspathEntry("org.junit.jupiter.engine", //$NON-NLS-1$
+							JUnitRuntimeClasspathEntry x = new JUnitRuntimeClasspathEntry("junit-jupiter-engine", //$NON-NLS-1$
 									null);
 							String entryString = new ClasspathLocalizer(false).entryString(x);
 							int length = classpath.length;
@@ -245,7 +245,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					if (!Arrays.stream(classpath)
 							.anyMatch(s -> s.contains("junit-jupiter-api") || s.contains("org.junit.jupiter.api"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						try {
-							JUnitRuntimeClasspathEntry x = new JUnitRuntimeClasspathEntry("org.junit.jupiter.api", //$NON-NLS-1$
+							JUnitRuntimeClasspathEntry x = new JUnitRuntimeClasspathEntry("junit-jupiter-api", //$NON-NLS-1$
 									null);
 							String entryString = new ClasspathLocalizer(false).entryString(x);
 							int length = classpath.length;

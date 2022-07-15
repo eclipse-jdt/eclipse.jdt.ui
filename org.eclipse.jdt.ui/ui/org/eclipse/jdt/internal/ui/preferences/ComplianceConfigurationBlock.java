@@ -21,6 +21,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import com.ibm.icu.text.MessageFormat;
+
 import org.osgi.service.prefs.Preferences;
 
 import org.eclipse.swt.SWT;
@@ -40,6 +42,7 @@ import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.BundleDefaultsScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -55,8 +58,10 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -67,10 +72,13 @@ import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.LibrariesWorkbookPage;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 
@@ -629,6 +637,16 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				updateComplianceDefaultSettings(true, null);
 				fComplianceStatus= validateCompliance();
 				validateComplianceStatus();
+				if (fComplianceStatus.isOK() && ENABLED.equals(getValue(PREF_RELEASE))) {
+					String exportOptionValue= addsExportToSystemModule();
+					if (exportOptionValue != null) {
+						int slash = exportOptionValue.indexOf('/');
+						if (slash > -1) {
+							fComplianceStatus = new Status(IStatus.ERROR, JavaUI.ID_PLUGIN,
+									MessageFormat.format(PreferencesMessages.ComplianceConfigurationBlock_release_notWith_addExports_error, exportOptionValue.substring(0, slash)));
+						}
+					}
+				}
 			} else if (PREF_SOURCE_COMPATIBILITY.equals(changedKey)) {
 				updatePreviewFeaturesState();
 				updateAssertEnumAsIdentifierEnableState();
@@ -831,6 +849,24 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			fJRE50InfoImage.setImage(isVisible ? image : null);
 			fJRE50InfoImage.getParent().layout();
 		}
+	}
+
+	private String addsExportToSystemModule() {
+		try {
+			for (IClasspathEntry cpe : JavaCore.create(fProject).getRawClasspath()) {
+				if (cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER && LibrariesWorkbookPage.isJREContainer(cpe.getPath())) {
+					for (IClasspathAttribute attribute : cpe.getExtraAttributes()) {
+						if (IClasspathAttribute.ADD_EXPORTS.equals(attribute.getName())) {
+							return attribute.getValue();
+						}
+					}
+					break;
+				}
+			}
+		} catch (JavaModelException e) {
+			return null;
+		}
+		return null;
 	}
 
 	private void updateReleaseOptionStatus() {

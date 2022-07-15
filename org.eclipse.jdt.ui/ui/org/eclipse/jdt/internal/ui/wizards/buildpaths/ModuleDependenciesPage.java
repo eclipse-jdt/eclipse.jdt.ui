@@ -63,6 +63,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -266,7 +268,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			fAddSystemModuleButton.setEnabled(false);
 			fDetailsList.removeAllElements();
 			fDetailsList.refresh();
-			ModuleDependenciesAdapter.updateButtonEnablement(fDetailsList, false, false, false);
+			ModuleDependenciesAdapter.updateButtonEnablement(fDetailsList, false, false, false, false);
 			return;
 		}
 		fModuleList.setEnabled(true);
@@ -459,6 +461,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 
 	private void selectModule(List<CPListElement> elements, IModuleDescription module) {
 		fDetailsList.removeAllElements();
+		boolean enableAddExport= true;
 		if (elements.size() == 1) {
 			CPListElement element= elements.get(0);
 			fDetailsList.addElement(new ModuleDependenciesAdapter.DeclaredDetails(module, element));
@@ -466,8 +469,17 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			ModuleDependenciesAdapter.ConfiguredDetails configured= new ModuleDependenciesAdapter.ConfiguredDetails(module, element, moduleKind, this);
 			fDetailsList.addElement(configured);
 			fDetailsList.expandElement(configured, 1);
+			if (moduleKind == ModuleKind.System) {
+				enableAddExport = JavaCore.DISABLED.equals(this.fCurrJProject.getOption(JavaCore.COMPILER_RELEASE, false));
+			}
 		}
-		ModuleDependenciesAdapter.updateButtonEnablement(fDetailsList, elements.size() == 1, !elements.isEmpty(), true);
+		if (!enableAddExport) {
+			setStatus(new Status(IStatus.INFO, JavaUI.ID_PLUGIN,
+					MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_addExport_notWith_release_info, module.getElementName())));
+		} else {
+			setStatus(StatusInfo.OK_STATUS);
+		}
+		ModuleDependenciesAdapter.updateButtonEnablement(fDetailsList, elements.size() == 1, !elements.isEmpty(), true, enableAddExport);
 	}
 
 	@Override

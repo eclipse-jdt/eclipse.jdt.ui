@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,11 +25,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITypedRegion;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IWorkbenchPartOrientation;
@@ -37,6 +40,7 @@ import org.eclipse.ui.part.IWorkbenchPartOrientation;
 import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
@@ -52,15 +56,20 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TextBlock;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
@@ -135,7 +144,11 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		fBracketHoverStatus= null;
 
 		if (result == null || result.length == 0) {
-			return getBracketHoverInfo(textViewer, region);
+			String val = getBracketHoverInfo(textViewer, region);
+			if (val == null) {
+				return getTextBlockHoverInfo(textViewer, region);
+			}
+			return val;
 		}
 
 		if (result.length > 1)
@@ -399,6 +412,69 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			fBracketHoverStatus= Messages.format(JavaHoverMessages.JavaSourceHover_skippedLines, Integer.valueOf(totalSkippedLines));
 		}
 		return hoverText;
+	}
+
+	private String getTextBlockHoverInfo(final ITextViewer textViewer, IRegion region) {
+		String hoverText= null;
+		IEditorPart editor= getEditor();
+		ITypeRoot input= getEditorInputJavaElement();
+		if (!(editor instanceof JavaEditor) || input == null || region == null) {
+			return null;
+		}
+		IDocument document= textViewer.getDocument();
+		if (document == null)
+			return null;
+
+		IDocumentExtension3 docExtension= null;
+		if (document instanceof IDocumentExtension3)
+			docExtension= (IDocumentExtension3) document;
+		else
+			return null;
+		IJavaProject javaProject= getProject(editor);
+		if (javaProject == null) {
+			return null;
+		}
+
+		try {
+			int selectionOffset= region.getOffset();
+			//boolean setCaratPosition= selection.getLength() > 0 ? false : true;
+			ITypedRegion partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, selectionOffset, false);
+			if (partition == null || !isTextBlock( partition, javaProject)) {
+				return null;
+			}
+			CompilationUnit ast= SharedASTProviderCore.getAST(input, SharedASTProviderCore.WAIT_NO, null);
+			ASTNode textBlockNode= NodeFinder.perform(ast, partition.getOffset(),
+					partition.getLength());
+			if (!(textBlockNode instanceof TextBlock)) {
+				return null;
+			}
+			TextBlock textBlock= (TextBlock) textBlockNode;
+			return textBlock.getLiteralValue();
+		} catch (BadLocationException | BadPartitioningException e) {
+			//do nothing
+		}
+		return hoverText;
+	}
+
+	private boolean isTextBlock(ITypedRegion partition, IJavaProject javaProject) {
+		if (!JavaModelUtil.is15OrHigher(javaProject)) {
+			return false;
+		}
+		boolean isTextBlock= true;
+		String partitionType= partition.getType();
+		if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(partitionType)) {
+			isTextBlock= true;
+		}
+		return isTextBlock;
+	}
+
+	private IJavaProject getProject(IEditorPart editor) {
+		IJavaProject javaProject= null;
+		if (editor != null) {
+			ITypeRoot inputJavaElement= EditorUtility.getEditorInputJavaElement(editor, false);
+			javaProject= inputJavaElement.getJavaProject();
+		}
+		return javaProject;
 	}
 
 	private int getNextElseOffset(Statement then, ITypeRoot editorInput) {
