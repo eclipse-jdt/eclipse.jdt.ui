@@ -1006,6 +1006,12 @@ public class JavaProjectHelper {
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 
+	public static IPackageFragmentRoot addRTJar_17(IJavaProject jproject, boolean enable_preview_feature) throws CoreException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS17);
+		set17CompilerOptions(jproject, enable_preview_feature);
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+
 	/**
 	 * Adds a variable entry with source attachment to a IJavaProject.
 	 * Can return null if variable can not be resolved.

@@ -78,7 +78,7 @@ public class ParameterNamesCodeMiningTest {
 			closeIntro(PlatformUI.getWorkbench());
 		}
 		fProject= JavaProjectHelper.createJavaProject(getClass().getName(), "bin");
-		JavaProjectHelper.addRTJar_16(fProject, true);
+		JavaProjectHelper.addRTJar_17(fProject, true);
 
 		Map<String, String> options= fProject.getOptions(false);
 		JavaProjectHelper.set17_CompilerOptions(options);
