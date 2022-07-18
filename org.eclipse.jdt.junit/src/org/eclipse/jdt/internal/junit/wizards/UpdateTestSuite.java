@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -78,6 +78,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	private static boolean fEmptySelectionAllowed= false;
 	private Object[] fSelectedTestCases;
 	private boolean fIsJunit4;
+	private boolean fIsJunit5;
 	private IAnnotation fSuiteClasses;
 
 	private class UpdateAllTestsValidator implements ISelectionStatusValidator {
@@ -111,7 +112,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 
 		private IStatus checkRecursiveSuiteInclusion(Object[] selection){
 			IType suiteClass= null;
-			if (fIsJunit4) {
+			if (fIsJunit4 || fIsJunit5) {
 				suiteClass= (IType) fSuiteClasses.getParent();
 			} else {
 				suiteClass= fSuiteMethod.getDeclaringType();
@@ -144,7 +145,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	@Override
 	public void run(IAction action) {
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		SuiteClassesContentProvider cprovider= new SuiteClassesContentProvider(fIsJunit4);
+		SuiteClassesContentProvider cprovider= new SuiteClassesContentProvider(fIsJunit4, fIsJunit5);
 
 		if (fIsJunit4) {
 			/* find TestClasses already in Test Suite */
@@ -156,7 +157,16 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				noSuiteError();
 			}
 
-		} else{
+		} else if (fIsJunit5) {
+			/* find TestClasses already in Test Suite */
+			IType testSuiteType= fTestSuite.findPrimaryType();
+			fSuiteClasses= testSuiteType.getAnnotation("SelectClasses"); //$NON-NLS-1$
+			if (fSuiteClasses.exists()) {
+				openTestSelectionDialog(lprovider, cprovider, testSuiteType);
+			} else {
+				noSuiteError();
+			}
+		} else {
 			/* find TestClasses already in Test Suite */
 			IType testSuiteType= fTestSuite.findPrimaryType();
 			fSuiteMethod= testSuiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
@@ -217,6 +227,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				IType primaryType = fTestSuite.findPrimaryType();
 				if (primaryType != null) {
 					fIsJunit4 = primaryType.getAnnotation("RunWith").exists(); //$NON-NLS-1$
+					fIsJunit5 = primaryType.getAnnotation("Test").exists() //$NON-NLS-1$
+							&& primaryType.getAnnotation("Test").getElementName().startsWith("org.junit.jupiter"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
 			}
@@ -232,6 +244,32 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			StringBuilder source= new StringBuilder();
 			monitor.worked(1);
 			source.append(getUpdatableAnnotations(selectedTestCases));
+			fullSource.replace(range.getOffset(), range.getLength(), source.toString());
+			monitor.worked(1);
+			String formattedContent= JUnitStubUtility.formatCompilationUnit(testSuite.getJavaProject(), fullSource.get(), testSuite.findRecommendedLineSeparator());
+			IBuffer buf= testSuite.getBuffer();
+			buf.replace(0, buf.getLength(), formattedContent);
+			monitor.worked(1);
+			testSuite.save(new SubProgressMonitor(monitor, 1), true);
+			monitor.worked(1);
+
+
+		}  catch (BadLocationException e) {
+			Assert.isTrue(false, "Should never happen"); //$NON-NLS-1$
+		} finally{
+			monitor.done();
+		}
+	}
+
+	public static void updateTestCasesInJunit5Suite(IProgressMonitor monitor, ICompilationUnit testSuite, IAnnotation testClassesAnnotation, Object[] selectedTestCases) throws JavaModelException {
+		try {
+			monitor.beginTask(WizardMessages.UpdateAllTests_beginTask, 5);
+
+			ISourceRange range= testClassesAnnotation.getSourceRange();
+			IDocument fullSource= new Document(testSuite.getBuffer().getContents());
+			StringBuilder source= new StringBuilder();
+			monitor.worked(1);
+			source.append(getUpdatableJUnit5Annotations(selectedTestCases));
 			fullSource.replace(range.getOffset(), range.getLength(), source.toString());
 			monitor.worked(1);
 			String formattedContent= JUnitStubUtility.formatCompilationUnit(testSuite.getJavaProject(), fullSource.get(), testSuite.findRecommendedLineSeparator());
@@ -336,6 +374,25 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		return buffer.toString();
 	}
 
+	/*
+	 * Returns the new test suite annotations which replace old annotations in the existing suite
+	 */
+	public static String getUpdatableJUnit5Annotations(Object[] selectedClasses) {
+		StringBuilder buffer = new StringBuilder("@SelectClasses({"); //$NON-NLS-1$
+		for (int i= 0; i < selectedClasses.length; i++) {
+			if (selectedClasses[i] instanceof IType) {
+				IType testType= (IType) selectedClasses[i];
+				buffer.append(testType.getElementName());
+				buffer.append(".class"); //$NON-NLS-1$
+				if (i < selectedClasses.length - 1)
+					buffer.append(',');
+			}
+		}
+		buffer.append("})"); //$NON-NLS-1$
+		buffer.append("\n"); //$NON-NLS-1$
+		return buffer.toString();
+	}
+
 	public static boolean checkValidateEditStatus(ICompilationUnit testSuiteCu, Shell shell){
 		IStatus status= validateModifiesFiles(getTestSuiteFile(testSuiteCu));
 		if (status.isOK())
@@ -369,6 +426,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			try {
 				if (fIsJunit4)
 					updateTestCasesInJunit4Suite(monitor, fTestSuite, fSuiteClasses, fSelectedTestCases);
+				else if (fIsJunit5)
+					updateTestCasesInJunit5Suite(monitor, fTestSuite, fSuiteClasses, fSelectedTestCases);
 				else
 					updateTestCasesInSuite(monitor, fTestSuite, fSuiteMethod, fSelectedTestCases);
 			} catch (JavaModelException e) {
@@ -386,6 +445,8 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	private void noSuiteError() {
 		if (fIsJunit4) {
 			MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotFind_annotation_errorDialog_title, WizardMessages.UpdateAllTests_cannotFind_annotation_errorDialog_message);
+		} else if (fIsJunit5) {
+			MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotFind_annotation5_errorDialog_title, WizardMessages.UpdateAllTests_cannotFind_annotation5_errorDialog_message);
 		} else {
 			MessageDialog.openError(fShell, WizardMessages.UpdateAllTests_cannotFind_errorDialog_title, WizardMessages.UpdateAllTests_cannotFind_errorDialog_message);
 		}

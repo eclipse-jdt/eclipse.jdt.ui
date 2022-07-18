@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -95,11 +95,13 @@ public final class WizardMessages extends NLS {
 	public static String NewTestSuiteWizPage_typeName_error_name_name_discouraged;
 	public static String NewTestSuiteWizPage_typeName_warning_already_exists;
 	public static String NewTestSuiteWizPage_typeName_warning_already_exists_junit4;
+	public static String NewTestSuiteWizPage_typeName_warning_already_exists_junit5;
 	public static String NewTestSuiteWizPage_typeName_error_filtered;
 	public static String NewTestSuiteWizPage_cannotUpdateDialog_title;
 	public static String NewTestSuiteWizPage_cannotUpdateDialog_message;
 	public static String NewTestClassWizPage_junit3_radio_label;
 	public static String NewTestClassWizPage_junit4_radio_label;
+	public static String NewTestClassWizPage_junit5_radio_label;
 	public static String NewTestClassWizPage_treeCaption_classSelected;
 	public static String NewTestClassWizPage_treeCaption_classesSelected;
 	public static String NewTestSuiteCreationWizardPage_infinite_recursion;
@@ -112,6 +114,8 @@ public final class WizardMessages extends NLS {
 	public static String UpdateAllTests_cannotUpdate_errorDialog_message;
 	public static String UpdateAllTests_cannotFind_annotation_errorDialog_message;
 	public static String UpdateAllTests_cannotFind_annotation_errorDialog_title;
+	public static String UpdateAllTests_cannotFind_annotation5_errorDialog_message;
+	public static String UpdateAllTests_cannotFind_annotation5_errorDialog_title;
 	public static String UpdateAllTests_cannotFind_errorDialog_title;
 	public static String UpdateAllTests_cannotFind_errorDialog_message;
 	public static String NewJUnitWizard_op_error_title;
