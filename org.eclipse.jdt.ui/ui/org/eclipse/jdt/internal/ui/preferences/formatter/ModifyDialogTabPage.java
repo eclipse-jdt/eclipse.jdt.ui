@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
+import static org.eclipse.swt.events.SelectionListener.widgetSelectedAdapter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +60,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-
 
 public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
@@ -893,12 +894,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		b.setEnabled(true);
 		b.setVisible(true);
 		SWTUtil.setButtonDimensionHint(b);
-		b.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				doSetAll(true);
-			}
-		});
+		b.addSelectionListener(widgetSelectedAdapter((e) -> { doSetAll(true); }));
 
 		b= new Button(buttonHolder, SWT.PUSH);
 		b.setText(FormatterMessages.ModifyDialogTabPage_deselectAll_text);
@@ -907,12 +903,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		b.setEnabled(true);
 		b.setVisible(true);
 		SWTUtil.setButtonDimensionHint(b);
-		b.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				doSetAll(false);
-			}
-		});
+		b.addSelectionListener(widgetSelectedAdapter((e) -> { doSetAll(false); }));
 
 		b= new Button(buttonHolder, SWT.PUSH);
 		b.setText(FormatterMessages.ModifyDialogTabPage_defaults_text);
@@ -921,12 +912,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		b.setEnabled(true);
 		b.setVisible(true);
 		SWTUtil.setButtonDimensionHint(b);
-		b.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setDefaults();
-			}
-		});
+		b.addSelectionListener(widgetSelectedAdapter((e) -> { setDefaults(); }));
 
 		b= new Button(buttonHolder, SWT.PUSH);
 		b.setText(FormatterMessages.ModifyDialogTabPage_reset_text);
@@ -935,12 +921,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		b.setEnabled(true);
 		b.setVisible(true);
 		SWTUtil.setButtonDimensionHint(b);
-		b.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				resetValues();
-			}
-		});
+		b.addSelectionListener(widgetSelectedAdapter((e) -> { resetValues(); }));
 
 		final Composite previewPane= new Composite(sashForm, SWT.NONE);
 		previewPane.setLayout(createGridLayout(numColumns, true));
