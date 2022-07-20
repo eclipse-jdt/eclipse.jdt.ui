@@ -17,6 +17,7 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -273,7 +274,8 @@ public class RenameLinkedMode {
 						return relativeRank;
 				}
 			});
-			sameNodes.add(nameNode);
+			List<ASTNode> nodes= new ArrayList<>();
+			nodes.add(nameNode);
 			IBinding resolvedNameNode= nameNode.resolveBinding();
 			if (resolvedNameNode != null && resolvedNameNode instanceof IMethodBinding) {
 				IJavaElement javaElement= resolvedNameNode.getJavaElement();
@@ -282,12 +284,12 @@ public class RenameLinkedMode {
 					for (IMethod iMethod : relatedMethods) {
 						ASTNode n= NodeFinder.perform(root, iMethod.getNameRange());
 						if (n != null) {
-							sameNodes.add(n);
+							nodes.add(n);
 						}
 					}
 				}
 			}
-			for (ASTNode astNode : new ArrayList<>(sameNodes)) {
+			for (ASTNode astNode : nodes) {
 				if (astNode instanceof SimpleName) {
 					for (SimpleName sameNode : LinkedNodeFinder.findByNode(root, (SimpleName) astNode)) {
 						sameNodes.add(sameNode);

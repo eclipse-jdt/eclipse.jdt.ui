@@ -885,7 +885,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 				if (fElementDeclaration != null && node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment)node.getParent();
 					IBinding targetBinding= fragment.getName().resolveBinding();
-					if (targetBinding != null) {
+					if (targetBinding != null && fragment.getName().getFullyQualifiedName().equals(parameterName)) {
 						VariableDeclarationStatement statement= (VariableDeclarationStatement)fragment.getParent();
 
 						if (statement.fragments().size() == 1) {

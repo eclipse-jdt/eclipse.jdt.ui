@@ -7103,9 +7103,13 @@
             runAfter="org.eclipse.jdt.ui.cleanup.control_statements">
       </cleanUp>
       <cleanUp
+             class="org.eclipse.jdt.internal.ui.fix.UseIteratorToForLoopCleanUp"
+             id="org.eclipse.jdt.ui.cleanup.toolscleanup" 
+             runAfter="org.eclipse.jdt.ui.cleanup.loop" />
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.SwitchCleanUp"
             id="org.eclipse.jdt.ui.cleanup.switch"
-            runAfter="org.eclipse.jdt.ui.cleanup.loop">
+            runAfter="org.eclipse.jdt.ui.cleanup.toolscleanup">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.AddAllCleanUp"
