@@ -357,7 +357,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	}
 
-	static boolean isJREContainer(IPath path) {
+	public static boolean isJREContainer(IPath path) {
 		if (path == null)
 			return false;
 		String[] segments= path.segments();

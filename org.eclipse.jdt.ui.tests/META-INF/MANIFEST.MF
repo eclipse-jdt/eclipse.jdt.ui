@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests; singleton:=true
-Bundle-Version: 3.14.300.qualifier
+Bundle-Version: 3.14.400.qualifier
 Bundle-Activator: org.eclipse.jdt.testplugin.JavaTestPlugin
 Bundle-Vendor: %Plugin.providerName
 Bundle-Localization: plugin
@@ -73,4 +73,7 @@ Require-Bundle:
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Eclipse-BundleShape: dir
 Bundle-ActivationPolicy: lazy
-Import-Package: org.junit.jupiter.api
+Import-Package: org.junit.jupiter.api,
+ org.junit.platform.suite.api,
+ org.junit.platform.suite.commons;status=INTERNAL,
+ org.junit.platform.suite.engine;status=INTERNAL

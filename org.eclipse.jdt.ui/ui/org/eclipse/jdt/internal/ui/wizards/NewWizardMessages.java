@@ -273,6 +273,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageOne_Message_projectAlreadyExists;
 	public static String NewJavaProjectWizardPageOne_UnknownDefaultJRE_name;
 	public static String NewJavaProjectWizardPageOne_Module_group;
+	public static String NewJavaProjectWizardPageOne_Module_group_empty_name;
 	public static String NewJavaProjectWizardPageOne_Create_ModuleInfoFile_name;
 	public static String NewJavaProjectWizardPageTwo_error_remove_message;
 	public static String NewJavaProjectWizardPageTwo_error_remove_title;
@@ -547,6 +548,7 @@ public final class NewWizardMessages extends NLS {
 	public static String AddReadsBlock_targetModule_label;
 	//
 	public static String ModuleDependenciesPage_modules_label;
+	public static String ModuleDependenciesPage_addExport_notWith_release_info;
 	public static String ModuleDependenciesPage_addSystemModule_button;
 	public static String ModuleDependenciesPage_details_label;
 	public static String ModuleDependenciesPage_nonModularProject_dummy;

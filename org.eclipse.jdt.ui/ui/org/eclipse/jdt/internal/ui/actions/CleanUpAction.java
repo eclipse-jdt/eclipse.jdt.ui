@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -39,6 +41,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -132,6 +135,9 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 		Object[] selected= selection.toArray();
 		for (Object s : selected) {
 			try {
+				if (s instanceof IProject) {
+				   s= JavaCore.create((IProject)s);
+				}
 				if (s instanceof IJavaElement) {
 					IJavaElement elem= (IJavaElement) s;
 					if (elem.exists()) {
@@ -231,6 +237,9 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 
 	private void collectCompilationUnits(Object element, Collection<IJavaElement> result) {
 		try {
+			if (element instanceof IProject) {
+				   element= JavaCore.create((IProject)element);
+			}
 			if (element instanceof IJavaElement) {
 				IJavaElement elem= (IJavaElement)element;
 				if (elem.exists()) {
