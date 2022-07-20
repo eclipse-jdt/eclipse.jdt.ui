@@ -5769,7 +5769,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview1= getPreviewContent(proposal);
 
 		StringBuilder buf= new StringBuilder();
@@ -5802,7 +5802,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		proposal= (CUCorrectionProposal) proposals.get(0);
+		proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuilder();
@@ -5867,7 +5867,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview1= getPreviewContent(proposal);
 
 		StringBuilder buf= new StringBuilder();
@@ -5908,7 +5908,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		proposal= (CUCorrectionProposal) proposals.get(0);
+		proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuilder();
@@ -5983,7 +5983,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview1= getPreviewContent(proposal);
 
 		StringBuilder buf= new StringBuilder();
@@ -6052,7 +6052,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview1= getPreviewContent(proposal);
 
 		StringBuilder buf= new StringBuilder();
