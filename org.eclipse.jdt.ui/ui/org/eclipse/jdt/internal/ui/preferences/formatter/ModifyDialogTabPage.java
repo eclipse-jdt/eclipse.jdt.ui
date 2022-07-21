@@ -878,6 +878,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		buttonComposite.setLayout(layout);
 
 		Group buttonHolder= new Group(buttonComposite, SWT.NONE);
+		buttonHolder.setText(FormatterMessages.ModifyDialogTabPage_buttonGroup_text);
 		gridData= new GridData(SWT.FILL, SWT.END, true, false);
 		buttonHolder.setLayoutData(gridData);
 		layout= new GridLayout(4, false);
@@ -943,9 +944,10 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 	/**
 	 * This method is called when the deselect/select all buttons are pressed.
+	 * @param value true if set all, false if deselect all
 	 *
 	 */
-	protected abstract void doSetAll(boolean value);
+	public abstract void doSetAll(boolean value);
 
 	/**
 	 * This method is called when the reset button is pressed.

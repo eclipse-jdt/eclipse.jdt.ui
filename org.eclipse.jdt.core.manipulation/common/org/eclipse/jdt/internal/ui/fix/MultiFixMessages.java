@@ -94,6 +94,8 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_PageTitle;
 	public static String CleanUpRefactoringWizard_formatterException_errorMessage;
 
+	public static String CleanUpSelectionDialog_deselectAll_label;
+
 	public static String ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description;
 	public static String ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description;
 

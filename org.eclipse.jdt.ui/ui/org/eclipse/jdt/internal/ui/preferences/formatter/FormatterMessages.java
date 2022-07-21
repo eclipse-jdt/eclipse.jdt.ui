@@ -514,6 +514,7 @@ final class FormatterMessages extends NLS {
 	public static String ModifyDialog_modifyAll_summary;
 	public static String ModifyDialog_modifyAll_tooltip;
 	public static String ModifyDialog_previewMissing_comment;
+	public static String ModifyDialogTabPage_buttonGroup_text;
 	public static String ModifyDialogTabPage_defaults_text;
 	public static String ModifyDialogTabPage_deselectAll_text;
 	public static String ModifyDialogTabPage_preview_label_text;

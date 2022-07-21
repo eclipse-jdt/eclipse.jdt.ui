@@ -124,7 +124,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	}
 
 	@Override
-	protected void doSetAll(boolean value) {
+	public void doSetAll(boolean value) {
 		for (ButtonPreference pref : fCheckboxes) {
 			pref.setChecked(value);
 		}
