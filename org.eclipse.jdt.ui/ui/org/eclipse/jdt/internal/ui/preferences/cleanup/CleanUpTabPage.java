@@ -131,7 +131,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	}
 
 	@Override
-	protected void setDefaults() {
+	public void setDefaults() {
 		CleanUpOptions settings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 		for (ButtonPreference pref : fCheckboxes) {
 			String defaultValueString= settings.getValue(pref.getKey());
@@ -141,7 +141,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	}
 
 	@Override
-	protected void resetValues() {
+	public void resetValues() {
 		for (ButtonPreference pref : fCheckboxes) {
 			String initialValueString= fInitialValues.get(pref.getKey());
 			boolean initialValue= Boolean.parseBoolean(initialValueString);

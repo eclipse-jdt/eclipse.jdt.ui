@@ -878,7 +878,6 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		buttonComposite.setLayout(layout);
 
 		Group buttonHolder= new Group(buttonComposite, SWT.NONE);
-		buttonHolder.setText(FormatterMessages.ModifyDialogTabPage_buttonGroup_text);
 		gridData= new GridData(SWT.FILL, SWT.END, true, false);
 		buttonHolder.setLayoutData(gridData);
 		layout= new GridLayout(4, false);
@@ -905,24 +904,6 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		b.setVisible(true);
 		SWTUtil.setButtonDimensionHint(b);
 		b.addSelectionListener(widgetSelectedAdapter((e) -> { doSetAll(false); }));
-
-		b= new Button(buttonHolder, SWT.PUSH);
-		b.setText(FormatterMessages.ModifyDialogTabPage_defaults_text);
-		gridData= new GridData(SWT.LEFT, SWT.TOP, false, true);
-		b.setLayoutData(gridData);
-		b.setEnabled(true);
-		b.setVisible(true);
-		SWTUtil.setButtonDimensionHint(b);
-		b.addSelectionListener(widgetSelectedAdapter((e) -> { setDefaults(); }));
-
-		b= new Button(buttonHolder, SWT.PUSH);
-		b.setText(FormatterMessages.ModifyDialogTabPage_reset_text);
-		gridData= new GridData(SWT.LEFT, SWT.TOP, false, true);
-		b.setLayoutData(gridData);
-		b.setEnabled(true);
-		b.setVisible(true);
-		SWTUtil.setButtonDimensionHint(b);
-		b.addSelectionListener(widgetSelectedAdapter((e) -> { resetValues(); }));
 
 		final Composite previewPane= new Composite(sashForm, SWT.NONE);
 		previewPane.setLayout(createGridLayout(numColumns, true));
@@ -953,13 +934,13 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * This method is called when the reset button is pressed.
 	 *
 	 */
-	protected abstract void resetValues();
+	public abstract void resetValues();
 
 	/**
 	 * This method is called when the defaults buttons is pressed.
 	 *
 	 */
-	protected abstract void setDefaults();
+	public abstract void setDefaults();
 
 	/**
 	 * Create the left side of the modify dialog. This is meant to be implemented by subclasses.

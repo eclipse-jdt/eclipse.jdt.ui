@@ -145,11 +145,18 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		super.createButtonsForButtonBar(parent);
-		Button deselectAll= createButton(parent, IDialogConstants.DESELECT_ALL_ID,
-				MultiFixMessages.CleanUpSelectionDialog_deselectAll_label, false);
-		deselectAll.addSelectionListener(widgetSelectedAdapter((e) -> {
+		Button restoreDefaults= createButton(parent, IDialogConstants.CLIENT_ID + 1,
+				MultiFixMessages.CleanUpSelectionDialog_restoreDefaults_label, false);
+		restoreDefaults.addSelectionListener(widgetSelectedAdapter((e) -> {
 			for (CleanUpTabPage page : fPages) {
-				page.doSetAll(false);
+				page.setDefaults();
+			}
+		}));
+		Button restoreValues= createButton(parent, IDialogConstants.CLIENT_ID + 2,
+				MultiFixMessages.CleanUpSelectionDialog_resetProfile_label, false);
+		restoreValues.addSelectionListener(widgetSelectedAdapter((e) -> {
+			for (CleanUpTabPage page : fPages) {
+				page.resetValues();
 			}
 		}));
 
