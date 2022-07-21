@@ -309,7 +309,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			gd.horizontalSpan= nColumns-1;
 
 			fClassesInSuiteTable.getTable().setLayoutData(gd);
-			System.out.println("is junit4 " + isJUnit4() + " is junit5 " + isJUnit5()); //$NON-NLS-1$ //$NON-NLS-2$
 			fClassesInSuiteTable.setContentProvider(new SuiteClassesContentProvider(isJUnit4(), isJUnit5()));
 			fClassesInSuiteTable.setLabelProvider(new JavaElementLabelProvider());
 			fClassesInSuiteTable.addCheckStateListener(event -> handleFieldChanged(CLASSES_IN_SUITE));
@@ -682,13 +681,18 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		fIsJunit5Enabled= isEnabled;
 		if (fJUnit5Toggle != null && !fJUnit5Toggle.isDisposed()) {
 			fJUnit3Toggle.setSelection(!isJUnit4 && !isJUnit5);
-			fJUnit4Toggle.setSelection(isJUnit4);
-			fJUnit5Toggle.setSelection(isJUnit5 && !isJUnit4);
+			fJUnit4Toggle.setSelection(!isJUnit5);
+			fJUnit5Toggle.setSelection(isJUnit5);
 			fJUnit4Toggle.setEnabled(isEnabled || !isJUnit5);
 			fJUnit3Toggle.setEnabled(isEnabled || !isJUnit5  && !isJUnit4);
 		}
-		internalSetJUnit5(isJUnit5);
-		internalSetJUnit4(isJUnit4);
+		if (isJUnit5) {
+			internalSetJUnit5(isJUnit5);
+			internalSetJUnit4(false);
+		} else {
+			internalSetJUnit5(false);
+			internalSetJUnit4(isJUnit4);
+		}
 	}
 
 	/**
