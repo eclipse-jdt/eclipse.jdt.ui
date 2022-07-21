@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
@@ -77,7 +78,12 @@ public class ParameterNamesCodeMiningTest {
 			closeIntro(PlatformUI.getWorkbench());
 		}
 		fProject= JavaProjectHelper.createJavaProject(getClass().getName(), "bin");
-		JavaProjectHelper.addRTJar(fProject);
+		JavaProjectHelper.addRTJar_17(fProject, true);
+
+		Map<String, String> options= fProject.getOptions(false);
+		JavaProjectHelper.set17_CompilerOptions(options);
+		fProject.setOptions(options);
+
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "src");
 		fPackage= root.getPackageFragment("");
 		fParameterNameCodeMiningProvider= new JavaMethodParameterCodeMiningProvider();
@@ -363,6 +369,41 @@ public class ParameterNamesCodeMiningTest {
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
+	@Test
+	public void testRecordConstructorOK() throws Exception {
+		String contents= "import java.util.Map;\n"
+				+ "public record Edge(int fromNodeId,\n"
+				+ "        int toNodeId,\n"
+				+ "        Map.Entry<Integer, Integer> fromPoint,\n"
+				+ "        Map.Entry<Integer, Integer> toPoint,\n"
+				+ "        double length,\n"
+				+ "        String profile) {\n"
+				+ "}\n"
+				+ "";
+		fPackage.createCompilationUnit("Edge.java", contents, true, new NullProgressMonitor());
+
+		contents = "import java.util.Map;\n"
+				+ "public class Test {\n"
+				+ "    public void test () {\n"
+				+ "        Edge e = new Edge(\n"
+				+ "        0,\n"
+				+ "        1,\n"
+				+ "        Map.entry(0, 0),\n"
+				+ "        Map.entry(1, 1),\n"
+				+ "        1,\n"
+				+ "        \"dev\");\n"
+				+ "    }\n"
+				+ "}";
+		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Test.java", contents, true, new NullProgressMonitor());
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
+		fParameterNameCodeMiningProvider.setContext(editor);
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
+		waitReconciled(viewer);
+
+		// 6 parameter names from Edge
+		// 4 parameter names from the 2 Map.entry(int, int) calls
+		assertEquals(10, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
+	}
 
 	private static boolean welcomeClosed;
 	private static void closeIntro(final IWorkbench wb) {
