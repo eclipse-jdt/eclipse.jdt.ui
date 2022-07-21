@@ -153,7 +153,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			presentation.clear();
 
 			String content= super.updatePresentation(drawable, hoverInfo, presentation, maxWidth, maxHeight);
-			return content + "\n\n" + warning; //$NON-NLS-1$
+			return content + System.lineSeparator()+System.lineSeparator() + warning;
 		}
 	}
 	/**
