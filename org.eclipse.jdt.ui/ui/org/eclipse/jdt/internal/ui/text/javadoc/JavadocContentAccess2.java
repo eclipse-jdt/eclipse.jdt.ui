@@ -695,9 +695,10 @@ public class JavadocContentAccess2 {
 	}
 
 	private static String firstToLower(String propertyName) {
-		char[] c = propertyName.toCharArray();
-		c[0] = Character.toLowerCase(c[0]);
-		return String.valueOf(c);
+		if (propertyName == null || propertyName.length() == 0) {
+			return propertyName;
+		}
+	    return propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
 	}
 
 	private static Javadoc getJavadocNode(IJavaElement element, String rawJavadoc) {

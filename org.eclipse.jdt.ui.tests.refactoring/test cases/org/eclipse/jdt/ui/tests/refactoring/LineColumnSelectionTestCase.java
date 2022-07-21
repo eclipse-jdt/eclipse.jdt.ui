@@ -67,8 +67,7 @@ public abstract class LineColumnSelectionTestCase extends AbstractJunit4CUTestCa
 		int separator= name.indexOf('_');
 		assertNotEquals(-1, separator);
 		assertTrue(separator >= 5);
-		return Character.toLowerCase(name.charAt(4))
-				+ name.substring(5, separator);
+		return name.substring(4, 5).toLowerCase() + name.substring(5, separator);
 	}
 
 	/*

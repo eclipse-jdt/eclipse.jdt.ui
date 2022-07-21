@@ -489,7 +489,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			if (! Character.isUpperCase(firstAfterPrefix))
 				continue; //not uppercase after prefix
 			//found matching prefix
-			String proposal= Character.toLowerCase(firstAfterPrefix) + methodName.substring(prefix.length() + 1);
+			String proposal= methodName.substring(prefix.length(), prefix.length()+1).toLowerCase() + methodName.substring(prefix.length()+1);
 			methodName= proposal;
 			break;
 		}
