@@ -122,10 +122,10 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#createContext(org.eclipse.jface.text.ITextViewer, int)
+	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#createContext(org.eclipse.jface.text.ITextViewer, int, boolean)
 	 */
 	@Override
-	protected ContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
-		return new JavaContentAssistInvocationContext(viewer, offset, fEditor);
+	protected ContentAssistInvocationContext createContext(ITextViewer viewer, int offset, boolean autoActivated) {
+		return new JavaContentAssistInvocationContext(viewer, offset, fEditor, autoActivated);
 	}
 }
