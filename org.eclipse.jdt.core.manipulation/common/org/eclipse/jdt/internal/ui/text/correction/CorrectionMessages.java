@@ -198,8 +198,6 @@ public final class CorrectionMessages extends NLS {
 	public static String UnimplementedMethodsCorrectionProposal_info_singular;
 	public static String UnimplementedMethodsCorrectionProposal_info_plural;
 
-	public static String UnimplementedCodeFix_DependenciesErrorMessage;
-	public static String UnimplementedCodeFix_DependenciesStatusMessage;
 	public static String UnimplementedCodeFix_MakeAbstractFix_label;
 	public static String UnimplementedCodeFix_TextEditGroup_label;
 

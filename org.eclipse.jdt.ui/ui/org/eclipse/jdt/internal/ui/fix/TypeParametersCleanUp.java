@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.TypeParametersFix;
+import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -66,9 +66,9 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		return TypeParametersFix.createCleanUp(compilationUnit,
+		return CleanUpFixWrapper.create(TypeParametersFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS),
-				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS));
+				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS)));
 	}
 
 	@Override
@@ -76,9 +76,9 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		return TypeParametersFix.createCleanUp(compilationUnit, problems,
+		return CleanUpFixWrapper.create(problems, problemLocations -> TypeParametersFixCore.createCleanUp(compilationUnit, problemLocations,
 				isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS),
-				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS));
+				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS)));
 	}
 
 	@Override
