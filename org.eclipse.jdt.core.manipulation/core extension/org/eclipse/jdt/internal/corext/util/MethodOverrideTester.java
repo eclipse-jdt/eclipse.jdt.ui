@@ -183,7 +183,7 @@ public class MethodOverrideTester {
 		}
 		return method;
 	}
-	
+
 	/**
 	 * Finds all overridden methods in a type and its super types. First the super class is examined and then the implemented interfaces.
 	 * With generics it is possible that 2 methods in the same type are overidden at the same time. In that case all overrides are returned
@@ -228,7 +228,7 @@ public class MethodOverrideTester {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds all overridden methods in a type. With generics it is possible that 2 methods in the same type are overridden at the same time.
 	 * In that case all overridden methods found are returned.
