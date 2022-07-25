@@ -17827,11 +17827,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public boolean dontMoveUpIfUsingUndefined() {\n" //
-				+ "        	    int totalHeight = 0;\n" //;
-				+ "             int innerHeight = 0;\n" //
-				+ "             int topMargin= 0;" //
-				+ "             int bottomMargin = 0;" //
-				+ "             totalHeight = topMargin + innerHeight + bottomMargin;" //
+				+ "        int totalHeight = 0;\n" //;
+				+ "        int innerHeight = 0;\n" //
+				+ "        int topMargin= 0;\n" //
+				+ "        int bottomMargin = 0;\n" //
+				+ "        totalHeight = topMargin + innerHeight + bottomMargin;\n" //
+				+ "        return true;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
@@ -17846,11 +17847,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    public boolean dontMoveUpIfUsingUndefined() {\n" //
-				+ "        	    int totalHeight;\n" //;
-				+ "             int innerHeight = 0;\n" //
-				+ "             int topMargin= 0;" //
-				+ "             int bottomMargin = 0;" //
-				+ "             totalHeight = topMargin + innerHeight + bottomMargin;" //
+				+ "        int totalHeight;\n" //;
+				+ "        int innerHeight = 0;\n" //
+				+ "        int topMargin= 0;\n" //
+				+ "        int bottomMargin = 0;\n" //
+				+ "        totalHeight = topMargin + innerHeight + bottomMargin;\n" //
+				+ "        return true;\n" //
 				+ "    }\n" //
 				+ "}\n";
 
