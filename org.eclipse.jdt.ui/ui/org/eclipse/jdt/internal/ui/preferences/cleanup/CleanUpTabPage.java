@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -24,19 +27,23 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUpConfigurationUI;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 
 public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICleanUpConfigurationUI {
 
 	private Map<String, String> fValues;
+	private Map<String, String> fInitialValues;
 	private JavaPreview fCleanUpPreview;
 	private boolean fIsSaveAction;
 
 	private int fCount;
 	private int fSelectedCount;
+	private List<ButtonPreference> fCheckboxes= new ArrayList<>();
 
 	public CleanUpTabPage() {
 		super();
@@ -98,10 +105,12 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	@Override
 	protected void initializePage() {
 		fCleanUpPreview.update();
+		fInitialValues= Map.copyOf(fValues);
 	}
 
 	protected void registerPreference(final CheckboxPreference preference) {
 		fCount++;
+		fCheckboxes.add(preference);
 		preference.addObserver((o, arg) -> {
 			if (preference.getChecked()) {
 				setSelectedCleanUpCount(fSelectedCount + 1);
@@ -114,6 +123,45 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		}
 	}
 
+	@Override
+	public void doSetAll(boolean value) {
+		for (ButtonPreference pref : fCheckboxes) {
+			pref.setChecked(value);
+		}
+	}
+
+	@Override
+	public void setDefaults() {
+		CleanUpOptions settings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
+		for (ButtonPreference pref : fCheckboxes) {
+			String defaultValueString= settings.getValue(pref.getKey());
+			boolean defaultValue= Boolean.parseBoolean(defaultValueString);
+			pref.setChecked(defaultValue);
+		}
+	}
+
+	@Override
+	public void resetValues() {
+		for (ButtonPreference pref : fCheckboxes) {
+			String initialValueString= fInitialValues.get(pref.getKey());
+			boolean initialValue= Boolean.parseBoolean(initialValueString);
+			pref.setChecked(initialValue);
+		}
+
+	}
+
+	/* Register a preference that is an option for a cleanup. Checking it does not change the number of clean ups.
+	 */
+	protected void registerOptionPreference(final CheckboxPreference main, final CheckboxPreference... options) {
+		registerPreference(main);
+		fCheckboxes.addAll(Arrays.asList(options));
+		main.addObserver((source, arg)-> {
+			for (CheckboxPreference option : options) {
+				option.setEnabled(main.getChecked());
+			}
+		});
+	}
+
 	protected void registerSlavePreference(final CheckboxPreference master, final RadioPreference[] slaves) {
 		internalRegisterSlavePreference(master, slaves);
 		registerPreference(master);
@@ -121,6 +169,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 	protected void registerSlavePreference(final CheckboxPreference master, final CheckboxPreference[] slaves) {
 		registerSlavePreference(master, slaves, null);
+		registerPreference(master);
 	}
 
 	/**
@@ -133,6 +182,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	 */
 	protected void registerSlavePreference(final CheckboxPreference master, final CheckboxPreference[] slaves, final CheckboxPreference[][] subSlaves) {
 		internalRegisterSlavePreference(master, slaves);
+
 		fCount+= slaves.length;
 
 		if (subSlaves != null) {
@@ -164,7 +214,11 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		});
 
 		for (CheckboxPreference slave : slaves) {
-			slave.addObserver((o, arg) -> setSelectedCleanUpCount(fSelectedCount + (slave.getChecked() ? 1 : -1)));
+			slave.addObserver((o, arg) -> {
+				if (master.getChecked()) {
+					setSelectedCleanUpCount(fSelectedCount + (slave.getChecked() ? 1 : -1));
+				}
+			});
 		}
 
 		if (master.getChecked()) {
@@ -177,6 +231,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	}
 
 	private void internalRegisterSlavePreference(final CheckboxPreference master, final ButtonPreference[] slaves) {
+		fCheckboxes.addAll(Arrays.asList(slaves));
     	master.addObserver( (o, arg) -> {
 			for (ButtonPreference slave : slaves) {
 				slave.setEnabled(master.getChecked());
