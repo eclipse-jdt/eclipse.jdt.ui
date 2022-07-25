@@ -80,6 +80,9 @@ public class CleanUpMessages extends NLS {
 
 	public static String CodeStyleTabPage_CheckboxName_SimplifyLambdaExpressionAndMethodRefSyntax;
 
+	public static String CodeStyleTabPage_GroupName_Platform;
+	public static String CodeStyleTabPage_CheckboxName_SimplifyPlatformStatus;
+
 	public static String PerformanceTabPage_GroupName_Performance;
 
 	public static String PerformanceTabPage_CheckboxName_SingleUsedField;

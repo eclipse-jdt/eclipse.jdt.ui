@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SimplifyPlatformStatusCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SwitchCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
@@ -51,7 +52,8 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new NumberSuffixCleanUp(values),
 				new InstanceofCleanUp(values),
 				new VariableDeclarationCleanUp(values),
-				new LambdaExpressionAndMethodRefCleanUp(values)
+				new LambdaExpressionAndMethodRefCleanUp(values),
+				new SimplifyPlatformStatusCleanUp(values)
 		};
 	}
 
@@ -117,5 +119,12 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference simplifyLambdaExpressionAndMethodRef= createCheckboxPref(functionalInterfacesGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_SimplifyLambdaExpressionAndMethodRefSyntax, CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(simplifyLambdaExpressionAndMethodRef);
+
+		Group platformGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_Platform);
+		final CheckboxPreference platformstatus= createCheckboxPref(platformGroup, numColumns,
+				CleanUpMessages.CodeStyleTabPage_CheckboxName_SimplifyPlatformStatus,
+				CleanUpConstants.SIMPLIFY_STATUS_CLEANUP, CleanUpModifyDialog.FALSE_TRUE);
+		intent(platformGroup);
+		registerPreference(platformstatus);
 	}
 }

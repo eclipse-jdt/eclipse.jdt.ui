@@ -7527,9 +7527,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.hash">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.SimplifyPlatformStatusCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.simplifystatus"
+            runAfter="org.eclipse.jdt.ui.cleanup.objects_equals">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp"
             id="org.eclipse.jdt.ui.cleanup.autoboxing"
-            runAfter="org.eclipse.jdt.ui.cleanup.objects_equals">
+            runAfter="org.eclipse.jdt.ui.cleanup.simplifystatus">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp"

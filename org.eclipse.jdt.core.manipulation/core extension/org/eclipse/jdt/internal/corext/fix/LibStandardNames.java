@@ -30,4 +30,7 @@ public class LibStandardNames {
 	static final String FIELD_PATH_SEPARATOR= "pathSeparator"; //$NON-NLS-1$
 	static final String FIELD_SEPARATOR= "separator"; //$NON-NLS-1$
 	static final String METHOD_FOREACH= "forEach"; //$NON-NLS-1$
+	public static final String STATUS_WARNING= "warning"; //$NON-NLS-1$
+	public static final String STATUS_ERROR= "error"; //$NON-NLS-1$
+	public static final String STATUS_INFO= "info"; //$NON-NLS-1$
 }

@@ -1929,6 +1929,19 @@ public class CleanUpConstants {
 	public static final String ADD_MISSING_ANNOTATIONS= "cleanup.add_missing_annotations"; //$NON-NLS-1$
 
 	/**
+	 * Controls whether status code should be refactored:<br>
+	 * {@link #SIMPLIFY_STATUS_CLEANUP}<br> {@value #SIMPLIFY_STATUS_CLEANUP} <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 *
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 3.3
+	 */
+	public static final String SIMPLIFY_STATUS_CLEANUP= "cleanup.simplify_status_creation"; //$NON-NLS-1$
+	/**
 	 * Add '@Override' annotation in front of overriding methods.
 	 * <p>
 	 * Example:
