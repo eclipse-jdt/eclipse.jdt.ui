@@ -17818,6 +17818,49 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDontMoveUpOverriddenAssignment() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean dontMoveUpIfUsingUndefined() {\n" //
+				+ "        int totalHeight = 0;\n" //;
+				+ "        int innerHeight = 0;\n" //
+				+ "        int topMargin= 0;\n" //
+				+ "        int bottomMargin = 0;\n" //
+				+ "        totalHeight = topMargin + innerHeight + bottomMargin;\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
+
+		enable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT);
+		disable(CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL);
+
+		String output= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.File;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public boolean dontMoveUpIfUsingUndefined() {\n" //
+				+ "        int totalHeight;\n" //;
+				+ "        int innerHeight = 0;\n" //
+				+ "        int topMargin= 0;\n" //
+				+ "        int bottomMargin = 0;\n" //
+				+ "        totalHeight = topMargin + innerHeight + bottomMargin;\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OverriddenAssignmentCleanUp_description)));
+	}
+
+	@Test
 	public void testDoNotRemoveAssignment() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
