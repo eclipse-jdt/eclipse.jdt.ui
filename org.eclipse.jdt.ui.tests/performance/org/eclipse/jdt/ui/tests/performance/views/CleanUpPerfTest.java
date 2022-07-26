@@ -94,6 +94,7 @@ import org.eclipse.jdt.internal.ui.fix.PullOutIfFromIfElseCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SimplifyPlatformStatusCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp;
@@ -404,6 +405,22 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		storeSettings(node);
 
 		cleanUpRefactoring.addCleanUp(new StringCleanUp());
+
+		doCleanUp(cleanUpRefactoring);
+	}
+
+	@Test
+	public void testPlatformStatusCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map<String, String> node= getNullSettings();
+
+		node.put(CleanUpConstants.SIMPLIFY_STATUS_CLEANUP, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new SimplifyPlatformStatusCleanUp());
 
 		doCleanUp(cleanUpRefactoring);
 	}

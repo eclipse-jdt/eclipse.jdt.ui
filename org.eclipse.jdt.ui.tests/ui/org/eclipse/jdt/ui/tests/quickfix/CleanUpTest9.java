@@ -246,4 +246,154 @@ public class CleanUpTest9 extends CleanUpTestCase {
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
+
+	@Test
+	public void testPlatformWarning3() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	IStatus status = new Status(IStatus.WARNING, \"plugin id\",\"important message\");\n"
+				+ "}";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.SIMPLIFY_STATUS_CLEANUP);
+
+		String expected= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	IStatus status = Status.warning(\"important message\");\n"
+				+ "}";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PlatformStatusCleanUp_description)));
+	}
+
+	@Test
+	public void testPlatformWarning4() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	IStatus status = new Status(IStatus.WARNING, \"plugin id\", \"important message\", null);\n"
+				+ "	void bla(Throwable e) {\n"
+				+ "		IStatus status = new Status(IStatus.WARNING, \"plugin id\", IStatus.OK, \"important message\", e);\n"
+				+ "	}\n"
+				+ "}";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.SIMPLIFY_STATUS_CLEANUP);
+
+		String expected= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	IStatus status = Status.warning(\"important message\");\n"
+				+ "	void bla(Throwable e) {\n"
+				+ "		IStatus status = Status.warning(\"important message\", e);\n"
+				+ "	}\n"
+				+ "}";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PlatformStatusCleanUp_description)));
+	}
+
+	@Test
+	public void testPlatformWarning5() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	void bla(Throwable e) {\n"
+				+ "		IStatus status = new Status(IStatus.WARNING, \"plugin id\", IStatus.OK, \"important message\", e);\n"
+				+ "	}\n"
+				+ "}";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.SIMPLIFY_STATUS_CLEANUP);
+
+		String expected= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	void bla(Throwable e) {\n"
+				+ "		IStatus status = Status.warning(\"important message\", e);\n"
+				+ "	}\n"
+				+ "}";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PlatformStatusCleanUp_description)));
+	}
+
+	@Test
+	public void testPlatformError() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	IStatus status = new Status(IStatus.ERROR, \"plugin id\", \"important message\", null);\n"
+				+ "}";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.SIMPLIFY_STATUS_CLEANUP);
+
+		String expected= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	IStatus status = Status.error(\"important message\");\n"
+				+ "}";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PlatformStatusCleanUp_description)));
+	}
+
+	@Test
+	public void testPlatformInfo() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	IStatus status = new Status(IStatus.INFO, \"plugin id\", \"important message\", null);\n"
+				+ "}";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.SIMPLIFY_STATUS_CLEANUP);
+
+		String expected= "package test;\n"
+				+ "\n"
+				+ "import org.eclipse.core.runtime.IStatus;\n"
+				+ "import org.eclipse.core.runtime.Status;\n"
+				+ "\n"
+				+ "public class Test {\n"
+				+ "	IStatus status = Status.info(\"important message\");\n"
+				+ "}";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PlatformStatusCleanUp_description)));
+	}
 }
