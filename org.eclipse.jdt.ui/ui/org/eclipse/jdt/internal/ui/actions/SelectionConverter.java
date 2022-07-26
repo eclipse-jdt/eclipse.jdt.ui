@@ -288,6 +288,9 @@ public class SelectionConverter {
 		    }
 			whiteSpaceOffset= i;
 		}
+		if (selectedString != null && whiteSpaceOffset == selectedString.length()) {
+			whiteSpaceOffset= 0; // leave offset alone if selection is all white-space
+		}
 		IJavaElement ref= input.getElementAt(selection.getOffset() + whiteSpaceOffset);
 		if (ref == null)
 			return input;
