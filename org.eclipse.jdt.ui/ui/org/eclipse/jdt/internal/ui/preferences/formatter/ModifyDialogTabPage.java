@@ -928,19 +928,19 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * @param value true if set all, false if deselect all
 	 *
 	 */
-	public abstract void doSetAll(boolean value);
+	public void doSetAll(boolean value) {}
 
 	/**
 	 * This method is called when the reset button is pressed.
 	 *
 	 */
-	public abstract void resetValues();
+	public void resetValues() {}
 
 	/**
 	 * This method is called when the defaults buttons is pressed.
 	 *
 	 */
-	public abstract void setDefaults();
+	public void setDefaults() {}
 
 	/**
 	 * Create the left side of the modify dialog. This is meant to be implemented by subclasses.
