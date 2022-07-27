@@ -197,11 +197,8 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 				isJunit4= true;
 			}
 			isJunit5= CoreTestSearchEngine.hasJUnit5TestAnnotation(project);
-			if (!isJunit5 && !CoreTestSearchEngine.hasTestCaseType(project) && JUnitStubUtility.is18OrHigher(project)) {
-				isJunit5= true;
-			}
 		}
-		setJUnit4or5(isJunit5, isJunit5, true);
+		setJUnit4or5(isJunit4, isJunit5, true);
 		doStatusUpdate();
 	}
 
@@ -216,7 +213,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
 		}
 
-		setTypeName(ALL_TESTS, true);
+		setTypeName(generateName(ALL_TESTS), true);
 		fTypeNameStatus= typeNameChanged(); //set status on initialization for this dialog - user must know that suite method will be overridden
 	}
 
@@ -476,6 +473,22 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	}
 
 
+	private String generateName(String name) {
+		IPackageFragment pack= getPackageFragment();
+		String finalName= name;
+		if (pack != null) {
+			int counter= 2;
+			ICompilationUnit cu= pack.getCompilationUnit(finalName + ".java"); //$NON-NLS-1$
+			//if this cu already exists, we need to disable the
+			//junit 3 option if it is a junit 4 suite and vice versa
+			while (cu.exists()) {
+				finalName= name + counter++;
+				cu= pack.getCompilationUnit(finalName + ".java"); //$NON-NLS-1$
+			}
+		}
+		return finalName;
+	}
+
 	@Override
 	protected IStatus typeNameChanged() {
 		super.typeNameChanged();
@@ -681,13 +694,13 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		fIsJunit5Enabled= isEnabled;
 		if (fJUnit5Toggle != null && !fJUnit5Toggle.isDisposed()) {
 			fJUnit3Toggle.setSelection(!isJUnit4 && !isJUnit5);
-			fJUnit4Toggle.setSelection(!isJUnit5);
+			fJUnit4Toggle.setSelection(isJUnit4 && !isJUnit5);
 			fJUnit5Toggle.setSelection(isJUnit5);
 			fJUnit4Toggle.setEnabled(isEnabled || !isJUnit5);
 			fJUnit3Toggle.setEnabled(isEnabled || !isJUnit5  && !isJUnit4);
 		}
 		if (isJUnit5) {
-			internalSetJUnit5(isJUnit5);
+			internalSetJUnit5(true);
 			internalSetJUnit4(false);
 		} else {
 			internalSetJUnit5(false);
