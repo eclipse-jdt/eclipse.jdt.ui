@@ -165,15 +165,15 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
-import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFix;
+import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
-import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFix;
+import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
-import org.eclipse.jdt.internal.corext.fix.TypeParametersFix;
+import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFix;
-import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
+import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
@@ -683,7 +683,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		IProposableFix fix= LambdaExpressionsFix.createConvertToLambdaFix(cic);
+		IProposableFix fix= LambdaExpressionsFixCore.createConvertToLambdaFix(cic);
 		if (fix == null)
 			return false;
 
@@ -710,7 +710,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		IProposableFix fix= LambdaExpressionsFix.createConvertToAnonymousClassCreationsFix(lambda);
+		IProposableFix fix= LambdaExpressionsFixCore.createConvertToAnonymousClassCreationsFix(lambda);
 		if (fix == null)
 			return false;
 
@@ -1799,7 +1799,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		IProposableFix fix= TypeParametersFix.createInsertInferredTypeArgumentsFix(context.getASTRoot(), createdType);
+		IProposableFix fix= TypeParametersFixCore.createInsertInferredTypeArgumentsFix(context.getASTRoot(), createdType);
 		if (fix != null && resultingCollections != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			int relevance= locations == null ? IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS : IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
@@ -4075,7 +4075,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null)
 			return true;
 
-		IProposableFix fix= DoWhileRatherThanWhileFix.createDoWhileFix(whileStatement);
+		IProposableFix fix= DoWhileRatherThanWhileFixCore.createDoWhileFix(whileStatement);
 		if (fix == null)
 			return false;
 
@@ -4254,7 +4254,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (selectedNodes.length == 0)
 			return false;
 
-		IProposableFix fix= VariableDeclarationFix.createChangeModifierToFinalFix(context.getASTRoot(), selectedNodes);
+		IProposableFix fix= VariableDeclarationFixCore.createChangeModifierToFinalFix(context.getASTRoot(), selectedNodes);
 		if (fix == null)
 			return false;
 
