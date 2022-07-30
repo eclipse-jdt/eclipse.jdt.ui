@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -52,13 +53,17 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.IInformationControlExtension3;
 import org.eclipse.jface.text.IInformationControlExtension5;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.SourceViewer;
+
+import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -69,9 +74,15 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingPresenter;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingReconciler;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover.JavaSourceInformationInput;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover.JavaSourceSemanticInformationInput;
 
 /**
  * Source viewer based implementation of <code>IInformationControl</code>.
@@ -89,7 +100,7 @@ public class SourceViewerInformationControl
 	/** The text font (do not dispose!) */
 	private Font fTextFont;
 	/** The control's source viewer */
-	private SourceViewer fViewer;
+	private JavaSourceViewer fViewer;
 	/**
 	 * The optional status field.
 	 *
@@ -130,6 +141,17 @@ public class SourceViewerInformationControl
 	private JavaSourceViewerConfiguration fViewerConfiguration;
 	private Map<String, JavaSourceViewerConfiguration> fKindToViewerConfiguration= new HashMap<>();
 
+	/** Parent java editor from which source viewer is shown */
+	private JavaEditor fParentJavaEditor;
+	/** Semantic highlighting manager doing semantic coloring of source content */
+	private SemanticHighlightingManager fSemanticHighlightingManager;
+	/** Java source information input from Java source hover for semantic coloring */
+	private volatile JavaSourceSemanticInformationInput fJavaSourceSemanticInformationInput;
+	/** Root element passed to semantic highlighting reconciler */
+	private volatile ITypeRoot fHoverElementTypeRoot;
+	/** Visibility status to apply after semantic coloring is finished */
+	private volatile boolean fDelayedVisible;
+
 	/**
 	 * Creates a source viewer information control with the given shell as parent. The given
 	 * styles are applied to the created styled text widget. The status field will
@@ -142,6 +164,23 @@ public class SourceViewerInformationControl
 	 *            or <code>null</code> if the status field should be hidden
 	 */
 	public SourceViewerInformationControl(Shell parent, boolean isResizable, int orientation, String statusFieldText) {
+		this(parent, null, isResizable, orientation, statusFieldText);
+	}
+
+	/**
+	 * Creates a source viewer information control with the given shell as parent. The given
+	 * styles are applied to the created styled text widget. The status field will
+	 * contain the given text or be hidden.
+	 *
+	 * @param parent the parent shell
+	 * @param editor the editor in which source viewer is being displayed
+	 * @param isResizable <code>true</code> if resizable
+	 * @param orientation the orientation
+	 * @param statusFieldText the text to be used in the optional status field
+	 *            or <code>null</code> if the status field should be hidden
+	 */
+	public SourceViewerInformationControl(Shell parent, IEditorPart editor, boolean isResizable, int orientation, String statusFieldText) {
+
 		Assert.isLegal(orientation == SWT.RIGHT_TO_LEFT || orientation == SWT.LEFT_TO_RIGHT || orientation == SWT.NONE);
 		fOrientation= orientation;
 
@@ -232,6 +271,28 @@ public class SourceViewerInformationControl
 		}
 
 		addDisposeListener(this);
+
+		if (editor instanceof JavaEditor) {
+			fParentJavaEditor= (JavaEditor) editor;
+		}
+		setupSemanticColoring(store);
+	}
+
+	private void setupSemanticColoring(IPreferenceStore preferenceStore) {
+		if (fParentJavaEditor != null && SemanticHighlightings.isEnabled(preferenceStore)) {
+			fSemanticHighlightingManager= new SourceViewerSemanticHighlightingManager();
+			fSemanticHighlightingManager.install(fParentJavaEditor, fViewer, JavaPlugin.getDefault().getJavaTextTools().getColorManager(), preferenceStore);
+		}
+	}
+
+	private void disposeSemanticColoring() {
+		if (fSemanticHighlightingManager != null) {
+			fSemanticHighlightingManager.uninstall();
+		}
+		fSemanticHighlightingManager= null;
+		fParentJavaEditor= null;
+		fHoverElementTypeRoot= null;
+		fJavaSourceSemanticInformationInput= null;
 	}
 
 	/**
@@ -320,6 +381,11 @@ public class SourceViewerInformationControl
 			content= (String) input;
 		} else if (input instanceof JavaSourceInformationInput) {
 			content= ((JavaSourceInformationInput) input).getHoverInfo();
+			if (input instanceof JavaSourceSemanticInformationInput && fSemanticHighlightingManager != null) {
+				fJavaSourceSemanticInformationInput= (JavaSourceSemanticInformationInput) input;
+				fHoverElementTypeRoot= fJavaSourceSemanticInformationInput.getViewerContentTypeRoot();
+				// source viewer size will be computed based on final text that will be displayed (getHoverInfo())
+			}
 		}
 		setInformation(content);
 
@@ -374,7 +440,15 @@ public class SourceViewerInformationControl
 	 */
 	@Override
 	public void setVisible(boolean visible) {
+		fDelayedVisible= visible;
+		// at this moment viewer size is already computed from final text (getHoverInfo()) that will be displayed in viewer,
+		// so we can now replace content (done inside prepareSemanticColoring()) in preparation for semantic coloring
+		if (visible && fJavaSourceSemanticInformationInput != null && fJavaSourceSemanticInformationInput.prepareSemanticColoring(fViewer)) {
+			fSemanticHighlightingManager.getReconciler().refresh(); // triggers semantic coloring job
+			fHoverElementTypeRoot= null; // not needed once job is triggered
+		} else {
 			fShell.setVisible(visible);
+		}
 	}
 
 	/**
@@ -394,6 +468,7 @@ public class SourceViewerInformationControl
 
 	@Override
 	public final void dispose() {
+		disposeSemanticColoring();
 		if (fShell != null && !fShell.isDisposed())
 			fShell.dispose();
 		else
@@ -588,7 +663,7 @@ public class SourceViewerInformationControl
 	 */
 	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		return parent -> new SourceViewerInformationControl(parent, true, fOrientation, null);
+		return parent -> new SourceViewerInformationControl(parent, fParentJavaEditor, true, fOrientation, null);
 	}
 
 	/*
@@ -628,5 +703,42 @@ public class SourceViewerInformationControl
 		gc.dispose();
 
 		return new Point(widthInChars * width, heightInChars * height);
+	}
+
+	private class SourceViewerSemanticHighlightingManager extends SemanticHighlightingManager {
+		@Override
+		protected SemanticHighlightingReconciler createSemanticHighlightingReconciler() {
+			return new SemanticHighlightingReconciler() {
+
+				@Override
+				protected ITypeRoot getElement() {
+					return fHoverElementTypeRoot;
+				}
+
+				@Override
+				protected boolean registerAsEditorReconcilingListener() {
+					return false;
+				}
+			};
+		}
+
+		@Override
+		protected SemanticHighlightingPresenter createSemanticHighlightingPresenter() {
+			return new SemanticHighlightingPresenter() {
+
+				@Override
+				public Runnable createUpdateRunnable(TextPresentation textPresentation, List<Position> addedPositions, List<Position> removedPositions) {
+					Runnable parentRunnable= super.createUpdateRunnable(textPresentation, addedPositions, removedPositions);
+					if (parentRunnable == null || fJavaSourceSemanticInformationInput == null || !fDelayedVisible) {
+						return null;
+					}
+					return () -> {
+						parentRunnable.run(); // applies semantic highlighting
+						fJavaSourceSemanticInformationInput.postSemanticColoring(); // then modifies source viewer content (preserving highlighting)
+						fShell.setVisible(true); // then show source viewer
+					};
+				}
+			};
+		}
 	}
 }

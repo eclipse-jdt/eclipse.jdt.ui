@@ -537,11 +537,21 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		fSourceViewer= sourceViewer;
 
 		if (fEditor instanceof CompilationUnitEditor) {
-			((CompilationUnitEditor)fEditor).addReconcileListener(this);
-		} else if (fEditor == null) {
+			if (registerAsEditorReconcilingListener()) {
+				((CompilationUnitEditor)fEditor).addReconcileListener(this);
+			}
+		} else if (fEditor != null) {
 			fSourceViewer.addTextInputListener(this);
 			scheduleJob();
 		}
+	}
+
+	/**
+	 * Decides if this reconciler should also register itself as a reconciling listener on the editor as part of {@link #install} process.
+	 * @return whether this instance should register itself as a reconciling listener on the editor
+	 */
+	protected boolean registerAsEditorReconcilingListener() {
+		return true;
 	}
 
 	/**
@@ -566,10 +576,19 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	}
 
 	/**
+	 * Get the type root java element for which reconciling job should be scheduled.
+	 *
+	 * @return root element for reconciling
+	 */
+	protected ITypeRoot getElement() {
+		return fEditor.getInputJavaElement();
+	}
+
+	/**
 	 * Schedule a background job for retrieving the AST and reconciling the Semantic Highlighting model.
 	 */
 	private void scheduleJob() {
-		final ITypeRoot element= fEditor.getInputJavaElement();
+		final ITypeRoot element= getElement();
 
 		synchronized (fJobLock) {
 			final Job oldJob= fJob;
