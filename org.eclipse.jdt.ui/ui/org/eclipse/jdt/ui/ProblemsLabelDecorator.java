@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -327,8 +328,6 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			if (monitor.isCanceled()) {
 				queue.clear();
 				return Status.CANCEL_STATUS;
-			} else if (!queue.isEmpty()) {
-				schedule(100);
 			}
 			return Status.OK_STATUS;
 		}
@@ -437,8 +436,6 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 				if (monitor.isCanceled()) {
 					queue.clear();
 					return Status.CANCEL_STATUS;
-				} else if (!queue.isEmpty()) {
-					schedule(100);
 				}
 			}
 			return Status.OK_STATUS;
@@ -457,16 +454,20 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 
 		void schedule(AdornmentTask task, AdornmentUpdateJob job) {
+			AtomicBoolean shouldSchedule = new AtomicBoolean(false);
 			synchronized (queue) {
 				queue.compute(task, (k,v) -> {
 					if (v == null) {
 						v = new LinkedHashSet<>();
 					}
 					if (v.add(job)) {
-						schedule(100);
+						shouldSchedule.set(true);
 					}
 					return v;
 				});
+			}
+			if (shouldSchedule.get()) {
+				schedule(100);
 			}
 		}
 	}
