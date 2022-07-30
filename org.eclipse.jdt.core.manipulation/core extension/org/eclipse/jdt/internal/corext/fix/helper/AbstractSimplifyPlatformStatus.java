@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.corext.fix.helper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -24,7 +25,6 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.common.HelperVisitor;
+import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
@@ -71,27 +73,26 @@ public abstract class AbstractSimplifyPlatformStatus<T extends ASTNode> {
 	public void find(SimplifyPlatformStatusFixCore fixcore, CompilationUnit compilationUnit,
 			Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed) throws CoreException {
 		try {
-			compilationUnit.accept(new ASTVisitor() {
-				@Override
-				public boolean visit(final ClassInstanceCreation visited) {
-					if (nodesprocessed.contains(visited) || ((visited.arguments().size() != 3)
-							&& (visited.arguments().size() != 4) && (visited.arguments().size() != 5))) {
-						return false;
-					}
-
-					ITypeBinding binding= visited.resolveTypeBinding();
-					if ((binding != null) && (Status.class.getSimpleName().equals(binding.getName()))) {
-						List<Expression> arguments= visited.arguments();
-						if (istatus.equals(arguments.get(0).toString())) {
-							operations.add(fixcore.rewrite(visited));
-							nodesprocessed.add(visited);
+			ReferenceHolder<ASTNode, Map<String,Object>> dataholder = new ReferenceHolder<>();
+			HelperVisitor.callClassInstanceCreationVisitor(compilationUnit, dataholder, nodesprocessed,
+					(visited,holder)->{
+						if (nodesprocessed.contains(visited) || ((visited.arguments().size() != 3)
+								&& (visited.arguments().size() != 4) && (visited.arguments().size() != 5))) {
 							return false;
 						}
-					}
 
-					return true;
-				}
-			});
+						ITypeBinding binding= visited.resolveTypeBinding();
+						if ((binding != null) && (Status.class.getSimpleName().equals(binding.getName()))) {
+							List<Expression> arguments= visited.arguments();
+							if (istatus.equals(arguments.get(0).toString())) {
+								operations.add(fixcore.rewrite(visited));
+								nodesprocessed.add(visited);
+								return false;
+							}
+						}
+
+						return true;
+					});
 		} catch (Exception e) {
 			throw new CoreException(new Status(IStatus.ERROR, "sandbox_platform_helper", "Problem in find", e)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
