@@ -179,7 +179,7 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 				if (node instanceof Statement) {
 					stmt= (Statement)node;
 				} else {
-					stmt= (Statement)ASTNodes.getFirstAncestorOrNull(node, Statement.class);
+					stmt= ASTNodes.getFirstAncestorOrNull(node, Statement.class);
 				}
 				if (stmt == null) {
 					return false;

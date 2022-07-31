@@ -588,7 +588,7 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 						Expression exp= returnStatement.getExpression();
 						if (exp != null) {
 							MethodDeclaration methodDeclaration=
-									(MethodDeclaration)ASTNodes.getFirstAncestorOrNull(returnStatement, MethodDeclaration.class);
+									ASTNodes.getFirstAncestorOrNull(returnStatement, MethodDeclaration.class);
 							if (methodDeclaration != null) {
 								IMethodBinding returnStatementMethodBinding= methodDeclaration.resolveBinding();
 								if (returnStatementMethodBinding != null) {
@@ -640,7 +640,7 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 									}
 								}
 							}
-							Assignment assignment= (Assignment)ASTNodes.getFirstAncestorOrNull(node, Assignment.class);
+							Assignment assignment= ASTNodes.getFirstAncestorOrNull(node, Assignment.class);
 							if (assignment != null) {
 								Expression leftSide= assignment.getLeftHandSide();
 								if (leftSide instanceof Name) {
@@ -752,7 +752,7 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 			Type type= visited.getType();
 			ITypeBinding typeBinding= type.resolveBinding();
 			if (isStringBufferType(typeBinding)) {
-				Assignment assignment= (Assignment)ASTNodes.getFirstAncestorOrNull(visited, Assignment.class);
+				Assignment assignment= ASTNodes.getFirstAncestorOrNull(visited, Assignment.class);
 				if (assignment != null) {
 					Expression leftSide= assignment.getLeftHandSide();
 					if (leftSide instanceof Name) {

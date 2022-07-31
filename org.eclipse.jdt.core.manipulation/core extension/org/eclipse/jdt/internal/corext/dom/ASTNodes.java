@@ -2476,6 +2476,30 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns the first ancestor of the provided node which has any of the required types.
+	 *
+	 * @param node the start node
+	 * @param ancestorClass the required ancestor's type
+	 * @return the first ancestor of the provided node which has any of the required type, or
+	 *         {@code null}
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends ASTNode> T getFirstAncestorOrNull(final ASTNode node, final Class<T> ancestorClass) {
+		if (node == null || node.getParent() == null) {
+			return null;
+		}
+
+		ASTNode parent= node.getParent();
+
+		if (ancestorClass.isAssignableFrom(parent.getClass())
+				) {
+			return (T) parent;
+		}
+
+		return getFirstAncestorOrNull(parent, ancestorClass);
+	}
+
+	/**
 	 * Returns the closest ancestor of <code>node</code> that is an instance of <code>parentClass</code>, or <code>null</code> if none.
 	 * <p>
 	 * <b>Warning:</b> This method does not stop at any boundaries like parentheses, statements, body declarations, etc.
