@@ -4088,15 +4088,18 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	@Test
 	public void testWhile() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n"
+		String sample= "package test1;\n"
 		                + "import java.util.*;\n"
 		                + "public class Test {\n"
 		                + "    void m(List<String> strings) {\n"
 		                + "        Collections.reverse(strings);\n"
+		                + "        // keep comment\n"
 		                + "        Iterator it = strings.iterator();\n"
+		                + "        // keep comment2\n"
 		                + "        while (it.hasNext()) {\n"
+		                + "            // keep comment3\n"
 		                + "            String s = (String) it.next();\n"
+		                + "            // keep comment4\n"
 		                + "            System.out.println(s);\n"
 		                + "            // OK\n"
 		                + "            System.err.println(s);\n"
@@ -4108,13 +4111,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		sample= "" //
-				+ "package test1;\n"
+		String expected= "package test1;\n"
                         + "import java.util.*;\n"
                         + "public class Test {\n"
                         + "    void m(List<String> strings) {\n"
                         + "        Collections.reverse(strings);\n"
-                        + "        for (String s : strings) {\n"
+                        + "        // keep comment\n"
+                        + "        \n"
+                        + "        // keep comment2\n"
+		                + "        for (String s : strings) {\n"
+		                + "            // keep comment3\n"
+		                + "            // keep comment4\n"
                         + "            System.out.println(s);\n"
                         + "            // OK\n"
                         + "            System.err.println(s);\n"
@@ -4122,9 +4129,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
                         + "        System.out.println();\n"
                         + "    }\n"
                         + "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected },
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 

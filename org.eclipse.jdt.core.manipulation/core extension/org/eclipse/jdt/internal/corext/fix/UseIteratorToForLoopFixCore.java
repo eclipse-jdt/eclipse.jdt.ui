@@ -22,13 +22,14 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.helper.AbstractTool;
 import org.eclipse.jdt.internal.corext.fix.helper.WhileLoopToChangeHit;
 import org.eclipse.jdt.internal.corext.fix.helper.WhileToForEach;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -65,15 +66,17 @@ public enum UseIteratorToForLoopFixCore {
 			@Override
 			public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 				TextEditGroup group= createTextEditGroup(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description, cuRewrite);
-				TightSourceRangeComputer rangeComputer;
 				ASTRewrite rewrite= cuRewrite.getASTRewrite();
-				if (rewrite.getExtendedSourceRangeComputer() instanceof TightSourceRangeComputer) {
-					rangeComputer= (TightSourceRangeComputer)rewrite.getExtendedSourceRangeComputer();
-				} else {
-					rangeComputer= new TightSourceRangeComputer();
-				}
-				rangeComputer.addTightSourceNode(hit.whileStatement);
-				rewrite.setTargetSourceRangeComputer(rangeComputer);
+				rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
+					@Override
+					public SourceRange computeSourceRange(final ASTNode nodeWithComment) {
+						if (Boolean.TRUE.equals(nodeWithComment.getProperty(ASTNodes.UNTOUCH_COMMENT))) {
+							return new SourceRange(nodeWithComment.getStartPosition(), nodeWithComment.getLength());
+						}
+
+						return super.computeSourceRange(nodeWithComment);
+					}
+				});
 				iteratortofor.rewrite(UseIteratorToForLoopFixCore.this, hit, cuRewrite, group);
 			}
 		};
