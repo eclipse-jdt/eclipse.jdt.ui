@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2022 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -250,6 +252,40 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 			boolean canMoveDown = overridingAssignment.getParent() instanceof ExpressionStatement;
 			boolean canMoveUp= followsImmediately || canMoveUp();
 
+
+			int start= fragment.getStartPosition()+ fragment.getLength();
+			int end= overridingAssignment.getStartPosition();
+
+			final class DeclarationChecker extends ASTVisitor{
+				private boolean preventsMoveUp= false;
+
+				private boolean preventsMoveUp(Name name) {
+					IBinding binding= name.resolveBinding();
+					if (binding instanceof IVariableBinding) {
+						ASTNode var= ASTNodes.findDeclaration(binding, fragment.getRoot());
+						if (var != null && (var.getStartPosition() >= start || var.getStartPosition() <= end-var.getLength())) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+				@Override
+				public boolean visit(QualifiedName node) {
+					preventsMoveUp |= preventsMoveUp(node);
+					return false;
+				}
+
+				@Override
+				public boolean visit(SimpleName node) {
+					preventsMoveUp |= preventsMoveUp(node);
+					return false;
+				}
+			}
+
+			DeclarationChecker declarationChecker= new DeclarationChecker();
+			overridingAssignment.getRightHandSide().accept(declarationChecker);
+			canMoveUp &= !declarationChecker.preventsMoveUp;
 
 			if (canMoveUp) {
 				moveUp(cuRewrite, group);
