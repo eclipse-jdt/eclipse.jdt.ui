@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.TypeAnnotationRewrite;
-import org.eclipse.jdt.internal.corext.fix.TypeParametersFix.InsertTypeArgumentsVisitor;
+import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -385,7 +385,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 		}
 
 		final ArrayList<ASTNode> changedNodes= new ArrayList<>();
-		node.accept(new InsertTypeArgumentsVisitor(changedNodes));
+		node.accept(new TypeParametersFixCore.InsertTypeArgumentsVisitor(changedNodes));
 		if (changedNodes.isEmpty()) {
 			return;
 		}

@@ -150,6 +150,18 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 	}
 
+	/* Register a preference that is an option for a cleanup. Checking it does not change the number of clean ups.
+	 */
+	protected void registerOptionPreference(final CheckboxPreference main, final CheckboxPreference... options) {
+		registerPreference(main);
+		fCheckboxes.addAll(Arrays.asList(options));
+		main.addObserver((source, arg)-> {
+			for (CheckboxPreference option : options) {
+				option.setEnabled(main.getChecked());
+			}
+		});
+	}
+
 	protected void registerSlavePreference(final CheckboxPreference master, final RadioPreference[] slaves) {
 		internalRegisterSlavePreference(master, slaves);
 		registerPreference(master);

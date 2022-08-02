@@ -283,10 +283,13 @@ public class SelectionConverter {
 		String selectedString= selection.getText();
 		if (selectedString != null && !selectedString.isEmpty()) {
 			int i= 0;
-			while (Character.isWhitespace(selectedString.charAt(i))) {
+			while (i < selectedString.length() && Character.isWhitespace(selectedString.charAt(i))) {
 				++i;
 		    }
 			whiteSpaceOffset= i;
+		}
+		if (selectedString != null && whiteSpaceOffset == selectedString.length()) {
+			whiteSpaceOffset= 0; // leave offset alone if selection is all white-space
 		}
 		IJavaElement ref= input.getElementAt(selection.getOffset() + whiteSpaceOffset);
 		if (ref == null)
