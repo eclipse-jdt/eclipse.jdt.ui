@@ -4128,6 +4128,59 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
+	@Ignore("https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/190")
+	@Test
+	public void testWhileDoubleUsage() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "package test1;\n"
+		                + "import java.util.*;\n"
+		                + "public class Test {\n"
+		                + "    void m(List<String> strings) {\n"
+		                + "        Collections.reverse(strings);\n"
+		                + "        Iterator it = strings.iterator();\n"
+		                + "        while (it.hasNext()) {\n"
+		                + "            String s = (String) it.next();\n"
+		                + "            System.out.println(s);\n"
+		                + "            // OK\n"
+		                + "            System.err.println(s);\n"
+		                + "        }\n"
+		                + "        it = strings.iterator();\n"
+		                + "        while (it.hasNext()) {\n"
+		                + "            String s = (String) it.next();\n"
+		                + "            System.out.println(s);\n"
+		                + "            // OK\n"
+		                + "            System.err.println(s);\n"
+		                + "        }\n"
+		                + "        System.out.println();\n"
+		                + "    }\n"
+		                + "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		String expected= "package test1;\n"
+                        + "import java.util.*;\n"
+                        + "public class Test {\n"
+                        + "    void m(List<String> strings) {\n"
+                        + "        Collections.reverse(strings);\n"
+                        + "        for (String s : strings) {\n"
+                        + "            System.out.println(s);\n"
+                        + "            // OK\n"
+                        + "            System.err.println(s);\n"
+                        + "        }\n"
+                        + "        for (String s : strings) {\n"
+                        + "            System.out.println(s);\n"
+                        + "            // OK\n"
+                        + "            System.err.println(s);\n"
+                        + "        }\n"
+                        + "        System.out.println();\n"
+                        + "    }\n"
+                        + "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
 	@Test
 	public void testWhileNested() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
