@@ -18,11 +18,13 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -95,7 +97,8 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 public final class StubUtility2Core {
 
 	/* This method should work with all AST levels. */
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type, int modifiers, boolean omitSuperForDefConst, boolean todo, CodeGenerationSettings settings, Map<String, String> formatSettings) throws CoreException {
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type,
+			int modifiers, boolean omitSuperForDefConst, boolean todo, CodeGenerationSettings settings, Map<String, String> formatSettings) throws CoreException {
 		AST ast= rewrite.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
@@ -552,14 +555,6 @@ public final class StubUtility2Core {
 		return decl.thrownExceptions();
 	}
 
-	private static IMethodBinding findMethodBinding(IMethodBinding method, List<IMethodBinding> allMethods) {
-		for (IMethodBinding curr : allMethods) {
-			if (Bindings.isSubsignature(method, curr)) {
-				return curr;
-			}
-		}
-		return null;
-	}
 
 	private static IMethodBinding findOverridingMethod(IMethodBinding method, List<IMethodBinding> allMethods) {
 		for (IMethodBinding curr : allMethods) {
@@ -567,49 +562,6 @@ public final class StubUtility2Core {
 				return curr;
 		}
 		return null;
-	}
-
-	private static void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet<ITypeBinding> visited,
-			ArrayList<IMethodBinding> allMethods, IPackageBinding currPack, ArrayList<IMethodBinding> toImplement) {
-
-		if (visited.add(typeBinding)) {
-			nextMethod: for (IMethodBinding curr : typeBinding.getDeclaredMethods()) {
-				for (Iterator<IMethodBinding> allIter= allMethods.iterator(); allIter.hasNext();) {
-					IMethodBinding oneMethod= allIter.next();
-					if (Bindings.isSubsignature(oneMethod, curr)) {
-						// We've already seen a method that is a subsignature of curr.
-						if (!Bindings.isSubsignature(curr, oneMethod)) {
-							// oneMethod is a true subsignature of curr; let's go with oneMethod
-							continue nextMethod;
-						}
-						// Subsignatures are equivalent.
-						// Check visibility and return types ('getErasure()' tries to achieve effect of "rename type variables")
-						if (Bindings.isVisibleInHierarchy(oneMethod, currPack)
-							&& oneMethod.getReturnType().getErasure().isSubTypeCompatible(curr.getReturnType().getErasure())) {
-							// oneMethod is visible and curr doesn't have a stricter return type; let's go with oneMethod
-							continue nextMethod;
-						}
-						// curr is stricter than oneMethod, so let's remove oneMethod
-						allIter.remove();
-						toImplement.remove(oneMethod);
-					} else if (Bindings.isSubsignature(curr, oneMethod)) {
-						// curr is a true subsignature of oneMethod. Let's remove oneMethod.
-						allIter.remove();
-						toImplement.remove(oneMethod);
-					}
-				}
-				int modifiers= curr.getModifiers();
-				if (!Modifier.isStatic(modifiers)) {
-					allMethods.add(curr);
-					if (Modifier.isAbstract(modifiers)) {
-						toImplement.add(curr);
-					}
-				}
-			}
-			for (ITypeBinding superInterface : typeBinding.getInterfaces()) {
-				findUnimplementedInterfaceMethods(superInterface, visited, allMethods, currPack, toImplement);
-			}
-		}
 	}
 
 	public static List<IExtendedModifier> getImplementationModifiers(AST ast, IMethodBinding method, boolean inInterface, ImportRewrite importRewrite, ImportRewriteContext context, EnumSet<TypeLocation> nullnessDefault) throws JavaModelException {
@@ -816,53 +768,133 @@ public final class StubUtility2Core {
 		return StubUtility.suggestArgumentName(unit.getJavaProject(), name, excluded);
 	}
 
-	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding) {
-		return getUnimplementedMethods(typeBinding, false);
-	}
+	@SuppressWarnings("unchecked")
+	public static Collection<IMethodBinding> getMethodsIn(ITypeBinding type, Predicate<IMethodBinding> ignoreTheseMethods) {
+		if (type == null) {
+			return Collections.EMPTY_LIST;
+		}
 
-	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding, boolean implementAbstractsOfInput) {
-		ArrayList<IMethodBinding> allMethods= new ArrayList<>();
-		ArrayList<IMethodBinding> toImplement= new ArrayList<>();
-
-		for (IMethodBinding curr : typeBinding.getDeclaredMethods()) {
-			int modifiers= curr.getModifiers();
-			if (!curr.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)
-					&& !curr.isSyntheticRecordMethod()) {
-				allMethods.add(curr);
+		if (ignoreTheseMethods == null) {
+			ignoreTheseMethods= m->false;
+		}
+		List<IMethodBinding> allMethods= new ArrayList<>();
+		IMethodBinding[] declaredMethods= type.getDeclaredMethods();
+		for (IMethodBinding method : declaredMethods) {
+			if (!isStatic(method) && !method.isConstructor() && !isPrivate(method) && !ignoreTheseMethods.test(method)) {
+				allMethods.add(method);
 			}
 		}
 
-		ITypeBinding superClass= typeBinding.getSuperclass();
-		while (superClass != null) {
-			for (IMethodBinding curr : superClass.getDeclaredMethods()) {
-				int modifiers= curr.getModifiers();
-				if (!curr.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
-					if (findMethodBinding(curr, allMethods) == null) {
-						allMethods.add(curr);
+		ITypeBinding[] interfaces= type.getInterfaces();
+		Collection<IMethodBinding>[] interfaceMethods;
+
+		if (!type.isInterface()) {
+			Collection<IMethodBinding> superMethods= getMethodsIn(type.getSuperclass(), ignoreTheseMethods);
+			interfaceMethods= new Collection[interfaces.length + 1];
+			interfaceMethods[interfaceMethods.length - 1]= superMethods;
+			for (IMethodBinding method : superMethods) {
+				if (isConcrete(method) && Bindings.isVisibleInHierarchy(method, type.getPackage()) && findSubSignatureMethod(method, allMethods) == null) {
+					allMethods.add(method);
+				}
+			}
+		} else {
+			interfaceMethods= new Collection[interfaces.length];
+		}
+
+		for (int i= 0; i < interfaces.length; i++) {
+			interfaceMethods[i]= getMethodsIn(interfaces[i], ignoreTheseMethods);
+		}
+
+		List<IMethodBinding> allInterfaceMethods= new ArrayList<>();
+
+		for (int i= 0; i < interfaceMethods.length; i++) {
+			for (IMethodBinding method : interfaceMethods[i]) {
+				if (isDefault(method) || isAbstract(method)) {
+					IMethodBinding previouslyFound= findSubSignatureMethod(method, allMethods);
+					if (previouslyFound == null) {
+						IMethodBinding subSigMethod= findSubSignatureMethod(method, allInterfaceMethods);
+						IMethodBinding superSigMethod= findSuperSignatureMethod(method, allInterfaceMethods);
+
+						if (superSigMethod != null && method.overrides(superSigMethod)) {
+							allInterfaceMethods.remove(subSigMethod);
+							allInterfaceMethods.add(method);
+						} else {
+							if (subSigMethod != null && superSigMethod != null) {
+								if (!subSigMethod.getReturnType().getErasure().isSubTypeCompatible(method.getReturnType().getErasure())) {
+									// keep the most specific one
+									allInterfaceMethods.remove(subSigMethod);
+									allInterfaceMethods.add(method);
+								}
+							} else if (superSigMethod != null) {
+								allInterfaceMethods.remove(superSigMethod);
+								allInterfaceMethods.add(method);
+							} else if (subSigMethod == null) {
+								allInterfaceMethods.add(method);
+							}
+						}
 					}
 				}
 			}
-			superClass= superClass.getSuperclass();
 		}
 
-		for (IMethodBinding curr : allMethods) {
-			int modifiers= curr.getModifiers();
-			if ((Modifier.isAbstract(modifiers) || curr.getDeclaringClass().isInterface()) && (implementAbstractsOfInput || typeBinding != curr.getDeclaringClass())) {
-				// implement all abstract methods
-				toImplement.add(curr);
+		allMethods.addAll(allInterfaceMethods);
+
+		return allMethods;
+	}
+
+	private static IMethodBinding findSubSignatureMethod(IMethodBinding method, Collection<IMethodBinding> methods) {
+		for (IMethodBinding candidate : methods) {
+			if (candidate.getName().equals(method.getName()) && candidate.isSubsignature(method)) {
+				return candidate;
 			}
 		}
+		return null;
+	}
 
-		HashSet<ITypeBinding> visited= new HashSet<>();
-		ITypeBinding curr= typeBinding;
-		while (curr != null) {
-			for (ITypeBinding superInterface : curr.getInterfaces()) {
-				findUnimplementedInterfaceMethods(superInterface, visited, allMethods, typeBinding.getPackage(), toImplement);
+	private static IMethodBinding findSuperSignatureMethod(IMethodBinding method, Collection<IMethodBinding> methods) {
+		for (IMethodBinding candidate : methods) {
+			if (candidate.getName().equals(method.getName()) && method.isSubsignature(candidate)) {
+				return candidate;
 			}
-			curr= curr.getSuperclass();
 		}
+		return null;
+	}
 
-		return toImplement.toArray(new IMethodBinding[toImplement.size()]);
+	private static boolean isStatic(IMethodBinding method) {
+		return Modifier.isPrivate(method.getModifiers());
+	}
+
+	private static boolean isPrivate(IMethodBinding method) {
+		return Modifier.isStatic(method.getModifiers());
+	}
+
+	private static boolean isAbstract(IMethodBinding method) {
+		return Modifier.isAbstract(method.getModifiers());
+	}
+
+	private static boolean isDefault(IMethodBinding method) {
+		return Modifier.isDefault(method.getModifiers());
+	}
+
+	private static boolean isConcrete(IMethodBinding method) {
+		return !isAbstract(method) && !isDefault(method);
+	}
+
+
+	public static Predicate<IMethodBinding> ignoreAbstractsOfInput(final ITypeBinding type) {
+		return m->isAbstract(m) && type == m.getDeclaringClass();
+	}
+
+	public static Predicate<IMethodBinding> IMPLEMENT_RECORD_SYNTHETICS= (IMethodBinding m) -> m.isSyntheticRecordMethod();
+
+	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding, Predicate<IMethodBinding> ignoreTheseMethods) {
+		List<IMethodBinding> abstractMethods= new ArrayList<>();
+		for (IMethodBinding method : getMethodsIn(typeBinding, ignoreTheseMethods)) {
+			if (isAbstract(method)) {
+				abstractMethods.add(method);
+			}
+		}
+		return abstractMethods.toArray(new IMethodBinding[abstractMethods.size()]);
 	}
 
 	public static IMethodBinding[] getVisibleConstructors(ITypeBinding binding, boolean accountExisting, boolean proposeDefault) {
