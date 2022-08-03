@@ -126,6 +126,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -146,6 +147,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
+import org.eclipse.jdt.internal.corext.fix.SealedClassFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
@@ -1353,65 +1355,24 @@ public class LocalCorrectionsSubProcessor {
 		proposals.add(new NewCUUsingWizardProposal(compilationUnit, null, NewCUUsingWizardProposal.K_CLASS, sealedTypeElement,  typeBinding, relevance + 6, false));
 	}
 
-	public static void addTypeAsPermittedSubTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode == null) {
-			return;
-		}
-		if (!ASTHelper.isSealedTypeSupportedInAST(selectedNode.getAST())) {
-			return;
-		}
+	public static void addTypeAsPermittedSubTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		SealedClassFixCore fix= SealedClassFixCore.addTypeAsPermittedSubTypeProposal(context.getASTRoot(), (IProblemLocationCore) problem);
+		if (fix != null) {
+			String label= fix.getDisplayString();
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+			CompilationUnitChange change;
+			try {
+				change= fix.createChange(null);
 
-		while (selectedNode.getParent() instanceof Type) {
-			selectedNode= selectedNode.getParent();
-		}
-		if (selectedNode.getLocationInParent() != TypeDeclaration.SUPERCLASS_TYPE_PROPERTY
-				&& selectedNode.getLocationInParent() != TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY) {
-			return;
-		}
-		TypeDeclaration subType= (TypeDeclaration) selectedNode.getParent();
-		ITypeBinding subTypeBinding= subType.resolveBinding();
-		IJavaElement sealedTypeElement= null;
-		if (selectedNode instanceof SimpleType) {
-			ITypeBinding typeBinding= ((SimpleType) selectedNode).resolveBinding();
-			if (typeBinding != null) {
-				sealedTypeElement= typeBinding.getJavaElement();
+				ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+				IType sealedType= SealedClassFixCore.getSealedType(selectedNode);
+				ICompilationUnit unit= SealedClassFixCore.getCompilationUnitForSealedType(sealedType);
+				CUCorrectionProposal proposal= new CUCorrectionProposal(label, unit, change, IProposalRelevance.DECLARE_SEALED_AS_DIRECT_SUPER_TYPE, image);
+				proposals.add(proposal);
+			} catch (CoreException e) {
+				// do nothing
 			}
 		}
-		if (!(sealedTypeElement instanceof IType)) {
-			return;
-		}
-		IType sealedType= (IType) sealedTypeElement;
-		if (sealedType.isBinary() || !sealedType.isSealed()) {
-			return;
-		}
-		ICompilationUnit compilationUnit= sealedType.getCompilationUnit();
-		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(compilationUnit);
-		TypeDeclaration declaration= ASTNodeSearchUtil.getTypeDeclarationNode(sealedType, cuRewrite.getRoot());
-		if (declaration == null) {
-			return;
-		}
-
-		AST ast= declaration.getAST();
-		String subTypeName= subType.getName().getIdentifier();
-		Type type= ast.newSimpleType(ast.newSimpleName(subTypeName));
-
-		ASTRewrite astRewrite= cuRewrite.getASTRewrite();
-		astRewrite.getListRewrite(declaration, TypeDeclaration.PERMITS_TYPES_PROPERTY).insertLast(type, null);
-
-		String sealedTypeName= problem.getProblemArguments()[1];
-		String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_declareSubClassAsPermitsSealedClass_description, new String[] { subTypeName, sealedTypeName });
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, compilationUnit, astRewrite, IProposalRelevance.DECLARE_SEALED_AS_DIRECT_SUPER_TYPE, image);
-		ImportRewrite importRewrite= proposal.getImportRewrite();
-		if (importRewrite == null) {
-			importRewrite= StubUtility.createImportRewrite(compilationUnit, true);
-		}
-
-		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(declaration.getRoot(), importRewrite);
-		importRewrite.addImport(subTypeBinding, astRewrite.getAST(), importRewriteContext);
-		proposal.setImportRewrite(importRewrite);
-		proposals.add(proposal);
 	}
 
 	public static void addSealedAsDirectSuperTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
