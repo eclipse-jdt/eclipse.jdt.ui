@@ -74,8 +74,8 @@ public class CPListElementSorter extends ViewerComparator {
         if (cat1 != cat2)
             return cat1 - cat2;
 
-        if (cat1 == ATTRIBUTE || cat1 == CONTAINER_ENTRY) {
-        	return 0; // do not sort attributes or container entries
+        if (cat1 == ATTRIBUTE) {
+            return 0; // do not sort attributes
         }
 
 		if (viewer instanceof ContentViewer) {
