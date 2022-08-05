@@ -19,6 +19,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -71,7 +73,14 @@ public class RefactoringScanner {
 	public void scan(ICompilationUnit cu)	throws JavaModelException {
 		char[] chars= cu.getBuffer().getCharacters();
 		fMatches= new HashSet<>();
-		fScanner= ToolFactory.createScanner(true, true, false, true);
+		IJavaProject javaProject= cu.getJavaProject();
+        if (javaProject != null) {
+            String sourceLevel = javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+            String complianceLevel = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+            fScanner = ToolFactory.createScanner(true, true, true, sourceLevel, complianceLevel);
+        } else {
+        	fScanner= ToolFactory.createScanner(true, true, false, true);
+        }
 		fScanner.setSource(chars);
 
 //		IImportContainer importContainer= cu.getImportContainer();
