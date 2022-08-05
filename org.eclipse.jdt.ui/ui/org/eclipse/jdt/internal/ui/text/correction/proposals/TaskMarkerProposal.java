@@ -25,6 +25,8 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -68,7 +70,15 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 	}
 
 	private Position getUpdatedPosition(IDocument document) throws BadLocationException {
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		IScanner scanner;
+		IJavaProject project = this.getCompilationUnit().getJavaProject();
+        if (project != null) {
+            String sourceLevel = project.getOption(JavaCore.COMPILER_SOURCE, true);
+            String complianceLevel = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+            scanner = ToolFactory.createScanner(true, false, false, sourceLevel, complianceLevel);
+        } else {
+        	scanner= ToolFactory.createScanner(true, false, false, false);
+        }
 		scanner.setSource(document.get().toCharArray());
 
 		int token= getSurroundingComment(scanner);

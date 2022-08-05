@@ -39,8 +39,10 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -54,6 +56,8 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -68,9 +72,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class MoveCuUpdateCreator {
 
@@ -318,7 +319,14 @@ public class MoveCuUpdateCreator {
 		public Collector(IPackageFragment source, ReferencesInBinaryContext binaryRefs) {
 			super(binaryRefs);
 			fSource= source;
-			fScanner= ToolFactory.createScanner(false, false, false, false);
+			IJavaProject javaProject= source.getJavaProject();
+	        if (javaProject != null) {
+	            String sourceLevel = javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+	            String complianceLevel = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+	            fScanner = ToolFactory.createScanner(false, false, false, sourceLevel, complianceLevel);
+	        } else {
+	        	fScanner= ToolFactory.createScanner(false, false, false, false);
+	        }
 		}
 
 		@Override
