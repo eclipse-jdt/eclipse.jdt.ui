@@ -1039,7 +1039,14 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 
 		private void parseCUs(IJavaProject javaProject, String text) {
-			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			IScanner scanner;
+	        if (javaProject != null) {
+	            String sourceLevel = javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+	            String complianceLevel = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+	            scanner = ToolFactory.createScanner(false, false, false, sourceLevel, complianceLevel);
+	        } else {
+	        	scanner= ToolFactory.createScanner(false, false, false, false);
+	        }
 			scanner.setSource(text.toCharArray());
 
 			ArrayList<ParsedCu> cus= new ArrayList<>();
