@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -692,20 +693,28 @@ public class ParameterObjectFactory {
 	}
 
 	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
-		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
+		IJavaProject javaProject= parentCU.getJavaProject();
+		if (StubUtility.doAddComments(javaProject)) {
 			StringBuilder typeName= new StringBuilder();
 			typeName.append(getClassName());
 			String[] typeParamNames= new String[0];
 			String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), typeParamNames, lineDelimiter);
-			if (comment != null && isValidComment(comment)) {
+			if (comment != null && isValidComment(comment, javaProject)) {
 				return comment;
 			}
 		}
 		return null;
 	}
 
-	private boolean isValidComment(String template) {
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+	private boolean isValidComment(String template, IJavaProject javaProject) {
+		IScanner scanner;
+        if (javaProject != null) {
+            String sourceLevel = javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+            String complianceLevel = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+            scanner = ToolFactory.createScanner(true, false, false, sourceLevel, complianceLevel);
+        } else {
+        	scanner= ToolFactory.createScanner(true, false, false, false);
+        }
 		scanner.setSource(template.toCharArray());
 		try {
 			int next= scanner.getNextToken();
