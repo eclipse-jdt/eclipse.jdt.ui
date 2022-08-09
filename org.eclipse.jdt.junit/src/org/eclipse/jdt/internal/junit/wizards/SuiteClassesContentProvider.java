@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Johannes Utzig <mail@jutzig.de> - [JUnit] Update test suite wizard for JUnit 4: @RunWith(Suite.class)... - https://bugs.eclipse.org/155828
+ *     Red Hat Inc. - Update test suite wizard for JUnit5 (@Suite support)
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
@@ -31,18 +32,21 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnit3TestFinder;
 import org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder;
+import org.eclipse.jdt.internal.junit.launcher.JUnit5TestFinder;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 public class SuiteClassesContentProvider implements IStructuredContentProvider {
 
 	private boolean fIncludeJunit4Tests;
+	private boolean fIncludeJunit5Tests;
 
 	public SuiteClassesContentProvider() {
-		this(false);
+		this(false, false);
 	}
 
-	public SuiteClassesContentProvider(boolean includeJunit4Tests) {
-		this.fIncludeJunit4Tests = includeJunit4Tests;
+	public SuiteClassesContentProvider(boolean includeJunit4Tests, boolean includeJunit5Tests) {
+		this.fIncludeJunit4Tests= includeJunit4Tests;
+		this.fIncludeJunit5Tests= includeJunit5Tests;
 	}
 
 	@Override
@@ -67,12 +71,13 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 	public Set<IType> getTests(IPackageFragment pack) {
 		try {
 			HashSet<IType> result= new HashSet<>();
-			if (isIncludeJunit4Tests()) {
+			if (isIncludeJunit5Tests()) {
+				new JUnit5TestFinder().findTestsInContainer(pack, result, null);
+			} else if (isIncludeJunit4Tests()) {
 				new JUnit4TestFinder().findTestsInContainer(pack, result, null);
 			} else {
 				new JUnit3TestFinder().findTestsInContainer(pack, result, null);
 			}
-
 			return result;
 		} catch (CoreException e) {
 			JUnitPlugin.log(e);
@@ -94,5 +99,13 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 
 	public boolean isIncludeJunit4Tests() {
 		return fIncludeJunit4Tests;
+	}
+
+	public void setIncludeJunit5Tests(boolean includeJunit5Tests) {
+		fIncludeJunit5Tests= includeJunit5Tests;
+	}
+
+	public boolean isIncludeJunit5Tests() {
+		return fIncludeJunit5Tests;
 	}
 }
