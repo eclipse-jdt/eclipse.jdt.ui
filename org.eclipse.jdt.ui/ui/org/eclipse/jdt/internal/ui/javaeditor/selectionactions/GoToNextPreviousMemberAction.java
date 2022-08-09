@@ -31,11 +31,13 @@ import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.ToolFactory;
@@ -230,7 +232,15 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 
 	private static int firstOpeningBraceOffset(IInitializer iInitializer) throws JavaModelException {
 		try {
-			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			IScanner scanner;
+			IJavaProject project = iInitializer.getJavaProject();
+	        if (project != null) {
+	            String sourceLevel = project.getOption(JavaCore.COMPILER_SOURCE, true);
+	            String complianceLevel = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+	            scanner = ToolFactory.createScanner(false, false, false, sourceLevel, complianceLevel);
+	        } else {
+	        	scanner= ToolFactory.createScanner(false, false, false, false);
+	        }
 			scanner.setSource(iInitializer.getSource().toCharArray());
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF && token != ITerminalSymbols.TokenNameLBRACE)
