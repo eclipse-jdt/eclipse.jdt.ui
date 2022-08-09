@@ -38,17 +38,17 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java17ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java16ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class UnresolvedMethodsQuickFixTest17 extends QuickFixTest {
+public class UnresolvedMethodsQuickFixTest16 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new Java17ProjectTestSetup(false);
+    public ProjectTestSetup projectSetup = new Java16ProjectTestSetup(false);
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -118,56 +118,4 @@ public class UnresolvedMethodsQuickFixTest17 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
 
-	/*
-	 * Test that a default method that is overridden with an abstract method is
-	 * adde when invoking "Add unimplemented methods"
-	 */
-	@Test
-	public void testOverrideDefaultMethod() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-
-		buf.append("package test1;\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default int gogo() {\n");
-		buf.append("        return 24;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("interface I2 extends I1 {\n");
-		buf.append("    int gogo();\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("public class XX implements I1, I2 {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("XX.java", buf.toString(), false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
-		assertNumberOfProposals(proposals, 2);
-		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default int gogo() {\n");
-		buf.append("        return 24;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("interface I2 extends I1 {\n");
-		buf.append("    int gogo();\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("public class XX implements I1, I2 {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    public int gogo() {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
-	}
 }
