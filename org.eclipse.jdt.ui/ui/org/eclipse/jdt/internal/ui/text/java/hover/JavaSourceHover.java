@@ -443,6 +443,9 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 				return null;
 			}
 			CompilationUnit ast= SharedASTProviderCore.getAST(input, SharedASTProviderCore.WAIT_NO, null);
+			if (ast == null) {
+				return null;
+			}
 			ASTNode textBlockNode= NodeFinder.perform(ast, partition.getOffset(),
 					partition.getLength());
 			if (!(textBlockNode instanceof TextBlock)) {
