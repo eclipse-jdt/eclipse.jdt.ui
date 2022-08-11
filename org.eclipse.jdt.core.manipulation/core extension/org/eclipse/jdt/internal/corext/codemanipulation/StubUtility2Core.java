@@ -861,11 +861,11 @@ public final class StubUtility2Core {
 	}
 
 	private static boolean isStatic(IMethodBinding method) {
-		return Modifier.isPrivate(method.getModifiers());
+		return Modifier.isStatic(method.getModifiers());
 	}
 
 	private static boolean isPrivate(IMethodBinding method) {
-		return Modifier.isStatic(method.getModifiers());
+		return Modifier.isPrivate(method.getModifiers());
 	}
 
 	private static boolean isAbstract(IMethodBinding method) {
