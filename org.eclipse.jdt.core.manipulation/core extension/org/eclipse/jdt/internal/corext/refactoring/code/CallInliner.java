@@ -78,12 +78,14 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
@@ -135,6 +137,7 @@ public class CallInliner {
 	private CodeScopeBuilder.Scope fInvocationScope;
 	private boolean fFieldInitializer;
 	private List<VariableDeclarationStatement> fLocals;
+	private Block fBlock;
 	private CallContext fContext;
 
 	private class InlineEvaluator extends HierarchicalASTVisitor {
@@ -206,6 +209,7 @@ public class CallInliner {
 		fRewrite= ASTRewrite.create(targetAstRoot.getAST());
 		fRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		fTypeEnvironment= new TypeEnvironment();
+		fBlock = null;
 	}
 
 	public void dispose() {
@@ -280,7 +284,9 @@ public class CallInliner {
 	private void initializeTargetNode() {
 		ASTNode parent= fInvocation.getParent();
 		int nodeType= parent.getNodeType();
-		if (nodeType == ASTNode.EXPRESSION_STATEMENT || nodeType == ASTNode.RETURN_STATEMENT) {
+		if (nodeType == ASTNode.EXPRESSION_STATEMENT
+				|| nodeType == ASTNode.RETURN_STATEMENT
+				|| nodeType == ASTNode.YIELD_STATEMENT) {
 			fTargetNode= parent;
 		} else {
 			fTargetNode= fInvocation;
@@ -562,12 +568,45 @@ public class CallInliner {
 	}
 
 	private void addNewLocals(TextEditGroup textEditGroup) {
+		fBlock = null;
 		if (fLocals.isEmpty())
 			return;
-		for (VariableDeclarationStatement variableDeclarationStatement : fLocals) {
-			ASTNode element= variableDeclarationStatement;
-			fListRewrite.insertAt(element, fInsertionIndex++, textEditGroup);
+		if (needToCreateBlockStatement()) {
+			Block block= fTargetNode.getAST().newBlock();
+
+			for (VariableDeclarationStatement variableDeclarationStatement : fLocals) {
+				ASTNode element= variableDeclarationStatement;
+				block.statements().add(element);
+			}
+			fRewrite.replace(fTargetNode, block, textEditGroup);
+			fBlock = block;
 		}
+		else {
+			for (VariableDeclarationStatement variableDeclarationStatement : fLocals) {
+				ASTNode element= variableDeclarationStatement;
+				fListRewrite.insertAt(element, fInsertionIndex++, textEditGroup);
+			}
+		}
+	}
+
+	private boolean needToCreateBlockStatement() {
+		boolean need = false;
+		if (fContext != null && ASTNode.YIELD_STATEMENT == fContext.callMode) {
+			if (fTargetNode !=  null && fTargetNode instanceof YieldStatement) {
+				ASTNode parent = fTargetNode;
+				while (parent != null) {
+					if (parent instanceof SwitchExpression) {
+						need = true;
+						break;
+					}
+					if (parent instanceof Block) {
+						break;
+					}
+					parent = parent.getParent();
+				}
+			}
+		}
+		return need;
 	}
 
 	private void replaceCall(RefactoringStatus status, String[] blocks, TextEditGroup textEditGroup) {
@@ -632,6 +671,12 @@ public class CallInliner {
 					pExp.setExpression((Expression)node);
 					node= pExp;
 				}
+			} else if (fContext.callMode == ASTNode.YIELD_STATEMENT) {
+				if (fBlock != null) {
+					node= fRewrite.createStringPlaceholder(block, ASTNode.BLOCK);
+				} else {
+					node= fRewrite.createStringPlaceholder(block, ASTNode.YIELD_STATEMENT);
+				}
 			} else {
 				node= fRewrite.createStringPlaceholder(block, ASTNode.RETURN_STATEMENT);
 			}
@@ -640,6 +685,8 @@ public class CallInliner {
 			if (node != null) {
 				if (fTargetNode == null) {
 					fListRewrite.insertAt(node, fInsertionIndex++, textEditGroup);
+				} else if (fBlock != null) {
+					fBlock.statements().add(node);
 				} else {
 					fRewrite.replace(fTargetNode, node, textEditGroup);
 				}
@@ -772,6 +819,10 @@ public class CallInliner {
 		} else if (type == ASTNode.SWITCH_STATEMENT) {
 			SwitchStatement switchStatement= (SwitchStatement)container;
 			fListRewrite= fRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
+		} else if (type == ASTNode.SWITCH_EXPRESSION) {
+			SwitchExpression switchExpression= (SwitchExpression)container;
+			fListRewrite= fRewrite.getListRewrite(switchExpression, SwitchExpression.STATEMENTS_PROPERTY);
 			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
 		} else if (isControlStatement(container) || type == ASTNode.LABELED_STATEMENT) {
 			fNeedsStatement= true;
