@@ -88,6 +88,20 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 				HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder, nodesprocessed, (whilestatement, holder) -> {
 					String name= computeNextVarname(whilestatement);
 					if (computeVarName.get(0).equals(name) && iteratorCall.getStartPosition() < whilestatement.getStartPosition()) {
+						final HelperVisitor<ReferenceHolder<ASTNode, WhileLoopToChangeHit>, ASTNode, WhileLoopToChangeHit> helperVisitor= holder.getHelperVisitor();
+						if (helperVisitor.nodesprocessed.size() > 0) {
+							boolean invalidated= false;
+							for (ASTNode astNode : helperVisitor.nodesprocessed) {
+								WhileLoopToChangeHit oldHit= operationsMap.get(astNode);
+								if (oldHit != null && oldHit.iteratorDeclaration == init_iterator) {
+									operationsMap.put(astNode, invalidHit);
+									invalidated= true;
+								}
+							}
+							if (invalidated) {
+								return true;
+							}
+						}
 						WhileLoopToChangeHit hit= holder.computeIfAbsent(whilestatement, k -> new WhileLoopToChangeHit());
 						if (!createForOnlyIfVarUsed) {
 							hit.iteratorDeclaration= init_iterator;
@@ -162,7 +176,6 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 									hit.nextWithoutVariableDeclaration= true;
 								}
 								operationsMap.put(whilestatement, hit);
-								HelperVisitor<ReferenceHolder<ASTNode, WhileLoopToChangeHit>, ASTNode, WhileLoopToChangeHit> helperVisitor= holder.getHelperVisitor();
 								helperVisitor.nodesprocessed.add(whilestatement);
 								holder2.remove(whilestatement);
 								return true;
@@ -276,50 +289,50 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 	private static MethodInvocation computeIteratorCall(VariableDeclarationStatement node_a) {
 		VariableDeclarationFragment bli= (VariableDeclarationFragment) node_a.fragments().get(0);
 		Expression exp= bli.getInitializer();
-		if (exp == null) {
-			IBinding bliBinding= bli.getName().resolveBinding();
-			if (bliBinding == null) {
-				return null;
-			}
-			ASTNode parent= node_a.getParent();
-			ReferenceHolder<ASTNode, Object> dataholder= new ReferenceHolder<>();
-			Set<ASTNode> nodesprocessed= new HashSet<>();
-			final Object Invalid= new Object();
-			try {
-				HelperVisitor.callAssignmentVisitor(parent, dataholder, nodesprocessed, (assignment, holder2) -> {
-					if (assignment.getStartPosition() > node_a.getStartPosition()) {
-						Expression leftSide= assignment.getLeftHandSide();
-						SimpleName sn= ASTNodes.as(leftSide, SimpleName.class);
-						if (sn != null) {
-							IBinding binding= sn.resolveBinding();
-							if (binding.isEqualTo(bliBinding)) {
-								MethodInvocation mi= ASTNodes.as(assignment.getRightHandSide(), MethodInvocation.class);
-								if (mi == null || !mi.getName().getIdentifier().equals("iterator")) { //$NON-NLS-1$
+		IBinding bliBinding= bli.getName().resolveBinding();
+		if (bliBinding == null) {
+			return null;
+		}
+		ASTNode parent= node_a.getParent();
+		ReferenceHolder<ASTNode, Object> dataholder= new ReferenceHolder<>();
+		if (exp != null && exp instanceof MethodInvocation) {
+			dataholder.put(node_a, exp);
+		}
+		Set<ASTNode> nodesprocessed= new HashSet<>();
+		final Object Invalid= new Object();
+		try {
+			HelperVisitor.callAssignmentVisitor(parent, dataholder, nodesprocessed, (assignment, holder2) -> {
+				if (assignment.getStartPosition() > node_a.getStartPosition()) {
+					Expression leftSide= assignment.getLeftHandSide();
+					SimpleName sn= ASTNodes.as(leftSide, SimpleName.class);
+					if (sn != null) {
+						IBinding binding= sn.resolveBinding();
+						if (binding.isEqualTo(bliBinding)) {
+							MethodInvocation mi= ASTNodes.as(assignment.getRightHandSide(), MethodInvocation.class);
+							if (mi == null || !mi.getName().getIdentifier().equals("iterator")) { //$NON-NLS-1$
+								dataholder.put(node_a, Invalid);
+								throw new AbortSearchException();
+							} else {
+								if (dataholder.get(node_a) != null) {
 									dataholder.put(node_a, Invalid);
 									throw new AbortSearchException();
-								} else {
-									if (dataholder.get(node_a) != null) {
-										dataholder.put(node_a, Invalid);
-										throw new AbortSearchException();
-									}
-									dataholder.put(node_a, mi);
 								}
+								dataholder.put(node_a, mi);
 							}
 						}
 					}
-					return true;
-				});
-			} catch (AbortSearchException e) {
-				// do nothing
-			}
-			Object holderObject= dataholder.get(node_a);
-			if (holderObject == Invalid || holderObject == null) {
-				return null;
-			} else {
-				return (MethodInvocation)holderObject;
-			}
+				}
+				return true;
+			});
+		} catch (AbortSearchException e) {
+			// do nothing
 		}
-		return ASTNodes.as(exp, MethodInvocation.class);
+		Object holderObject= dataholder.get(node_a);
+		if (holderObject == Invalid || holderObject == null) {
+			return null;
+		} else {
+			return (MethodInvocation)holderObject;
+		}
 	}
 
 	private static ITypeBinding computeTypeArgument(VariableDeclarationStatement node_a) {
