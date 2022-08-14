@@ -11,3 +11,4 @@ Bug 574012 - Comparator errors in I20210604-0350
 Bug 574522 - 4.21 I-Build: I20210628-1800 - Comparator Errors Found
 Bug 577483 - Comparator errors in I20211126-0230
 Bug 579126 - 4.24 I-Build: I20220307-0340 - Comparator Errors Found
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/439 - Update ICU4J to version 71.1
