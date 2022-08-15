@@ -199,6 +199,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			isJunit5= CoreTestSearchEngine.hasJUnit5TestAnnotation(project);
 		}
 		setJUnit4or5(isJunit4, isJunit5, true);
+		ensureNoRecursiveTestSuiteInclusion();
 		doStatusUpdate();
 	}
 
@@ -213,7 +214,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
 		}
 
-		setTypeName(generateName(ALL_TESTS), true);
+		setTypeName(ALL_TESTS, true);
 		fTypeNameStatus= typeNameChanged(); //set status on initialization for this dialog - user must know that suite method will be overridden
 	}
 
@@ -279,6 +280,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			}
 			fClassesInSuiteTable.setInput(pack);
 			fClassesInSuiteTable.setAllChecked(true);
+			ensureNoRecursiveTestSuiteInclusion();
 			updateSelectedClassesLabel();
 		}
 	}
@@ -472,23 +474,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		fSelectedClassesLabel.setText(Messages.format(key, Integer.valueOf(noOfClassesChecked)));
 	}
 
-
-	private String generateName(String name) {
-		IPackageFragment pack= getPackageFragment();
-		String finalName= name;
-		if (pack != null) {
-			int counter= 2;
-			ICompilationUnit cu= pack.getCompilationUnit(finalName + ".java"); //$NON-NLS-1$
-			//if this cu already exists, we need to disable the
-			//junit 3 option if it is a junit 4 suite and vice versa
-			while (cu.exists()) {
-				finalName= name + counter++;
-				cu= pack.getCompilationUnit(finalName + ".java"); //$NON-NLS-1$
-			}
-		}
-		return finalName;
-	}
-
 	@Override
 	protected IStatus typeNameChanged() {
 		super.typeNameChanged();
@@ -567,6 +552,18 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		return new JUnitStatus();
 	}
 
+	private void ensureNoRecursiveTestSuiteInclusion(){
+		if (fClassesInSuiteTable == null)
+			return;
+		String typeName= getTypeName();
+		Object[] checkedClasses= fClassesInSuiteTable.getCheckedElements();
+		for (Object checkedClass : checkedClasses) {
+			if (((IType)checkedClass).getElementName().equals(typeName)) {
+				fClassesInSuiteTable.setChecked(checkedClass, false);
+				return;
+			}
+		}
+	}
 
 	private void cannotUpdateSuiteError() {
 		MessageDialog.openError(getShell(), WizardMessages.NewTestSuiteWizPage_cannotUpdateDialog_title,
