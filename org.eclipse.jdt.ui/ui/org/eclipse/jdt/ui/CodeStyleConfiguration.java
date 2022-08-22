@@ -41,7 +41,6 @@ public class CodeStyleConfiguration {
 	/**
 	 * Returns a {@link ImportRewrite} using {@link ImportRewrite#create(ICompilationUnit, boolean)} and
 	 * configures the rewriter with the settings as specified in the JDT UI preferences.
-	 * <p>
 	 *
 	 * @param cu the compilation unit to create the rewriter on
 	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
