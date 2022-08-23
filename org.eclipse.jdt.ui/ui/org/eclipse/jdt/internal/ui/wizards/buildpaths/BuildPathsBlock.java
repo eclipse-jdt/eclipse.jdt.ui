@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -30,8 +32,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.CoreException;
@@ -135,7 +135,7 @@ public class BuildPathsBlock {
 
 	private IStatusChangeListener fContext;
 	private Control fSWTWidget;
-	private TabFolder fTabFolder;
+	private CTabFolder fTabFolder;
 
 	private int fPageIndex;
 
@@ -226,12 +226,13 @@ public class BuildPathsBlock {
 		layout.numColumns= 1;
 		composite.setLayout(layout);
 
-		TabFolder folder= new TabFolder(composite, SWT.NONE);
+		CTabFolder folder= new CTabFolder(composite, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		folder.setFont(composite.getFont());
 
-		TabItem item;
-        item= new TabItem(folder, SWT.NONE);
+		CTabItem item;
+        item= new CTabItem(folder, SWT.NONE);
+        folder.setSelection(0);
         item.setText(NewWizardMessages.BuildPathsBlock_tab_source);
         item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
 
@@ -246,14 +247,14 @@ public class BuildPathsBlock {
 		Image projectImage= PlatformUI.getWorkbench().getSharedImages().getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
 
 		fProjectsPage= new ProjectsWorkbookPage(fClassPathList, fPageContainer);
-		item= new TabItem(folder, SWT.NONE);
+		item= new CTabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.BuildPathsBlock_tab_projects);
 		item.setImage(projectImage);
 		item.setData(fProjectsPage);
 		item.setControl(fProjectsPage.getControl(folder));
 
 		fLibrariesPage= new LibrariesWorkbookPage(fClassPathList, fPageContainer);
-		item= new TabItem(folder, SWT.NONE);
+		item= new CTabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.BuildPathsBlock_tab_libraries);
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_LIBRARY));
 		item.setData(fLibrariesPage);
@@ -264,14 +265,14 @@ public class BuildPathsBlock {
 		composite.addDisposeListener(new ImageDisposer(cpoImage));
 
 		ClasspathOrderingWorkbookPage ordpage= new ClasspathOrderingWorkbookPage(fClassPathList);
-		item= new TabItem(folder, SWT.NONE);
+		item= new CTabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.BuildPathsBlock_tab_order);
 		item.setImage(cpoImage);
 		item.setData(ordpage);
 		item.setControl(ordpage.getControl(folder));
 
 		fModulesPage= new ModuleDependenciesPage(fContext, fClassPathList);
-		item= new TabItem(folder, SWT.NONE);
+		item= new CTabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.BuildPathsBlock_tab_modules);
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_MODULE));
 		item.setData(fModulesPage);
@@ -1026,8 +1027,8 @@ public class BuildPathsBlock {
 	// -------- tab switching ----------
 
 	private void tabChanged(Widget widget) {
-		if (widget instanceof TabItem) {
-			TabItem tabItem= (TabItem) widget;
+		if (widget instanceof CTabItem) {
+			CTabItem tabItem= (CTabItem) widget;
 			BuildPathBasePage newPage= (BuildPathBasePage) tabItem.getData();
 			if (fCurrPage != null) {
 				List<?> selection= fCurrPage.getSelection();

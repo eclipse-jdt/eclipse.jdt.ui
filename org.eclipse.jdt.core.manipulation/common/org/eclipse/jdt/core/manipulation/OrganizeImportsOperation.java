@@ -675,6 +675,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				if (unresolvableImports.isEmpty()) {
 					String pref= JavaManipulation.getPreference(JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS, importRewrite.getCompilationUnit().getJavaProject());
+					if (pref == null  || pref.isBlank()) {
+						return;
+					}
 					String[] favourites= pref.split(";"); //$NON-NLS-1$
 					if (favourites.length == 0) {
 						return;

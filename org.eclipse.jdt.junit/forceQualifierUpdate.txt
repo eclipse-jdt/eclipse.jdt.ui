@@ -9,3 +9,4 @@ Bug 564399 - [Comparator] Comparator Errors in Y-build Y20200617-2350
 Bug 566471 - I20200828-0150 - Comparator Errors Found
 Comparator errors in jdt.ui bundles in I20210317-0330
 Bug 574522 - 4.21 I-Build: I20210628-1800 - Comparator Errors Found
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/439 - Update ICU4J to version 71.1

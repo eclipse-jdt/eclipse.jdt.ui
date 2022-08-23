@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
+
+import static org.eclipse.swt.events.SelectionListener.widgetSelectedAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,9 +61,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
-
 public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
-
 
 	/**
 	 * This is the default listener for any of the Preference
@@ -211,6 +211,8 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		}
 
 		public void setChecked(boolean checked) {
+			if (checked == getChecked())
+				return;
 			getPreferences().put(getKey(), checked ? fValues[1] : fValues[0]);
 			updateWidget();
 			checkboxChecked(checked);
@@ -862,7 +864,46 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 		Label sashHandle = new Label(scrollContainer, SWT.SEPARATOR | SWT.VERTICAL);
 		gridData= new GridData(SWT.RIGHT, SWT.FILL, false, true);
+		gridData.verticalSpan= 2;
 		sashHandle.setLayoutData(gridData);
+
+		Composite buttonComposite= new Composite(scrollContainer, SWT.NONE);
+		gridData= new GridData(SWT.FILL, SWT.END, true, false);
+		buttonComposite.setLayoutData(gridData);
+		layout= new GridLayout(1, false);
+		layout.verticalSpacing= (int)(1.5 * fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING));
+		layout.horizontalSpacing= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+		layout.marginHeight= fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+		layout.marginWidth= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+		buttonComposite.setLayout(layout);
+
+		Group buttonHolder= new Group(buttonComposite, SWT.NONE);
+		gridData= new GridData(SWT.FILL, SWT.END, true, false);
+		buttonHolder.setLayoutData(gridData);
+		layout= new GridLayout(4, false);
+		layout.verticalSpacing= (int)(1.5 * fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING));
+		layout.horizontalSpacing= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+		layout.marginHeight= fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+		layout.marginWidth= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+		buttonHolder.setLayout(layout);
+
+		Button b= new Button(buttonHolder, SWT.PUSH);
+		b.setText(FormatterMessages.ModifyDialogTabPage_selectAll_text);
+		gridData= new GridData(SWT.LEFT, SWT.TOP, false, true);
+		b.setLayoutData(gridData);
+		b.setEnabled(true);
+		b.setVisible(true);
+		SWTUtil.setButtonDimensionHint(b);
+		b.addSelectionListener(widgetSelectedAdapter((e) -> { doSetAll(true); }));
+
+		b= new Button(buttonHolder, SWT.PUSH);
+		b.setText(FormatterMessages.ModifyDialogTabPage_deselectAll_text);
+		gridData= new GridData(SWT.LEFT, SWT.TOP, false, true);
+		b.setLayoutData(gridData);
+		b.setEnabled(true);
+		b.setVisible(true);
+		SWTUtil.setButtonDimensionHint(b);
+		b.addSelectionListener(widgetSelectedAdapter((e) -> { doSetAll(false); }));
 
 		final Composite previewPane= new Composite(sashForm, SWT.NONE);
 		previewPane.setLayout(createGridLayout(numColumns, true));
@@ -882,6 +923,24 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 */
 	protected abstract void initializePage();
 
+	/**
+	 * This method is called when the deselect/select all buttons are pressed.
+	 * @param value true if set all, false if deselect all
+	 *
+	 */
+	public void doSetAll(boolean value) {}
+
+	/**
+	 * This method is called when the reset button is pressed.
+	 *
+	 */
+	public void resetValues() {}
+
+	/**
+	 * This method is called when the defaults buttons is pressed.
+	 *
+	 */
+	public void setDefaults() {}
 
 	/**
 	 * Create the left side of the modify dialog. This is meant to be implemented by subclasses.

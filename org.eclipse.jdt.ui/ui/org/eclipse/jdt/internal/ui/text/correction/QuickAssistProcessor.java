@@ -165,15 +165,15 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
-import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFix;
+import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
-import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFix;
+import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
-import org.eclipse.jdt.internal.corext.fix.TypeParametersFix;
+import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFix;
-import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
+import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
@@ -683,7 +683,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		IProposableFix fix= LambdaExpressionsFix.createConvertToLambdaFix(cic);
+		IProposableFix fix= LambdaExpressionsFixCore.createConvertToLambdaFix(cic);
 		if (fix == null)
 			return false;
 
@@ -710,7 +710,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		IProposableFix fix= LambdaExpressionsFix.createConvertToAnonymousClassCreationsFix(lambda);
+		IProposableFix fix= LambdaExpressionsFixCore.createConvertToAnonymousClassCreationsFix(lambda);
 		if (fix == null)
 			return false;
 
@@ -1799,7 +1799,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		IProposableFix fix= TypeParametersFix.createInsertInferredTypeArgumentsFix(context.getASTRoot(), createdType);
+		IProposableFix fix= TypeParametersFixCore.createInsertInferredTypeArgumentsFix(context.getASTRoot(), createdType);
 		if (fix != null && resultingCollections != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			int relevance= locations == null ? IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS : IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
@@ -3165,7 +3165,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		TryStatement enclosingTry= (TryStatement)ASTResolving.findAncestor(node, ASTNode.TRY_STATEMENT);
 		ListRewrite resourcesRewriter= null;
 		ListRewrite clausesRewriter= null;
-		if (enclosingTry == null || enclosingTry.getBody() == null || enclosingTry.getBody().statements().get(0) != coveredNodes.get(0)) {
+		if (needNewTryBlock(coveredStatements, enclosingTry)) {
 			newTryStatement= ast.newTryStatement();
 			newTryBody= ast.newBlock();
 			newTryStatement.setBody(newTryBody);
@@ -3304,7 +3304,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			catchClause.setException(decl);
 			linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + 0, true).addPosition(rewrite.track(decl.getName()), false);
 			Statement st= null;
-			String s= StubUtility.getCatchBodyContent(icu, "Exception", name, coveredNodes.get(0), icu.findRecommendedLineSeparator()); //$NON-NLS-1$
+			String s= StubUtility.getCatchBodyContent(icu, "Exception", name, coveredStatements.get(0), icu.findRecommendedLineSeparator()); //$NON-NLS-1$
 			if (s != null) {
 				st= (Statement)rewrite.createStringPlaceholder(s, ASTNode.RETURN_STATEMENT);
 			}
@@ -3340,6 +3340,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static boolean needNewTryBlock(List<ASTNode> coveredStatements, TryStatement enclosingTry) {
+		if(enclosingTry == null || enclosingTry.getBody() == null) {
+			return true;
+		}
+		List<?> statements= enclosingTry.getBody().statements();
+		return statements.size() > 0 && coveredStatements.size() > 0 && statements.get(0) != coveredStatements.get(0);
 	}
 
 	private static boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
@@ -4075,7 +4083,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null)
 			return true;
 
-		IProposableFix fix= DoWhileRatherThanWhileFix.createDoWhileFix(whileStatement);
+		IProposableFix fix= DoWhileRatherThanWhileFixCore.createDoWhileFix(whileStatement);
 		if (fix == null)
 			return false;
 
@@ -4254,7 +4262,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (selectedNodes.length == 0)
 			return false;
 
-		IProposableFix fix= VariableDeclarationFix.createChangeModifierToFinalFix(context.getASTRoot(), selectedNodes);
+		IProposableFix fix= VariableDeclarationFixCore.createChangeModifierToFinalFix(context.getASTRoot(), selectedNodes);
 		if (fix == null)
 			return false;
 

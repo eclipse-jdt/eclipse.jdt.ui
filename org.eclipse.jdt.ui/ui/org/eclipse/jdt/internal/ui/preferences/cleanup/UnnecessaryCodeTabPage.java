@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -154,7 +154,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		CheckboxPreference overriddenAssignment= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_OverriddenAssignment, CleanUpConstants.OVERRIDDEN_ASSIGNMENT, CleanUpModifyDialog.FALSE_TRUE);
 		intent(unnecessaryGroup);
 		CheckboxPreference moveDeclaration= createCheckboxPref(unnecessaryGroup, numColumns-1, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_MoveDeclaration, CleanUpConstants.OVERRIDDEN_ASSIGNMENT_MOVE_DECL, CleanUpModifyDialog.FALSE_TRUE);
-		registerSlavePreference(overriddenAssignment, new CheckboxPreference[] { moveDeclaration });
+		registerOptionPreference(overriddenAssignment, moveDeclaration);
 
 		CheckboxPreference modifiers= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantModifiers, CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(modifiers);

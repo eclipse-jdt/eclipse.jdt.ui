@@ -30,6 +30,7 @@ import org.junit.runners.Suite;
 	UnresolvedVariablesQuickFixTest.class,
 	UnresolvedMethodsQuickFixTest.class,
 	UnresolvedMethodsQuickFixTest1d8.class,
+	UnresolvedMethodsQuickFixTest16.class,
 	ReturnTypeQuickFixTest.class,
 	LocalCorrectionsQuickFixTest.class,
 	LocalCorrectionsQuickFixTest1d7.class,

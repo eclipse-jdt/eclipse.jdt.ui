@@ -17,27 +17,19 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.codemining.ICodeMiningProvider;
 import org.eclipse.jface.text.codemining.LineContentCodeMining;
 
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Expression;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaMethodParameterCodeMining extends LineContentCodeMining {
 
-	public JavaMethodParameterCodeMining(Expression parameterNode, int parameterIndex, IMethod method, boolean isVarargs, ICodeMiningProvider provider) {
+	public JavaMethodParameterCodeMining(Expression parameterNode, int parameterIndex, String [] parameterNames, boolean isVarargs, ICodeMiningProvider provider) {
 		super(new Position(parameterNode.getStartPosition(), parameterNode.getLength()), provider, null);
 		StringBuilder text = new StringBuilder();
-		try {
-			text.append(method.getParameterNames()[parameterIndex]);
-			if (isVarargs && parameterIndex == method.getParameterNames().length - 1) {
-				text.append('…');
-			}
-			text.append(": "); //$NON-NLS-1$
-			setLabel(text.toString());
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+		text.append(parameterNames[parameterIndex]);
+		if (isVarargs && parameterIndex == parameterNames.length - 1) {
+			text.append('…');
 		}
+		text.append(": "); //$NON-NLS-1$
+		setLabel(text.toString());
 	}
 
 	@Override

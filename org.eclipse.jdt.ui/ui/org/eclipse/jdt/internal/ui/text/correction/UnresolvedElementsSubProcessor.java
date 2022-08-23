@@ -1324,6 +1324,9 @@ public class UnresolvedElementsSubProcessor {
 		IJavaProject project= context.getCompilationUnit().getJavaProject();
 		if (JavaModelUtil.is50OrHigher(project)) {
 			String pref= PreferenceConstants.getPreference(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, project);
+			if (pref == null  || pref.isBlank()) {
+				return;
+			}
 			String[] favourites= pref.split(";"); //$NON-NLS-1$
 			if (favourites.length == 0) {
 				return;

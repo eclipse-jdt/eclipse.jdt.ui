@@ -5769,7 +5769,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview1= getPreviewContent(proposal);
 
 		StringBuilder buf= new StringBuilder();
@@ -5802,7 +5802,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		proposal= (CUCorrectionProposal) proposals.get(0);
+		proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuilder();
@@ -5867,7 +5867,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview1= getPreviewContent(proposal);
 
 		StringBuilder buf= new StringBuilder();
@@ -5908,7 +5908,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		proposal= (CUCorrectionProposal) proposals.get(0);
+		proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview2= getPreviewContent(proposal);
 
 		buf= new StringBuilder();
@@ -5983,7 +5983,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview1= getPreviewContent(proposal);
 
 		StringBuilder buf= new StringBuilder();
@@ -6052,7 +6052,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
 		String preview1= getPreviewContent(proposal);
 
 		StringBuilder buf= new StringBuilder();
@@ -6086,6 +6086,64 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 		assertCorrectLabels(proposals);
 	}
+
+	@Test
+	public void testSurroundWithTryWithResource_05() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuilder bufOrg= new StringBuilder();
+		bufOrg.append("package p;\n");
+		bufOrg.append("\n");
+		bufOrg.append("import java.io.File;\n"
+				+ "import java.util.stream.Stream;\n"
+				+ "\n"
+				+ "public class X {\n"
+				+ "	public static void main(String[] args) throws Exception {\n"
+				+ "		try {\n"
+				+ "			try {\n"
+				+ "				Stream<File> stream = Stream.of(new File(\"\"));\n"
+				+ "				System.out.println(stream);\n"
+				+ "			} catch (Exception e) {\n"
+				+ "			}\n"
+				+ "		} catch (Exception e) {\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "}");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", bufOrg.toString(), false, null);
+
+		int cursor = bufOrg.toString().indexOf("Stream<File>");
+		AssistContext context= getCorrectionContext(cu, cursor + 1, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) findProposalByName("Surround with try-with-resources", proposals);
+		String preview1= getPreviewContent(proposal);
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.io.File;\n"
+				+ "import java.util.stream.Stream;\n"
+				+ "\n"
+				+ "public class X {\n"
+				+ "	public static void main(String[] args) throws Exception {\n"
+				+ "		try {\n"
+				+ "			try (Stream<File> stream = Stream.of(new File(\"\"))) {\n"
+				+ "				System.out.println(stream);\n"
+				+ "			} catch (Exception e) {\n"
+				+ "			}\n"
+				+ "		} catch (Exception e) {\n"
+				+ "		}\n"
+				+ "	}\n"
+				+ "}");
+		String expected1= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+		assertCorrectLabels(proposals);
+	}
+
+
 	@Test
 	public void testWrapInOptional_01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);

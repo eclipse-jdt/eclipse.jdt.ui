@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
@@ -370,10 +371,11 @@ public class SourceProvider {
 		updateStaticReferences(rewriter, context);
 		updateTypeVariables(rewriter, context);
 		updateMethodTypeVariable(rewriter, context);
-
+		updateReturnStatements(rewriter, context);
 		List<IRegion> ranges= null;
 		if (hasReturnValue()) {
-			if (context.callMode == ASTNode.RETURN_STATEMENT) {
+			if (context.callMode == ASTNode.RETURN_STATEMENT
+					|| context.callMode == ASTNode.YIELD_STATEMENT) {
 				ranges= getStatementRanges();
 			} else {
 				ranges= getExpressionRanges();
@@ -619,6 +621,23 @@ public class SourceProvider {
 		if (method == null)
 			return;
 		rewriteReferences(rewriter, method.getTypeArguments(), fAnalyzer.getMethodTypeParameterReferences());
+	}
+
+	private void updateReturnStatements(ASTRewrite rewriter, CallContext context) {
+		if (rewriter != null && context != null && context.callMode == ASTNode.YIELD_STATEMENT) {
+			Block nodeToVisit= fDeclaration.getBody();
+			ASTVisitor visitor= new ASTVisitor() {
+				@Override
+				public boolean visit(ReturnStatement node) {
+					Expression exp= node.getExpression();
+					YieldStatement yStmt= rewriter.getAST().newYieldStatement();
+					yStmt.setExpression((Expression) rewriter.createMoveTarget(exp));
+					rewriter.replace(node, yStmt, null);
+					return false;
+				}
+			};
+			nodeToVisit.accept(visitor);
+		}
 	}
 
 	private void rewriteReferences(ASTRewrite rewriter, ITypeBinding[] typeArguments, List<NameData> typeParameterReferences) {

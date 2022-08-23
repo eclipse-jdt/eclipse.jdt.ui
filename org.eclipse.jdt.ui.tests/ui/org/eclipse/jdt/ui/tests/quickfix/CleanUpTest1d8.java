@@ -4523,6 +4523,97 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
+	/**
+	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/120
+	 *
+	 * @throws CoreException
+	 */
+	@Test
+	public void testWhileIssue120_CollectionTypeResolution() throws CoreException {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				+ "import java.util.*;\n"
+				+ "public class Test {\n"
+				+ "    private static <K, V> List<V> m(Map<K, List<V>> map) {\n"
+				+ "        List<V> results = new ArrayList<>();\n"
+				+ "        Iterator<List<V>> iterator = map.values().iterator();\n"
+				+ "        while (iterator.hasNext()) {\n"
+				+ "            results.addAll(iterator.next());\n"
+				+ "        }\n"
+				+ "        return results;\n"
+				+ "    }"
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		String expected= "" //
+				+ "package test;\n"
+				+ "import java.util.*;\n"
+				+ "public class Test {\n"
+				+ "    private static <K, V> List<V> m(Map<K, List<V>> map) {\n"
+				+ "        List<V> results = new ArrayList<>();\n"
+				+ "        for (List<V> element : map.values()) {\n"
+				+ "            results.addAll(element);\n"
+				+ "        }\n"
+				+ "        return results;\n"
+				+ "    }"
+				+ "}\n";
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	/**
+	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/190
+	 *
+	 * @throws CoreException
+	 */
+	@Test
+	public void testWhileIssue190_MultipleWhileLoops() throws CoreException {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				+ "import java.util.*;\n"
+				+ "public class Test {\n"
+				+ "    void m(List<String> strings) {\n"
+				+ "        Iterator<String> it = strings.iterator();\n"
+				+ "        while (it.hasNext()) {\n"
+				+ "            String s = (String) it.next();\n"
+				+ "            System.out.println(s);\n"
+				+ "            System.err.println(s);\n"
+				+ "        }\n"
+				+ "        Iterator<String> it2 = strings.iterator();\n"
+				+ "        while (it2.hasNext()) {\n"
+				+ "            String s = (String) it2.next();\n"
+				+ "            System.out.println(s);\n"
+				+ "            System.err.println(s);\n"
+				+ "        }\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		String expected= "" //
+				+ "package test;\n"
+				+ "import java.util.*;\n"
+				+ "public class Test {\n"
+				+ "    void m(List<String> strings) {\n"
+				+ "        for (String s : strings) {\n"
+				+ "            System.out.println(s);\n"
+				+ "            System.err.println(s);\n"
+				+ "        }\n"
+				+ "        for (String s : strings) {\n"
+				+ "            System.out.println(s);\n"
+				+ "            System.err.println(s);\n"
+				+ "        }\n"
+				+ "    }\n"
+				+ "}\n";
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
 	@Test
 	public void testWhileSelf() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -4998,6 +5089,65 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testDoNotWhileIssue190_1() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				        + "import java.util.*;\n"
+				        + "public class Test {\n"
+				        + "    void m(List<String> strings) {\n"
+				        + "        Iterator<String> it = strings.iterator();\n"
+				        + "        while (it.hasNext()) {\n"
+				        + "            String s = (String) it.next();\n"
+				        + "            System.out.println(s);\n"
+				        + "            System.err.println(s);\n"
+				        + "        }\n"
+				        + "        it = strings.iterator();\n"
+				        + "        while (it.hasNext()) {\n"
+				        + "            String s = (String) it.next();\n"
+				        + "            System.out.println(s);\n"
+				        + "            System.err.println(s);\n"
+				        + "        }\n"
+			        + "    }\n"
+				        + "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+
+	}
+
+	@Test
+	public void testDoNotWhileIssue190_2() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				+ "import java.util.*;\n"
+				+ "public class Test {\n"
+				+ "    void m(List<String> strings) {\n"
+				+ "        Iterator<String> it = strings.iterator();\n"
+				+ "        while (it.hasNext()) {\n"
+				+ "            String s = (String) it.next();\n"
+				+ "            System.out.println(s);\n"
+				+ "            System.err.println(s);\n"
+				+ "        }\n"
+				+ "        while (it.hasNext()) {\n"
+				+ "            String s = (String) it.next();\n"
+				+ "            System.out.println(s);\n"
+				+ "            System.err.println(s);\n"
+				+ "        }\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+
 	}
 
 	@Test

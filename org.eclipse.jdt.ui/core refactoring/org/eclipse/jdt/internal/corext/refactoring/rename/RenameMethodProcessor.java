@@ -619,7 +619,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 		SearchPattern refsPattern= RefactoringSearchEngine.createOrPattern(wcNewMethods, IJavaSearchConstants.REFERENCES);
 		SearchParticipant[] searchParticipants= SearchUtils.getDefaultSearchParticipants();
-		IJavaSearchScope scope= RefactoringScopeFactory.create(wcNewMethods);
+		IJavaSearchScope scope= RefactoringScopeFactory.createProjectsScope(wcNewMethods, true);
 
 		MethodOccurenceCollector requestor;
 		if (getDelegateUpdating()) {
