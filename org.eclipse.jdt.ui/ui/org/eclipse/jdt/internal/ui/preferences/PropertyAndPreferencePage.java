@@ -324,7 +324,8 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 
 	@Override
 	public void setElement(IAdaptable element) {
-		fProject= (IProject) element.getAdapter(IResource.class);
+		IResource resource= element.getAdapter(IResource.class);
+		fProject= resource == null ? null : resource.getProject();
 	}
 
 
