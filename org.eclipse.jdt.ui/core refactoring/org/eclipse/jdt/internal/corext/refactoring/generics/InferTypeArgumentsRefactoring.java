@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
@@ -419,7 +420,14 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				if (chosenType.isParameterizedType()) // workaround for bug 99124
 					chosenType= chosenType.getTypeDeclaration();
 				BindingKey bindingKey= new BindingKey(chosenType.getBindingKey());
-				typeArgument= rewrite.getImportRewrite().addImportFromSignature(bindingKey.toSignature(), rewrite.getAST());
+				if (chosenType.isLocal()) { // fix for issue #224
+					String typeName= chosenType.getName();
+					AST ast= rewrite.getAST();
+					// need type but do not obtain it via an extraneous import
+					typeArgument= ast.newSimpleType(ast.newSimpleName(typeName));
+				} else {
+					typeArgument= rewrite.getImportRewrite().addImportFromSignature(bindingKey.toSignature(), rewrite.getAST());
+				}
 				ArrayList<CollectionElementVariable2> nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv, tCModel);
 				Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite, tCModel, leaveUnconstraindRaw); //recursion
 				if (nestedTypeArguments != null) {
