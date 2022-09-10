@@ -234,6 +234,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MethodMustOverride:
 			case IProblem.MethodMustOverrideOrImplement:
 			case IProblem.IsClassPathCorrect:
+			case IProblem.IsClassPathCorrectWithReferencingType:
 			case IProblem.MethodReturnsVoid:
 			case IProblem.ForbiddenReference:
 			case IProblem.DiscouragedReference:
@@ -743,6 +744,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ModifierCorrectionSubProcessor.addOverridingDeprecatedMethodProposal(context, problem, proposals);
 				break;
 			case IProblem.IsClassPathCorrect:
+			case IProblem.IsClassPathCorrectWithReferencingType:
 				ReorgCorrectionsSubProcessor.getIncorrectBuildPathProposals(context, problem, proposals);
 				break;
 			case IProblem.ForbiddenReference:
