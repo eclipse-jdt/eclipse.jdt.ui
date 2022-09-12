@@ -1185,14 +1185,32 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 		endVisit((AbstractTagElement)node);
 	}
 
+	public boolean visit(AbstractTextElement node) {
+		return visit((ASTNode)node);
+	}
+
+	public void endVisit(AbstractTextElement node) {
+		endVisit((ASTNode)node);
+	}
+
 	@Override
 	public boolean visit(TextElement node) {
-		return visit((ASTNode)node);
+		return visit((AbstractTextElement)node);
 	}
 
 	@Override
 	public void endVisit(TextElement node) {
-		endVisit((ASTNode)node);
+		endVisit((AbstractTextElement)node);
+	}
+
+	@Override
+	public boolean visit(JavaDocTextElement node) {
+		return visit((AbstractTextElement)node);
+	}
+
+	@Override
+	public void endVisit(JavaDocTextElement node) {
+		endVisit((AbstractTextElement)node);
 	}
 
 	@Override

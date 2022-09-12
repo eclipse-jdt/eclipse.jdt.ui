@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTagElement;
+import org.eclipse.jdt.core.dom.AbstractTextElement;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -146,6 +147,24 @@ public class HierarchicalASTVisitorTest {
 		}
 		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(AbstractTagElement node) {
+			super.visit(node);
+		}
+
+		@Override
+		public boolean visit(AbstractTextElement node) {
+			registerCall(AbstractTextElement.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(AbstractTextElement node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(AbstractTextElement node) {
+			registerCall(AbstractTextElement.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(AbstractTextElement node) {
 			super.visit(node);
 		}
 
