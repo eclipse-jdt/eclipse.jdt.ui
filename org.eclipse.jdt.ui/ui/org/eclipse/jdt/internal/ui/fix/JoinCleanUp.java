@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2022 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -731,7 +731,7 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.JoinCleanup_description, cuRewrite);
 
-			Expression copyOfDelimiter= ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(delimiter));
+			Expression copyOfDelimiter= null;
 
 			if (ASTNodes.hasType(delimiter, char.class.getCanonicalName()) && ASTNodes.is(delimiter, CharacterLiteral.class)) {
 				StringLiteral delimiterAsStringLiteral= ast.newStringLiteral();
@@ -741,8 +741,10 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 				MethodInvocation valueOfMethod= ast.newMethodInvocation();
 				valueOfMethod.setExpression(ast.newSimpleName(String.class.getSimpleName()));
 				valueOfMethod.setName(ast.newSimpleName("valueOf")); //$NON-NLS-1$
-				valueOfMethod.arguments().add(copyOfDelimiter);
+				valueOfMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(delimiter)));
 				copyOfDelimiter= valueOfMethod;
+			} else {
+				copyOfDelimiter= ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(delimiter));
 			}
 
 			MethodInvocation joinMethod= ast.newMethodInvocation();
