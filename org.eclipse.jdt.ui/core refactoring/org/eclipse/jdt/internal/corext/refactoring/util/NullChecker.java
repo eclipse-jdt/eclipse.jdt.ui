@@ -10,7 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     chixiaye <chixiaye@icloud.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 import java.util.HashSet;
@@ -18,13 +18,14 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
 
 public class NullChecker {
 	private ASTNode expression;
@@ -38,25 +39,22 @@ public class NullChecker {
 		this.expression=expression;
 		this.startOffset=startOffset;
 		this.endOffset=endOffset;
-		this.invocationSet=new HashSet<String>();
-		if(this.endOffset-startOffset==expression.getLength()) {
-			return;
-		}
-		InvocationVisitor iv=new InvocationVisitor();
-		expression.accept(iv);
+		this.invocationSet=new HashSet<>();
+		InvocationVisitor iv=new InvocationVisitor( );
+		this.expression.accept(iv);
 		this.invocationSet=iv.invocationSet;
 	}
 
 	public boolean isExistNull( ) {
 		NullMiddleCodeVisitor nullMiddleCodeVisitor=new NullMiddleCodeVisitor(this.invocationSet,this.startOffset,this.endOffset);
         this.commonNode.accept(nullMiddleCodeVisitor);
-		return nullMiddleCodeVisitor.isValid();
+		return nullMiddleCodeVisitor.isNull();
 	}
 
 	private class InvocationVisitor extends ASTVisitor{
 		Set<String> invocationSet;
 		InvocationVisitor(){
-			this.invocationSet=new HashSet<String>();
+			this.invocationSet=new HashSet<>();
 		}
 		@Override
 		public void preVisit(ASTNode node) {
@@ -72,7 +70,12 @@ public class NullChecker {
 				this.invocationSet.add(temp.toString());
 			}else if(node instanceof QualifiedName) {
 				QualifiedName qn=( QualifiedName)node;
-				SimpleName temp = qn.getName();
+				Name temp = qn.getQualifier();
+				if(temp!=null)
+				this.invocationSet.add(temp.toString());
+			}else if(node instanceof ArrayAccess) {
+				ArrayAccess aa=( ArrayAccess)node;
+				Expression temp = aa.getArray();
 				if(temp!=null)
 				this.invocationSet.add(temp.toString());
 			}
@@ -91,7 +94,7 @@ public class NullChecker {
 	        this.nullFlag=false;
 	    }
 
-	    public boolean isValid() {
+	    public boolean isNull() {
 	    	return this.nullFlag;
 	    }
 
@@ -102,7 +105,6 @@ public class NullChecker {
 	        if(el<startPosition||sl>endPosition||this.nullFlag==true) {
 	        	return false;
 	        }
-	        //add astNode
 	        if(sl>=startPosition && el <=endPosition && node instanceof InfixExpression){
 	        	InfixExpression infixExpression=(InfixExpression)node;
 	            Operator op=infixExpression.getOperator();
@@ -110,9 +112,9 @@ public class NullChecker {
 		    		Expression leftExpression = infixExpression.getLeftOperand();
 		    		Expression rightExpression = infixExpression.getRightOperand();
 		    		Expression target=null;
-		    		if( rightExpression.getNodeType()==Expression.NULL_LITERAL) {
+		    		if( rightExpression.getNodeType()==ASTNode.NULL_LITERAL) {
 		    			target=leftExpression;
-		    		}else if(leftExpression.getNodeType()==Expression.NULL_LITERAL) {
+		    		}else if(leftExpression.getNodeType()==ASTNode.NULL_LITERAL) {
 		    			target=rightExpression;
 		    		}
 		    		if(target!=null&&this.set.contains(target.toString())) {

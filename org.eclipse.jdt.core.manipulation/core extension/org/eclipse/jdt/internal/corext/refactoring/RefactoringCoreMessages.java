@@ -16,8 +16,8 @@
  *     Red Hat Inc. - copied to jdt.core.manipulation
  *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
  *     Nikolay Metchev - <nikolaymetchev@gmail.com> - [inline] Inline Local Variable does not qualify accesses to obscured types - https://bugs.eclipse.org/367536
- *	   chixiaye <chixiaye@icloud.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
- *******************************************************************************/
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+ ********************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import org.eclipse.osgi.util.NLS;

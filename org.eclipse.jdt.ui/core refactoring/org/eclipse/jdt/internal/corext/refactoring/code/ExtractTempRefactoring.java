@@ -13,7 +13,7 @@
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract local] Extract to local variable not replacing multiple occurrences in same statement - https://bugs.eclipse.org/406347
  *     Nicolaj Hoess <nicohoess@gmail.com> - [extract local] puts declaration at wrong position - https://bugs.eclipse.org/65875
  *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
- *     chixiaye <chixiaye@icloud.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -373,6 +373,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
 	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
 
+	private int startPoint;
+	private int endPoint;
+
+	private boolean nullWarning;
 
 	/**
 	 * Creates a new extract temp refactoring
@@ -396,10 +400,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		fLinkedProposalModel= null;
 		fCheckResultForCompileProblems= true;
 
-		// Default
-		this.startPoint=0;
-		this.endPoint=-1;
-		nullWarning=false;
+		this.startPoint= -1; // default
+		this.endPoint= -1; // default
+		this.nullWarning= false; // default
 	}
 
 	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
@@ -420,21 +423,21 @@ public class ExtractTempRefactoring extends Refactoring {
 		fLinkedProposalModel= null;
 		fCheckResultForCompileProblems= true;
 
-		// Default
-		this.startPoint=0;
-		this.endPoint=-1;
-		nullWarning=false;
+		this.startPoint= -1; // default
+		this.endPoint= -1; // default
+		this.nullWarning= false; // default
 	}
 
     public ExtractTempRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this((ICompilationUnit) null, 0, 0);
+
+   		this.startPoint= -1; // default
+		this.endPoint= -1; // default
+		this.nullWarning= false; // default
+
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
 
-   		// Default
-   		this.startPoint=0;
-   		this.endPoint=-1;
-   		nullWarning=false;
     }
 
 	public void setCheckResultForCompileProblems(boolean checkResultForCompileProblems) {
@@ -454,7 +457,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		//TODO: should not have to prune duplicates here...
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		HashSet<IASTFragment> seen= new HashSet<>();
-		for (int i = this.endPoint==-1? fragmentsToReplace.length - 1:this.endPoint; i >= this.startPoint; --i) {
+		for (int i = this.endPoint ; i >= this.startPoint; --i) {
 			IASTFragment fragment = fragmentsToReplace[i];
 			if (!seen.add(fragment))
 				continue;
@@ -536,6 +539,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			if(this.nullWarning){
 				result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_potential_null, BasicElementLabels.getJavaElementName(fTempName)));
 			}
+
 			result.merge(checkMatchingFragments());
 
 			fChange.setKeepPreviewEdits(true);
@@ -722,90 +726,133 @@ public class ExtractTempRefactoring extends Refactoring {
 			node= ASTNodes.getParent(node, SwitchStatement.class);
 			fDeclareFinal= true;
 		}
+
+		IASTFragment[] reSortRetainOnlyReplacableMatches= reSortRetainOnlyReplacableMatches();
+ 		if(reSortRetainOnlyReplacableMatches == null) {
+ 			return;
+ 		}
+
+ 		int selectNumber= 0;
+ 		for(int i= 0;i < reSortRetainOnlyReplacableMatches.length;++i) {
+ 			if(this.fSelectionStart == reSortRetainOnlyReplacableMatches[i].getAssociatedNode().getStartPosition()) {
+ 				selectNumber= i;
+ 				break;
+ 			}
+ 		}
 		if (node instanceof SwitchStatement) {
 			/* must insert above switch statement */
+			this.startPoint= 0;
+			this.endPoint= reSortRetainOnlyReplacableMatches.length - 1;
 			insertAt(node, vds);
 			return;
 		} else {
 			if (insertAtSelection) {
-				insertAt(getSelectedExpression().getAssociatedNode(), vds);
+				ASTNode realCommonASTNode= null;
+				this.endPoint= selectNumber;
+	 			this.startPoint= selectNumber;
+		 		while(realCommonASTNode == null && selectNumber < reSortRetainOnlyReplacableMatches.length) {
+		 			realCommonASTNode= evalStartAndEnd(reSortRetainOnlyReplacableMatches, selectNumber++);
+		 		}
+		 		if(realCommonASTNode == null && reSortRetainOnlyReplacableMatches.length > 0) {
+		 			this.nullWarning= true;
+		 		}
+	 			insertAt(getSelectedExpression().getAssociatedNode(), vds);
 				return;
 			}
 		}
- 		IASTFragment[] reSortRetainOnlyReplacableMatches = reSortRetainOnlyReplacableMatches();
- 		if(reSortRetainOnlyReplacableMatches==null) {
- 			return;
+
+ 		ASTNode realCommonASTNode= null;
+ 		this.endPoint= selectNumber;
+		this.startPoint= selectNumber;
+ 		while(realCommonASTNode==null && selectNumber< reSortRetainOnlyReplacableMatches.length) {
+ 			realCommonASTNode= evalStartAndEnd(reSortRetainOnlyReplacableMatches, selectNumber++);
  		}
- 		ASTNode firstReplaceExpression = getCertainReplacedExpression(reSortRetainOnlyReplacableMatches, 0)
- 				.getAssociatedNode();
- 		int selectNumber=0;
- 		for(int i=0;i<reSortRetainOnlyReplacableMatches.length;++i) {
- 			if(this.fSelectionStart==reSortRetainOnlyReplacableMatches[i].getAssociatedNode().getStartPosition()) {
- 				selectNumber=i;
- 				break;
- 			}
+ 		if(realCommonASTNode != null)
+ 			insertAt(realCommonASTNode, vds);
+ 		else {
+ 			this.nullWarning= true;
+ 			insertAt(getSelectedExpression().getAssociatedNode(), vds);
  		}
- 		int start=selectNumber;
- 		int end =selectNumber;
- 		ASTNode realCommonASTNode=null;
- 		boolean startFlag=true;
- 		boolean endFlag=true;
- 		while((startFlag||endFlag)&&start<=end){
- 			IASTFragment iASTFragment=reSortRetainOnlyReplacableMatches[start];
- 			firstReplaceExpression=getCertainReplacedExpression(reSortRetainOnlyReplacableMatches,start).getAssociatedNode();
- 			ASTNode[] firstReplaceNodeParents = getParents(firstReplaceExpression);
- 			ASTNode[] commonPath = findDeepestCommonSuperNodePathForReplacedNodes(start,end);
+	}
+
+	private ASTNode evalStartAndEnd(IASTFragment[] reSortRetainOnlyReplacableMatches, int selectNumber) throws JavaModelException {
+		ASTNode realCommonASTNode= null;
+		ASTNode firstReplaceExpression;
+		int start= selectNumber;
+ 		int end= selectNumber;
+		int expandFlag= 2; // 2:backward 1:forward 0:break
+ 		while(expandFlag > 0&& start <= end){
+ 			IASTFragment iASTFragment= reSortRetainOnlyReplacableMatches[start];
+ 			firstReplaceExpression= getCertainReplacedExpression(reSortRetainOnlyReplacableMatches,start).getAssociatedNode();
+ 			ASTNode[] firstReplaceNodeParents= getParents(firstReplaceExpression);
+ 			ASTNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes(start,end);
  			Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
- 			ASTNode deepestCommonParent = firstReplaceNodeParents[commonPath.length - 1];
+ 			ASTNode deepestCommonParent= firstReplaceNodeParents[commonPath.length - 1];
  			int startOffset;
- 			ASTNode expression=iASTFragment.getAssociatedNode();
- 			int endOffset=expression.getStartPosition();
+ 			ASTNode expression= iASTFragment.getAssociatedNode();
+ 			int endOffset= expression.getStartPosition();
  			ASTNode commonASTNode;
  			if (deepestCommonParent instanceof Block) {
- 				commonASTNode=firstReplaceNodeParents[commonPath.length];
+ 				commonASTNode= firstReplaceNodeParents[commonPath.length];
  			} else {
- 				commonASTNode=deepestCommonParent;
+ 				commonASTNode= deepestCommonParent;
 			}
- 			commonASTNode=convertToExtractNode(commonASTNode);
- 			startOffset=commonASTNode.getStartPosition()-1;
- 			NullChecker nullChecker=new NullChecker(commonASTNode,expression,startOffset,endOffset);
+ 			commonASTNode= convertToExtractNode(commonASTNode);
+ 			startOffset= commonASTNode.getStartPosition() - 1;
+ 			NullChecker nullChecker= new NullChecker(commonASTNode,expression,startOffset,endOffset);
  			if(!nullChecker.isExistNull()) {//at least one be extracted
-				this.startPoint=start;
-				this.endPoint=end;
-				realCommonASTNode=commonASTNode;
-				if(start==0) {
-					startFlag=false;
+				this.startPoint= start;
+				this.endPoint= end;
+				realCommonASTNode= commonASTNode;
+				if(end == reSortRetainOnlyReplacableMatches.length-1 && expandFlag == 2) {
+					expandFlag= 1;
 				}
-				if(end==reSortRetainOnlyReplacableMatches.length-1) {
-					endFlag=false;
+				if(start == 0 && expandFlag == 1) {
+					expandFlag= 0;
 				}
-				if(startFlag) {
+				if(expandFlag == 1) {
 					start--;
-				}else if(endFlag){
+				}else if(expandFlag == 2){
 					end++;
 				}
-			}else if(start==end) {
-				this.nullWarning=true;
-				this.startPoint=start;
-				this.endPoint=end;
-				realCommonASTNode=commonASTNode;
-				break;
-			}else {
-				if(startFlag) {
-					startFlag=false;
-					if(start!=selectNumber)//restore
-						start++;
-					if(end==reSortRetainOnlyReplacableMatches.length-1) {
-						endFlag=false;
+			}
+ 			else {
+				if(expandFlag == 2) {
+					expandFlag= 1;
+					if(end!=selectNumber)//restore
+						end--;
+					if(start == 0) {
+						expandFlag= 0;
 					}else {
-						end++;
+						start--;
 					}
 				}else {
-					break;
+					expandFlag = 0;
 				}
 			}
  		}
- 		insertAt(realCommonASTNode, vds);
+		return realCommonASTNode;
+	}
+
+	private ASTNode convertToExtractNode(ASTNode target) {
+		ASTNode parent= target.getParent();
+		StructuralPropertyDescriptor locationInParent= target.getLocationInParent();
+		while (locationInParent != Block.STATEMENTS_PROPERTY && locationInParent != SwitchStatement.STATEMENTS_PROPERTY) {
+			if (locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
+					|| locationInParent == IfStatement.ELSE_STATEMENT_PROPERTY
+					|| locationInParent == ForStatement.BODY_PROPERTY
+					|| locationInParent == EnhancedForStatement.BODY_PROPERTY
+					|| locationInParent == DoStatement.BODY_PROPERTY
+					|| locationInParent == WhileStatement.BODY_PROPERTY) {
+				break;
+			} else if (locationInParent == LambdaExpression.BODY_PROPERTY && ((LambdaExpression) parent).getBody() instanceof Expression) {
+				break;
+			}
+			target= parent;
+			parent= parent.getParent();
+			locationInParent= target.getLocationInParent();
+		}
+		return target;
 	}
 
 	private VariableDeclarationStatement createTempDeclaration(Expression initializer) throws CoreException {
@@ -839,31 +886,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		return vds;
 	}
 
-	private ASTNode convertToExtractNode(ASTNode target) {
-		ASTNode parent= target.getParent();
-		StructuralPropertyDescriptor locationInParent= target.getLocationInParent();
-		while (locationInParent != Block.STATEMENTS_PROPERTY && locationInParent != SwitchStatement.STATEMENTS_PROPERTY) {
-			if (locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
-					|| locationInParent == IfStatement.ELSE_STATEMENT_PROPERTY
-					|| locationInParent == ForStatement.BODY_PROPERTY
-					|| locationInParent == EnhancedForStatement.BODY_PROPERTY
-					|| locationInParent == DoStatement.BODY_PROPERTY
-					|| locationInParent == WhileStatement.BODY_PROPERTY) {
-				break;
-			} else if (locationInParent == LambdaExpression.BODY_PROPERTY && ((LambdaExpression) parent).getBody() instanceof Expression) {
-				break;
-			}
-			target= parent;
-			parent= parent.getParent();
-			locationInParent= target.getLocationInParent();
-		}
-		return target;
-	}
-
 	private void insertAt(ASTNode target, Statement declaration) {
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		TextEditGroup groupDescription= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable);
-
 		ASTNode parent= target.getParent();
 		StructuralPropertyDescriptor locationInParent= target.getLocationInParent();
 		while (locationInParent != Block.STATEMENTS_PROPERTY && locationInParent != SwitchStatement.STATEMENTS_PROPERTY) {
@@ -936,10 +961,10 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private ASTNode[] findDeepestCommonSuperNodePathForReplacedNodes(int start,int end) throws JavaModelException {
 		ASTNode[] matchNodes= getMatchNodes();
-		Comparator<ASTNode> comparator = (o1, o2) -> o1.getStartPosition() - o2.getStartPosition();
+		Comparator<ASTNode> comparator= (o1, o2) -> o1.getStartPosition() - o2.getStartPosition();
 		Arrays.sort(matchNodes, comparator);
 		ASTNode[][] matchingNodesParents = new ASTNode[end+1-start][];
-		for (int i =start; i < Math.min(matchNodes.length,end+1); i++) {
+		for(int i= start; i < matchNodes.length && i < end+1;++i) {
 			matchingNodesParents[i-start] = getParents(matchNodes[i]);
 		}
 		List<ASTNode> l= Arrays.asList(getLongestArrayPrefix(matchingNodesParents));
@@ -1164,6 +1189,8 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private void replaceSelectedExpressionWithTempDeclaration() throws CoreException {
+		this.startPoint = 0;
+		this.endPoint= retainOnlyReplacableMatches(getMatchingFragments()).length-1;
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression(); // whole expression selected
 
@@ -1285,16 +1312,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		return isAllowed;
 	}
 
-	private int startPoint;
-	private int endPoint;
-	private boolean nullWarning;
-
 	private IASTFragment[] reSortRetainOnlyReplacableMatches() throws JavaModelException {
-		 IASTFragment[] nodesToReplace = retainOnlyReplacableMatches(getMatchingFragments());
-		 Comparator<IASTFragment> comparator = (o1, o2) -> o1.getStartPosition() - o2.getStartPosition();
+		 IASTFragment[] nodesToReplace= retainOnlyReplacableMatches(getMatchingFragments());
+		 Comparator<IASTFragment> comparator= (o1, o2) -> o1.getStartPosition() - o2.getStartPosition();
 		 Arrays.sort(nodesToReplace, comparator);
 		 return nodesToReplace;
 	}
-
-
 }
