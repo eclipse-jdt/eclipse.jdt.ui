@@ -16,8 +16,9 @@ package org.eclipse.jdt.junit.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -68,10 +69,10 @@ public class TestTestSearchEngine {
 		ICompilationUnit test1= createCompilationUnit(p, 1);
 		ICompilationUnit test2= createCompilationUnit(p, 2);
 
-		IType[] result= findTests(p);
-		assertEqualTypes("Test case not found", new IType[] {
+		var result= findTests(p);
+		assertEqualTypes("Test case not found", List.of(
 				test1.getType("Test1"), test2.getType("Test2")
-			}, result);
+			), result);
 	}
 
 	@Test
@@ -83,10 +84,10 @@ public class TestTestSearchEngine {
 		IPackageFragment q= fRoot.createPackageFragment("q", true, null);
 		ICompilationUnit test3= createCompilationUnit(q, 3);
 
-		IType[] result= findTests(new IJavaElement[] {p, q});
-		assertEqualTypes("Test case not found", new IType[] {
+		var result= findTests(new IJavaElement[] {p, q});
+		assertEqualTypes("Test case not found", List.of(
 				test1.getType("Test1"), test2.getType("Test2"), test3.getType("Test3")
-			}, result);
+			), result);
 	}
 
 	@Test
@@ -98,10 +99,10 @@ public class TestTestSearchEngine {
 		IPackageFragment q= fRoot.createPackageFragment("q", true, null);
 		createCompilationUnit(q, 3);
 
-		IType[] result= findTests(p);
-		assertEqualTypes("Test case not found", new IType[] {
+		var result= findTests(p);
+		assertEqualTypes("Test case not found", List.of(
 				test1.getType("Test1"), test2.getType("Test2")
-			}, result);
+			), result);
 	}
 
 	@Test
@@ -113,10 +114,10 @@ public class TestTestSearchEngine {
 		IPackageFragment q= fRoot.createPackageFragment("q", true, null);
 		ICompilationUnit test3= createCompilationUnit(q, 3);
 
-		IType[] result= findTests(fRoot);
-		assertEqualTypes("Test case not found", new IType[] {
+		var result= findTests(fRoot);
+		assertEqualTypes("Test case not found", List.of(
 				test1.getType("Test1"), test2.getType("Test2"), test3.getType("Test3")
-			}, result);
+			), result);
 	}
 
 	@Test
@@ -134,11 +135,11 @@ public class TestTestSearchEngine {
 		ICompilationUnit test4= createCompilationUnit(r, 4);
 		ICompilationUnit test5= createCompilationUnit(r, 5);
 
-		IType[] result= findTests(new IJavaElement[] {fRoot, root2});
-		assertEqualTypes("Test case not found", new IType[] {
+		var result= findTests(new IJavaElement[] {fRoot, root2});
+		assertEqualTypes("Test case not found", List.of(
 				test1.getType("Test1"), test2.getType("Test2"), test3.getType("Test3"),
 				test4.getType("Test4"), test5.getType("Test5")
-			}, result);
+			), result);
 	}
 
 	@Test
@@ -156,10 +157,10 @@ public class TestTestSearchEngine {
 		ICompilationUnit test4= createCompilationUnit(r, 4);
 		ICompilationUnit test5= createCompilationUnit(r, 5);
 
-		IType[] result= findTests(root2);
-		assertEqualTypes("Test case not found", new IType[] {
+		var result= findTests(root2);
+		assertEqualTypes("Test case not found", List.of(
 				test4.getType("Test4"), test5.getType("Test5")
-			}, result);
+			), result);
 	}
 
 	@Test
@@ -176,8 +177,8 @@ public class TestTestSearchEngine {
 				true,
 				null);
 
-		IType[] result= findTests(root2);
-		assertEqualTypes("Test case not found", new IType[] { testSub.getType("TestSub") }, result);
+		var result= findTests(root2);
+		assertEqualTypes("Test case not found", List.of(testSub.getType("TestSub")), result);
 	}
 
 	@Test
@@ -195,11 +196,11 @@ public class TestTestSearchEngine {
 		ICompilationUnit test4= createCompilationUnit(r, 4);
 		ICompilationUnit test5= createCompilationUnit(r, 5);
 
-		IType[] result= findTests(fProject);
-		assertEqualTypes("Test case not found", new IType[] {
+		var result= findTests(fProject);
+		assertEqualTypes("Test case not found", List.of(
 				test1.getType("Test1"), test2.getType("Test2"), test3.getType("Test3"),
 				test4.getType("Test4"), test5.getType("Test5")
-			}, result);
+			), result);
 	}
 
 	@Test
@@ -210,26 +211,23 @@ public class TestTestSearchEngine {
 		IPackageFragment q= fRoot.createPackageFragment("p.q", true, null);
 		createCompilationUnit(q, 2);
 
-		IType[] result= findTests(p);
-		assertEqualTypes("Test case not found", new IType[] {
-				test1.getType("Test1")
-			}, result);
+		var result= findTests(p);
+		assertEqualTypes("Test case not found", List.of(test1.getType("Test1")), result);
 	}
 
-	private IType[] findTests(IJavaElement element) throws InvocationTargetException, InterruptedException {
+	private List<IType> findTests(IJavaElement element) throws InvocationTargetException, InterruptedException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(fProject);
-		return TestSearchEngine.findTests(new BusyIndicatorRunnableContext(), element, testKind);
+		return new ArrayList<>(TestSearchEngine.findTests(new BusyIndicatorRunnableContext(), element, testKind));
 	}
 
-	private IType[] findTests(IJavaElement[] elements) throws InvocationTargetException, InterruptedException {
+	private List<IType> findTests(IJavaElement[] elements) throws InvocationTargetException, InterruptedException {
 		HashSet<IType> res= new HashSet<>();
 		for (IJavaElement element : elements) {
-			IType[] types= findTests(element);
-			res.addAll(Arrays.asList(types));
+			var types= findTests(element);
+			res.addAll(types);
 		}
-		return res.toArray(new IType[res.size()]);
+		return new ArrayList<>(res);
 	}
-
 
 	@Test
 	public void testJUnit4NoSrc() throws Exception {
@@ -245,11 +243,10 @@ public class TestTestSearchEngine {
 			true, null);
 	}
 
-	private void assertEqualTypes(String message, IType[] expected, IType[] actual) {
-		assertEquals("Wrong number of found tests", expected.length, actual.length);
-		List<IType> list= Arrays.asList(expected);
-		for (int i= 0; i < actual.length; i++) {
-			assertTrue(message + expected[i].getFullyQualifiedName(), list.contains(expected[i]));
+	private void assertEqualTypes(String message, List<IType> expected, List<IType> actual) {
+		assertEquals("Wrong number of found tests", expected.size(), actual.size());
+		for (int i= 0; i < actual.size(); i++) {
+			assertTrue(message + expected.get(i).getFullyQualifiedName(), expected.contains(actual.get(i)));
 		}
 	}
 }

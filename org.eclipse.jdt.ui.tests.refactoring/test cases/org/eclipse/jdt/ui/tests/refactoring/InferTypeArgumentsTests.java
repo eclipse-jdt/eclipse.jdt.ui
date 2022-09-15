@@ -514,4 +514,16 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 		performCuOK();
 	}
 
+	@Test
+	public void testCuWithLocalClass1() throws Exception {
+		// test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/224
+		performCuOK();
+	}
+
+	@Test
+	public void testCuWithLocalClass2() throws Exception {
+		// test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/224
+		performCuOK();
+	}
+
 }
