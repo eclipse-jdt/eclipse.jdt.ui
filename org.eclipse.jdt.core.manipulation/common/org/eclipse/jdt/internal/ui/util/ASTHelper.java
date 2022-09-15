@@ -51,7 +51,10 @@ public class ASTHelper {
 			case ASTNode.RECORD_DECLARATION:
 			case ASTNode.INSTANCEOF_EXPRESSION:
 				return ast.apiLevel() >= JLS16;
+			case ASTNode.TAG_PROPERTY:
+				return ast.apiLevel() >= AST.JLS18;
 			case ASTNode.TYPE_PATTERN:
+			case ASTNode.RECORD_PATTERN:
 				return ast.isPreviewEnabled();
 			default:
 				break;
@@ -102,4 +105,11 @@ public class ASTHelper {
 		return isNodeTypeSupportedInAST(ast, ASTNode.TYPE_PATTERN);
 	}
 
+	public static boolean isRecordPatternSupported(AST ast) {
+		return isNodeTypeSupportedInAST(ast, ASTNode.RECORD_PATTERN);
+	}
+
+	public static boolean isJavaDocCodeSnippetSupported(AST ast) {
+		return isNodeTypeSupportedInAST(ast, ASTNode.TAG_PROPERTY);
+	}
 }
