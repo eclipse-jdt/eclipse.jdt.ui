@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Jesper S Møller - Bug 529432 - Allow JDT UI to target Java 10
@@ -845,13 +841,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 
-			//TODO: Comment once Java SE 19 has been shipped:
-			String selectedCompliance= getValue(PREF_COMPLIANCE);
-			if (VERSION_19.equals(selectedCompliance)) {
-				fJRE50InfoText.setText(
-						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
-				isVisible= true;
-			}
+//			//TODO: Comment once Java SE 19 has been shipped:
+//			String selectedCompliance= getValue(PREF_COMPLIANCE);
+//			if (VERSION_19.equals(selectedCompliance)) {
+//				fJRE50InfoText.setText(
+//						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
+//				isVisible= true;
+//			}
 
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? image : null);
