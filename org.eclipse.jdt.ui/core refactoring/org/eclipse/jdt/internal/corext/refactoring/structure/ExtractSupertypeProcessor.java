@@ -638,7 +638,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 								}
 								Expression newExp= (Expression)rewriter.createCopyTarget(exp);
 								newSuperCall.arguments().add(newExp);
-								Statement stmt= (Statement)ASTNodes.getFirstAncestorOrNull(exp, Statement.class);
+								Statement stmt= ASTNodes.getFirstAncestorOrNull(exp, Statement.class);
 								constructorRewrite.remove(stmt, null);
 							}
 							constructorRewrite.replace(currentSuperCall, newSuperCall, null);
@@ -650,7 +650,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 								}
 								Expression newExp= (Expression)rewriter.createCopyTarget(exp);
 								newSuperCall.arguments().add(newExp);
-								Statement stmt= (Statement)ASTNodes.getFirstAncestorOrNull(exp, Statement.class);
+								Statement stmt= ASTNodes.getFirstAncestorOrNull(exp, Statement.class);
 								constructorRewrite.remove(stmt, null);
 							}
 							constructorRewrite.insertFirst(newSuperCall, null);

@@ -192,8 +192,8 @@ public class VarCleanUp extends AbstractMultiFix {
 								return true;
 							}
 						} else if (lambdaParent instanceof VariableDeclarationFragment) {
-							VariableDeclarationStatement statement= (VariableDeclarationStatement) ASTNodes.getFirstAncestorOrNull(lambdaParent, VariableDeclarationStatement.class);
-							FieldDeclaration fieldDeclaration= (FieldDeclaration) ASTNodes.getFirstAncestorOrNull(lambdaParent, FieldDeclaration.class);
+							VariableDeclarationStatement statement= ASTNodes.getFirstAncestorOrNull(lambdaParent, VariableDeclarationStatement.class);
+							FieldDeclaration fieldDeclaration= ASTNodes.getFirstAncestorOrNull(lambdaParent, FieldDeclaration.class);
 							Type statementType= null;
 
 							if (statement != null) {

@@ -337,7 +337,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 									}
 								} else if (expression instanceof SimpleName) {
 									String referenceName= ((SimpleName)expression).getFullyQualifiedName();
-									final TypeDeclaration thisType= (TypeDeclaration)ASTNodes.getFirstAncestorOrNull(methodInvocation, TypeDeclaration.class);
+									final TypeDeclaration thisType= ASTNodes.getFirstAncestorOrNull(methodInvocation, TypeDeclaration.class);
 									if (thisType != null) {
 										final String thisTypeName= thisType.getName().getFullyQualifiedName();
 										for (FieldDeclaration fieldDeclaration : thisType.getFields()) {
