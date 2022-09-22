@@ -554,10 +554,10 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					if (actualFragment.getParent() instanceof FieldDeclaration) {
 						FieldDeclaration fieldDeclaration= (FieldDeclaration) actualFragment.getParent();
 
-						ASTNode declarationClass= ASTNodes.getFirstAncestorOrNull(fieldDeclaration, TypeDeclaration.class);
+						TypeDeclaration declarationClass= ASTNodes.getFirstAncestorOrNull(fieldDeclaration, TypeDeclaration.class);
 
-						if (declarationClass instanceof TypeDeclaration) {
-							TypeDeclaration typeDeclaration= (TypeDeclaration) declarationClass;
+						if (declarationClass != null) {
+							TypeDeclaration typeDeclaration= declarationClass;
 
 							final List<FieldDeclaration> nextFields= new ArrayList<>(typeDeclaration.getFields().length);
 							boolean isBefore= true;

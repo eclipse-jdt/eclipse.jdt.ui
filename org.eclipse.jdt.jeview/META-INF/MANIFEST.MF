@@ -3,8 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.jeview
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.jeview; singleton:=true
-Bundle-Version: 1.4.0.qualifier
-Eclipse-SourceReferences: scm:git:https://git.eclipse.org/r/jdt/eclipse.jdt.ui.git;path="org.eclipse.jdt.jeview";tag=R4_4
+Bundle-Version: 1.4.200.qualifier
 Bundle-Activator: org.eclipse.jdt.jeview.JEViewPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin

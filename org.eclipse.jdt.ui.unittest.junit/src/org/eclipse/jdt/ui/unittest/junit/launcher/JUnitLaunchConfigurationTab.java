@@ -596,7 +596,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 		IJavaProject javaProject = getJavaProject();
 
-		IType[] types = new IType[0];
+		final Set<IType> types;
 		boolean[] radioSetting = new boolean[2];
 		try {
 			// fix for 66922 Wrong radio behaviour when switching
@@ -1125,12 +1125,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				ITestKind testKind = JUnitTestPlugin.getJUnitVersion(javaElement).getJUnitTestKind();
 				testKindId = testKind.getId();
 
-				IType[] types = TestSearchEngine.findTests(getLaunchConfigurationDialog(), javaElement, testKind);
-				if ((types == null) || (types.length < 1)) {
+				var types = TestSearchEngine.findTests(getLaunchConfigurationDialog(), javaElement, testKind);
+				if ((types == null) || (types.isEmpty())) {
 					return;
 				}
 				// Simply grab the first main type found in the searched element
-				name = types[0].getFullyQualifiedName('.');
+				name = types.iterator().next().getFullyQualifiedName('.');
 
 			}
 		} catch (InterruptedException | InvocationTargetException ie) {

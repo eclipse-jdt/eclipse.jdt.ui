@@ -84,7 +84,7 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			List<Object> computeVarName= computeVarName(init_iterator);
 			MethodInvocation iteratorCall= computeIteratorCall(init_iterator);
 			if (computeVarName != null && iteratorCall != null) {
-				Statement iteratorAssignment= (Statement)ASTNodes.getFirstAncestorOrNull(iteratorCall, Statement.class);
+				Statement iteratorAssignment= ASTNodes.getFirstAncestorOrNull(iteratorCall, Statement.class);
 				HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder, nodesprocessed, (whilestatement, holder) -> {
 					String name= computeNextVarname(whilestatement);
 					if (computeVarName.get(0).equals(name) && iteratorCall.getStartPosition() < whilestatement.getStartPosition()) {
@@ -223,12 +223,12 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 					return false;
 				}
 			} else if (mi.getName().getIdentifier().equals("iterator")) { //$NON-NLS-1$
-				ASTNode assignment= ASTNodes.getFirstAncestorOrNull(mi, Assignment.class);
-				if (assignment instanceof Assignment) {
-					Expression leftSide= ((Assignment)assignment).getLeftHandSide();
+				Assignment assignment= ASTNodes.getFirstAncestorOrNull(mi, Assignment.class);
+				if (assignment != null) {
+					Expression leftSide= assignment.getLeftHandSide();
 					SimpleName assignedVar= ASTNodes.as(leftSide, SimpleName.class);
 					if (assignedVar != null && assignedVar.getIdentifier().equals(hit.iteratorName)) {
-						Statement stmt= (Statement) ASTNodes.getFirstAncestorOrNull(assignment, Statement.class);
+						Statement stmt= ASTNodes.getFirstAncestorOrNull(assignment, Statement.class);
 						if (stmt == null || stmt.getParent() != hit.whileStatement.getParent()) {
 							hit.isInvalid= true;
 							return false;

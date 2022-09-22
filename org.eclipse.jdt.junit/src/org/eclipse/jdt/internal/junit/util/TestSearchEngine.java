@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.junit.launcher.ITestKind;
  */
 public class TestSearchEngine extends CoreTestSearchEngine {
 
-	public static IType[] findTests(IRunnableContext context, final IJavaElement element, final ITestKind testKind) throws InvocationTargetException, InterruptedException {
+	public static Set<IType> findTests(IRunnableContext context, final IJavaElement element, final ITestKind testKind) throws InvocationTargetException, InterruptedException {
 		final Set<IType> result= new HashSet<>();
 
 		IRunnableWithProgress runnable= progressMonitor -> {
@@ -45,7 +45,7 @@ public class TestSearchEngine extends CoreTestSearchEngine {
 			}
 		};
 		context.run(true, true, runnable);
-		return result.toArray(new IType[result.size()]);
+		return result;
 	}
 
 }

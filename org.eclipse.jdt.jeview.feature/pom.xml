@@ -14,10 +14,10 @@
   <parent>
     <artifactId>eclipse.jdt.ui</artifactId>
     <groupId>eclipse.jdt.ui</groupId>
-    <version>4.25.0-SNAPSHOT</version>
+    <version>4.26.0-SNAPSHOT</version>
   </parent>
   <groupId>org.eclipse.jdt.feature</groupId>
   <artifactId>org.eclipse.jdt.jeview.feature</artifactId>
-  <version>1.0.13-SNAPSHOT</version>
+  <version>1.0.14-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 </project>

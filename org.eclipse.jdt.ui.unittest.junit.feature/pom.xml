@@ -16,11 +16,11 @@
   <parent>
     <artifactId>eclipse.jdt.ui</artifactId>
     <groupId>eclipse.jdt.ui</groupId>
-    <version>4.25.0-SNAPSHOT</version>
+    <version>4.26.0-SNAPSHOT</version>
   </parent>
   <groupId>org.eclipse.jdt.feature</groupId>
   <artifactId>org.eclipse.jdt.ui.unittest.junit.feature</artifactId>
-  <version>1.0.300-SNAPSHOT</version>
+  <version>1.0.400-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
   <build>
      <plugins>

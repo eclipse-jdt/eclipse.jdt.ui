@@ -393,9 +393,9 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 				if (!node.getIdentifier().equals(variableName)) {
 					return true;
 				}
-				ASTNode assignNode= ASTNodes.getFirstAncestorOrNull(node, Assignment.class);
+				Assignment assignNode= ASTNodes.getFirstAncestorOrNull(node, Assignment.class);
 				if (assignNode != null) {
-					Expression lhs= ((Assignment) assignNode).getLeftHandSide();
+					Expression lhs= assignNode.getLeftHandSide();
 					IBinding resolveBinding= node.resolveBinding();
 					if (resolveBinding != null && ((IVariableBinding) resolveBinding).isField()) {
 						int nodeType= lhs.getNodeType();
@@ -458,7 +458,7 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 
 				@Override
 				public boolean visit(SimpleName node) {
-					ASTNode assignNode= ASTNodes.getFirstAncestorOrNull(node, Assignment.class);
+					Assignment assignNode= ASTNodes.getFirstAncestorOrNull(node, Assignment.class);
 					if (assignNode != null) {
 						IBinding resolveBinding= node.resolveBinding();
 						if (resolveBinding instanceof IVariableBinding
