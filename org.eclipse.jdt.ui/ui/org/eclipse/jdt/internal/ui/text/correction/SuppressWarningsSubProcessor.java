@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -262,6 +263,8 @@ public class SuppressWarningsSubProcessor {
 		boolean isLocalVariable= false;
 		switch (node.getNodeType()) {
 			case ASTNode.SINGLE_VARIABLE_DECLARATION:
+				if(node.getParent() instanceof PatternInstanceofExpression && warningToken.equals("preview")) //$NON-NLS-1$
+					return relevance;
 				property= SingleVariableDeclaration.MODIFIERS2_PROPERTY;
 				name= ((SingleVariableDeclaration) node).getName().getIdentifier();
 				isLocalVariable= true;

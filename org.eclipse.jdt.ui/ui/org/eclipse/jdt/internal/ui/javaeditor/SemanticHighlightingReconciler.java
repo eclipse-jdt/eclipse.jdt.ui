@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.GuardedPattern;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
@@ -296,6 +297,28 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 					fNOfRemovedPositions--;
 				}
 			}
+		}
+
+		@Override
+		public boolean visit(GuardedPattern node) {
+			try {
+				if (node != null) {
+					int offset= node.getRestrictedIdentifierStartPosition();
+					int length= 4; // length of 'when'
+					if (offset > -1) {
+						for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
+							SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
+							if (semanticHighlighting instanceof RestrictedIdentifiersHighlighting) {
+								addPosition(offset, length, fJobHighlightings[i]);
+								return true;
+							}
+						}
+					}
+				}
+			} catch (UnsupportedOperationException e) {
+				// do nothing
+			}
+			return true;
 		}
 	}
 

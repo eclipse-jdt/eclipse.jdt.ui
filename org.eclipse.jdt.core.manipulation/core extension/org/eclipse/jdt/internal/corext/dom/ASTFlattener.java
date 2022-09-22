@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -739,7 +739,7 @@ public class ASTFlattener extends GenericVisitor {
 	public boolean visit(GuardedPattern node) {
 		if (ASTHelper.isPatternSupported(node.getAST())) {
 			node.getPattern().accept(this);
-			this.fBuffer.append(" && ");//$NON-NLS-1$
+			this.fBuffer.append(" when ");//$NON-NLS-1$
 			node.getExpression().accept(this);
 		}
 		return false;
@@ -861,6 +861,17 @@ public class ASTFlattener extends GenericVisitor {
 			e.accept(this);
 		}
 		this.fBuffer.append("\n */");//$NON-NLS-1$
+		return false;
+	}
+
+	@Override
+	public boolean visit(JavaDocRegion node) {
+		return false;
+	}
+
+	@Override
+	public boolean visit(JavaDocTextElement node) {
+		this.fBuffer.append(node.getText());
 		return false;
 	}
 
@@ -1310,6 +1321,17 @@ public class ASTFlattener extends GenericVisitor {
 		return false;
 	}
 
+	@Override
+	public boolean visit(ModuleQualifiedName node) {
+		node.getModuleQualifier().accept(this);
+		this.fBuffer.append("/");//$NON-NLS-1$
+		ASTNode cNode = node.getName();
+		if (cNode != null) {
+			cNode.accept(this);
+		}
+		return false;
+	}
+
 	/*
 	 * @see ASTVisitor#visit(QualifiedName)
 	 */
@@ -1386,6 +1408,52 @@ public class ASTFlattener extends GenericVisitor {
 			}
 		}
 		this.fBuffer.append("}\n");//$NON-NLS-1$
+		return false;
+	}
+
+	@Override
+	public boolean visit(RecordPattern node) {
+		if (ASTHelper.isRecordPatternSupported(node.getAST())) {
+
+			if (node.getPatternType() != null) {
+				node.getPatternType().accept(this);
+			}
+			boolean addBraces = node.patterns().size() >= 1;
+			if (addBraces) {
+				this.fBuffer.append("(");//$NON-NLS-1$
+			}
+			int size = 1;
+			for (Pattern pattern : node.patterns()) {
+					visitPattern(pattern);
+					if (addBraces && size < node.patterns().size()) {
+						this.fBuffer.append(", ");//$NON-NLS-1$
+					}
+					size++;
+			}
+			if (addBraces) {
+				this.fBuffer.append(")");//$NON-NLS-1$
+			}
+			if (node.getPatternName() != null) {
+				this.fBuffer.append(" ");//$NON-NLS-1$
+				node.getPatternName().accept(this);
+			}
+		}
+		return false;
+	}
+
+	private boolean visitPattern(Pattern node) {
+		if (!ASTHelper.isPatternSupported(node.getAST())) {
+			return false;
+		}
+		if (node instanceof RecordPattern) {
+			return visit((RecordPattern) node);
+		}
+		if (node instanceof GuardedPattern) {
+			return visit((GuardedPattern) node);
+		}
+		if (node instanceof TypePattern) {
+			return visit((TypePattern) node);
+		}
 		return false;
 	}
 
@@ -1489,15 +1557,6 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(StringLiteral node) {
-		this.fBuffer.append(node.getEscapedValue());
-		return false;
-	}
-
-	/*
-	 * @see ASTVisitor#visit(StringLiteral)
-	 */
-	@Override
-	public boolean visit(TextBlock node) {
 		this.fBuffer.append(node.getEscapedValue());
 		return false;
 	}
@@ -1731,9 +1790,35 @@ public class ASTFlattener extends GenericVisitor {
 			e.accept(this);
 			previousRequiresWhiteSpace= !currentIncludesWhiteSpace && !(e instanceof TagElement);
 		}
+		if (ASTHelper.isJavaDocCodeSnippetSupported(node.getAST())) {
+			for (Iterator<TagProperty> it = node.tagProperties().iterator(); it.hasNext(); ) {
+				TagProperty tagProperty = it.next();
+				tagProperty.accept(this);
+			}
+
+		}
 		if (node.isNested()) {
 			this.fBuffer.append("}");//$NON-NLS-1$
 		}
+		return false;
+	}
+
+	@Override
+	public boolean visit(TagProperty node) {
+		this.fBuffer.append("\n{"); //$NON-NLS-1$
+		this.fBuffer.append(node.getName());
+		this.fBuffer.append(" = "); //$NON-NLS-1$
+		this.fBuffer.append(node.getStringValue());
+		node.getNodeValue().accept(this);
+		this.fBuffer.append("}"); //$NON-NLS-1$
+		return false;
+	}
+
+
+
+	@Override
+	public boolean visit(TextBlock node) {
+		this.fBuffer.append(node.getEscapedValue());
 		return false;
 	}
 
