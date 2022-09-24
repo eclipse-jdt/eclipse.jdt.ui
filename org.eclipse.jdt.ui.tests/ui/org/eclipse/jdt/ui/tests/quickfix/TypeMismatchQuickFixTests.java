@@ -1692,7 +1692,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
-		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
 		buf.append("public class E implements IBase {\n");
 		buf.append("    public String[] getValues() {\n");
 		buf.append("        return null;\n");
@@ -1752,7 +1752,6 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.EOFException;\n");
-		buf.append("import java.text.ParseException;\n");
 		buf.append("public class E extends Base {\n");
 		buf.append("    public String[] getValues() throws EOFException {\n");
 		buf.append("        return null;\n");
@@ -1834,7 +1833,6 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.EOFException;\n");
-		buf.append("import java.text.ParseException;\n");
 		buf.append("public class E extends Base {\n");
 		buf.append("    /**\n");
 		buf.append("     * @param i The parameter\n");
@@ -1894,7 +1892,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
-		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
 		buf.append("public class E implements IBase<String> {\n");
 		buf.append("    public String[] getValues() {\n");
 		buf.append("        return null;\n");

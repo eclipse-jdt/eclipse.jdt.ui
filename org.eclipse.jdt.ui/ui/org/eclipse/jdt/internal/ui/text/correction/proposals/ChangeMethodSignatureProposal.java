@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -402,6 +402,15 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			} else if (curr instanceof RemoveDescription) {
 				Type node= exceptions.get(k);
 
+				ITypeBinding binding= node.resolveBinding();
+
+				if (binding != null) {
+					int typeReferences= ASTNodes.getNumberOfTypeReferences(binding, (CompilationUnit)node.getRoot());
+					if (typeReferences == 1) {
+						String name= binding.getQualifiedName();
+						imports.removeImport(name);
+					}
+				}
 				listRewrite.remove(node, null);
 				k++;
 

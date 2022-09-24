@@ -331,7 +331,7 @@ public class PackageJavadocTests extends CoreTests {
 		IClasspathAttribute attribute=
 				JavaCore.newClasspathAttribute(
 						IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
-						"https://docs.oracle.com/javase/6/docs/apii/");
+						"https://doc.oracle.com/javase/6/docs/apii/");
 		IClasspathEntry[] rawClasspath= fJProject1.getRawClasspath();
 		IClasspathEntry newEntry= JavaCore.newLibraryEntry(new Path(JavaTestPlugin.getDefault().getFileInPlugin(new Path("/testresources/rtstubs15.jar")).getAbsolutePath()), null, null, null,
 				new IClasspathAttribute[] { attribute }, false);
