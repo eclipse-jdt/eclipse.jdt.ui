@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Control;
@@ -335,9 +334,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			if(!fragments.isEmpty()) {
 				LogicalPackage logicalPackage= new LogicalPackage(pkgFragment);
 				fMapToLogicalPackage.put(getKey(pkgFragment), logicalPackage);
-				Iterator<IPackageFragment> iter= fragments.iterator();
-				while(iter.hasNext()){
-					IPackageFragment f= iter.next();
+				for (IPackageFragment f : fragments) {
 					if(logicalPackage.belongs(f)){
 						logicalPackage.add(f);
 						fMapToLogicalPackage.put(getKey(f), logicalPackage);

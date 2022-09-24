@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -98,10 +97,7 @@ public class SelectionUtil {
 		}
 
 		final ISelection selection= new StructuredSelection(resources);
-		Iterator<IWorkbenchPart> itr= parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part= itr.next();
-
+		for (IWorkbenchPart part : parts) {
 			// get the part's ISetSelectionTarget implementation
 			ISetSelectionTarget target= null;
 			if (part instanceof ISetSelectionTarget) {

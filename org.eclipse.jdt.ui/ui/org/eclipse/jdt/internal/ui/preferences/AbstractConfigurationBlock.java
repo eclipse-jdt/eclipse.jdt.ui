@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -393,11 +392,8 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			t.setText(fStore.getString(keyForStore));
 		}
 
-        // Update slaves
-        Iterator<SelectionListener> iter3= fMasterSlaveListeners.iterator();
-        while (iter3.hasNext()) {
-            SelectionListener listener= iter3.next();
-			listener.widgetSelected((SelectionEvent) null);
+        for (SelectionListener listener : fMasterSlaveListeners) {
+            listener.widgetSelected((SelectionEvent) null);
         }
 
         updateStatus(new StatusInfo());

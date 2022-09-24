@@ -3319,8 +3319,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		if (modifyExistingTry) {
-			for (int i= 0; i < coveredAutoClosableNodes.size(); i++) {
-				rewrite.remove(coveredAutoClosableNodes.get(i), null);
+			for (ASTNode coveredAutoClosableNode : coveredAutoClosableNodes) {
+				rewrite.remove(coveredAutoClosableNode, null);
 			}
 		} else {
 			if (!nodesInRange.isEmpty()) {

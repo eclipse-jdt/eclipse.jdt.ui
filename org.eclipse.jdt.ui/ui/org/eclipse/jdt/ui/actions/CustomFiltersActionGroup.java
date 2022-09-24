@@ -655,9 +655,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private void saveLRUFilters(IMemento memento) {
 		if(fLRUFilterIdsStack != null && !fLRUFilterIdsStack.isEmpty()) {
 			IMemento lruFilters= memento.createChild(TAG_LRU_FILTERS);
-			Iterator<String> iter= fLRUFilterIdsStack.iterator();
-			while (iter.hasNext()) {
-				String id= iter.next();
+			for (String id : fLRUFilterIdsStack) {
 				IMemento child= lruFilters.createChild(TAG_CHILD);
 				child.putString(TAG_FILTER_ID, id);
 			}

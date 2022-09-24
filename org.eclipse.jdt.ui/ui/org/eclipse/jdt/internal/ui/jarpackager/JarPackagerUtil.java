@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -225,9 +224,7 @@ public final class JarPackagerUtil {
 		if (resources.contains(file))
 			return true;
 
-		Iterator<IResource> iter= resources.iterator();
-		while (iter.hasNext()) {
-			IResource resource= iter.next();
+		for (IResource resource : resources) {
 			if (resource != null && resource.getType() != IResource.FILE) {
 				List<IResource> children= null;
 				try {

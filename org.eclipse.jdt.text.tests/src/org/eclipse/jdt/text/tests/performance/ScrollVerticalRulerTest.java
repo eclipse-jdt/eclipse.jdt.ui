@@ -79,9 +79,7 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		IEclipsePreferences editorsNode= InstanceScope.INSTANCE.getNode(EditorsUI.PLUGIN_ID);
 
 		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
-		Iterator<AnnotationPreference> iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();
-		while (iterator.hasNext()) {
-			AnnotationPreference pref= iterator.next();
+		for (AnnotationPreference pref : markerAnnotationPreferences.getAnnotationPreferences()) {
 			String preferenceKey= pref.getVerticalRulerPreferenceKey();
 			if ("spellingIndicationInVerticalRuler".equals(preferenceKey)) {
 				editorsNode.putBoolean(preferenceKey, true);
@@ -101,9 +99,7 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		IEclipsePreferences editorsNode= InstanceScope.INSTANCE.getNode(EditorsUI.PLUGIN_ID);
 
 		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
-		Iterator<AnnotationPreference> iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();
-		while (iterator.hasNext()) {
-			AnnotationPreference pref= iterator.next();
+		for (AnnotationPreference pref : markerAnnotationPreferences.getAnnotationPreferences()) {
 			String preferenceKey= pref.getVerticalRulerPreferenceKey();
 			if ("spellingIndicationInVerticalRuler".equals(preferenceKey)) {
 				editorsNode.putBoolean(preferenceKey, false);

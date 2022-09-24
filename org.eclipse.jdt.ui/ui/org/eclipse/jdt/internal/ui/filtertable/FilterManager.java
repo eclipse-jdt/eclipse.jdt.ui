@@ -78,9 +78,9 @@ public class FilterManager {
 		ArrayList<String> active = new ArrayList<>();
 		ArrayList<String> inactive = new ArrayList<>();
 		String name = ""; //$NON-NLS-1$
-		for (int i = 0; i < filters.length; i++) {
-			name = filters[i].getName();
-			if (filters[i].isChecked()) {
+		for (Filter filter : filters) {
+			name = filter.getName();
+			if (filter.isChecked()) {
 				active.add(name);
 			} else {
 				inactive.add(name);

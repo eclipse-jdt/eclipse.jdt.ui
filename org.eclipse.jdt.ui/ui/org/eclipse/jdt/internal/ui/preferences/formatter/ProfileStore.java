@@ -26,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -315,10 +314,7 @@ public class ProfileStore {
 		element.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profile.getVersion()));
 		element.setAttribute(XML_ATTRIBUTE_PROFILE_KIND, profileVersioner.getProfileKind());
 
-		final Iterator<String> keyIter= profile.getSettings().keySet().iterator();
-
-		while (keyIter.hasNext()) {
-			final String key= keyIter.next();
+		for (String key : profile.getSettings().keySet()) {
 			final String value= profile.getSettings().get(key);
 			if (value != null) {
 				final Element setting= document.createElement(XML_NODE_SETTING);

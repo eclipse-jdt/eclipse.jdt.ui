@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -222,8 +221,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		public IStructuredSelection getSelection() {
 			IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 			ArrayList<Object> externalSelection= new ArrayList<>();
-			for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-				Object element= iter.next();
+			for (Object element : selection) {
 				if (element instanceof JavaElement) {
 					IJavaElement javaElement= ((JavaElement) element).getJavaElement();
 					if (javaElement != null && ! (javaElement instanceof IJavaModel)) // various selection listeners assume getJavaProject() is non-null
@@ -943,8 +941,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
 			if (structuredSelection.size() >= 1) {
 				List<Object> input= new ArrayList<>();
-				for (Iterator<?> iter = structuredSelection.iterator(); iter.hasNext();) {
-					Object item= iter.next();
+				for (Object item : structuredSelection) {
 					if (item instanceof IJavaElement || item instanceof IResource || item instanceof IJarEntryResource) {
 						input.add(item);
 					}

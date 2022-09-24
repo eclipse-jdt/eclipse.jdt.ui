@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -428,11 +427,7 @@ public class JavaStructureCreator extends StructureCreator {
 			rewriteTree(differencer, diff);
 		}
 
-		// now we have to rebuild the diff tree according to the combined
-		// changes
-		Iterator<String> it= map.keySet().iterator();
-		while (it.hasNext()) {
-			String name= it.next();
+		for (String name : map.keySet()) {
 			RewriteInfo i= map.get(name);
 			if (i.matches()) { // we found a RewriteInfo that could be successfully combined
 
@@ -441,9 +436,7 @@ public class JavaStructureCreator extends StructureCreator {
 				DiffNode d= (DiffNode) differencer.findDifferences(true, null, root, i.fAncestor, i.fLeft, i.fRight);
 				if (d != null) {// there better should be a difference
 					d.setDontExpand(true);
-					Iterator<IDiffElement> it2= i.fChildren.iterator();
-					while (it2.hasNext()) {
-						IDiffElement rd= it2.next();
+					for (IDiffElement rd : i.fChildren) {
 						root.removeToRoot(rd);
 						d.add(rd);
 					}

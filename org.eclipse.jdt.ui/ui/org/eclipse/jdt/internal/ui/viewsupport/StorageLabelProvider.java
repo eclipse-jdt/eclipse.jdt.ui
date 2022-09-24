@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
@@ -71,9 +70,7 @@ public class StorageLabelProvider extends LabelProvider {
 	@Override
 	public void dispose() {
 		if (fJarImageMap != null) {
-			Iterator<Image> each= fJarImageMap.values().iterator();
-			while (each.hasNext()) {
-				Image image= each.next();
+			for (Image image : fJarImageMap.values()) {
 				image.dispose();
 			}
 			fJarImageMap= null;

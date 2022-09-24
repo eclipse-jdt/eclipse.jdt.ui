@@ -1457,9 +1457,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, CompilationUnitRewrite cuRewrite) {
-		Iterator<ParameterInfo> iter= getNotDeletedInfos().iterator();
-		while (iter.hasNext()) {
-			ParameterInfo info= iter.next();
+		for (ParameterInfo info : getNotDeletedInfos()) {
 			Expression newExpression= createNewExpression(info, getParameterInfos(), superCall.arguments(), cuRewrite, ASTNodes.getParent(superCall, MethodDeclaration.class));
 			if (newExpression != null)
 				superCall.arguments().add(newExpression);

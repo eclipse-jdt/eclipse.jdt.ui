@@ -899,9 +899,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		Map<JavaProjectionAnnotation, Position> newStructure= ctx.fMap;
 		Map<IJavaElement, List<Tuple>> oldStructure= computeCurrentStructure(ctx);
 
-		Iterator<JavaProjectionAnnotation> e= newStructure.keySet().iterator();
-		while (e.hasNext()) {
-			JavaProjectionAnnotation newAnnotation= e.next();
+		for (JavaProjectionAnnotation newAnnotation : newStructure.keySet()) {
 			Position newPosition= newStructure.get(newAnnotation);
 
 			IJavaElement element= newAnnotation.getElement();
@@ -951,9 +949,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 		}
 
-		Iterator<List<Tuple>> iter= oldStructure.values().iterator();
-		while (iter.hasNext()) {
-			List<Tuple> list= iter.next();
+		for (List<Tuple> list : oldStructure.values()) {
 			int size= list.size();
 			for (int i= 0; i < size; i++)
 				deletions.add(list.get(i).annotation);

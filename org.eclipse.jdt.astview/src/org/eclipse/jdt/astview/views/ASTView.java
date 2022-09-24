@@ -1647,8 +1647,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	protected void performDelete() {
 		boolean removed= false;
 		IStructuredSelection selection= (IStructuredSelection) fTray.getSelection();
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			Object obj= iter.next();
+		for (Object obj : selection) {
 			if (obj instanceof DynamicAttributeProperty)
 				obj= ((DynamicAttributeProperty) obj).getParent();
 			if (obj instanceof DynamicBindingProperty)

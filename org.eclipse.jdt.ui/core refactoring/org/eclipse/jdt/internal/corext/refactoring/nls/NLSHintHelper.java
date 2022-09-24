@@ -17,7 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -310,10 +309,7 @@ public class NLSHintHelper {
 		if (fieldName != null)
 			return (String)resultCollector.get(fieldName);
 
-		// Now try hard-coded bundle name String field names from NLS tooling:
-		Iterator<Object> iter= resultCollector.keySet().iterator();
-		while (iter.hasNext()) {
-			Object o= iter.next();
+		for (Object o : resultCollector.keySet()) {
 			if (!(o instanceof IBinding))
 				continue;
 			IBinding binding= (IBinding)o;

@@ -256,9 +256,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fJarPackage.areOutputFoldersExported()) {
 			if (!fJarPackage.areJavaFilesExported())
 				count= 0;
-			Iterator<IJavaProject> iter= enclosingJavaProjects.iterator();
-			while (iter.hasNext()) {
-				IJavaProject javaProject= iter.next();
+			for (IJavaProject javaProject : enclosingJavaProjects) {
 				IContainer[] outputContainers;
 				try {
 					outputContainers= getOutputContainers(javaProject);
@@ -647,9 +645,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (javaProjects == null)
 			return;
 
-		Iterator<IJavaProject> iter= javaProjects.iterator();
-		while (iter.hasNext()) {
-			IJavaProject javaProject= iter.next();
+		for (IJavaProject javaProject : javaProjects) {
 			IContainer[] outputContainers;
 			try {
 				outputContainers= getOutputContainers(javaProject);
@@ -687,9 +683,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 		// Convert paths to containers
 		Set<IContainer> outputContainers= new HashSet<>(outputPaths.size());
-		Iterator<IPath> iter= outputPaths.iterator();
-		while (iter.hasNext()) {
-			IPath path= iter.next();
+		for (IPath path : outputPaths) {
 			if (javaProject.getProject().getFullPath().equals(path))
 				outputContainers.add(javaProject.getProject());
 			else {

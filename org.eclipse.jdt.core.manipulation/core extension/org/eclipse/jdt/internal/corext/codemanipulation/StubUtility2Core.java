@@ -807,8 +807,8 @@ public final class StubUtility2Core {
 
 		List<IMethodBinding> allInterfaceMethods= new ArrayList<>();
 
-		for (int i= 0; i < interfaceMethods.length; i++) {
-			for (IMethodBinding method : interfaceMethods[i]) {
+		for (Collection<IMethodBinding> interfaceMethod : interfaceMethods) {
+			for (IMethodBinding method : interfaceMethod) {
 				if (isDefault(method) || isAbstract(method)) {
 					IMethodBinding previouslyFound= findSubSignatureMethod(method, allMethods);
 					if (previouslyFound == null) {

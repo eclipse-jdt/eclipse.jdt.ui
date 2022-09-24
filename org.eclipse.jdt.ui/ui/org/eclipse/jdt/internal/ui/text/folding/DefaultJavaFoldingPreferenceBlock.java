@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.text.folding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -122,9 +121,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 	}
 
 	private void initializeFields() {
-		Iterator<Button> it= fCheckBoxes.keySet().iterator();
-		while (it.hasNext()) {
-			Button b= it.next();
+		for (Button b : fCheckBoxes.keySet()) {
 			String key= fCheckBoxes.get(b);
 			b.setSelection(fOverlayStore.getBoolean(key));
 		}

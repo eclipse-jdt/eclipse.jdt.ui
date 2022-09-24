@@ -71,9 +71,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		}
 		@Override
 		public void dispose() {
-			Iterator<Image> iterator= fIcons.values().iterator();
-			while (iterator.hasNext()) {
-				Image icon= iterator.next();
+			for (Image icon : fIcons.values()) {
 				icon.dispose();
 			}
 			super.dispose();
@@ -474,10 +472,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 * Rolls back changes to working sets.
 	 */
 	private void restoreChangedWorkingSets() {
-		Iterator<IWorkingSet> iterator= fEditedWorkingSets.keySet().iterator();
-
-		while (iterator.hasNext()) {
-			IWorkingSet editedWorkingSet= iterator.next();
+		for (IWorkingSet editedWorkingSet : fEditedWorkingSets.keySet()) {
 			IWorkingSet originalWorkingSet= fEditedWorkingSets.get(editedWorkingSet);
 
 			if (editedWorkingSet.getName().equals(originalWorkingSet.getName()) == false) {

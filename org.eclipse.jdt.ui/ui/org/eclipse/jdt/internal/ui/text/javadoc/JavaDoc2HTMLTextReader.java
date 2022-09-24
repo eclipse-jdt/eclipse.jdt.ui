@@ -19,7 +19,6 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
@@ -132,9 +131,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	}
 
 	private void printDefinitions(StringBuilder buffer, List<String> list, boolean firstword) {
-		Iterator<String> e= list.iterator();
-		while (e.hasNext()) {
-			String s= e.next();
+		for (String s : list) {
 			buffer.append("<dd>"); //$NON-NLS-1$
 			if (!firstword)
 				buffer.append(s);
@@ -200,9 +197,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
 	private void printRest(StringBuilder buffer) {
 		if ( !fRest.isEmpty()) {
-			Iterator<Pair> e= fRest.iterator();
-			while (e.hasNext()) {
-				Pair p= e.next();
+			for (Pair p : fRest) {
 				buffer.append("<dt>"); //$NON-NLS-1$
 				if (p.fTag != null)
 					buffer.append(p.fTag);

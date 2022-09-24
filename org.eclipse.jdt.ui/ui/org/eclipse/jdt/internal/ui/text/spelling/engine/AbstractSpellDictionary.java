@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -665,9 +664,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 * @since 3.3.
 	 */
 	private void compact() {
-		Iterator<Object> iter= fHashBuckets.values().iterator();
-		while (iter.hasNext()) {
-			Object element= iter.next();
+		for (Object element : fHashBuckets.values()) {
 			if (element instanceof ArrayList)
 				((ArrayList<?>)element).trimToSize();
 		}

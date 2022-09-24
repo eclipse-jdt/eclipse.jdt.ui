@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -288,9 +287,7 @@ public abstract class History<K, V> {
 			Element rootElement = document.createElement(fRootNodeName);
 			document.appendChild(rootElement);
 
-			Iterator<V> values= getValues().iterator();
-			while (values.hasNext()) {
-				Object object= values.next();
+			for (Object object : getValues()) {
 				Element element= document.createElement(fInfoNodeName);
 				setAttributes(object, element);
 				rootElement.appendChild(element);

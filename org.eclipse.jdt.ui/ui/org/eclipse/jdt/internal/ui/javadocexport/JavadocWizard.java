@@ -25,7 +25,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -375,9 +374,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	}
 
 	private static String getEncoding(ArrayList<String> vmArgs) {
-		Iterator<String> iter= vmArgs.iterator();
-		while (iter.hasNext()) {
-			String argument= iter.next();
+		for (String argument : vmArgs) {
 			if (argument.length() > ENCODING_ARGUMENT_PREFIX.length() && argument.startsWith(ENCODING_ARGUMENT_PREFIX)) {
 				String encoding= argument.substring(ENCODING_ARGUMENT_PREFIX.length());
 				if (Charset.isSupported(encoding))

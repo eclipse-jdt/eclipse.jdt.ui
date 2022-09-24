@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -155,9 +154,7 @@ public class EnablePreviewFeaturesAction implements IObjectActionDelegate {
 	private void updateComplianceSettings(IJavaProject project, String compliance) {
 		HashMap<String, String> defaultOptions= new HashMap<>();
 		JavaCore.setComplianceOptions(compliance, defaultOptions);
-		Iterator<Map.Entry<String, String>> it= defaultOptions.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry<String, String> pair= it.next();
+		for (Entry<String, String> pair : defaultOptions.entrySet()) {
 			project.setOption(pair.getKey(), pair.getValue());
 		}
 	}

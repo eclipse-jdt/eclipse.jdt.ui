@@ -210,11 +210,8 @@ public class InferTypeArgumentsConstraintsSolver {
 	 * to process
 	 */
 	private void processConstraints(List<ITypeConstraint2> usedIn) {
-		Iterator<ITypeConstraint2> iter= usedIn.iterator();
-		while (iter.hasNext()) {
-			ITypeConstraint2 tc= iter.next();
-
-				maintainSimpleConstraint(tc);
+		for (ITypeConstraint2 tc : usedIn) {
+			maintainSimpleConstraint(tc);
 				//TODO: prune tcs which cannot cause further changes
 				// Maybe these should be pruned after a special first loop over all ConstraintVariables,
 				// Since this can only happen once for every CV in the work list.

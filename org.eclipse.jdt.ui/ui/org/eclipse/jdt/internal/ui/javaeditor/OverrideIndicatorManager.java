@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -218,9 +217,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 				((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(fOverrideAnnotations, annotationMap);
 			} else {
 				removeAnnotations();
-				Iterator<Entry<Annotation, Position>> iter= annotationMap.entrySet().iterator();
-				while (iter.hasNext()) {
-					Entry<Annotation, Position> mapEntry= iter.next();
+				for (Entry<Annotation, Position> mapEntry : annotationMap.entrySet()) {
 					fAnnotationModel.addAnnotation(mapEntry.getKey(), mapEntry.getValue());
 				}
 			}

@@ -169,9 +169,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 		// Try same language
 		String language= locale.getLanguage();
-		Iterator<Entry<Locale, ISpellDictionary>> iter= fLocaleDictionaries.entrySet().iterator();
-		while (iter.hasNext()) {
-			Entry<Locale, ISpellDictionary> entry= iter.next();
+		for (Entry<Locale, ISpellDictionary> entry : fLocaleDictionaries.entrySet()) {
 			Locale dictLocale= entry.getKey();
 			if (dictLocale.getLanguage().equals(language))
 				return entry.getValue();
@@ -193,9 +191,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 		// Try same language
 		String language= locale.getLanguage();
-		Iterator<Locale> iter= getLocalesWithInstalledDictionaries().iterator();
-		while (iter.hasNext()) {
-			Locale dictLocale= iter.next();
+		for (Locale dictLocale : getLocalesWithInstalledDictionaries()) {
 			if (dictLocale.getLanguage().equals(language))
 				return dictLocale;
 		}

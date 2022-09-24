@@ -199,8 +199,8 @@ public class MethodOverrideTester {
 			ans.addAll(findAllOverriddenMethodsInHierarchy(superClass, overriding));
 		}
 		IType[] superInterfaces= fHierarchy.getSuperInterfaces(type);
-		for (int i= 0; i < superInterfaces.length; i++) {
-			ans.addAll(findAllOverriddenMethodsInHierarchy(superInterfaces[i], overriding));
+		for (IType element : superInterfaces) {
+			ans.addAll(findAllOverriddenMethodsInHierarchy(element, overriding));
 		}
 		return ans;
 	}
@@ -243,8 +243,7 @@ public class MethodOverrideTester {
 		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overriding.isConstructor())
 			return ans;
 		IMethod[] overriddenMethods= overriddenType.getMethods();
-		for (int i= 0; i < overriddenMethods.length; i++) {
-			IMethod overridden= overriddenMethods[i];
+		for (IMethod overridden : overriddenMethods) {
 			flags= overridden.getFlags();
 			if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overridden.isConstructor())
 				continue;

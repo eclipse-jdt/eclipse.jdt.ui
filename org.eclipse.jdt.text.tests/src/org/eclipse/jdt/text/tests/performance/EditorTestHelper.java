@@ -17,7 +17,6 @@ package org.eclipse.jdt.text.tests.performance;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -527,9 +526,7 @@ public class EditorTestHelper {
 				subDirs.add(file);
 			}
 		}
-		Iterator<File> iter= subDirs.iterator();
-		while (iter.hasNext()) {
-			File subDir= iter.next();
+		for (File subDir : subDirs) {
 			addJavaFiles(subDir, collection);
 		}
 	}

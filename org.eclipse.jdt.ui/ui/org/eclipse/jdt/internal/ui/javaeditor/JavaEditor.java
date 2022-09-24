@@ -1873,9 +1873,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fProjectionSupport= new ProjectionSupport((ProjectionViewer)sourceViewer, getAnnotationAccess(), getSharedColors());
 			MarkerAnnotationPreferences markerAnnotationPreferences= getAdapter(MarkerAnnotationPreferences.class);
 			if (markerAnnotationPreferences != null) {
-				Iterator<AnnotationPreference> e= markerAnnotationPreferences.getAnnotationPreferences().iterator();
-				while (e.hasNext()) {
-					AnnotationPreference annotationPreference= e.next();
+				for (AnnotationPreference annotationPreference : markerAnnotationPreferences.getAnnotationPreferences()) {
 					Object annotationType= annotationPreference.getAnnotationType();
 					if (annotationType instanceof String)
 						fProjectionSupport.addSummarizableAnnotationType((String)annotationType);
@@ -3251,9 +3249,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
 				} else {
 					removeOccurrenceAnnotations();
-					Iterator<Entry<Annotation, Position>> iter= annotationMap.entrySet().iterator();
-					while (iter.hasNext()) {
-						Entry<Annotation, Position> mapEntry= iter.next();
+					for (Entry<Annotation, Position> mapEntry : annotationMap.entrySet()) {
 						annotationModel.addAnnotation(mapEntry.getKey(), mapEntry.getValue());
 					}
 				}

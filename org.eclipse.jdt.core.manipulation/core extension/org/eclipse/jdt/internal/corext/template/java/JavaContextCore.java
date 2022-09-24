@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -207,9 +206,8 @@ public class JavaContextCore extends CompilationUnitContext implements IJavaCont
 		if (fCompatibleContextTypeIds == null)
 			return false;
 
-		Iterator<String> iter= fCompatibleContextTypeIds.iterator();
-		while (iter.hasNext()) {
-			if (template.matches(key, iter.next()))
+		for (String fCompatibleContextTypeId : fCompatibleContextTypeIds) {
+			if (template.matches(key, fCompatibleContextTypeId))
 				return true;
 		}
 

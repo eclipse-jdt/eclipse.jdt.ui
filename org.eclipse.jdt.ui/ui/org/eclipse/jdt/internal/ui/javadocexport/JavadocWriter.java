@@ -17,7 +17,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -287,14 +286,12 @@ public class JavadocWriter {
 
 	private String toSeparatedList(List<String> packages) {
 		StringBuilder buf= new StringBuilder();
-		Iterator<String> iter= packages.iterator();
 		int nAdded= 0;
-		while (iter.hasNext()) {
+		for (String curr : packages) {
 			if (nAdded > 0) {
 				buf.append(',');
 			}
 			nAdded++;
-			String curr= iter.next();
 			buf.append(curr);
 		}
 		return buf.toString();

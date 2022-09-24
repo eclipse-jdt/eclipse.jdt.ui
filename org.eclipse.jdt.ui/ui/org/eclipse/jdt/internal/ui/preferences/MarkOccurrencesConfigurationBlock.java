@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -246,18 +245,13 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 
 	void initializeFields() {
 
-		Iterator<Button> iter= fCheckBoxes.keySet().iterator();
-		while (iter.hasNext()) {
-			Button b= iter.next();
+		for (Button b : fCheckBoxes.keySet()) {
 			String key= fCheckBoxes.get(b);
 			b.setSelection(fStore.getBoolean(key));
 		}
 
-        // Update slaves
-        Iterator<SelectionListener> iter2= fMasterSlaveListeners.iterator();
-        while (iter2.hasNext()) {
-            SelectionListener listener= iter2.next();
-			listener.widgetSelected((SelectionEvent) null);
+        for (SelectionListener listener : fMasterSlaveListeners) {
+            listener.widgetSelected((SelectionEvent) null);
         }
 
 	}

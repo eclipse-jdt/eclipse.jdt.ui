@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.packageview;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -142,9 +141,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 				try {
 					monitor.beginTask(PackagesMessages.DragAdapter_deleting, elements.size());
 					MultiStatus status= createMultiStatus();
-					Iterator<IResource> iter= elements.iterator();
-					while(iter.hasNext()) {
-						IResource resource= iter.next();
+					for (IResource resource : elements) {
 						try {
 							monitor.subTask(BasicElementLabels.getPathLabel(resource.getFullPath(), true));
 							resource.delete(true, null);
@@ -175,9 +172,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 				try {
 					monitor.beginTask(PackagesMessages.DragAdapter_refreshing, roots.size());
 					MultiStatus status= createMultiStatus();
-					Iterator<IResource> iter= roots.iterator();
-					while (iter.hasNext()) {
-						IResource r= iter.next();
+					for (IResource r : roots) {
 						try {
 							r.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(monitor, 1));
 						} catch (CoreException e) {
@@ -199,9 +194,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	protected Set<IResource> collectRoots(final List<IResource> elements) {
 		final Set<IResource> roots= new HashSet<>(10);
 
-		Iterator<IResource> iter= elements.iterator();
-		while (iter.hasNext()) {
-			IResource resource= iter.next();
+		for (IResource resource : elements) {
 			IResource parent= resource.getParent();
 			if (parent == null) {
 				roots.add(resource);

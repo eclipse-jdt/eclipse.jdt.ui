@@ -691,15 +691,13 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 				if (reportedProblems != null && reportedProblems.size() > 0) {
 
-					Iterator<IProblem> e= reportedProblems.iterator();
-					while (e.hasNext()) {
+					for (IProblem problem : reportedProblems) {
 
 						if (fProgressMonitor != null && fProgressMonitor.isCanceled()) {
 							isCanceled= true;
 							break;
 						}
 
-						IProblem problem= e.next();
 						Position position= createPositionFromProblem(problem);
 						if (position != null) {
 
@@ -729,9 +727,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			if (isCanceled) {
 				fCurrentlyOverlaid.addAll(fPreviouslyOverlaid);
 			} else if (fPreviouslyOverlaid != null) {
-				Iterator<JavaMarkerAnnotation> e= fPreviouslyOverlaid.iterator();
-				while (e.hasNext()) {
-					JavaMarkerAnnotation annotation= e.next();
+				for (JavaMarkerAnnotation annotation : fPreviouslyOverlaid) {
 					annotation.setOverlay(null);
 				}
 			}

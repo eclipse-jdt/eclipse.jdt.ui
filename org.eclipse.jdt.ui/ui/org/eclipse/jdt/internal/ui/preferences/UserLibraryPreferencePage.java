@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -949,10 +948,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			monitor.worked(1);
 		}
 
-		Iterator<String> iter= oldNames.iterator();
-		while (iter.hasNext()) {
-			String name= iter.next();
-
+		for (String name : oldNames) {
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(name);
 			try {
 				initializer.requestClasspathContainerUpdate(path, jproject, null);

@@ -365,9 +365,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private boolean accessesAnonymousFields() {
         List<IVariableBinding> anonymousInnerFieldTypes = getAllEnclosingAnonymousTypesField();
         List<IBinding> accessedField = getAllAccessedFields();
-        final Iterator<IVariableBinding> it = anonymousInnerFieldTypes.iterator();
-        while(it.hasNext()) {
-            final IVariableBinding variableBinding = it.next();
+        for (IVariableBinding variableBinding : anonymousInnerFieldTypes) {
             final Iterator<IBinding> it2 = accessedField.iterator();
             while (it2.hasNext()) {
                 IVariableBinding variableBinding2 = (IVariableBinding) it2.next();

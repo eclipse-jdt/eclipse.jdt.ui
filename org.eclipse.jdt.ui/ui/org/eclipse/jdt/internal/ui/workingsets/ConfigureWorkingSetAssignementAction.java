@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -214,9 +213,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 		@Override
 		public void dispose() {
-			Iterator<Image> iterator= fIcons.values().iterator();
-			while (iterator.hasNext()) {
-				Image icon= iterator.next();
+			for (Image icon : fIcons.values()) {
 				icon.dispose();
 			}
 			super.dispose();

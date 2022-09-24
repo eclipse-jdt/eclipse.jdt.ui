@@ -669,10 +669,8 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	private Set<Object> removeContainedChildren(Set<Object> elements) {
 		Set<Object> newList= new HashSet<>(elements.size());
 		Set<Object> javaElementResources= getCorrespondingContainers(elements);
-		Iterator<Object> iter= elements.iterator();
 		boolean removedOne= false;
-		while (iter.hasNext()) {
-			Object element= iter.next();
+		for (Object element : elements) {
 			Object parent;
 			if (element instanceof IResource)
 				parent= ((IResource)element).getParent();
@@ -737,9 +735,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 */
 	private Set<Object> getCorrespondingContainers(Set<Object> elements) {
 		Set<Object> javaElementResources= new HashSet<>(elements.size());
-		Iterator<Object> iter= elements.iterator();
-		while (iter.hasNext()) {
-			Object element= iter.next();
+		for (Object element : elements) {
 			if (element instanceof IJavaElement) {
 				IJavaElement je= (IJavaElement)element;
 				int type= je.getElementType();

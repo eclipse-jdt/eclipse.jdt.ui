@@ -500,8 +500,8 @@ public class JavaFilterTable {
 			Object[] packages= dialog.getResult();
 			if (packages != null) {
 				IJavaElement pkg= null;
-				for (int i= 0; i < packages.length; i++) {
-					pkg= (IJavaElement) packages[i];
+				for (Object package1 : packages) {
+					pkg= (IJavaElement) package1;
 					String filter= pkg.getElementName() + ".*"; //$NON-NLS-1$
 					addFilter(filter, true);
 				}
@@ -533,9 +533,9 @@ public class JavaFilterTable {
 	 */
 	private void initTableState(boolean defaults) {
 		Filter[] filters= getAllStoredFilters(defaults);
-		for (int i= 0; i < filters.length; i++) {
-			fTableViewer.add(filters[i]);
-			setChecked(filters[i], filters[i].isChecked());
+		for (Filter filter : filters) {
+			fTableViewer.add(filter);
+			setChecked(filter, filter.isChecked());
 		}
 	}
 

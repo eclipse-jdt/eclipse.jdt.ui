@@ -20,7 +20,6 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -59,10 +58,8 @@ public class SearchParticipantsExtensionPoint {
 	}
 
 	private void collectParticipants(Set<SearchParticipantRecord> participants, IProject[] projects) {
-		Iterator<SearchParticipantDescriptor> activeParticipants= getAllParticipants().iterator();
 		Set<String> seenParticipants= new HashSet<>();
-		while (activeParticipants.hasNext()) {
-			SearchParticipantDescriptor participant= activeParticipants.next();
+		for (SearchParticipantDescriptor participant : getAllParticipants()) {
 			String id= participant.getID();
 			if (participant.isEnabled() && !seenParticipants.contains(id)) {
 				for (IProject project : projects) {

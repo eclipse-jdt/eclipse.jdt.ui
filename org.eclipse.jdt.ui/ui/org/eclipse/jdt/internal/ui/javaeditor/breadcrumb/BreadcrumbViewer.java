@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -721,9 +720,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		}
 
 		if (fBreadcrumbItems != null) {
-			Iterator<BreadcrumbItem> iterator= fBreadcrumbItems.iterator();
-			while (iterator.hasNext()) {
-				BreadcrumbItem item= iterator.next();
+			for (BreadcrumbItem item : fBreadcrumbItems) {
 				item.dispose();
 			}
 		}

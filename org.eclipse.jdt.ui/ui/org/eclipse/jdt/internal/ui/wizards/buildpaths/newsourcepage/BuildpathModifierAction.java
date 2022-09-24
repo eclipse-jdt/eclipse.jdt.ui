@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
@@ -174,10 +173,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 			}
 		}
 
-		Iterator<IWorkbenchPart> itr= parts.iterator();
-		while (itr.hasNext()) {
-			IWorkbenchPart part= itr.next();
-
+		for (IWorkbenchPart part : parts) {
 			// get the part's ISetSelectionTarget implementation
 			ISetSelectionTarget target= null;
 			if (part instanceof ISetSelectionTarget)
