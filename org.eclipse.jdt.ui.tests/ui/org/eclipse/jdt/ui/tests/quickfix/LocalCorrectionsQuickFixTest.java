@@ -1423,7 +1423,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
-		buf.append("import java.net.SocketException;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void goo() throws IOException {\n");
 		buf.append("        return;\n");
