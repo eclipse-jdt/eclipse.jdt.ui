@@ -1209,7 +1209,7 @@ public class JavaElementLabelComposerCore {
 	protected void appendModuleLabel(IModuleDescription module, long flags) {
 		fBuffer.append(module.getElementName());
 		// category
-		if (getFlag(flags, JavaElementLabelsCore.MOD_CATEGORY) && module.exists()) {
+		if (getFlag(flags, JavaElementLabelsCore.MOD_CATEGORY2) && module.exists()) {
 			try {
 				appendCategoryLabel(module, flags);
 			} catch (JavaModelException e) {
