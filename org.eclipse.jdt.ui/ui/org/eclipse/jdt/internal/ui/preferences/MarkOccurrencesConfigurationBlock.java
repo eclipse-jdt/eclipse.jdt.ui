@@ -250,6 +250,7 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 			b.setSelection(fStore.getBoolean(key));
 		}
 
+	// Update slaves
         for (SelectionListener listener : fMasterSlaveListeners) {
             listener.widgetSelected((SelectionEvent) null);
         }
