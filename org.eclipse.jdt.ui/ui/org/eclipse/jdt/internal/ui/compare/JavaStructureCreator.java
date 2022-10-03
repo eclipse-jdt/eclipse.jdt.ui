@@ -427,6 +427,8 @@ public class JavaStructureCreator extends StructureCreator {
 			rewriteTree(differencer, diff);
 		}
 
+		// now we have to rebuild the diff tree according to the combined
+		// changes
 		for (String name : map.keySet()) {
 			RewriteInfo i= map.get(name);
 			if (i.matches()) { // we found a RewriteInfo that could be successfully combined
