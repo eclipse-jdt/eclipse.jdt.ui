@@ -392,6 +392,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			t.setText(fStore.getString(keyForStore));
 		}
 
+	// Update slaves
         for (SelectionListener listener : fMasterSlaveListeners) {
             listener.widgetSelected((SelectionEvent) null);
         }
