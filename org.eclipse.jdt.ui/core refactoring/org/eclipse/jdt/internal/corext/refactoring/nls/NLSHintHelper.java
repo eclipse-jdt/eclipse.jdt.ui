@@ -309,6 +309,7 @@ public class NLSHintHelper {
 		if (fieldName != null)
 			return (String)resultCollector.get(fieldName);
 
+		// Now try hard-coded bundle name String field names from NLS tooling:
 		for (Object o : resultCollector.keySet()) {
 			if (!(o instanceof IBinding))
 				continue;
