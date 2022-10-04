@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -73,6 +73,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -85,6 +86,7 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -112,6 +114,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.actions.AddGetterSetterAction;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -166,6 +169,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertSwitchToIfProposals(context, coveringNode, null)
 					|| getConvertIfElseToSwitchProposals(context, coveringNode, null)
 					|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null)
+					|| getGettersSettersForTypeProposals(context, coveringNode, null)
 					|| ExternalNullAnnotationQuickAssistProcessor.canAssist(context);
 		}
 		return false;
@@ -209,6 +213,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertSwitchToIfProposals(context, coveringNode, resultingCollections);
 				getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections);
 				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, locations, resultingCollections);
+				getGettersSettersForTypeProposals(context, coveringNode, resultingCollections);
 
 				ExternalNullAnnotationQuickAssistProcessor.getAnnotateProposals(context, resultingCollections);
 			}
@@ -2394,6 +2399,34 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.JOIN_IF_SEQUENCE, image);
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static boolean getGettersSettersForTypeProposals(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+		if (!(coveringNode instanceof SimpleName)) {
+			return false;
+		}
+		ASTNode parent= coveringNode.getParent();
+		if (!(parent instanceof TypeDeclaration) && !(parent instanceof RecordDeclaration)) {
+			return false;
+		}
+		if (parent instanceof TypeDeclaration) {
+			TypeDeclaration typeDeclaration= (TypeDeclaration)parent;
+			if (typeDeclaration.isInterface()) {
+				return false;
+			}
+			if (typeDeclaration.getName() != coveringNode) {
+				return false;
+			}
+		} else {
+			RecordDeclaration recordDeclaration= (RecordDeclaration)parent;
+			if (recordDeclaration.getName() != coveringNode) {
+				return false;
+			}
+		}
+		if (resultingCollections == null) {
+			return true;
+		}
+		return AddGetterSetterAction.getAddGetterSetterTypeProposal(context, coveringNode, resultingCollections);
 	}
 
 	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
