@@ -196,7 +196,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 * @param node - SimpleName of type or record
 	 * @param resultingCollections - collection of proposals to add to
 	 * @return true if proposal created successfully, false otherwise
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public static boolean getAddGetterSetterTypeProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof SimpleName)) {
@@ -259,7 +259,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * @since 3.27
+	 * @since 3.28
 	 */
 	public static class AddGetterSetterTypeProposal extends ChangeCorrectionProposal { // public for tests
 
