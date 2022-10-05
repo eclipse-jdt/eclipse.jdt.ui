@@ -665,10 +665,20 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 			for (ILaunchConfiguration launchconfig : manager.getLaunchConfigurations(type)) {
 				if (!launchconfig.getAttribute(IDebugUIConstants.ATTR_PRIVATE, false)) {
-					String projectName= launchconfig.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
-					IProject proj= ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-					if (proj != null && proj.isOpen()) {
-						result.add(new ExistingLaunchConfigurationElement(launchconfig, projectName));
+					final String illegalName= ""; //$NON-NLS-1$
+					String projectName= launchconfig.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, illegalName);
+					if (illegalName.equals(projectName)) {
+						// don't care
+						continue;
+					}
+					try {
+						IProject proj= ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+						if (proj != null && proj.isOpen()) {
+							result.add(new ExistingLaunchConfigurationElement(launchconfig, projectName));
+						}
+					} catch (IllegalArgumentException e) {
+						IStatus status= Status.warning("Unknown project " + projectName + " defined in " + launchconfig.getName() + " launch configuration", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						JavaPlugin.log(status);
 					}
 				}
 			}
