@@ -30,8 +30,13 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -101,6 +106,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.core.manipulation.dom.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
+import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -114,16 +120,17 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.actions.AddGetterSetterAction;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.AddGetterSetterTypeProposal;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
@@ -169,7 +176,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertSwitchToIfProposals(context, coveringNode, null)
 					|| getConvertIfElseToSwitchProposals(context, coveringNode, null)
 					|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null)
-					|| getGettersSettersForTypeProposals(context, coveringNode, null)
+					|| getGettersSettersForTypeProposals(coveringNode, null)
 					|| ExternalNullAnnotationQuickAssistProcessor.canAssist(context);
 		}
 		return false;
@@ -213,7 +220,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertSwitchToIfProposals(context, coveringNode, resultingCollections);
 				getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections);
 				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, locations, resultingCollections);
-				getGettersSettersForTypeProposals(context, coveringNode, resultingCollections);
+				getGettersSettersForTypeProposals(coveringNode, resultingCollections);
 
 				ExternalNullAnnotationQuickAssistProcessor.getAnnotateProposals(context, resultingCollections);
 			}
@@ -2401,7 +2408,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getGettersSettersForTypeProposals(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+	private boolean getGettersSettersForTypeProposals(ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
 		if (!(coveringNode instanceof SimpleName)) {
 			return false;
 		}
@@ -2426,7 +2433,60 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
-		return AddGetterSetterAction.getAddGetterSetterTypeProposal(context, coveringNode, resultingCollections);
+		SimpleName sn= (SimpleName)coveringNode;
+		IBinding binding= sn.resolveBinding();
+		if (!(binding instanceof ITypeBinding)) {
+			return false;
+		}
+		ITypeBinding typeBinding= (ITypeBinding)binding;
+
+		IJavaElement element= typeBinding.getJavaElement();
+		try {
+			if (element instanceof IType) {
+				IType type= (IType) element;
+				if (!hasMissingGettersOrSetters(type)) {
+					return false;
+				}
+				ChangeCorrectionProposal proposal= new AddGetterSetterTypeProposal(IProposalRelevance.GETTER_SETTER_QUICK_ASSIST, type);
+				resultingCollections.add(proposal);
+				return true;
+			}
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return false;
+	}
+
+	/**
+	 * @param type the type
+	 * @return true if any fields are missing getter or setter based on default getter/setter names
+	 * @throws JavaModelException if the type does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 */
+	private boolean hasMissingGettersOrSetters (IType type) throws JavaModelException {
+		for (IField field : type.getFields()) {
+			int flags= field.getFlags();
+			if (!Flags.isEnum(flags)) {
+				if (GetterSetterUtil.getGetter(field) == null) {
+					return true;
+				}
+
+				if (GetterSetterUtil.getSetter(field) == null) {
+					return true;
+				}
+			}
+		}
+		if (type.isRecord()) {
+			for (IField field : type.getRecordComponents()) {
+				int flags= field.getFlags();
+				if (!Flags.isEnum(flags)) {
+					if (GetterSetterUtil.getGetter(field) == null) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {

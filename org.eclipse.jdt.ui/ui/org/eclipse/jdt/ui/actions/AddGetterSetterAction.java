@@ -18,7 +18,6 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -37,13 +36,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -55,12 +52,10 @@ import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 
@@ -77,11 +72,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -100,13 +91,9 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
-import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -115,8 +102,6 @@ import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -190,116 +175,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		fEditor.getEditorSite();
 	}
 
-	/**
-	 * Creates a new AddGetterSetterTypeProposal for a specified type or record
-	 * @param context - IInvocationContext from quick assist processor
-	 * @param node - SimpleName of type or record
-	 * @param resultingCollections - collection of proposals to add to
-	 * @return true if proposal created successfully, false otherwise
-	 * @since 3.28
-	 */
-	public static boolean getAddGetterSetterTypeProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
-		if (!(node instanceof SimpleName)) {
-			return false;
-		}
-		SimpleName sn= (SimpleName)node;
-		IBinding binding= sn.resolveBinding();
-		if (!(binding instanceof ITypeBinding)) {
-			return false;
-		}
-		ITypeBinding typeBinding= (ITypeBinding)binding;
 
-		IJavaElement element= typeBinding.getJavaElement();
-		try {
-		if (element instanceof IType) {
-			IType type= (IType) element;
-			if (!hasMissingGettersOrSetters(type)) {
-				return false;
-			}
-			ChangeCorrectionProposal proposal= new AddGetterSetterTypeProposal(IProposalRelevance.GETTER_SETTER_QUICK_ASSIST, type);
-			resultingCollections.add(proposal);
-			return true;
-		}
-		} catch (JavaModelException e) {
-			// fall through
-		}
-		return false;
-	}
-
-	/**
-	 * @param type the type
-	 * @return true if any fields are missing getter or setter based on default getter/setter names
-	 * @throws JavaModelException if the type does not exist or if an exception occurs while
-	 *             accessing its corresponding resource
-	 */
-	private static boolean hasMissingGettersOrSetters (IType type) throws JavaModelException {
-		for (IField field : type.getFields()) {
-			int flags= field.getFlags();
-			if (!Flags.isEnum(flags)) {
-				if (GetterSetterUtil.getGetter(field) == null) {
-					return true;
-				}
-
-				if (GetterSetterUtil.getSetter(field) == null) {
-					return true;
-				}
-			}
-		}
-		if (type.isRecord()) {
-			for (IField field : type.getRecordComponents()) {
-				int flags= field.getFlags();
-				if (!Flags.isEnum(flags)) {
-					if (GetterSetterUtil.getGetter(field) == null) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * @since 3.28
-	 */
-	public static class AddGetterSetterTypeProposal extends ChangeCorrectionProposal { // public for tests
-
-		private IType fType;
-
-		public AddGetterSetterTypeProposal(int relevance, IType type) {
-			super(getDescription(type), null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-			fType= type;
-		}
-
-		public IType getType() {
-			return fType;
-		}
-
-		private static String getDescription(IType type) {
-			return Messages.format(CorrectionMessages.AddGetterSetter_creategetterssettersfortype_description, BasicElementLabels.getJavaElementName(type.getElementName()));
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
-		 * @since 3.5
-		 */
-		@Override
-		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			return CorrectionMessages.AddGettersSetters_additional_info;
-		}
-
-		@Override
-		public void apply(IDocument document) {
-			Display.getDefault().syncExec(() -> {
-				try {
-					IStructuredSelection selection= new StructuredSelection(fType);
-					IWorkbenchSite site= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite();
-					new AddGetterSetterAction(site).run(selection);
-				} catch (NullPointerException e) {
-					// do nothing
-				}
-			});
-		}
-	}
 	// ---- Structured Viewer -----------------------------------------------------------
 
 	@Override
