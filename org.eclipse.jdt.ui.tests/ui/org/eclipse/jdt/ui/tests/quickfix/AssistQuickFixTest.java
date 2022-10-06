@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10434,6 +10434,74 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, "Convert to static import");
 		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	@Test
+	public void testConvertToStaticImportFromReferenceToSubclass() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("    public static void foo() { };\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class TSub extends T {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("TSub.java", buf.toString(), false, null);
+
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuilder();
+		buf.append("package test2;\n");
+		buf.append("\n");
+		buf.append("import test1.TSub;\n");
+		buf.append("public class S {\n");
+		buf.append("    public S() {\n");
+		buf.append("        TSub.foo();\n");
+		buf.append("        TSub.foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "foo";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_static_import);
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_static_import_replace_all);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		StringBuilder expectation= new StringBuilder();
+		expectation.append("package test2;\n");
+		expectation.append("\n");
+		expectation.append("import static test1.T.foo;\n");
+		expectation.append("\n");
+		expectation.append("import test1.TSub;\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        foo();\n");
+		expectation.append("        TSub.foo();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		String preview1= expectation.toString();
+
+		expectation= new StringBuilder();
+		expectation.append("package test2;\n");
+		expectation.append("\n");
+		expectation.append("import static test1.T.foo;\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        foo();\n");
+		expectation.append("        foo();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		String preview2= expectation.toString();
+		assertExpectedExistInProposals(proposals, new String[] {preview1, preview2});
 	}
 
 	@Test
