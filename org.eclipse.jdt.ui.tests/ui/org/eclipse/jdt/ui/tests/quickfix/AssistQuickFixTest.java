@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10475,9 +10475,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_static_import_replace_all);
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
-		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
 
 		StringBuilder expectation= new StringBuilder();
 		expectation.append("package test2;\n");
@@ -10491,10 +10488,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		expectation.append("        TSub.foo();\n");
 		expectation.append("    }\n");
 		expectation.append("}\n");
-		assertEqualString(expectation.toString(), preview);
+		String preview1= expectation.toString();
 
-		proposal= (CUCorrectionProposal)proposals.get(1);
-		preview= getPreviewContent(proposal);
 		expectation= new StringBuilder();
 		expectation.append("package test2;\n");
 		expectation.append("\n");
@@ -10505,7 +10500,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		expectation.append("        foo();\n");
 		expectation.append("    }\n");
 		expectation.append("}\n");
-		assertEqualString(expectation.toString(), preview);
+		String preview2= expectation.toString();
+		assertExpectedExistInProposals(proposals, new String[] {preview1, preview2});
 	}
 
 	@Test
