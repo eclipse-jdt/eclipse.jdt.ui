@@ -73,6 +73,38 @@ public class SealedClassFixCore extends CompilationUnitRewriteOperationsFixCore 
 		}
 	}
 
+	public static class AddSealedAsDirectSuperTypeProposalOperation extends CompilationUnitRewriteOperation {
+
+		private TypeDeclaration fPermittedTypeDeclaration;
+
+		private TypeDeclaration fSealedType;
+
+		public AddSealedAsDirectSuperTypeProposalOperation(TypeDeclaration permittedTypeDeclaration, TypeDeclaration sealedType) {
+			this.fPermittedTypeDeclaration= permittedTypeDeclaration;
+			this.fSealedType= sealedType;
+		}
+
+		@Override
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
+			AST ast= fPermittedTypeDeclaration.getAST();
+			String sealedTypeName= fSealedType.getName().getIdentifier();
+			Type type= ast.newSimpleType(ast.newSimpleName(sealedTypeName));
+
+			boolean isSealedInterface= fSealedType.isInterface();
+
+			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+			if (isSealedInterface) {
+				astRewrite.getListRewrite(fPermittedTypeDeclaration, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, null);
+			} else {
+				astRewrite.set(fPermittedTypeDeclaration, TypeDeclaration.SUPERCLASS_TYPE_PROPERTY, type, null);
+			}
+
+			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fPermittedTypeDeclaration.getRoot(), importRewrite);
+			importRewrite.addImport(fSealedType.resolveBinding(), astRewrite.getAST(), importRewriteContext);
+		}
+	}
+
 	public static SealedClassFixCore addTypeAsPermittedSubTypeProposal(CompilationUnit cu, IProblemLocationCore problem) {
 		ASTNode selectedNode= problem.getCoveringNode(cu);
 
@@ -85,7 +117,7 @@ public class SealedClassFixCore extends CompilationUnitRewriteOperationsFixCore 
 			selectedNode= selectedNode.getParent();
 		}
 
-		TypeDeclaration subType= getSubType(selectedNode);
+		TypeDeclaration subType= getDeclaringType(selectedNode);
 		if (subType == null) {
 			return null;
 		}
@@ -116,7 +148,56 @@ public class SealedClassFixCore extends CompilationUnitRewriteOperationsFixCore 
 		return new SealedClassFixCore(label, cuRewrite.getRoot(), op);
 	}
 
-	private static TypeDeclaration getSubType(ASTNode selectedNode) {
+	public static SealedClassFixCore addSealedAsDirectSuperTypeProposal(CompilationUnit cu, IProblemLocationCore problem) {
+		ASTNode selectedNode= problem.getCoveringNode(cu);
+
+		TypeDeclaration sealedType= getSealedTypeNodeFromPermitsNode(selectedNode);
+
+		if (sealedType == null) {
+			return null;
+		}
+
+		IType permittedTypeElement= getPermittedType(selectedNode);
+		if (permittedTypeElement == null) {
+			return null;
+		}
+
+		ICompilationUnit compilationUnit= permittedTypeElement.getCompilationUnit();
+		if (compilationUnit == null) {
+			return null;
+		}
+
+		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(compilationUnit);
+		TypeDeclaration permittedTypeDeclaration;
+		try {
+			permittedTypeDeclaration= ASTNodeSearchUtil.getTypeDeclarationNode(permittedTypeElement, cuRewrite.getRoot());
+		} catch (JavaModelException e) {
+			return null;
+		}
+		if (permittedTypeDeclaration == null) {
+			return null;
+		}
+
+		boolean isSealedInterface= sealedType.isInterface();
+		String permittedTypeName= permittedTypeDeclaration.getName().getIdentifier();
+		String sealedTypeName= sealedType.getName().getIdentifier();
+		String label;
+		if (isSealedInterface) {
+			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_declareSealedAsDirectSuperInterface_description, new String[] { sealedTypeName, permittedTypeName });
+		} else {
+			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_declareSealedAsDirectSuperClass_description, new String[] { sealedTypeName, permittedTypeName });
+		}
+
+		AddSealedAsDirectSuperTypeProposalOperation op= new AddSealedAsDirectSuperTypeProposalOperation(permittedTypeDeclaration, sealedType);
+		return new SealedClassFixCore(label, cuRewrite.getRoot(), op);
+	}
+
+
+	/**
+	 * @param selectedNode The selected node representing a type that is inherited by the class
+	 * @return a TypeDeclaration representing the declaring type of the selected node or null if not applicable
+	 */
+	private static TypeDeclaration getDeclaringType(ASTNode selectedNode) {
 		if (selectedNode.getLocationInParent() != TypeDeclaration.SUPERCLASS_TYPE_PROPERTY
 				&& selectedNode.getLocationInParent() != TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY) {
 			return null;
@@ -124,6 +205,11 @@ public class SealedClassFixCore extends CompilationUnitRewriteOperationsFixCore 
 		return (TypeDeclaration) selectedNode.getParent();
 	}
 
+	/**
+	 *
+	 * @param selectedNode The selected node representing a type that is inherited by the class
+	 * @return an IType representing the sealed type from the inheriting class or null if not applicable
+	 */
 	public static IType getSealedType(ASTNode selectedNode) {
 		if (selectedNode == null) {
 			return null;
@@ -152,6 +238,29 @@ public class SealedClassFixCore extends CompilationUnitRewriteOperationsFixCore 
 		return (IType) sealedTypeElement;
 	}
 
+	/**
+	 *
+	 * @param selectedNode The selected node representing a 'permits' node type
+	 * @return a TypeDeclaration representing the sealed type or null if not applicable
+	 */
+	private static TypeDeclaration getSealedTypeNodeFromPermitsNode(ASTNode selectedNode) {
+		if (selectedNode == null) {
+			return null;
+		}
+		if (!ASTHelper.isSealedTypeSupportedInAST(selectedNode.getAST())) {
+			return null;
+		}
+
+		while (selectedNode.getParent() instanceof Type) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (selectedNode.getLocationInParent() != TypeDeclaration.PERMITS_TYPES_PROPERTY) {
+			return null;
+		}
+		TypeDeclaration sealedType= (TypeDeclaration) selectedNode.getParent();
+		return sealedType;
+	}
+
 	public static ICompilationUnit getCompilationUnitForSealedType(IType sealedType) {
 		try {
 			if (sealedType.isBinary() || !sealedType.isSealed()) {
@@ -161,5 +270,37 @@ public class SealedClassFixCore extends CompilationUnitRewriteOperationsFixCore 
 			return null;
 		}
 		return sealedType.getCompilationUnit();
+	}
+
+	/**
+	 * @param selectedNode The selected node representing a 'permits' node type
+	 * @return an IType representing the permitted type node or null if not applicable
+	 */
+	public static IType getPermittedType(ASTNode selectedNode) {
+		if (selectedNode == null) {
+			return null;
+		}
+		if (!ASTHelper.isSealedTypeSupportedInAST(selectedNode.getAST())) {
+			return null;
+		}
+
+		while (selectedNode.getParent() instanceof Type) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (selectedNode.getLocationInParent() != TypeDeclaration.PERMITS_TYPES_PROPERTY) {
+			return null;
+		}
+
+		IJavaElement permittedTypeElement= null;
+		if (selectedNode instanceof SimpleType) {
+			ITypeBinding typeBinding= ((SimpleType) selectedNode).resolveBinding();
+			if (typeBinding != null) {
+				permittedTypeElement= typeBinding.getJavaElement();
+			}
+		}
+		if (!(permittedTypeElement instanceof IType)) {
+			return null;
+		}
+		return (IType) permittedTypeElement;
 	}
 }
