@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
@@ -131,6 +132,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AddGetterSetterTypeProposal;
+import org.eclipse.jdt.internal.ui.actions.HashCodeEqualsTypeProposal;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
@@ -177,6 +179,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertIfElseToSwitchProposals(context, coveringNode, null)
 					|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null)
 					|| getGettersSettersForTypeProposals(coveringNode, null)
+					|| getHashCodeEqualsForTypeProposals(coveringNode, null)
 					|| ExternalNullAnnotationQuickAssistProcessor.canAssist(context);
 		}
 		return false;
@@ -221,6 +224,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections);
 				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, locations, resultingCollections);
 				getGettersSettersForTypeProposals(coveringNode, resultingCollections);
+				getHashCodeEqualsForTypeProposals(coveringNode, resultingCollections);
 
 				ExternalNullAnnotationQuickAssistProcessor.getAnnotateProposals(context, resultingCollections);
 			}
@@ -2487,6 +2491,84 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		return false;
+	}
+
+	private boolean getHashCodeEqualsForTypeProposals(ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+		if (!(coveringNode instanceof SimpleName)) {
+			return false;
+		}
+		ASTNode parent= coveringNode.getParent();
+		if (!(parent instanceof TypeDeclaration)) {
+			return false;
+		}
+		TypeDeclaration typeDeclaration= (TypeDeclaration)parent;
+		if (typeDeclaration.isInterface()) {
+			return false;
+		}
+		if (typeDeclaration.getName() != coveringNode) {
+			return false;
+		}
+		if (resultingCollections == null) {
+			return true;
+		}
+		SimpleName sn= (SimpleName)coveringNode;
+		IBinding binding= sn.resolveBinding();
+		if (!(binding instanceof ITypeBinding)) {
+			return false;
+		}
+		ITypeBinding typeBinding= (ITypeBinding)binding;
+
+		IJavaElement element= typeBinding.getJavaElement();
+		try {
+			if (element instanceof IType) {
+				IType type= (IType) element;
+				if (!hasMissingHashCodeOrEquals(type)) {
+					return false;
+				}
+				ChangeCorrectionProposal proposal= new HashCodeEqualsTypeProposal(IProposalRelevance.GENERATE_HASHCODE_AND_EQUALS, type);
+				resultingCollections.add(proposal);
+				return true;
+			}
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return false;
+	}
+
+
+	/**
+	 * @param type the type
+	 * @return true if type is missing either hashCode() or equals() methods
+	 * @throws JavaModelException if the type does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 */
+	private boolean hasMissingHashCodeOrEquals (IType type) throws JavaModelException {
+		boolean hasHashCode= false;
+		boolean hasEquals= false;
+		boolean hasFields= false;
+		for (IField field : type.getFields()) {
+			int flags= field.getFlags();
+			if (!Flags.isEnum(flags) && !Flags.isStatic(flags)) {
+				hasFields= true;
+				break;
+			}
+		}
+		if (!hasFields) {
+			return false;
+		}
+		for (IMethod method : type.getMethods()) {
+			int flags= method.getFlags();
+			if (!Flags.isStatic(flags)) {
+				if (method.getElementName().equals("hashCode") //$NON-NLS-1$
+						&& method.getSignature().equals("()I")) { //$NON-NLS-1$
+					hasHashCode= true;
+				} else if (method.getElementName().equals("equals") //$NON-NLS-1$
+					&& method.getSignature().equals("(QObject;)Z")) { //$NON-NLS-1$
+					hasEquals= true;
+				}
+			}
+		}
+		return !hasHashCode && !hasEquals;
 	}
 
 	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
