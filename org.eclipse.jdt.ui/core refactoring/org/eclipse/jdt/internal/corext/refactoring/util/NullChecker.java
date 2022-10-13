@@ -13,118 +13,222 @@
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
+
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+
+import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
+import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 
 public class NullChecker {
 	private ASTNode expression;
+
 	private int startOffset;
+
 	private int endOffset;
 
 	private ASTNode commonNode;
-	private Set<String> invocationSet;
-	public NullChecker(ASTNode commonNode,ASTNode expression,int startOffset,int endOffset) {
-		this.commonNode=commonNode;
-		this.expression=expression;
-		this.startOffset=startOffset;
-		this.endOffset=endOffset;
-		this.invocationSet=new HashSet<>();
-		InvocationVisitor iv=new InvocationVisitor( );
+
+	private Set<IBinding> invocationSet;
+
+	private CompilationUnit fCompilationUnitNode;
+
+	private ICompilationUnit fCu;
+
+	private Set<Integer> matchNodePosSet;
+
+	public NullChecker(CompilationUnit fCompilationUnitNode, ICompilationUnit fCu, ASTNode commonNode, ASTNode expression, int startOffset, int endOffset) {
+		this.fCompilationUnitNode= fCompilationUnitNode;
+		this.fCu= fCu;
+		this.commonNode= commonNode;
+		this.expression= expression;
+		this.startOffset= startOffset;
+		this.endOffset= endOffset;
+		InvocationVisitor iv= new InvocationVisitor();
 		this.expression.accept(iv);
-		this.invocationSet=iv.invocationSet;
+		this.invocationSet= iv.invocationSet;
+		this.matchNodePosSet= iv.matchNodePosSet;
 	}
 
-	public boolean isExistNull( ) {
-		NullMiddleCodeVisitor nullMiddleCodeVisitor=new NullMiddleCodeVisitor(this.invocationSet,this.startOffset,this.endOffset);
-        this.commonNode.accept(nullMiddleCodeVisitor);
-		return nullMiddleCodeVisitor.isNull();
+	public boolean hasNullCheck() {
+		NullMiddleCodeVisitor nullMiddleCodeVisitor= new NullMiddleCodeVisitor(this.invocationSet, this.matchNodePosSet, this.startOffset, this.endOffset);
+		this.commonNode.accept(nullMiddleCodeVisitor);
+		return nullMiddleCodeVisitor.hasNullCheck();
 	}
 
-	private class InvocationVisitor extends ASTVisitor{
-		Set<String> invocationSet;
-		InvocationVisitor(){
-			this.invocationSet=new HashSet<>();
-		}
-		@Override
-		public void preVisit(ASTNode node) {
-			if(node instanceof MethodInvocation) {
-				MethodInvocation mi=( MethodInvocation)node;
-				Expression temp = mi.getExpression();
-				if(temp!=null)
-				this.invocationSet.add(temp.toString());
-			}else if(node instanceof FieldAccess) {
-				FieldAccess fa=( FieldAccess)node;
-				Expression temp = fa.getExpression();
-				if(temp!=null)
-				this.invocationSet.add(temp.toString());
-			}else if(node instanceof QualifiedName) {
-				QualifiedName qn=( QualifiedName)node;
-				Name temp = qn.getQualifier();
-				if(temp!=null)
-				this.invocationSet.add(temp.toString());
-			}else if(node instanceof ArrayAccess) {
-				ArrayAccess aa=( ArrayAccess)node;
-				Expression temp = aa.getArray();
-				if(temp!=null)
-				this.invocationSet.add(temp.toString());
+	private IASTFragment getIASTFragment(ASTNode astNode) throws JavaModelException {
+		int length= astNode.getLength();
+		int startPosition= astNode.getStartPosition();
+		return ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(startPosition, length), this.fCompilationUnitNode, this.fCu);
+
+	}
+
+	private ASTNode getEnclosingBodyNode(ASTNode node) throws JavaModelException {
+		StructuralPropertyDescriptor location= null;
+		while (node != null && !(node instanceof BodyDeclaration)) {
+			location= node.getLocationInParent();
+			node= node.getParent();
+			if (node instanceof LambdaExpression) {
+				break;
 			}
 		}
+		if (location == MethodDeclaration.BODY_PROPERTY || location == Initializer.BODY_PROPERTY
+				|| (location == LambdaExpression.BODY_PROPERTY && ((LambdaExpression) node).resolveMethodBinding() != null)) {
+			return (ASTNode) node.getStructuralProperty(location);
+		}
+		return null;
 	}
 
-	private class NullMiddleCodeVisitor extends ASTVisitor{
+
+	private Expression getOriginalExpression(Expression expr) throws JavaModelException {
+		while (expr instanceof ParenthesizedExpression || expr instanceof CastExpression) {
+			if (expr instanceof ParenthesizedExpression) {
+				ParenthesizedExpression pe= (ParenthesizedExpression) expr;
+				expr= pe.getExpression();
+			} else {
+				CastExpression ce= (CastExpression) expr;
+				expr= ce.getExpression();
+			}
+		}
+		return expr;
+
+	}
+
+
+
+	private class InvocationVisitor extends ASTVisitor {
+		Set<IBinding> invocationSet;
+
+		Set<Integer> matchNodePosSet;
+
+		InvocationVisitor() {
+			this.invocationSet= new HashSet<>();
+			this.matchNodePosSet= new HashSet<>();
+		}
+
+		@Override
+		public void preVisit(ASTNode node) {
+			Expression temp= null;
+			if (node instanceof MethodInvocation) {
+				MethodInvocation mi= (MethodInvocation) node;
+				temp= mi.getExpression();
+			} else if (node instanceof FieldAccess) {
+				FieldAccess fa= (FieldAccess) node;
+				temp= fa.getExpression();
+			} else if (node instanceof QualifiedName) {
+				QualifiedName qn= (QualifiedName) node;
+				temp= qn.getQualifier();
+			} else if (node instanceof ArrayAccess) {
+				ArrayAccess aa= (ArrayAccess) node;
+				temp= aa.getArray();
+			}
+
+			if (temp != null) {
+				try {
+					temp= getOriginalExpression(temp);
+					IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(getEnclosingBodyNode(temp)).getSubFragmentsMatching(getIASTFragment(temp));
+					for (IASTFragment match : allMatches) {
+						if (match.getAssociatedNode() != null) {
+							this.matchNodePosSet.add(match.getAssociatedNode().getStartPosition());
+						}
+					}
+				} catch (JavaModelException e) {
+					e.printStackTrace();
+				}
+				IBinding resolveBinding= null;
+				if (temp instanceof Name)
+					resolveBinding= ((Name) temp).resolveBinding();
+				if (resolveBinding != null)
+					this.invocationSet.add(resolveBinding);
+			}
+		}
+
+	}
+
+	private class NullMiddleCodeVisitor extends ASTVisitor {
 		int startPosition;
-	    int endPosition;
-	    boolean nullFlag;
-	    Set<String> set;
-	    public NullMiddleCodeVisitor(Set<String> invocationSet,int startPosition, int endPosition) {
-	        this.set=invocationSet;
-	    	this.startPosition=startPosition;
-	        this.endPosition=endPosition;
-	        this.nullFlag=false;
-	    }
 
-	    public boolean isNull() {
-	    	return this.nullFlag;
-	    }
+		int endPosition;
 
-	    @Override
-	    public boolean preVisit2(ASTNode node) {
-	        int sl= node.getStartPosition() ;
-	        int el= node.getStartPosition()+node.getLength() ;
-	        if(el<startPosition||sl>endPosition||this.nullFlag==true) {
-	        	return false;
-	        }
-	        if(sl>=startPosition && el <=endPosition && node instanceof InfixExpression){
-	        	InfixExpression infixExpression=(InfixExpression)node;
-	            Operator op=infixExpression.getOperator();
-		    	if(Operator.toOperator(op.toString())==Operator.EQUALS||Operator.toOperator(op.toString())==Operator.NOT_EQUALS) {
-		    		Expression leftExpression = infixExpression.getLeftOperand();
-		    		Expression rightExpression = infixExpression.getRightOperand();
-		    		Expression target=null;
-		    		if( rightExpression.getNodeType()==ASTNode.NULL_LITERAL) {
-		    			target=leftExpression;
-		    		}else if(leftExpression.getNodeType()==ASTNode.NULL_LITERAL) {
-		    			target=rightExpression;
-		    		}
-		    		if(target!=null&&this.set.contains(target.toString())) {
-		    			this.nullFlag=true;
-		    			return false;
-		    		}
-		    	}
-	        }
-	        return super.preVisit2(node);
-	    }
+		boolean nullFlag;
+
+		Set<IBinding> invocationSet;
+
+		Set<Integer> matchNodePosSet;
+
+		public NullMiddleCodeVisitor(Set<IBinding> invocationSet, Set<Integer> matchNodePosSet, int startPosition, int endPosition) {
+			this.invocationSet= invocationSet;
+			this.matchNodePosSet= matchNodePosSet;
+			this.startPosition= startPosition;
+			this.endPosition= endPosition;
+			this.nullFlag= false;
+		}
+
+		public boolean hasNullCheck() {
+			return this.nullFlag;
+		}
+
+		@Override
+		public boolean preVisit2(ASTNode node) {
+			int sl= node.getStartPosition();
+			int el= node.getStartPosition() + node.getLength();
+			if (el < startPosition || sl > endPosition || this.nullFlag == true) {
+				return false;
+			}
+			Expression target= null;
+			if (sl >= startPosition && el <= endPosition && node instanceof InfixExpression) {
+				InfixExpression infixExpression= (InfixExpression) node;
+				Operator op= infixExpression.getOperator();
+				if (Operator.toOperator(op.toString()) == Operator.EQUALS || Operator.toOperator(op.toString()) == Operator.NOT_EQUALS) {
+					Expression leftExpression= infixExpression.getLeftOperand();
+					Expression rightExpression= infixExpression.getRightOperand();
+					if (rightExpression.getNodeType() == ASTNode.NULL_LITERAL) {
+						target= leftExpression;
+					} else if (leftExpression.getNodeType() == ASTNode.NULL_LITERAL) {
+						target= rightExpression;
+					}
+				}
+			}
+
+			if (target != null) {
+				try {
+					target= getOriginalExpression(target);
+				} catch (JavaModelException e) {
+					e.printStackTrace();
+				}
+				if (target instanceof Name && this.invocationSet.contains(((Name) target).resolveBinding())) {
+					this.nullFlag= true;
+					return false;
+				} else if (this.matchNodePosSet.contains(target.getStartPosition())) {
+					this.nullFlag= true;
+					return false;
+				}
+			}
+			return super.preVisit2(node);
+		}
 	}
 
 }

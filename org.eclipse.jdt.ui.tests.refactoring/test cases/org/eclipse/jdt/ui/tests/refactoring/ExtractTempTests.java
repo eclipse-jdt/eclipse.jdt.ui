@@ -837,7 +837,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	@Test
 	public void test119() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
-		warningHelper1(5, 28, 5, 38, true, false, "length", "length", RefactoringStatus.WARNING);
+		helper1(5, 28, 5, 38, true, false, "length", "length");
 	}
 
 	@Test
@@ -846,6 +846,23 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(7, 63, 7, 87, true, false, "ch1", "charAt");
 	}
 
+	@Test
+	public void test121() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(8, 44, 8, 58, true, false, "length", "length");
+	}
+
+	@Test
+	public void test122() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(5, 68, 5, 94, true, false, "intValue", "intValue");
+	}
+
+	@Test
+	public void test123() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(8, 28, 8, 38, true, false, "j", "j");
+	}
 
 
 	@Test
