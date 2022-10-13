@@ -133,6 +133,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AddGetterSetterTypeProposal;
 import org.eclipse.jdt.internal.ui.actions.HashCodeEqualsTypeProposal;
+import org.eclipse.jdt.internal.ui.actions.ToStringTypeProposal;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
@@ -180,6 +181,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null)
 					|| getGettersSettersForTypeProposals(coveringNode, null)
 					|| getHashCodeEqualsForTypeProposals(coveringNode, null)
+					|| getToStringForTypeProposals(coveringNode, null)
 					|| ExternalNullAnnotationQuickAssistProcessor.canAssist(context);
 		}
 		return false;
@@ -225,6 +227,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, locations, resultingCollections);
 				getGettersSettersForTypeProposals(coveringNode, resultingCollections);
 				getHashCodeEqualsForTypeProposals(coveringNode, resultingCollections);
+				getToStringForTypeProposals(coveringNode, resultingCollections);
 
 				ExternalNullAnnotationQuickAssistProcessor.getAnnotateProposals(context, resultingCollections);
 			}
@@ -2525,7 +2528,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				if (!hasMissingHashCodeOrEquals(type)) {
 					return false;
 				}
-				ChangeCorrectionProposal proposal= new HashCodeEqualsTypeProposal(IProposalRelevance.GENERATE_HASHCODE_AND_EQUALS, type);
+				ChangeCorrectionProposal proposal= new HashCodeEqualsTypeProposal(IProposalRelevance.HASHCODE_EQUALS_QUICK_ASSIST, type);
 				resultingCollections.add(proposal);
 				return true;
 			}
@@ -2534,7 +2537,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return false;
 	}
-
 
 	/**
 	 * @param type the type
@@ -2569,6 +2571,80 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		return !hasHashCode && !hasEquals;
+	}
+
+	private boolean getToStringForTypeProposals(ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+		if (!(coveringNode instanceof SimpleName)) {
+			return false;
+		}
+		ASTNode parent= coveringNode.getParent();
+		if (!(parent instanceof TypeDeclaration)) {
+			return false;
+		}
+		TypeDeclaration typeDeclaration= (TypeDeclaration)parent;
+		if (typeDeclaration.isInterface()) {
+			return false;
+		}
+		if (typeDeclaration.getName() != coveringNode) {
+			return false;
+		}
+		if (resultingCollections == null) {
+			return true;
+		}
+		SimpleName sn= (SimpleName)coveringNode;
+		IBinding binding= sn.resolveBinding();
+		if (!(binding instanceof ITypeBinding)) {
+			return false;
+		}
+		ITypeBinding typeBinding= (ITypeBinding)binding;
+
+		IJavaElement element= typeBinding.getJavaElement();
+		try {
+			if (element instanceof IType) {
+				IType type= (IType) element;
+				if (!hasMissingToString(type)) {
+					return false;
+				}
+				ChangeCorrectionProposal proposal= new ToStringTypeProposal(IProposalRelevance.TOSTRING_QUICK_ASSIST, type);
+				resultingCollections.add(proposal);
+				return true;
+			}
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return false;
+	}
+
+	/**
+	 * @param type the type
+	 * @return true if type is missing its own toString() method
+	 * @throws JavaModelException if the type does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 */
+	private boolean hasMissingToString (IType type) throws JavaModelException {
+		boolean hasToString= false;
+		boolean hasFields= false;
+		for (IField field : type.getFields()) {
+			int flags= field.getFlags();
+			if (!Flags.isEnum(flags) && !Flags.isStatic(flags)) {
+				hasFields= true;
+				break;
+			}
+		}
+		if (!hasFields) {
+			return false;
+		}
+		for (IMethod method : type.getMethods()) {
+			int flags= method.getFlags();
+			if (!Flags.isStatic(flags)) {
+				if (method.getElementName().equals("toString") //$NON-NLS-1$
+						&& method.getSignature().equals("()QString;")) { //$NON-NLS-1$
+					hasToString= true;
+					break;
+				}
+			}
+		}
+		return !hasToString;
 	}
 
 	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {

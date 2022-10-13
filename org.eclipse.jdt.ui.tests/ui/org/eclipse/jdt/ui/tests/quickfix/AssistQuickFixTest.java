@@ -6942,7 +6942,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 1);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
+		assertProposalExists(proposals, Messages.format(CorrectionMessages.AddGetterSetter_creategetterssettersfortype_description, "E"));
+		assertProposalExists(proposals, Messages.format(CorrectionMessages.AddHashCodeEquals_createhashcodeequalsfortype_description, "E"));
+		assertProposalExists(proposals, Messages.format(CorrectionMessages.AddToString_createtostringfortype_description, "E"));
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
 	}
 

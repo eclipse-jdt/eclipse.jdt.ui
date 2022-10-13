@@ -402,6 +402,8 @@ public final class CorrectionMessages extends NLS {
 	public static String AddGettersSetters_additional_info;
 	public static String AddHashCodeEquals_createhashcodeequalsfortype_description;
 	public static String AddHashCodeEquals_additional_info;
+	public static String AddToString_createtostringfortype_description;
+	public static String AddToString_additional_info;
 	public static String AddTypeParameterProposal_method_label;
 	public static String AddTypeParameterProposal_type_label;
 
