@@ -44,38 +44,38 @@ import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 
 public class NullChecker {
-	private ASTNode expression;
+	private ASTNode fExpression;
 
-	private int startOffset;
+	private int fStartOffset;
 
-	private int endOffset;
+	private int fEndOffset;
 
-	private ASTNode commonNode;
+	private ASTNode fCommonNode;
 
-	private Set<IBinding> invocationSet;
+	private Set<IBinding> fInvocationSet;
 
 	private CompilationUnit fCompilationUnitNode;
 
 	private ICompilationUnit fCu;
 
-	private Set<Integer> matchNodePosSet;
+	private Set<Integer> fMatchNodePosSet;
 
 	public NullChecker(CompilationUnit fCompilationUnitNode, ICompilationUnit fCu, ASTNode commonNode, ASTNode expression, int startOffset, int endOffset) {
 		this.fCompilationUnitNode= fCompilationUnitNode;
 		this.fCu= fCu;
-		this.commonNode= commonNode;
-		this.expression= expression;
-		this.startOffset= startOffset;
-		this.endOffset= endOffset;
+		this.fCommonNode= commonNode;
+		this.fExpression= expression;
+		this.fStartOffset= startOffset;
+		this.fEndOffset= endOffset;
 		InvocationVisitor iv= new InvocationVisitor();
-		this.expression.accept(iv);
-		this.invocationSet= iv.invocationSet;
-		this.matchNodePosSet= iv.matchNodePosSet;
+		this.fExpression.accept(iv);
+		this.fInvocationSet= iv.invocationSet;
+		this.fMatchNodePosSet= iv.matchNodePosSet;
 	}
 
 	public boolean hasNullCheck() {
-		NullMiddleCodeVisitor nullMiddleCodeVisitor= new NullMiddleCodeVisitor(this.invocationSet, this.matchNodePosSet, this.startOffset, this.endOffset);
-		this.commonNode.accept(nullMiddleCodeVisitor);
+		NullMiddleCodeVisitor nullMiddleCodeVisitor= new NullMiddleCodeVisitor(this.fInvocationSet, this.fMatchNodePosSet, this.fStartOffset, this.fEndOffset);
+		this.fCommonNode.accept(nullMiddleCodeVisitor);
 		return nullMiddleCodeVisitor.hasNullCheck();
 	}
 
@@ -86,7 +86,7 @@ public class NullChecker {
 
 	}
 
-	private ASTNode getEnclosingBodyNode(ASTNode node) throws JavaModelException {
+	private ASTNode getEnclosingBodyNode(ASTNode node) {
 		StructuralPropertyDescriptor location= null;
 		while (node != null && !(node instanceof BodyDeclaration)) {
 			location= node.getLocationInParent();
@@ -95,15 +95,17 @@ public class NullChecker {
 				break;
 			}
 		}
-		if (location == MethodDeclaration.BODY_PROPERTY || location == Initializer.BODY_PROPERTY
-				|| (location == LambdaExpression.BODY_PROPERTY && ((LambdaExpression) node).resolveMethodBinding() != null)) {
-			return (ASTNode) node.getStructuralProperty(location);
+		if (node != null) {
+			if (location == MethodDeclaration.BODY_PROPERTY || location == Initializer.BODY_PROPERTY
+					|| (location == LambdaExpression.BODY_PROPERTY && ((LambdaExpression) node).resolveMethodBinding() != null)) {
+				return (ASTNode) node.getStructuralProperty(location);
+			}
 		}
 		return null;
 	}
 
 
-	private Expression getOriginalExpression(Expression expr) throws JavaModelException {
+	private Expression getOriginalExpression(Expression expr) {
 		while (expr instanceof ParenthesizedExpression || expr instanceof CastExpression) {
 			if (expr instanceof ParenthesizedExpression) {
 				ParenthesizedExpression pe= (ParenthesizedExpression) expr;
@@ -214,11 +216,7 @@ public class NullChecker {
 			}
 
 			if (target != null) {
-				try {
-					target= getOriginalExpression(target);
-				} catch (JavaModelException e) {
-					e.printStackTrace();
-				}
+				target= getOriginalExpression(target);
 				if (target instanceof Name && this.invocationSet.contains(((Name) target).resolveBinding())) {
 					this.nullFlag= true;
 					return false;

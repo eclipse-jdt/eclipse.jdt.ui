@@ -373,10 +373,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
 	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
 
-	private int startPoint;
-	private int endPoint;
+	private int fStartPoint;
+	private int fEndPoint;
 
-	private boolean nullWarning;
+	private boolean fNullWarning;
 
 	/**
 	 * Creates a new extract temp refactoring
@@ -400,9 +400,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		fLinkedProposalModel= null;
 		fCheckResultForCompileProblems= true;
 
-		this.startPoint= -1; // default
-		this.endPoint= -1; // default
-		this.nullWarning= false; // default
+		fStartPoint= -1; // default
+		fEndPoint= -1; // default
+		fNullWarning= false; // default
 	}
 
 	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
@@ -423,17 +423,17 @@ public class ExtractTempRefactoring extends Refactoring {
 		fLinkedProposalModel= null;
 		fCheckResultForCompileProblems= true;
 
-		this.startPoint= -1; // default
-		this.endPoint= -1; // default
-		this.nullWarning= false; // default
+		fStartPoint= -1; // default
+		fEndPoint= -1; // default
+		fNullWarning= false; // default
 	}
 
     public ExtractTempRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this((ICompilationUnit) null, 0, 0);
 
-   		this.startPoint= -1; // default
-		this.endPoint= -1; // default
-		this.nullWarning= false; // default
+   		fStartPoint= -1; // default
+		fEndPoint= -1; // default
+		fNullWarning= false; // default
 
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
@@ -452,13 +452,13 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private void addReplaceExpressionWithTemp() throws JavaModelException {
 		IASTFragment[] fragmentsToReplace= reSortRetainOnlyReplacableMatches();
-		if (fragmentsToReplace.length == 0 || this.nullWarning == true) {
+		if (fragmentsToReplace.length == 0 || fNullWarning) {
 			return;
 		}
 		//TODO: should not have to prune duplicates here...
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		HashSet<IASTFragment> seen= new HashSet<>();
-		for (int i= this.endPoint; i >= this.startPoint; --i) {
+		for (int i= fEndPoint; i >= fStartPoint; --i) {
 			IASTFragment fragment= fragmentsToReplace[i];
 			if (!seen.add(fragment))
 				continue;
@@ -541,7 +541,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 			fChange.setKeepPreviewEdits(true);
 
-			if (this.nullWarning == false && fCheckResultForCompileProblems) {
+			if (!fNullWarning && fCheckResultForCompileProblems) {
 				result.merge(RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fCompilationUnitNode, pm));
 			}
 
@@ -738,20 +738,20 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 		if (node instanceof SwitchStatement) {
 			/* must insert above switch statement */
-			this.startPoint= 0;
-			this.endPoint= reSortRetainOnlyReplacableMatches.length - 1;
+			fStartPoint= 0;
+			fEndPoint= reSortRetainOnlyReplacableMatches.length - 1;
 			insertAt(node, vds);
 			return;
 		} else {
 			if (insertAtSelection) {
 				ASTNode realCommonASTNode= null;
-				this.endPoint= selectNumber;
-				this.startPoint= selectNumber;
+				fEndPoint= selectNumber;
+				fStartPoint= selectNumber;
 				while (realCommonASTNode == null && selectNumber < reSortRetainOnlyReplacableMatches.length) {
 					realCommonASTNode= evalStartAndEnd(reSortRetainOnlyReplacableMatches, selectNumber++);
 				}
 				if (realCommonASTNode == null && reSortRetainOnlyReplacableMatches.length > 0) {
-					this.nullWarning= true;
+					fNullWarning= true;
 				} else
 					insertAt(getSelectedExpression().getAssociatedNode(), vds);
 				return;
@@ -759,15 +759,15 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 
 		ASTNode realCommonASTNode= null;
-		this.endPoint= selectNumber;
-		this.startPoint= selectNumber;
+		fEndPoint= selectNumber;
+		fStartPoint= selectNumber;
 		while (realCommonASTNode == null && selectNumber < reSortRetainOnlyReplacableMatches.length) {
 			realCommonASTNode= evalStartAndEnd(reSortRetainOnlyReplacableMatches, selectNumber++);
 		}
 		if (realCommonASTNode != null)
 			insertAt(realCommonASTNode, vds);
 		else {
-			this.nullWarning= true;
+			fNullWarning= true;
 		}
 	}
 
@@ -797,8 +797,8 @@ public class ExtractTempRefactoring extends Refactoring {
 			startOffset= commonASTNode.getStartPosition() - 1;
 			NullChecker nullChecker= new NullChecker(fCompilationUnitNode, fCu, commonASTNode, expression, startOffset, endOffset);
 			if (!nullChecker.hasNullCheck()) {//at least one be extracted
-				this.startPoint= start;
-				this.endPoint= end;
+				fStartPoint= start;
+				fEndPoint= end;
 				realCommonASTNode= commonASTNode;
 				if (end == reSortRetainOnlyReplacableMatches.length - 1 && expandFlag == 2) {
 					expandFlag= 1;
@@ -1183,8 +1183,8 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private void replaceSelectedExpressionWithTempDeclaration() throws CoreException {
-		this.startPoint= 0;
-		this.endPoint= retainOnlyReplacableMatches(getMatchingFragments()).length - 1;
+		this.fStartPoint= 0;
+		this.fEndPoint= retainOnlyReplacableMatches(getMatchingFragments()).length - 1;
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression(); // whole expression selected
 
