@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -170,7 +170,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		try {
 			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 4);
 
-			CompilationUnit astRoot= SharedASTProviderCore.getAST(fCompilationUnit, SharedASTProviderCore.WAIT_YES, new SubProgressMonitor(monitor, 1));
+			CompilationUnit astRoot= SharedASTProviderCore.getAST(fCompilationUnit, SharedASTProviderCore.WAIT_YES, SubMonitor.convert(monitor, 1));
 			if (astRoot == null)
 				throw new OperationCanceledException();
 
@@ -178,19 +178,19 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 
 			MultiTextEdit res= new MultiTextEdit();
 
-			TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, new SubProgressMonitor(monitor, 1));
+			TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, SubMonitor.convert(monitor, 1));
 			if (edit == null) {
 				return;
 			}
 			res.addChild(edit);
 
-			TextEdit importsEdit= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
+			TextEdit importsEdit= importRewrite.rewriteImports(SubMonitor.convert(monitor, 1));
 			res.addChild(importsEdit);
 
 			fResultingEdit= res;
 
 			if (fApply) {
-				JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, new SubProgressMonitor(monitor, 1));
+				JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, SubMonitor.convert(monitor, 1));
 			}
 		} finally {
 			monitor.done();
@@ -354,7 +354,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
 
-		TypeNameMatch[] types= findAllTypes(simpleName, searchScope, nameNode, new SubProgressMonitor(monitor, 1));
+		TypeNameMatch[] types= findAllTypes(simpleName, searchScope, nameNode, SubMonitor.convert(monitor, 1));
 		if (types.length == 0) {
 			fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_notresolved_message, BasicElementLabels.getJavaElementName(simpleName)), null);
 			return null;
