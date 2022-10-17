@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 
@@ -20,24 +21,44 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Hashtable;
 
 import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+
+import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d5ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.fix.IMultiFix;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGenerator;
 
 /**
  * Tests the cleanup features related to Java 5 (i.e. Tiger).
@@ -4244,6 +4265,69 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu0, cu1 }, new String[] { expected0, expected1 },
 				new HashSet<>(Arrays.asList(MultiFixMessages.StringBufferToStringBuilderCleanUp_description)));
+	}
+
+	@Test
+	public void testOverrideMultiFix() throws Exception {
+		Hashtable<String, String> opts= JavaCore.getOptions();
+		opts.put(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, JavaCore.ERROR);
+		JavaCore.setOptions(opts);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 extends MyAbstract {\n" //
+				+ "    public void run() {};\n" //
+				+ "    public int compareTo(String o) { return -1; };\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public abstract class MyAbstract {\n" //
+				+ "    public void run();\n" //
+				+ "    public int compareTo(String o);\n" //
+				+ "}";
+		pack1.createCompilationUnit("MyAbstract.java", sample, false, null);
+
+		cu1.getJavaProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 extends MyAbstract {\n" //
+				+ "    @Override\n" //
+				+ "    public void run() {};\n" //
+				+ "    @Override\n" //
+				+ "    public int compareTo(String o) { return -1; };\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		// Two error markers due to missing override annotations
+		IMarker[] markers= cu1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
+		assertEquals(2, markers.length);
+
+		IEditorInput input= EditorUtility.getEditorInput(cu1);
+		IProblemLocation location1= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+		IProblemLocation location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[1]);
+
+		CleanUpOptions cleanUpOptions= new CleanUpOptions();
+		cleanUpOptions.setOption(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
+		cleanUpOptions.setOption(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpOptions.TRUE);
+		cleanUpOptions.setOption(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION, CleanUpOptions.TRUE);
+
+		Java50CleanUp cleanUp = new Java50CleanUp();
+		cleanUp.setOptions(cleanUpOptions);
+
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		parser.setResolveBindings(true);
+		parser.setProject(getProject());
+		parser.setSource(cu1);
+		CompilationUnit ast= (CompilationUnit)parser.createAST(null);
+
+		ICleanUpFix cleanUpFix= cleanUp.createFix(new IMultiFix.MultiFixContext(cu1, ast, new IProblemLocation[] {location1, location2}));
+		CompilationUnitChange change= cleanUpFix.createChange(new NullProgressMonitor());
+		change.perform(new NullProgressMonitor());
+		assertEquals(expected1, cu1.getBuffer().getContents());
+
 	}
 
 }

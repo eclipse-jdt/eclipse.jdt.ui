@@ -66,8 +66,11 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.InferTypeArgumentsDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.CorextCore;
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -92,10 +95,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
 
@@ -199,7 +199,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 								public void run() throws Exception {
 									for (IProblem problem : ast.getProblems()) {
 										if (problem.isError()) {
-											String cuName= JavaElementLabels.getElementLabel(source, JavaElementLabels.CU_QUALIFIED);
+											String cuName= JavaElementLabelsCore.getElementLabel(source, JavaElementLabelsCore.CU_QUALIFIED);
 											String msg= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_in_cu_skipped, new Object[] {cuName});
 											result.addError(msg, JavaStatusContext.create(source, SourceRangeFactory.create(problem)));
 											return;
@@ -210,9 +210,9 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 								@Override
 								public void handleException(Throwable exception) {
-									String cuName= JavaElementLabels.getElementLabel(source, JavaElementLabels.CU_QUALIFIED);
+									String cuName= JavaElementLabelsCore.getElementLabel(source, JavaElementLabelsCore.CU_QUALIFIED);
 									String msg= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_internal_error, new Object[] {cuName});
-									JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
+									JavaManipulationPlugin.log(new Status(IStatus.ERROR, CorextCore.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
 									String msg2= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_skipped, new Object[] {cuName});
 									result.addError(msg2, JavaStatusContext.create(source));
 								}
@@ -549,7 +549,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 					final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(name, this, header);
 					final String[] settings= new String[fElements.length];
 					for (int index= 0; index < settings.length; index++)
-						settings[index]= JavaElementLabels.getTextLabel(fElements[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
+						settings[index]= JavaElementLabelsCore.getTextLabel(fElements[index], JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
 					comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_original_elements, settings));
 					if (fAssumeCloneReturnsSameType)
 						comment.addSetting(RefactoringCoreMessages.InferTypeArgumentsRefactoring_assume_clone);

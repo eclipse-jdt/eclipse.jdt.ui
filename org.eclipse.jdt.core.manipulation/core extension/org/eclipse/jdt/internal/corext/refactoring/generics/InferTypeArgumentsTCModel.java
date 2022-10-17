@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
@@ -61,8 +62,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivale
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class InferTypeArgumentsTCModel {
 	private static final String INDEXED_COLLECTION_ELEMENTS= "IndexedCollectionElements"; //$NON-NLS-1$
@@ -320,7 +319,7 @@ public class InferTypeArgumentsTCModel {
 				fCuScopedConstraintVariables.add(storedCv);
 			makeElementVariables(storedCv, type);
 			makeArrayElementVariable(storedCv);
-			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
+			if (JavaManipulationPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, '[' + variableBinding.getName() + ']');
 		}
 		return storedCv;
@@ -348,7 +347,7 @@ public class InferTypeArgumentsTCModel {
 			if (isAGenericType(ttype))
 				makeElementVariables(storedCv, ttype);
 			makeArrayElementVariable(storedCv);
-			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
+			if (JavaManipulationPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, type.toString());
 		}
 		return storedCv;
@@ -361,7 +360,7 @@ public class InferTypeArgumentsTCModel {
 			fCuScopedConstraintVariables.add(storedCv);
 //			if (isAGenericType(typeBinding)) // would lead to infinite recursion!
 //				makeElementVariables(storedCv, typeBinding);
-			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
+			if (JavaManipulationPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "IndependentType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;
@@ -382,7 +381,7 @@ public class InferTypeArgumentsTCModel {
 		if (cv == storedCv) {
 			fCuScopedConstraintVariables.add(storedCv);
 			makeElementVariables(storedCv, type);
-			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
+			if (JavaManipulationPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "ParameterizedType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;
@@ -401,7 +400,7 @@ public class InferTypeArgumentsTCModel {
 		if (cv == storedCv) {
 			fCuScopedConstraintVariables.add(storedCv);
 			makeArrayElementVariable(storedCv);
-			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
+			if (JavaManipulationPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "ArrayType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;
@@ -421,7 +420,7 @@ public class InferTypeArgumentsTCModel {
 				fCuScopedConstraintVariables.add(cv);
 			makeElementVariables(storedCv, type);
 			makeArrayElementVariable(storedCv);
-			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
+			if (JavaManipulationPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "[Parameter(" + parameterIndex + "," + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		return storedCv;
@@ -457,7 +456,7 @@ public class InferTypeArgumentsTCModel {
 		if (cv == storedCv) {
 			makeElementVariables(storedCv, returnType);
 			makeArrayElementVariable(storedCv);
-			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
+			if (JavaManipulationPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "[ReturnType(" + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;

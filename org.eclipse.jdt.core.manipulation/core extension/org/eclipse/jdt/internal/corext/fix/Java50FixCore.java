@@ -50,7 +50,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintCreator;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintsSolver;
@@ -61,12 +64,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
 
 /**
  * Fix which introduce new language constructs to pre Java50 code.
@@ -76,7 +75,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
  * 		Add missing @Deprecated annotation
  * 		Convert for loop to enhanced for loop
  */
-public class Java50Fix extends CompilationUnitRewriteOperationsFix {
+public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 
 	private static final String OVERRIDE= "Override"; //$NON-NLS-1$
 	private static final String DEPRECATED= "Deprecated"; //$NON-NLS-1$
@@ -91,7 +90,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
 			Annotation newAnnotation= ast.newMarkerAnnotation();
@@ -110,7 +109,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore positionGroups) throws CoreException {
 			InferTypeArgumentsTCModel model= new InferTypeArgumentsTCModel();
 			InferTypeArgumentsConstraintCreator creator= new InferTypeArgumentsConstraintCreator(model, true);
 
@@ -131,7 +130,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 				List<Type> args= type.typeArguments();
 				int j= 0;
 				for (Type argType : args) {
-					LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
+					LinkedProposalPositionGroupCore group= new LinkedProposalPositionGroupCore("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
 					if (!positionGroups.hasLinkedPositions()) {
 						group.addPosition(astRewrite.track(argType), true);
 					} else {
@@ -145,7 +144,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	public static Java50Fix createAddOverrideAnnotationFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+	public static Java50FixCore createAddOverrideAnnotationFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
 		if (!isMissingOverrideAnnotationProblem(problem.getProblemId()))
 			return null;
 
@@ -160,7 +159,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		return id == IProblem.MissingOverrideAnnotation || id == IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation;
 	}
 
-	public static Java50Fix createAddDeprectatedAnnotation(CompilationUnit compilationUnit, IProblemLocation problem) {
+	public static Java50FixCore createAddDeprectatedAnnotation(CompilationUnit compilationUnit, IProblemLocationCore problem) {
 		if (!isMissingDeprecationProblem(problem.getProblemId()))
 			return null;
 
@@ -173,7 +172,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 				|| id == IProblem.TypeMissingDeprecatedAnnotation;
 	}
 
-	private static Java50Fix createFix(CompilationUnit compilationUnit, IProblemLocation problem, String annotation, String label) {
+	private static Java50FixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore problem, String annotation, String label) {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
@@ -190,19 +189,19 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 
 		AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, annotation);
 
-		return new Java50Fix(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation});
+		return new Java50FixCore(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation});
 	}
 
-	public static Java50Fix createRawTypeReferenceFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+	public static Java50FixCore createRawTypeReferenceFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
-		SimpleType node= createRawTypeReferenceOperations(compilationUnit, new IProblemLocation[] {problem}, operations);
+		SimpleType node= createRawTypeReferenceOperations(compilationUnit, new IProblemLocationCore[] {problem}, operations);
 		if (operations.isEmpty())
 			return null;
 
-		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeArguments_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
+		return new Java50FixCore(Messages.format(FixMessages.Java50Fix_AddTypeArguments_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 
-	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit,
 			boolean addOverrideAnnotation,
 			boolean addOverrideInterfaceAnnotation,
 			boolean addDeprecatedAnnotation,
@@ -218,9 +217,9 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 
 		IProblem[] problems= compilationUnit.getProblems();
-		IProblemLocation[] locations= new IProblemLocation[problems.length];
+		IProblemLocationCore[] locations= new IProblemLocationCore[problems.length];
 		for (int i= 0; i < problems.length; i++) {
-			locations[i]= new ProblemLocation(problems[i]);
+			locations[i]= new ProblemLocationCore(problems[i]);
 		}
 
 		if (addOverrideAnnotation)
@@ -243,10 +242,10 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
-		return new Java50Fix(fixName, compilationUnit, operationsArray);
+		return new Java50FixCore(fixName, compilationUnit, operationsArray);
 	}
 
-	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
+	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocationCore[] problems,
 			boolean addOverrideAnnotation,
 			boolean addOverrideInterfaceAnnotation,
 			boolean addDeprecatedAnnotation,
@@ -275,11 +274,11 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			return null;
 
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
-		return new Java50Fix(FixMessages.Java50Fix_add_annotations_change_name, compilationUnit, operationsArray);
+		return new Java50FixCore(FixMessages.Java50Fix_add_annotations_change_name, compilationUnit, operationsArray);
 	}
 
-	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
-		for (IProblemLocation problem : locations) {
+	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocationCore[] locations, List<CompilationUnitRewriteOperation> result) {
+		for (IProblemLocationCore problem : locations) {
 			if (isMissingDeprecationProblem(problem.getProblemId())) {
 				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 				if (selectedNode != null) {
@@ -295,8 +294,8 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
-		for (IProblemLocation problem : locations) {
+	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocationCore[] locations, List<CompilationUnitRewriteOperation> result) {
+		for (IProblemLocationCore problem : locations) {
 			int problemId= problem.getProblemId();
 
 			if (isMissingOverrideAnnotationProblem(problemId)) {
@@ -316,12 +315,12 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static SimpleType createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> operations) {
+	private static SimpleType createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocationCore[] locations, List<CompilationUnitRewriteOperation> operations) {
 		if (hasFatalError(compilationUnit))
 			return null;
 
 		List<SimpleType> result= new ArrayList<>();
-		for (IProblemLocation problem : locations) {
+		for (IProblemLocationCore problem : locations) {
 			if (isRawTypeReferenceProblem(problem.getProblemId())) {
 				ASTNode node= problem.getCoveredNode(compilationUnit);
 				if (node instanceof ClassInstanceCreation) {
@@ -361,7 +360,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			if (!((ICompilationUnit) compilationUnit.getJavaElement()).isStructureKnown())
 				return true;
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaManipulationPlugin.log(e);
 			return true;
 		}
 
@@ -506,7 +505,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		return declaringNode;
 	}
 
-	private Java50Fix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewrites) {
+	private Java50FixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewrites) {
 		super(name, compilationUnit, fixRewrites);
 	}
 
