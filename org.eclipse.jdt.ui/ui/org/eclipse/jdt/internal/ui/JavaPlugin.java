@@ -163,8 +163,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	public static boolean DEBUG_BREADCRUMB_ITEM_DROP_DOWN;
 
-	public static boolean DEBUG_TYPE_CONSTRAINTS;
-
 	public static boolean DEBUG_RESULT_COLLECTOR;
 
 	private static JavaPlugin fgJavaPlugin;
@@ -1133,7 +1131,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	public void optionsChanged(DebugOptions options) {
 		DEBUG_AST_PROVIDER= options.getBooleanOption("org.eclipse.jdt.ui/debug/ASTProvider", false); //$NON-NLS-1$
 		DEBUG_BREADCRUMB_ITEM_DROP_DOWN= options.getBooleanOption("org.eclipse.jdt.ui/debug/BreadcrumbItemDropDown", false); //$NON-NLS-1$
-		DEBUG_TYPE_CONSTRAINTS= options.getBooleanOption("org.eclipse.jdt.ui/debug/TypeConstraints", false); //$NON-NLS-1$
 		DEBUG_RESULT_COLLECTOR= options.getBooleanOption("org.eclipse.jdt.ui/debug/ResultCollector", false); //$NON-NLS-1$
 	}
 

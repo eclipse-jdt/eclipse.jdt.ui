@@ -43,6 +43,8 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 
 	public static boolean DEBUG_AST_PROVIDER;
 
+	public static boolean DEBUG_TYPE_CONSTRAINTS;
+
 	//The shared instance.
 	private static JavaManipulationPlugin fgDefault;
 
@@ -100,8 +102,13 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 		Platform.getLog(JavaManipulationPlugin.class).log(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IStatusConstants.INTERNAL_ERROR, JavaManipulationMessages.JavaManipulationMessages_internalError, e));
 	}
 
+	public static void log(IStatus status) {
+		Platform.getLog(JavaManipulationPlugin.class).log(status);
+	}
+
 	@Override
 	public void optionsChanged(DebugOptions options) {
 		DEBUG_AST_PROVIDER= options.getBooleanOption("org.eclipse.jdt.core.manipulation/debug/ASTProvider", false); //$NON-NLS-1$
+		DEBUG_TYPE_CONSTRAINTS= options.getBooleanOption("org.eclipse.jdt.core.manipulation/debug/TypeConstraints", false); //$NON-NLS-1$
 	}
 }
