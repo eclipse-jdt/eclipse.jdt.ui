@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -77,6 +78,7 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -94,6 +96,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -369,6 +372,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			subPm,
 			result, true);
 
+		checkAffectedCUs(result, affectedCUs);
 		checkInHierarchy(result, usingLocalGetter, usingLocalSetter);
 		if (result.hasFatalError())
 			return result;
@@ -427,6 +431,55 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return result;
 		ResourceChangeChecker.checkFilesToBeChanged(filesToBeModified, new SubProgressMonitor(pm, 1));
 		return result;
+	}
+
+	private class AffectedCUVisitor extends ASTVisitor {
+		private String fTypeName= null;
+		private boolean fGetterConflict= false;
+
+		public String getTypeName() {
+			return fTypeName;
+		}
+
+		public boolean isGetterConflict() {
+			return fGetterConflict;
+		}
+
+		@Override
+		public boolean visit(TypeDeclaration node) {
+			ITypeBinding typeBinding= node.resolveBinding();
+			while (typeBinding != null) {
+				IMethodBinding[] methodBindings= typeBinding.getDeclaredMethods();
+				for (IMethodBinding methodBinding : methodBindings) {
+					if (methodBinding.getName().equals(getGetterName()) && methodBinding.getParameterNames().length == 0) {
+						fTypeName= typeBinding.getName();
+						fGetterConflict= true;
+						throw new AbortSearchException();
+					}
+					if (methodBinding.getName().equals(getSetterName()) && methodBinding.getParameterNames().length == 1) {
+						if (methodBinding.getParameterTypes()[0].isEqualTo(fFieldDeclaration.resolveBinding().getType())) {
+							fTypeName= typeBinding.getName();
+							throw new AbortSearchException();
+						}
+					}
+				}
+				typeBinding= typeBinding.getSuperclass();
+			}
+			return true;
+		}
+
+	}
+
+	private void checkAffectedCUs(RefactoringStatus result, ICompilationUnit[] affectedCUs) {
+		AffectedCUVisitor visitor= new AffectedCUVisitor();
+		try {
+			for (ICompilationUnit cu : affectedCUs) {
+				CompilationUnit root= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu, true);
+				root.accept(visitor);
+			}
+		} catch (AbortSearchException e) {
+			result.addWarning(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_subtype_method_exists, new String[] { visitor.isGetterConflict() ? getGetterName() : getSetterName(), visitor.getTypeName() }));
+		}
 	}
 
 	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List<TextEditGroup> groups, ImportRewrite importRewrite) throws CoreException {

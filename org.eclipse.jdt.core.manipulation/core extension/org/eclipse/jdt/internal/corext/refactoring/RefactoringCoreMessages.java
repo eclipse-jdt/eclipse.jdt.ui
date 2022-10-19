@@ -2295,6 +2295,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String SelfEncapsulateField_setter_pattern;
 
+	public static String SelfEncapsulateField_subtype_method_exists;
+
 	public static String SelfEncapsulateField_type_not_resolveable;
 
 	public static String SelfEncapsulateField_use_accessors;
