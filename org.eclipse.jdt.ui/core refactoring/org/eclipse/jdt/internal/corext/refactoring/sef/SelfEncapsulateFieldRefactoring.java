@@ -478,7 +478,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				root.accept(visitor);
 			}
 		} catch (AbortSearchException e) {
-			result.addWarning(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_subtype_method_exists, new String[] { visitor.isGetterConflict() ? getGetterName() : getSetterName(), visitor.getTypeName() }));
+			result.addError(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_subtype_method_exists, new String[] { visitor.isGetterConflict() ? getGetterName() : getSetterName(), visitor.getTypeName() }));
 		}
 	}
 
