@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - Import static (Ctrl+Shift+M) creates imports for private methods - https://bugs.eclipse.org/409594
+ *     Fabian Pfaff <fabian.pfaff@vogella.com> - Import static doesn't work when static method is referenced from subtype - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/276
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -285,31 +286,29 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 					}
 					if (Modifier.isStatic(binding.getModifiers())) {
 						if (containerName.length() > 0) {
-							if (containerName.equals(declaringClass.getName()) || containerName.equals(declaringClass.getQualifiedName()) ) {
-								ASTNode node= nameNode.getParent();
-								boolean isDirectlyAccessible= false;
-								while (node != null) {
-									if (isTypeDeclarationSubTypeCompatible(node, declaringClass)) {
-										isDirectlyAccessible= true;
-										break;
-									}
-									node= node.getParent();
+							ASTNode node= nameNode.getParent();
+							boolean isDirectlyAccessible= false;
+							while (node != null) {
+								if (isTypeDeclarationSubTypeCompatible(node, declaringClass)) {
+									isDirectlyAccessible= true;
+									break;
 								}
-								if (!isDirectlyAccessible) {
-									if (Modifier.isPrivate(declaringClass.getModifiers())) {
-										fStatus= JavaUIStatus.createError(IStatus.ERROR,
-												Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, BasicElementLabels.getJavaElementName(declaringClass.getName())),
-												null);
-										return null;
-									}
-									String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
-									if (!res.equals(simpleName)) {
-										// adding import failed
-										return null;
-									}
-								}
-								return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+								node= node.getParent();
 							}
+							if (!isDirectlyAccessible) {
+								if (Modifier.isPrivate(declaringClass.getModifiers())) {
+									fStatus= JavaUIStatus.createError(IStatus.ERROR,
+											Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, BasicElementLabels.getJavaElementName(declaringClass.getName())),
+											null);
+									return null;
+								}
+								String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
+								if (!res.equals(simpleName)) {
+									// adding import failed
+									return null;
+								}
+							}
+							return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
 						}
 					}
 					return null; // no static imports for packages
