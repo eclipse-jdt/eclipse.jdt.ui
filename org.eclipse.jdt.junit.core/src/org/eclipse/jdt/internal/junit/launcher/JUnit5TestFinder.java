@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 IBM Corporation and others.
+ * Copyright (c) 2016, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -218,7 +218,7 @@ public class JUnit5TestFinder implements ITestFinder {
 
 		// search for all types with references to RunWith and Test and all subclasses
 		for (IType type : allClasses) {
-			if (internalIsTest(type, pm) && region.contains(type)) {
+			if (region.contains(type) && internalIsTest(type, pm)) {
 				addTypeAndSubtypes(type, result, hierarchy);
 			}
 		}

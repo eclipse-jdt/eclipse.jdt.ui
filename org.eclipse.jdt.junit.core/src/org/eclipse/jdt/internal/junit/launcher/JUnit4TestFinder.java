@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2021 IBM Corporation and others.
+ * Copyright (c) 2006, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -132,11 +134,20 @@ public class JUnit4TestFinder implements ITestFinder {
 			ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, new SubProgressMonitor(pm, 1));
 			IType[] allClasses= hierarchy.getAllClasses();
 
+			// filter out anonymous classes which have no name
+			List<IType> nonAnonymousClasses= new ArrayList<>();
+			for (IType t : allClasses) {
+				if (!t.getElementName().isEmpty()) {
+					nonAnonymousClasses.add(t);
+				}
+			}
+			IType[] filteredClasses= nonAnonymousClasses.toArray(new IType[0]);
+
 			// search for all types with references to RunWith and Test and all subclasses
-			HashSet<IType> candidates= new HashSet<>(allClasses.length);
+			HashSet<IType> candidates= new HashSet<>(filteredClasses.length);
 			SearchRequestor requestor= new AnnotationSearchRequestor(hierarchy, candidates);
 
-			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(allClasses, IJavaSearchScope.SOURCES);
+			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(filteredClasses, IJavaSearchScope.SOURCES);
 			int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 			SearchPattern runWithPattern= SearchPattern.createPattern(Annotation.RUN_WITH.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE, matchRule);
 			SearchPattern testPattern= SearchPattern.createPattern(Annotation.TEST.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE, matchRule);
@@ -147,7 +158,7 @@ public class JUnit4TestFinder implements ITestFinder {
 
 			// find all classes in the region
 			for (IType curr : candidates) {
-				if (CoreTestSearchEngine.isAccessibleClass(curr) && !Flags.isAbstract(curr.getFlags()) && region.contains(curr)) {
+				if (!Flags.isAbstract(curr.getFlags()) && CoreTestSearchEngine.isAccessibleClass(curr) && region.contains(curr)) {
 					result.add(curr);
 				}
 			}
