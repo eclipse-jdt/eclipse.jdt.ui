@@ -502,10 +502,9 @@ public class ImportOrganizeTest extends CoreTests {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
+		buf.append("import java.util.Properties;\n");
 		buf.append("import java.io.File;\n");
 		buf.append("import java.io.FileInputStream;\n");
-		buf.append("\n");
-		buf.append("import java.util.Properties;\n");
 		buf.append("\n");
 		buf.append("public class C extends Vector {\n");
 		buf.append("}\n");
@@ -521,11 +520,10 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("\n");
 		buf.append("import java.util.Properties;\n");
 		buf.append("import java.util.Vector;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.FileInputStream;\n");
 		buf.append("\n");
 		buf.append("public class C extends Vector {\n");
 		buf.append("}\n");
