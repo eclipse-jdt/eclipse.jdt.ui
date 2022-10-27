@@ -843,7 +843,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	@Test
 	public void test120() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
-		helper1(7, 63, 7, 87, true, false, "ch1", "charAt");
+		helper1(7, 63, 7, 87, true, false, "charAt", "charAt");
 	}
 
 	@Test
@@ -864,6 +864,11 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(8, 28, 8, 38, true, false, "j", "j");
 	}
 
+	@Test
+	public void test124() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(8, 32, 8, 42, true, false, "length", "length");
+	}
 
 	@Test
 	public void testZeroLengthSelection0() throws Exception {
