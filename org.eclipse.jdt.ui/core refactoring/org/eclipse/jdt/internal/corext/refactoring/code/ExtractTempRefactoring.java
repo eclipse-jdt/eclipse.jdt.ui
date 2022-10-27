@@ -822,7 +822,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (insertAtSelection) {
 				ASTNode realCommonASTNode= null;
 				realCommonASTNode= evalStartAndEnd(reSortRetainOnlyReplacableMatches, selectNumber);
-				if (realCommonASTNode == null) {
+				if (realCommonASTNode == null && selectNumber >=0 ) {
 					fSeen.add(reSortRetainOnlyReplacableMatches[selectNumber]);
 				}
 				if (realCommonASTNode != null) {
