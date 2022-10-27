@@ -650,10 +650,8 @@ public class ExtractTempRefactoring extends Refactoring {
 					}
 					if (flag == false)
 						break;
-					System.out.println(fSelectionStart + " " + fSelectionLength); //$NON-NLS-1$
 					createTempDeclaration();
 					if (fStartPoint != -1 && fEndPoint != -1) {
-						System.out.println(fStartPoint + " " + fEndPoint); //$NON-NLS-1$
 						addReplaceExpressionWithTemp();
 						cnt++;
 						fTempName= newName + "_" + String.valueOf(cnt); //$NON-NLS-1$
@@ -825,7 +823,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				if (realCommonASTNode == null && selectNumber >=0 ) {
 					fSeen.add(reSortRetainOnlyReplacableMatches[selectNumber]);
 				}
-				if (realCommonASTNode != null) {
+				if (realCommonASTNode != null || reSortRetainOnlyReplacableMatches.length ==0) {
 					insertAt(getSelectedExpression().getAssociatedNode(), vds);
 				}
 				return;
