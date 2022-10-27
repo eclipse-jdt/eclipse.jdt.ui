@@ -22,10 +22,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -164,37 +163,31 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	 */
 	@Override
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
+		SubMonitor subMonitor= SubMonitor.convert(monitor, CodeGenerationMessages.AddImportsOperation_description, 4);
+
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(fCompilationUnit, SharedASTProviderCore.WAIT_YES, subMonitor.split(1));
+		if (astRoot == null)
+			throw new OperationCanceledException();
+
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(astRoot, true);
+
+		MultiTextEdit res= new MultiTextEdit();
+
+		TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, subMonitor.split(1));
+		if (edit == null) {
+			return;
 		}
-		try {
-			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 4);
+		res.addChild(edit);
 
-			CompilationUnit astRoot= SharedASTProviderCore.getAST(fCompilationUnit, SharedASTProviderCore.WAIT_YES, new SubProgressMonitor(monitor, 1));
-			if (astRoot == null)
-				throw new OperationCanceledException();
+		TextEdit importsEdit= importRewrite.rewriteImports(subMonitor.split(1));
+		res.addChild(importsEdit);
 
-			ImportRewrite importRewrite= StubUtility.createImportRewrite(astRoot, true);
+		fResultingEdit= res;
 
-			MultiTextEdit res= new MultiTextEdit();
-
-			TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, new SubProgressMonitor(monitor, 1));
-			if (edit == null) {
-				return;
-			}
-			res.addChild(edit);
-
-			TextEdit importsEdit= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
-			res.addChild(importsEdit);
-
-			fResultingEdit= res;
-
-			if (fApply) {
-				JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, new SubProgressMonitor(monitor, 1));
-			}
-		} finally {
-			monitor.done();
+		if (fApply) {
+			JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, subMonitor.split(1));
 		}
+		subMonitor.setWorkRemaining(0);
 	}
 
 	/**
@@ -207,6 +200,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	}
 
 	private TextEdit evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws JavaModelException {
+		SubMonitor subMonitor= SubMonitor.convert(monitor, 1);
 		SimpleName nameNode= null;
 		if (root != null) { // got an AST
 			ASTNode node= NodeFinder.perform(root, offset, length);
@@ -354,15 +348,12 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
 
-		TypeNameMatch[] types= findAllTypes(simpleName, searchScope, nameNode, new SubProgressMonitor(monitor, 1));
+		TypeNameMatch[] types= findAllTypes(simpleName, searchScope, nameNode, subMonitor.split(1));
 		if (types.length == 0) {
 			fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_notresolved_message, BasicElementLabels.getJavaElementName(simpleName)), null);
 			return null;
 		}
 
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
 		TypeNameMatch chosen;
 		if (types.length > 1 && fQuery != null) {
 			chosen= fQuery.chooseImport(types, containerName);
