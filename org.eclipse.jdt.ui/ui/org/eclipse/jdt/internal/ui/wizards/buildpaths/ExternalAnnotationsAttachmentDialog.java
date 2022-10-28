@@ -24,6 +24,8 @@ import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -43,12 +45,13 @@ public class ExternalAnnotationsAttachmentDialog extends StatusDialog {
 	 *
 	 * @param parent Parent shell for the dialog
 	 * @param entry The entry to edit.
+	 * @param javaProject
 	 */
-	public ExternalAnnotationsAttachmentDialog(Shell parent, IPath entry) {
+	public ExternalAnnotationsAttachmentDialog(Shell parent, IPath entry, IJavaProject javaProject) {
 		super(parent);
 
 		IStatusChangeListener listener= this::updateStatus;
-		fAnnotationsAttachmentBlock= new ExternalAnnotationsAttachmentBlock(listener, entry);
+		fAnnotationsAttachmentBlock= new ExternalAnnotationsAttachmentBlock(listener, entry, javaProject);
 
 		setTitle(NewWizardMessages.ExternalAnnotationsDialog_title);
 	}
