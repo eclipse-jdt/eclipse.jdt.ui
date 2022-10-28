@@ -23,22 +23,29 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.jface.text.link.LinkedPositionGroup;
-
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.corrections.IInvocationContext;
+import org.eclipse.jdt.core.corrections.proposals.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.core.corrections.proposals.ChangeCorrectionProposal;
+import org.eclipse.jdt.core.corrections.proposals.CodeActionKind;
+import org.eclipse.jdt.core.corrections.proposals.IProposalRelevance;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -52,23 +59,32 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 public class QuickAssistProcessorUtil {
 
@@ -489,4 +505,183 @@ public class QuickAssistProcessorUtil {
 		return statements.size();
 	}
 
+	public boolean getSplitVariableProposals(IInvocationContext context, ASTNode node,
+			ArrayList<ChangeCorrectionProposal> resultingCollections) throws JavaModelException {
+		if (resultingCollections == null) {
+			return true;
+		}
+		VariableDeclarationFragment fragment;
+		if (node instanceof VariableDeclarationFragment) {
+			fragment = (VariableDeclarationFragment) node;
+		} else if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
+			fragment = (VariableDeclarationFragment) node.getParent();
+		} else {
+			return false;
+		}
+
+		if (fragment.getInitializer() == null) {
+			return false;
+		}
+
+		Statement statement;
+		ASTNode fragParent = fragment.getParent();
+		boolean isVarType = false;
+		if (fragParent instanceof VariableDeclarationStatement) {
+			statement = (VariableDeclarationStatement) fragParent;
+			Type type = ((VariableDeclarationStatement) fragParent).getType();
+			isVarType = (type == null) ? false : type.isVar();
+		} else if (fragParent instanceof VariableDeclarationExpression) {
+			if (fragParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+				return false;
+			}
+			statement = (Statement) fragParent.getParent();
+			Type type = ((VariableDeclarationExpression) fragParent).getType();
+			isVarType = (type == null) ? false : type.isVar();
+		} else {
+			return false;
+		}
+		if (!(statement instanceof ForStatement) && !(statement instanceof VariableDeclarationStatement)) {
+			return false;
+		}
+		// statement is ForStatement or VariableDeclarationStatement
+		ASTNode statementParent = statement.getParent();
+		StructuralPropertyDescriptor property = statement.getLocationInParent();
+		if (!property.isChildListProperty()) {
+			return false;
+		}
+
+		List<? extends ASTNode> list = ASTNodes.getChildListProperty(statementParent,
+				(ChildListPropertyDescriptor) property);
+
+		AST ast = statement.getAST();
+		ASTRewrite rewrite = ASTRewrite.create(ast);
+
+		String label = CorrectionMessages.QuickAssistProcessor_splitdeclaration_description;
+		ASTRewriteCorrectionProposal proposal = new ASTRewriteCorrectionProposal(label, CodeActionKind.RefactorRewrite,
+				context.getCompilationUnit(), rewrite, IProposalRelevance.SPLIT_VARIABLE_DECLARATION);
+
+		// for multiple declarations; all must be moved outside, leave none behind
+		if (statement instanceof ForStatement) {
+			IBuffer buffer = context.getCompilationUnit().getBuffer();
+			ForStatement forStatement = (ForStatement) statement;
+			VariableDeclarationExpression oldVarDecl = (VariableDeclarationExpression) fragParent;
+			Type type = oldVarDecl.getType();
+			ITypeBinding tBinding = type.resolveBinding();
+			List<VariableDeclarationFragment> oldFragments = oldVarDecl.fragments();
+			CompilationUnit cup = (CompilationUnit) fragment.getRoot();
+			ListRewrite forListRewrite = rewrite.getListRewrite(forStatement, ForStatement.INITIALIZERS_PROPERTY);
+			// create the new initializers
+			for (VariableDeclarationFragment oldFragment : oldFragments) {
+				int extendedStartPositionFragment = cup.getExtendedStartPosition(oldFragment);
+				int extendedLengthFragment = cup.getExtendedLength(oldFragment);
+				StringBuilder codeFragment = new StringBuilder(
+						buffer.getText(extendedStartPositionFragment, extendedLengthFragment));
+				if (oldFragment.getInitializer() == null) {
+					ITypeBinding typeBinding = type.resolveBinding();
+					if ("Z".equals(typeBinding.getBinaryName())) { //$NON-NLS-1$
+						codeFragment.append(" = false"); //$NON-NLS-1$
+					} else if (type.isPrimitiveType()) {
+						codeFragment.append(" = 0"); //$NON-NLS-1$
+					} else {
+						codeFragment.append(" = null"); //$NON-NLS-1$
+					}
+				}
+				Assignment newAssignmentFragment = (Assignment) rewrite.createStringPlaceholder(codeFragment.toString(),
+						ASTNode.ASSIGNMENT);
+				forListRewrite.insertLast(newAssignmentFragment, null);
+			}
+
+			// create the new declarations
+			Type nType = null;
+			if (isVarType) {
+				ImportRewrite importRewrite = proposal.createImportRewrite(context.getASTRoot());
+				ImportRewriteContext icontext = new ContextSensitiveImportRewriteContext(cup, importRewrite);
+				nType = importRewrite.addImport(tBinding, ast, icontext, TypeLocation.LOCAL_VARIABLE);
+				String codeDeclaration = tBinding.getName();
+				String commentToken = ""; //$NON-NLS-1$
+				int extendedStatementStart = cup.getExtendedStartPosition(oldVarDecl);
+				if (oldVarDecl.getStartPosition() > extendedStatementStart) {
+					commentToken = buffer.getText(extendedStatementStart,
+							oldVarDecl.getStartPosition() - extendedStatementStart);
+				}
+				codeDeclaration = commentToken + codeDeclaration;
+				nType = (Type) rewrite.createStringPlaceholder(codeDeclaration.trim(), type.getNodeType());
+			} else {
+				int extendedStartPositionDeclaration = cup.getExtendedStartPosition(oldVarDecl);
+				int firstFragmentStart = ((ASTNode) oldVarDecl.fragments().get(0)).getStartPosition();
+				String codeDeclaration = buffer.getText(extendedStartPositionDeclaration,
+						firstFragmentStart - extendedStartPositionDeclaration);
+				nType = (Type) rewrite.createStringPlaceholder(codeDeclaration.trim(), type.getNodeType());
+			}
+
+			VariableDeclarationFragment newFrag = ast.newVariableDeclarationFragment();
+			VariableDeclarationStatement newVarDec = ast.newVariableDeclarationStatement(newFrag);
+			newVarDec.setType(nType);
+			newFrag.setName(ast.newSimpleName(oldFragments.get(0).getName().getIdentifier()));
+			newFrag.extraDimensions()
+					.addAll(DimensionRewrite.copyDimensions(oldFragments.get(0).extraDimensions(), rewrite));
+
+			for (int i = 1; i < oldFragments.size(); i++) {
+				VariableDeclarationFragment oldFragment = oldFragments.get(i);
+				newFrag = ast.newVariableDeclarationFragment();
+				newFrag.setName(ast.newSimpleName(oldFragment.getName().getIdentifier()));
+				newFrag.extraDimensions()
+						.addAll(DimensionRewrite.copyDimensions(oldFragment.extraDimensions(), rewrite));
+				newVarDec.fragments().add(newFrag);
+			}
+			newVarDec.modifiers().addAll(ASTNodeFactory.newModifiers(ast, oldVarDecl.getModifiers()));
+
+			ListRewrite listRewriter = rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
+			listRewriter.insertBefore(newVarDec, statement, null);
+
+			rewrite.remove(oldVarDecl, null);
+
+			resultingCollections.add(proposal);
+			return true;
+		}
+
+		int insertIndex = list.indexOf(statement);
+		ITypeBinding binding = fragment.getInitializer().resolveTypeBinding();
+		Expression placeholder = (Expression) rewrite.createMoveTarget(fragment.getInitializer());
+		if (placeholder instanceof ArrayInitializer && binding != null && binding.isArray()) {
+			ArrayCreation creation = ast.newArrayCreation();
+			creation.setInitializer((ArrayInitializer) placeholder);
+			final ITypeBinding componentType = binding.getElementType();
+			Type type = null;
+			if (componentType.isPrimitive()) {
+				type = ast.newPrimitiveType(PrimitiveType.toCode(componentType.getName()));
+			} else {
+				type = ast.newSimpleType(ast.newSimpleName(componentType.getName()));
+			}
+			creation.setType(ast.newArrayType(type, binding.getDimensions()));
+			placeholder = creation;
+		}
+
+		Assignment assignment = ast.newAssignment();
+		assignment.setRightHandSide(placeholder);
+		assignment.setLeftHandSide(ast.newSimpleName(fragment.getName().getIdentifier()));
+
+		// statement is VariableDeclarationStatement
+		Statement newStatement = ast.newExpressionStatement(assignment);
+		;
+		insertIndex += 1; // add after declaration
+
+		if (isVarType) {
+			VariableDeclarationStatement varDecl = (VariableDeclarationStatement) statement;
+			CompilationUnit cup = (CompilationUnit) fragment.getRoot();
+			Type type = varDecl.getType();
+			ITypeBinding tBinding = type.resolveBinding();
+			ImportRewrite importRewrite = proposal.createImportRewrite(context.getASTRoot());
+			ImportRewriteContext icontext = new ContextSensitiveImportRewriteContext(cup, importRewrite);
+			Type nType = importRewrite.addImport(tBinding, ast, icontext, TypeLocation.LOCAL_VARIABLE);
+			rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, nType, null);
+			DimensionRewrite.removeAllChildren(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY,
+					rewrite, null);
+		}
+
+		ListRewrite listRewriter = rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
+		listRewriter.insertAt(newStatement, insertIndex, null);
+		resultingCollections.add(proposal);
+		return true;
+	}
 }
