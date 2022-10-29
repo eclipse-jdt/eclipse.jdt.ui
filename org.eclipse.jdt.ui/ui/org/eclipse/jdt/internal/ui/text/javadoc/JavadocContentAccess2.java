@@ -1436,6 +1436,13 @@ public class JavadocContentAccess2 {
 					++fPreCounter;
 				} else if (text.equals("</pre>")) { //$NON-NLS-1$
 					--fPreCounter;
+				} else if (fPreCounter > 0 && text.matches("}\\s*</pre>")) { //$NON-NLS-1$
+					// this is a temporary workaround for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/316
+					// as the parser for @code is treating the first } it finds as the end of the code
+					// sequence but this is not the case for a <pre>{@code sequence which goes over
+					// multiple lines and may contain }'s that are part of the code
+					--fPreCounter;
+					text= "</pre>"; //$NON-NLS-1$
 				}
 				handleText(text);
 			} else if (child instanceof TagElement) {
