@@ -155,26 +155,7 @@ public final class BuildPathDialogAccess {
 	 * @since 3.11
 	 */
 	public static IPath configureExternalAnnotationsAttachment(Shell shell, IPath initialEntry) {
-		return configureExternalAnnotationsAttachment(shell, initialEntry,  null);
-	}
-
-	/**
-	 * Shows the UI for configuring an external annotations attachment. <code>null</code> is
-	 * returned when the user cancels the dialog. The dialog does not apply any changes.
-	 *
-	 * @param shell The parent shell for the dialog
-	 * @param initialEntry The entry to edit.
-	 * @param javaProject The enclosing java project
-	 * @return Returns the selected path, possibly different from the initialEntry,
-	 * or <code>null</code> if the dialog has been cancelled.
-	 * @since 3.27
-	 */
-	public static IPath configureExternalAnnotationsAttachment(Shell shell, IPath initialEntry, IJavaProject javaProject) {
-		ExternalAnnotationsAttachmentDialog dialog= new ExternalAnnotationsAttachmentDialog(shell, initialEntry, javaProject);
-		if (dialog.open() == Window.OK) {
-			return dialog.getResult();
-		}
-		return null;
+		return ExternalAnnotationsAttachmentDialog.configureExternalAnnotationsAttachment(shell, initialEntry, null);
 	}
 
 	/**

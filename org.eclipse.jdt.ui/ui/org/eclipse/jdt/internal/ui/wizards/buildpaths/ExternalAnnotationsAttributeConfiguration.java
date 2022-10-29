@@ -27,7 +27,6 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -90,7 +89,7 @@ public class ExternalAnnotationsAttributeConfiguration extends ClasspathAttribut
 	public IClasspathAttribute performEdit(Shell shell, ClasspathAttributeAccess attribute) {
 		String initialLocation= attribute.getClasspathAttribute().getValue();
 		IPath locationPath= initialLocation == null ? null : new Path(initialLocation);
-		IPath newPath= BuildPathDialogAccess.configureExternalAnnotationsAttachment(shell, locationPath, attribute.getJavaProject());
+		IPath newPath= ExternalAnnotationsAttachmentDialog.configureExternalAnnotationsAttachment(shell, locationPath, attribute.getJavaProject());
 		if(null == newPath)	// Was the dialog cancelled?
 			return null;
 		return JavaCore.newClasspathAttribute(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, newPath.segmentCount() == 0 ? null : newPath.toPortableString());
