@@ -1442,7 +1442,9 @@ public class JavadocContentAccess2 {
 					// sequence but this is not the case for a <pre>{@code sequence which goes over
 					// multiple lines and may contain }'s that are part of the code
 					--fPreCounter;
-					text= "</pre>"; //$NON-NLS-1$
+					text= "</code></pre>"; //$NON-NLS-1$
+					int lastCodeEnd= fBuf.lastIndexOf("</code>"); //$NON-NLS-1$
+					fBuf.replace(lastCodeEnd, lastCodeEnd + 6, ""); //$NON-NLS-1$
 				}
 				handleText(text);
 			} else if (child instanceof TagElement) {

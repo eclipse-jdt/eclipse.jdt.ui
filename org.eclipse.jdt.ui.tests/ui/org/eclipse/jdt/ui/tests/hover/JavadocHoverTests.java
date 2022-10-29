@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 GK Software SE and others.
+ * Copyright (c) 2020, 2022 GK Software SE and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Stephan Herrmann - initial API and implementation
+ *     Red Hat Inc. - add test for pre with code tag
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.hover;
 
@@ -140,4 +141,64 @@ public class JavadocHoverTests extends CoreTests {
 		// Should not throw ClassCastException
 		JavadocHover.getHoverInfo(elements, myEnumCu, new Region(range.getOffset(), range.getLength()), null);
 	}
+
+	@Test
+	public void testCodeTagWithPre() throws Exception {
+		String source=
+				"package p;\n" +
+				"public class TestClass {\n" +
+			    "/**\n" +
+			    " * Performs:\n" +
+			    " * <pre>{@code\n" +
+			    " *    for (String s : strings) {\n" +
+			    " *        if (s.equals(value)) {\n" +
+			    " * 	          return 0;\n" +
+			    " *        }\n" +
+			    " *        if (s.startsWith(value)) {\n" +
+			    " *            return 1;\n" +
+			    " *        }\n" +
+			    " *    }\n" +
+			    " *    return -1;\n" +
+			    " * }</pre>\n" +
+			    " */\n" +
+				"int check (String value, String[] strings) {\n" +
+				"	for (String s : strings) {\n" +
+				"		if (s.equals(value)) {\n" +
+				"			return 0;\n" +
+				"		}\n" +
+				"		if (s.startsWith(value)) {\n" +
+				"			return 1;\n" +
+				"		}\n" +
+				"	}\n" +
+				"	return -1;\n" +
+				"}\n";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/TestClass.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("TestClass");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			String expectedCodeSequence= "<pre><code>\n"
+					+ "    for (String s : strings) {\n"
+					+ "        if (s.equals(value)) {\n"
+					+ " 	          return 0;>\n"
+					+ "        }\n"
+					+ "        if (s.startsWith(value)) {\n"
+					+ "            return 1;\n"
+					+ "        }\n"
+					+ "    }\n"
+					+ "    return -1;\n"
+					+ " </code></pre>";
+
+			// value should be expanded:
+			assertTrue(actualHtmlContent, actualHtmlContent.contains(expectedCodeSequence));
+		}
+	}
+
 }
+
