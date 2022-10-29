@@ -52,6 +52,10 @@ public class JavaPrecomputedNamesAssistProcessor implements ISubjectControlConte
 		fProposalAutoActivationSet= triggers.toCharArray();
 	}
 
+	public void setNames(Iterable<String> names) {
+		fNames= names;
+	}
+
 	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$

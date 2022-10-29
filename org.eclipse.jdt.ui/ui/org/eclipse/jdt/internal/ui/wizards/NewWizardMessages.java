@@ -457,6 +457,12 @@ public final class NewWizardMessages extends NLS {
 	public static String ExternalAnnotationsDialog_title;
 
 	public static String AnnotationsAttachmentBlock_message;
+	public static String AnnotationsAttachmentBlock_artifact_label;
+	public static String AnnotationsAttachmentBlock_artifactNotFound_error;
+	public static String AnnotationsAttachmentBlock_container_label;
+	public static String AnnotationsAttachmentBlock_containerRelative_radio;
+	public static String AnnotationsAttachmentBlock_missingArtifact_error;
+	public static String AnnotationsAttachmentBlock_missingContainer_error;
 	public static String AnnotationsAttachmentBlock_filename_externalfile_button;
 	public static String AnnotationsAttachmentBlock_filename_externalfolder_button;
 	public static String AnnotationsAttachmentBlock_filename_external_label;

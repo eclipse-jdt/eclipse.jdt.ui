@@ -44,13 +44,13 @@ import org.eclipse.ui.views.navigator.ResourceComparator;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.FilteredElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -155,11 +155,7 @@ public final class BuildPathDialogAccess {
 	 * @since 3.11
 	 */
 	public static IPath configureExternalAnnotationsAttachment(Shell shell, IPath initialEntry) {
-		ExternalAnnotationsAttachmentDialog dialog= new ExternalAnnotationsAttachmentDialog(shell, initialEntry);
-		if (dialog.open() == Window.OK) {
-			return dialog.getResult();
-		}
-		return null;
+		return ExternalAnnotationsAttachmentDialog.configureExternalAnnotationsAttachment(shell, initialEntry, null);
 	}
 
 	/**
