@@ -14,6 +14,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.hover;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -152,7 +154,7 @@ public class JavadocHoverTests extends CoreTests {
 			    " * <pre>{@code\n" +
 			    " *    for (String s : strings) {\n" +
 			    " *        if (s.equals(value)) {\n" +
-			    " * 	          return 0;\n" +
+			    " *            return 0;\n" +
 			    " *        }\n" +
 			    " *        if (s.startsWith(value)) {\n" +
 			    " *            return 1;\n" +
@@ -186,7 +188,7 @@ public class JavadocHoverTests extends CoreTests {
 			String expectedCodeSequence= "<pre><code>\n"
 					+ "    for (String s : strings) {\n"
 					+ "        if (s.equals(value)) {\n"
-					+ " 	          return 0;>\n"
+					+ "            return 0;\n"
 					+ "        }\n"
 					+ "        if (s.startsWith(value)) {\n"
 					+ "            return 1;\n"
@@ -196,7 +198,10 @@ public class JavadocHoverTests extends CoreTests {
 					+ " </code></pre>";
 
 			// value should be expanded:
-			assertTrue(actualHtmlContent, actualHtmlContent.contains(expectedCodeSequence));
+			int index= actualHtmlContent.indexOf("<pre><code>");
+			assertFalse(index == -1);
+			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
+			assertEquals("sequence doesn't match", actualSnippet, expectedCodeSequence);
 		}
 	}
 
