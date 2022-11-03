@@ -15,7 +15,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -304,13 +304,53 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
 	}
 
+	private void getTypeParameters(ITypeBinding binding, IMethodBinding methodBinding, Set<ITypeBinding> typeParametersFound) {
+		if (methodBinding != null) {
+			ITypeBinding[] typeParameters= methodBinding.getTypeParameters();
+			for (ITypeBinding typeParameter : typeParameters) {
+				if (typeParameter.isEqualTo(binding)) {
+					typeParametersFound.add(typeParameter);
+					ITypeBinding[] typeBounds= typeParameter.getTypeBounds();
+					for (ITypeBinding typeBound : typeBounds) {
+						getTypeParameters(typeBound, methodBinding, typeParametersFound);
+					}
+				}
+			}
+		}
+	}
+
 	@Override
-	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
+	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params,
+			ImportRewriteContext context) throws CoreException {
 		AST ast= rewrite.getAST();
+		ASTNode node= getInvocationNode();
+		Set<ITypeBinding> typeParametersFound= new LinkedHashSet<>();
+
+		ITypeBinding returnTypeBinding= null;
+
+		if (node.getParent() instanceof MethodInvocation) {
+			MethodInvocation parent= (MethodInvocation) node.getParent();
+			if (parent.getExpression() == node) {
+				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments(), getSenderBinding());
+				if (bindings.length > 0) {
+					returnTypeBinding= bindings[0];
+				}
+			}
+		}
+		if (returnTypeBinding == null) {
+			ITypeBinding binding= ASTResolving.guessBindingForReference(node);
+			if (binding != null && binding.isWildcardType()) {
+				binding= ASTResolving.normalizeWildcardType(binding, false, ast);
+			}
+			returnTypeBinding= binding;
+		}
+
+		if (returnTypeBinding != null) {
+			IMethodBinding mbinding= returnTypeBinding.getDeclaringMethod();
+			getTypeParameters(returnTypeBinding, mbinding, typeParametersFound);
+		}
 
 		List<Expression> arguments= fArguments;
-
-		Set<ITypeBinding> typeParametersFound= new HashSet<>();
 
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression elem= arguments.get(i);
@@ -319,18 +359,19 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 				binding= ASTResolving.normalizeWildcardType(binding, true, ast);
 			}
 			if (binding != null) {
-				IMethodBinding mbinding= binding.getDeclaringMethod();
-				if (mbinding != null) {
-					ITypeBinding[] bindings= mbinding.getTypeParameters();
-					for (ITypeBinding m : bindings) {
-						if (m.isEqualTo(binding) && !typeParametersFound.contains(binding)) {
-							typeParametersFound.add(m);
-							TypeParameter newTypeParameter= ast.newTypeParameter();
-							newTypeParameter.setName(ast.newSimpleName(m.getName()));
-							params.add(newTypeParameter);
-						}
-					}
-				}
+				getTypeParameters(binding, binding.getDeclaringMethod(), typeParametersFound);
+			}
+		}
+
+		for (ITypeBinding m : typeParametersFound) {
+			TypeParameter newTypeParameter= ast.newTypeParameter();
+			newTypeParameter.setName(ast.newSimpleName(m.getName()));
+			params.add(newTypeParameter);
+			ITypeBinding[] bounds= m.getTypeBounds();
+			List<Type> newTypeBounds= newTypeParameter.typeBounds();
+			for (ITypeBinding bound : bounds) {
+				Type t= getImportRewrite().addImport(bound, ast, context, TypeLocation.TYPE_PARAMETER);
+				newTypeBounds.add(t);
 			}
 		}
 	}
