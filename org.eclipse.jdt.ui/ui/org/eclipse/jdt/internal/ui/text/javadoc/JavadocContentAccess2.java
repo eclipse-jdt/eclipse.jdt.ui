@@ -471,6 +471,7 @@ public class JavadocContentAccess2 {
 	private StringBuffer[] fTypeParamDescriptions;
 	private StringBuffer[] fParamDescriptions;
 	private HashMap<String, StringBuffer> fExceptionDescriptions;
+	private int fPreCounter;
 
 	private JavadocContentAccess2(IJavaElement element, Javadoc javadoc, String source, JavadocLookup lookup) {
 		Assert.isNotNull(element);
@@ -1387,10 +1388,14 @@ public class JavadocContentAccess2 {
 
 
 	private void handleContentElements(List<? extends ASTNode> nodes) {
-		handleContentElements(nodes, false);
+		handleContentElements(nodes, false, null);
 	}
 
-	private void handleContentElements(List<? extends ASTNode> nodes, boolean skipLeadingWhitespace) {
+	private void handleContentElements(List<? extends ASTNode> nodes, boolean skipLeadingWhiteSpace) {
+		handleContentElements(nodes, skipLeadingWhiteSpace, null);
+	}
+
+	private void handleContentElements(List<? extends ASTNode> nodes, boolean skipLeadingWhitespace, TagElement tagElement) {
 		ASTNode previousNode= null;
 		for (ASTNode child : nodes) {
 			if (previousNode != null) {
@@ -1411,6 +1416,13 @@ public class JavadocContentAccess2 {
 					String text= removeDocLineIntros(textWithStars);
 					fBuf.append(text);
 				}
+			} else if (tagElement != null && fPreCounter >= 1) {
+				int childStart= child.getStartPosition();
+				int previousEnd= tagElement.getStartPosition() + tagElement.getTagName().length() + 1;
+				// Need to preserve whitespace before a node in a <pre> section
+				String textWithStars= fSource.substring(previousEnd, childStart);
+				String text= removeDocLineIntros(textWithStars);
+				fBuf.append(text);
 			}
 			previousNode= child;
 			if (child instanceof TextElement) {
@@ -1420,6 +1432,20 @@ public class JavadocContentAccess2 {
 				}
 				// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=233481 :
 				text= text.replaceAll("(\r\n?|\n)([ \t]*\\*)", "$1"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (tagElement == null && text.equals("<pre>")) { //$NON-NLS-1$
+					++fPreCounter;
+				} else if (tagElement == null && text.equals("</pre>")) { //$NON-NLS-1$
+					--fPreCounter;
+				} else if (tagElement == null && fPreCounter > 0 && text.matches("}\\s*</pre>")) { //$NON-NLS-1$
+					// this is a temporary workaround for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/316
+					// as the parser for @code is treating the first } it finds as the end of the code
+					// sequence but this is not the case for a <pre>{@code sequence which goes over
+					// multiple lines and may contain }'s that are part of the code
+					--fPreCounter;
+					text= "</code></pre>"; //$NON-NLS-1$
+					int lastCodeEnd= fBuf.lastIndexOf("</code>"); //$NON-NLS-1$
+					fBuf.replace(lastCodeEnd, lastCodeEnd + 7, ""); //$NON-NLS-1$
+				}
 				handleText(text);
 			} else if (child instanceof TagElement) {
 				handleInlineTagElement((TagElement) child);
@@ -1502,7 +1528,7 @@ public class JavadocContentAccess2 {
 		else if (isIndex)
 			handleIndex(node.fragments());
 		else if (isCode || isLiteral)
-			handleContentElements(node.fragments(), true);
+			handleContentElements(node.fragments(), true, node);
 		else if (isSnippet) {
 			handleSnippet(node);
 		}
