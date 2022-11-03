@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -304,5 +306,32 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 
 	@Override
 	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
+		AST ast= rewrite.getAST();
+
+		List<Expression> arguments= fArguments;
+
+		Set<ITypeBinding> typeParametersFound= new HashSet<>();
+
+		for (int i= 0; i < arguments.size(); i++) {
+			Expression elem= arguments.get(i);
+			ITypeBinding binding= Bindings.normalizeTypeBinding(elem.resolveTypeBinding());
+			if (binding != null && binding.isWildcardType()) {
+				binding= ASTResolving.normalizeWildcardType(binding, true, ast);
+			}
+			if (binding != null) {
+				IMethodBinding mbinding= binding.getDeclaringMethod();
+				if (mbinding != null) {
+					ITypeBinding[] bindings= mbinding.getTypeParameters();
+					for (ITypeBinding m : bindings) {
+						if (m.isEqualTo(binding) && !typeParametersFound.contains(binding)) {
+							typeParametersFound.add(m);
+							TypeParameter newTypeParameter= ast.newTypeParameter();
+							newTypeParameter.setName(ast.newSimpleName(m.getName()));
+							params.add(newTypeParameter);
+						}
+					}
+				}
+			}
+		}
 	}
 }
