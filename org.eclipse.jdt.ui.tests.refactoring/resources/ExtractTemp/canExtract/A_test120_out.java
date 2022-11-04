@@ -9,8 +9,8 @@ class A {
 			if (s.length() % 2 == 1)
 				System.out.println(charAt + s.charAt(s.length() - 2));
 		} else if (s != null && s.length() == 1) {
-			char charAt_1= s.charAt(s.length() - 1);
-			System.out.println(charAt_1);
+			char charAt2= s.charAt(s.length() - 1);
+			System.out.println(charAt2);
 		}
 		return;
 	}

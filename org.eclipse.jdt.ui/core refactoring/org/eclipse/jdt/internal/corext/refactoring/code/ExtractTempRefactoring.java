@@ -618,7 +618,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 1);
 			try {
-				int cnt= 0;
+				int cnt= 1;
 				getSelectedExpression();
 				fSelectionStart= fSelectedExpression.getAssociatedNode().getStartPosition();
 				fSelectionLength= fSelectedExpression.getAssociatedNode().getLength();
@@ -627,12 +627,15 @@ public class ExtractTempRefactoring extends Refactoring {
 				int tmpFSelectionLength= fSelectionLength;
 
 				IExpressionFragment tmpFSelectedExpression= fSelectedExpression;
+				Collection<String> usedNames= getUsedLocalNames(fSelectedExpression.getAssociatedNode());
 				String newName= fTempName;
 				createTempDeclaration();
 				if (fStartPoint != -1 && fEndPoint != -1) {
 					addReplaceExpressionWithTemp();
-					cnt++;
-					fTempName= newName + "_" + String.valueOf(cnt); //$NON-NLS-1$
+					fTempName= newName + ++cnt;
+					while (usedNames.contains(fTempName)) {
+						fTempName= newName + ++cnt;
+					}
 				}
 				while (replaceAllOccurrences() && reSortRetainOnlyReplacableMatches.length > fSeen.size()) {
 					fStartPoint= -1;
@@ -653,8 +656,10 @@ public class ExtractTempRefactoring extends Refactoring {
 					createTempDeclaration();
 					if (fStartPoint != -1 && fEndPoint != -1) {
 						addReplaceExpressionWithTemp();
-						cnt++;
-						fTempName= newName + "_" + String.valueOf(cnt); //$NON-NLS-1$
+						fTempName= newName + ++cnt;
+						while (usedNames.contains(fTempName)) {
+							fTempName= newName + ++cnt;
+						}
 					}
 				}
 				fSelectionStart= tmpFSelectionStart;
@@ -669,6 +674,25 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 	}
 
+	/**
+	 * Retrieves used names for the block containing a node.
+	 * @param selected the selected node
+	 *
+	 * @return an array of used variable names to avoid
+	 */
+	private Collection<String> getUsedLocalNames(ASTNode selected) {
+		ASTNode surroundingBlock= selected;
+		while ((surroundingBlock= surroundingBlock.getParent()) != null) {
+			if (surroundingBlock instanceof Block || surroundingBlock instanceof MethodDeclaration) {
+				break;
+			}
+		}
+		if (surroundingBlock == null) {
+			return new ArrayList<>();
+		}
+		Collection<String> localUsedNames= new ScopeAnalyzer((CompilationUnit) selected.getRoot()).getUsedVariableNames(surroundingBlock.getStartPosition(), surroundingBlock.getLength());
+		return localUsedNames;
+	}
 
 
 	@Override

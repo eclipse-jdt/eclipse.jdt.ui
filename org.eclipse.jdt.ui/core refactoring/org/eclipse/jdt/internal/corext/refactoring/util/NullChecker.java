@@ -104,7 +104,6 @@ public class NullChecker {
 		return null;
 	}
 
-
 	private Expression getOriginalExpression(Expression expr) {
 		while (expr instanceof ParenthesizedExpression || expr instanceof CastExpression) {
 			if (expr instanceof ParenthesizedExpression) {
@@ -118,8 +117,6 @@ public class NullChecker {
 		return expr;
 
 	}
-
-
 
 	private class InvocationVisitor extends ASTVisitor {
 		Set<IBinding> invocationSet;
@@ -217,7 +214,8 @@ public class NullChecker {
 
 			if (target != null) {
 				target= getOriginalExpression(target);
-				if (target instanceof Name && this.invocationSet.contains(((Name) target).resolveBinding())) {
+				IBinding targetBinding= null;
+				if (target instanceof Name && (targetBinding= ((Name)target).resolveBinding()) != null && this.invocationSet.contains(targetBinding)) {
 					this.nullFlag= true;
 					return false;
 				} else if (this.matchNodePosSet.contains(target.getStartPosition())) {
