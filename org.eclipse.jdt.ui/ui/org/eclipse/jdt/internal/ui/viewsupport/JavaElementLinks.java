@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -255,11 +255,15 @@ public class JavaElementLinks {
 			public void changing(LocationEvent event) {
 				String loc= event.location;
 
-				if ("about:blank".equals(loc)) { //$NON-NLS-1$
+				if ("about:blank".equals(loc) || loc.startsWith("data:")) { //$NON-NLS-1$ //$NON-NLS-2$
 					/*
 					 * Using the Browser.setText API triggers a location change to "about:blank".
 					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
 					 */
+					// The check for "data:" is due to Edge browser issuing a location change with a URL using the data: protocol
+					// that contains the Base64 encoded version of the text whenever setText is called on the browser.
+					// See issue: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/248
+
 					//input set with setText
 					handler.handleTextSet();
 					return;
@@ -313,7 +317,7 @@ public class JavaElementLinks {
 				}
 				if (nomatch) {
 					try {
-						if (handler.handleExternalLink(new URL(loc), event.display))
+						if (!(loc.startsWith("data:")) && handler.handleExternalLink(new URL(loc), event.display)) //$NON-NLS-1$
 							return;
 						event.doit= true;
 					} catch (MalformedURLException e) {
