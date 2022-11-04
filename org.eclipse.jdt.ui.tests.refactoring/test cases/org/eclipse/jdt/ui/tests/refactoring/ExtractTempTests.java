@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract local] Extract to local variable not replacing multiple occurrences in same statement - https://bugs.eclipse.org/406347
  *     Nicolaj Hoess <nicohoess@gmail.com> - [extract local] puts declaration at wrong position - https://bugs.eclipse.org/65875
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -825,6 +826,54 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	public void test117() throws Exception {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=377288
 		helper1(8, 18, 8, 19, true, false, "temp", "j");
+	}
+
+	@Test
+	public void test118() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(8, 28, 8, 38, true, false, "length", "length");
+	}
+
+	@Test
+	public void test119() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(5, 28, 5, 38, true, false, "length", "length");
+	}
+
+	@Test
+	public void test120() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(7, 63, 7, 87, true, false, "charAt", "charAt");
+	}
+
+	@Test
+	public void test121() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(8, 44, 8, 58, true, false, "length", "length");
+	}
+
+	@Test
+	public void test122() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(5, 68, 5, 94, true, false, "intValue", "intValue");
+	}
+
+	@Test
+	public void test123() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(8, 28, 8, 38, true, false, "j", "j");
+	}
+
+	@Test
+	public void test124() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(8, 32, 8, 42, true, false, "length", "length");
+	}
+
+	@Test
+	public void test125() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		helper1(9, 32, 9, 42, true, false, "length", "length");
 	}
 
 	@Test
