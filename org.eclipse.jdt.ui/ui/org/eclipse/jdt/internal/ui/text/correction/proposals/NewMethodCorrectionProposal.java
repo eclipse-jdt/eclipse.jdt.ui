@@ -328,26 +328,28 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 
 		ITypeBinding returnTypeBinding= null;
 
-		if (node.getParent() instanceof MethodInvocation) {
-			MethodInvocation parent= (MethodInvocation) node.getParent();
-			if (parent.getExpression() == node) {
-				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments(), getSenderBinding());
-				if (bindings.length > 0) {
-					returnTypeBinding= bindings[0];
+		if (!isConstructor()) {
+			if (node.getParent() instanceof MethodInvocation) {
+				MethodInvocation parent= (MethodInvocation) node.getParent();
+				if (parent.getExpression() == node) {
+					ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments(), getSenderBinding());
+					if (bindings.length > 0) {
+						returnTypeBinding= bindings[0];
+					}
 				}
 			}
-		}
-		if (returnTypeBinding == null) {
-			ITypeBinding binding= ASTResolving.guessBindingForReference(node);
-			if (binding != null && binding.isWildcardType()) {
-				binding= ASTResolving.normalizeWildcardType(binding, false, ast);
+			if (returnTypeBinding == null) {
+				ITypeBinding binding= ASTResolving.guessBindingForReference(node);
+				if (binding != null && binding.isWildcardType()) {
+					binding= ASTResolving.normalizeWildcardType(binding, false, ast);
+				}
+				returnTypeBinding= binding;
 			}
-			returnTypeBinding= binding;
-		}
 
-		if (returnTypeBinding != null) {
-			IMethodBinding mbinding= returnTypeBinding.getDeclaringMethod();
-			getTypeParameters(returnTypeBinding, mbinding, typeParametersFound);
+			if (returnTypeBinding != null) {
+				IMethodBinding mbinding= returnTypeBinding.getDeclaringMethod();
+				getTypeParameters(returnTypeBinding, mbinding, typeParametersFound);
+			}
 		}
 
 		List<Expression> arguments= fArguments;
