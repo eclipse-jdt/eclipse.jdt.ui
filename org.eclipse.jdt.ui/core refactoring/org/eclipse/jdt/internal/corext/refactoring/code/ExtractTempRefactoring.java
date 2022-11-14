@@ -135,9 +135,9 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.Checker;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.refactoring.util.NullChecker;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -302,6 +302,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private static boolean isReferringToLocalVariableFromFor(Expression expression) {
 		ASTNode current= expression;
 		ASTNode parent= current.getParent();
+
 		while (parent != null && !(parent instanceof BodyDeclaration)) {
 			if (parent instanceof ForStatement) {
 				ForStatement forStmt= (ForStatement) parent;
@@ -676,6 +677,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	/**
 	 * Retrieves used names for the block containing a node.
+	 *
 	 * @param selected the selected node
 	 *
 	 * @return an array of used variable names to avoid
@@ -844,10 +846,10 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (insertAtSelection) {
 				ASTNode realCommonASTNode= null;
 				realCommonASTNode= evalStartAndEnd(reSortRetainOnlyReplacableMatches, selectNumber);
-				if (realCommonASTNode == null && selectNumber >=0 ) {
+				if (realCommonASTNode == null && selectNumber >= 0) {
 					fSeen.add(reSortRetainOnlyReplacableMatches[selectNumber]);
 				}
-				if (realCommonASTNode != null || reSortRetainOnlyReplacableMatches.length ==0) {
+				if (realCommonASTNode != null || reSortRetainOnlyReplacableMatches.length == 0) {
 					insertAt(getSelectedExpression().getAssociatedNode(), vds);
 				}
 				return;
@@ -891,8 +893,8 @@ public class ExtractTempRefactoring extends Refactoring {
 			}
 			commonASTNode= convertToExtractNode(commonASTNode);
 			startOffset= commonASTNode.getStartPosition() - 1;
-			NullChecker nullChecker= new NullChecker(fCompilationUnitNode, fCu, commonASTNode, expression, startOffset, endOffset);
-			if (!nullChecker.hasNullCheck()) {//at least one be extracted
+			Checker checker= new Checker(fCompilationUnitNode, fCu, commonASTNode, expression, startOffset, endOffset);
+			if (!checker.hasCheck()) {//at least one be extracted
 				fStartPoint= start;
 				fEndPoint= end;
 				realCommonASTNode= commonASTNode;
@@ -1180,6 +1182,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		return fSelectedExpression;
 	}
 
+
 	private Type createTempType() throws CoreException {
 		Expression expression= getSelectedExpression().getAssociatedExpression();
 
@@ -1256,6 +1259,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		Expression expression= fragment.getAssociatedExpression();
 		if (expression == null)
 			return false;
+
 		switch (expression.getNodeType()) {
 			case ASTNode.BOOLEAN_LITERAL:
 			case ASTNode.CHARACTER_LITERAL:

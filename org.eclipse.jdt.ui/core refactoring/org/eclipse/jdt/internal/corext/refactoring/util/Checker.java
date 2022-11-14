@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,9 +30,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -39,11 +42,12 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 
-public class NullChecker {
+public class Checker {
 	private ASTNode fExpression;
 
 	private int fStartOffset;
@@ -52,31 +56,37 @@ public class NullChecker {
 
 	private ASTNode fCommonNode;
 
-	private Set<IBinding> fInvocationSet;
-
 	private CompilationUnit fCompilationUnitNode;
 
 	private ICompilationUnit fCu;
 
 	private Set<Integer> fMatchNodePosSet;
 
-	public NullChecker(CompilationUnit fCompilationUnitNode, ICompilationUnit fCu, ASTNode commonNode, ASTNode expression, int startOffset, int endOffset) {
+	private Set<IBinding> fInvocationSet;
+
+	private HashMap<IBinding, ITypeBinding> fInvocationHashMap;
+
+	private HashMap<Integer, ITypeBinding> fMatchNodePosHashMap;
+
+	public Checker(CompilationUnit fCompilationUnitNode, ICompilationUnit fCu, ASTNode commonNode, ASTNode expression, int startOffset, int endOffset) {
 		this.fCompilationUnitNode= fCompilationUnitNode;
 		this.fCu= fCu;
 		this.fCommonNode= commonNode;
 		this.fExpression= expression;
 		this.fStartOffset= startOffset;
 		this.fEndOffset= endOffset;
+		this.fMatchNodePosSet= new HashSet<>();
+		this.fInvocationSet= new HashSet<>();
+		this.fInvocationHashMap= new HashMap<>();
+		this.fMatchNodePosHashMap= new HashMap<>();
 		InvocationVisitor iv= new InvocationVisitor();
 		this.fExpression.accept(iv);
-		this.fInvocationSet= iv.invocationSet;
-		this.fMatchNodePosSet= iv.matchNodePosSet;
 	}
 
-	public boolean hasNullCheck() {
-		NullMiddleCodeVisitor nullMiddleCodeVisitor= new NullMiddleCodeVisitor(this.fInvocationSet, this.fMatchNodePosSet, this.fStartOffset, this.fEndOffset);
-		this.fCommonNode.accept(nullMiddleCodeVisitor);
-		return nullMiddleCodeVisitor.hasNullCheck();
+	public boolean hasCheck() {
+		MiddleCodeVisitor middleCodeVisitor= new MiddleCodeVisitor(this.fStartOffset, this.fEndOffset);
+		this.fCommonNode.accept(middleCodeVisitor);
+		return middleCodeVisitor.hasNullCheck() || middleCodeVisitor.hasCastCheck();
 	}
 
 	private IASTFragment getIASTFragment(ASTNode astNode) throws JavaModelException {
@@ -119,17 +129,22 @@ public class NullChecker {
 	}
 
 	private class InvocationVisitor extends ASTVisitor {
-		Set<IBinding> invocationSet;
-
-		Set<Integer> matchNodePosSet;
-
-		InvocationVisitor() {
-			this.invocationSet= new HashSet<>();
-			this.matchNodePosSet= new HashSet<>();
-		}
 
 		@Override
 		public void preVisit(ASTNode node) {
+			if (node instanceof CastExpression) {
+				CastExpression castExpression= (CastExpression) node;
+				ITypeBinding resolveBinding= castExpression.getType().resolveBinding();
+				Expression expression= getOriginalExpression(castExpression.getExpression());
+				IBinding targetBinding= null;
+				if (expression instanceof Name &&
+						(targetBinding= ((Name) expression).resolveBinding()) != null) {
+					fInvocationHashMap.put(targetBinding, resolveBinding);
+				} else {
+					fMatchNodePosHashMap.put(expression.getStartPosition(), resolveBinding);
+				}
+			}
+
 			Expression temp= null;
 			if (node instanceof MethodInvocation) {
 				MethodInvocation mi= (MethodInvocation) node;
@@ -151,7 +166,7 @@ public class NullChecker {
 					IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(getEnclosingBodyNode(temp)).getSubFragmentsMatching(getIASTFragment(temp));
 					for (IASTFragment match : allMatches) {
 						if (match.getAssociatedNode() != null) {
-							this.matchNodePosSet.add(match.getAssociatedNode().getStartPosition());
+							fMatchNodePosSet.add(match.getAssociatedNode().getStartPosition());
 						}
 					}
 				} catch (JavaModelException e) {
@@ -161,42 +176,80 @@ public class NullChecker {
 				if (temp instanceof Name)
 					resolveBinding= ((Name) temp).resolveBinding();
 				if (resolveBinding != null)
-					this.invocationSet.add(resolveBinding);
+					fInvocationSet.add(resolveBinding);
 			}
 		}
 
 	}
 
-	private class NullMiddleCodeVisitor extends ASTVisitor {
+	private class MiddleCodeVisitor extends ASTVisitor {
 		int startPosition;
 
 		int endPosition;
 
 		boolean nullFlag;
 
-		Set<IBinding> invocationSet;
+		boolean castFlag;
 
-		Set<Integer> matchNodePosSet;
-
-		public NullMiddleCodeVisitor(Set<IBinding> invocationSet, Set<Integer> matchNodePosSet, int startPosition, int endPosition) {
-			this.invocationSet= invocationSet;
-			this.matchNodePosSet= matchNodePosSet;
+		public MiddleCodeVisitor(int startPosition, int endPosition) {
 			this.startPosition= startPosition;
 			this.endPosition= endPosition;
 			this.nullFlag= false;
+			this.castFlag= false;
 		}
 
 		public boolean hasNullCheck() {
 			return this.nullFlag;
 		}
 
+
+		public boolean hasCastCheck() {
+			return this.castFlag;
+		}
+
+
 		@Override
 		public boolean preVisit2(ASTNode node) {
 			int sl= node.getStartPosition();
 			int el= node.getStartPosition() + node.getLength();
-			if (el < startPosition || sl > endPosition || this.nullFlag == true) {
+			if (el < startPosition || sl > endPosition || this.nullFlag == true || this.castFlag == true) {
 				return false;
 			}
+
+			if (sl >= startPosition && el <= endPosition && node instanceof InstanceofExpression) {
+				InstanceofExpression instanceofExpression= (InstanceofExpression) node;
+				Expression leftOperand= getOriginalExpression(instanceofExpression.getLeftOperand());
+				Type rightOperand= instanceofExpression.getRightOperand();
+				ITypeBinding resolveBinding= rightOperand.resolveBinding();
+				IBinding targetBinding= null;
+				if (leftOperand instanceof Name &&
+						(targetBinding= ((Name) leftOperand).resolveBinding()) != null &&
+						hasInheritanceRelationship(fInvocationHashMap.get(targetBinding), resolveBinding)) {
+					this.castFlag= true;
+					return false;
+				} else if (hasInheritanceRelationship(fMatchNodePosHashMap.get(leftOperand.getStartPosition()), resolveBinding)) {
+					this.castFlag= true;
+					return false;
+				}
+			}
+
+			if (sl >= startPosition && el <= endPosition && node instanceof InstanceofExpression) {
+				InstanceofExpression instanceofExpression= (InstanceofExpression) node;
+				Expression leftOperand= getOriginalExpression(instanceofExpression.getLeftOperand());
+				Type rightOperand= instanceofExpression.getRightOperand();
+				ITypeBinding resolveBinding= rightOperand.resolveBinding();
+				IBinding targetBinding= null;
+				if (leftOperand instanceof Name &&
+						(targetBinding= ((Name) leftOperand).resolveBinding()) != null &&
+						hasInheritanceRelationship(fInvocationHashMap.get(targetBinding), resolveBinding)) {
+					this.castFlag= true;
+					return false;
+				} else if (hasInheritanceRelationship(fMatchNodePosHashMap.get(leftOperand.getStartPosition()), resolveBinding)) {
+					this.castFlag= true;
+					return false;
+				}
+			}
+
 			Expression target= null;
 			if (sl >= startPosition && el <= endPosition && node instanceof InfixExpression) {
 				InfixExpression infixExpression= (InfixExpression) node;
@@ -215,15 +268,28 @@ public class NullChecker {
 			if (target != null) {
 				target= getOriginalExpression(target);
 				IBinding targetBinding= null;
-				if (target instanceof Name && (targetBinding= ((Name)target).resolveBinding()) != null && this.invocationSet.contains(targetBinding)) {
+				if (target instanceof Name && (targetBinding= ((Name) target).resolveBinding()) != null && fInvocationSet.contains(targetBinding)) {
 					this.nullFlag= true;
 					return false;
-				} else if (this.matchNodePosSet.contains(target.getStartPosition())) {
+				} else if (fMatchNodePosSet.contains(target.getStartPosition())) {
 					this.nullFlag= true;
 					return false;
 				}
 			}
 			return super.preVisit2(node);
+		}
+
+		private boolean hasInheritanceRelationship(ITypeBinding itb1, ITypeBinding itb2) {
+
+			ITypeBinding superclass= itb2.getSuperclass();
+			while (superclass != null) {
+				if (superclass == itb1) {
+					return true;
+				}
+				superclass= superclass.getSuperclass();
+			}
+			return itb1 == itb2;
+
 		}
 	}
 
