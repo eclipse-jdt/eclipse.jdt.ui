@@ -215,8 +215,10 @@ public class Checker {
 			if (el < startPosition || sl > endPosition || this.nullFlag == true || this.castFlag == true) {
 				return false;
 			}
-
-			if (sl >= startPosition && el <= endPosition && node instanceof InstanceofExpression) {
+			if (!(sl >= startPosition && el <= endPosition)) {
+				return super.preVisit2(node);
+			}
+			if (node instanceof InstanceofExpression) {
 				InstanceofExpression instanceofExpression= (InstanceofExpression) node;
 				Expression leftOperand= getOriginalExpression(instanceofExpression.getLeftOperand());
 				Type rightOperand= instanceofExpression.getRightOperand();
@@ -232,26 +234,8 @@ public class Checker {
 					return false;
 				}
 			}
-
-			if (sl >= startPosition && el <= endPosition && node instanceof InstanceofExpression) {
-				InstanceofExpression instanceofExpression= (InstanceofExpression) node;
-				Expression leftOperand= getOriginalExpression(instanceofExpression.getLeftOperand());
-				Type rightOperand= instanceofExpression.getRightOperand();
-				ITypeBinding resolveBinding= rightOperand.resolveBinding();
-				IBinding targetBinding= null;
-				if (leftOperand instanceof Name &&
-						(targetBinding= ((Name) leftOperand).resolveBinding()) != null &&
-						hasInheritanceRelationship(fInvocationHashMap.get(targetBinding), resolveBinding)) {
-					this.castFlag= true;
-					return false;
-				} else if (hasInheritanceRelationship(fMatchNodePosHashMap.get(leftOperand.getStartPosition()), resolveBinding)) {
-					this.castFlag= true;
-					return false;
-				}
-			}
-
 			Expression target= null;
-			if (sl >= startPosition && el <= endPosition && node instanceof InfixExpression) {
+			if (node instanceof InfixExpression) {
 				InfixExpression infixExpression= (InfixExpression) node;
 				Operator op= infixExpression.getOperator();
 				if (Operator.toOperator(op.toString()) == Operator.EQUALS || Operator.toOperator(op.toString()) == Operator.NOT_EQUALS) {
