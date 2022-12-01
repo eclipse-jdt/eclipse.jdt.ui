@@ -663,7 +663,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		Assert.isNotNull(type);
 		Assert.isNotNull(targetRewrite);
 		final ITypeBinding binding= type.resolveBinding();
-		if (binding != null) {
+		if (!type.isVar() && binding != null) {
 			final ITypeBinding declaring= binding.getDeclaringClass();
 			if (declaring != null) {
 				if (type instanceof SimpleType) {
