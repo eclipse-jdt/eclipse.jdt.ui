@@ -45,6 +45,8 @@ final class JavaDocMessages extends NLS {
 	public static String JavaDoc2HTMLTextReader_provides;
 	public static String JavadocContentAccess2_getproperty_message;
 	public static String JavadocContentAccess2_setproperty_message;
+	public static String JavadocContentAccess2_returns_pre;
+	public static String JavadocContentAccess2_returns_post;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaDocMessages.class);
