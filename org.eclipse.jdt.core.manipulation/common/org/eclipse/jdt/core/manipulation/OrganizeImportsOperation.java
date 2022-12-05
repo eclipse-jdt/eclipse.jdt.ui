@@ -411,6 +411,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (nFound == 0) {
 				// nothing found
 				return null;
+			} else if (fDoPreserveDemandImports && fOldDemandImports.contains(typeRefsFound.get(0).getTypeContainerName())) {
+				// The original code had a * import for this type. Preserve it!
+				TypeNameMatch typeRef= typeRefsFound.get(0);
+				String containerName= typeRef.getTypeContainerName();
+				fImpStructure.addImport(containerName);
+				return null;
 			} else if (nFound == 1) {
 				TypeNameMatch typeRef= typeRefsFound.get(0);
 				fImpStructure.addImport(typeRef.getFullyQualifiedName());
