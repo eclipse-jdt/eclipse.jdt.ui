@@ -47,7 +47,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 
-public class Checker {
+public class UnsafeCheckTester {
 	private ASTNode fExpression;
 
 	private int fStartOffset;
@@ -68,7 +68,7 @@ public class Checker {
 
 	private HashMap<Integer, ITypeBinding> fMatchNodePosHashMap;
 
-	public Checker(CompilationUnit fCompilationUnitNode, ICompilationUnit fCu, ASTNode commonNode, ASTNode expression, int startOffset, int endOffset) {
+	public UnsafeCheckTester(CompilationUnit fCompilationUnitNode, ICompilationUnit fCu, ASTNode commonNode, ASTNode expression, int startOffset, int endOffset) {
 		this.fCompilationUnitNode= fCompilationUnitNode;
 		this.fCu= fCu;
 		this.fCommonNode= commonNode;
@@ -83,7 +83,7 @@ public class Checker {
 		this.fExpression.accept(iv);
 	}
 
-	public boolean hasCheck() {
+	public boolean hasUnsafeCheck() {
 		MiddleCodeVisitor middleCodeVisitor= new MiddleCodeVisitor(this.fStartOffset, this.fEndOffset);
 		this.fCommonNode.accept(middleCodeVisitor);
 		return middleCodeVisitor.hasNullCheck() || middleCodeVisitor.hasCastCheck();
@@ -132,6 +132,7 @@ public class Checker {
 
 		@Override
 		public void preVisit(ASTNode node) {
+			Expression temp= null;
 			if (node instanceof CastExpression) {
 				CastExpression castExpression= (CastExpression) node;
 				ITypeBinding resolveBinding= castExpression.getType().resolveBinding();
@@ -143,10 +144,7 @@ public class Checker {
 				} else {
 					fMatchNodePosHashMap.put(expression.getStartPosition(), resolveBinding);
 				}
-			}
-
-			Expression temp= null;
-			if (node instanceof MethodInvocation) {
+			} else if (node instanceof MethodInvocation) {
 				MethodInvocation mi= (MethodInvocation) node;
 				temp= mi.getExpression();
 			} else if (node instanceof FieldAccess) {
@@ -233,7 +231,9 @@ public class Checker {
 					this.castFlag= true;
 					return false;
 				}
+				return super.preVisit2(node);
 			}
+
 			Expression target= null;
 			if (node instanceof InfixExpression) {
 				InfixExpression infixExpression= (InfixExpression) node;
@@ -264,7 +264,11 @@ public class Checker {
 		}
 
 		private boolean hasInheritanceRelationship(ITypeBinding itb1, ITypeBinding itb2) {
-
+			if (itb2 == null) {
+				return false;
+			} else if (itb1 == itb2) {
+				return true;
+			}
 			ITypeBinding superclass= itb2.getSuperclass();
 			while (superclass != null) {
 				if (superclass == itb1) {
@@ -272,7 +276,7 @@ public class Checker {
 				}
 				superclass= superclass.getSuperclass();
 			}
-			return itb1 == itb2;
+			return false;
 
 		}
 	}
