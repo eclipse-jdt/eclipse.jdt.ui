@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.activation;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.After;
@@ -43,7 +41,7 @@ public class JavaActivationTest {
 	private IJavaProject project;
 
 
-	private static final String[] inactiveTestBundles= new String[] {
+	private static final Set<String> inactiveTestBundles= Set.of(
 			"org.apache.xerces",
 			"org.eclipse.jdt.astview",
 			"org.eclipse.jdt.jeview",
@@ -52,7 +50,7 @@ public class JavaActivationTest {
 			"org.eclipse.swt.spy",
 			"com.jcraft.jsch",
 			"javax.servlet",
-			"javax.servlet.jsp",
+			"javax.servlet.jsp-api",
 			"org.apache.ant",
 			"org.apache.commons.el",
 			"org.apache.commons.logging",
@@ -133,7 +131,7 @@ public class JavaActivationTest {
 			"org.junit4",
 			"org.mortbay.jetty",
 			"com.ibm.icu.source",
-			"javax.servlet.jsp.source",
+			"javax.servlet.jsp-api.source",
 			"javax.servlet.source",
 			"org.apache.ant.source",
 			"org.apache.commons.el.source",
@@ -163,7 +161,7 @@ public class JavaActivationTest {
 			"org.eclipse.ui.browser",
 			"org.junit.source",
 			"org.mortbay.jetty.source"
-		};
+		);
 
 	@Before
 	public void setUp() throws Exception {
@@ -194,9 +192,7 @@ public class JavaActivationTest {
 	public void testOpenJavaEditor() throws Exception {
 		ICompilationUnit unit= createTestCU();
 		EditorUtility.openInEditor(unit);
-
-		Set<String> set= new HashSet<>(Arrays.asList(inactiveTestBundles));
-		checkNotLoaded(set);
+		checkNotLoaded(inactiveTestBundles);
 	}
 
 	public void checkNotLoaded(Set<String> inactiveBundles) {
