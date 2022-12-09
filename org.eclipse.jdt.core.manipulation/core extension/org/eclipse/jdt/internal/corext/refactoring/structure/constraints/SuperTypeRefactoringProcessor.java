@@ -91,6 +91,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -115,9 +116,6 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 
 /**
  * Partial implementation of a refactoring processor solving supertype
@@ -299,7 +297,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			try {
 				edit.apply(document, TextEdit.UPDATE_REGIONS);
 			} catch (MalformedTreeException | BadLocationException exception) {
-				JavaPlugin.log(exception);
+				JavaManipulationPlugin.log(exception);
 			}
 			buffer.setLength(0);
 			buffer.append(document.get());
@@ -341,7 +339,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			try {
 				rewrite.rewriteImports(new SubProgressMonitor(monitor, 100)).apply(document);
 			} catch (MalformedTreeException | BadLocationException | CoreException exception) {
-				JavaPlugin.log(exception);
+				JavaManipulationPlugin.log(exception);
 			}
 			fTypeBindings.clear();
 			fStaticBindings.clear();
@@ -433,12 +431,12 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				source= buffer.toString();
 			}
 			final IDocument document= new Document(source);
-			final TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, source, 0, delimiter, FormatterProfileManager.getProjectSettings(copy.getJavaProject()));
+			final TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, source, 0, delimiter, copy.getJavaProject().getOptions(true));
 			if (edit != null) {
 				try {
 					edit.apply(document, TextEdit.UPDATE_REGIONS);
 				} catch (MalformedTreeException | BadLocationException exception) {
-					JavaPlugin.log(exception);
+					JavaManipulationPlugin.log(exception);
 					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
 				}
 				source= document.get();
@@ -728,7 +726,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					getFieldReferencingCompilationUnits(units, nodes);
 					monitor.worked(40);
 				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
+					JavaManipulationPlugin.log(exception);
 				}
 			}
 		} finally {
@@ -791,7 +789,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					cu.getBuffer().setContents(unit.getPrimary().getBuffer().getContents());
 					JavaModelUtil.reconcile(cu);
 				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
+					JavaManipulationPlugin.log(exception);
 				}
 			}
 		}
