@@ -287,7 +287,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 				}
 			}
 			int errorCode = e.getStatus().getCode();
-			if (errorCode == IResourceStatus.MARKER_NOT_FOUND || errorCode == IResourceStatus.RESOURCE_NOT_FOUND) {
+			if (errorCode == IResourceStatus.MARKER_NOT_FOUND || errorCode == IResourceStatus.RESOURCE_NOT_FOUND
+					|| errorCode == IResourceStatus.PROJECT_NOT_OPEN) {
 				return 0;
 			}
 
@@ -511,7 +512,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					}
 				} else {
 					int errorCode = e.getStatus().getCode();
-					if (errorCode == IResourceStatus.MARKER_NOT_FOUND || errorCode == IResourceStatus.RESOURCE_NOT_FOUND) {
+					if (errorCode == IResourceStatus.MARKER_NOT_FOUND || errorCode == IResourceStatus.RESOURCE_NOT_FOUND
+							|| errorCode == IResourceStatus.PROJECT_NOT_OPEN) {
 						newAdornment = 0;
 						shouldLog = false;
 					}
