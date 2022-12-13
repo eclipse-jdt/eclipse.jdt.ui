@@ -67,6 +67,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 
 	public static final String CATCHBLOCK_ID= CODETEMPLATES_PREFIX + "catchblock"; //$NON-NLS-1$
 	public static final String METHODSTUB_ID= CODETEMPLATES_PREFIX + "methodbody"; //$NON-NLS-1$
+	public static final String METHODSTUB_ALTERNATIVE_ID= CODETEMPLATES_PREFIX + "methodbodyalternative"; //$NON-NLS-1$
 	public static final String NEWTYPE_ID= CODETEMPLATES_PREFIX + "newtype"; //$NON-NLS-1$
 	public static final String CONSTRUCTORSTUB_ID= CODETEMPLATES_PREFIX + "constructorbody"; //$NON-NLS-1$
 	public static final String GETTERSTUB_ID= CODETEMPLATES_PREFIX + "getterbody"; //$NON-NLS-1$

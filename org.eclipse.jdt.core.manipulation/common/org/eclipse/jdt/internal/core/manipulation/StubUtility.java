@@ -140,7 +140,13 @@ public class StubUtility {
 	 * Don't use this method directly, use CodeGeneration.
 	 */
 	public static String getMethodBodyContent(boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement, String lineDelimiter) throws CoreException {
-		String templateName= isConstructor ? CodeTemplateContextType.CONSTRUCTORSTUB_ID : CodeTemplateContextType.METHODSTUB_ID;
+		return getMethodBodyContent(false, isConstructor, project, destTypeName, methodName, bodyStatement, lineDelimiter);
+	}
+
+	public static String getMethodBodyContent(boolean useAlternativeMethodBody, boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement, String lineDelimiter) throws CoreException {
+		String templateName= isConstructor ? CodeTemplateContextType.CONSTRUCTORSTUB_ID
+							: useAlternativeMethodBody ? CodeTemplateContextType.METHODSTUB_ALTERNATIVE_ID
+							: CodeTemplateContextType.METHODSTUB_ID;
 		Template template= getCodeTemplate(templateName, project);
 		if (template == null) {
 			return bodyStatement;
