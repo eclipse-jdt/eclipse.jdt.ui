@@ -15,8 +15,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
@@ -46,6 +48,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
@@ -69,10 +72,33 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 
 	private List<Expression> fArguments;
 
+	private Map<ITypeBinding, ITypeBinding> fTypeMapping= new HashMap<>();
+
 	//	invocationNode is MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
 	public NewMethodCorrectionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List<Expression> arguments, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, invocationNode, binding, relevance, image);
 		fArguments= arguments;
+		initializeTypeMapping(invocationNode);
+	}
+
+	private void initializeTypeMapping(ASTNode invocationNode) {
+		if (invocationNode instanceof MethodInvocation) {
+			MethodInvocation methodInvocation= (MethodInvocation)invocationNode;
+			Expression methodExpression= methodInvocation.getExpression();
+			if (methodExpression != null) {
+				ITypeBinding expressionBinding= methodExpression.resolveTypeBinding();
+				if (expressionBinding != null) {
+					if (expressionBinding.isParameterizedType()) {
+						ITypeBinding declaringClass= expressionBinding.getTypeDeclaration();
+						ITypeBinding[] declaringClassTypeParameters= declaringClass.getTypeParameters();
+						ITypeBinding[] typeArguments= expressionBinding.getTypeArguments();
+						for (int i= 0; i < typeArguments.length; ++i) {
+							fTypeMapping.put(typeArguments[i], declaringClassTypeParameters[i]);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	protected int evaluateModifiers(ASTNode targetTypeDecl) {
@@ -213,7 +239,8 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 			if (parent.getExpression() == node) {
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments(), getSenderBinding());
 				if (bindings.length > 0) {
-					newTypeNode= getImportRewrite().addImport(bindings[0], ast, importRewriteContext, TypeLocation.RETURN_TYPE);
+					ITypeBinding firstBinding= getClassTypeParameterBinding(bindings[0]);
+					newTypeNode= getImportRewrite().addImport(firstBinding, ast, importRewriteContext, TypeLocation.RETURN_TYPE);
 					otherProposals= bindings;
 				}
 			}
@@ -224,6 +251,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 				binding= ASTResolving.normalizeWildcardType(binding, false, ast);
 			}
 			if (binding != null) {
+				binding= getClassTypeParameterBinding(binding);
 				newTypeNode= getImportRewrite().addImport(binding, ast, importRewriteContext, TypeLocation.RETURN_TYPE);
 			} else {
 				ASTNode parent= node.getParent();
@@ -281,12 +309,34 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 			binding= ASTResolving.normalizeWildcardType(binding, true, ast);
 		}
 		if (binding != null) {
+			binding= getClassTypeParameterBinding(binding);
 			for (ITypeBinding typeProposal : ASTResolving.getRelaxingTypes(ast, binding)) {
 				addLinkedPositionProposal(key, typeProposal);
 			}
 			return getImportRewrite().addImport(binding, ast, context, TypeLocation.PARAMETER);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+	}
+
+	private ITypeBinding getClassTypeParameterBinding(ITypeBinding binding) {
+		ITypeBinding[] typeParameters= new ITypeBinding[0];
+		ITypeBinding declaringClassBinding= binding.getDeclaringClass();
+		if (declaringClassBinding != null && declaringClassBinding.isGenericType()) {
+			typeParameters= declaringClassBinding.getTypeParameters();
+		} else {
+			IMethodBinding methodBinding= binding.getDeclaringMethod();
+			if (methodBinding != null) {
+				typeParameters= methodBinding.getTypeParameters();
+			}
+		}
+		for (ITypeBinding typeParameter : typeParameters) {
+			if (typeParameter.isEqualTo(binding)) {
+				if (fTypeMapping.containsKey(binding)) {
+					return fTypeMapping.get(binding);
+				}
+			}
+		}
+		return binding;
 	}
 
 	private String evaluateParameterName(List<String> takenNames, Expression argNode, Type type, String key) {
@@ -304,7 +354,11 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
 	}
 
-	private void getTypeParameters(ITypeBinding binding, IMethodBinding methodBinding, Set<ITypeBinding> typeParametersFound) {
+	private void getTypeParameters(ITypeBinding binding, Set<ITypeBinding> typeParametersFound) {
+		if (!getClassTypeParameterBinding(binding).isEqualTo(binding)) {
+			return;
+		}
+		IMethodBinding methodBinding= binding.getDeclaringMethod();
 		if (methodBinding != null) {
 			ITypeBinding[] typeParameters= methodBinding.getTypeParameters();
 			for (ITypeBinding typeParameter : typeParameters) {
@@ -312,7 +366,26 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 					typeParametersFound.add(typeParameter);
 					ITypeBinding[] typeBounds= typeParameter.getTypeBounds();
 					for (ITypeBinding typeBound : typeBounds) {
-						getTypeParameters(typeBound, methodBinding, typeParametersFound);
+						getTypeParameters(typeBound, typeParametersFound);
+					}
+				}
+			}
+		} else {
+			ITypeBinding declaringClassBinding= binding.getDeclaringClass();
+			if (declaringClassBinding != null) {
+				ASTNode invocationNode= getInvocationNode();
+				if (invocationNode instanceof MethodInvocation
+						&& ((MethodInvocation)invocationNode).getExpression() != null
+						&& !(((MethodInvocation)invocationNode).getExpression() instanceof ThisExpression)) {
+					ITypeBinding[] typeParameters= declaringClassBinding.getTypeParameters();
+					for (ITypeBinding typeParameter : typeParameters) {
+						if (typeParameter.isEqualTo(binding)) {
+							typeParametersFound.add(typeParameter);
+							ITypeBinding[] typeBounds= typeParameter.getTypeBounds();
+							for (ITypeBinding typeBound : typeBounds) {
+								getTypeParameters(typeBound, typeParametersFound);
+							}
+						}
 					}
 				}
 			}
@@ -347,8 +420,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 			}
 
 			if (returnTypeBinding != null) {
-				IMethodBinding mbinding= returnTypeBinding.getDeclaringMethod();
-				getTypeParameters(returnTypeBinding, mbinding, typeParametersFound);
+				getTypeParameters(returnTypeBinding, typeParametersFound);
 			}
 		}
 
@@ -361,7 +433,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 				binding= ASTResolving.normalizeWildcardType(binding, true, ast);
 			}
 			if (binding != null) {
-				getTypeParameters(binding, binding.getDeclaringMethod(), typeParametersFound);
+				getTypeParameters(binding, typeParametersFound);
 			}
 		}
 
