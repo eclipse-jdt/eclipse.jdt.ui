@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -65,6 +65,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -126,6 +127,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -840,8 +842,9 @@ public class UnresolvedElementsSubProcessor {
 		// try to resolve type in context -> highest severity
 		String resolvedTypeName= null;
 		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
+		ITypeBinding simpleBinding= null;
 		if (binding != null) {
-			ITypeBinding simpleBinding= binding;
+			simpleBinding= binding;
 			if (simpleBinding.isArray()) {
 				simpleBinding= simpleBinding.getElementType();
 			}
@@ -885,6 +888,27 @@ public class UnresolvedElementsSubProcessor {
 			if ((elem.getKind() & TypeKinds.ALL_TYPES) != 0) {
 				String fullName= elem.getName();
 				if (!fullName.equals(resolvedTypeName)) {
+					if (simpleBinding != null && simpleBinding.isInterface()) {
+						// If we have an interface, we should verify that any classes we suggest to import
+						// inherit directly or implement the interface
+						ITypeBinding qualifiedTypeBinding= null;
+						try {
+							IJavaProject focus= simpleBinding.getJavaElement().getJavaProject();
+							IType javaElementType= focus.findType(fullName);
+							ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+							parser.setProject(focus);
+							IBinding[] bindings= parser.createBindings(new IJavaElement[] {javaElementType} , null);
+							qualifiedTypeBinding=(ITypeBinding)bindings[0];
+						} catch (JavaModelException e) {
+							// fall through
+						}
+
+						if (qualifiedTypeBinding != null) {
+							if (!isInherited(qualifiedTypeBinding, simpleBinding)) {
+								continue;
+							}
+						}
+					}
 					CUCorrectionProposal cuProposal= createTypeRefChangeProposal(cu, fullName, node, relevance, elements.length);
 					ChangeCorrectionProposal compositeProposal= getCompositeChangeProposal(cuProposal);
 					if (compositeProposal != null) {
@@ -898,6 +922,34 @@ public class UnresolvedElementsSubProcessor {
 		if (elements.length == 0) {
 			addRequiresModuleProposals(cu, node, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
 		}
+	}
+
+	private static Type getQualifiedType(String qualifiedName, Name name) {
+		AST ast= name.getAST();
+		String[] qualifiers= qualifiedName.split("\\."); //$NON-NLS-1$
+		Type type= ast.newSimpleType(ast.newSimpleName(qualifiers[0]));
+		for (int i= 1; i < qualifiers.length; ++i) {
+			type= ast.newQualifiedType(type, ast.newSimpleName(qualifiers[i]));
+		}
+		return type;
+	}
+
+	private static boolean isInherited(ITypeBinding binding, ITypeBinding ancestorBinding) {
+		if (binding == null) {
+			return false;
+		}
+		if (binding.isEqualTo(ancestorBinding)) {
+			return true;
+		}
+		for (ITypeBinding interfaceBinding : binding.getInterfaces()) {
+			if (isInherited(interfaceBinding, ancestorBinding)) {
+				return true;
+			}
+		}
+		if (isInherited(binding.getSuperclass(), ancestorBinding)) {
+			return true;
+		}
+		return false;
 	}
 
 	private static ChangeCorrectionProposal getCompositeChangeProposal(ChangeCorrectionProposal proposal) throws CoreException {
