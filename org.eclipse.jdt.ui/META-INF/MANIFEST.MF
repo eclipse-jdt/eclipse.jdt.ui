@@ -27,7 +27,6 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.corext.refactoring.scripting;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.sef;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.structure;x-internal:=true,
- org.eclipse.jdt.internal.corext.refactoring.structure.constraints;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.surround;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.util;x-internal:=true,
  org.eclipse.jdt.internal.corext.template.java;x-friends:="org.eclipse.jdt.debug.ui",

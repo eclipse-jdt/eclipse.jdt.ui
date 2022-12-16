@@ -96,6 +96,8 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractInterfaceDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
@@ -128,9 +130,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
@@ -289,7 +288,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			if (fragment.isDefaultPackage())
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_default_type, BasicElementLabels.getJavaElementName(fSuperName)));
 			else {
-				String packageLabel= JavaElementLabels.getElementLabel(fragment, JavaElementLabels.ALL_DEFAULT);
+				String packageLabel= JavaElementLabelsCore.getElementLabel(fragment, JavaElementLabelsCore.ALL_DEFAULT);
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_type, new String[] { BasicElementLabels.getJavaElementName(fSuperName), packageLabel }));
 			}
 		}
@@ -315,7 +314,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				return result;
 			final IPackageFragment fragment= fSubType.getPackageFragment();
 			if (fragment.getCompilationUnit(unitName).exists()) {
-				result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_compilation_unit, new String[] { BasicElementLabels.getResourceName(unitName), JavaElementLabels.getElementLabel(fragment, JavaElementLabels.ALL_DEFAULT) }));
+				result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_compilation_unit, new String[] { BasicElementLabels.getResourceName(unitName), JavaElementLabelsCore.getElementLabel(fragment, JavaElementLabelsCore.ALL_DEFAULT) }));
 				return result;
 			}
 			result.merge(checkSuperType());
@@ -344,18 +343,18 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				if (fSubType.isLocal() || fSubType.isAnonymous())
 					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
+				JavaManipulationPlugin.log(exception);
 			}
 			final IPackageFragment fragment= fSubType.getPackageFragment();
 			final ICompilationUnit cu= fragment.getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName));
 			final IType type= cu.getType(fSuperName);
 			final String description= Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_description_descriptor_short, BasicElementLabels.getJavaElementName(fSuperName));
-			final String header= Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+			final String header= Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { JavaElementLabelsCore.getElementLabel(type, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), JavaElementLabelsCore.getElementLabel(fSubType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED) });
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_refactored_element_pattern, JavaElementLabels.getElementLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_refactored_element_pattern, JavaElementLabelsCore.getElementLabel(type, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 			final String[] settings= new String[fMembers.length];
 			for (int index= 0; index < settings.length; index++)
-				settings[index]= JavaElementLabels.getElementLabel(fMembers[index], JavaElementLabels.ALL_FULLY_QUALIFIED);
+				settings[index]= JavaElementLabelsCore.getElementLabel(fMembers[index], JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
 			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ExtractInterfaceProcessor_extracted_members_pattern, settings));
 			addSuperTypeSettings(comment, true);
 			final ExtractInterfaceDescriptor descriptor= RefactoringSignatureDescriptorFactory.createExtractInterfaceDescriptor(project, description, comment.asString(), arguments, flags);
@@ -480,7 +479,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				rewrite.rewriteAST(document, unit.getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 				targetRewrite.getListRewrite(targetDeclaration, targetDeclaration.getBodyDeclarationsProperty()).insertFirst(targetRewrite.createStringPlaceholder(normalizeText(document.get(position.getStartPosition(), position.getLength())), ASTNode.FIELD_DECLARATION), null);
 			} catch (MalformedTreeException | BadLocationException exception) {
-				JavaPlugin.log(exception);
+				JavaManipulationPlugin.log(exception);
 			}
 		} finally {
 			RefactoringFileBuffers.release(unit);
@@ -687,7 +686,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				rewrite.rewriteAST(document, unit.getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 				targetRewrite.getListRewrite(targetDeclaration, targetDeclaration.getBodyDeclarationsProperty()).insertFirst(targetRewrite.createStringPlaceholder(normalizeText(document.get(position.getStartPosition(), position.getLength())), ASTNode.METHOD_DECLARATION), null);
 			} catch (MalformedTreeException | BadLocationException exception) {
-				JavaPlugin.log(exception);
+				JavaManipulationPlugin.log(exception);
 			}
 		} finally {
 			RefactoringFileBuffers.release(unit);
@@ -1041,7 +1040,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				try {
 					rewrite.rewriteAST(document, fSubType.getCompilationUnit().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 				} catch (MalformedTreeException | BadLocationException exception) {
-					JavaPlugin.log(exception);
+					JavaManipulationPlugin.log(exception);
 				}
 				subUnit.getBuffer().setContents(document.get());
 			} finally {
@@ -1085,7 +1084,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 													try {
 														edit.apply(document, TextEdit.UPDATE_REGIONS);
 													} catch (MalformedTreeException | BadLocationException exception) {
-														JavaPlugin.log(exception);
+														JavaManipulationPlugin.log(exception);
 														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
 													}
 													fSuperSource= document.get();
@@ -1098,7 +1097,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 							}
 						}
 					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
+						JavaManipulationPlugin.log(exception);
 						status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
 					}
 				}
