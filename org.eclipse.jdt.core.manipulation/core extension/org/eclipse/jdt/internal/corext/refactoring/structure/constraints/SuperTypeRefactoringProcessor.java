@@ -117,6 +117,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManagerCore;
+
 /**
  * Partial implementation of a refactoring processor solving supertype
  * constraint models.
@@ -431,7 +433,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				source= buffer.toString();
 			}
 			final IDocument document= new Document(source);
-			final TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, source, 0, delimiter, copy.getJavaProject().getOptions(true));
+			final TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, source, 0, delimiter, FormatterProfileManagerCore.getProjectSettings(copy.getJavaProject()));
 			if (edit != null) {
 				try {
 					edit.apply(document, TextEdit.UPDATE_REGIONS);
