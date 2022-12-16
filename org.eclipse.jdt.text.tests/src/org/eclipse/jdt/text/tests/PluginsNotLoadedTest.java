@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * @since 3.1
  */
 public class PluginsNotLoadedTest {
-	private static String[] NOT_LOADED_BUNDLES= new String[] {
+	private static List<String> NOT_LOADED_BUNDLES= List.of(
 			"org.apache.xerces",
 			"org.eclipse.jdt.astview",
 			"org.eclipse.jdt.jeview",
@@ -62,7 +62,7 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.swt.spy",
 			"com.jcraft.jsch",
 			"javax.servlet",
-			"javax.servlet.jsp",
+			"javax.servlet.jsp-api",
 			"org.apache.ant",
 			"org.apache.commons.el",
 			"org.apache.commons.logging",
@@ -148,7 +148,7 @@ public class PluginsNotLoadedTest {
 			"org.junit4",
 			"org.mortbay.jetty",
 			"com.ibm.icu.source",
-			"javax.servlet.jsp.source",
+			"javax.servlet.jsp-api.source",
 			"javax.servlet.source",
 			"org.apache.ant.source",
 			"org.apache.commons.el.source",
@@ -178,7 +178,7 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.ui.browser",
 			"org.junit.source",
 			"org.mortbay.jetty.source"
-		};
+		);
 
 
 	private JavaEditor fEditor;
@@ -217,9 +217,9 @@ public class PluginsNotLoadedTest {
 	 */
 	public static void addLoadedPlugIns(String... loadedPlugins) {
 		Assert.isLegal(loadedPlugins != null);
-		List<String> l= new ArrayList<>(Arrays.asList(NOT_LOADED_BUNDLES));
+		List<String> l= new ArrayList<>(NOT_LOADED_BUNDLES);
 		l.removeAll(Arrays.asList(loadedPlugins));
-		NOT_LOADED_BUNDLES= l.toArray(new String[0]);
+		NOT_LOADED_BUNDLES= l;
 	}
 
 	@Before
