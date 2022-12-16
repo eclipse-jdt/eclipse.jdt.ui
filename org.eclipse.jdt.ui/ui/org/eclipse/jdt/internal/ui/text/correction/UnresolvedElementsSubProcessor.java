@@ -888,9 +888,9 @@ public class UnresolvedElementsSubProcessor {
 			if ((elem.getKind() & TypeKinds.ALL_TYPES) != 0) {
 				String fullName= elem.getName();
 				if (!fullName.equals(resolvedTypeName)) {
-					if (simpleBinding != null && simpleBinding.isInterface()) {
-						// If we have an interface, we should verify that any classes we suggest to import
-						// inherit directly or implement the interface
+					if (simpleBinding != null) {
+						// If we have an expected type, we should verify that any classes we suggest to import
+						// inherit directly or indirectly from the type
 						ITypeBinding qualifiedTypeBinding= null;
 						try {
 							IJavaProject focus= simpleBinding.getJavaElement().getJavaProject();
@@ -922,16 +922,6 @@ public class UnresolvedElementsSubProcessor {
 		if (elements.length == 0) {
 			addRequiresModuleProposals(cu, node, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
 		}
-	}
-
-	private static Type getQualifiedType(String qualifiedName, Name name) {
-		AST ast= name.getAST();
-		String[] qualifiers= qualifiedName.split("\\."); //$NON-NLS-1$
-		Type type= ast.newSimpleType(ast.newSimpleName(qualifiers[0]));
-		for (int i= 1; i < qualifiers.length; ++i) {
-			type= ast.newQualifiedType(type, ast.newSimpleName(qualifiers[i]));
-		}
-		return type;
 	}
 
 	private static boolean isInherited(ITypeBinding binding, ITypeBinding ancestorBinding) {
