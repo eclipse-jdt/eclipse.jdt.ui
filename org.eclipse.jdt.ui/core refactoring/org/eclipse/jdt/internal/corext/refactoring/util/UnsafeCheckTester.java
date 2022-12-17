@@ -264,17 +264,19 @@ public class UnsafeCheckTester {
 		}
 
 		private boolean hasInheritanceRelationship(ITypeBinding itb1, ITypeBinding itb2) {
-			if (itb2 == null) {
+			if (itb2 == null || itb1 == null) {
 				return false;
 			} else if (itb1 == itb2) {
 				return true;
 			}
 			ITypeBinding superclass= itb2.getSuperclass();
-			while (superclass != null) {
-				if (superclass == itb1) {
+			ITypeBinding[] interfaces= itb2.getInterfaces();
+			for (int i= 0; i < interfaces.length; ++i) {
+				if (hasInheritanceRelationship(itb1, interfaces[i]))
 					return true;
-				}
-				superclass= superclass.getSuperclass();
+			}
+			if (superclass != null && hasInheritanceRelationship(itb1, superclass)) {
+				return true;
 			}
 			return false;
 
