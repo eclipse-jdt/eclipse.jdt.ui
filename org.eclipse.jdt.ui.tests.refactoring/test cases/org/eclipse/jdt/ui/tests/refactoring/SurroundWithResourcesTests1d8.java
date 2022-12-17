@@ -204,4 +204,8 @@ public class SurroundWithResourcesTests1d8 extends AbstractJunit4SelectionTestCa
 		tryResourcesTest();
 	}
 
+	@Test
+	public void testIssue353() throws Exception {
+		tryResourcesTest();
+	}
 }
