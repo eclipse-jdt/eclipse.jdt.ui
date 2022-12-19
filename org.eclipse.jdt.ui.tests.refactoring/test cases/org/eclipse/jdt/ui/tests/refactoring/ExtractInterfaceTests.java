@@ -135,6 +135,40 @@ public class ExtractInterfaceTests extends GenericRefactoringTest {
 		assertEqualLines("(interface cu)", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
 	}
 
+	protected void validatePassingTest(String className, String[] cuNames, String newInterfaceName, boolean replaceOccurrences, String[] extractedMethodNames, String[][] extractedSignatures, String[] extractedFieldNames, IPackageFragment newPackageFragment) throws Exception {
+		IType clas= getClassFromTestFile(getPackageP(), className);
+
+		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+
+		processor.setTypeName(newInterfaceName);
+		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkTypeName(newInterfaceName).getSeverity());
+
+		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
+		for (int i= 0; i < cuNames.length; i++) {
+			if (cuNames[i].equals(clas.getCompilationUnit().findPrimaryType().getElementName()))
+				cus[i]= clas.getCompilationUnit();
+			else
+				cus[i]= createCUfromTestFile(clas.getPackageFragment(), cuNames[i]);
+		}
+		processor.setReplace(replaceOccurrences);
+		processor.setAnnotations(fGenerateAnnotations);
+		IMethod[] extractedMethods= getMethods(clas, extractedMethodNames, extractedSignatures);
+	    IField[] extractedFields= getFields(clas, extractedFieldNames);
+		processor.setExtractedMembers(merge(extractedMethods, extractedFields));
+		processor.setPackageFragment(newPackageFragment);
+		assertNull("was supposed to pass", performRefactoring(ref));
+
+		for (int i= 0; i < cus.length; i++) {
+			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
+			String actual= cus[i].getSource();
+			assertEqualLines("(" + cus[i].getElementName() +")", expected, actual);
+		}
+
+		ICompilationUnit interfaceCu= newPackageFragment.getCompilationUnit(newInterfaceName + ".java");
+		assertEqualLines("(interface cu)", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
+	}
+
 	protected void validatePassingTest(String className, String newInterfaceName, boolean extractAll, boolean replaceOccurrences) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 		ICompilationUnit cu= clas.getCompilationUnit();
@@ -1079,6 +1113,14 @@ public class ExtractInterfaceTests extends GenericRefactoringTest {
 		String[][] signatures= {new String[0], new String[0], new String[0], new String[0]};
 		String[] fieldNames= null;
 		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
+	}
+
+	@Test
+	public void testInterface7() throws Exception{
+		String[] methodNames= {"foo0", "foo1", "foo2", "foo3"};
+		String[][] signatures= {new String[0], new String[0], new String[0], new String[0]};
+		String[] fieldNames= null;
+		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames, getPackageQ());
 	}
 
 	@Test
