@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -612,6 +612,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	//---- End Name Hierarchy ------------------------------------
 
 	@Override
+	public boolean visit(RecordPattern node) {
+		return visit((Pattern)node);
+	}
+
+	@Override
+	public void endVisit(RecordPattern node) {
+		endVisit((Pattern)node);
+	}
+
+	@Override
 	public boolean visit(GuardedPattern node) {
 		return visit((Pattern)node);
 	}
@@ -1185,14 +1195,32 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 		endVisit((AbstractTagElement)node);
 	}
 
+	public boolean visit(AbstractTextElement node) {
+		return visit((ASTNode)node);
+	}
+
+	public void endVisit(AbstractTextElement node) {
+		endVisit((ASTNode)node);
+	}
+
 	@Override
 	public boolean visit(TextElement node) {
-		return visit((ASTNode)node);
+		return visit((AbstractTextElement)node);
 	}
 
 	@Override
 	public void endVisit(TextElement node) {
-		endVisit((ASTNode)node);
+		endVisit((AbstractTextElement)node);
+	}
+
+	@Override
+	public boolean visit(JavaDocTextElement node) {
+		return visit((AbstractTextElement)node);
+	}
+
+	@Override
+	public void endVisit(JavaDocTextElement node) {
+		endVisit((AbstractTextElement)node);
 	}
 
 	@Override

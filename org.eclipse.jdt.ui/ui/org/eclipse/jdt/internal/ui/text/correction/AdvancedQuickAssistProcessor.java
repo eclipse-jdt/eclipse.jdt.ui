@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,8 +30,14 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -73,6 +79,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -85,6 +92,7 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -99,6 +107,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.core.manipulation.dom.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
+import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -118,9 +127,13 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.AddGetterSetterTypeProposal;
+import org.eclipse.jdt.internal.ui.actions.HashCodeEqualsTypeProposal;
+import org.eclipse.jdt.internal.ui.actions.ToStringTypeProposal;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
@@ -166,6 +179,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertSwitchToIfProposals(context, coveringNode, null)
 					|| getConvertIfElseToSwitchProposals(context, coveringNode, null)
 					|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null)
+					|| getGettersSettersForTypeProposals(coveringNode, null)
+					|| getHashCodeEqualsForTypeProposals(coveringNode, null)
+					|| getToStringForTypeProposals(coveringNode, null)
 					|| ExternalNullAnnotationQuickAssistProcessor.canAssist(context);
 		}
 		return false;
@@ -209,6 +225,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertSwitchToIfProposals(context, coveringNode, resultingCollections);
 				getConvertIfElseToSwitchProposals(context, coveringNode, resultingCollections);
 				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, locations, resultingCollections);
+				getGettersSettersForTypeProposals(coveringNode, resultingCollections);
+				getHashCodeEqualsForTypeProposals(coveringNode, resultingCollections);
+				getToStringForTypeProposals(coveringNode, resultingCollections);
 
 				ExternalNullAnnotationQuickAssistProcessor.getAnnotateProposals(context, resultingCollections);
 			}
@@ -2394,6 +2413,238 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.JOIN_IF_SEQUENCE, image);
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private boolean getGettersSettersForTypeProposals(ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+		if (!(coveringNode instanceof SimpleName)) {
+			return false;
+		}
+		ASTNode parent= coveringNode.getParent();
+		if (!(parent instanceof TypeDeclaration) && !(parent instanceof RecordDeclaration)) {
+			return false;
+		}
+		if (parent instanceof TypeDeclaration) {
+			TypeDeclaration typeDeclaration= (TypeDeclaration)parent;
+			if (typeDeclaration.isInterface()) {
+				return false;
+			}
+			if (typeDeclaration.getName() != coveringNode) {
+				return false;
+			}
+		} else {
+			RecordDeclaration recordDeclaration= (RecordDeclaration)parent;
+			if (recordDeclaration.getName() != coveringNode) {
+				return false;
+			}
+		}
+		if (resultingCollections == null) {
+			return true;
+		}
+		SimpleName sn= (SimpleName)coveringNode;
+		IBinding binding= sn.resolveBinding();
+		if (!(binding instanceof ITypeBinding)) {
+			return false;
+		}
+		ITypeBinding typeBinding= (ITypeBinding)binding;
+
+		IJavaElement element= typeBinding.getJavaElement();
+		try {
+			if (element instanceof IType) {
+				IType type= (IType) element;
+				if (!hasMissingGettersOrSetters(type)) {
+					return false;
+				}
+				ChangeCorrectionProposal proposal= new AddGetterSetterTypeProposal(IProposalRelevance.GETTER_SETTER_QUICK_ASSIST, type);
+				resultingCollections.add(proposal);
+				return true;
+			}
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return false;
+	}
+
+	/**
+	 * @param type the type
+	 * @return true if any fields are missing getter or setter based on default getter/setter names
+	 * @throws JavaModelException if the type does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 */
+	private boolean hasMissingGettersOrSetters (IType type) throws JavaModelException {
+		for (IField field : type.getFields()) {
+			int flags= field.getFlags();
+			if (!Flags.isEnum(flags)) {
+				if (GetterSetterUtil.getGetter(field) == null) {
+					return true;
+				}
+
+				if (GetterSetterUtil.getSetter(field) == null) {
+					return true;
+				}
+			}
+		}
+		if (type.isRecord()) {
+			for (IField field : type.getRecordComponents()) {
+				int flags= field.getFlags();
+				if (!Flags.isEnum(flags)) {
+					if (GetterSetterUtil.getGetter(field) == null) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean getHashCodeEqualsForTypeProposals(ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+		if (!(coveringNode instanceof SimpleName)) {
+			return false;
+		}
+		ASTNode parent= coveringNode.getParent();
+		if (!(parent instanceof TypeDeclaration)) {
+			return false;
+		}
+		TypeDeclaration typeDeclaration= (TypeDeclaration)parent;
+		if (typeDeclaration.isInterface()) {
+			return false;
+		}
+		if (typeDeclaration.getName() != coveringNode) {
+			return false;
+		}
+		if (resultingCollections == null) {
+			return true;
+		}
+		SimpleName sn= (SimpleName)coveringNode;
+		IBinding binding= sn.resolveBinding();
+		if (!(binding instanceof ITypeBinding)) {
+			return false;
+		}
+		ITypeBinding typeBinding= (ITypeBinding)binding;
+
+		IJavaElement element= typeBinding.getJavaElement();
+		try {
+			if (element instanceof IType) {
+				IType type= (IType) element;
+				if (!hasMissingHashCodeOrEquals(type)) {
+					return false;
+				}
+				ChangeCorrectionProposal proposal= new HashCodeEqualsTypeProposal(IProposalRelevance.HASHCODE_EQUALS_QUICK_ASSIST, type);
+				resultingCollections.add(proposal);
+				return true;
+			}
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return false;
+	}
+
+	/**
+	 * @param type the type
+	 * @return true if type is missing either hashCode() or equals() methods
+	 * @throws JavaModelException if the type does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 */
+	private boolean hasMissingHashCodeOrEquals (IType type) throws JavaModelException {
+		boolean hasHashCode= false;
+		boolean hasEquals= false;
+		boolean hasFields= false;
+		for (IField field : type.getFields()) {
+			int flags= field.getFlags();
+			if (!Flags.isEnum(flags) && !Flags.isStatic(flags)) {
+				hasFields= true;
+				break;
+			}
+		}
+		if (!hasFields) {
+			return false;
+		}
+		for (IMethod method : type.getMethods()) {
+			int flags= method.getFlags();
+			if (!Flags.isStatic(flags)) {
+				if (method.getElementName().equals("hashCode") //$NON-NLS-1$
+						&& method.getSignature().equals("()I")) { //$NON-NLS-1$
+					hasHashCode= true;
+				} else if (method.getElementName().equals("equals") //$NON-NLS-1$
+					&& method.getSignature().equals("(QObject;)Z")) { //$NON-NLS-1$
+					hasEquals= true;
+				}
+			}
+		}
+		return !hasHashCode && !hasEquals;
+	}
+
+	private boolean getToStringForTypeProposals(ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+		if (!(coveringNode instanceof SimpleName)) {
+			return false;
+		}
+		ASTNode parent= coveringNode.getParent();
+		if (!(parent instanceof TypeDeclaration)) {
+			return false;
+		}
+		TypeDeclaration typeDeclaration= (TypeDeclaration)parent;
+		if (typeDeclaration.isInterface()) {
+			return false;
+		}
+		if (typeDeclaration.getName() != coveringNode) {
+			return false;
+		}
+		if (resultingCollections == null) {
+			return true;
+		}
+		SimpleName sn= (SimpleName)coveringNode;
+		IBinding binding= sn.resolveBinding();
+		if (!(binding instanceof ITypeBinding)) {
+			return false;
+		}
+		ITypeBinding typeBinding= (ITypeBinding)binding;
+
+		IJavaElement element= typeBinding.getJavaElement();
+		try {
+			if (element instanceof IType) {
+				IType type= (IType) element;
+				if (!hasMissingToString(type)) {
+					return false;
+				}
+				ChangeCorrectionProposal proposal= new ToStringTypeProposal(IProposalRelevance.TOSTRING_QUICK_ASSIST, type);
+				resultingCollections.add(proposal);
+				return true;
+			}
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return false;
+	}
+
+	/**
+	 * @param type the type
+	 * @return true if type is missing its own toString() method
+	 * @throws JavaModelException if the type does not exist or if an exception occurs while
+	 *             accessing its corresponding resource
+	 */
+	private boolean hasMissingToString (IType type) throws JavaModelException {
+		boolean hasToString= false;
+		boolean hasFields= false;
+		for (IField field : type.getFields()) {
+			int flags= field.getFlags();
+			if (!Flags.isEnum(flags) && !Flags.isStatic(flags)) {
+				hasFields= true;
+				break;
+			}
+		}
+		if (!hasFields) {
+			return false;
+		}
+		for (IMethod method : type.getMethods()) {
+			int flags= method.getFlags();
+			if (!Flags.isStatic(flags)) {
+				if (method.getElementName().equals("toString") //$NON-NLS-1$
+						&& method.getSignature().equals("()QString;")) { //$NON-NLS-1$
+					hasToString= true;
+					break;
+				}
+			}
+		}
+		return !hasToString;
 	}
 
 	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {

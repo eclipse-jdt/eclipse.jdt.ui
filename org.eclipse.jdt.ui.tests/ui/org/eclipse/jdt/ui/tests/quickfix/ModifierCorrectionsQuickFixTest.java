@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1269,7 +1269,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
-		buf.append("public class E {\n");
+		buf.append("public abstract class E {\n");
 		buf.append("    public abstract void foo();\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -1310,8 +1310,54 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
-		buf.append("public class E {\n");
+		buf.append("public abstract class E {\n");
 		buf.append("    public abstract int foo();\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testMethodRequiresBody3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static class E1 {\n");
+		buf.append("        public int foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static class E1 {\n");
+		buf.append("        public int foo() {\n");
+		buf.append("            return 0;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static abstract class E1 {\n");
+		buf.append("        public abstract int foo();\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 

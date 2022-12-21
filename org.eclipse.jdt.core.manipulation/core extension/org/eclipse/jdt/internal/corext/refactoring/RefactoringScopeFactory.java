@@ -15,8 +15,10 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -174,6 +176,26 @@ public class RefactoringScopeFactory {
 			}
 		}
 		return create(candidate, true, sourceReferencesOnly);
+	}
+
+	/**
+	 * Creates a new search scope comprising <code>members</code>.
+	 * Includes the scopes of all projects that elements in {@code members} belong to.
+	 *
+	 * @param members the members
+	 * @param sourceReferencesOnly consider references in source only (no references in binary)
+	 * @return the search scope
+	 * @throws JavaModelException if an error occurs
+	 */
+	public static IJavaSearchScope createProjectsScope(IMember[] members, boolean sourceReferencesOnly) throws JavaModelException {
+		Assert.isTrue(members != null && members.length > 0);
+		Set<IJavaElement> scopeElements = new LinkedHashSet<>();
+		for (IMember member : members) {
+			IJavaProject javaProject= member.getJavaProject();
+			IJavaElement[] projectScopeElements = getAllScopeElements(javaProject, sourceReferencesOnly);
+			scopeElements.addAll(Arrays.asList(projectScopeElements));
+		}
+		return SearchEngine.createJavaSearchScope(scopeElements.toArray(IJavaElement[]::new), false);
 	}
 
 	/**

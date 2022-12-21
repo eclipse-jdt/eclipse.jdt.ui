@@ -398,6 +398,12 @@ public final class CorrectionMessages extends NLS {
 	public static String AdvancedQuickAssistProcessor_joinWithOr_description;
 	public static String AdvancedQuickAssistProcessor_splitOrCondition_description;
 	public static String AdvancedQuickAssistProcessor_exchangeOperands_description;
+	public static String AddGetterSetter_creategetterssettersfortype_description;
+	public static String AddGettersSetters_additional_info;
+	public static String AddHashCodeEquals_createhashcodeequalsfortype_description;
+	public static String AddHashCodeEquals_additional_info;
+	public static String AddToString_createtostringfortype_description;
+	public static String AddToString_additional_info;
 	public static String AddTypeParameterProposal_method_label;
 	public static String AddTypeParameterProposal_type_label;
 

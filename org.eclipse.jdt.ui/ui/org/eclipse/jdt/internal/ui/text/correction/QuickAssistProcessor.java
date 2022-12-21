@@ -3165,7 +3165,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		TryStatement enclosingTry= (TryStatement)ASTResolving.findAncestor(node, ASTNode.TRY_STATEMENT);
 		ListRewrite resourcesRewriter= null;
 		ListRewrite clausesRewriter= null;
-		if (enclosingTry == null || enclosingTry.getBody() == null || enclosingTry.getBody().statements().get(0) != coveredNodes.get(0)) {
+		if (needNewTryBlock(coveredStatements, enclosingTry)) {
 			newTryStatement= ast.newTryStatement();
 			newTryBody= ast.newBlock();
 			newTryStatement.setBody(newTryBody);
@@ -3304,7 +3304,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			catchClause.setException(decl);
 			linkedProposalModel.getPositionGroup(GROUP_EXC_NAME + 0, true).addPosition(rewrite.track(decl.getName()), false);
 			Statement st= null;
-			String s= StubUtility.getCatchBodyContent(icu, "Exception", name, coveredNodes.get(0), icu.findRecommendedLineSeparator()); //$NON-NLS-1$
+			String s= StubUtility.getCatchBodyContent(icu, "Exception", name, coveredStatements.get(0), icu.findRecommendedLineSeparator()); //$NON-NLS-1$
 			if (s != null) {
 				st= (Statement)rewrite.createStringPlaceholder(s, ASTNode.RETURN_STATEMENT);
 			}
@@ -3340,6 +3340,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static boolean needNewTryBlock(List<ASTNode> coveredStatements, TryStatement enclosingTry) {
+		if(enclosingTry == null || enclosingTry.getBody() == null) {
+			return true;
+		}
+		List<?> statements= enclosingTry.getBody().statements();
+		return statements.size() > 0 && coveredStatements.size() > 0 && statements.get(0) != coveredStatements.get(0);
 	}
 
 	private static boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {

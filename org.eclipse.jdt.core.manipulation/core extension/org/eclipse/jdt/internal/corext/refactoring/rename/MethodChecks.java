@@ -27,7 +27,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
-import org.eclipse.jdt.internal.corext.Corext;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.corext.CorextCore;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -36,8 +37,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class MethodChecks {
 
@@ -87,8 +86,8 @@ public class MethodChecks {
 
 		RefactoringStatusContext context= JavaStatusContext.create(overrides);
 		String message= Messages.format(RefactoringCoreMessages.MethodChecks_overrides,
-				new String[]{JavaElementUtil.createMethodSignature(overrides), JavaElementLabels.getElementLabel(overrides.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
-		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, overrides);
+				new String[]{JavaElementUtil.createMethodSignature(overrides), JavaElementLabelsCore.getElementLabel(overrides.getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
+		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, CorextCore.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, overrides);
 	}
 
 	public static RefactoringStatus checkIfComesFromInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
@@ -99,8 +98,8 @@ public class MethodChecks {
 
 		RefactoringStatusContext context= JavaStatusContext.create(inInterface);
 		String message= Messages.format(RefactoringCoreMessages.MethodChecks_implements,
-				new String[]{JavaElementUtil.createMethodSignature(inInterface), JavaElementLabels.getElementLabel(inInterface.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
-		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, inInterface);
+				new String[]{JavaElementUtil.createMethodSignature(inInterface), JavaElementLabelsCore.getElementLabel(inInterface.getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
+		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, CorextCore.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, inInterface);
 	}
 
 	public static IMethod isDeclaredInInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {

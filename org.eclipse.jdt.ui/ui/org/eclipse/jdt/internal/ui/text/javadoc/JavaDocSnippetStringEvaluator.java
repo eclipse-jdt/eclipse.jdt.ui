@@ -23,6 +23,7 @@ import java.util.regex.PatternSyntaxException;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTextElement;
 import org.eclipse.jdt.core.dom.JavaDocRegion;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodRef;
@@ -31,7 +32,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TagProperty;
-import org.eclipse.jdt.core.dom.TextElement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
@@ -131,8 +131,8 @@ public class JavaDocSnippetStringEvaluator {
 			List<Object> fragments = snippetTag.fragments();
 			for( Object fragment : fragments) {
 				String str= ""; //$NON-NLS-1$
-				if (fragment instanceof TextElement) {
-					TextElement textElement= (TextElement) fragment;
+				if (fragment instanceof AbstractTextElement) {
+					AbstractTextElement textElement= (AbstractTextElement) fragment;
 					List<TagElement> tagElements= getTagElementsForTextElement(snippetTag, textElement);
 					str = getModifiedString(textElement, tagElements);
 				} else if (fragment instanceof JavaDocRegion) {
@@ -151,16 +151,16 @@ public class JavaDocSnippetStringEvaluator {
 		}
 	}
 
-	private String getModifiedString(TextElement textElement, List<TagElement> tags) {
+	private String getModifiedString(AbstractTextElement textElement, List<TagElement> tags) {
 		return getModifiedString(textElement.getText(), tags);
 	}
 
 	private String getModifiedString(TagElement tagElement, List<TagElement> tags) {
-		return getModifiedString(((TextElement)tagElement.fragments().get(0)).getText(), tags);
+		return getModifiedString(((AbstractTextElement)tagElement.fragments().get(0)).getText(), tags);
 	}
 
 	private String getModifiedString(JavaDocRegion region, List<TagElement> tags) {
-		return getModifiedString(((TextElement)region.fragments().get(0)).getText(), tags);
+		return getModifiedString(((AbstractTextElement)region.fragments().get(0)).getText(), tags);
 	}
 
 	private String getModifiedString(String str, List<TagElement> tags) {
@@ -262,7 +262,7 @@ public class JavaDocSnippetStringEvaluator {
 		}
 	}
 
-	private List<TagElement> getTagElementsForTextElement(TagElement snippetTag, TextElement textElement) {
+	private List<TagElement> getTagElementsForTextElement(TagElement snippetTag, AbstractTextElement textElement) {
 		List<TagElement> tagElements= new ArrayList<>();
 		List<JavaDocRegion> regions= snippetTag.tagRegionsStartingAtTextElement(textElement);
 		List<JavaDocRegion> masterList= snippetTag.tagRegionsContainingTextElement(textElement);
@@ -306,7 +306,7 @@ public class JavaDocSnippetStringEvaluator {
 
 	private List<TagElement> getTagElementsForDummyJavaDocRegion(TagElement snippetTag, JavaDocRegion javaDocRegion) {
 		List<TagElement> tagElements= new ArrayList<>();
-		TextElement textElement= (TextElement) javaDocRegion.fragments().get(0);
+		AbstractTextElement textElement= (AbstractTextElement) javaDocRegion.fragments().get(0);
 		List<JavaDocRegion> regions= snippetTag.tagRegionsStartingAtTextElement(textElement);
 		List<JavaDocRegion> masterList= snippetTag.tagRegionsContainingTextElement(textElement);
 		masterList.removeAll(regions);
@@ -351,7 +351,7 @@ public class JavaDocSnippetStringEvaluator {
 
 	private List<TagElement> getTagElementsForTagElement(TagElement snippetTag, TagElement tag) {
 		List<TagElement> tagElements= new ArrayList<>();
-		TextElement textElement= (TextElement) tag.fragments().get(0);
+		AbstractTextElement textElement= (AbstractTextElement) tag.fragments().get(0);
 		List<JavaDocRegion> regions= snippetTag.tagRegionsStartingAtTextElement(textElement);
 		List<JavaDocRegion> masterList= snippetTag.tagRegionsContainingTextElement(textElement);
 		masterList.removeAll(regions);

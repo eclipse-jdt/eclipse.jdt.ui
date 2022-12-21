@@ -495,6 +495,42 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	@Test
+	public void testRestoreExistingImports() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Properties;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("\n");
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query, true);
+		op.run(null);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Properties;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("\n");
+		buf.append("public class C extends Vector {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	@Test
 	public void testClearImportsNoPackage() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -3624,6 +3660,11 @@ public class ImportOrganizeTest extends CoreTests {
 	protected OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
 		setOrganizeImportSettings(order, threshold, threshold, cu.getJavaProject());
 		return new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, allowSyntaxErrors, chooseImportQuery);
+	}
+
+	protected OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery, boolean restoreExistingImports) {
+		setOrganizeImportSettings(order, threshold, threshold, cu.getJavaProject());
+		return new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, allowSyntaxErrors, chooseImportQuery, restoreExistingImports);
 	}
 
 	protected void setOrganizeImportSettings(String[] order, int threshold, int staticThreshold, IJavaProject project) {

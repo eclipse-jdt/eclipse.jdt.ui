@@ -613,12 +613,12 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 			for (IExecutionEnvironment environment : environments) {
 				String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(environment);
-				if (defaultCC.endsWith(eeCompliance)) {
+				if (defaultCC.equals(eeCompliance)) {
 					return environment.getId();
 				}
 			}
 
-			return "JavaSE-1.7"; //$NON-NLS-1$
+			return "JavaSE-11"; //$NON-NLS-1$
 		}
 
 		private String getDefaultJVMLabel() {

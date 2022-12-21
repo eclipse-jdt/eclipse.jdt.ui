@@ -78,7 +78,7 @@ public class UnimplementedCodeFixCore extends CompilationUnitRewriteOperationsFi
 			if (addMissingMethod) {
 				ASTNode typeNode= getSelectedTypeNode(root, problem);
 				if (typeNode != null && !isTypeBindingNull(typeNode)) {
-					operations.add(new AddUnimplementedMethodsOperation(typeNode));
+					operations.add(new AddUnimplementedMethodsOperation(typeNode, null));
 				}
 			} else {
 				ASTNode typeNode= getSelectedTypeNode(root, problem);
@@ -108,7 +108,7 @@ public class UnimplementedCodeFixCore extends CompilationUnitRewriteOperationsFi
 		if (isTypeBindingNull(typeNode))
 			return null;
 
-		AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(typeNode);
+		AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(typeNode, null);
 		if (operation.getMethodsToImplement().length > 0) {
 			return new UnimplementedCodeFixCore(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new CompilationUnitRewriteOperation[] { operation });
 		}

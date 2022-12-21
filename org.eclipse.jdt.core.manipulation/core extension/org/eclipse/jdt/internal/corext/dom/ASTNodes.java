@@ -101,6 +101,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
@@ -120,6 +121,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -2476,6 +2478,30 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns the first ancestor of the provided node which has any of the required types.
+	 *
+	 * @param node the start node
+	 * @param ancestorClass the required ancestor's type
+	 * @return the first ancestor of the provided node which has any of the required type, or
+	 *         {@code null}
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends ASTNode> T getFirstAncestorOrNull(final ASTNode node, final Class<T> ancestorClass) {
+		if (node == null || node.getParent() == null) {
+			return null;
+		}
+
+		ASTNode parent= node.getParent();
+
+		if (ancestorClass.isAssignableFrom(parent.getClass())
+				) {
+			return (T) parent;
+		}
+
+		return getFirstAncestorOrNull(parent, ancestorClass);
+	}
+
+	/**
 	 * Returns the closest ancestor of <code>node</code> that is an instance of <code>parentClass</code>, or <code>null</code> if none.
 	 * <p>
 	 * <b>Warning:</b> This method does not stop at any boundaries like parentheses, statements, body declarations, etc.
@@ -4156,10 +4182,10 @@ public class ASTNodes {
 		List<Comment> comments= new ArrayList<>();
 		CompilationUnit cu= (CompilationUnit)node.getRoot();
 		List<Comment> commentList= cu.getCommentList();
-		for (Comment comment : commentList) {
-			if (comment.getStartPosition() >= cu.getExtendedStartPosition(node)
-					&& comment.getStartPosition() + comment.getLength() < node.getStartPosition()) {
-				comments.add(comment);
+		for (Comment commentFromList : commentList) {
+			if (commentFromList.getStartPosition() >= cu.getExtendedStartPosition(node)
+					&& commentFromList.getStartPosition() + commentFromList.getLength() < node.getStartPosition()) {
+				comments.add(commentFromList);
 			}
 		}
 		return comments;
@@ -4177,12 +4203,123 @@ public class ASTNodes {
 		List<Comment> commentList= cu.getCommentList();
 		int extendedStart= cu.getExtendedStartPosition(node);
 		int extendedLength= cu.getExtendedLength(node);
-		for (Comment comment : commentList) {
-			if (comment.getStartPosition() > node.getStartPosition()
-					&& comment.getStartPosition() < extendedStart + extendedLength) {
-				comments.add(comment);
+		for (Comment commentFromList : commentList) {
+			if (commentFromList.getStartPosition() > node.getStartPosition()
+					&& commentFromList.getStartPosition() < extendedStart + extendedLength) {
+				comments.add(commentFromList);
 			}
 		}
 		return comments;
+	}
+
+	/**
+	 * Get the number of Type references in a Compilation Unit - used for determining
+	 * if an import can be removed.
+	 *
+	 * @param typeBinding - binding of the type in question
+	 * @param cu - compilation unit
+	 * @return integer count of times type is referenced (may be 0 if bindings cannot be resolved)
+	 */
+	public static int getNumberOfTypeReferences(ITypeBinding typeBinding, CompilationUnit cu) {
+		class CounterVisitor extends ASTVisitor {
+			private int counter= 0;
+			private void checkType(Type type) {
+				if (type != null && !type.isParameterizedType()) {
+					ITypeBinding binding= type.resolveBinding();
+					if (binding != null) {
+						if (binding.isArray()) {
+							binding= binding.getElementType();
+						}
+						if (binding.isEqualTo(typeBinding)) {
+							++counter;
+						}
+					}
+				}
+			}
+			public int getCounter() {
+				return counter;
+			}
+			@Override
+			public boolean visit(ArrayCreation node) {
+				Type type= node.getType();
+				checkType(type);
+				return true;
+			}
+			@Override
+			public boolean visit(MethodDeclaration node) {
+				Type type= node.getReturnType2();
+				checkType(type);
+				List<Type> exceptions= node.thrownExceptionTypes();
+				for (Type t : exceptions) {
+					checkType(t);
+				}
+				return true;
+			}
+			@Override
+			public boolean visit(ClassInstanceCreation node) {
+				Type type= node.getType();
+				checkType(type);
+				return true;
+			}
+			@Override
+			public boolean visit(SingleVariableDeclaration node) {
+				Type type= node.getType();
+				checkType(type);
+				return true;
+			}
+			@Override
+			public boolean visit(CastExpression node) {
+				Type type= node.getType();
+				checkType(type);
+				return true;
+			}
+			@Override
+			public boolean visit(VariableDeclarationExpression node) {
+				Type type= node.getType();
+				checkType(type);
+				return true;
+			}
+			@Override
+			public boolean visit(InstanceofExpression node) {
+				Type type= node.getRightOperand();
+				checkType(type);
+				return true;
+			}
+			@Override
+			public boolean visit(FieldDeclaration node) {
+				Type type= node.getType();
+				checkType(type);
+				return true;
+			}
+			@Override
+			public boolean visit(ParameterizedType node) {
+				Type type= node.getType();
+				checkType(type);
+				List<Type> types= node.typeArguments();
+				for (Type t : types) {
+					checkType(t);
+				}
+				return true;
+			}
+			@Override
+			public boolean visit(TypeDeclaration node) {
+				List<Type> types= node.typeParameters();
+				for (Type t : types) {
+					checkType(t);
+				}
+				return true;
+			}
+			@Override
+			public boolean visit(RecordDeclaration node) {
+				List<Type> types= node.typeParameters();
+				for (Type t : types) {
+					checkType(t);
+				}
+				return true;
+			}
+		}
+		CounterVisitor visitor= new CounterVisitor();
+		cu.accept(visitor);
+		return visitor.getCounter();
 	}
 }

@@ -499,6 +499,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private boolean fDoSave;
 
 	private boolean fIgnoreLowerCaseNames;
+	private boolean fRestoreExistingImports;
 
 	private IChooseImportQuery fChooseImportQuery;
 
@@ -528,6 +529,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 		fDoSave= save;
 		fIgnoreLowerCaseNames= ignoreLowerCaseNames;
+		fRestoreExistingImports= false;
 		fAllowSyntaxErrors= allowSyntaxErrors;
 		fChooseImportQuery= chooseImportQuery;
 
@@ -535,6 +537,23 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fNumberOfImportsRemoved= 0;
 
 		fParsingError= null;
+	}
+
+	/**
+	 * Creates a new OrganizeImportsOperation operation.
+	 *
+	 * @param cu The compilation unit
+	 * @param astRoot the compilation unit AST node
+	 * @param ignoreLowerCaseNames when true, type names starting with a lower case are ignored
+	 * @param save If set, the result will be saved
+	 * @param allowSyntaxErrors If set, the operation will only proceed when the compilation unit has no syntax errors
+	 * @param chooseImportQuery Query element to be used for UI interaction or <code>null</code> to not select anything
+	 * @param restoreExistingImports when true, the operation will restore existing imports
+	 * @since 1.17
+	 */
+	public OrganizeImportsOperation(ICompilationUnit cu, CompilationUnit astRoot, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery, boolean restoreExistingImports) {
+		this(cu, astRoot, ignoreLowerCaseNames, save, allowSyntaxErrors, chooseImportQuery);
+		fRestoreExistingImports= restoreExistingImports;
 	}
 
 	/**
@@ -564,7 +583,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		subMonitor.setWorkRemaining(7);
 
-		ImportRewrite importsRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, false);
+		ImportRewrite importsRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, fRestoreExistingImports);
 		if (astRoot.getAST().hasResolvedBindings()) {
 			importsRewrite.setUseContextToFilterImplicitImports(true);
 		}
@@ -675,6 +694,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				if (unresolvableImports.isEmpty()) {
 					String pref= JavaManipulation.getPreference(JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS, importRewrite.getCompilationUnit().getJavaProject());
+					if (pref == null  || pref.isBlank()) {
+						return;
+					}
 					String[] favourites= pref.split(";"); //$NON-NLS-1$
 					if (favourites.length == 0) {
 						return;

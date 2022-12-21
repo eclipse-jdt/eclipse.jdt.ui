@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2020 IBM Corporation and others.
+ * Copyright (c) 2014, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -401,6 +401,294 @@ public class UnresolvedMethodsQuickFixTest1d8 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
+
+	@Test
+	public void testCreateMethodIssue322_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T> void test(T a) {\n");
+		buf.append("        test(a, a);      // error here\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T> void test(T a) {\n");
+		buf.append("        test(a, a);      // error here\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static <T> void test(T a, T a2) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodIssue322_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T, U> void test(T a, U b) {\n");
+		buf.append("        test(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T, U> void test(T a, U b) {\n");
+		buf.append("        test(a);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static <T> void test(T a) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodIssue322_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T extends U, U> void test(T a, U b) {\n");
+		buf.append("        test(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T extends U, U> void test(T a, U b) {\n");
+		buf.append("        test(a);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static <T extends U, U> void test(T a) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodIssue322_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T extends U, U> U test(T a, U b) {\n");
+		buf.append("        return test(a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T extends U, U> U test(T a, U b) {\n");
+		buf.append("        return test(a);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static <U, T extends U> U test(T a) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodIssue322_5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T extends U, U> U test(T a) {\n");
+		buf.append("        return test(a, a);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <T extends U, U> U test(T a) {\n");
+		buf.append("        return test(a, a);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static <U, T extends U> U test(T a, T a2) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodIssue330_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static class Class1<T> {\n");
+		buf.append("        T t;\n");
+		buf.append("        Class2<T> c2;\n");
+		buf.append("        \n");
+		buf.append("        T method() {\n");
+		buf.append("            return c2.useT(t);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static class Class2<U> {\n");
+		buf.append("\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static class Class1<T> {\n");
+		buf.append("        T t;\n");
+		buf.append("        Class2<T> c2;\n");
+		buf.append("        \n");
+		buf.append("        T method() {\n");
+		buf.append("            return c2.useT(t);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static class Class2<U> {\n");
+		buf.append("\n");
+		buf.append("        public U useT(U t) {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodIssue330_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <K> void test(K t) {\n");
+		buf.append("        Class2<K> c2 = new Class2<>();\n");
+		buf.append("        c2.useT(t);\n");
+		buf.append("       \n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static class Class2<U> {\n");
+		buf.append("\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static <K> void test(K t) {\n");
+		buf.append("        Class2<K> c2 = new Class2<>();\n");
+		buf.append("        c2.useT(t);\n");
+		buf.append("       \n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static class Class2<U> {\n");
+		buf.append("\n");
+		buf.append("        public void useT(U t) {\n");
+		buf.append("        }\n");
+		buf.append("\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	@Test
+	public void testCreateMethodIssue330_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static class Class1<T> {\n");
+		buf.append("        <K> void test(T t) {\n");
+		buf.append("            Class2<K> c2 = new Class2<>();\n");
+		buf.append("            c2.useT(t);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static class Class2<U> {\n");
+		buf.append("\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static class Class1<T> {\n");
+		buf.append("        <K> void test(T t) {\n");
+		buf.append("            Class2<K> c2 = new Class2<>();\n");
+		buf.append("            c2.useT(t);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static class Class2<U> {\n");
+		buf.append("\n");
+		buf.append("        public <T> void useT(T t) {\n");
+		buf.append("        }\n");
+		buf.append("\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
 	@Test
 	public void testBug514213_avoidRedundantNonNullWhenCreatingMissingMethodForOverride() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
@@ -657,6 +945,59 @@ public class UnresolvedMethodsQuickFixTest1d8 extends QuickFixTest {
 		} finally {
 			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);
 		}
+	}
+
+	/*
+	 * Test that a default method that is overridden with an abstract method is
+	 * added when invoking "Add unimplemented methods"
+	 */
+	@Test
+	public void testOverrideDefaultMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+
+		buf.append("package test1;\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default int gogo() {\n");
+		buf.append("        return 24;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface I2 extends I1 {\n");
+		buf.append("    int gogo();\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class XX implements I1, I2 {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("XX.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default int gogo() {\n");
+		buf.append("        return 24;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface I2 extends I1 {\n");
+		buf.append("    int gogo();\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class XX implements I1, I2 {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public int gogo() {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
 
 }

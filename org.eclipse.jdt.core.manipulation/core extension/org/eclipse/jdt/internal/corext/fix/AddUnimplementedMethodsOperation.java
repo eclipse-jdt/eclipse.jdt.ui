@@ -19,6 +19,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -54,6 +55,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOperation {
 
 	private ASTNode fTypeNode;
+	private Predicate<IMethodBinding> fMethodFilter;
 
 	/**
 	 * Create a {@link AddUnimplementedMethodsOperation}
@@ -61,9 +63,11 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 	 * <ul><li>AnonymousClassDeclaration</li>
 	 * <li>AbstractTypeDeclaration</li>
 	 * <li>EnumConstantDeclaration</li></ul>
+	 * @param methodFilter a filter for methods to ignore when looking for unimplemented methods
 	 */
-	public AddUnimplementedMethodsOperation(ASTNode typeNode) {
-		fTypeNode= typeNode;
+	public AddUnimplementedMethodsOperation(ASTNode typeNode, Predicate<IMethodBinding> methodFilter) {
+		this.fTypeNode= typeNode;
+		this.fMethodFilter= methodFilter;
 	}
 
 	@Override
@@ -138,7 +142,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 
 	private IMethodBinding[] getUnimplementedMethods(ASTNode typeNode) {
 		ITypeBinding binding= null;
-		boolean implementAbstractsOfInput= false;
+		Predicate<IMethodBinding> filter= StubUtility2Core.ignoreAbstractsOfInput(binding);
 		if (typeNode instanceof AnonymousClassDeclaration) {
 			AnonymousClassDeclaration decl= (AnonymousClassDeclaration) typeNode;
 			binding= decl.resolveBinding();
@@ -153,14 +157,18 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 				IVariableBinding varBinding= enumConstantDeclaration.resolveVariable();
 				if (varBinding != null) {
 					binding= varBinding.getDeclaringClass();
-					implementAbstractsOfInput= true;
+					filter= m->false;
 				}
 			}
 		}
 		if (binding == null)
 			return new IMethodBinding[0];
 
-		IMethodBinding[] unimplementedMethods= StubUtility2Core.getUnimplementedMethods(binding, implementAbstractsOfInput);
+		if (fMethodFilter != null) {
+			filter= filter.or(fMethodFilter);
+		}
+
+		IMethodBinding[] unimplementedMethods= StubUtility2Core.getUnimplementedMethods(binding, filter);
 		Arrays.sort(unimplementedMethods, new MethodsSourcePositionComparator(binding));
 		return unimplementedMethods;
 	}

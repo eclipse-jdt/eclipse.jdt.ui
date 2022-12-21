@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -132,6 +133,17 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 
 			LinkedProposalPositionGroup positionGroup= new LinkedProposalPositionGroup("group"); //$NON-NLS-1$
 			positionGroup.addPosition(trackedDeclNode);
+
+			// add abstract modifier to class if we added abstract modifier to method
+			if (declNode.getNodeType() == ASTNode.METHOD_DECLARATION && (fIncludedModifiers & Modifier.ABSTRACT) != 0) {
+				TypeDeclaration typeDecl= ASTNodes.getFirstAncestorOrNull(declNode, TypeDeclaration.class);
+				if (typeDecl != null && !typeDecl.isInterface() && !Modifier.isAbstract(typeDecl.getModifiers())) {
+					ModifierRewrite listRewrite2= ModifierRewrite.create(rewrite, typeDecl);
+					PositionInformation trackedDeclNode2= listRewrite2.setModifiers(typeDecl.getModifiers() | Modifier.ABSTRACT, null);
+					positionGroup.addPosition(trackedDeclNode2);
+				}
+			}
+
 			getLinkedProposalModel().addPositionGroup(positionGroup);
 
 			if (boundNode != null) {

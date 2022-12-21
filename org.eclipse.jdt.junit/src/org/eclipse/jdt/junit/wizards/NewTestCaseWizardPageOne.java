@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import com.ibm.icu.text.UTF16;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -1132,7 +1130,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				buffer.replace(index, index + 1, QUESTION_MARK_TAG);
 			else if (!Character.isJavaIdentifierPart(character)) {
 				// Check for surrogates
-				if (!UTF16.isSurrogate(character)) {
+				if (!Character.isSurrogate(character)) {
 					/*
 					 * XXX: Here we should create the code point and test whether
 					 * it is a Java identifier part. Currently this is not possible

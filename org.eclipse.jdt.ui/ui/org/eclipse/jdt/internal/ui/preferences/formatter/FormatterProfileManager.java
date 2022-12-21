@@ -15,15 +15,12 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-
-import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -48,10 +45,9 @@ public class FormatterProfileManager extends ProfileManager {
 	};
 
 	private final static String PROFILE_KEY= PreferenceConstants.FORMATTER_PROFILE;
-	private final static String FORMATTER_SETTINGS_VERSION= "formatter_settings_version";  //$NON-NLS-1$
 
 	public FormatterProfileManager(List<Profile> profiles, IScopeContext context, PreferencesAccess preferencesAccess, IProfileVersioner profileVersioner) {
-	    super(addBuiltinProfiles(profiles, profileVersioner), context, preferencesAccess, profileVersioner, KEY_SETS, PROFILE_KEY, FORMATTER_SETTINGS_VERSION);
+	    super(addBuiltinProfiles(profiles, profileVersioner), context, preferencesAccess, profileVersioner, KEY_SETS, PROFILE_KEY, FormatterProfileManagerCore.FORMATTER_SETTINGS_VERSION);
     }
 
 	private static List<Profile> addBuiltinProfiles(List<Profile> profiles, IProfileVersioner profileVersioner) {
@@ -96,17 +92,7 @@ public class FormatterProfileManager extends ProfileManager {
 	}
 
 	public static Map<String, String> getProjectSettings(IJavaProject javaProject) {
-		Map<String, String> options= new HashMap<>(javaProject.getOptions(true));
-		ProfileVersioner versioner= new ProfileVersioner();
-		IEclipsePreferences prefs= new ProjectScope(javaProject.getProject()).getNode(JavaUI.ID_PLUGIN);
-		if (prefs == null)
-			return options;
-		int profileVersion= prefs.getInt(FORMATTER_SETTINGS_VERSION, versioner.getCurrentVersion());
-		if (profileVersion == versioner.getCurrentVersion())
-			return options;
-		CustomProfile profile= new CustomProfile(null, options, profileVersion, null);
-		versioner.update(profile);
-		return profile.getSettings();
+		return FormatterProfileManagerCore.getProjectSettings(javaProject);
 	}
 
 	@Override

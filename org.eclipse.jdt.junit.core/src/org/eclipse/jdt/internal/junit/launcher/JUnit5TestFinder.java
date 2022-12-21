@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 IBM Corporation and others.
+ * Copyright (c) 2016, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IRegion;
@@ -65,11 +64,11 @@ public class JUnit5TestFinder implements ITestFinder {
 			fName= name;
 		}
 
-		public String getName() {
+		String getName() {
 			return fName;
 		}
 
-		public boolean annotatesAtLeastOneInnerClass(ITypeBinding type) {
+		boolean annotatesAtLeastOneInnerClass(ITypeBinding type) {
 			if (type == null) {
 				return false;
 			}
@@ -110,7 +109,7 @@ public class JUnit5TestFinder implements ITestFinder {
 			return false;
 		}
 
-		public boolean annotatesTypeOrSuperTypes(ITypeBinding type) {
+		boolean annotatesTypeOrSuperTypes(ITypeBinding type) {
 			while (type != null) {
 				if (annotates(type.getAnnotations())) {
 					return true;
@@ -120,7 +119,7 @@ public class JUnit5TestFinder implements ITestFinder {
 			return false;
 		}
 
-		public boolean annotatesAtLeastOneMethod(ITypeBinding type) {
+		boolean annotatesAtLeastOneMethod(ITypeBinding type) {
 			if (type == null) {
 				return false;
 			}
@@ -211,34 +210,27 @@ public class JUnit5TestFinder implements ITestFinder {
 			}
 		}
 
-		if (pm == null)
-			pm= new NullProgressMonitor();
+		var subMonitor = SubMonitor.convert(pm, JUnitMessages.JUnit5TestFinder_searching_description, 4);
 
-		try {
-			pm.beginTask(JUnitMessages.JUnit5TestFinder_searching_description, 4);
+		IRegion region= CoreTestSearchEngine.getRegion(element);
+		ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, subMonitor.split(1));
+		IType[] allClasses= hierarchy.getAllClasses();
 
-			IRegion region= CoreTestSearchEngine.getRegion(element);
-			ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, new SubProgressMonitor(pm, 1));
-			IType[] allClasses= hierarchy.getAllClasses();
-
-			// search for all types with references to RunWith and Test and all subclasses
-			for (IType type : allClasses) {
-				if (internalIsTest(type, pm) && region.contains(type)) {
-					addTypeAndSubtypes(type, result, hierarchy);
-				}
+		// search for all types with references to RunWith and Test and all subclasses
+		for (IType type : allClasses) {
+			if (region.contains(type) && internalIsTest(type, pm)) {
+				addTypeAndSubtypes(type, result, hierarchy);
 			}
-
-			// add all classes implementing JUnit 3.8's Test interface in the region
-			IType testInterface= element.getJavaProject().findType(JUnitCorePlugin.TEST_INTERFACE_NAME);
-			if (testInterface != null) {
-				CoreTestSearchEngine.findTestImplementorClasses(hierarchy, testInterface, region, result);
-			}
-
-			//JUnit 4.3 can also run JUnit-3.8-style public static Test suite() methods:
-			CoreTestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 1));
-		} finally {
-			pm.done();
 		}
+
+		// add all classes implementing JUnit 3.8's Test interface in the region
+		IType testInterface= element.getJavaProject().findType(JUnitCorePlugin.TEST_INTERFACE_NAME);
+		if (testInterface != null) {
+			CoreTestSearchEngine.findTestImplementorClasses(hierarchy, testInterface, region, result);
+		}
+
+		//JUnit 4.3 can also run JUnit-3.8-style public static Test suite() methods:
+		CoreTestSearchEngine.findSuiteMethods(element, result, subMonitor.split(1));
 	}
 
 	private void addTypeAndSubtypes(IType type, Set<IType> result, ITypeHierarchy hierarchy) {

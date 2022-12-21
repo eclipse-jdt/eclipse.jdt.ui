@@ -663,7 +663,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	}
 
 	private IMethodBinding[] getUnimplementedMethods(ITypeBinding binding) {
-		IMethodBinding[] unimplementedMethods= StubUtility2Core.getUnimplementedMethods(binding, true);
+		IMethodBinding[] unimplementedMethods= StubUtility2Core.getUnimplementedMethods(binding, null);
 		Arrays.sort(unimplementedMethods, new MethodsSourcePositionComparator(binding));
 		return unimplementedMethods;
 	}
