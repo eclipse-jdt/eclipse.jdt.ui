@@ -3,6 +3,8 @@ Contributing to JDT UI - Java development tools UI
 
 [![Java CI with Maven](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/maven.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/maven.yml)
 
+[![Check Code Freeze Period](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/verifyFreezePeriod.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/verifyFreezePeriod.yml)
+
 [![CodeQL](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codeql.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codeql.yml)
 
 [![Codacy Security Scan](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codacy.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codacy.yml)
