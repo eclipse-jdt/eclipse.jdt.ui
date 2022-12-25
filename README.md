@@ -2,6 +2,7 @@ Contributing to JDT UI - Java development tools UI
 ============================================
 
 [![CodeQL](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codeql.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codeql.yml)
+
 [![Codacy Security Scan](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codacy.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codacy.yml)
 
 Thanks for your interest in this project.
