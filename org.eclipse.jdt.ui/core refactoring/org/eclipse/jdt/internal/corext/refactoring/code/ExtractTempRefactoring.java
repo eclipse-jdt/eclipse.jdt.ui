@@ -140,6 +140,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComp
 import org.eclipse.jdt.internal.corext.refactoring.util.NullChecker;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.SideEffectChecker;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -386,6 +387,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private HashSet<IASTFragment> fSeen= new HashSet<>();
 
+	private int fReplacedExprNum;
 
 	/**
 	 * Creates a new extract temp refactoring
@@ -412,6 +414,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		fStartPoint= -1; // default
 		fEndPoint= -1; // default
+		fReplacedExprNum= 0; // default
 	}
 
 	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
@@ -434,7 +437,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		fStartPoint= -1; // default
 		fEndPoint= -1; // default
-
+		fReplacedExprNum= 0; // default
 	}
 
 	public ExtractTempRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
@@ -442,6 +445,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		fStartPoint= -1; // default
 		fEndPoint= -1; // default
+		fReplacedExprNum= 0; // default
 
 
 		RefactoringStatus initializeStatus= initialize(arguments);
@@ -471,10 +475,12 @@ public class ExtractTempRefactoring extends Refactoring {
 			IASTFragment fragment= fragmentsToReplace[i];
 			if (!fSeen.add(fragment))
 				continue;
+
 			SimpleName tempName= fCURewrite.getAST().newSimpleName(fTempName);
 			TextEditGroup description= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_replace);
 
 			fragment.replace(rewrite, tempName, description);
+			fReplacedExprNum++;
 			if (fLinkedProposalModel != null)
 				fLinkedProposalModel.getPositionGroup(KEY_NAME, true).addPosition(rewrite.track(tempName), false);
 		}
@@ -563,8 +569,9 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
 				result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, BasicElementLabels.getJavaElementName(fTempName)));
 
-			result.merge(checkMatchingFragments());
 
+			result.merge(checkSideEffectsInSelectedExpression());
+			result.merge(checkMatchingFragments());
 			fChange.setKeepPreviewEdits(false);
 
 			if (fCheckResultForCompileProblems) {
@@ -623,9 +630,8 @@ public class ExtractTempRefactoring extends Refactoring {
 				fSelectionStart= fSelectedExpression.getAssociatedNode().getStartPosition();
 				fSelectionLength= fSelectedExpression.getAssociatedNode().getLength();
 				IASTFragment[] reSortRetainOnlyReplacableMatches= reSortRetainOnlyReplacableMatches();
-				int tmpFSelectionStart= fSelectionStart;
-				int tmpFSelectionLength= fSelectionLength;
-
+				final int tmpFSelectionStart= fSelectionStart;
+				final int tmpFSelectionLength= fSelectionLength;
 				IExpressionFragment tmpFSelectedExpression= fSelectedExpression;
 				Collection<String> usedNames= getUsedLocalNames(fSelectedExpression.getAssociatedNode());
 				String newName= fTempName;
@@ -637,7 +643,8 @@ public class ExtractTempRefactoring extends Refactoring {
 						fTempName= newName + ++cnt;
 					}
 				}
-				while (replaceAllOccurrences() && reSortRetainOnlyReplacableMatches.length > fSeen.size()) {
+				while (replaceAllOccurrences() &&
+						reSortRetainOnlyReplacableMatches.length > fSeen.size()) {
 					fStartPoint= -1;
 					fEndPoint= -1;
 					boolean flag= false;
@@ -676,6 +683,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	/**
 	 * Retrieves used names for the block containing a node.
+	 *
 	 * @param selected the selected node
 	 *
 	 * @return an array of used variable names to avoid
@@ -726,6 +734,20 @@ public class ExtractTempRefactoring extends Refactoring {
 			ASTNode node= matchingFragment.getAssociatedNode();
 			if (isLeftValue(node) && !isReferringToLocalVariableFromFor((Expression) node)) {
 				String msg= RefactoringCoreMessages.ExtractTempRefactoring_assigned_to;
+				result.addWarning(msg, JavaStatusContext.create(fCu, node));
+			}
+		}
+		return result;
+	}
+
+	private RefactoringStatus checkSideEffectsInSelectedExpression() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		if (replaceAllOccurrences() && fReplacedExprNum > 1) {
+			SideEffectChecker ev= new SideEffectChecker(getSelectedExpression().getAssociatedNode());
+			ASTNode node= fSelectedExpression.getAssociatedNode();
+			node.accept(ev);
+			if (ev.hasSideEffect()) {
+				String msg= RefactoringCoreMessages.ExtractTempRefactoring_side_effcts_in_selected_expression;
 				result.addWarning(msg, JavaStatusContext.create(fCu, node));
 			}
 		}
@@ -844,10 +866,10 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (insertAtSelection) {
 				ASTNode realCommonASTNode= null;
 				realCommonASTNode= evalStartAndEnd(reSortRetainOnlyReplacableMatches, selectNumber);
-				if (realCommonASTNode == null && selectNumber >=0 ) {
+				if (realCommonASTNode == null && selectNumber >= 0) {
 					fSeen.add(reSortRetainOnlyReplacableMatches[selectNumber]);
 				}
-				if (realCommonASTNode != null || reSortRetainOnlyReplacableMatches.length ==0) {
+				if (realCommonASTNode != null || reSortRetainOnlyReplacableMatches.length == 0) {
 					insertAt(getSelectedExpression().getAssociatedNode(), vds);
 				}
 				return;
@@ -891,6 +913,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			}
 			commonASTNode= convertToExtractNode(commonASTNode);
 			startOffset= commonASTNode.getStartPosition() - 1;
+
 			NullChecker nullChecker= new NullChecker(fCompilationUnitNode, fCu, commonASTNode, expression, startOffset, endOffset);
 			if (!nullChecker.hasNullCheck()) {//at least one be extracted
 				fStartPoint= start;

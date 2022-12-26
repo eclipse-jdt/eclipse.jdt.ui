@@ -876,6 +876,37 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(9, 32, 9, 42, true, false, "length", "length");
 	}
 
+
+	@Test
+	public void test132() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(5, 16, 5, 28, true, false, "i", "i", RefactoringStatus.WARNING);
+	}
+
+	@Test
+	public void test133() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		helper1(4, 16, 4, 23, true, false, "i", "i");
+	}
+
+	@Test
+	public void test134() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(4, 29, 4, 45, true, false, "i", "i", RefactoringStatus.WARNING);
+	}
+
+	@Test
+	public void test135() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(6, 18, 6, 31, true, false, "f", "f", RefactoringStatus.WARNING);
+	}
+
+	@Test
+	public void test136() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(4, 22, 4, 25, true, false, "m", "m", RefactoringStatus.WARNING);
+	}
+
 	@Test
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
