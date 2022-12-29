@@ -180,6 +180,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_lineWrap_pref_param_type_parameters;
 	public static String FormatterModifyDialog_lineWrap_pref_param_type_ref;
 	public static String FormatterModifyDialog_lineWrap_pref_parameters;
+	public static String FormatterModifyDialog_lineWrap_pref_permits_clause;
 	public static String FormatterModifyDialog_lineWrap_pref_qualified_invocations;
 	public static String FormatterModifyDialog_lineWrap_pref_qualified_invocations_indent_from_base_expression_first_line;
 	public static String FormatterModifyDialog_lineWrap_pref_qualified_object_allocation_arguments;
