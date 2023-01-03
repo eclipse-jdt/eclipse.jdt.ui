@@ -60,7 +60,7 @@ public class BindingLabels9Test extends AbstractBindingLabelsTest {
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("mymod"), 5);
 		IJavaElement i= elems[0];
-		String lab= getBindingLabel(i, JavaElementLabels.ALL_CATEGORY | JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
+		String lab= getBindingLabel(i, JavaElementLabels.ALL_CATEGORY2 | JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
 		assertEquals("mymod", lab); // category not shown in binding labels
 	}
 
