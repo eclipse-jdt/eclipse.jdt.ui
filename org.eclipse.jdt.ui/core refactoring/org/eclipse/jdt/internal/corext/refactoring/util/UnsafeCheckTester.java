@@ -60,13 +60,54 @@ public class UnsafeCheckTester {
 
 	private ICompilationUnit fCu;
 
-	private Set<Integer> fMatchNodePosSet;
+	private Set<Position> fMatchNodePosSet;
 
 	private Set<IBinding> fInvocationSet;
 
 	private HashMap<IBinding, ITypeBinding> fInvocationHashMap;
 
-	private HashMap<Integer, ITypeBinding> fMatchNodePosHashMap;
+	private HashMap<Position, ITypeBinding> fMatchNodePosHashMap;
+
+	class Position {
+		int start;
+
+		int length;
+
+		public Position(int start, int length) {
+			this.start= start;
+			this.length= length;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime= 31;
+			int result= 1;
+			result= prime * result + getEnclosingInstance().hashCode();
+			result= prime * result + length;
+			result= prime * result + start;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!(obj instanceof Position))
+				return false;
+			Position other= (Position) obj;
+			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))
+				return false;
+			if (length != other.length)
+				return false;
+			if (start != other.start)
+				return false;
+			return true;
+		}
+
+		private UnsafeCheckTester getEnclosingInstance() {
+			return UnsafeCheckTester.this;
+		}
+	}
 
 	public UnsafeCheckTester(CompilationUnit fCompilationUnitNode, ICompilationUnit fCu, ASTNode commonNode, ASTNode expression, int startOffset, int endOffset) {
 		this.fCompilationUnitNode= fCompilationUnitNode;
@@ -142,7 +183,7 @@ public class UnsafeCheckTester {
 						(targetBinding= ((Name) expression).resolveBinding()) != null) {
 					fInvocationHashMap.put(targetBinding, resolveBinding);
 				} else {
-					fMatchNodePosHashMap.put(expression.getStartPosition(), resolveBinding);
+					fMatchNodePosHashMap.put(new Position(expression.getStartPosition(), expression.getLength()), resolveBinding);
 				}
 			} else if (node instanceof MethodInvocation) {
 				MethodInvocation mi= (MethodInvocation) node;
@@ -163,8 +204,9 @@ public class UnsafeCheckTester {
 					temp= getOriginalExpression(temp);
 					IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(getEnclosingBodyNode(temp)).getSubFragmentsMatching(getIASTFragment(temp));
 					for (IASTFragment match : allMatches) {
-						if (match.getAssociatedNode() != null) {
-							fMatchNodePosSet.add(match.getAssociatedNode().getStartPosition());
+						ASTNode associatedNode= match.getAssociatedNode();
+						if (associatedNode != null) {
+							fMatchNodePosSet.add(new Position(associatedNode.getStartPosition(),associatedNode.getLength()));
 						}
 					}
 				} catch (JavaModelException e) {
