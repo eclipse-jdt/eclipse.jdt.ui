@@ -851,6 +851,10 @@ class Example extends OtherClass {}
 class Example implements I1, I2, I3 {}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_superinterfaces_in_type_declaration
 
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_permitted_types_in_type_declaration
+sealed class Example permits C1, C2, C3 {}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_permitted_types_in_type_declaration
+
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_parameters_in_constructor_declaration
 class Example {Example(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) { this();}Example() {}}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_parameters_in_constructor_declaration

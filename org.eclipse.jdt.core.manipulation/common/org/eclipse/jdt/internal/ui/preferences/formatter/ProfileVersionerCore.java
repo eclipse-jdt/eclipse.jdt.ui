@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.PreferenceConstantsCore;
 
 public class ProfileVersionerCore {
 
-	private static final int CURRENT_VERSION= 22;
+	private static final int CURRENT_VERSION= 23;
 
 	public static int getFirstVersion() {
 		return 1;
@@ -96,6 +96,9 @@ public class ProfileVersionerCore {
 			//$FALL-THROUGH$
 		case 21:
 			version21to22(oldSettings);
+			//$FALL-THROUGH$
+		case 22:
+			version22to23(oldSettings);
 			//$FALL-THROUGH$
 		default:
 			for (Map.Entry<String, String> entry : oldSettings.entrySet()) {
@@ -744,6 +747,11 @@ public class ProfileVersionerCore {
 					DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
 			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_SWITCH_CASE_WITH_COLON,
 					DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+		}
+
+		private static void version22to23(Map<String, String> oldSettings) {
+			checkAndReplace(oldSettings, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_TYPE_DECLARATION,
+					DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PERMITTED_TYPES_IN_TYPE_DECLARATION);
 		}
 
 		/* old format constant values */
