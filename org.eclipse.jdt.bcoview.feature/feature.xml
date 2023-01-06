@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.jdt.bcoview.feature"
+      label="Bytecode Outline"
+      version="1.0.1.qualifier"
+      provider-name="Eclipse.org"
+      plugin="org.eclipse.jdt.bcoview"
+      license-feature="org.eclipse.license"
+      license-feature-version="0.0.0">
+
+   <description url="https://github.com/iloveeclipse/bytecodeoutline/wiki">
+      Bytecode outline and Bytecode comparison view for java/class files.
+   </description>
+
+   <copyright url="..">
+      Copyright (c) 2004 - 2022 licensed under the Eclipse Public License 2.0.
+   </copyright>
+
+   <license url="https://www.eclipse.org/legal/epl-2.0/">
+      Copyright (c) 2004 - 2022 licensed under the Eclipse Public License 2.0.
+   </license>
+
+   <url>
+      <update label="JDT UI Tools" url="http://www.eclipse.org/jdt/ui/update-site"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.compare"/>
+      <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.help.base"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.jdt.debug"/>
+      <import plugin="org.eclipse.jdt.core" version="3.6.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="org.eclipse.jdt.bcoview"
+         download-size="710"
+         install-size="710"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

@@ -70,5 +70,8 @@
     <module>org.eclipse.jdt.junit5.runtime</module>
     <module>org.eclipse.jdt.ui.unittest.junit</module>
     <module>org.eclipse.jdt.ui.unittest.junit.feature</module>
+    <module>org.eclipse.jdt.bcoview</module>
+    <module>org.eclipse.jdt.bcoview.feature</module>
+    <module>org.eclipse.jdt.bcoview.tests</module>
   </modules>
 </project>

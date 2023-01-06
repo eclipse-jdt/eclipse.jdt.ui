@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<FindBugsFilter>
+  <Match>
+    <Bug pattern="DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED"/>
+  </Match>
+  <Match>
+    <Bug category="MALICIOUS_CODE"/>
+  </Match>
+  <Match>
+    <BugCode name="Se"/>
+  </Match>
+  <Match>
+    <Package name="~inner.*"/>
+  </Match>
+  <Match>
+    <Class name="~.*Test.*"/>
+  </Match>
+</FindBugsFilter>
