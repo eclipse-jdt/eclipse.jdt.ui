@@ -206,7 +206,7 @@ public class UnsafeCheckTester {
 					for (IASTFragment match : allMatches) {
 						ASTNode associatedNode= match.getAssociatedNode();
 						if (associatedNode != null) {
-							fMatchNodePosSet.add(new Position(associatedNode.getStartPosition(),associatedNode.getLength()));
+							fMatchNodePosSet.add(new Position(associatedNode.getStartPosition(), associatedNode.getLength()));
 						}
 					}
 				} catch (JavaModelException e) {
@@ -269,7 +269,7 @@ public class UnsafeCheckTester {
 						hasInheritanceRelationship(fInvocationHashMap.get(targetBinding), resolveBinding)) {
 					this.castFlag= true;
 					return false;
-				} else if (hasInheritanceRelationship(fMatchNodePosHashMap.get(leftOperand.getStartPosition()), resolveBinding)) {
+				} else if (hasInheritanceRelationship(fMatchNodePosHashMap.get(new Position(leftOperand.getStartPosition(), leftOperand.getLength())), resolveBinding)) {
 					this.castFlag= true;
 					return false;
 				}
@@ -297,7 +297,7 @@ public class UnsafeCheckTester {
 				if (target instanceof Name && (targetBinding= ((Name) target).resolveBinding()) != null && fInvocationSet.contains(targetBinding)) {
 					this.nullFlag= true;
 					return false;
-				} else if (fMatchNodePosSet.contains(target.getStartPosition())) {
+				} else if (fMatchNodePosSet.contains(new Position(target.getStartPosition(), target.getLength()))) {
 					this.nullFlag= true;
 					return false;
 				}
