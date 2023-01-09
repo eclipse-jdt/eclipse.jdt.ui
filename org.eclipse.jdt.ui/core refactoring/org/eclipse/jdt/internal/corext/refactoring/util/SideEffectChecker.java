@@ -15,6 +15,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -59,6 +61,17 @@ public class SideEffectChecker extends ASTVisitor {
 
 	ASTNode fExpression;
 
+	private final int THRESHOld= 1000;
+
+	static private HashSet<String> MARKEDMETHODSET= new HashSet<>();
+	static {
+		String[] methodNames= { "java.lang.System.currentTimeMillis", "java.lang.System.nanoTime", //$NON-NLS-1$ //$NON-NLS-2$
+				"java.io.PrintStream.print", "java.io.PrintStream.printf", //$NON-NLS-1$ //$NON-NLS-2$
+				"java.io.PrintStream.println" }; //$NON-NLS-1$
+		MARKEDMETHODSET.addAll(Arrays.asList(methodNames));
+	}
+
+
 	public boolean hasSideEffect() {
 		return fSideEffect;
 	}
@@ -75,14 +88,24 @@ public class SideEffectChecker extends ASTVisitor {
 		if (node instanceof MethodInvocation) {
 			MethodInvocation node2= (MethodInvocation) node;
 			final IMethodBinding resolveMethodBinding= node2.resolveMethodBinding();
+			if (MARKEDMETHODSET.contains(getQualifiedName(resolveMethodBinding))) {
+				fSideEffect= true;
+				return false;
+			}
 			MethodDeclaration md= findFunctionDefinition(resolveMethodBinding.getDeclaringClass(), resolveMethodBinding);
-			if (md != null) {
+			if (md != null && md.getLength() < THRESHOld) {
 				MethodVisitor mv= new MethodVisitor();
 				md.accept(mv);
 				fSideEffect= mv.hasUpdateNoTemp() == true ? true : fSideEffect;
 			}
 		}
 		return super.preVisit2(node);
+	}
+
+	private String getQualifiedName(IMethodBinding imb) {
+		if (imb == null || imb.getDeclaringClass() == null)
+			return null;
+		return imb.getDeclaringClass().getQualifiedName() + "." + imb.getName(); //$NON-NLS-1$
 	}
 
 
@@ -206,6 +229,14 @@ public class SideEffectChecker extends ASTVisitor {
 			if (updateNoTemp == true) {
 				return false;
 			}
+			if (node instanceof MethodInvocation) {
+				MethodInvocation mi= (MethodInvocation) node;
+				if (MARKEDMETHODSET.contains(getQualifiedName(mi.resolveMethodBinding()))) {
+					updateNoTemp= true;
+					return false;
+				}
+
+			}
 			Expression operand= null;
 			if (node instanceof Assignment) {
 				Assignment node2= (Assignment) node;
@@ -214,7 +245,7 @@ public class SideEffectChecker extends ASTVisitor {
 					return super.preVisit2(node);
 				}
 				if (!getOriginalExpression(node2.getRightHandSide()).subtreeMatch(new ASTMatcher(), operand)
-						|| node2.getOperator()!= Assignment.Operator.ASSIGN) {
+						|| node2.getOperator() != Assignment.Operator.ASSIGN) {
 					AssignmentVisitor visitor= new AssignmentVisitor(node2.getLeftHandSide());
 					node2.getRightHandSide().accept(visitor);
 					if (visitor.hasDepend()) {
@@ -288,4 +319,6 @@ public class SideEffectChecker extends ASTVisitor {
 		}
 		return expr;
 	}
+
+
 }

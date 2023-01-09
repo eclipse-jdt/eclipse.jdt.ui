@@ -10,7 +10,7 @@ class A {
 	}
 	
 	String m() {
-		B.S = B.S + "_";
+		System.out.println(B.S);
 		return B.S;
 	}
 }

@@ -5,7 +5,7 @@ class A {
 	void method(int index) {
 		int f= this.f(index);
 		int i1 = f;
-		int i2 = f;
+		int i2 = this.f(index);
 		return;
 	}
 

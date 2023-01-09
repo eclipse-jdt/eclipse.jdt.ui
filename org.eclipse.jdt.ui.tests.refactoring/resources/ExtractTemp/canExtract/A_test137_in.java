@@ -1,8 +1,7 @@
 package p; // 4, 22, 4, 25
 class A {
 	String foo() {
-		String m= m();
-		String res = m;
+		String res = m();
 		for (int i = 1; i < 10; ++i) {
 			res = m();
 		}
@@ -10,7 +9,7 @@ class A {
 	}
 	
 	String m() {
-		B.S = B.S + "_";
+		System.out.println(B.S);
 		return B.S;
 	}
 }
