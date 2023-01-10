@@ -72,7 +72,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_CATEGORY)) {
-			fTextFlagMask ^= JavaElementLabels.ALL_CATEGORY;
+			fTextFlagMask ^= JavaElementLabels.ALL_CATEGORY2;
 		}
 
 		fImageFlagMask= -1;

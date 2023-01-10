@@ -323,9 +323,19 @@ public class JavaElementLabels {
 
 	/**
 	 * Show category for all elements.
+	 *
 	 * @since 3.2
+	 * @deprecated Use {@link #ALL_CATEGORY2} instead.
 	 */
+	@Deprecated
 	public final static long ALL_CATEGORY= JavaElementLabelsCore.ALL_CATEGORY;
+
+	/**
+	 * Show category for all elements.
+	 *
+	 * @since 3.28
+	 */
+	public final static long ALL_CATEGORY2= JavaElementLabelsCore.ALL_CATEGORY2;
 
 	/**
 	 * Qualify all elements

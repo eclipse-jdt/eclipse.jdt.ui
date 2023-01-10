@@ -225,7 +225,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		private ILabelProvider createDropDownLabelProvider() {
 			final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
-					| JavaElementLabels.ALL_CATEGORY | JavaElementLabels.P_COMPRESSED, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+					| JavaElementLabels.ALL_CATEGORY2 | JavaElementLabels.P_COMPRESSED, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 
 			return new DecoratingJavaLabelProvider(result);
 		}
@@ -711,7 +711,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	private static ILabelProvider createLabelProvider() {
 		final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_TYPES
 				| JavaElementLabels.M_APP_TYPE_PARAMETERS | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.F_APP_TYPE_SIGNATURE
-				| JavaElementLabels.ALL_CATEGORY | JavaElementLabels.P_COMPRESSED, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+				| JavaElementLabels.ALL_CATEGORY2 | JavaElementLabels.P_COMPRESSED, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 
 		return new DecoratingJavaLabelProvider(result) {
 
@@ -749,7 +749,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 */
 	private ILabelProvider createToolTipLabelProvider() {
 		final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
-				| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+				| JavaElementLabels.ALL_CATEGORY2, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 
 		return new DecoratingJavaLabelProvider(result);
 	}
