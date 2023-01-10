@@ -65,14 +65,6 @@ public final class JavaElementLabelsCore {
 	public final static long M_PARAMETER_NAMES= 1L << 1;
 
 	/**
-	 * Method labels contain parameter annotations.
-	 * E.g. <code>foo(@NonNull int)</code>.
-	 * This flag is only valid if {@link #M_PARAMETER_NAMES} or {@link #M_PARAMETER_TYPES} is also set.
-	 * @since 3.8
-	 */
-	public final static long M_PARAMETER_ANNOTATIONS= 1L << 52;
-
-	/**
 	 * Method names contain type parameters prepended.
 	 * e.g. <code>&lt;A&gt; foo(A index)</code>
 	 */
@@ -286,11 +278,6 @@ public final class JavaElementLabelsCore {
 	public final static long USE_RESOLVED= 1L << 48;
 
 	/**
-	 * Specifies to apply color styles to labels. This flag only applies to methods taking or returning a StyledString.
-	 */
-	public final static long COLORIZE= 1L << 55;
-
-	/**
 	 * Prepend first category (if any) to field.
 	 */
 	public final static long F_CATEGORY= 1L << 49;
@@ -302,15 +289,46 @@ public final class JavaElementLabelsCore {
 	 * Prepend first category (if any) to type.
 	 */
 	public final static long T_CATEGORY= 1L << 51;
+
+	/**
+	 * Method labels contain parameter annotations.
+	 * E.g. <code>foo(@NonNull int)</code>.
+	 * This flag is only valid if {@link #M_PARAMETER_NAMES} or {@link #M_PARAMETER_TYPES} is also set.
+	 * @since 3.8
+	 */
+	public final static long M_PARAMETER_ANNOTATIONS= 1L << 52;
+
+	/**
+	 * Prepend first category (if any) to module.
+	 *
+	 * @deprecated Deprecated due to conflict with {@link #M_PARAMETER_ANNOTATIONS}. Use
+	 *             {@link #MOD_CATEGORY2} instead
+	 */
+	@Deprecated
+	public final static long MOD_CATEGORY= 1L << 52;
+
 	/**
 	 * Prepend first category (if any) to module.
 	 */
-	public final static long MOD_CATEGORY= 1L << 52;
+	public final static long MOD_CATEGORY2= 1L << 53;
+
+	/**
+	 * Specifies to apply color styles to labels. This flag only applies to methods taking or returning a StyledString.
+	 */
+	public final static long COLORIZE= 1L << 55;
+
+	/**
+	 * Show category for all elements.
+	 *
+	 * @deprecated Use {@link #ALL_CATEGORY2} instead
+	 */
+	@Deprecated
+	public final static long ALL_CATEGORY= F_CATEGORY | M_CATEGORY | T_CATEGORY | MOD_CATEGORY;
 
 	/**
 	 * Show category for all elements.
 	 */
-	public final static long ALL_CATEGORY= F_CATEGORY | M_CATEGORY | T_CATEGORY | MOD_CATEGORY;
+	public final static long ALL_CATEGORY2= F_CATEGORY | M_CATEGORY | T_CATEGORY | MOD_CATEGORY2;
 
 	/**
 	 * Qualify all elements

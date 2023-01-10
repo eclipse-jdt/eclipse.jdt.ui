@@ -877,6 +877,42 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test126() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(6, 32, 6, 58, true, false, "intValue", "intValue");
+	}
+
+	@Test
+	public void test127() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(6, 32, 6, 47, true, false, "v2", "v2");
+	}
+
+	@Test
+	public void test128() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
+	}
+
+	@Test
+	public void test129() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
+	}
+
+	@Test
+	public void test130() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
+	}
+
+	@Test
+	public void test131() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
+	}
+
+	@Test
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
