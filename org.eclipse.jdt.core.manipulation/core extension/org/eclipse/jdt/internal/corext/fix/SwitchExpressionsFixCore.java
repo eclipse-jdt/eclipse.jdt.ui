@@ -120,6 +120,9 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					currentBlock= new ArrayList<>();
 					currentCase= switchCase;
 				} else if (statement instanceof ReturnStatement) {
+					if (((ReturnStatement)statement).getExpression() == null) {
+						return null;
+					}
 					returnList.add(currentCase);
 					if (currentBlock == null) {
 						return null;
