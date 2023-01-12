@@ -35,7 +35,7 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 	}
 
 	@Override
-	public void notifyTestFailed(TestReferenceFailure failure) {
+	public synchronized void notifyTestFailed(TestReferenceFailure failure) {
 		sendMessage(failure.getTest(), failure.getStatus());
 		sendFailure(failure, MessageIds.TRACE_START, MessageIds.TRACE_END);
 		// fSender.flush(); // flush is implicitly done by sendFailure()
