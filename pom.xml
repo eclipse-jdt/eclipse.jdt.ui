@@ -74,5 +74,6 @@
     <module>org.eclipse.jdt.astview.feature</module>
     <module>org.eclipse.jdt.jeview</module>
     <module>org.eclipse.jdt.jeview.feature</module>
+    <module>org.eclipse.jdt.bcoview</module>
   </modules>
 </project>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.jdt.bcoview" version="2">
+    <resource path="src/org/eclipse/jdt/bcoview/views/BytecodeOutlineView.java" type="org.eclipse.jdt.bcoview.views.BytecodeOutlineView$JavaConfiguration">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="JavaSourceViewerConfiguration"/>
+                <message_argument value="JavaConfiguration"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
