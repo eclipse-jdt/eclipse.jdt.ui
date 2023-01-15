@@ -876,6 +876,41 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(9, 32, 9, 42, true, false, "length", "length");
 	}
 
+	@Test
+	public void test126() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(6, 32, 6, 58, true, false, "intValue", "intValue");
+	}
+
+	@Test
+	public void test127() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(6, 32, 6, 47, true, false, "v2", "v2");
+	}
+
+	@Test
+	public void test128() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
+	}
+
+	@Test
+	public void test129() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
+	}
+
+	@Test
+	public void test130() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
+	}
+
+	@Test
+	public void test131() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
+	}
 
 	@Test
 	public void test132() throws Exception {
@@ -912,41 +947,16 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
 		warningHelper1(4, 22, 4, 25, true, false, "m", "m", RefactoringStatus.INFO);
 	}
-
 	@Test
-	public void test126() throws Exception {
-		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
-		helper1(6, 32, 6, 58, true, false, "intValue", "intValue");
+	public void test138() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		helper1(11, 14, 11, 35, true, false, "valueOf", "valueOf");
 	}
 
 	@Test
-	public void test127() throws Exception {
-		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
-		helper1(6, 32, 6, 47, true, false, "v2", "v2");
-	}
-
-	@Test
-	public void test128() throws Exception {
-		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
-		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
-	}
-
-	@Test
-	public void test129() throws Exception {
-		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
-		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
-	}
-
-	@Test
-	public void test130() throws Exception {
-		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
-		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
-	}
-
-	@Test
-	public void test131() throws Exception {
-		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
-		helper1(5, 34, 5, 55, true, false, "hashCode", "hashCode");
+	public void test139() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(11, 14, 11, 33, true, false, "valueOf", "valueOf", RefactoringStatus.INFO);
 	}
 
 	@Test

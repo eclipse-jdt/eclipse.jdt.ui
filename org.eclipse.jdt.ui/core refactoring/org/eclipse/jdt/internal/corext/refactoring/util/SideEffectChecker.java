@@ -18,8 +18,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -61,7 +64,7 @@ public class SideEffectChecker extends ASTVisitor {
 
 	ASTNode fExpression;
 
-	private final int THRESHOld= 1000;
+	private final int THRESHOLD= 2500;
 
 	static private HashSet<String> MARKEDMETHODSET= new HashSet<>();
 	static {
@@ -93,7 +96,7 @@ public class SideEffectChecker extends ASTVisitor {
 				return false;
 			}
 			MethodDeclaration md= findFunctionDefinition(resolveMethodBinding.getDeclaringClass(), resolveMethodBinding);
-			if (md != null && md.getLength() < THRESHOld) {
+			if (md != null && md.getLength() < THRESHOLD) {
 				MethodVisitor mv= new MethodVisitor();
 				md.accept(mv);
 				fSideEffect= mv.hasUpdateNoTemp() == true ? true : fSideEffect;
@@ -108,8 +111,6 @@ public class SideEffectChecker extends ASTVisitor {
 		return imb.getDeclaringClass().getQualifiedName() + "." + imb.getName(); //$NON-NLS-1$
 	}
 
-
-
 	private static MethodDeclaration findFunctionDefinition(ITypeBinding iTypeBinding, IMethodBinding methodBinding) {
 		if (methodBinding == null ||
 				iTypeBinding == null || !(iTypeBinding.getJavaElement() instanceof IType)) {
@@ -117,6 +118,14 @@ public class SideEffectChecker extends ASTVisitor {
 		}
 		IType it= (IType) (iTypeBinding.getJavaElement());
 		try {
+			IJavaElement root= it.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			if (root instanceof IPackageFragmentRoot) {
+				IClasspathEntry cpEntry= ((IPackageFragmentRoot) root).getRawClasspathEntry();
+				if (cpEntry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
+						&& cpEntry.getPath().toString().startsWith("org.eclipse.jdt.launching.JRE_CONTAINER")) { //$NON-NLS-1$
+					return null;
+				}
+			}
 			ITypeHierarchy ith= it.newTypeHierarchy(iTypeBinding.getJavaElement().getJavaProject(), null);
 			IMethod iMethod= (IMethod) methodBinding.getJavaElement();
 			if (iMethod == null) {
@@ -152,13 +161,13 @@ public class SideEffectChecker extends ASTVisitor {
 			}
 			return res;
 		} catch (JavaModelException e) {
-			e.printStackTrace();
 		}
 		return null;
 	}
 
-	private static void findTypes(IType it, ITypeHierarchy ith, ArrayList<IType> iTypes) throws JavaModelException {
+	private static void findTypes(IType it, ITypeHierarchy ith, ArrayList<IType> iTypes) {
 		iTypes.add(it);
+
 		for (IType i : ith.getAllSubtypes(it)) {
 			iTypes.add(i);
 		}
@@ -292,15 +301,6 @@ public class SideEffectChecker extends ASTVisitor {
 				ArrayAccess aa= (ArrayAccess) expr;
 				return isNoTemp(aa.getArray());
 			}
-//			if (ivb != null && ivb.isParameter()) {
-//				final StructuralPropertyDescriptor locationInParent= e.getLocationInParent();
-//				if (locationInParent == Assignment.LEFT_HAND_SIDE_PROPERTY
-//						|| locationInParent == PostfixExpression.OPERAND_PROPERTY
-//						|| locationInParent == PrefixExpression.OPERAND_PROPERTY) {
-//					return false;
-//				}
-//			}
-//			|| ivb.isParameter()
 			return ivb != null && (ivb.isField() || Modifier.isStatic(ivb.getModifiers()));
 		}
 
