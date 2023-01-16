@@ -70,5 +70,9 @@
     <module>org.eclipse.jdt.junit5.runtime</module>
     <module>org.eclipse.jdt.ui.unittest.junit</module>
     <module>org.eclipse.jdt.ui.unittest.junit.feature</module>
+    <module>org.eclipse.jdt.astview</module>
+    <module>org.eclipse.jdt.astview.feature</module>
+    <module>org.eclipse.jdt.jeview</module>
+    <module>org.eclipse.jdt.jeview.feature</module>
   </modules>
 </project>
