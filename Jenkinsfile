@@ -17,7 +17,7 @@ pipeline {
 				wrap([$class: 'Xvnc', useXauthority: true]) {
 					sh """
 					mvn -f pom.xml -Dmaven.compiler.failOnWarning=true -DskipTests=false -Dmaven.repo.local=$WORKSPACE/.m2/repository \
-						clean verify --batch-mode -Pbuild-individual-bundles -Pbree-libs -Papi-check
+						clean verify --batch-mode -Pbuild-individual-bundles -Pbree-libs -Papi-check -Dcompare-version-with-baselines.skip=false
 					"""
 				}
 			}
