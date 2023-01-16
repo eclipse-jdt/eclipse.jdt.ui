@@ -46,8 +46,8 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -314,7 +314,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		String[] buttons= new String[] {
 			PreferencesMessages.NameConventionConfigurationBlock_list_edit_button
 		};
-		fNameConventionList= new ListDialogField<NameConventionEntry>(adapter, buttons, new NameConventionLabelProvider()) {
+		fNameConventionList= new ListDialogField<>(adapter, buttons, new NameConventionLabelProvider()) {
 			@Override
 			protected int getListStyle() {
 				return super.getListStyle() & ~SWT.MULTI | SWT.SINGLE;

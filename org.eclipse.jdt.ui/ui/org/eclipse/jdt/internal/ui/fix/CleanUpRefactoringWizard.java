@@ -288,7 +288,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			String[] buttons= new String[] {
 				MultiFixMessages.CleanUpRefactoringWizard_Configure_Button
 			};
-			final ListDialogField<IJavaProject> settingsField= new ListDialogField<IJavaProject>(listAdapter, buttons, tableLabelProvider) {
+			final ListDialogField<IJavaProject> settingsField= new ListDialogField<>(listAdapter, buttons, tableLabelProvider) {
 				@Override
 				protected int getListStyle() {
 					return super.getListStyle() | SWT.SINGLE;

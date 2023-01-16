@@ -254,7 +254,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 				AtomicReference<Expression> criteria= new AtomicReference<>();
 				AtomicBoolean isForward= new AtomicBoolean(true);
 
-				NodeMatcher<Expression> compareToMatcher= new NodeMatcher<Expression>() {
+				NodeMatcher<Expression> compareToMatcher= new NodeMatcher<>() {
 					@Override
 					public Boolean isMatching(final Expression node) {
 						if (isReturnedExpressionToRefactor(node, criteria, isForward, name1, name2)) {
@@ -265,7 +265,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 					}
 				};
 
-				NodeMatcher<Expression> zeroMatcher= new NodeMatcher<Expression>() {
+				NodeMatcher<Expression> zeroMatcher= new NodeMatcher<>() {
 					@Override
 					public Boolean isMatching(final Expression node) {
 						if (Long.valueOf(0L).equals(ASTNodes.getIntegerLiteral(node))) {
@@ -276,7 +276,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 					}
 				};
 
-				NodeMatcher<Expression> positiveMatcher= new NodeMatcher<Expression>() {
+				NodeMatcher<Expression> positiveMatcher= new NodeMatcher<>() {
 					@Override
 					public Boolean isMatching(final Expression node) {
 						Long value= ASTNodes.getIntegerLiteral(node);
@@ -289,7 +289,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 					}
 				};
 
-				NodeMatcher<Expression> negativeMatcher= new NodeMatcher<Expression>() {
+				NodeMatcher<Expression> negativeMatcher= new NodeMatcher<>() {
 					@Override
 					public Boolean isMatching(final Expression node) {
 						Long value= ASTNodes.getIntegerLiteral(node);
