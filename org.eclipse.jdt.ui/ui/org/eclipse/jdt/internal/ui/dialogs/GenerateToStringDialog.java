@@ -201,7 +201,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		}
 
 		public void sort() {
-			Comparator<IBinding> comparator= new Comparator<IBinding>() {
+			Comparator<IBinding> comparator= new Comparator<>() {
 				Collator collator= Collator.getInstance();
 				@Override
 				public int compare(IBinding b1, IBinding b2) {

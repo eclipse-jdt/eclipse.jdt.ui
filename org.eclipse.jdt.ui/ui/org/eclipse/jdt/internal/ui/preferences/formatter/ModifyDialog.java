@@ -426,7 +426,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		}
 
 		public static ModifyAll<Button> addModifyAll(Section section, Images images) {
-			return new ModifyAll<Button>(section, images) {
+			return new ModifyAll<>(section, images) {
 				@Override
 				protected Button createControl(Composite parent) {
 					Button checkBox= new Button(parent, SWT.CHECK);
@@ -520,7 +520,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		}
 
 		public static ModifyAll<Combo> addModifyAll(Section section, Images images) {
-			return new ModifyAll<Combo>(section, images) {
+			return new ModifyAll<>(section, images) {
 				ArrayList<String> fItems= new ArrayList<>();
 
 				@Override
@@ -648,7 +648,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		}
 
 		public static ModifyAll<Spinner> addModifyAll(final int minValue, final int maxValue, Section section, Images images) {
-			return new ModifyAll<Spinner>(section, images) {
+			return new ModifyAll<>(section, images) {
 				private Label fLabel;
 
 				@Override

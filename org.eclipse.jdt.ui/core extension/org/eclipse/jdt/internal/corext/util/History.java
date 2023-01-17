@@ -50,12 +50,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.CorextMessages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * History stores a list of key, object pairs. The list is bounded at size
@@ -84,7 +84,7 @@ public abstract class History<K, V> {
 	private final String fInfoNodeName;
 
 	public History(String fileName, String rootNodeName, String infoNodeName) {
-		fHistory= new LinkedHashMap<K, V>(80, 0.75f, true) {
+		fHistory= new LinkedHashMap<>(80, 0.75f, true) {
 			private static final long serialVersionUID= 1L;
 			@Override
 			protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {

@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
 
-public class CUPositionCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
+public class CUPositionCompletionProcessor implements ISubjectControlContentAssistProcessor {
 
 	private static final ImageDescriptorRegistry IMAGE_DESC_REGISTRY= JavaPlugin.getImageDescriptorRegistry();
 

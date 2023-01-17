@@ -27,7 +27,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
@@ -48,7 +47,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  * TODO: this class is not used anywhere yet.
  * (ContentAssist should be added to all source folder dialog fields.)
  */
-public class JavaPackageFragmentRootCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
+public class JavaPackageFragmentRootCompletionProcessor implements ISubjectControlContentAssistProcessor {
 	private static final ImageDescriptorRegistry IMAGE_DESC_REGISTRY= JavaPlugin.getImageDescriptorRegistry();
 
 	private IPackageFragmentRoot fPackageFragmentRoot;

@@ -62,7 +62,7 @@ public class HistoryListAction extends Action {
 				TypeHierarchyMessages.HistoryListDialog_remove_button,
 			};
 
-			IListAdapter<IJavaElement[]> adapter= new IListAdapter<IJavaElement[]>() {
+			IListAdapter<IJavaElement[]> adapter= new IListAdapter<>() {
 				@Override
 				public void customButtonPressed(ListDialogField<IJavaElement[]> field, int index) {
 					doCustomButtonPressed();

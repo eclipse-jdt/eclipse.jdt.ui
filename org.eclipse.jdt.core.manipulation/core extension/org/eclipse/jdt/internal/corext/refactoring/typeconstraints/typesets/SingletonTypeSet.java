@@ -99,7 +99,7 @@ public class SingletonTypeSet extends TypeSet {
 
 	@Override
 	public Iterator<TType> iterator() {
-		return new Iterator<TType>() {
+		return new Iterator<>() {
 			private boolean done= false;
 			@Override
 			public void remove() {
