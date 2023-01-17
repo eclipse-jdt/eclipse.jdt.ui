@@ -91,7 +91,8 @@ public class SideEffectChecker extends ASTVisitor {
 		if (node instanceof MethodInvocation) {
 			MethodInvocation node2= (MethodInvocation) node;
 			final IMethodBinding resolveMethodBinding= node2.resolveMethodBinding();
-			if (MARKEDMETHODSET.contains(getQualifiedName(resolveMethodBinding))) {
+			if (MARKEDMETHODSET.contains(getQualifiedName(resolveMethodBinding))
+					|| resolveMethodBinding == null) {
 				fSideEffect= true;
 				return false;
 			}
@@ -111,11 +112,13 @@ public class SideEffectChecker extends ASTVisitor {
 		return imb.getDeclaringClass().getQualifiedName() + "." + imb.getName(); //$NON-NLS-1$
 	}
 
-	private static MethodDeclaration findFunctionDefinition(ITypeBinding iTypeBinding, IMethodBinding methodBinding) {
-		if (methodBinding == null ||
-				iTypeBinding == null || !(iTypeBinding.getJavaElement() instanceof IType)) {
+	private MethodDeclaration findFunctionDefinition(ITypeBinding iTypeBinding, IMethodBinding methodBinding) {
+		if (methodBinding == null || iTypeBinding == null) {
+			fSideEffect= true;
 			return null;
 		}
+		if (!(iTypeBinding.getJavaElement() instanceof IType))
+			return null;
 		IType it= (IType) (iTypeBinding.getJavaElement());
 		try {
 			IJavaElement root= it.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -128,7 +131,8 @@ public class SideEffectChecker extends ASTVisitor {
 			}
 			ITypeHierarchy ith= it.newTypeHierarchy(iTypeBinding.getJavaElement().getJavaProject(), null);
 			IMethod iMethod= (IMethod) methodBinding.getJavaElement();
-			if (iMethod == null) {
+			if (iMethod == null || ith == null) {
+				fSideEffect= true;
 				return null;
 			}
 
@@ -138,7 +142,7 @@ public class SideEffectChecker extends ASTVisitor {
 			for (IType t : iTypes) {
 				IMethod tmp= JavaModelUtil.findMethod(iMethod.getElementName(),
 						iMethod.getParameterTypes(), false, t);
-				if (tmp != null) {
+				if (tmp != null && res == null) {
 					ICompilationUnit icu= tmp.getCompilationUnit();
 					if (icu == null || icu.getSource() == null) {
 						return null;
@@ -149,18 +153,22 @@ public class SideEffectChecker extends ASTVisitor {
 					parser.setResolveBindings(true);
 					CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
 					final ASTNode perform= NodeFinder.perform(compilationUnit, tmp.getSourceRange());
-					if (perform instanceof MethodDeclaration) {
+					if (perform instanceof MethodDeclaration && ((MethodDeclaration) perform).resolveBinding() != null) {
 						MethodDeclaration md= (MethodDeclaration) perform;
 						if (Modifier.isAbstract(md.resolveBinding().getModifiers()))
 							continue;
-						if (res != null)
-							return null;
 						res= md;
+					} else {
+						fSideEffect= true;
+						return null;
 					}
+				} else if (tmp != null && res != null) {
+					return null;
 				}
 			}
 			return res;
 		} catch (JavaModelException e) {
+			fSideEffect= true;
 		}
 		return null;
 	}
