@@ -54,7 +54,7 @@ public class LinkedProposalModelCore {
 
 	public Iterator<LinkedProposalPositionGroupCore> getPositionGroupCoreIterator() {
 		if (fPositionGroups == null) {
-			return new Iterator<LinkedProposalPositionGroupCore>() {
+			return new Iterator<>() {
 				@Override
 				public boolean hasNext() {return false;}
 				@Override

@@ -493,6 +493,26 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to {@link JavaCore#latestSupportedJavaVersion()}
+	 *
+	 * @param options the compiler options to configure
+	 */
+	public static void setLatestCompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.latestSupportedJavaVersion(), options);
+	}
+
+	/**
+	 * Sets the compiler options to {@link JavaCore#latestSupportedJavaVersion()}
+	 *
+	 * @param project the project to configure
+	 */
+	public static void setLatestCompilerOptions(IJavaProject project) {
+		Map<String, String> options= project.getOptions(false);
+		setLatestCompilerOptions(options);
+		project.setOptions(options);
+	}
+
+	/**
 	 * Sets the compiler options to 1.7
 	 * @param options The compiler options to configure
 	 */

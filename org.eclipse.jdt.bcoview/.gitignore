@@ -1,0 +1,6 @@
+output
+doc
+.fbwarnings
+/bin/
+/bin_tests/
+/lib/

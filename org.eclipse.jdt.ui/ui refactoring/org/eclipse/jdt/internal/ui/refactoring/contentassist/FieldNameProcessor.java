@@ -27,7 +27,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
@@ -39,7 +38,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-public class FieldNameProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
+public class FieldNameProcessor implements ISubjectControlContentAssistProcessor {
 
 	private String[] fFieldNameProposals;
 	private String fErrorMessage;

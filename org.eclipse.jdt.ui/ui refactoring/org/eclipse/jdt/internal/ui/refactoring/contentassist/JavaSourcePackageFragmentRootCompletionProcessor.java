@@ -29,7 +29,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
@@ -50,7 +49,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
  * Simple completion processor that completes package fragment roots that are source
  * folders.
  */
-public class JavaSourcePackageFragmentRootCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
+public class JavaSourcePackageFragmentRootCompletionProcessor implements ISubjectControlContentAssistProcessor {
 
 	private char[] fProposalAutoActivationSet;
 	private IJavaModel fRoot;

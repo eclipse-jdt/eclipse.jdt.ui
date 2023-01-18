@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests; singleton:=true
-Bundle-Version: 3.14.600.qualifier
+Bundle-Version: 3.14.700.qualifier
 Bundle-Activator: org.eclipse.jdt.testplugin.JavaTestPlugin
 Bundle-Vendor: %Plugin.providerName
 Bundle-Localization: plugin
@@ -69,7 +69,10 @@ Require-Bundle:
  org.eclipse.ui.views,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.text.tests,
- org.junit
+ org.junit,
+ org.eclipse.jdt.bcoview,
+ org.eclipse.jdt.jeview,
+ org.eclipse.jdt.astview
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Eclipse-BundleShape: dir
 Bundle-ActivationPolicy: lazy

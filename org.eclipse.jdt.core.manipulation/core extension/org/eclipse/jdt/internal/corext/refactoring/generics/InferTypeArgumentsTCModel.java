@@ -85,7 +85,7 @@ public class InferTypeArgumentsTCModel {
 	private TypeEnvironment fTypeEnvironment;
 
 	private static final int MAX_TTYPE_CACHE= 1024;
-	private Map<String, TType> fTTypeCache= new LinkedHashMap<String, TType>(MAX_TTYPE_CACHE, 0.75f, true) {
+	private Map<String, TType> fTTypeCache= new LinkedHashMap<>(MAX_TTYPE_CACHE, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
 		@Override
 		protected boolean removeEldestEntry(Map.Entry<String, TType> eldest) {

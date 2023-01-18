@@ -212,7 +212,7 @@ public final class SuperTypeConstraintsModel {
 	private final TType fSuperType;
 
 	/** The TType cache */
-	private Map<String, TType> fTTypeCache= new LinkedHashMap<String, TType>(MAX_CACHE, 0.75f, true) {
+	private Map<String, TType> fTTypeCache= new LinkedHashMap<>(MAX_CACHE, 0.75f, true) {
 
 		private static final long serialVersionUID= 1L;
 

@@ -36,7 +36,7 @@ public abstract class NodeMatcher<N extends ASTNode> {
 	 */
 	public NodeMatcher<N> negate() {
 		final NodeMatcher<N> thisNodeMatcher= this;
-		return new NodeMatcher<N>() {
+		return new NodeMatcher<>() {
 			@Override
 			public Boolean isMatching(final N node) {
 				Boolean isMatching= thisNodeMatcher.isMatching(node);
