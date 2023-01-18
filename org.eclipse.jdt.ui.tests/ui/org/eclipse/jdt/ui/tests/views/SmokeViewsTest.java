@@ -17,9 +17,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,6 +97,11 @@ public class SmokeViewsTest {
 		smokeTest("org.eclipse.jdt.bcoview.views.BytecodeOutlineView");
 	}
 
+	@Test
+	public void testOpenBytecodeReferenceView() throws Exception {
+		smokeTest("org.eclipse.jdt.bcoview.views.BytecodeReferenceView");
+	}
+
 	private void smokeTest(String viewId) throws PartInitException {
 		view = window.getActivePage().showView(viewId);
 		assertNotNull("View " + viewId + " should be created", view);
@@ -143,12 +145,12 @@ public class SmokeViewsTest {
 		return ceditor;
 	}
 
-	private IJavaProject createProject() throws CoreException, IOException {
+	private IJavaProject createProject() throws CoreException {
 		IJavaProject project = JavaProjectHelper.createJavaProject("SmokeViewsTest", "bin");
 
 		String javaHome = System.getProperty("java.home") + File.separator;
 		String latestSupportedJavaVersion = JavaCore.latestSupportedJavaVersion();
-		String jdkRelease = readJdkRelease(javaHome);
+		String jdkRelease = System.getProperty("java.specification.version");
 		if(jdkRelease.compareTo(latestSupportedJavaVersion) >= 0) {
 			JavaProjectHelper.setLatestCompilerOptions(project);
 		} else {
@@ -170,21 +172,4 @@ public class SmokeViewsTest {
 		return project;
 	}
 
-	/*
-	 * See org.eclipse.jdt.internal.compiler.util.Jdk.readJdkReleaseFile(String)
-	 */
-	static String readJdkRelease(String javaHome) throws IOException {
-		Properties properties = new Properties();
-		try(FileReader reader = new FileReader(new File(javaHome, "release"))){ //$NON-NLS-1$
-			properties.load(reader);
-		}
-		// Something like JAVA_VERSION="1.8.0_05"
-		String ver = properties.getProperty("JAVA_VERSION"); //$NON-NLS-1$
-		if (ver != null) {
-			ver = ver.replace("\"", "");  //$NON-NLS-1$//$NON-NLS-2$
-			// We only want major part
-			ver = ver.substring(0, ver.indexOf('.'));
-		}
-		return ver;
-	}
 }
