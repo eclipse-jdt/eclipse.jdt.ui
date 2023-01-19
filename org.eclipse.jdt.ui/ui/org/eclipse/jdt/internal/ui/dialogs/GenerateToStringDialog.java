@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 Mateusz Matela and others.
+ * Copyright (c) 2008, 2023 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -78,6 +78,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.GenerateToStringOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettingsCore;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettingsCore.CustomBuilderSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringTemplateParser;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
@@ -647,8 +648,8 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		}
 
 		private void applyChanges() {
-			getDialogSettings().put(ToStringGenerationSettings.SETTINGS_TEMPLATE_NAMES, templateNames.toArray(new String[0]));
-			getDialogSettings().put(ToStringGenerationSettings.SETTINGS_TEMPLATES, templates.toArray(new String[0]));
+			getDialogSettings().put(ToStringGenerationSettingsCore.SETTINGS_TEMPLATE_NAMES, templateNames.toArray(new String[0]));
+			getDialogSettings().put(ToStringGenerationSettingsCore.SETTINGS_TEMPLATES, templates.toArray(new String[0]));
 			getGenerationSettings().stringFormatTemplateNumber= Math.max(selectedTemplateNumber, 0);
 			somethingChanged= false;
 			getButton(APPLY_BUTTON).setEnabled(false);
@@ -1144,14 +1145,14 @@ public class GenerateToStringDialog extends SourceActionDialog {
 	}
 
 	public static String[] getTemplates(IDialogSettings dialogSettings) {
-		String[] result= dialogSettings.getArray(ToStringGenerationSettings.SETTINGS_TEMPLATES);
+		String[] result= dialogSettings.getArray(ToStringGenerationSettingsCore.SETTINGS_TEMPLATES);
 		if (result != null && result.length > 0)
 			return result;
 		return new String[] { ToStringTemplateParser.DEFAULT_TEMPLATE };
 	}
 
 	public String[] getTemplateNames() {
-		String[] result= getDialogSettings().getArray(ToStringGenerationSettings.SETTINGS_TEMPLATE_NAMES);
+		String[] result= getDialogSettings().getArray(ToStringGenerationSettingsCore.SETTINGS_TEMPLATE_NAMES);
 		if (result != null && result.length > 0)
 			return result;
 		return new String[] { JavaUIMessages.GenerateToStringDialog_defaultTemplateName };
@@ -1159,7 +1160,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 	public int getSelectedTemplate() {
 		try {
-			int result= getDialogSettings().getInt(ToStringGenerationSettings.SETTINGS_SELECTED_TEMPLATE);
+			int result= getDialogSettings().getInt(ToStringGenerationSettingsCore.SETTINGS_SELECTED_TEMPLATE);
 			if (result < 0)
 				return 0;
 			return result;
@@ -1169,7 +1170,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 	}
 
 	public void setSelectedTemplate(int templateNumber) {
-		getDialogSettings().put(ToStringGenerationSettings.SETTINGS_SELECTED_TEMPLATE, templateNumber);
+		getDialogSettings().put(ToStringGenerationSettingsCore.SETTINGS_SELECTED_TEMPLATE, templateNumber);
 	}
 
 	public GenerateToStringDialog(Shell shell, CompilationUnitEditor editor, IType type, IVariableBinding[] fields, IVariableBinding[] inheritedFields, IVariableBinding[] selectedFields,
