@@ -138,11 +138,10 @@ public class SideEffectChecker extends ASTVisitor {
 
 			ArrayList<IType> iTypes= new ArrayList<>();
 			findTypes(it, ith, iTypes);
-			MethodDeclaration res= null;
 			for (IType t : iTypes) {
 				IMethod tmp= JavaModelUtil.findMethod(iMethod.getElementName(),
 						iMethod.getParameterTypes(), false, t);
-				if (tmp != null && res == null) {
+				if (tmp != null ) {
 					ICompilationUnit icu= tmp.getCompilationUnit();
 					if (icu == null || icu.getSource() == null) {
 						return null;
@@ -157,16 +156,15 @@ public class SideEffectChecker extends ASTVisitor {
 						MethodDeclaration md= (MethodDeclaration) perform;
 						if (Modifier.isAbstract(md.resolveBinding().getModifiers()))
 							continue;
-						res= md;
+						return md;
 					} else {
 						fSideEffect= true;
 						return null;
 					}
-				} else if (tmp != null && res != null) {
-					return null;
 				}
 			}
-			return res;
+			fSideEffect= true;
+			return null;
 		} catch (JavaModelException e) {
 			fSideEffect= true;
 		}
