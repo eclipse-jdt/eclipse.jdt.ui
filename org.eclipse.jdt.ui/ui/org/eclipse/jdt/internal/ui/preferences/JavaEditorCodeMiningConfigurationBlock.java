@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2018, 2020 Angelo ZERR.
+ *  Copyright (c) 2018, 2023 Angelo ZERR.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -54,6 +54,9 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	private static final Key PREF_SHOW_CODEMINING_AT_LEAST_ONE= getJDTUIKey(
 			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE);
 
+	private static final Key PREF_IGNORE_INEXACT_MATCHES= getJDTUIKey(
+			PreferenceConstants.EDITOR_JAVA_CODEMINING_IGNORE_INEXACT_MATCHES);
+
 	private static final Key PREF_SHOW_REFERENCES= getJDTUIKey(
 			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES);
 
@@ -80,6 +83,8 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 
 	private Button atLeastOneCheckBox;
 
+	private Button ignoreInexactReferenceMatches;
+
 	private PreferenceTree fFilteredPrefTree;
 
 	public JavaEditorCodeMiningConfigurationBlock(IStatusChangeListener context,
@@ -90,7 +95,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	public static Key[] getAllKeys() {
 		return new Key[] { PREF_CODEMINING_ENABLED, PREF_SHOW_CODEMINING_AT_LEAST_ONE, PREF_SHOW_REFERENCES, PREF_SHOW_REFERENCES_ON_TYPES, PREF_SHOW_REFERENCES_ON_FIELDS,
 				PREF_SHOW_REFERENCES_ON_METHODS,
-				PREF_SHOW_IMPLEMENTATIONS, PREF_SHOW_PARAMETER_NAMES };
+				PREF_SHOW_IMPLEMENTATIONS, PREF_SHOW_PARAMETER_NAMES, PREF_IGNORE_INEXACT_MATCHES };
 	}
 
 	@Override
@@ -122,6 +127,11 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showCodeMining_atLeastOne_label,
 				PREF_SHOW_CODEMINING_AT_LEAST_ONE, TRUE_FALSE, LayoutUtil.getIndent());
 
+		ignoreInexactReferenceMatches= addCheckBox(mainComp,
+				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_ignoreInexactMatches_label,
+				PREF_IGNORE_INEXACT_MATCHES, TRUE_FALSE, LayoutUtil.getIndent());
+
+
 		Composite commonComposite= createCodeMiningContent(mainComp);
 		GridData gridData= new GridData(GridData.FILL, GridData.FILL, true, true);
 		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(20);
@@ -135,6 +145,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		});
 		atLeastOneCheckBox.setEnabled(codeMiningEnabledCheckBox.getSelection());
 		fFilteredPrefTree.setEnabled(codeMiningEnabledCheckBox.getSelection());
+		ignoreInexactReferenceMatches.setEnabled(codeMiningEnabledCheckBox.getSelection());
 		validateSettings(null, null, null);
 		return mainComp;
 	}
@@ -206,6 +217,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		if (enabledCodeMining) {
 			// Show references checkboxes
 			atLeastOneCheckBox.setEnabled(true);
+			ignoreInexactReferenceMatches.setEnabled(true);
 			fFilteredPrefTree.setEnabled(true);
 
 			boolean showReferences= getCheckBox(PREF_SHOW_REFERENCES).getSelection();
@@ -217,6 +229,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 			getCheckBox(PREF_SHOW_PARAMETER_NAMES).getSelection();
 		} else {
 			atLeastOneCheckBox.setEnabled(false);
+			ignoreInexactReferenceMatches.setEnabled(false);
 			fFilteredPrefTree.setEnabled(false);
 		}
 	}

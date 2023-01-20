@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Angelo Zerr and others.
+ * Copyright (c) 2018, 2023 Angelo Zerr and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -36,8 +36,6 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.search.ui.NewSearchUI;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -50,10 +48,12 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.FindReferencesAction;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesPropertyTester;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 /**
@@ -144,7 +144,7 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 			return 0;
 		}
 		SearchEngine engine= new SearchEngine();
-		final boolean ignoreInaccurate= NewSearchUI.arePotentialMatchesIgnored();
+		final boolean ignoreInaccurate= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_IGNORE_INEXACT_MATCHES);
 		engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
 				createSearchScope(element), new SearchRequestor() {
 

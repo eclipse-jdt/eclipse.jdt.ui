@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		}
 
 		private void createHistoryList() {
-			IListAdapter<E> adapter= new IListAdapter<E>() {
+			IListAdapter<E> adapter= new IListAdapter<>() {
 				@Override
 				public void customButtonPressed(ListDialogField<E> field, int index) {
 					doCustomButtonPressed(index);

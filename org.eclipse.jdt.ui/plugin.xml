@@ -6351,6 +6351,16 @@
 					</or>
 				</enablement>
 			</commonWizard>
+			<commonWizard
+	           menuGroupId="org.eclipse.jdt.ui.java"
+	           type="new"
+	           wizardId="org.eclipse.jdt.ui.wizards.JavaProjectWizard">
+		       <enablement>
+					<with variable="activeWorkbenchWindow.activePerspective">
+   						<equals value="org.eclipse.jdt.ui.JavaPerspective"/>
+   					</with>
+				</enablement>
+		    </commonWizard>
   			<dropAssistant
     			class="org.eclipse.jdt.internal.ui.navigator.JavaDropAdapterAssistant"
    				id="org.eclipse.jdt.ui.dropAssistant">

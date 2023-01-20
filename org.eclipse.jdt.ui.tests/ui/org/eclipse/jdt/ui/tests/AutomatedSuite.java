@@ -38,6 +38,7 @@ import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTestSuite;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTests;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
+import org.eclipse.jdt.ui.tests.views.SmokeViewsTest;
 import org.eclipse.jdt.ui.tests.wizardapi.ImporterTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewTypeWizardTest;
@@ -78,7 +79,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 	JarExportTests.class,
 	PackageJavadocTests.class,
-	JavadocHoverTests.class
+	JavadocHoverTests.class,
+	SmokeViewsTest.class
 })
 public class AutomatedSuite {
 	@Before

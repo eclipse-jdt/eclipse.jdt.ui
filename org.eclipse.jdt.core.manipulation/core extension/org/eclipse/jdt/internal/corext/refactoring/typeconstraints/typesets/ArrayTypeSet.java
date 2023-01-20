@@ -114,7 +114,7 @@ public class ArrayTypeSet extends TypeSet {
 	public Iterator<TType> iterator() {
 		if (fEnumCache != null) return fEnumCache.iterator();
 
-		return new Iterator<TType>() {
+		return new Iterator<>() {
 			Iterator<TType> fElemIter= fElemTypeSet.iterator();
 			@Override
 			public boolean hasNext() {

@@ -522,7 +522,7 @@ public class TestViewer {
 				comparator= null;
 				break;
 			case SORT_BY_EXECUTION_TIME:
-				comparator= new Comparator<ITestElement>() {
+				comparator= new Comparator<>() {
 					@Override
 					public int compare(ITestElement o1, ITestElement o2) {
 						return compareElapsedTime(o1, o2);
@@ -530,7 +530,7 @@ public class TestViewer {
 				};
 				break;
 			case SORT_BY_NAME:
-				comparator= new Comparator<ITestElement>() {
+				comparator= new Comparator<>() {
 					@Override
 					public int compare(ITestElement o1, ITestElement o2) {
 						return compareName(o1, o2);

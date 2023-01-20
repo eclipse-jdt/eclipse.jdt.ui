@@ -118,7 +118,7 @@ public class TypeEnvironment {
 	private UnboundWildcardType fUnboundWildcardType= null;
 
 	private static final int MAX_ENTRIES= 1024;
-	private Map<TypeTuple, Boolean> fSubTypeCache= new LinkedHashMap<TypeTuple, Boolean>(50, 0.75f, true) {
+	private Map<TypeTuple, Boolean> fSubTypeCache= new LinkedHashMap<>(50, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
 		@Override
 		protected boolean removeEldestEntry(Map.Entry<TypeTuple, Boolean> eldest) {

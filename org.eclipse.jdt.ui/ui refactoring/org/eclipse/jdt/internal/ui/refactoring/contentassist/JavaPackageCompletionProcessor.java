@@ -30,7 +30,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
@@ -46,7 +45,7 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 
-public class JavaPackageCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
+public class JavaPackageCompletionProcessor implements ISubjectControlContentAssistProcessor {
 
 	private IPackageFragmentRoot[] fPackageFragmentRoots;
 	private CompletionProposalComparator fComparator;

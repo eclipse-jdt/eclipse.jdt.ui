@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.jdt.jeview.feature"
-      label="JavaElement View"
+      label="Java Element View"
       version="1.0.14.qualifier"
       provider-name="Eclipse.org"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
 
    <description>
-      JavaElement View for Eclipse 2021-12 and later (jdt.core 3.28)
+      Java Element View
    </description>
 
    <license url="%licenseURL">
       %license
    </license>
-
-   <url>
-      <update label="JDT UI Tools" url="http://www.eclipse.org/jdt/ui/update-site"/>
-   </url>
 
    <requires>
       <import plugin="org.eclipse.jdt.core" version="3.31.0" match="compatible"/>

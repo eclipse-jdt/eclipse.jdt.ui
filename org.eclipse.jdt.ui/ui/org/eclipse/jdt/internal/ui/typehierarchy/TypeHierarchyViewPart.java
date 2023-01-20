@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -110,6 +110,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -136,7 +137,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.FileTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.PluginTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -357,7 +357,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	protected void doPropertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (fMethodsViewer != null) {
-			if (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty())) {
+			if (MembersOrderPreferenceCacheCommon.isMemberOrderProperty(event.getProperty())) {
 				fMethodsViewer.refresh();
 			}
 		}

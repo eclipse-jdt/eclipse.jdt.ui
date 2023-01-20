@@ -27,7 +27,7 @@ public class RerunExecutionListener extends FirstRunExecutionListener {
 	private String fStatus = RemoteTestRunner.RERAN_OK;
 
 	@Override
-	public void notifyTestFailed(TestReferenceFailure failure) {
+	public synchronized void notifyTestFailed(TestReferenceFailure failure) {
 		sendFailure(failure, MessageIds.RTRACE_START, MessageIds.RTRACE_END);
 
 		String status = failure.getStatus();
