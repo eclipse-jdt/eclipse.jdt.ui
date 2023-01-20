@@ -411,7 +411,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (nFound == 0) {
 				// nothing found
 				return null;
-			//} else if (fDoPreserveDemandImports && fOldDemandImports.contains(typeRefsFound.get(0).getTypeContainerName())) {
+			// You may want to make preserving star imports depending on user preference. In this case use something like fDoPreserveDemandImports from new preferences setting.
 			} else if (fOldDemandImports.contains(typeRefsFound.get(0).getTypeContainerName())) {
 				// The original code had a * import for this type. Preserve it!
 				TypeNameMatch typeRef= typeRefsFound.get(0);
