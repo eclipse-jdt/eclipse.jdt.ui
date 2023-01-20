@@ -913,6 +913,53 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test132() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(5, 16, 5, 28, true, false, "i", "i",RefactoringStatus.INFO);
+	}
+
+	@Test
+	public void test133() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		helper1(4, 16, 4, 23, true, false, "i", "i");
+	}
+
+	@Test
+	public void test134() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(4, 29, 4, 45, true, false, "i", "i", RefactoringStatus.INFO);
+	}
+
+	@Test
+	public void test135() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(6, 18, 6, 31, true, false, "f", "f", RefactoringStatus.INFO);
+	}
+
+	@Test
+	public void test136() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(4, 22, 4, 25, true, false, "m", "m", RefactoringStatus.INFO);
+	}
+
+	@Test
+	public void test137() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(4, 22, 4, 25, true, false, "m", "m", RefactoringStatus.INFO);
+	}
+	@Test
+	public void test138() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		helper1(11, 14, 11, 35, true, false, "valueOf", "valueOf");
+	}
+
+	@Test
+	public void test139() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+		warningHelper1(11, 14, 11, 33, true, false, "valueOf", "valueOf", RefactoringStatus.INFO);
+	}
+
+	@Test
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
