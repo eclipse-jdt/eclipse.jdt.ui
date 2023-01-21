@@ -5,7 +5,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            name="JavaElement View"
+            name="Java Element"
             icon="icons/view.png"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.jeview.views.JavaElementView"
