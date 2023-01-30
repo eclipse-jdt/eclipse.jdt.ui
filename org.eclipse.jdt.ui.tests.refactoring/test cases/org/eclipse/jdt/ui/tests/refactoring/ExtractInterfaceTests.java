@@ -102,40 +102,13 @@ public class ExtractInterfaceTests extends GenericRefactoringTest {
 		return getType(createCUfromTestFile(pack, getTopLevelTypeName(className)), className);
 	}
 
-	protected void validatePassingTest(String className, String[] cuNames, String newInterfaceName, boolean replaceOccurrences, String[] extractedMethodNames, String[][] extractedSignatures, String[] extractedFieldNames) throws Exception {
-		IType clas= getClassFromTestFile(getPackageP(), className);
-
-		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
-		Refactoring ref= new ProcessorBasedRefactoring(processor);
-
-		processor.setTypeName(newInterfaceName);
-		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkTypeName(newInterfaceName).getSeverity());
-
-		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
-		for (int i= 0; i < cuNames.length; i++) {
-			if (cuNames[i].equals(clas.getCompilationUnit().findPrimaryType().getElementName()))
-				cus[i]= clas.getCompilationUnit();
-			else
-				cus[i]= createCUfromTestFile(clas.getPackageFragment(), cuNames[i]);
-		}
-		processor.setReplace(replaceOccurrences);
-		processor.setAnnotations(fGenerateAnnotations);
-		IMethod[] extractedMethods= getMethods(clas, extractedMethodNames, extractedSignatures);
-	    IField[] extractedFields= getFields(clas, extractedFieldNames);
-		processor.setExtractedMembers(merge(extractedMethods, extractedFields));
-		assertNull("was supposed to pass", performRefactoring(ref));
-
-		for (int i= 0; i < cus.length; i++) {
-			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
-			String actual= cus[i].getSource();
-			assertEqualLines("(" + cus[i].getElementName() +")", expected, actual);
-		}
-
-		ICompilationUnit interfaceCu= clas.getPackageFragment().getCompilationUnit(newInterfaceName + ".java");
-		assertEqualLines("(interface cu)", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
+	protected void validatePassingTest(String className, String[] cuNames, String newInterfaceName, boolean replaceOccurrences, String[] extractedMethodNames, String[][] extractedSignatures,
+			String[] extractedFieldNames) throws Exception {
+		validatePassingTest(className, cuNames, newInterfaceName, replaceOccurrences, extractedMethodNames, extractedSignatures, extractedFieldNames, null);
 	}
 
-	protected void validatePassingTest(String className, String[] cuNames, String newInterfaceName, boolean replaceOccurrences, String[] extractedMethodNames, String[][] extractedSignatures, String[] extractedFieldNames, IPackageFragment newPackageFragment) throws Exception {
+	protected void validatePassingTest(String className, String[] cuNames, String newInterfaceName, boolean replaceOccurrences, String[] extractedMethodNames, String[][] extractedSignatures,
+			String[] extractedFieldNames, IPackageFragment newPackageFragment) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 
 		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
@@ -154,15 +127,17 @@ public class ExtractInterfaceTests extends GenericRefactoringTest {
 		processor.setReplace(replaceOccurrences);
 		processor.setAnnotations(fGenerateAnnotations);
 		IMethod[] extractedMethods= getMethods(clas, extractedMethodNames, extractedSignatures);
-	    IField[] extractedFields= getFields(clas, extractedFieldNames);
+		IField[] extractedFields= getFields(clas, extractedFieldNames);
 		processor.setExtractedMembers(merge(extractedMethods, extractedFields));
-		processor.setPackageFragment(newPackageFragment);
+		if (newPackageFragment != null) {
+			processor.setPackageFragment(newPackageFragment);
+		}
 		assertNull("was supposed to pass", performRefactoring(ref));
 
 		for (int i= 0; i < cus.length; i++) {
 			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
 			String actual= cus[i].getSource();
-			assertEqualLines("(" + cus[i].getElementName() +")", expected, actual);
+			assertEqualLines("(" + cus[i].getElementName() + ")", expected, actual);
 		}
 
 		ICompilationUnit interfaceCu= newPackageFragment.getCompilationUnit(newInterfaceName + ".java");
