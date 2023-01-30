@@ -907,19 +907,19 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 	void showAndLogError(String message, CoreException e) {
 		JEViewPlugin.log(message, e);
-		ErrorDialog.openError(getSite().getShell(), "JavaElement View", message, e.getStatus()); //$NON-NLS-1$
+		ErrorDialog.openError(getSite().getShell(), "Java Element View", message, e.getStatus()); //$NON-NLS-1$
 	}
 
 	void showAndLogError(String message, Exception e) {
 		IStatus status= new Status(IStatus.ERROR, JEViewPlugin.getPluginId(), 0, message, e);
 		JEViewPlugin.log(status);
-		ErrorDialog.openError(getSite().getShell(), "JavaElement View", null, status); //$NON-NLS-1$
+		ErrorDialog.openError(getSite().getShell(), "Java Element View", null, status); //$NON-NLS-1$
 	}
 
 	void showMessage(String message) {
 		MessageDialog.openInformation(
 			fViewer.getControl().getShell(),
-			"JavaElement View",
+			"Java Element View",
 			message);
 	}
 

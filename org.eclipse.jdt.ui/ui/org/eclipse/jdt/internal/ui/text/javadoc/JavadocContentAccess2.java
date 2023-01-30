@@ -974,8 +974,6 @@ public class JavadocContentAccess2 {
 						}
 						break;
 					case TagElement.TAG_RETURN:
-						if (returnTag == null)
-							returnTag= tag; // the Javadoc tool only shows the first return tag
 						break;
 					case TagElement.TAG_EXCEPTION:
 					case TagElement.TAG_THROWS:
@@ -1032,6 +1030,11 @@ public class JavadocContentAccess2 {
 				}
 			}
 		}
+
+		List<TagElement> returnTags = new ArrayList<>();
+		findTags(TagElement.TAG_RETURN, returnTags, tags);
+		if (!returnTags.isEmpty())
+			returnTag = returnTags.get(0); // the Javadoc tool only shows the first return tag
 
 		//TODO: @Documented annotations before header
 		if (deprecatedTag != null)
@@ -1092,6 +1095,20 @@ public class JavadocContentAccess2 {
 		} else if (fBuf.length() > 0) {
 			handleSuperMethodReferences();
 		}
+	}
+
+	private List<TagElement> findTags(String tagName, List<TagElement> found, List<? extends ASTNode> tags) {
+		for (ASTNode node : tags) {
+			if (node instanceof TagElement) {
+				TagElement tag = (TagElement) node;
+				if (tagName.equals(tag.getTagName())) {
+					found.add(tag);
+				}
+
+				findTags(tagName, found, tag.fragments());
+			}
+		}
+		return found;
 	}
 
 	private void handleBlockTagsHidden() {
@@ -1242,12 +1259,11 @@ public class JavadocContentAccess2 {
 			fLiteralContent= 0;
 
 			List<TagElement> tags= fJavadoc.tags();
-			for (TagElement tag : tags) {
-				String tagName= tag.getTagName();
-				if (TagElement.TAG_RETURN.equals(tagName)) {
-					handleContentElements(tag.fragments());
-					break;
-				}
+			List<TagElement> returnTags = new ArrayList<>();
+			findTags(TagElement.TAG_RETURN, returnTags, tags);
+			if (!returnTags.isEmpty()) {
+				TagElement returnTag = returnTags.get(0);
+				handleContentElements(returnTag.fragments());
 			}
 
 			fBuf= null;
@@ -1515,11 +1531,14 @@ public class JavadocContentAccess2 {
 		boolean isSummary = TagElement.TAG_SUMMARY.equals(name);
 		boolean isIndex = TagElement.TAG_INDEX.equals(name);
 		boolean isSnippet = TagElement.TAG_SNIPPET.equals(name);
+		boolean isReturn = TagElement.TAG_RETURN.equals(name);
 
 		if (isLiteral || isCode || isSummary || isIndex)
 			fLiteralContent++;
 		if (isLink || isCode)
 			fBuf.append("<code>"); //$NON-NLS-1$
+		if (isReturn)
+			fBuf.append(JavaDocMessages.JavadocContentAccess2_returns_pre);
 
 		if (isLink || isLinkplain)
 			handleLink(node.fragments());
@@ -1527,7 +1546,7 @@ public class JavadocContentAccess2 {
 			handleSummary(node.fragments());
 		else if (isIndex)
 			handleIndex(node.fragments());
-		else if (isCode || isLiteral)
+		else if (isCode || isLiteral || isReturn)
 			handleContentElements(node.fragments(), true, node);
 		else if (isSnippet) {
 			handleSnippet(node);
@@ -1541,6 +1560,8 @@ public class JavadocContentAccess2 {
 			fBuf.append(removeDocLineIntros(text));
 		}
 
+		if (isReturn)
+			fBuf.append(JavaDocMessages.JavadocContentAccess2_returns_post);
 		if (isLink || isCode)
 			fBuf.append("</code>"); //$NON-NLS-1$
 		if (isSnippet)
