@@ -140,7 +140,9 @@ public class ExtractInterfaceTests extends GenericRefactoringTest {
 			assertEqualLines("(" + cus[i].getElementName() + ")", expected, actual);
 		}
 
-		ICompilationUnit interfaceCu= newPackageFragment.getCompilationUnit(newInterfaceName + ".java");
+		ICompilationUnit interfaceCu= newPackageFragment != null
+				? newPackageFragment.getCompilationUnit(newInterfaceName + ".java")
+				: clas.getPackageFragment().getCompilationUnit(newInterfaceName + ".java");
 		assertEqualLines("(interface cu)", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
 	}
 
