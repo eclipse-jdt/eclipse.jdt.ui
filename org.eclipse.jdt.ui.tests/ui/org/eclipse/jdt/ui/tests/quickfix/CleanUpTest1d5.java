@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 IBM Corporation and others.
+ * Copyright (c) 2019, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -4329,5 +4329,42 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 
 	}
+
+	@Test
+	public void testRemoveThisBug536138() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A<K> {\n" //
+				+ "    private int val;\n" //
+				+ "    public A(int val) {\n" //
+				+ "        this.val = val;\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        this.val = 7;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A<K> {\n" //
+				+ "    private int val;\n" //
+				+ "    public A(int val) {\n" //
+				+ "        this.val = val;\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        val = 7;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+    }
 
 }

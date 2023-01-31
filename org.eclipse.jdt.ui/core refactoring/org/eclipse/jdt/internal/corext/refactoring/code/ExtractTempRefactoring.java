@@ -139,6 +139,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.SideEffectChecker;
 import org.eclipse.jdt.internal.corext.refactoring.util.UnsafeCheckTester;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -434,7 +435,6 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		fStartPoint= -1; // default
 		fEndPoint= -1; // default
-
 	}
 
 	public ExtractTempRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
@@ -442,7 +442,6 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		fStartPoint= -1; // default
 		fEndPoint= -1; // default
-
 
 		RefactoringStatus initializeStatus= initialize(arguments);
 		status.merge(initializeStatus);
@@ -471,6 +470,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			IASTFragment fragment= fragmentsToReplace[i];
 			if (!fSeen.add(fragment))
 				continue;
+
 			SimpleName tempName= fCURewrite.getAST().newSimpleName(fTempName);
 			TextEditGroup description= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_replace);
 
@@ -541,6 +541,17 @@ public class ExtractTempRefactoring extends Refactoring {
 			fCURewrite= new CompilationUnitRewrite(fCu, fCompilationUnitNode);
 			fCURewrite.getASTRewrite().setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 
+			RefactoringStatus result= new RefactoringStatus();
+			fStartPoint= -1;
+			fEndPoint= -1;
+			fSeen.clear();
+			boolean replaceAll= fReplaceAllOccurrences;
+			RefactoringStatus sideEffectsResult= checkSideEffectsInSelectedExpression();
+			if (sideEffectsResult.hasInfo()) {
+				fReplaceAllOccurrences= false;
+			}
+			result.merge(sideEffectsResult);
+
 			doCreateChange(new SubProgressMonitor(pm, 2));
 
 			fChange= fCURewrite.createChange(RefactoringCoreMessages.ExtractTempRefactoring_change_name, true, new SubProgressMonitor(pm, 1));
@@ -559,18 +570,17 @@ public class ExtractTempRefactoring extends Refactoring {
 					super.preVisit(edit);
 				}
 			});
-			RefactoringStatus result= new RefactoringStatus();
 			if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
 				result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, BasicElementLabels.getJavaElementName(fTempName)));
 
 			result.merge(checkMatchingFragments());
-
 			fChange.setKeepPreviewEdits(false);
 
 			if (fCheckResultForCompileProblems) {
 				result.merge(RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fCompilationUnitNode, pm));
 			}
 
+			fReplaceAllOccurrences= replaceAll;
 			return result;
 		} finally {
 			pm.done();
@@ -620,12 +630,11 @@ public class ExtractTempRefactoring extends Refactoring {
 			try {
 				int cnt= 1;
 				getSelectedExpression();
-				fSelectionStart= fSelectedExpression.getAssociatedNode().getStartPosition();
-				fSelectionLength= fSelectedExpression.getAssociatedNode().getLength();
+				fSelectionStart= fSelectedExpression.getStartPosition();
+				fSelectionLength= fSelectedExpression.getLength();
 				IASTFragment[] reSortRetainOnlyReplacableMatches= reSortRetainOnlyReplacableMatches();
-				int tmpFSelectionStart= fSelectionStart;
-				int tmpFSelectionLength= fSelectionLength;
-
+				final int tmpFSelectionStart= fSelectionStart;
+				final int tmpFSelectionLength= fSelectionLength;
 				IExpressionFragment tmpFSelectedExpression= fSelectedExpression;
 				Collection<String> usedNames= getUsedLocalNames(fSelectedExpression.getAssociatedNode());
 				String newName= fTempName;
@@ -637,14 +646,15 @@ public class ExtractTempRefactoring extends Refactoring {
 						fTempName= newName + ++cnt;
 					}
 				}
-				while (replaceAllOccurrences() && reSortRetainOnlyReplacableMatches.length > fSeen.size()) {
+				while (replaceAllOccurrences() &&
+						reSortRetainOnlyReplacableMatches.length > fSeen.size()) {
 					fStartPoint= -1;
 					fEndPoint= -1;
 					boolean flag= false;
 					for (int i= 0; i < reSortRetainOnlyReplacableMatches.length; ++i) {
 						if (!fSeen.contains(reSortRetainOnlyReplacableMatches[i])) {
-							fSelectionStart= reSortRetainOnlyReplacableMatches[i].getAssociatedNode().getStartPosition();
-							fSelectionLength= reSortRetainOnlyReplacableMatches[i].getAssociatedNode().getLength();
+							fSelectionStart= reSortRetainOnlyReplacableMatches[i].getStartPosition();
+							fSelectionLength= reSortRetainOnlyReplacableMatches[i].getLength();
 							fSelectedExpression= null;
 							getSelectedExpression();
 							flag= true;
@@ -728,6 +738,20 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (isLeftValue(node) && !isReferringToLocalVariableFromFor((Expression) node)) {
 				String msg= RefactoringCoreMessages.ExtractTempRefactoring_assigned_to;
 				result.addWarning(msg, JavaStatusContext.create(fCu, node));
+			}
+		}
+		return result;
+	}
+
+	private RefactoringStatus checkSideEffectsInSelectedExpression() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		if (replaceAllOccurrences() && retainOnlyReplacableMatches(getMatchingFragments()).length > 1) {
+			SideEffectChecker ev= new SideEffectChecker(getSelectedExpression().getAssociatedNode());
+			ASTNode node= fSelectedExpression.getAssociatedNode();
+			node.accept(ev);
+			if (ev.hasSideEffect()) {
+				String msg= RefactoringCoreMessages.ExtractTempRefactoring_side_effcts_in_selected_expression;
+				result.addInfo(msg, JavaStatusContext.create(fCu, node));
 			}
 		}
 		return result;
@@ -830,7 +854,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		int selectNumber= -1;
 
 		for (int i= 0; i < reSortRetainOnlyReplacableMatches.length; ++i) {
-			if (fSelectionStart == reSortRetainOnlyReplacableMatches[i].getAssociatedNode().getStartPosition()) {
+			if (fSelectionStart == reSortRetainOnlyReplacableMatches[i].getStartPosition()) {
 				selectNumber= i;
 				break;
 			}
@@ -878,7 +902,9 @@ public class ExtractTempRefactoring extends Refactoring {
 			IASTFragment iASTFragment= reSortRetainOnlyReplacableMatches[start];
 			firstReplaceExpression= getCertainReplacedExpression(reSortRetainOnlyReplacableMatches, start).getAssociatedNode();
 			ASTNode[] firstReplaceNodeParents= getParents(firstReplaceExpression);
-			ASTNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes(start, end);
+			// fix (1+i)+1+i
+			ASTNode[] commonPath= start == end ? firstReplaceNodeParents : findDeepestCommonSuperNodePathForReplacedNodes(start, end);
+
 			Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
 			ASTNode deepestCommonParent= firstReplaceNodeParents[commonPath.length - 1];
 			int startOffset;
@@ -1055,8 +1081,6 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private ASTNode[] findDeepestCommonSuperNodePathForReplacedNodes(int start, int end) throws JavaModelException {
 		ASTNode[] matchNodes= getMatchNodes();
-		Comparator<ASTNode> comparator= (o1, o2) -> o1.getStartPosition() - o2.getStartPosition();
-		Arrays.sort(matchNodes, comparator);
 		ASTNode[][] matchingNodesParents= new ASTNode[end + 1 - start][];
 		for (int i= start; i < matchNodes.length && i < end + 1; ++i) {
 			matchingNodesParents[i - start]= getParents(matchNodes[i]);
@@ -1145,9 +1169,13 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private ASTNode[] getMatchNodes() throws JavaModelException {
 		IASTFragment[] matches= retainOnlyReplacableMatches(getMatchingFragments());
+		Comparator<IASTFragment> comparator= (o1, o2) -> o1.getStartPosition() - o2.getStartPosition();
+		Arrays.sort(matches, comparator);
 		ASTNode[] result= new ASTNode[matches.length];
-		for (int i= 0; i < matches.length; i++)
+		for (int i= 0; i < matches.length; i++) {
 			result[i]= matches[i].getAssociatedNode();
+		}
+
 		return result;
 	}
 
