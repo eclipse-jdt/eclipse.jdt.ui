@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDesc
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -91,8 +92,6 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor {
 
@@ -561,7 +560,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 		try {
 			ipod.setComment(createComment(project).asString());
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaManipulationPlugin.log(e);
 		}
 		ipod.setProject(project);
 		ipod.setDescription(getProcessorName());

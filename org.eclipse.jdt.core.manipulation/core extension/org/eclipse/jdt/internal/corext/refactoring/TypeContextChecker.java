@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -90,8 +91,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessorCore;
 
 public class TypeContextChecker {
 	private static class MethodTypesChecker {
@@ -711,12 +711,12 @@ public class TypeContextChecker {
 						stubTypeContext.getBeforeString() + prolog,
 						epilog + stubTypeContext.getAfterString());
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				JavaManipulationPlugin.log(e);
 				stubTypeContext= new StubTypeContext(null, null, null);
 			}
 
 		} else if (packageFragment != null) {
-			ICompilationUnit cu= packageFragment.getCompilationUnit(JavaTypeCompletionProcessor.DUMMY_CU_NAME);
+			ICompilationUnit cu= packageFragment.getCompilationUnit(JavaTypeCompletionProcessorCore.DUMMY_CU_NAME);
 			stubTypeContext= new StubTypeContext(cu, "package " + packageFragment.getElementName() + ";" + prolog, epilog);  //$NON-NLS-1$//$NON-NLS-2$
 
 		} else {
@@ -732,7 +732,7 @@ public class TypeContextChecker {
 					IPackageFragment packageFragment= root.getPackageFragment(""); //$NON-NLS-1$
 					String prolog= "abstract class __X__ {\n\tabstract @"; //$NON-NLS-1$
 					String epilog= " __X__ dummy();\n} "; //$NON-NLS-1$
-					ICompilationUnit cu= packageFragment.getCompilationUnit(JavaTypeCompletionProcessor.DUMMY_CU_NAME);
+					ICompilationUnit cu= packageFragment.getCompilationUnit(JavaTypeCompletionProcessorCore.DUMMY_CU_NAME);
 					return new StubTypeContext(cu, prolog, epilog);
 				}
 			}
