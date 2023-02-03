@@ -66,7 +66,6 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
-import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
@@ -140,13 +139,6 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetMessages;
  * of the plug-in such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener {
-
-	/**
-	 * The view id for the workbench's Resource Navigator standard component.
-	 * @since 3.6
-	 */
-	@Deprecated
-	public static final String ID_RES_NAV= IPageLayout.ID_RES_NAV;
 
 	/**
 	 * The key to store customized templates.
