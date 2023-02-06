@@ -1740,7 +1740,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		int offset= buf.indexOf("Object f");
 		AssistContext context= new AssistContext(cu, offset, 0);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, context);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, context);
 		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
