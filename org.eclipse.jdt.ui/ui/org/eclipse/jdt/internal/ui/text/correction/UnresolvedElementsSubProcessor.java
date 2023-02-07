@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 202 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -888,7 +888,7 @@ public class UnresolvedElementsSubProcessor {
 			if ((elem.getKind() & TypeKinds.ALL_TYPES) != 0) {
 				String fullName= elem.getName();
 				if (!fullName.equals(resolvedTypeName)) {
-					if (simpleBinding != null) {
+					if (simpleBinding != null && !simpleBinding.isPrimitive()) {
 						// If we have an expected type, we should verify that any classes we suggest to import
 						// inherit directly or indirectly from the type
 						ITypeBinding qualifiedTypeBinding= null;
