@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="Navigator view deprecated since 2019" id="923795461">
+            <message_arguments>
+                <message_argument value="3.28.0"/>
+                <message_argument value="3.27.100"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.jdt.ui.actions.ShowInNavigatorViewAction">
+        <filter comment="Navigator view deprecated since 2019" id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.actions.ShowInNavigatorViewAction"/>
+                <message_argument value="org.eclipse.jdt.ui_3.28.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
         <filter id="571519004">
             <message_arguments>
