@@ -578,7 +578,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 
 			try (BufferedWriter bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
 				if (testContainer instanceof IPackageFragment) {
-					pkgNames.add(getPackageName(testContainer.getElementName()));
+					addAllSubPackageFragments((IPackageFragment) testContainer, pkgNames);
 				} else if (testContainer instanceof IPackageFragmentRoot) {
 					addAllPackageFragments((IPackageFragmentRoot) testContainer, pkgNames);
 				} else if (testContainer instanceof IJavaProject) {
@@ -613,6 +613,16 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 		}
 		return pkgNames;
+	}
+
+	private void addAllSubPackageFragments(IPackageFragment pkgFragment, Set<String> pkgNames) throws JavaModelException {
+		String elementName= getPackageName(pkgFragment.getElementName());
+		IPackageFragmentRoot pkgFragmentRoot= (IPackageFragmentRoot) pkgFragment.getParent();
+		for (IJavaElement child : pkgFragmentRoot.getChildren()) {
+			if (child instanceof IPackageFragment && getPackageName(((IPackageFragment) child).getElementName()).startsWith(elementName) && ((IPackageFragment) child).hasChildren()) {
+				pkgNames.add(getPackageName(((IPackageFragment) child).getElementName()));
+			}
+		}
 	}
 
 	private String getPackageName(String elementName) {

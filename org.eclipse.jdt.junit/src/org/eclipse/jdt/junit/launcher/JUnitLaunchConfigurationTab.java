@@ -1153,20 +1153,21 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses) {
 			@Override
 			public boolean select(Viewer viewer, Object parent, Object element) {
-			    if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot)element).isArchive())
-			        return false;
-			    try {
-					if (element instanceof IPackageFragment && !((IPackageFragment) element).hasChildren()) {
-						return false;
-					}
-				} catch (JavaModelException e) {
+				if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) element).isArchive())
 					return false;
-				}
 				return super.select(viewer, parent, element);
 			}
 		};
 
-		StandardJavaElementContentProvider provider= new StandardJavaElementContentProvider();
+		StandardJavaElementContentProvider provider= new StandardJavaElementContentProvider() {
+			@Override
+			public boolean hasChildren(Object element) {
+				if(element instanceof IPackageFragment) {
+					return false;
+				}
+				return super.hasChildren(element);
+			}
+		};
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setValidator(validator);
