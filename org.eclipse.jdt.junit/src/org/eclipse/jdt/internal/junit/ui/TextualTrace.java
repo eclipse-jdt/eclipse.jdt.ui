@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2017 IBM Corporation and others.
+ * Copyright (c) 2005, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -119,11 +119,15 @@ public class TextualTrace {
 		String line;
 		String[] patterns = filterPatterns;
 		boolean firstLine= true;
+		boolean stackFrameSeen= false;
 		try {
 			while ((line= bufferedReader.readLine()) != null) {
-				if (firstLine || !filterLine(patterns, line))
+				if (firstLine || !stackFrameSeen || !filterLine(patterns, line))
 					printWriter.println(line);
 				firstLine= false;
+				if (!(stackFrameSeen)) {
+					stackFrameSeen= isAStackFrame(line.replace('\t', ' '));
+				}
 			}
 		} catch (IOException e) {
 			return stackTrace; // return the stack unfiltered
