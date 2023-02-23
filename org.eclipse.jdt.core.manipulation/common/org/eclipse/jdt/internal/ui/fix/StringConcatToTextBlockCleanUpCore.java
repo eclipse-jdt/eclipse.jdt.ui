@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2023 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -51,12 +51,15 @@ public class StringConcatToTextBlockCleanUpCore extends AbstractCleanUpCore {
 			return null;
 		}
 
-		return StringConcatToTextBlockFixCore.createCleanUp(compilationUnit);
+		return StringConcatToTextBlockFixCore.createCleanUp(compilationUnit, isEnabled(CleanUpConstants.STRINGCONCAT_STRINGBUFFER_STRINGBUILDER));
 	}
 
 	@Override
 	public String[] getStepDescriptions() {
 		if (isEnabled(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK)) {
+			if (isEnabled(CleanUpConstants.STRINGCONCAT_STRINGBUFFER_STRINGBUILDER)) {
+				return new String[] {MultiFixMessages.StringConcatToTextBlockStringBuffer_description};
+			}
 			return new String[] {MultiFixMessages.StringConcatToTextBlockCleanUp_description};
 		}
 		return new String[0];
@@ -79,6 +82,20 @@ public class StringConcatToTextBlockCleanUpCore extends AbstractCleanUpCore {
 			bld.append("    \"    public void foo() {\" +\n"); //$NON-NLS-1$
 			bld.append("    \"    }\" + \n"); //$NON-NLS-1$
 			bld.append("    \"}\";\n"); //$NON-NLS-1$
+		}
+		bld.append("\n"); //$NON-NLS-1$
+		if (isEnabled(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK) && isEnabled(CleanUpConstants.STRINGCONCAT_STRINGBUFFER_STRINGBUILDER)) {
+			bld.append("String k = \"\"\"\n"); //$NON-NLS-1$
+			bld.append("    public void foo() {\n"); //$NON-NLS-1$
+			bld.append("        return null;\n"); //$NON-NLS-1$
+			bld.append("    }\n"); //$NON-NLS-1$
+			bld.append("    \"\"\";\n"); //$NON-NLS-1$
+		} else {
+			bld.append("StringBuffer buf= new StringBuffer();\n"); //$NON-NLS-1$
+			bld.append("buf.append(\"public void foo() {\\n\");\n"); //$NON-NLS-1$
+			bld.append("buf.append(\"    return null;\\n\");\n"); //$NON-NLS-1$
+			bld.append("buf.append(\"}\\n\");\n"); //$NON-NLS-1$
+			bld.append("String k = buf.toString();\n"); //$NON-NLS-1$
 		}
 
 		return bld.toString();
