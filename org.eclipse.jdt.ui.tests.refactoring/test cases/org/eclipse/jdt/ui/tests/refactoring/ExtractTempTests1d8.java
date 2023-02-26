@@ -42,7 +42,6 @@ public class ExtractTempTests1d8 extends ExtractTempTests {
 
 	//--- TESTS
 
-	@Override
 	@Test
 	public void test110() throws Exception {
 		helper1(6, 77, 6, 82, true, false, "x", "x");
