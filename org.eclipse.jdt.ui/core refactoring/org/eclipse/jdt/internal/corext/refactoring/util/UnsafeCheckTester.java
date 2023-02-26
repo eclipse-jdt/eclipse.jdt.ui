@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -67,47 +67,6 @@ public class UnsafeCheckTester {
 	private HashMap<IBinding, ITypeBinding> fInvocationHashMap;
 
 	private HashMap<Position, ITypeBinding> fMatchNodePosHashMap;
-
-	class Position {
-		int start;
-
-		int length;
-
-		public Position(int start, int length) {
-			this.start= start;
-			this.length= length;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + getEnclosingInstance().hashCode();
-			result= prime * result + length;
-			result= prime * result + start;
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (!(obj instanceof Position))
-				return false;
-			Position other= (Position) obj;
-			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))
-				return false;
-			if (length != other.length)
-				return false;
-			if (start != other.start)
-				return false;
-			return true;
-		}
-
-		private UnsafeCheckTester getEnclosingInstance() {
-			return UnsafeCheckTester.this;
-		}
-	}
 
 	public UnsafeCheckTester(CompilationUnit fCompilationUnitNode, ICompilationUnit fCu, ASTNode commonNode, ASTNode expression, int startOffset, int endOffset) {
 		this.fCompilationUnitNode= fCompilationUnitNode;
@@ -242,11 +201,9 @@ public class UnsafeCheckTester {
 			return this.nullFlag;
 		}
 
-
 		public boolean hasCastCheck() {
 			return this.castFlag;
 		}
-
 
 		@Override
 		public boolean preVisit2(ASTNode node) {
@@ -323,6 +280,45 @@ public class UnsafeCheckTester {
 			return false;
 
 		}
+	}
+
+}
+
+class Position {
+	int start;
+
+	int length;
+
+	public Position(int start, int length) {
+		this.start= start;
+		this.length= length;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime= 31;
+		int result= 1;
+		result= prime * result + length;
+		result= prime * result + start;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof Position)) {
+			return false;
+		}
+		Position other= (Position) obj;
+		if (length != other.length) {
+			return false;
+		}
+		if (start != other.start) {
+			return false;
+		}
+		return true;
 	}
 
 }

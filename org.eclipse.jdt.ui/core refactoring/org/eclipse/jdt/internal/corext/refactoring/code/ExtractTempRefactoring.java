@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,7 @@
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract local] Extract to local variable not replacing multiple occurrences in same statement - https://bugs.eclipse.org/406347
  *     Nicolaj Hoess <nicohoess@gmail.com> - [extract local] puts declaration at wrong position - https://bugs.eclipse.org/65875
  *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
- *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of "Extract Local Variable" refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -135,6 +135,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.ChangedValueChecker;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -461,7 +462,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private void addReplaceExpressionWithTemp() throws JavaModelException {
 		IASTFragment[] fragmentsToReplace= reSortRetainOnlyReplacableMatches();
 
-		if (fragmentsToReplace.length == 0) {
+		if (fragmentsToReplace.length == 0 || fEndPoint == -1) {
 			return;
 		}
 		//TODO: should not have to prune duplicates here...
@@ -747,7 +748,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		if (replaceAllOccurrences() && retainOnlyReplacableMatches(getMatchingFragments()).length > 1) {
 			SideEffectChecker ev= new SideEffectChecker(getSelectedExpression().getAssociatedNode());
-			ASTNode node= fSelectedExpression.getAssociatedNode();
+			ASTNode node= getSelectedExpression().getAssociatedNode();
 			node.accept(ev);
 			if (ev.hasSideEffect()) {
 				String msg= RefactoringCoreMessages.ExtractTempRefactoring_side_effcts_in_selected_expression;
@@ -891,13 +892,15 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private ASTNode evalStartAndEnd(IASTFragment[] reSortRetainOnlyReplacableMatches, int selectNumber) throws JavaModelException {
 		ASTNode realCommonASTNode= null;
-		if (selectNumber < 0) {
+		if (selectNumber < 0 || selectNumber >= reSortRetainOnlyReplacableMatches.length) {
 			return realCommonASTNode;
 		}
 		ASTNode firstReplaceExpression;
 		int start= selectNumber;
 		int end= selectNumber;
 		int expandFlag= 2; // 2:backward 1:forward 0:break
+		ChangedValueChecker cvc= new ChangedValueChecker(getSelectedExpression().getAssociatedNode());
+
 		while (expandFlag > 0 && start <= end) {
 			IASTFragment iASTFragment= reSortRetainOnlyReplacableMatches[start];
 			firstReplaceExpression= getCertainReplacedExpression(reSortRetainOnlyReplacableMatches, start).getAssociatedNode();
@@ -917,9 +920,18 @@ public class ExtractTempRefactoring extends Refactoring {
 				commonASTNode= deepestCommonParent;
 			}
 			commonASTNode= convertToExtractNode(commonASTNode);
+			boolean flag= false;
 			startOffset= commonASTNode.getStartPosition() - 1;
-			UnsafeCheckTester checker= new UnsafeCheckTester(fCompilationUnitNode, fCu, commonASTNode, expression, startOffset, endOffset);
-			if (!checker.hasUnsafeCheck()) {//at least one be extracted
+			int lastExprOffset= reSortRetainOnlyReplacableMatches[end].getStartPosition();
+			UnsafeCheckTester uct= new UnsafeCheckTester(fCompilationUnitNode, fCu, commonASTNode, expression, startOffset, endOffset);
+
+			ArrayList<IASTFragment> candidateList= new ArrayList<IASTFragment>();
+			for (int i= start; i <= end; ++i)
+				candidateList.add(reSortRetainOnlyReplacableMatches[i]);
+			cvc.detectConflict(startOffset, lastExprOffset, reSortRetainOnlyReplacableMatches[start].getAssociatedNode(),
+					reSortRetainOnlyReplacableMatches[end].getAssociatedNode(), deepestCommonParent, candidateList);
+			flag= !uct.hasUnsafeCheck() && !cvc.hasConflict();
+			if (flag) {//at least one be extracted
 				fStartPoint= start;
 				fEndPoint= end;
 				realCommonASTNode= commonASTNode;
@@ -1313,10 +1325,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private void replaceSelectedExpressionWithTempDeclaration() throws CoreException {
-		fStartPoint= 0;
-		fEndPoint= retainOnlyReplacableMatches(getMatchingFragments()).length - 1;
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression(); // whole expression selected
+
+		fSeen.add(getSelectedExpression());
 
 		Expression initializer= (Expression) rewrite.createMoveTarget(selectedExpression);
 		VariableDeclarationStatement tempDeclaration= createTempDeclaration(initializer);
