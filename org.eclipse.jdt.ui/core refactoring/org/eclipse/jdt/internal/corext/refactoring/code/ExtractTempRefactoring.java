@@ -548,7 +548,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			fSeen.clear();
 			boolean replaceAll= fReplaceAllOccurrences;
 			RefactoringStatus sideEffectsResult= checkSideEffectsInSelectedExpression();
-			if (sideEffectsResult.hasInfo()) {
+			if (sideEffectsResult.hasInfo() || shouldReplaceSelectedExpressionWithTempDeclaration()) {
 				fReplaceAllOccurrences= false;
 			}
 			result.merge(sideEffectsResult);
@@ -1377,12 +1377,10 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private boolean shouldReplaceSelectedExpressionWithTempDeclaration() throws JavaModelException {
 		IExpressionFragment selectedFragment= getSelectedExpression();
-		IExpressionFragment firstExpression= getCertainReplacedExpression(reSortRetainOnlyReplacableMatches(), 0);
-		if (firstExpression.getStartPosition() < selectedFragment.getStartPosition())
-			return false;
 		ASTNode associatedNode= selectedFragment.getAssociatedNode();
-		return (associatedNode.getParent() instanceof ExpressionStatement || associatedNode.getParent() instanceof LambdaExpression)
+		boolean b= (associatedNode.getParent() instanceof ExpressionStatement || associatedNode.getParent() instanceof LambdaExpression)
 				&& selectedFragment.matches(ASTFragmentFactory.createFragmentForFullSubtree(associatedNode));
+		return b;
 	}
 
 	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
