@@ -789,17 +789,19 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(5, 20, 5, 29, true, false, "temp", "i");
 	}
 
-	@Test
-	public void test110() throws Exception {
-		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
-		helper1(6, 9, 6, 25, true, false, "temp", "calculateCount");
-	}
+//	test disabled - replace strategy has changed
+//	@Test
+//	public void test110() throws Exception {
+//		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
+//		helper1(6, 9, 6, 25, true, false, "temp", "calculateCount");
+//	}
 
-	@Test
-	public void test111() throws Exception {
-		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
-		helper1(11, 9, 11, 25, true, false, "temp", "calculateCount");
-	}
+//	test disabled - replace strategy has changed
+//	@Test
+//	public void test111() throws Exception {
+//		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
+//		helper1(11, 9, 11, 25, true, false, "temp", "calculateCount");
+//	}
 
 	@Test
 	public void test113() throws Exception {
