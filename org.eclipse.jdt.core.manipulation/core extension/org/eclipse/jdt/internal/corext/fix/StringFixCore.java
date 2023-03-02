@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - refactored StringFix to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -34,15 +35,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
-import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
 
 /**
  * Fix which solves various issues with strings.
@@ -51,13 +51,13 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * 		Remove unnecessary $NON-NLS$ tag
  *
  */
-public class StringFix implements IProposableFix, ICleanUpFix {
+public class StringFixCore implements IProposableFix, ICleanUpFixCore {
 
 	private final TextEditGroup[] fEditGroups;
 	private final String fName;
 	private final ICompilationUnit fCompilationUnit;
 
-	public static StringFix createFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean removeNLSTag, boolean addNLSTag) throws CoreException {
+	public static StringFixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore problem, boolean removeNLSTag, boolean addNLSTag) throws CoreException {
 		TextEdit addEdit= null;
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (addNLSTag) {
@@ -73,53 +73,53 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 
 		if (addEdit != null && removeEdit != null) {
 			String label= FixMessages.StringFix_AddRemoveNonNls_description;
-			return new StringFix(label, compilationUnit, new TextEditGroup[] {new TextEditGroup(label, addEdit), new TextEditGroup(label, removeEdit)});
+			return new StringFixCore(label, compilationUnit, new TextEditGroup[] {new TextEditGroup(label, addEdit), new TextEditGroup(label, removeEdit)});
 		} else if (addEdit != null) {
 			String label= FixMessages.StringFix_AddNonNls_description;
-			return new StringFix(label, compilationUnit, new TextEditGroup[] {new TextEditGroup(label, addEdit)});
+			return new StringFixCore(label, compilationUnit, new TextEditGroup[] {new TextEditGroup(label, addEdit)});
 		} else if (removeEdit != null) {
 			String label= FixMessages.StringFix_RemoveNonNls_description;
-			return new StringFix(label, compilationUnit, new TextEditGroup[] {new TextEditGroup(label, removeEdit)});
+			return new StringFixCore(label, compilationUnit, new TextEditGroup[] {new TextEditGroup(label, removeEdit)});
 		} else {
 			return null;
 		}
 	}
 
-	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
 
 		IProblem[] problems= compilationUnit.getProblems();
-		IProblemLocation[] locations= new IProblemLocation[problems.length];
+		IProblemLocationCore[] locations= new IProblemLocationCore[problems.length];
 		for (int i= 0; i < problems.length; i++) {
-			locations[i]= new ProblemLocation(problems[i]);
+			locations[i]= new ProblemLocationCore(problems[i]);
 		}
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, locations);
 	}
 
-	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocationCore[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
 
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, problems);
 	}
 
-	private static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
+	private static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocationCore[] problems) throws CoreException, JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!cu.isStructureKnown())
 			return null; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 :
 
 		List<CategorizedTextEditGroup> result= new ArrayList<>();
 
-		List<IProblemLocation> missingNLSProblems= new ArrayList<>();
-		for (IProblemLocation problem : problems) {
+		List<IProblemLocationCore> missingNLSProblems= new ArrayList<>();
+		for (IProblemLocationCore problem : problems) {
 			if (addNLSTag && problem.getProblemId() == IProblem.NonExternalizedStringLiteral) {
 				missingNLSProblems.add(problem);
 			}
 			if (removeNLSTag && problem.getProblemId() == IProblem.UnnecessaryNLSTag) {
 				IBuffer buffer= cu.getBuffer();
 				if (buffer != null) {
-					TextEdit edit= StringFix.getReplace(problem.getOffset(), problem.getLength(), buffer, true);
+					TextEdit edit= StringFixCore.getReplace(problem.getOffset(), problem.getLength(), buffer, true);
 					if (edit != null) {
 						String label= FixMessages.StringFix_RemoveNonNls_description;
 						result.add(new CategorizedTextEditGroup(label, edit, new GroupCategorySet(new GroupCategory(label, label, label))));
@@ -130,7 +130,7 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 		if (!missingNLSProblems.isEmpty()) {
 			int[] positions= new int[missingNLSProblems.size()];
 			int i=0;
-			for (IProblemLocation problem : missingNLSProblems) {
+			for (IProblemLocationCore problem : missingNLSProblems) {
 				positions[i]= problem.getOffset();
 				i++;
 			}
@@ -145,10 +145,10 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 		if (result.isEmpty())
 			return null;
 
-		return new StringFix("", compilationUnit, result.toArray(new TextEditGroup[result.size()])); //$NON-NLS-1$
+		return new StringFixCore("", compilationUnit, result.toArray(new TextEditGroup[result.size()])); //$NON-NLS-1$
 	}
 
-	private static ReplaceEdit getReplace(int offset, int length, IBuffer buffer, boolean removeLeadingIndents) {
+	public static ReplaceEdit getReplace(int offset, int length, IBuffer buffer, boolean removeLeadingIndents) {
 
 		String replaceString= ""; //$NON-NLS-1$
 		boolean hasMoreInComment= false;
@@ -194,7 +194,7 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 		}
 	}
 
-	private StringFix(String name, CompilationUnit compilationUnit, TextEditGroup[] groups) {
+	public StringFixCore(String name, CompilationUnit compilationUnit, TextEditGroup[] groups) {
 		fName= name;
 		fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
 		fEditGroups= groups;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -149,7 +149,7 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCo
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
 import org.eclipse.jdt.internal.corext.fix.SealedClassFixCore;
-import org.eclipse.jdt.internal.corext.fix.StringFix;
+import org.eclipse.jdt.internal.corext.fix.StringFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
@@ -616,7 +616,7 @@ public class LocalCorrectionsSubProcessor {
 		};
 		proposals.add(proposal);
 
-		IProposableFix fix= StringFix.createFix(context.getASTRoot(), problem, false, true);
+		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), (ProblemLocation)problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			Map<String, String> options= new Hashtable<>();
@@ -628,7 +628,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void getUnnecessaryNLSTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
-		IProposableFix fix= StringFix.createFix(context.getASTRoot(), problem, true, false);
+		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), (ProblemLocation)problem, true, false);
 		if (fix != null) {
 			Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			Map<String, String> options= new Hashtable<>();
