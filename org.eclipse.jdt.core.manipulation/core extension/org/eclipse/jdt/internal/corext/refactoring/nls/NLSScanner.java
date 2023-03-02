@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -160,6 +160,27 @@ public class NLSScanner {
 										false));
 					}
 					break;
+
+				case ITerminalSymbols.TokenNameTextBlock:
+					if (insideAnnotation.isEmpty() && defaultCounter == 0) {
+						currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenEndPosition());
+						if (currentLineNr != previousLineNr) {
+							currentLine= new NLSLine(currentLineNr - 1);
+							lines.add(currentLine);
+							previousLineNr= currentLineNr;
+							nlsElementIndex= 0;
+						}
+						String value= new String(scanner.getCurrentTokenSource());
+						currentLine.add(
+								new NLSElement(
+										value,
+										scanner.getCurrentTokenStartPosition(),
+										scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenStartPosition(),
+										nlsElementIndex++,
+										false));
+					}
+					break;
+
 				case ITerminalSymbols.TokenNameCOMMENT_LINE:
 					defaultCounter= 0;
 					if (currentLineNr != scanner.getLineNumber(scanner.getCurrentTokenStartPosition()))

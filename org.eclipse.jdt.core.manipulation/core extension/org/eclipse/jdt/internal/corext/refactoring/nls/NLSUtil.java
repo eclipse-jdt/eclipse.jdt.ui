@@ -18,11 +18,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import java.text.Collator;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -187,7 +186,12 @@ public class NLSUtil {
 		NLSElement nextTagged= findNextTagged(index, elements);
 		if (nextTagged != null)
 			return nextTagged.getTagPosition().getOffset();
-		return findLineEnd(cu, elements[index].getPosition().getOffset());
+		Region position= elements[index].getPosition();
+		int lineEnd= findLineEnd(cu, position.getOffset());
+		if (lineEnd < position.getOffset() + position.getLength()) {
+			lineEnd= findLineEnd(cu, position.getOffset() + position.getLength());
+		}
+		return lineEnd;
 	}
 
 	private static NLSElement findPreviousTagged(int startIndex, NLSElement[] elements) {
