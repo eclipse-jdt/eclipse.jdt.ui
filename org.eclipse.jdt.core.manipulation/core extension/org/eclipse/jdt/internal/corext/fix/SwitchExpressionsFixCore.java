@@ -388,7 +388,11 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 							ThrowStatement throwStatement= (ThrowStatement)oldStatement;
 							newStatement= (Statement)rewrite.createCopyTarget(throwStatement);
 						} else if (oldStatement instanceof ReturnStatement && createReturnStatement) {
-							newStatement= getNewStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatement);
+							if (forceOldStyle) {
+								newStatement= getNewYieldStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatement);
+							} else {
+								newStatement= getNewStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatement);
+							}
 						} else if (forceOldStyle) {
 							newStatement= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatement);
 						} else {
