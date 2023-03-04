@@ -550,7 +550,19 @@ public class ExtractTempRefactoring extends Refactoring {
 			fEndPoint= -1;
 			fSeen.clear();
 			boolean replaceAll= fReplaceAllOccurrences;
-			if ( shouldReplaceSelectedExpressionWithTempDeclaration()) {
+
+			boolean insertAtSelection;
+
+			if (!fReplaceAllOccurrences) {
+				insertAtSelection= true;
+			} else {
+				// not other expressions would be replaced together
+				IASTFragment[] replacableMatches= retainOnlyReplacableMatches(getMatchingFragments());
+				insertAtSelection= replacableMatches.length == 0
+						|| replacableMatches.length == 1 && replacableMatches[0].getAssociatedNode().equals(getSelectedExpression().getAssociatedExpression());
+			}
+
+			if ( insertAtSelection || shouldReplaceSelectedExpressionWithTempDeclaration()  ) {
 				fReplaceAllOccurrences= false;
 			} else {
 				RefactoringStatus checkSideEffectsInSelectedExpression= checkSideEffectsInSelectedExpression();
@@ -646,6 +658,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				IExpressionFragment tmpFSelectedExpression= fSelectedExpression;
 				Collection<String> usedNames= getUsedLocalNames(fSelectedExpression.getAssociatedNode());
 				String newName= fTempName;
+//				System.out.println(this.getSelectedExpression().);
 				if(!replaceAllOccurrences()) {
 					createTempDeclaration();
 					addReplaceExpressionWithTemp();
