@@ -7,15 +7,15 @@ public class A {
 		if (key < arr[low] || key > arr[high] || low > high) {
 			return -1;
 		}
-		int i2= arr[(low + high) / 2];
-		if (i2 == key) {
+		int i= arr[(low + high) / 2];
+		if (i == key) {
 			return (low + high) / 2;
 		}
 		while (low <= high && arr[(low + high) / 2] != key) {
-			int i= arr[(low + high) / 2];
-			if (i > key) {
+			int i2= arr[(low + high) / 2];
+			if (i2 > key) {
 				high = (low + high) / 2 - 1;
-			} else if (i < key) {
+			} else if (i2 < key) {
 				for (; isNoOutOfBound(arr, (low + high) / 2) && arr[(low + high) / 2] < key; ++low)
 					;
 			}

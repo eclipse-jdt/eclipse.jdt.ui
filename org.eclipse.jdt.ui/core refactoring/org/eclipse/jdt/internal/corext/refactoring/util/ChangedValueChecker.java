@@ -90,7 +90,7 @@ public class ChangedValueChecker {
 		fNode2= node2;
 		fBodyNode= bodyNode;
 		fConflict= false;
-		fPosSet= new HashSet<Position>();
+		fPosSet= new HashSet<>();
 		PathVisitor pathVisitor= new PathVisitor(startOffset, endOffset, fNode2, candidateList);
 		while (fBodyNode != null && (fBodyNode.getStartPosition() + fBodyNode.getLength() < pathVisitor.endOffset
 				|| fBodyNode.getStartPosition() > pathVisitor.startOffset)) {
@@ -102,7 +102,7 @@ public class ChangedValueChecker {
 	}
 
 	public void analyzeSelectedExpression(ASTNode selectedExpression) {
-		fDependSet= new HashSet<Elem>();
+		fDependSet= new HashSet<>();
 		ReadVisitor readVisitor= new ReadVisitor(true);
 		selectedExpression.accept(readVisitor);
 		fDependSet.addAll(readVisitor.readSet);
@@ -339,8 +339,8 @@ public class ChangedValueChecker {
 		ASTNode selectedExpression;
 
 		public PathVisitor(int startOffset, int endOffset, ASTNode node, ArrayList<IASTFragment> candidateList) {
-			nodes= new ArrayList<ASTNode>();
-			posSet= new HashSet<Position>();
+			nodes= new ArrayList<>();
+			posSet= new HashSet<>();
 			this.startOffset= startOffset;
 			this.endOffset= endOffset;
 			this.selectedExpression= node;
@@ -429,7 +429,7 @@ public class ChangedValueChecker {
 		private boolean visitMethodCall;
 
 		public ReadVisitor(boolean visitMethodCall) {
-			this.readSet= new HashSet<Elem>();
+			this.readSet= new HashSet<>();
 			this.visitMethodCall= visitMethodCall;
 		}
 
@@ -491,7 +491,7 @@ public class ChangedValueChecker {
 		private boolean visitMethodCall;
 
 		public UpdateVisitor(HashSet<Elem> dependSet, boolean visitMethodCall) {
-			this.updateSet= new HashSet<Elem>();
+			this.updateSet= new HashSet<>();
 			this.visitMethodCall= visitMethodCall;
 			this.dependSet= dependSet;
 		}

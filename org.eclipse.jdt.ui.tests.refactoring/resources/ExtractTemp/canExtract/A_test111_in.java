@@ -10,7 +10,9 @@ class A {
 		
 		calculateCount();
 	}
+	private static int cnt=1;
 	private int calculateCount() {
-		return 1;
+		cnt++;
+		return cnt;
 	}
 }

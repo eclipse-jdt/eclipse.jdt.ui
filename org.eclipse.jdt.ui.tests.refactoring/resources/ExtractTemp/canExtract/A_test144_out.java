@@ -3,15 +3,15 @@ package p; // 11, 17, 11, 36
 public class A {
 	char handle(final String value, int index) {
 		char result = ' ';
-		char charAt2= value.charAt(index);
-		if (charAt2 != ' ' && value.contains("WR")) {
-			result = charAt2;
+		char charAt= value.charAt(index);
+		if (charAt != ' ' && value.contains("WR")) {
+			result = charAt;
 			index += 2;
 		} else if (index == 0 && (value.charAt(index + 1) == 'a' || value.contains("WH"))) {
 			index++;
-			char charAt= value.charAt(index);
-			if (charAt == 'a') {
-				result = charAt;
+			char charAt2= value.charAt(index);
+			if (charAt2 == 'a') {
+				result = charAt2;
 				index++;
 			} else {
 				result = 'A';

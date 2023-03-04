@@ -2,16 +2,17 @@ package p; //11, 9, 11, 25
 
 class A {
 	void m() {
+		System.out.println(calculateCount());
+		calculateCount();
+		System.out.println(calculateCount());
+		
+		int x= calculateCount();
+		
 		int temp= calculateCount();
-		System.out.println(temp);
-		calculateCount();
-		System.out.println(temp);
-		
-		int x= temp;
-		
-		calculateCount();
 	}
+	private static int cnt=1;
 	private int calculateCount() {
-		return 1;
+		cnt++;
+		return cnt;
 	}
 }

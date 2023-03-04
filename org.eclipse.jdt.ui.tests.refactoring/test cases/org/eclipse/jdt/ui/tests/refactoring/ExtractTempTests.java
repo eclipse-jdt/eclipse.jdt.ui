@@ -12,7 +12,10 @@
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract local] Extract to local variable not replacing multiple occurrences in same statement - https://bugs.eclipse.org/406347
  *     Nicolaj Hoess <nicohoess@gmail.com> - [extract local] puts declaration at wrong position - https://bugs.eclipse.org/65875
- *	   Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+ *	   Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+ *	   Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by Identifying the Side Effect of Selected Expression. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -414,12 +417,11 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(4, 16, 4, 19, true, false, "temp", "f");
 	}
 
-// test disabled - if we replaces selected expression with temp declaration, other occurrences would not be replaced
-//	@Test
-//	public void test46() throws Exception {
-////		printTestDisabledMessage("test for bug 21815");
-//		helper1(4, 9, 4, 12, true, false, "temp", "f");
-//	}
+	@Test
+	public void test46() throws Exception {
+//		printTestDisabledMessage("test for bug 21815");
+		helper1(4, 9, 4, 12, true, false, "temp", "f");
+	}
 
 	@Test
 	public void test47() throws Exception {
@@ -570,13 +572,12 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(8, 32, 8, 33, true, false, "temp", "i2");
 	}
 
-//test disabled - flow analysis has been added
 //	@Test
-//	public void test73() throws Exception {
-////		printTestDisabledMessage("test for bug 40353");
-//		warningHelper1(6, 39, 6, 40, true, false, "temp", "i2", RefactoringStatus.WARNING);
-//		// (warning is superfluous, but detection would need flow analysis)
-//	}
+	public void test73() throws Exception {
+//		printTestDisabledMessage("test for bug 40353");
+		warningHelper1(6, 39, 6, 40, true, false, "temp", "i2", RefactoringStatus.WARNING);
+		// (warning is superfluous, but detection would need flow analysis)
+	}
 
 	@Test
 	public void test74() throws Exception {
@@ -790,18 +791,18 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 //	test disabled - replace strategy has changed
-//	@Test
-//	public void test110() throws Exception {
-//		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
-//		helper1(6, 9, 6, 25, true, false, "temp", "calculateCount");
-//	}
+	@Test
+	public void test110() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
+		helper1(6, 9, 6, 25, true, false, "temp", "calculateCount");
+	}
 
 //	test disabled - replace strategy has changed
-//	@Test
-//	public void test111() throws Exception {
-//		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
-//		helper1(11, 9, 11, 25, true, false, "temp", "calculateCount");
-//	}
+	@Test
+	public void test111() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
+		helper1(11, 9, 11, 25, true, false, "temp", "calculateCount");
+	}
 
 	@Test
 	public void test113() throws Exception {
