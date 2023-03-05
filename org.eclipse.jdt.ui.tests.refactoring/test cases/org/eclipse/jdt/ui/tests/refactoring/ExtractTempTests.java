@@ -13,8 +13,8 @@
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract local] Extract to local variable not replacing multiple occurrences in same statement - https://bugs.eclipse.org/406347
  *     Nicolaj Hoess <nicohoess@gmail.com> - [extract local] puts declaration at wrong position - https://bugs.eclipse.org/65875
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
- *	   Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
- *	   Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by Identifying the Side Effect of Selected Expression. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by Identifying the Side Effect of Selected Expression. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;

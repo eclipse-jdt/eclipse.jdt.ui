@@ -11,7 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
- *	   Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
