@@ -1,8 +1,13 @@
 package p;
 class A {
-	int f(){
-		f();
-		int u= f();
-		return 0;
-	}
+	public static long fibonacci(long number) {
+        if ((number == 0) || (number == 1)){
+            System.out.println("stop recursion");
+            return number;
+        } 
+        else {
+            fibonacci(number - 1);
+            return fibonacci(number - 1) + fibonacci(number - 2);
+        }
+    }
 }

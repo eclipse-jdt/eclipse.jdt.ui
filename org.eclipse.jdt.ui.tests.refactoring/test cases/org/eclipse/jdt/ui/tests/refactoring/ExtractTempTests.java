@@ -420,7 +420,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	@Test
 	public void test46() throws Exception {
 //		printTestDisabledMessage("test for bug 21815");
-		helper1(4, 9, 4, 12, true, false, "temp", "f");
+		helper1(9, 13, 9, 34, true, false, "fibonacci", "fibonacci");
 	}
 
 	@Test
