@@ -139,6 +139,7 @@ public class ContentAssistPreference {
 
 		boolean enabled= store.getBoolean(AUTOACTIVATION);
 		assistant.enableAutoActivation(enabled);
+		assistant.enableAutoActivateCompletionOnType(enabled);
 
 		int delay= store.getInt(AUTOACTIVATION_DELAY);
 		assistant.setAutoActivationDelay(delay);
