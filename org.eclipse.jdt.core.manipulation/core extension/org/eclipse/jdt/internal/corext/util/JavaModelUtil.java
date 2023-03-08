@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -80,7 +84,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_19; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_20; // make sure it is not inlined
 	}
 
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
@@ -789,7 +793,7 @@ public final class JavaModelUtil {
 	}
 
 
-	public static boolean is20OrHigher(String compliance) {
+	public static boolean is1d2OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_2);
 	}
 
@@ -857,6 +861,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_19);
 	}
 
+	public static boolean is20OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_20);
+	}
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.2 or greater.
 	 *
@@ -864,7 +872,7 @@ public final class JavaModelUtil {
 	 * @return <code>true</code> if the given project or workspace has source compliance 1.2 or greater.
 	 */
 	public static boolean is1d2OrHigher(IJavaProject project) {
-		return is20OrHigher(getSourceCompliance(project));
+		return is1d2OrHigher(getSourceCompliance(project));
 	}
 
 	/**
@@ -1019,6 +1027,17 @@ public final class JavaModelUtil {
 		return is19OrHigher(getSourceCompliance(project));
 	}
 
+	/**
+	 * Checks if the given project or workspace has source compliance 20 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 20 or
+	 *         greater.
+	 */
+	public static boolean is20OrHigher(IJavaProject project) {
+		return is20OrHigher(getSourceCompliance(project));
+	}
+
 	public static String getSourceCompliance(IJavaProject project) {
 		return project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 	}
@@ -1069,6 +1088,10 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_20)) {
+			return JavaCore.VERSION_20;
+		} else if (version.startsWith(JavaCore.VERSION_19)) {
+			return JavaCore.VERSION_19;
 		} else if (version.startsWith(JavaCore.VERSION_18)) {
 			return JavaCore.VERSION_18;
 		} else if (version.startsWith(JavaCore.VERSION_17)) {
@@ -1117,7 +1140,9 @@ public final class JavaModelUtil {
 
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_19) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_20) != -1) {
+			return JavaCore.VERSION_20;
+		} else if (desc.indexOf(JavaCore.VERSION_19) != -1) {
 			return JavaCore.VERSION_19;
 		} else if (desc.indexOf(JavaCore.VERSION_18) != -1) {
 			return JavaCore.VERSION_18;
