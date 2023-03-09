@@ -5,9 +5,7 @@ class A {
 		System.out.println(calculateCount());
 		calculateCount();
 	}
-	private static int cnt=1;
 	private int calculateCount() {
-		cnt++;
-		return cnt;
+		return 0;
 	}
 }
