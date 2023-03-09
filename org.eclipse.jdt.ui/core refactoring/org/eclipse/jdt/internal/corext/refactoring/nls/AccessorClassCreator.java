@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -223,7 +223,7 @@ public class AccessorClassCreator {
 	private String getBundleNameFieldValue() throws CoreException {
 		IPath resourceBundleContainerPath= fResourceBundlePath.removeLastSegments(1);
 		IPath accessorContainerPath= fAccessorPath.removeLastSegments(1);
-		if (Objects.equals(accessorContainerPath, resourceBundleContainerPath)) {
+		if (JavaModelUtil.is9OrHigher(fCu.getJavaProject()) && Objects.equals(accessorContainerPath, resourceBundleContainerPath)) {
 			return fAccessorClassName + ".class.getPackageName() + \"." + getPropertyFileNameWithoutExtension() + "\""; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "\"" + getResourceBundleName() + "\""; //$NON-NLS-1$//$NON-NLS-2$
