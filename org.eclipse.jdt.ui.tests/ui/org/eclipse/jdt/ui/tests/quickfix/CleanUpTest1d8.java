@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation and others.
+ * Copyright (c) 2020, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -5081,6 +5081,29 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				        + "            String s = (String) it.next();\n"
 				        + "            System.out.println(s);\n"
 				        + "            System.err.println(s);\n"
+				        + "        }\n"
+				        + "    }\n"
+				        + "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testDoNotWhileIssue373() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n"
+				        + "import java.util.*;\n"
+				        + "public class Test {\n"
+				        + "    void m(List<String> strings) {\n"
+				        + "        Iterator it = strings.iterator();\n"
+				        + "        while (it.hasNext()) {\n"
+				        + "            String s = (String) it.next();\n"
+				        + "            System.out.println(s);\n"
+				        + "            System.err.println(it);\n"
 				        + "        }\n"
 				        + "    }\n"
 				        + "}\n";
