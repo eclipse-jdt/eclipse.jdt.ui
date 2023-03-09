@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+/********************,***********************************************************
+ * Copyright (c) 2020 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -343,6 +343,60 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		buf.append("		};\n");
 		buf.append("		return i;\n");
 		buf.append("	}\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertToSwitchExpression5() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public int foo(int i) {\n");
+		buf.append("        switch (i) {\n");
+		buf.append("        case 0: // comment\n");
+		buf.append("            return 0;\n");
+		buf.append("        default:\n");
+		buf.append("            return 1;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		int index= buf.indexOf("switch");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 0);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuilder();
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public int foo(int i) {\n");
+		buf.append("        return switch (i) {\n");
+		buf.append("			case 0: // comment\n");
+		buf.append("				yield 0;\n");
+		buf.append("			default:\n");
+		buf.append("				yield 1;\n");
+		buf.append("		};\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 
