@@ -412,14 +412,14 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        \n");
-		buf.append("        // comment 1\n");
-		buf.append("        String k = \"\"\"\n");
+		buf.append("        String str = \"\"\"\n");
 		buf.append("		\tpublic void foo() {\n");
 		buf.append("		\t    return null;\n");
 		buf.append("		\t}\n");
 		buf.append("		\t\n");
 		buf.append("		\t\"\"\"; //$NON-NLS-1$\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String k = str;\n");
 		buf.append("        \n");
 		buf.append("    }\n");
 		buf.append("}\n");

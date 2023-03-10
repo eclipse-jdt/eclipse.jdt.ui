@@ -137,11 +137,11 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public void foo() {\n" //
 				+ "        // comment 1\n" //
-				+ "        StringBuffer buf= new StringBuffer(\"intro string\\n\");\n" //
-				+ "        buf.append(\"public void foo() {\\n\");\n" //
-				+ "        buf.append(\"    return null;\\n\");\n" //
-				+ "        buf.append(\"}\\n\");\n" //
-				+ "        buf.append(\"\\n\");\n" //
+				+ "        StringBuffer buf= new StringBuffer(\"intro string\\n\"); //$NON-NLS-1$\n" //
+				+ "        buf.append(\"public void foo() {\\n\"); //$NON-NLS-1$\n" //
+				+ "        buf.append(\"    return null;\\n\"); //$NON-NLS-1$\n" //
+				+ "        buf.append(\"}\\n\"); //$NON-NLS-1$\n" //
+				+ "        buf.append(\"\\n\"); //$NON-NLS-1$\n" //
 				+ "        System.out.println(buf.toString());\n" //
 				+ "        System.out.println(buf.toString() + \"abc\");\n" //
 				+ "        // comment 2\n" //
@@ -190,7 +190,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        \t    return null;\n" //
 				+ "        \t}\n" //
 				+ "        \t\n" //
-				+ "        \t\"\"\";\n" //
+				+ "        \t\"\"\"; //$NON-NLS-1$\n" //
 				+ "        System.out.println(str);\n" //
 				+ "        System.out.println(str + \"abc\");\n" //
 				+ "        // comment 2\n" //
@@ -314,6 +314,15 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        StringBuffer buf = new StringBuffer();\n" //
     	        + "        buf.append(\"abcdef\\n\");\n" //
     	        + "        buf.append(\"123456\\n\");\n" //
+    	        + "        buf.append(\"ghijkl\\n\");\n" //
+    	        + "        buf.append(3);\n" //
+				+ "        String x = buf.toString();\n" //
+    	        + "    }\n" //
+    	        + "\n" //
+   	            + "    public void testInconsistentNLS() {\n" //
+				+ "        StringBuffer buf = new StringBuffer();\n" //
+    	        + "        buf.append(\"abcdef\\n\");\n" //
+    	        + "        buf.append(\"123456\\n\"); //$NON-NLS-1$\n" //
     	        + "        buf.append(\"ghijkl\\n\");\n" //
     	        + "        buf.append(3);\n" //
 				+ "        String x = buf.toString();\n" //

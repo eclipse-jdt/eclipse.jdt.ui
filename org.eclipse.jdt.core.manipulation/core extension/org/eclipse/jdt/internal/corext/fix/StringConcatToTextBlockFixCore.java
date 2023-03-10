@@ -625,22 +625,14 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			MethodInvocation firstToStringCall= fToStringList.get(0);
 			AST ast= firstToStringCall.getAST();
 			if (fToStringList.size() == 1 &&
+					!fNonNLS &&
 					ASTNodes.getLeadingComments(fStatements.get(0)).size() == 0 &&
 					(firstToStringCall.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY ||
 					firstToStringCall.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY)) {
 				// if we only have one use of buffer.toString() and it is assigned to another string variable,
 				// put the text block in place of the buffer.toString() call and delete the whole StringBuffer/StringBuilder
-				if (fNonNLS) {
-					Statement firstStatement= ASTNodes.getFirstAncestorOrNull(firstToStringCall, Statement.class);
-					ICompilationUnit cu= cuRewrite.getCu();
-					String newStmtText= cu.getBuffer().getText(firstStatement.getStartPosition(), firstToStringCall.getStartPosition() - firstStatement.getStartPosition());
-					newStmtText= newStmtText + buf.toString() + (fNonNLS ? "; //$NON-NLS-1$" : ";"); //$NON-NLS-1$ //$NON-NLS-2$
-					Statement newStmt= (Statement)rewrite.createStringPlaceholder(newStmtText, firstStatement.getNodeType());
-					ASTNodes.replaceButKeepComment(rewrite, firstStatement, newStmt, group);
-				} else {
-					TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
-					rewrite.replace(firstToStringCall, textBlock, group);
-				}
+				TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
+				rewrite.replace(firstToStringCall, textBlock, group);
 				for (Statement statement : fStatements) {
 					rewrite.remove(statement, group);
 				}
