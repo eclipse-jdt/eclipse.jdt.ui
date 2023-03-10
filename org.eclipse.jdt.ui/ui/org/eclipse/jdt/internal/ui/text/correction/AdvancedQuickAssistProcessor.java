@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1872,6 +1872,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REPLACE_IF_ELSE_WITH_CONDITIONAL, image);
 
+		// don't allow different boxed expressions to be merged into one conditional
+		if (thenExpression.resolveBoxing() && elseExpression.resolveBoxing()) {
+			ITypeBinding thenTypeBinding= thenExpression.resolveTypeBinding();
+			ITypeBinding elseTypeBinding= elseExpression.resolveTypeBinding();
+			if (!thenTypeBinding.isEqualTo(elseTypeBinding)) {
+				return false;
+			}
+		}
 
 		// prepare conditional expression
 		ConditionalExpression conditionalExpression= ast.newConditionalExpression();
