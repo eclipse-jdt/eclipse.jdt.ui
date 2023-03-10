@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -53,14 +53,14 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileCha
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java9ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class NLSSourceModifierTest {
+public class NLSSourceModifierTest1d8 {
 	@Rule
-	public ProjectTestSetup pts= new Java9ProjectTestSetup();
+	public ProjectTestSetup pts= new Java1d8ProjectTestSetup();
 
     private IJavaProject javaProject;
 
@@ -161,8 +161,7 @@ public class NLSSourceModifierTest {
       buf.append("import org.eclipse.osgi.util.NLS;\n");
       buf.append("\n");
       buf.append("public class Accessor extends NLS {\n");
-      buf.append("    private static final String BUNDLE_NAME = Accessor.class.getPackageName()\n");
-      buf.append("            + \".test\"; //$NON-NLS-1$\n");
+      buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
       buf.append("    public static String key_0;\n");
       buf.append("    static {\n");
       buf.append("        // initialize resource bundle\n");
@@ -240,8 +239,7 @@ public class NLSSourceModifierTest {
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("\n");
         buf.append("public class Accessor extends NLS {\n");
-        buf.append("    private static final String BUNDLE_NAME = Accessor.class.getPackageName()\n");
-        buf.append("            + \".test\"; //$NON-NLS-1$\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
         buf.append("\n");
         buf.append("    static {\n");
         buf.append("        // initialize resource bundle\n");
@@ -327,8 +325,7 @@ public class NLSSourceModifierTest {
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("\n");
         buf.append("public class Accessor extends NLS {\n");
-        buf.append("    private static final String BUNDLE_NAME = Accessor.class.getPackageName()\n");
-        buf.append("            + \".test\"; //$NON-NLS-1$\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
         buf.append("    public static String key_0;\n");
         buf.append("    static {\n");
         buf.append("        // initialize resource bundle\n");
@@ -406,8 +403,7 @@ public class NLSSourceModifierTest {
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("\n");
         buf.append("public class Accessor extends NLS {\n");
-        buf.append("    private static final String BUNDLE_NAME = Accessor.class.getPackageName()\n");
-        buf.append("            + \".test\"; //$NON-NLS-1$\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
         buf.append("\n");
         buf.append("    static {\n");
         buf.append("        // initialize resource bundle\n");
@@ -894,8 +890,7 @@ public class NLSSourceModifierTest {
         buf.append("import org.eclipse.osgi.util.NLS;\n");
         buf.append("\n");
         buf.append("public class Accessor extends NLS {\n");
-        buf.append("    private static final String BUNDLE_NAME = Accessor.class.getPackageName()\n");
-        buf.append("            + \".test\"; //$NON-NLS-1$\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
         buf.append("    public static String key_0;\n");
         buf.append("    static {\n");
         buf.append("        // initialize resource bundle\n");
@@ -1402,8 +1397,7 @@ public class NLSSourceModifierTest {
         buf.append("import java.util.ResourceBundle;\n");
         buf.append("\n");
         buf.append("public class Accessor {\n");
-        buf.append("    private static final String BUNDLE_NAME = Accessor.class.getPackageName()\n");
-        buf.append("            + \".test\"; //$NON-NLS-1$\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
         buf.append("\n");
         buf.append("    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle\n");
         buf.append("            .getBundle(BUNDLE_NAME);\n");
