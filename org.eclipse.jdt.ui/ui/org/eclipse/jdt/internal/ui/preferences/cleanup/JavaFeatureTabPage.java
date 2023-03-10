@@ -73,6 +73,9 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 		Group java15Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java15);
 		CheckboxPreference stringConcatToTextBlock= createCheckboxPref(java15Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_StringConcatToTextBlock, CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(stringConcatToTextBlock);
+		intent(java15Group);
+		CheckboxPreference convertStringBufferBuilderToTextBlock= createCheckboxPref(java15Group, 1, CleanUpMessages.JavaFeatureTabPage_CheckboxName_StringBufferBuilderToTextBlock, CleanUpConstants.STRINGCONCAT_STRINGBUFFER_STRINGBUILDER, CleanUpModifyDialog.FALSE_TRUE);
+		registerSlavePreference(stringConcatToTextBlock, new CheckboxPreference[] {convertStringBufferBuilderToTextBlock});
 
 		Group java14Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java14);
 
