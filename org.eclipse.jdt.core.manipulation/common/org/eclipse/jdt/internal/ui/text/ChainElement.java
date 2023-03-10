@@ -10,6 +10,9 @@
  */
 package org.eclipse.jdt.internal.ui.text;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -18,6 +21,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 /**
  * Represents a transition from Type A to Type B by some chain element ( {@link IField} access,
@@ -160,5 +165,89 @@ public class ChainElement {
 			}
 		}
 		return element.toString();
+	}
+
+	public static String createChainCode(final Chain chain, final boolean createAsTitle, final int expectedDimension) {
+		final Map<String, Integer> varNames= new HashMap<>();
+		StringBuilder sb= new StringBuilder(64);
+		for (final ChainElement edge : chain.getElements()) {
+			switch (edge.getElementType()) {
+				case FIELD:
+				case TYPE:
+				case LOCAL_VARIABLE:
+					appendVariableString(edge, sb);
+					break;
+				case METHOD:
+					final IMethod method= (IMethod) edge.getElement();
+					if (createAsTitle) {
+						StringBuffer tmp= new StringBuffer(sb.toString());
+						JavaElementLabelsCore.getMethodLabel(method, JavaElementLabelsCore.ALL_DEFAULT, tmp);
+						sb= new StringBuilder(tmp.toString());
+					} else {
+						sb.append(method.getElementName());
+						appendParameters(sb, method, varNames);
+					}
+					break;
+				default:
+			}
+			final boolean appendVariables= !createAsTitle;
+			appendArrayDimensions(sb, edge.getReturnTypeDimension(), expectedDimension, appendVariables, varNames);
+			sb.append("."); //$NON-NLS-1$
+		}
+		deleteLastChar(sb);
+		return sb.toString();
+	}
+
+	private static void appendVariableString(final ChainElement edge, final StringBuilder sb) {
+		if (edge.requiresThisForQualification() && sb.length() == 0) {
+			sb.append("this."); //$NON-NLS-1$
+		}
+		sb.append((edge.getElement()).getElementName());
+	}
+
+	private static void appendParameters(final StringBuilder sb, final IMethod method, final Map<String, Integer> varNames) {
+		sb.append("("); //$NON-NLS-1$
+		for (final String typeSig : method.getParameterTypes()) {
+			String parameterName= Signature.getSignatureSimpleName(Signature.getElementType(typeSig));
+			parameterName= parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1);
+			int index= parameterName.indexOf('<');
+			if (index != -1) {
+				parameterName= parameterName.substring(0, index);
+			}
+			appendTemplateVariable(sb, parameterName, varNames);
+			sb.append(", "); //$NON-NLS-1$
+		}
+		if (method.getParameterTypes().length > 0) {
+			deleteLastChar(sb);
+			deleteLastChar(sb);
+		}
+		sb.append(")"); //$NON-NLS-1$
+	}
+
+	private static void appendTemplateVariable(final StringBuilder sb, final String varname,
+			final Map<String, Integer> varNames) {
+		int val= varNames.containsKey(varname) ? varNames.get(varname) : 0;
+		varNames.put(varname, val + 1);
+		sb.append("${").append(varname); //$NON-NLS-1$
+		final int count= varNames.get(varname);
+		if (count > 1) {
+			sb.append(count);
+		}
+		sb.append("}"); //$NON-NLS-1$
+	}
+
+	private static void appendArrayDimensions(final StringBuilder sb, final int dimension, final int expectedDimension,
+			final boolean appendVariables, final Map<String, Integer> varNames) {
+		for (int i= dimension; i-- > expectedDimension;) {
+			sb.append("["); //$NON-NLS-1$
+			if (appendVariables) {
+				appendTemplateVariable(sb, "i", varNames); //$NON-NLS-1$
+			}
+			sb.append("]"); //$NON-NLS-1$
+		}
+	}
+
+	private static StringBuilder deleteLastChar(final StringBuilder sb) {
+		return sb.deleteCharAt(sb.length() - 1);
 	}
 }
