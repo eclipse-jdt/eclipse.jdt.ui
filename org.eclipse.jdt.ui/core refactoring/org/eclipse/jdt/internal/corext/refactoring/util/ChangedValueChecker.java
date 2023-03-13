@@ -98,7 +98,8 @@ public class ChangedValueChecker extends AbstractChecker {
 		fNode2= node;
 		fBodyNode= bodyNode;
 		fConflict= false;
-		fPosSet=  Collections.synchronizedSet(new HashSet<>());;
+		fPosSet= Collections.synchronizedSet(new HashSet<>());
+		;
 		PathVisitor pathVisitor= new PathVisitor(startOffset, endOffset, fNode2, candidateList);
 		while (fBodyNode != null && (fBodyNode.getStartPosition() + fBodyNode.getLength() < pathVisitor.endOffset
 				|| fBodyNode.getStartPosition() > pathVisitor.startOffset)) {
@@ -117,7 +118,7 @@ public class ChangedValueChecker extends AbstractChecker {
 	}
 
 	public boolean hasConflict() {
-		ExecutorService threadPool= new ThreadPoolExecutor(5, 10, 10, TimeUnit.SECONDS,
+		ExecutorService threadPool= new ThreadPoolExecutor(5, 10, 5, TimeUnit.SECONDS,
 				new ArrayBlockingQueue<>(10), new ThreadPoolExecutor.CallerRunsPolicy());
 		for (ASTNode node : fMiddleNodes) {
 			Position pos= new Position(node.getStartPosition(), node.getLength());
@@ -135,9 +136,18 @@ public class ChangedValueChecker extends AbstractChecker {
 					fConflict= true;
 			});
 		}
-		threadPool.shutdown();
-		while(!threadPool.isTerminated())
-			;
+		try {
+			threadPool.shutdown();
+			threadPool.awaitTermination(15, TimeUnit.SECONDS);
+			while (true) {
+				if (threadPool.isTerminated()) {
+					break;
+				}
+			}
+		} catch (InterruptedException e) {
+		} finally {
+			threadPool.shutdownNow();
+		}
 		return fConflict;
 	}
 
