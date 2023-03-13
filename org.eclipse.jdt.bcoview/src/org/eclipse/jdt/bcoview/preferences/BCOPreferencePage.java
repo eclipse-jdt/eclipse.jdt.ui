@@ -14,7 +14,6 @@
 package org.eclipse.jdt.bcoview.preferences;
 
 import static org.eclipse.jdt.bcoview.BytecodeOutlinePlugin.getDefault;
-import static org.eclipse.jdt.bcoview.BytecodeOutlinePlugin.getResourceString;
 import static org.eclipse.jdt.bcoview.preferences.BCOConstants.DIFF_EXPAND_STACKMAP;
 import static org.eclipse.jdt.bcoview.preferences.BCOConstants.DIFF_SHOW_ASMIFIER_CODE;
 import static org.eclipse.jdt.bcoview.preferences.BCOConstants.DIFF_SHOW_LINE_INFO;
@@ -31,6 +30,8 @@ import static org.eclipse.jdt.bcoview.preferences.BCOConstants.SHOW_ONLY_SELECTE
 import static org.eclipse.jdt.bcoview.preferences.BCOConstants.SHOW_RAW_BYTECODE;
 import static org.eclipse.jdt.bcoview.preferences.BCOConstants.SHOW_STACKMAP;
 import static org.eclipse.jdt.bcoview.preferences.BCOConstants.SHOW_VARIABLES;
+
+import org.eclipse.jdt.bcoview.internal.Messages;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -50,7 +51,7 @@ public class BCOPreferencePage extends FieldEditorPreferencePage implements IWor
 	public BCOPreferencePage() {
 		super(GRID);
 		setPreferenceStore(getDefault().getPreferenceStore());
-		setDescription(getResourceString("BCOPreferencePage.description")); //$NON-NLS-1$
+		setDescription(Messages.BCOPreferencePage_description);
 	}
 
 	@Override
@@ -61,10 +62,10 @@ public class BCOPreferencePage extends FieldEditorPreferencePage implements IWor
 		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		TabItem tabPrefs = new TabItem(tabFolder, SWT.NONE);
-		tabPrefs.setText(getResourceString("BCOPreferencePage.defaultsGroup")); //$NON-NLS-1$
+		tabPrefs.setText(Messages.BCOPreferencePage_defaultsGroup);
 
 		TabItem tabCompare = new TabItem(tabFolder, SWT.NONE);
-		tabCompare.setText(getResourceString("BCOPreferencePage.compareGroup")); //$NON-NLS-1$
+		tabCompare.setText(Messages.BCOPreferencePage_compareGroup);
 
 		Group viewGroup = new Group(tabFolder, SWT.NONE);
 		viewGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -74,22 +75,22 @@ public class BCOPreferencePage extends FieldEditorPreferencePage implements IWor
 		compareGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
 		tabCompare.setControl(compareGroup);
 
-		addField(new BooleanFieldEditor(LINK_VIEW_TO_EDITOR, getResourceString("BCOPreferencePage.linkViewToEditor"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(LINK_REF_VIEW_TO_EDITOR, getResourceString("BCOPreferencePage.linkRefViewToEditor"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(SHOW_ONLY_SELECTED_ELEMENT, getResourceString("BCOPreferencePage.showOnlySelected"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(SHOW_RAW_BYTECODE, getResourceString("BCOPreferencePage.showRawBytecode"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(SHOW_ASMIFIER_CODE, getResourceString("BCOPreferencePage.showAsmifierCode"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(SHOW_ANALYZER, getResourceString("BCOPreferencePage.showAnalyzer"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(SHOW_LINE_INFO, getResourceString("BCOPreferencePage.showLineInfo"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(SHOW_VARIABLES, getResourceString("BCOPreferencePage.showVariables"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(SHOW_STACKMAP, getResourceString("BCOPreferencePage.showStackMap"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(SHOW_HEX_VALUES, getResourceString("BCOPreferencePage.showHexValues"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(EXPAND_STACKMAP, getResourceString("BCOPreferencePage.expandStackMap"), viewGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(DIFF_SHOW_ASMIFIER_CODE, getResourceString("BCOPreferencePage.diffShowAsmifierCode"), compareGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(DIFF_SHOW_LINE_INFO, getResourceString("BCOPreferencePage.diffShowLineInfo"), compareGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(DIFF_SHOW_VARIABLES, getResourceString("BCOPreferencePage.diffShowVariables"), compareGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(DIFF_SHOW_STACKMAP, getResourceString("BCOPreferencePage.diffShowStackMap"), compareGroup)); //$NON-NLS-1$
-		addField(new BooleanFieldEditor(DIFF_EXPAND_STACKMAP, getResourceString("BCOPreferencePage.diffExpandStackMap"), compareGroup)); //$NON-NLS-1$
+		addField(new BooleanFieldEditor(LINK_VIEW_TO_EDITOR, Messages.BCOPreferencePage_linkViewToEditor, viewGroup));
+		addField(new BooleanFieldEditor(LINK_REF_VIEW_TO_EDITOR, Messages.BCOPreferencePage_linkRefViewToEditor, viewGroup));
+		addField(new BooleanFieldEditor(SHOW_ONLY_SELECTED_ELEMENT, Messages.BCOPreferencePage_showOnlySelected, viewGroup));
+		addField(new BooleanFieldEditor(SHOW_RAW_BYTECODE, Messages.BCOPreferencePage_showRawBytecode, viewGroup));
+		addField(new BooleanFieldEditor(SHOW_ASMIFIER_CODE, Messages.BCOPreferencePage_showAsmifierCode, viewGroup));
+		addField(new BooleanFieldEditor(SHOW_ANALYZER, Messages.BCOPreferencePage_showAnalyzer, viewGroup));
+		addField(new BooleanFieldEditor(SHOW_LINE_INFO, Messages.BCOPreferencePage_showLineInfo, viewGroup));
+		addField(new BooleanFieldEditor(SHOW_VARIABLES, Messages.BCOPreferencePage_showVariables, viewGroup));
+		addField(new BooleanFieldEditor(SHOW_STACKMAP, Messages.BCOPreferencePage_showStackMap, viewGroup));
+		addField(new BooleanFieldEditor(SHOW_HEX_VALUES, Messages.BCOPreferencePage_showHexValues, viewGroup));
+		addField(new BooleanFieldEditor(EXPAND_STACKMAP, Messages.BCOPreferencePage_expandStackMap, viewGroup));
+		addField(new BooleanFieldEditor(DIFF_SHOW_ASMIFIER_CODE, Messages.BCOPreferencePage_diffShowAsmifierCode, compareGroup));
+		addField(new BooleanFieldEditor(DIFF_SHOW_LINE_INFO, Messages.BCOPreferencePage_diffShowLineInfo, compareGroup));
+		addField(new BooleanFieldEditor(DIFF_SHOW_VARIABLES, Messages.BCOPreferencePage_diffShowVariables, compareGroup));
+		addField(new BooleanFieldEditor(DIFF_SHOW_STACKMAP, Messages.BCOPreferencePage_diffShowStackMap, compareGroup));
+		addField(new BooleanFieldEditor(DIFF_EXPAND_STACKMAP, Messages.BCOPreferencePage_diffExpandStackMap, compareGroup));
 	}
 
 	@Override
