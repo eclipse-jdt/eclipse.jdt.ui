@@ -14,6 +14,7 @@
 package org.eclipse.jdt.bcoview.ui.actions;
 
 import org.eclipse.jdt.bcoview.BytecodeOutlinePlugin;
+import org.eclipse.jdt.bcoview.internal.Messages;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -90,10 +91,10 @@ public abstract class DefaultToggleAction extends Action implements IPropertyCha
 		setImageDescriptor(AbstractUIPlugin
 				.imageDescriptorFromPlugin(
 						BytecodeOutlinePlugin.getDefault().getBundle().getSymbolicName(),
-						BytecodeOutlinePlugin.getResourceString(ACTION + "." + myId + "." + IMAGE))); //$NON-NLS-1$ //$NON-NLS-2$
+						Messages.getResourceString(ACTION + "_" + myId + "_" + IMAGE))); //$NON-NLS-1$ //$NON-NLS-2$
 
-		setText(BytecodeOutlinePlugin.getResourceString(ACTION + "." + myId + "." + TEXT)); //$NON-NLS-1$ //$NON-NLS-2$
-		setToolTipText(BytecodeOutlinePlugin.getResourceString(ACTION + "." + myId + "." + TOOL_TIP_TEXT)); //$NON-NLS-1$ //$NON-NLS-2$
+		setText(Messages.getResourceString(ACTION + "_" + myId + "_" + TEXT)); //$NON-NLS-1$ //$NON-NLS-2$
+		setToolTipText(Messages.getResourceString(ACTION + "_" + myId + "_" + TOOL_TIP_TEXT)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Override
