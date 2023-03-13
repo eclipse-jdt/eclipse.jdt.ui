@@ -16,8 +16,13 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -63,7 +68,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-public class ChangedValueChecker extends AbstractChecker{
+public class ChangedValueChecker extends AbstractChecker {
 
 	private ASTNode fNode2;
 
@@ -77,7 +82,7 @@ public class ChangedValueChecker extends AbstractChecker{
 
 	private boolean fConflict;
 
-	private HashSet<Position> fPosSet;
+	private Set<Position> fPosSet;
 
 	private String fEnclosingMethodSignature;
 
@@ -93,7 +98,7 @@ public class ChangedValueChecker extends AbstractChecker{
 		fNode2= node;
 		fBodyNode= bodyNode;
 		fConflict= false;
-		fPosSet= new HashSet<>();
+		fPosSet=  Collections.synchronizedSet(new HashSet<>());;
 		PathVisitor pathVisitor= new PathVisitor(startOffset, endOffset, fNode2, candidateList);
 		while (fBodyNode != null && (fBodyNode.getStartPosition() + fBodyNode.getLength() < pathVisitor.endOffset
 				|| fBodyNode.getStartPosition() > pathVisitor.startOffset)) {
@@ -112,7 +117,8 @@ public class ChangedValueChecker extends AbstractChecker{
 	}
 
 	public boolean hasConflict() {
-		List<Thread> threadList= new ArrayList<>();
+		ExecutorService threadPool= new ThreadPoolExecutor(5, 10, 10, TimeUnit.SECONDS,
+				new ArrayBlockingQueue<>(10), new ThreadPoolExecutor.CallerRunsPolicy());
 		for (ASTNode node : fMiddleNodes) {
 			Position pos= new Position(node.getStartPosition(), node.getLength());
 			if (fPosSet.contains(pos)) {
@@ -121,25 +127,17 @@ public class ChangedValueChecker extends AbstractChecker{
 			if (fConflict == true) {
 				break;
 			}
-			Thread t= new Thread(() -> {
+			threadPool.execute(() -> {
 				fPosSet.add(pos);
 				UpdateVisitor uv= new UpdateVisitor(fDependSet, true);
 				node.accept(uv);
 				if (uv.hasConflict())
 					fConflict= true;
-
 			});
-			threadList.add(t);
-			t.start();
 		}
-
-
-		for (Thread thread : threadList) {
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-			}
-		}
+		threadPool.shutdown();
+		while(!threadPool.isTerminated())
+			;
 		return fConflict;
 	}
 
@@ -470,7 +468,7 @@ public class ChangedValueChecker extends AbstractChecker{
 		@Override
 		public boolean visit(MethodInvocation methodInvocation) {
 			final IMethodBinding resolveMethodBinding= methodInvocation.resolveMethodBinding();
-			if (!this.visitMethodCall || resolveMethodBinding.getMethodDeclaration() != null && fEnclosingMethodSignature!=null &&
+			if (!this.visitMethodCall || resolveMethodBinding.getMethodDeclaration() != null && fEnclosingMethodSignature != null &&
 					fEnclosingMethodSignature.equals(resolveMethodBinding.getMethodDeclaration().getKey())) {
 				return super.visit(methodInvocation);
 			}
@@ -555,7 +553,7 @@ public class ChangedValueChecker extends AbstractChecker{
 		@Override
 		public boolean visit(MethodInvocation methodInvocation) {
 			final IMethodBinding resolveMethodBinding= methodInvocation.resolveMethodBinding();
-			if (!this.visitMethodCall || resolveMethodBinding.getMethodDeclaration() != null && fEnclosingMethodSignature!=null &&
+			if (!this.visitMethodCall || resolveMethodBinding.getMethodDeclaration() != null && fEnclosingMethodSignature != null &&
 					fEnclosingMethodSignature.equals(resolveMethodBinding.getMethodDeclaration().getKey())) {
 				return super.visit(methodInvocation);
 			}
