@@ -4,13 +4,13 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            name="Bytecode"
+            name="%bytecode.view.name"
             icon="icons/bytecodeview.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.bcoview.views.BytecodeOutlineView"
             id="org.eclipse.jdt.bcoview.views.BytecodeOutlineView"/>
       <view
-            name="Bytecode Reference"
+            name="%reference.view.name"
             icon="icons/reference.gif"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.bcoview.views.BytecodeReferenceView"
@@ -34,7 +34,7 @@
             </or>
          </visibility>
          <menu
-               label="Compare With ..."
+               label="%compare_with"
                path="additions"
                id="compareWithMenu">
             <separator
@@ -44,7 +44,7 @@
 
          <action
                enablesFor="1"
-               label="Another Class Bytecode"
+               label="%compare_with_another"
                icon="icons/bytecodeview.gif"
                class="org.eclipse.jdt.bcoview.ui.actions.OpenAction"
                menubarPath="compareWithMenu/compareWithGroup"
@@ -52,7 +52,7 @@
          </action>
          <action
                enablesFor="2"
-               label="Each Other Bytecode"
+               label="%compare_with_each_other"
                icon="icons/bytecodeview.gif"
                class="org.eclipse.jdt.bcoview.ui.actions.CompareBytecodeAction"
                menubarPath="compareWithMenu/compareWithGroup"
@@ -74,7 +74,7 @@
             </not>
          </visibility>
          <menu
-               label="Compare With ..."
+               label="%compare_with"
                path="additions"
                id="compareWithMenu">
             <separator
@@ -84,7 +84,7 @@
 
          <action
                enablesFor="1"
-               label="Another Class Bytecode"
+               label="%compare_with_another"
                icon="icons/bytecodeview.gif"
                class="org.eclipse.jdt.bcoview.ui.actions.OpenAction"
                menubarPath="compareWithMenu/compareWithGroup"
@@ -92,7 +92,7 @@
          </action>
          <action
                enablesFor="2"
-               label="Each Other Bytecode"
+               label="%compare_with_each_other"
                icon="icons/bytecodeview.gif"
                class="org.eclipse.jdt.bcoview.ui.actions.CompareBytecodeAction"
                menubarPath="compareWithMenu/compareWithGroup"
@@ -114,7 +114,7 @@
             </not>
          </visibility>
          <menu
-               label="Compare With ..."
+               label="%compare_with"
                path="additions"
                id="compareWithMenu">
             <separator
@@ -124,7 +124,7 @@
 
          <action
                enablesFor="2"
-               label="Each Other Bytecode"
+               label="%compare_with_each_other"
                icon="icons/bytecodeview.gif"
                class="org.eclipse.jdt.bcoview.ui.actions.CompareMemberBytecodeAction"
                menubarPath="compareWithMenu/compareWithGroup"
@@ -142,7 +142,7 @@
 
          <action
                enablesFor="*"
-               label="Open bytecode reference"
+               label="%open_bytecode_reference"
                icon="icons/reference.gif"
                class="org.eclipse.jdt.bcoview.ui.actions.OpenBytecodeReferenceAction"
                menubarPath="additions"
@@ -171,7 +171,7 @@
            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
            class="org.eclipse.jdt.bcoview.preferences.BCOPreferencePage"
            id="org.eclipse.jdt.bcoview.ByteCodeOutline.page"
-           name="Bytecode Outline">
+           name="%page.name">
      </page>
   </extension>
 </plugin>

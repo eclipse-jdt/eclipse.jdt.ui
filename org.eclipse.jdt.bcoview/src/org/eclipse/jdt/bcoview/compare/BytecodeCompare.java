@@ -16,6 +16,7 @@ package org.eclipse.jdt.bcoview.compare;
 import java.lang.reflect.Field;
 
 import org.eclipse.jdt.bcoview.BytecodeOutlinePlugin;
+import org.eclipse.jdt.bcoview.internal.Messages;
 import org.eclipse.jdt.bcoview.preferences.BCOConstants;
 import org.eclipse.jdt.bcoview.ui.actions.DefaultToggleAction;
 
@@ -112,10 +113,10 @@ public class BytecodeCompare extends CompareEditorInput {
 		try {
 			initLabels();
 			Differencer differencer = new Differencer();
-			monitor.beginTask("Bytecode Outline: comparing...", 30); //$NON-NLS-1$
+			monitor.beginTask(Messages.BytecodeCompare_comparing, 30); 
 			IProgressMonitor sub = SubMonitor.convert(monitor, 10);
 			try {
-				sub.beginTask("Bytecode Outline: comparing...", 100); //$NON-NLS-1$
+				sub.beginTask(Messages.BytecodeCompare_comparing, 100); 
 				return differencer.findDifferences(false, sub, null, null, left, right);
 			} finally {
 				sub.done();
