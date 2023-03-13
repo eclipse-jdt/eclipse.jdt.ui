@@ -6,6 +6,6 @@ class A {
 		calculateCount();
 	}
 	private int calculateCount() {
-		return 0;
+		return 1;
 	}
 }

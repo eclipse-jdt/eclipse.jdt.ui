@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-public class ChangedValueChecker {
+public class ChangedValueChecker extends AbstractChecker{
 
 	private ASTNode fNode2;
 
@@ -79,15 +79,18 @@ public class ChangedValueChecker {
 
 	private HashSet<Position> fPosSet;
 
-	public ChangedValueChecker(ASTNode selectedExpression) {
+	private String fEnclosingMethodSignature;
+
+	public ChangedValueChecker(ASTNode selectedExpression, String enclosingMethodSignature) {
 		super();
+		this.fEnclosingMethodSignature= enclosingMethodSignature;
 		analyzeSelectedExpression(selectedExpression);
 	}
 
 
-	public void detectConflict(int startOffset, int endOffset, ASTNode node1, ASTNode node2,
+	public void detectConflict(int startOffset, int endOffset, ASTNode node,
 			ASTNode bodyNode, ArrayList<IASTFragment> candidateList) {
-		fNode2= node2;
+		fNode2= node;
 		fBodyNode= bodyNode;
 		fConflict= false;
 		fPosSet= new HashSet<>();
@@ -467,7 +470,8 @@ public class ChangedValueChecker {
 		@Override
 		public boolean visit(MethodInvocation methodInvocation) {
 			final IMethodBinding resolveMethodBinding= methodInvocation.resolveMethodBinding();
-			if (!this.visitMethodCall) {
+			if (!this.visitMethodCall || resolveMethodBinding.getMethodDeclaration() != null && fEnclosingMethodSignature!=null &&
+					fEnclosingMethodSignature.equals(resolveMethodBinding.getMethodDeclaration().getKey())) {
 				return super.visit(methodInvocation);
 			}
 			MethodDeclaration md= findFunctionDefinition(resolveMethodBinding.getDeclaringClass(), resolveMethodBinding);
@@ -551,7 +555,8 @@ public class ChangedValueChecker {
 		@Override
 		public boolean visit(MethodInvocation methodInvocation) {
 			final IMethodBinding resolveMethodBinding= methodInvocation.resolveMethodBinding();
-			if (!this.visitMethodCall) {
+			if (!this.visitMethodCall || resolveMethodBinding.getMethodDeclaration() != null && fEnclosingMethodSignature!=null &&
+					fEnclosingMethodSignature.equals(resolveMethodBinding.getMethodDeclaration().getKey())) {
 				return super.visit(methodInvocation);
 			}
 			MethodDeclaration md= findFunctionDefinition(resolveMethodBinding.getDeclaringClass(), resolveMethodBinding);

@@ -48,7 +48,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 
-public class UnsafeCheckTester {
+public class UnsafeCheckTester extends AbstractChecker{
 	private ASTNode fExpression;
 
 	private int fStartOffset;
@@ -199,11 +199,11 @@ public class UnsafeCheckTester {
 		}
 
 		public boolean hasNullCheck() {
-			return this.nullFlag;
+			return nullFlag;
 		}
 
 		public boolean hasCastCheck() {
-			return this.castFlag;
+			return castFlag;
 		}
 
 		@Override
@@ -225,10 +225,10 @@ public class UnsafeCheckTester {
 				if (leftOperand instanceof Name &&
 						(targetBinding= ((Name) leftOperand).resolveBinding()) != null &&
 						hasInheritanceRelationship(fInvocationHashMap.get(targetBinding), resolveBinding)) {
-					this.castFlag= true;
+					castFlag= true;
 					return false;
 				} else if (hasInheritanceRelationship(fMatchNodePosHashMap.get(new Position(leftOperand.getStartPosition(), leftOperand.getLength())), resolveBinding)) {
-					this.castFlag= true;
+					castFlag= true;
 					return false;
 				}
 				return super.preVisit2(node);
@@ -253,10 +253,10 @@ public class UnsafeCheckTester {
 				target= getOriginalExpression(target);
 				IBinding targetBinding= null;
 				if (target instanceof Name && (targetBinding= ((Name) target).resolveBinding()) != null && fInvocationSet.contains(targetBinding)) {
-					this.nullFlag= true;
+					nullFlag= true;
 					return false;
 				} else if (fMatchNodePosSet.contains(new Position(target.getStartPosition(), target.getLength()))) {
-					this.nullFlag= true;
+					nullFlag= true;
 					return false;
 				}
 			}
@@ -285,41 +285,4 @@ public class UnsafeCheckTester {
 
 }
 
-class Position {
-	int start;
 
-	int length;
-
-	public Position(int start, int length) {
-		this.start= start;
-		this.length= length;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime= 31;
-		int result= 1;
-		result= prime * result + length;
-		result= prime * result + start;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof Position)) {
-			return false;
-		}
-		Position other= (Position) obj;
-		if (length != other.length) {
-			return false;
-		}
-		if (start != other.start) {
-			return false;
-		}
-		return true;
-	}
-
-}
