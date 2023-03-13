@@ -650,7 +650,8 @@ public class ExtractTempRefactoring extends Refactoring {
 				IExpressionFragment tmpFSelectedExpression= fSelectedExpression;
 				Collection<String> usedNames= getUsedLocalNames(fSelectedExpression.getAssociatedNode());
 				String newName= fTempName;
-				if (!replaceAllOccurrences() || shouldReplaceSelectedExpressionWithTempDeclaration()) {
+				if (!replaceAllOccurrences() || shouldReplaceSelectedExpressionWithTempDeclaration()
+						|| reSortRetainOnlyReplacableMatches.length==0) {
 					createTempDeclaration();
 					addReplaceExpressionWithTemp();
 					fTempName= newName + ++cnt;
