@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2022 IBM Corporation and others.
+ * Copyright (c) 2005, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -171,6 +171,58 @@ public class IndentActionTest15 {
 
 	@Test
 	public void testIssue30_4() throws Exception {
+		IJavaProject project= indentTestSetup.getProject();
+		String value= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, true);
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, Integer.toString(DefaultCodeFormatterConstants.INDENT_PRESERVE));
+		try {
+			selectAll();
+			assertIndentResult();
+		} finally {
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, value);
+		}
+	}
+
+	@Test
+	public void testIssue414_1() throws Exception {
+		IJavaProject project= indentTestSetup.getProject();
+		String value= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, true);
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, Integer.toString(DefaultCodeFormatterConstants.INDENT_BY_ONE));
+		try {
+			selectAll();
+			assertIndentResult();
+		} finally {
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, value);
+		}
+	}
+
+	@Test
+	public void testIssue414_2() throws Exception {
+		IJavaProject project= indentTestSetup.getProject();
+		String value= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, true);
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, Integer.toString(DefaultCodeFormatterConstants.INDENT_DEFAULT));
+		try {
+			selectAll();
+			assertIndentResult();
+		} finally {
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, value);
+		}
+	}
+
+	@Test
+	public void testIssue414_3() throws Exception {
+		IJavaProject project= indentTestSetup.getProject();
+		String value= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, true);
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, Integer.toString(DefaultCodeFormatterConstants.INDENT_ON_COLUMN));
+		try {
+			selectAll();
+			assertIndentResult();
+		} finally {
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, value);
+		}
+	}
+
+	@Test
+	public void testIssue414_4() throws Exception {
 		IJavaProject project= indentTestSetup.getProject();
 		String value= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, true);
 		project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, Integer.toString(DefaultCodeFormatterConstants.INDENT_PRESERVE));

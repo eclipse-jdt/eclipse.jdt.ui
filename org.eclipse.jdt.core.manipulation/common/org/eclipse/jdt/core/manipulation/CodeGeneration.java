@@ -377,7 +377,29 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, boolean isConstructor, String bodyStatement, String lineDelimiter) throws CoreException {
-		return StubUtility.getMethodBodyContent(isConstructor, cu.getJavaProject(), declaringTypeName, methodName, bodyStatement, lineDelimiter);
+		return StubUtility.getMethodBodyContent(false, isConstructor, cu.getJavaProject(), declaringTypeName, methodName, bodyStatement, lineDelimiter);
+	}
+
+	/**
+	 * Returns the content of the body for a method or constructor using the method body templates.
+	 * <code>null</code> is returned if the template is empty.
+	 * <p>The returned string is unformatted and not indented.
+	 *
+	 * @param cu The compilation unit to which the method belongs. The compilation unit does not need to exist.
+	 * @param declaringTypeName Name of the type to which the method belongs. For inner types the name must be qualified and include the outer
+	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}.
+	 * @param methodName Name of the method.
+	 * @param isConstructor Defines if the created body is for a constructor.
+	 * @param useAlternativeMethodBody Defines if the alternative method body template is to be used.
+	 * @param bodyStatement The code to be entered at the place of the variable ${body_statement}.
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return Returns the constructed body content or <code>null</code> if
+	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
+	 * @throws CoreException Thrown when the evaluation of the code template fails.
+	 * @since 1.18
+	 */
+	public static String getMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, boolean isConstructor, boolean useAlternativeMethodBody, String bodyStatement, String lineDelimiter) throws CoreException {
+		return StubUtility.getMethodBodyContent(useAlternativeMethodBody, isConstructor, cu.getJavaProject(), declaringTypeName, methodName, bodyStatement, lineDelimiter);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Carsten Pfeiffer <carsten.pfeiffer@gebit.de> - [ccp] ReorgPolicies' canEnable() methods return true too often - https://bugs.eclipse.org/bugs/show_bug.cgi?id=303698
  *     Yves Joan <yves.joan@oracle.com> - [reorg] Copy action should NOT add 'copy of' prefix - https://bugs.eclipse.org/bugs/show_bug.cgi?id=151668
+ *     Red Hat Inc. - [reorg] Move of package should not show binary roots and package roots should not expand - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/430
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
@@ -3097,7 +3098,6 @@ public final class ReorgPolicyFactory {
 			switch (javaElement.getElementType()) {
 				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.JAVA_PROJECT:
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 					// can be nested
 					// (with exclusion
 					// filters)
@@ -3116,8 +3116,13 @@ public final class ReorgPolicyFactory {
 		public boolean canElementBeDestination(IJavaElement javaElement) {
 			switch (javaElement.getElementType()) {
 				case IJavaElement.JAVA_PROJECT:
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 					return true;
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					try {
+						return ((IPackageFragmentRoot)javaElement).getKind() != IPackageFragmentRoot.K_BINARY;
+					} catch (JavaModelException e) {
+						return false;
+					}
 				default:
 					return false;
 			}

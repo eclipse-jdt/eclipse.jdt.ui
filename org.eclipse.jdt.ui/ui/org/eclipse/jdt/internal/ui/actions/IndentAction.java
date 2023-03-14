@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -350,7 +350,6 @@ public class IndentAction extends TextEditorAction {
 		IRegion currentLine= document.getLineInformation(line);
 		int offset= currentLine.getOffset();
 		int wsStart= offset; // where we start searching for non-WS; after the "//" in single line comments
-
 		String indent= null;
 		if (offset < document.getLength()) {
 			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
@@ -381,11 +380,24 @@ public class IndentAction extends TextEditorAction {
 					indent= document.get(offset, wsStart - offset) + computed;
 				}
 			} else if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(type)) {
-				if (textBlockInfo != null && textBlockInfo.getPartitionOffset() != partition.getOffset()) {
-					textBlockInfo.setPartitionOffset(partition.getOffset());
-					textBlockInfo.setMinIndent(IndentAction.getTextBlockMinIndent(document, partition.getOffset(), partition.getLength()));
+				if (textBlockInfo != null) {
+					if (textBlockInfo.getPartitionOffset() != partition.getOffset()) {
+						textBlockInfo.setPartitionOffset(partition.getOffset());
+						textBlockInfo.setMinIndent(IndentAction.getTextBlockMinIndent(document, partition.getOffset(), partition.getLength()));
+					}
+					indent= IndentAction.getTextBlockIndentationString(document, partition.getOffset(), currentLine.getOffset(), textBlockInfo.getMinIndent(), project);
 				}
-				indent= IndentAction.getTextBlockIndentationString(document, partition.getOffset(), currentLine.getOffset(), textBlockInfo.getMinIndent(), project);
+			} else if (document.get(currentLine.getOffset(), currentLine.getLength()).trim().equals(TEXT_BLOCK_STR)) {
+				ITypedRegion nextPartition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset + currentLine.getLength(), false);
+				if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(nextPartition.getType())) {
+					if (textBlockInfo != null) {
+						if (textBlockInfo.getPartitionOffset() != nextPartition.getOffset()) {
+							textBlockInfo.setPartitionOffset(nextPartition.getOffset());
+							textBlockInfo.setMinIndent(IndentAction.getTextBlockMinIndent(document, nextPartition.getOffset(), nextPartition.getLength()));
+						}
+						indent= IndentAction.getTextBlockIndentationString(document, nextPartition.getOffset(), currentLine.getOffset(), textBlockInfo.getMinIndent(), project);
+					}
+				}
 			}
 		}
 
@@ -926,6 +938,19 @@ public class IndentAction extends TextEditorAction {
 		boolean isTextBlockStarting= false;
 		if ((fullStrNoTrim.endsWith(IndentAction.TEXT_BLOCK_STR) || fullStrNoTrim.trim().endsWith(IndentAction.TEXT_BLOCK_STR)) && startIndex != -1) {
 			stringTocalculate= fullStrNoTrim.substring(0, startIndex);
+			if (fullStrNoTrim.trim().equals(IndentAction.TEXT_BLOCK_STR)) {
+				int lineno= document.getLineOfOffset(line.getOffset());
+				boolean done= false;
+				while (--lineno > 0 && !done) {
+					IRegion prevLine= document.getLineInformation(lineno);
+					String prevLineString= document.get(prevLine.getOffset(), prevLine.getLength());
+					if (!prevLineString.trim().isEmpty()) {
+						stringTocalculate= prevLineString;
+						indentation= getLineIndentation(document, prevLine.getOffset());
+						done= true;
+					}
+				}
+			}
 			isTextBlockStarting= true;
 		} else {
 			stringTocalculate= indentation;

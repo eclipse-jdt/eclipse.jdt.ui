@@ -316,6 +316,12 @@ public final class StubUtility2Core {
 
 	public static MethodDeclaration createImplementationStubCore(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context,
 			IMethodBinding binding, String[] parameterNames, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface, ASTNode astNode, boolean snippetStringSupport) throws CoreException {
+		return createImplementationStubCore(unit, rewrite, imports, context, binding, parameterNames, targetType, settings,
+				inInterface, false, astNode, snippetStringSupport);
+	}
+
+	public static MethodDeclaration createImplementationStubCore(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context,
+			IMethodBinding binding, String[] parameterNames, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface, boolean useAlternativeMethodBody, ASTNode astNode, boolean snippetStringSupport) throws CoreException {
 		Assert.isNotNull(imports);
 		Assert.isNotNull(rewrite);
 
@@ -406,7 +412,7 @@ public final class StubUtility2Core {
 					final String DOLLAR= "\\$"; //$NON-NLS-1$
 					bodyStatement= bodyStatement.replaceAll(DOLLAR, ESCAPE_DOLLAR);
 				}
-				String bodyContent= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), false, bodyStatement, delimiter);
+				String bodyContent= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), false, useAlternativeMethodBody, bodyStatement, delimiter);
 
 				if (snippetStringSupport) {
 					placeHolder.append("${0"); //$NON-NLS-1$

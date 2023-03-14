@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Jerome Cambon <jerome.cambon@oracle.com> - [code style] don't generate redundant modifiers "public static final abstract" for interface members - https://bugs.eclipse.org/71627
  *     Microsoft Corporation - read formatting options from the compilation unit
+ *     Microsoft Corporation - allow specifying destination package
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -90,6 +91,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -185,6 +187,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/** The supertype name */
 	private String fSuperName;
+
+	/** The supertype fragment */
+	private IPackageFragment fFragment= null;
 
 	/** The source of the new supertype */
 	private String fSuperSource= null;
@@ -282,7 +287,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 *             if an error occurs
 	 */
 	protected RefactoringStatus checkSuperType() throws JavaModelException {
-		final IPackageFragment fragment= fSubType.getPackageFragment();
+		final IPackageFragment fragment= this.getPackageFragment();
 		final IType type= Checks.findTypeInPackage(fragment, fSuperName);
 		if (type != null && type.exists()) {
 			if (fragment.isDefaultPackage())
@@ -312,7 +317,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			result.merge(Checks.checkCompilationUnitName(unitName, fSubType));
 			if (result.hasFatalError())
 				return result;
-			final IPackageFragment fragment= fSubType.getPackageFragment();
+			final IPackageFragment fragment= this.getPackageFragment();
 			if (fragment.getCompilationUnit(unitName).exists()) {
 				result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_compilation_unit, new String[] { BasicElementLabels.getResourceName(unitName), JavaElementLabelsCore.getElementLabel(fragment, JavaElementLabelsCore.ALL_DEFAULT) }));
 				return result;
@@ -345,7 +350,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			} catch (JavaModelException exception) {
 				JavaManipulationPlugin.log(exception);
 			}
-			final IPackageFragment fragment= fSubType.getPackageFragment();
+			final IPackageFragment fragment= this.getPackageFragment();
 			final ICompilationUnit cu= fragment.getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName));
 			final IType type= cu.getType(fSuperName);
 			final String description= Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_description_descriptor_short, BasicElementLabels.getJavaElementName(fSuperName));
@@ -368,7 +373,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			final DynamicValidationRefactoringChange change= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ExtractInterfaceRefactoring_name, fChangeManager.getAllChanges());
 			final IFile file= ResourceUtil.getFile(fSubType.getCompilationUnit());
 			if (fSuperSource != null && fSuperSource.length() > 0)
-				change.add(new CreateCompilationUnitChange(fSubType.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName)), fSuperSource, file.getCharset(false)));
+				change.add(new CreateCompilationUnitChange(this.getPackageFragment().getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName)), fSuperSource, file.getCharset(false)));
 			monitor.worked(1);
 			return change;
 		} finally {
@@ -410,7 +415,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 						ASTNodeDeleteUtil.markAsDeleted(methods, sourceRewrite, sourceRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractInterfaceProcessor_remove_method_label, SET_EXTRACT_INTERFACE));
 				}
 				final String name= JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName);
-				final ICompilationUnit original= fSubType.getPackageFragment().getCompilationUnit(name);
+				final ICompilationUnit original= this.getPackageFragment().getCompilationUnit(name);
 				final ICompilationUnit copy= getSharedWorkingCopy(original.getPrimary(), new SubProgressMonitor(monitor, 20));
 				fSuperSource= createTypeSource(copy, fSubType, fSuperName, sourceRewrite, declaration, status, new SubProgressMonitor(monitor, 40));
 				if (fSuperSource != null) {
@@ -537,7 +542,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		if (binding != null) {
 			IVariableBinding variable= null;
 			SingleVariableDeclaration argument= null;
-			final IPackageFragment fragment= fSubType.getPackageFragment();
+			final IPackageFragment fragment= this.getPackageFragment();
 			final String string= fragment.isDefaultPackage() ? fSuperName : fragment.getElementName() + "." + fSuperName; //$NON-NLS-1$
 			final ITypeBinding[] bindings= binding.getParameterTypes();
 			final String[] names= new String[bindings.length];
@@ -1043,6 +1048,14 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					JavaManipulationPlugin.log(exception);
 				}
 				subUnit.getBuffer().setContents(document.get());
+				IPackageFragment fragment = this.getPackageFragment();
+				if (fragment != null && !fragment.equals(this.fSubType.getPackageFragment())) {
+					ImportRewrite importRewrite = sourceRewrite.getImportRewrite();
+					if (importRewrite != null) {
+						importRewrite.addImport(superUnit.findPrimaryType().getFullyQualifiedName());
+						subUnit.applyTextEdit(sourceRewrite.getImportRewrite().rewriteImports(monitor), monitor);
+					}
+				}
 			} finally {
 				RefactoringFileBuffers.release(fSubType.getCompilationUnit());
 			}
@@ -1112,6 +1125,10 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		}
 	}
 
+	protected IPackageFragment getPackageFragment() {
+		return fFragment == null ? fSubType.getPackageFragment() : fFragment;
+	}
+
 	/**
 	 * Determines whether override annotations should be generated.
 	 *
@@ -1153,5 +1170,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	public void setTypeName(final String name) {
 		Assert.isNotNull(name);
 		fSuperName= name;
+	}
+
+	public void setPackageFragment(IPackageFragment fragment) {
+		fFragment = fragment;
 	}
 }
