@@ -128,6 +128,9 @@ public class NLSUtil {
 										editOffset= elements[j+1].getTagPosition().getOffset();
 									} else {
 										editOffset= findLineEnd(cu, element.getPosition().getOffset());
+										if (editOffset < element.getPosition().getOffset() + element.getPosition().getLength()) {
+											editOffset= findLineEnd(cu, element.getPosition().getOffset() + element.getPosition().getLength());
+										}
 									}
 								} else {
 									Region previousPosition= elements[j-1].getTagPosition();
