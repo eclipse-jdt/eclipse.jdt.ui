@@ -4909,6 +4909,13 @@
             sequence="M1+M2+T"
             commandId="org.eclipse.jdt.ui.navigate.open.type"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <!-- Forces M1+M2+T to Open Type inside JDT editor, preventing conflicts with other
+           plugins that provide same binding for other commands in more generic contexts -->
+      <key
+            sequence="M1+M2+T"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.navigate.open.type"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M2+H"
             commandId="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
