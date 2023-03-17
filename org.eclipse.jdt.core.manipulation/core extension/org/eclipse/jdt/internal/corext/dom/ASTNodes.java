@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -4206,6 +4206,26 @@ public class ASTNodes {
 		for (Comment commentFromList : commentList) {
 			if (commentFromList.getStartPosition() > node.getStartPosition()
 					&& commentFromList.getStartPosition() < extendedStart + extendedLength) {
+				comments.add(commentFromList);
+			}
+		}
+		return comments;
+	}
+
+	/**
+	 * Return a list of comments for a region
+	 *
+	 * @param cu - CompilationUnit
+	 * @param start - start of region
+	 * @param length - length of region
+	 * @return list of Comment nodes
+	 */
+	public static List<Comment> getCommentsForRegion(CompilationUnit cu, int start, int length) {
+		List<Comment> comments= new ArrayList<>();
+		List<Comment> commentList= cu.getCommentList();
+		for (Comment commentFromList : commentList) {
+			if (commentFromList.getStartPosition() > start
+					&& commentFromList.getStartPosition() < start + length) {
 				comments.add(commentFromList);
 			}
 		}

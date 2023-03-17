@@ -152,7 +152,7 @@ public class NLSUtil {
 		return result.toArray(new TextEdit[result.size()]);
 	}
 
-	private static NLSLine scanCurrentLine(ICompilationUnit cu, int position) throws JavaModelException {
+	public static NLSLine scanCurrentLine(ICompilationUnit cu, int position) throws JavaModelException {
 		try {
 			Assert.isTrue(position >= 0 && position <= cu.getBuffer().getLength());
 			for (NLSLine line : NLSScanner.scan(cu)) {

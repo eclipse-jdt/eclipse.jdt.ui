@@ -60,6 +60,9 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -135,7 +138,9 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (!(leftHand instanceof StringLiteral)) {
 				return false;
 			}
+			boolean hasComments= false;
 			StringLiteral leftLiteral= (StringLiteral)leftHand;
+			CompilationUnit cUnit= (CompilationUnit)leftLiteral.getRoot();
 			String literal= leftLiteral.getLiteralValue();
 			if (!literal.isEmpty() && !fAllConcats && !literal.endsWith("\n")) { //$NON-NLS-1$
 				return false;
@@ -145,6 +150,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				return false;
 			}
 			StringLiteral rightLiteral= (StringLiteral)leftHand;
+			hasComments= hasComments | ASTNodes.getTrailingComments(rightLiteral).size() > 0;
 			literal= rightLiteral.getLiteralValue();
 			if (!literal.isEmpty() && !fAllConcats && !literal.endsWith("\n")) { //$NON-NLS-1$
 				return false;
@@ -153,10 +159,19 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (extendedOperands.isEmpty()) {
 				return false;
 			}
+			int lineNo= getLineOfOffset(cUnit, leftLiteral.getStartPosition());
+			int endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
+			hasComments= hasComments | ASTNodes.getCommentsForRegion(cUnit, leftLiteral.getStartPosition(), endPosition - leftLiteral.getStartPosition()).size() > 0;
+			lineNo= getLineOfOffset(cUnit, rightLiteral.getStartPosition());
+			endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
+			hasComments= hasComments | ASTNodes.getCommentsForRegion(cUnit, rightLiteral.getStartPosition(), endPosition - rightLiteral.getStartPosition()).size() > 0;
 			for (int i= 0; i < extendedOperands.size(); ++i) {
 				Expression operand= extendedOperands.get(i);
 				if (operand instanceof StringLiteral) {
 					StringLiteral stringLiteral= (StringLiteral)operand;
+					lineNo= getLineOfOffset(cUnit, stringLiteral.getStartPosition());
+					endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
+					hasComments= hasComments | ASTNodes.getCommentsForRegion(cUnit, stringLiteral.getStartPosition(), endPosition - stringLiteral.getStartPosition()).size() > 0;
 					String string= stringLiteral.getLiteralValue();
 					if (!string.isEmpty() && (fAllConcats || string.endsWith("\n") || i == extendedOperands.size() - 1)) { //$NON-NLS-1$
 						continue;
@@ -164,8 +179,51 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				}
 				return false;
 			}
-			fOperations.add(new ChangeStringConcatToTextBlock(visited));
+			boolean isTagged= false;
+			if (hasComments) {
+				// we must ensure that NLS comments are consistent for all string literals in concatenation
+				ICompilationUnit cu= (ICompilationUnit)((CompilationUnit)leftHand.getRoot()).getJavaElement();
+				try {
+				   NLSLine nlsLine= NLSUtil.scanCurrentLine(cu, leftHand.getStartPosition());
+				   isTagged= nlsLine.getElements()[0].hasTag();
+				   if (!isConsistent(nlsLine, isTagged)) {
+					   return false;
+				   }
+				   nlsLine= NLSUtil.scanCurrentLine(cu, rightHand.getStartPosition());
+				   if (!isConsistent(nlsLine, isTagged)) {
+					   return false;
+				   }
+				   for (int i= 0; i < extendedOperands.size(); ++i) {
+					   Expression operand= extendedOperands.get(i);
+					   nlsLine= NLSUtil.scanCurrentLine(cu, operand.getStartPosition());
+					   if (!isConsistent(nlsLine, isTagged)) {
+						   return false;
+					   }
+				   }
+				} catch (JavaModelException e) {
+					return false;
+				}
+			}
+			fOperations.add(new ChangeStringConcatToTextBlock(visited, isTagged));
 			return false;
+		}
+
+		private int getLineOfOffset(CompilationUnit astRoot, int offset) {
+			return astRoot.getLineNumber(offset) - 1;
+		}
+
+		private int getLineOffset(CompilationUnit astRoot, int line) {
+			return astRoot.getPosition(line + 1, 0);
+		}
+
+		private boolean isConsistent(NLSLine nlsLine, boolean isTagged) {
+			NLSElement[] elements= nlsLine.getElements();
+			for (NLSElement element : elements) {
+				if (element.hasTag() != isTagged) {
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 
@@ -173,10 +231,12 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 		private final InfixExpression fInfix;
 		private final String fIndent;
+		private final boolean isTagged;
 
-		public ChangeStringConcatToTextBlock(final InfixExpression infix) {
+		public ChangeStringConcatToTextBlock(final InfixExpression infix, boolean isTagged) {
 			this.fInfix= infix;
 			this.fIndent= "\t"; //$NON-NLS-1$
+			this.isTagged= isTagged;
 		}
 
 		@Override
@@ -226,7 +286,19 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			}
 			buf.append("\"\"\""); //$NON-NLS-1$
 			TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
-			rewrite.replace(fInfix, textBlock, group);
+			if (!isTagged) {
+				rewrite.replace(fInfix, textBlock, group);
+			} else {
+				Statement stmt= ASTNodes.getFirstAncestorOrNull(fInfix, Statement.class);
+				ICompilationUnit cu= (ICompilationUnit)((CompilationUnit)fInfix.getRoot()).getJavaElement();
+				StringBuilder buffer= new StringBuilder();
+				buffer.append(cu.getBuffer().getText(stmt.getStartPosition(), fInfix.getStartPosition() - stmt.getStartPosition()));
+				buffer.append(buf.toString());
+				buffer.append(cu.getBuffer().getText(fInfix.getStartPosition() + fInfix.getLength(), stmt.getStartPosition() + stmt.getLength() - fInfix.getStartPosition() - fInfix.getLength()));
+//				buffer.append(" //$NON-NLS-1$"); //$NON-NLS-1$
+				Statement newStmt= (Statement) rewrite.createStringPlaceholder(buffer.toString(), stmt.getNodeType());
+				ASTNodes.replaceButKeepComment(rewrite, stmt, newStmt, group);
+			}
 		}
 
 	}
