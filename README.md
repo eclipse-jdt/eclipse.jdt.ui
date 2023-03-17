@@ -1,3 +1,5 @@
+Just some dummy edits
+
 Contributing to JDT UI - Java development tools UI
 ============================================
 
