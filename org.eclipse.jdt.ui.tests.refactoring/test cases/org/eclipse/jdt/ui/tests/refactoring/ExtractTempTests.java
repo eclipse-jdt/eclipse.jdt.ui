@@ -1019,6 +1019,18 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test149() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
+		helper1(6, 13, 6, 29, true, false, "calculateCount", "calculateCount");
+	}
+
+	@Test
+	public void test150() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
+		helper1(7, 17, 7, 33, true, false, "calculateCount", "calculateCount");
+	}
+
+	@Test
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
