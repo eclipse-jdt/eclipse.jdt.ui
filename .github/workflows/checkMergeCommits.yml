@@ -16,3 +16,9 @@ jobs:
         uses: Morishiri/block-merge-commits-action@a4554c78def8d874966a8d1e20e2971121443755
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update Message
+        if: ${{ failure() }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Please always use reabase to update your branch')
