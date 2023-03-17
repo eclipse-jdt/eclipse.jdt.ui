@@ -4726,6 +4726,11 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.rename.element"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
+            sequence="M2+M3+R"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.rename.element"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
             platform="carbon"
             sequence="M2+M3+R"
             commandId=""
@@ -4902,6 +4907,13 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M2+T"
+            commandId="org.eclipse.jdt.ui.navigate.open.type"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <!-- Forces M1+M2+T to Open Type inside JDT editor, preventing conflicts with other
+           plugins that provide same binding for other commands in more generic contexts -->
+      <key
+            sequence="M1+M2+T"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.navigate.open.type"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
@@ -6351,6 +6363,16 @@
 					</or>
 				</enablement>
 			</commonWizard>
+			<commonWizard
+	           menuGroupId="org.eclipse.jdt.ui.java"
+	           type="new"
+	           wizardId="org.eclipse.jdt.ui.wizards.JavaProjectWizard">
+		       <enablement>
+					<with variable="activeWorkbenchWindow.activePerspective">
+   						<equals value="org.eclipse.jdt.ui.JavaPerspective"/>
+   					</with>
+				</enablement>
+		    </commonWizard>
   			<dropAssistant
     			class="org.eclipse.jdt.internal.ui.navigator.JavaDropAdapterAssistant"
    				id="org.eclipse.jdt.ui.dropAssistant">

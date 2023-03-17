@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
+import java.lang.reflect.Modifier;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -20,7 +22,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.TypeNameMatch;
+
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -28,7 +34,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class TypeNameMatchLabelProvider extends LabelProvider {
@@ -117,6 +122,30 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 		return BasicElementLabels.getJavaElementName(buf.toString());
 	}
 
+	/**
+	 * Method to get effective modifiers for nested interfaces, types.  Nested interfaces and classes in
+	 * interfaces have default modifiers such as public and static.
+	 *
+	 * @param origType - type to check
+	 * @param origModifiers - original modifiers stored
+	 * @return the effective modifiers
+	 */
+	private static int getEffectiveModifiers(IType origType, int origModifiers) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=567663
+		try {
+			if (origType.isMember() && origType.getParent() instanceof IType) {
+				IType parentType= (IType)origType.getParent();
+				if (parentType.isInterface()) {
+					if (!Modifier.isPublic(origModifiers) && !Modifier.isPrivate(origModifiers) && !Modifier.isProtected(origModifiers)) {
+						return origModifiers | Modifier.PUBLIC | Modifier.STATIC;
+					}
+					return origModifiers | Modifier.STATIC;
+				}
+			}
+		} catch (JavaModelException e) {
+			// should never happen
+		}
+		return origModifiers;
+	}
 
 	public static ImageDescriptor getImageDescriptor(TypeNameMatch typeRef, int flags) {
 		if (isSet(SHOW_TYPE_CONTAINER_ONLY, flags)) {
@@ -130,7 +159,7 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 			return JavaPluginImages.DESC_OBJS_PACKAGE;
 		} else {
 			boolean isInner= typeRef.getTypeContainerName().indexOf('.') != -1;
-			int modifiers= typeRef.getModifiers();
+			int modifiers= getEffectiveModifiers(typeRef.getType(), typeRef.getModifiers());
 
 			ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(isInner, false, modifiers, false);
 			int adornmentFlags= 0;

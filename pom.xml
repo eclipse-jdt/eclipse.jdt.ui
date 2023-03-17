@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse</groupId>
     <artifactId>eclipse-platform-parent</artifactId>
-    <version>4.27.0-SNAPSHOT</version>
+    <version>4.28.0-SNAPSHOT</version>
     <relativePath>../eclipse-platform-parent</relativePath>
   </parent>
 
@@ -70,5 +70,11 @@
     <module>org.eclipse.jdt.junit5.runtime</module>
     <module>org.eclipse.jdt.ui.unittest.junit</module>
     <module>org.eclipse.jdt.ui.unittest.junit.feature</module>
+    <module>org.eclipse.jdt.astview</module>
+    <module>org.eclipse.jdt.astview.feature</module>
+    <module>org.eclipse.jdt.jeview</module>
+    <module>org.eclipse.jdt.jeview.feature</module>
+    <module>org.eclipse.jdt.bcoview</module>
+    <module>org.eclipse.jdt.bcoview.feature</module>
   </modules>
 </project>

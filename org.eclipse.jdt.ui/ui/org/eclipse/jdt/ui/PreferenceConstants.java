@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3829,6 +3829,16 @@ public class PreferenceConstants {
 	public static final String EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE = "java.codemining.atLeastOne"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that stores the value for "Ignore inexact matches".
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.28
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_IGNORE_INEXACT_MATCHES = "java.codemining.ignoreInexactMatches"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that stores the value for "Show references" codemining.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -4297,6 +4307,8 @@ public class PreferenceConstants {
 		// Code minings preferences
 		store.setDefault(PreferenceConstants.EDITOR_CODEMINING_ENABLED, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE,
+				true);
+		store.setDefault(EDITOR_JAVA_CODEMINING_IGNORE_INEXACT_MATCHES,
 				true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_TYPES, false);

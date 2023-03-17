@@ -16,7 +16,10 @@
 
 package org.eclipse.jdt.internal.junit.runner;
 
-
+/**
+ * Note that tests may be executed in parallel, so be aware of concurrency issues when implementing
+ * this interface.
+ */
 public interface IListensToTestExecutions {
 	void notifyTestFailed(TestReferenceFailure failure);
 

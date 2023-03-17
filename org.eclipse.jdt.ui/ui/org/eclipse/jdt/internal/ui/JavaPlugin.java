@@ -66,7 +66,6 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
-import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
@@ -142,13 +141,6 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetMessages;
 public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener {
 
 	/**
-	 * The view id for the workbench's Resource Navigator standard component.
-	 * @since 3.6
-	 */
-	@Deprecated
-	public static final String ID_RES_NAV= IPageLayout.ID_RES_NAV;
-
-	/**
 	 * The key to store customized templates.
 	 * @since 3.0
 	 */
@@ -167,7 +159,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	private static JavaPlugin fgJavaPlugin;
 
-	private static LinkedHashMap<String, Long> fgRepeatedMessages= new LinkedHashMap<String, Long>(20, 0.75f, true) {
+	private static LinkedHashMap<String, Long> fgRepeatedMessages= new LinkedHashMap<>(20, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
 		@Override
 		protected boolean removeEldestEntry(java.util.Map.Entry<String, Long> eldest) {

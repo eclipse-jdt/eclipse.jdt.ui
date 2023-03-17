@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -53,13 +53,14 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileCha
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.rules.Java9ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class NLSSourceModifierTest {
 	@Rule
-	public ProjectTestSetup pts= new ProjectTestSetup();
+	public ProjectTestSetup pts= new Java9ProjectTestSetup();
 
     private IJavaProject javaProject;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2023 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -120,6 +120,9 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					currentBlock= new ArrayList<>();
 					currentCase= switchCase;
 				} else if (statement instanceof ReturnStatement) {
+					if (((ReturnStatement)statement).getExpression() == null) {
+						return null;
+					}
 					returnList.add(currentCase);
 					if (currentBlock == null) {
 						return null;
@@ -385,7 +388,11 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 							ThrowStatement throwStatement= (ThrowStatement)oldStatement;
 							newStatement= (Statement)rewrite.createCopyTarget(throwStatement);
 						} else if (oldStatement instanceof ReturnStatement && createReturnStatement) {
-							newStatement= getNewStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatement);
+							if (forceOldStyle) {
+								newStatement= getNewYieldStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatement);
+							} else {
+								newStatement= getNewStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatement);
+							}
 						} else if (forceOldStyle) {
 							newStatement= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatement);
 						} else {
@@ -400,13 +407,16 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 							newBlock.statements().add(rewrite.createCopyTarget(oldSwitchCaseStatement));
 						}
 						Statement lastStatement= oldStatements.get(statementsLen - 1);
-						YieldStatement newYield= null;
-						if (lastStatement instanceof ReturnStatement) {
-							newYield= getNewYieldStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatements.get(statementsLen-1));
+						Statement newStatement= null;
+						if (lastStatement instanceof ThrowStatement) {
+							ThrowStatement throwStatement= (ThrowStatement)lastStatement;
+							newStatement= (Statement)rewrite.createCopyTarget(throwStatement);
+						} else if (lastStatement instanceof ReturnStatement) {
+							newStatement= getNewYieldStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatements.get(statementsLen-1));
 						} else {
-							newYield= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatements.get(statementsLen-1));
+							newStatement= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatements.get(statementsLen-1));
 						}
-						newBlock.statements().add(newYield);
+						newBlock.statements().add(newStatement);
 						newSwitchExpression.statements().add(newBlock);
 					}
 					if (needDuplicateDefault) {

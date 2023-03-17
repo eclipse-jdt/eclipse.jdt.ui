@@ -85,7 +85,7 @@ public class EmptyTypeSet extends TypeSet {
 
 	@Override
 	public Iterator<TType> iterator() {
-		return new Iterator<TType>() {
+		return new Iterator<>() {
 			@Override
 			public void remove() {
 				//do nothing

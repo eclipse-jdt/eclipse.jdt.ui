@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2023 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -613,6 +613,94 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToSwitchExpressionIssue380() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void bar() {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(int i) {\n" //
+				+ "        switch (i) {\n" //
+				+ "        case 0:\n" //
+				+ "            return 0;\n" //
+				+ "        default:\n" //
+				+ "            bar(); //\n" //
+				+ "            throw new AssertionError();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void bar() {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(int i) {\n" //
+				+ "        return switch (i) {\n" //
+				+ "            case 0 -> 0;\n" //
+				+ "            default -> {\n" //
+				+ "                bar(); //\n" //
+				+ "                throw new AssertionError();\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testConvertToSwitchExpressionIssue388() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void bar() {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(int i) {\n" //
+				+ "        switch (i) {\n" //
+				+ "        case 0: // comment\n" //
+				+ "            return 0;\n" //
+				+ "        default:\n" //
+				+ "            return 1;\n" //
+				+ "        }\n" //
+				+ "    }\n"
+				+ "}\n"; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public void bar() {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(int i) {\n" //
+				+ "        return switch (i) {\n" //
+				+ "            case 0: // comment\n" //
+				+ "                yield 0;\n" //
+				+ "            default:\n" //
+				+ "                yield 1;\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
 	public void testDoNotConvertToReturnSwitchExpressionIssue104_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -942,6 +1030,30 @@ public class CleanUpTest14 extends CleanUpTestCase {
 			    + "        System.out.println(rulesOK);\n" //
 			    + "    }\n" //
 				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotConvertToSwitchExpressionIssue381() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void f(int i) {\n" //
+				+ "        switch (i) {\n" //
+				+ "        case 0:\n" //
+				+ "            return;\n" //
+				+ "        default:\n" //
+				+ "            throw new AssertionError();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);

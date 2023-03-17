@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,17 +25,21 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.StringFix;
+import org.eclipse.jdt.internal.corext.fix.StringFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
 /**
  * Create fixes which can solve problems in connection with Strings
- * @see org.eclipse.jdt.internal.corext.fix.StringFix
+ * @see org.eclipse.jdt.internal.corext.fix.StringFixCore
  *
  */
 public class StringCleanUp extends AbstractMultiFix {
@@ -65,9 +69,10 @@ public class StringCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		return StringFix.createCleanUp(compilationUnit,
+		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
+		return coreFix == null ? null : new CleanUpFixWrapper(coreFix);
 	}
 
 	@Override
@@ -75,9 +80,14 @@ public class StringCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		return StringFix.createCleanUp(compilationUnit, problems,
+		List<IProblemLocationCore> coreProblems= new ArrayList<>();
+		for (IProblemLocation problem : problems) {
+			coreProblems.add((ProblemLocation)problem);
+		}
+		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
+		return coreFix == null ? null : new CleanUpFixWrapper(coreFix);
 	}
 
 	private Map<String, String> getRequiredOptions() {

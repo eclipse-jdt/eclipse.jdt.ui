@@ -320,7 +320,7 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 
 	private static final int MAX_CACHE= 1024;
-	private Map<TType, Boolean> fInterfaceTaggingCache= new LinkedHashMap<TType, Boolean>(MAX_CACHE, 0.75f, true) {
+	private Map<TType, Boolean> fInterfaceTaggingCache= new LinkedHashMap<>(MAX_CACHE, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
 		@Override
 		protected boolean removeEldestEntry(Map.Entry<TType, Boolean> eldest) {

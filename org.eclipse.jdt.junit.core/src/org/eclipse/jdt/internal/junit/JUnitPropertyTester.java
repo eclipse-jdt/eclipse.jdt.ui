@@ -81,7 +81,7 @@ public class JUnitPropertyTester extends PropertyTester {
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 					return true; // can run, let test runner detect if there are tests
 				case IJavaElement.PACKAGE_FRAGMENT:
-					return ((IPackageFragment) element).hasChildren();
+					return ((IPackageFragment) element).hasChildren() || ((IPackageFragment) element).hasSubpackages();
 				case IJavaElement.COMPILATION_UNIT:
 					IType[] types= ((ICompilationUnit) element).getAllTypes();
 					for (IType type : types) {

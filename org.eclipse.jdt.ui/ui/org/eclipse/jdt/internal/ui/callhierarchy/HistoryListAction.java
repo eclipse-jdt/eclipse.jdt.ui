@@ -66,7 +66,7 @@ public class HistoryListAction extends Action {
 				CallHierarchyMessages.HistoryListDialog_remove_button,
 			};
 
-			IListAdapter<IMember[]> adapter= new IListAdapter<IMember[]>() {
+			IListAdapter<IMember[]> adapter= new IListAdapter<>() {
 				@Override
 				public void customButtonPressed(ListDialogField<IMember[]> field, int index) {
 					doCustomButtonPressed();

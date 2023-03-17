@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Carsten Hammer.
+ * Copyright (c) 2021, 2023 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -233,6 +233,23 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 							hit.isInvalid= true;
 							return false;
 						}
+					}
+				}
+			}
+			return true;
+		});
+		HelperVisitor.callSimpleNameVisitor(iterDeclarationParent, dataholder, nodesprocessed, (sn, holder2) -> {
+			if (sn.getIdentifier().equals(hit.iteratorName)) {
+				Statement parentStatement= ASTNodes.getFirstAncestorOrNull(sn, Statement.class);
+				if (parentStatement == null) {
+					hit.isInvalid= true;
+					return false;
+				}
+				if (sn.getParent() != iterDeclFragment && parentStatement != hit.iteratorCall && sn.getLocationInParent() != MethodInvocation.EXPRESSION_PROPERTY) {
+					IBinding binding= sn.resolveBinding();
+					if (binding == null || binding.isEqualTo(iterBinding)) {
+						hit.isInvalid= true;
+						return false;
 					}
 				}
 			}

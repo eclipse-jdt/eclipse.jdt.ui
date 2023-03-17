@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="%bytecode.view.name"
+            icon="icons/bytecodeview.gif"
+            category="org.eclipse.jdt.ui.java"
+            class="org.eclipse.jdt.bcoview.views.BytecodeOutlineView"
+            id="org.eclipse.jdt.bcoview.views.BytecodeOutlineView"/>
+      <view
+            name="%reference.view.name"
+            icon="icons/reference.gif"
+            category="org.eclipse.jdt.ui.java"
+            class="org.eclipse.jdt.bcoview.views.BytecodeReferenceView"
+            id="org.eclipse.jdt.bcoview.views.BytecodeReferenceView"/>
+   </extension>
+
+   <extension point="org.eclipse.core.runtime.preferences">
+      <initializer class="org.eclipse.jdt.bcoview.preferences.BCOPreferenceInitializer"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IOpenable"
+            id="org.eclipse.jdt.bcoview.CompareBytecodeActionContribution1">
+
+         <visibility>
+            <or>
+               <objectClass name="org.eclipse.jdt.core.IClassFile"/>
+               <objectClass name="org.eclipse.jdt.core.ICompilationUnit"/>
+            </or>
+         </visibility>
+         <menu
+               label="%compare_with"
+               path="additions"
+               id="compareWithMenu">
+            <separator
+                  name="compareWithGroup">
+            </separator>
+         </menu>
+
+         <action
+               enablesFor="1"
+               label="%compare_with_another"
+               icon="icons/bytecodeview.gif"
+               class="org.eclipse.jdt.bcoview.ui.actions.OpenAction"
+               menubarPath="compareWithMenu/compareWithGroup"
+               id="org.eclipse.jdt.bcoview.CompareBytecodeAction">
+         </action>
+         <action
+               enablesFor="2"
+               label="%compare_with_each_other"
+               icon="icons/bytecodeview.gif"
+               class="org.eclipse.jdt.bcoview.ui.actions.CompareBytecodeAction"
+               menubarPath="compareWithMenu/compareWithGroup"
+               id="org.eclipse.jdt.bcoview.OpenAction">
+         </action>
+       </objectContribution>
+
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.class"
+            id="org.eclipse.jdt.bcoview.CompareBytecodeActionContribution2">
+
+         <visibility>
+            <not>
+             <or>
+                   <objectClass name="org.eclipse.jdt.core.IClassFile"/>
+                   <objectClass name="org.eclipse.jdt.core.ICompilationUnit"/>
+               </or>
+            </not>
+         </visibility>
+         <menu
+               label="%compare_with"
+               path="additions"
+               id="compareWithMenu">
+            <separator
+                  name="compareWithGroup">
+            </separator>
+         </menu>
+
+         <action
+               enablesFor="1"
+               label="%compare_with_another"
+               icon="icons/bytecodeview.gif"
+               class="org.eclipse.jdt.bcoview.ui.actions.OpenAction"
+               menubarPath="compareWithMenu/compareWithGroup"
+               id="org.eclipse.jdt.bcoview.CompareBytecodeAction">
+         </action>
+         <action
+               enablesFor="2"
+               label="%compare_with_each_other"
+               icon="icons/bytecodeview.gif"
+               class="org.eclipse.jdt.bcoview.ui.actions.CompareBytecodeAction"
+               menubarPath="compareWithMenu/compareWithGroup"
+               id="org.eclipse.jdt.bcoview.OpenAction">
+         </action>
+       </objectContribution>
+
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IMember"
+            nameFilter="*"
+            id="org.eclipse.jdt.bcoview.CompareBytecodeActionContribution3">
+
+         <visibility>
+            <not>
+             <or>
+                   <objectClass name="org.eclipse.jdt.core.IField"/>
+                   <objectClass name="org.eclipse.jdt.core.IType"/>
+               </or>
+            </not>
+         </visibility>
+         <menu
+               label="%compare_with"
+               path="additions"
+               id="compareWithMenu">
+            <separator
+                  name="compareWithGroup">
+            </separator>
+         </menu>
+
+         <action
+               enablesFor="2"
+               label="%compare_with_each_other"
+               icon="icons/bytecodeview.gif"
+               class="org.eclipse.jdt.bcoview.ui.actions.CompareMemberBytecodeAction"
+               menubarPath="compareWithMenu/compareWithGroup"
+               id="org.eclipse.jdt.bcoview.OpenAction">
+         </action>
+       </objectContribution>
+
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            targetID="org.eclipse.jdt.bcoview.views.BytecodeOutlineView#ContextMenu"
+            id="org.eclipse.jdt.bcoview.OpenBytecodeReference">
+
+         <action
+               enablesFor="*"
+               label="%open_bytecode_reference"
+               icon="icons/reference.gif"
+               class="org.eclipse.jdt.bcoview.ui.actions.OpenBytecodeReferenceAction"
+               menubarPath="additions"
+               id="org.eclipse.jdt.bcoview.OpenReferenceAction"/>
+      </viewerContribution>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+          targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               relative="org.eclipse.ui.views.ContentOutline"
+               visible="false"
+               id="org.eclipse.jdt.bcoview.views.BytecodeOutlineView"
+               relationship="stack">
+         </view>
+         <viewShortcut id="org.eclipse.jdt.bcoview.views.BytecodeOutlineView"/>
+      </perspectiveExtension>
+
+   </extension>
+
+   <extension
+        point="org.eclipse.ui.preferencePages">
+     <page
+           category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+           class="org.eclipse.jdt.bcoview.preferences.BCOPreferencePage"
+           id="org.eclipse.jdt.bcoview.ByteCodeOutline.page"
+           name="%page.name">
+     </page>
+  </extension>
+</plugin>

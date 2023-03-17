@@ -101,7 +101,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 	 */
 	public static final ASTSemanticMatcher INSTANCE= new ASTSemanticMatcher();
 
-	private static final Map<PrefixExpression.Operator, InfixExpression.Operator> PREFIX_TO_INFIX_OPERATOR= new HashMap<PrefixExpression.Operator, InfixExpression.Operator>() {
+	private static final Map<PrefixExpression.Operator, InfixExpression.Operator> PREFIX_TO_INFIX_OPERATOR= new HashMap<>() {
 		private static final long serialVersionUID= -8949107654517355855L;
 
 		{
@@ -110,7 +110,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		}
 	};
 
-	private static final Map<PrefixExpression.Operator, Assignment.Operator> PREFIX_TO_ASSIGN_OPERATOR= new HashMap<PrefixExpression.Operator, Assignment.Operator>() {
+	private static final Map<PrefixExpression.Operator, Assignment.Operator> PREFIX_TO_ASSIGN_OPERATOR= new HashMap<>() {
 		private static final long serialVersionUID= -8949107654517355856L;
 
 		{
@@ -119,7 +119,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		}
 	};
 
-	private static final Map<PostfixExpression.Operator, InfixExpression.Operator> POSTFIX_TO_INFIX_OPERATOR= new HashMap<PostfixExpression.Operator, InfixExpression.Operator>() {
+	private static final Map<PostfixExpression.Operator, InfixExpression.Operator> POSTFIX_TO_INFIX_OPERATOR= new HashMap<>() {
 		private static final long serialVersionUID= -8949107654517355857L;
 
 		{
@@ -128,7 +128,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		}
 	};
 
-	private static final Map<PostfixExpression.Operator, Assignment.Operator> POSTFIX_TO_ASSIGN_OPERATOR= new HashMap<PostfixExpression.Operator, Assignment.Operator>() {
+	private static final Map<PostfixExpression.Operator, Assignment.Operator> POSTFIX_TO_ASSIGN_OPERATOR= new HashMap<>() {
 		private static final long serialVersionUID= -8949107654517355858L;
 
 		{
@@ -137,7 +137,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		}
 	};
 
-	private static final Map<PrefixExpression.Operator, PostfixExpression.Operator> PREFIX_TO_POSTFIX_OPERATOR= new HashMap<PrefixExpression.Operator, PostfixExpression.Operator>() {
+	private static final Map<PrefixExpression.Operator, PostfixExpression.Operator> PREFIX_TO_POSTFIX_OPERATOR= new HashMap<>() {
 		private static final long serialVersionUID= -8949107654517355859L;
 
 		{
@@ -146,7 +146,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		}
 	};
 
-	private static final Map<Assignment.Operator, InfixExpression.Operator> ASSIGN_TO_INFIX_OPERATOR= new HashMap<Assignment.Operator, InfixExpression.Operator>() {
+	private static final Map<Assignment.Operator, InfixExpression.Operator> ASSIGN_TO_INFIX_OPERATOR= new HashMap<>() {
 		private static final long serialVersionUID= -8949107654517355859L;
 
 		{
@@ -164,7 +164,7 @@ public class ASTSemanticMatcher extends ASTMatcher {
 		}
 	};
 
-	private static final Map<InfixExpression.Operator, InfixExpression.Operator> INFIX_TO_MIRROR_OPERATOR= new HashMap<InfixExpression.Operator, InfixExpression.Operator>() {
+	private static final Map<InfixExpression.Operator, InfixExpression.Operator> INFIX_TO_MIRROR_OPERATOR= new HashMap<>() {
 		private static final long serialVersionUID= -8949107654517355857L;
 
 		{
