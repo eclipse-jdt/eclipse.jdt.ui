@@ -13,6 +13,6 @@ jobs:
 
     steps:
       - name: Block Merge Commits
-        uses: Morishiri/block-merge-commits-action@v1
+        uses: Morishiri/block-merge-commits-action@a4554c78def8d874966a8d1e20e2971121443755
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
