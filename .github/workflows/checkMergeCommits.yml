@@ -1,16 +1,11 @@
-on: pull_request
-
 name: Check for merge commits
-
-permissions:
-  pull-requests: read
-
+on: pull_request
 jobs:
   message-check:
     name: Block Merge Commits
-
     runs-on: ubuntu-latest
-
+    permissions:
+      pull-requests: read
     steps:
       - name: Block Merge Commits
         uses: Morishiri/block-merge-commits-action@a4554c78def8d874966a8d1e20e2971121443755
