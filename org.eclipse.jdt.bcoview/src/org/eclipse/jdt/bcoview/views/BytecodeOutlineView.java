@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.bcoview.views;
 
-import static org.eclipse.jdt.bcoview.BytecodeOutlinePlugin.getResourceString;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -34,6 +32,7 @@ import org.eclipse.jdt.bcoview.asm.DecompiledMethod;
 import org.eclipse.jdt.bcoview.asm.DecompilerHelper;
 import org.eclipse.jdt.bcoview.asm.DecompilerOptions;
 import org.eclipse.jdt.bcoview.asm.LineRange;
+import org.eclipse.jdt.bcoview.internal.Messages;
 import org.eclipse.jdt.bcoview.preferences.BCOConstants;
 import org.eclipse.jdt.bcoview.ui.EclipseUtils;
 import org.eclipse.jdt.bcoview.ui.JdtUtils;
@@ -253,8 +252,6 @@ public class BytecodeOutlineView extends ViewPart implements IBytecodePart {
 	 * This flag is a workaround and allows us restore the state after internal toggling.
 	 */
 	private boolean restoreVerify;
-
-	private static final String NLS_PREFIX = "BytecodeOutlineView."; //$NON-NLS-1$
 
 	// updates the find replace action if the document length is > 0
 	private ITextListener textListener;
@@ -659,11 +656,11 @@ public class BytecodeOutlineView extends ViewPart implements IBytecodePart {
 		tc.setToolTipText("ASM instruction offset"); //$NON-NLS-1$
 
 		tc = new TableColumn(tableControl, SWT.LEFT);
-		tc.setText(getResourceString(NLS_PREFIX + "lvt.header")); //$NON-NLS-1$
+		tc.setText(Messages.BytecodeOutlineView_lvt_header);
 		tc.setToolTipText("Local variables"); //$NON-NLS-1$
 
 		tc = new TableColumn(tableControl, SWT.LEFT);
-		tc.setText(getResourceString(NLS_PREFIX + "stack.header")); //$NON-NLS-1$
+		tc.setText(Messages.BytecodeOutlineView_stack_header);
 		tc.setToolTipText("Stack content *before* current instruction is executed"); //$NON-NLS-1$
 		new TableColumn(tableControl, SWT.LEFT);
 		new TableColumn(tableControl, SWT.LEFT);
@@ -1549,22 +1546,22 @@ public class BytecodeOutlineView extends ViewPart implements IBytecodePart {
 		TextViewerAction action = new TextViewerAction(textViewer, ITextOperationTarget.SELECT_ALL);
 
 		action.configureAction(
-				getResourceString(NLS_PREFIX + "select_all.label"), //$NON-NLS-1$
-				getResourceString(NLS_PREFIX + "select_all.tooltip"), //$NON-NLS-1$
-				getResourceString(NLS_PREFIX + "select_all.description")); //$NON-NLS-1$
+				Messages.BytecodeOutlineView_select_all_label,
+				Messages.BytecodeOutlineView_select_all_tooltip,
+				Messages.BytecodeOutlineView_select_all_description);
 		setGlobalAction(actionBars, ActionFactory.SELECT_ALL.getId(), action);
 
 		action = new TextViewerAction(textViewer, ITextOperationTarget.COPY);
 		action.configureAction(
-				getResourceString(NLS_PREFIX + "copy.label"), //$NON-NLS-1$
-				getResourceString(NLS_PREFIX + "copy.tooltip"), //$NON-NLS-1$
-				getResourceString(NLS_PREFIX + "copy.description")); //$NON-NLS-1$
+				Messages.BytecodeOutlineView_copy_label,
+				Messages.BytecodeOutlineView_copy_tooltip,
+				Messages.BytecodeOutlineView_copy_description);
 		action.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		action.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
 		setGlobalAction(actionBars, ActionFactory.COPY.getId(), action);
 
-		ResourceBundle bundle = BytecodeOutlinePlugin.getDefault().getResourceBundle();
-		setGlobalAction(actionBars, ActionFactory.FIND.getId(), new FindReplaceAction(bundle, NLS_PREFIX + "find_replace.", this)); //$NON-NLS-1$
+		ResourceBundle bundle = Messages.getResourceBundle();
+		setGlobalAction(actionBars, ActionFactory.FIND.getId(), new FindReplaceAction(bundle, "BytecodeOutlineView_find_replace_", this)); //$NON-NLS-1$
 
 		selectionActions.add(ActionFactory.COPY.getId());
 		selectionActions.add(ActionFactory.FIND.getId());
@@ -1638,13 +1635,13 @@ public class BytecodeOutlineView extends ViewPart implements IBytecodePart {
 
 			String symbolicName = BytecodeOutlinePlugin.getDefault().getBundle().getSymbolicName();
 			if (orientation == VIEW_ORIENTATION_HORIZONTAL) {
-				setText(getResourceString(NLS_PREFIX + "toggle.horizontal.label")); //$NON-NLS-1$
+				setText(Messages.BytecodeOutlineView_toggle_horizontal_label);
 				setImageDescriptor(AbstractUIPlugin.imageDescriptorFromPlugin(symbolicName, "icons/th_horizontal.gif")); //$NON-NLS-1$
 			} else if (orientation == VIEW_ORIENTATION_VERTICAL) {
-				setText(getResourceString(NLS_PREFIX + "toggle.vertical.label")); //$NON-NLS-1$
+				setText(Messages.BytecodeOutlineView_toggle_vertical_label);
 				setImageDescriptor(AbstractUIPlugin.imageDescriptorFromPlugin(symbolicName, "icons/th_vertical.gif")); //$NON-NLS-1$
 			} else if (orientation == VIEW_ORIENTATION_AUTOMATIC) {
-				setText(getResourceString(NLS_PREFIX + "toggle.automatic.label")); //$NON-NLS-1$
+				setText(Messages.BytecodeOutlineView_toggle_automatic_label);
 				setImageDescriptor(AbstractUIPlugin.imageDescriptorFromPlugin(symbolicName, "icons/th_automatic.gif")); //$NON-NLS-1$
 			}
 			actionOrientation = orientation;

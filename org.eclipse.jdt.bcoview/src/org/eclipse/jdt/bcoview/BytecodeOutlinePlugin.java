@@ -13,10 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.bcoview;
 
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
 import org.osgi.framework.BundleContext;
+
+import org.eclipse.jdt.bcoview.internal.Messages;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -31,8 +30,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 public class BytecodeOutlinePlugin extends AbstractUIPlugin {
 	private static BytecodeOutlinePlugin plugin;
 
-	private ResourceBundle resourceBundle;
-
 	public static boolean DEBUG;
 
 	public BytecodeOutlinePlugin() {
@@ -41,11 +38,6 @@ public class BytecodeOutlinePlugin extends AbstractUIPlugin {
 			throw new IllegalStateException("Bytecode outline plugin is a singleton!"); //$NON-NLS-1$
 		}
 		plugin = this;
-		try {
-			resourceBundle = ResourceBundle.getBundle("org.eclipse.jdt.bcoview.BytecodeOutlinePluginResources"); //$NON-NLS-1$
-		} catch (MissingResourceException x) {
-			resourceBundle = null;
-		}
 	}
 
 	@Override
@@ -59,25 +51,6 @@ public class BytecodeOutlinePlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the string from the plugin's resource bundle, or 'key' if not found.
-	 *
-	 * @param key preference key
-	 * @return translation
-	 */
-	public static String getResourceString(String key) {
-		ResourceBundle bundle = BytecodeOutlinePlugin.getDefault().getResourceBundle();
-		try {
-			return bundle != null ? bundle.getString(key) : key;
-		} catch (MissingResourceException e) {
-			return key;
-		}
-	}
-
-	public ResourceBundle getResourceBundle() {
-		return resourceBundle;
-	}
-
-	/**
 	 * Returns the workspace instance.
 	 *
 	 * @return shell object
@@ -86,16 +59,15 @@ public class BytecodeOutlinePlugin extends AbstractUIPlugin {
 		return PlatformUI.getWorkbench().getDisplay().getActiveShell();
 	}
 
-	public static void error(String messageID, Throwable error) {
+	public static void error(String message, Throwable error) {
 		Shell shell = getShell();
-		String message = getResourceString("BytecodeOutline.Error"); //$NON-NLS-1$
-		if (messageID != null) {
-			message = getResourceString(messageID);
+		if (message == null) {
+			message = Messages.BytecodeOutline_Error;
 		}
 		if (error != null) {
 			message += " " + error.getMessage(); //$NON-NLS-1$
 		}
-		MessageDialog.openError(shell, getResourceString("BytecodeOutline.Title"), message); //$NON-NLS-1$
+		MessageDialog.openError(shell, Messages.BytecodeOutline_Title, message);
 		getDefault().getLog().log(new Status(IStatus.ERROR, "org.eclipse.jdt.bcoview", 0, message, error)); //$NON-NLS-1$
 	}
 
