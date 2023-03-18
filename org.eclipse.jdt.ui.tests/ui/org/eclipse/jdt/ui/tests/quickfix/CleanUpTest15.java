@@ -54,10 +54,10 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public void testSimple() {\n"
 				+ "        // comment 1\n" //
-				+ "        String x = \"\" +\n" //
-    	        + "            \"public void foo() {\\n\" +\n" //
-    	        + "            \"    System.out.println(\\\"abc\\\");\\n\" +\n" //
-    	        + "            \"}\\n\"; // comment 2\n" //
+				+ "        String x = \"\" + //$NON-NLS-1$\n" //
+    	        + "            \"public void foo() {\\n\" + //$NON-NLS-1$\n" //
+    	        + "            \"    System.out.println(\\\"abc\\\");\\n\" + //$NON-NLS-1$\n" //
+    	        + "            \"}\\n\"; //$NON-NLS-1$ // comment 2\n" //
     	        + "    }\n" //
     	        + "\n" //
 				+ "    public void testTrailingSpacesAndInnerNewlines() {\n"
@@ -97,7 +97,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        \tpublic void foo() {\n" //
     	        + "        \t    System.out.println(\"abc\");\n" //
     	        + "        \t}\n" //
-    	        + "        \t\"\"\"; // comment 2\n" //
+    	        + "        \t\"\"\"; //$NON-NLS-1$ // comment 2\n" //
     	        + "    }\n" //
     	        + "\n" //
 				+ "    public void testTrailingSpacesAndInnerNewlines() {\n" //
@@ -262,6 +262,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            \"abcdef\" +\n" //
     	        + "            \"ghijkl\" +\n" //
     	        + "            3;\n;"
+    	        + "    }\n" //
+    	        + "\n" //
+   	            + "    public void testInconsistentNLS() {\n" //
+				+ "        String x = \"\" +\n" //
+    	        + "            \"abcdef\" +\n" //
+    	        + "            \"ghijkl\" + //$NON-NLS-1$\n" //
+    	        + "            \"mnop\";\n" //
     	        + "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2021, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -75,10 +75,10 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\" +\n");
-        buf.append("            \"public void foo() {\\n\" +\n");
-        buf.append("            \"    System.out.println(\\\"abc\\\");\\n\" +\n");
-        buf.append("            \"}\\n\"; // comment 2\n");
+		buf.append("        String x = \"\" + //$NON-NLS-1$\n");
+        buf.append("            \"public void foo() {\\n\" + //$NON-NLS-1$\n");
+        buf.append("            \"    System.out.println(\\\"abc\\\");\\n\" + //$NON-NLS-1$\n");
+        buf.append("            \"}\\n\"; //$NON-NLS-1$ // comment 2\n");
         buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
@@ -97,7 +97,7 @@ public class AssistQuickFixTest15 extends QuickFixTest {
         buf.append("		\tpublic void foo() {\n");
         buf.append("		\t    System.out.println(\"abc\");\n");
         buf.append("		\t}\n");
-        buf.append("		\t\"\"\"; // comment 2\n");
+        buf.append("		\t\"\"\"; //$NON-NLS-1$ // comment 2\n");
         buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();
@@ -710,6 +710,41 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 
 		int index= buf.indexOf("buf3");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		assertProposalDoesNotExist(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
+	}
+
+	@Test
+	public void testNoConcatToTextBlock9() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void inconsistentNLS() {\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String x = \"\" + //$NON-NLS-1$\n");
+        buf.append("            \"public void foo() {\\n\" +\n");
+        buf.append("            \"    System.out.println(\\\"abc\\\");\\n\" + //$NON-NLS-1$\n");
+        buf.append("            \"}\\n\"; //$NON-NLS-1$ // comment 2\n");
+        buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		int index= buf.indexOf("x");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 1);
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
