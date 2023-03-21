@@ -572,11 +572,10 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(8, 32, 8, 33, true, false, "temp", "i2");
 	}
 
-//	@Test
+	@Test
 	public void test73() throws Exception {
 //		printTestDisabledMessage("test for bug 40353");
-		warningHelper1(6, 39, 6, 40, true, false, "temp", "i2", RefactoringStatus.WARNING);
-		// (warning is superfluous, but detection would need flow analysis)
+		helper1(6, 39, 6, 40, true, false, "temp", "i2");
 	}
 
 	@Test
