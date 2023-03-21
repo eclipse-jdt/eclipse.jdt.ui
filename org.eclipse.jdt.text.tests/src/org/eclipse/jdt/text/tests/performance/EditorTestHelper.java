@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -119,8 +119,6 @@ public class EditorTestHelper {
 	public static final String OUTLINE_VIEW_ID= "org.eclipse.ui.views.ContentOutline";
 
 	public static final String PACKAGE_EXPLORER_VIEW_ID= "org.eclipse.jdt.ui.PackageExplorer";
-
-	public static final String NAVIGATOR_VIEW_ID= "org.eclipse.ui.views.ResourceNavigator";
 
 	public static final String INTRO_VIEW_ID= "org.eclipse.ui.internal.introview";
 
