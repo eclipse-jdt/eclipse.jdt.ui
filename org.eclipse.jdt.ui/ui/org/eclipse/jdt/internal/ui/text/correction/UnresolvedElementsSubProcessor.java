@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 202 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -895,16 +895,18 @@ public class UnresolvedElementsSubProcessor {
 						try {
 							IJavaProject focus= simpleBinding.getJavaElement().getJavaProject();
 							IType javaElementType= focus.findType(fullName);
-							ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
-							parser.setProject(focus);
-							IBinding[] bindings= parser.createBindings(new IJavaElement[] {javaElementType} , null);
-							qualifiedTypeBinding=(ITypeBinding)bindings[0];
+							if (javaElementType != null) {
+								ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+								parser.setProject(focus);
+								IBinding[] bindings= parser.createBindings(new IJavaElement[] {javaElementType} , null);
+								qualifiedTypeBinding=(ITypeBinding)bindings[0];
+							}
 						} catch (JavaModelException e) {
 							// fall through
 						}
 
 						if (qualifiedTypeBinding != null) {
-							if (!isInherited(qualifiedTypeBinding, simpleBinding)) {
+							if (!qualifiedTypeBinding.getName().equals(simpleBinding.getName()) && !isInherited(qualifiedTypeBinding, simpleBinding)) {
 								continue;
 							}
 						}
