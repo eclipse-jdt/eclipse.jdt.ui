@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1673,4 +1673,41 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
+	public void testIssue485() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Date d1= new Date();\n");
+		buf.append("        Date d2;\n");
+		buf.append("        d2=new Date();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 4, 0);
+
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuilder();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("import java.util.Date;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Date d1= new Date();\n");
+		buf.append("        Date d2;\n");
+		buf.append("        d2=new Date();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 }
