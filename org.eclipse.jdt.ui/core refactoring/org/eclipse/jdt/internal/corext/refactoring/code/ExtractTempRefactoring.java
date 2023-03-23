@@ -380,6 +380,23 @@ public class ExtractTempRefactoring extends Refactoring {
 					return result.toArray(new IASTFragment[result.size()]);
 				}
 				int offset= parent.getStartPosition() + parent.getLength();
+				if (location == SwitchStatement.STATEMENTS_PROPERTY) {
+					SwitchStatement ss= (SwitchStatement) parent.getParent();
+					Iterator<Object> iterator= ss.statements().iterator();
+					int preOffset= -1;
+					while (iterator.hasNext()) {
+						Object obj= iterator.next();
+						if (obj instanceof ASTNode) {
+							ASTNode node= (ASTNode) obj;
+							if (node instanceof SwitchCase && node.getStartPosition() > offset) {
+								break;
+							}
+							preOffset= node.getStartPosition() + node.getLength();
+						}
+					}
+					if (preOffset > 0)
+						offset= preOffset;
+				}
 				for (int i= 0; i < result.size(); ++i) {
 					if (result.get(i).getStartPosition() > offset) {
 						upper= i;

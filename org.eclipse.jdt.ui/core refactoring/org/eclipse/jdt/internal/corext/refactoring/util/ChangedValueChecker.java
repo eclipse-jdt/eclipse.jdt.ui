@@ -91,7 +91,6 @@ public class ChangedValueChecker extends AbstractChecker {
 		analyzeSelectedExpression(selectedExpression);
 	}
 
-
 	public void detectConflict(int startOffset, int endOffset, ASTNode node,
 			ASTNode bodyNode, ArrayList<IASTFragment> candidateList) {
 		fNode2= node;
@@ -145,8 +144,6 @@ public class ChangedValueChecker extends AbstractChecker {
 		}
 		return fConflict;
 	}
-
-
 
 	private MethodDeclaration findFunctionDefinition(ITypeBinding iTypeBinding, IMethodBinding methodBinding) {
 		if (methodBinding == null || iTypeBinding == null) {
@@ -426,7 +423,6 @@ public class ChangedValueChecker extends AbstractChecker {
 				}
 				return false;
 			}
-
 			return super.preVisit2(node);
 		}
 
