@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -138,6 +138,7 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 
 	static final int JLS_LATEST= AST.getJLSLatest();
+	private static final int JLS20= ASTHelper.JLS20;
 	private static final int JLS19= ASTHelper.JLS19;
 	private static final int JLS18= ASTHelper.JLS18;
 	private static final int JLS17= ASTHelper.JLS17;
@@ -515,6 +516,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				case JLS17:
 				case JLS18:
 				case JLS19:
+				case JLS20:
 					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
@@ -1140,6 +1142,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				new ASTLevelToggle("AST Level 1&7 (17)", JLS17), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&8 (18)", JLS18), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&9 (19)", JLS19), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &20 (20)", JLS20), //$NON-NLS-1$
 		};
 
 		fAddToTrayAction= new Action() {
