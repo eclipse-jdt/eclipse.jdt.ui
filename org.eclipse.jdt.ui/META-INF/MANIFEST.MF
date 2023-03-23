@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.ui; singleton:=true
-Bundle-Version: 3.28.100.qualifier
+Bundle-Version: 3.29.0.qualifier
 Bundle-Activator: org.eclipse.jdt.internal.ui.JavaPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
@@ -112,7 +112,7 @@ Require-Bundle:
  org.eclipse.core.filesystem;bundle-version="[1.2.0,2.0.0)",
  org.eclipse.core.resources;bundle-version="[3.14.0,4.0.0)",
  org.eclipse.core.variables;bundle-version="[3.2.200,4.0.0)",
- org.eclipse.jdt.core;bundle-version="[3.32.0,4.0.0)",
+ org.eclipse.jdt.core;bundle-version="[3.34.0,4.0.0)",
  org.eclipse.search;bundle-version="[3.10.0,4.0.0)",
  org.eclipse.debug.core;bundle-version="[3.10.0,4.0.0)",
  org.eclipse.debug.ui;bundle-version="[3.11.0,4.0.0)",
@@ -136,4 +136,4 @@ Require-Bundle:
  org.eclipse.jdt.core.manipulation;bundle-version="[1.15.200,2.0.0)",
  com.ibm.icu;bundle-version="4.4.2",
  org.eclipse.equinox.bidi;bundle-version="[0.10.0,2.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
