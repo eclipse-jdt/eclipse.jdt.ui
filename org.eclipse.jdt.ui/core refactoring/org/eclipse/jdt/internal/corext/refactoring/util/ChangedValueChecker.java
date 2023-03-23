@@ -87,7 +87,6 @@ public class ChangedValueChecker extends AbstractChecker {
 	private String fEnclosingMethodSignature;
 
 	public ChangedValueChecker(ASTNode selectedExpression, String enclosingMethodSignature) {
-		super();
 		this.fEnclosingMethodSignature= enclosingMethodSignature;
 		analyzeSelectedExpression(selectedExpression);
 	}
@@ -99,7 +98,6 @@ public class ChangedValueChecker extends AbstractChecker {
 		fBodyNode= bodyNode;
 		fConflict= false;
 		fPosSet= Collections.synchronizedSet(new HashSet<>());
-		;
 		PathVisitor pathVisitor= new PathVisitor(startOffset, endOffset, fNode2, candidateList);
 		while (fBodyNode != null && (fBodyNode.getStartPosition() + fBodyNode.getLength() < pathVisitor.endOffset
 				|| fBodyNode.getStartPosition() > pathVisitor.startOffset)) {
@@ -120,29 +118,26 @@ public class ChangedValueChecker extends AbstractChecker {
 	public boolean hasConflict() {
 		ExecutorService threadPool= new ThreadPoolExecutor(5, 10, 5, TimeUnit.SECONDS,
 				new ArrayBlockingQueue<>(10), new ThreadPoolExecutor.CallerRunsPolicy());
-		for (ASTNode node : fMiddleNodes) {
-			Position pos= new Position(node.getStartPosition(), node.getLength());
-			if (fPosSet.contains(pos)) {
-				continue;
-			}
-			if (fConflict == true) {
-				break;
-			}
-			threadPool.execute(() -> {
-				fPosSet.add(pos);
-				UpdateVisitor uv= new UpdateVisitor(fDependSet, true);
-				node.accept(uv);
-				if (uv.hasConflict())
-					fConflict= true;
-			});
-		}
 		try {
-			threadPool.shutdown();
-			threadPool.awaitTermination(15, TimeUnit.SECONDS);
-			while (true) {
-				if (threadPool.isTerminated()) {
+			for (ASTNode node : fMiddleNodes) {
+				Position pos= new Position(node.getStartPosition(), node.getLength());
+				if (fPosSet.contains(pos)) {
+					continue;
+				}
+				if (fConflict == true) {
 					break;
 				}
+				threadPool.execute(() -> {
+					fPosSet.add(pos);
+					UpdateVisitor uv= new UpdateVisitor(fDependSet, true);
+					node.accept(uv);
+					if (uv.hasConflict())
+						fConflict= true;
+				});
+			}
+			threadPool.shutdown();
+			threadPool.awaitTermination(5, TimeUnit.SECONDS);
+			while (!threadPool.isTerminated() && fConflict == true) {
 			}
 		} catch (InterruptedException e) {
 		} finally {
@@ -237,7 +232,6 @@ public class ChangedValueChecker extends AbstractChecker {
 		Elem e;
 
 		public Elem(ASTNode node, boolean flag) {
-			super();
 			if (node instanceof SimpleName) {
 				SimpleName sn= (SimpleName) node;
 				IBinding resolveBinding= sn.resolveBinding();
@@ -276,7 +270,6 @@ public class ChangedValueChecker extends AbstractChecker {
 		}
 
 		public Elem(MethodInvocation expr) { // use String to represent the instances of MethodInvocation
-			super();
 			this.memberKey= expr.toString();
 		}
 
@@ -334,6 +327,14 @@ public class ChangedValueChecker extends AbstractChecker {
 		}
 	}
 
+	enum TraversalStatus {
+		NOT_YET_BETWEEN_EXPRESSIONS, BETWEEN_EXPRESSIONS, EXITED_BETWEEN_EXPRESSIONS
+	};
+
+	/*
+	 * This class calculates the path between two expressions in AST.
+	 * It considers loop and conditional statements to ensure that the calculation is not based only on positions.
+	 */
 	class PathVisitor extends ASTVisitor {
 		ArrayList<ASTNode> nodes;
 
@@ -345,7 +346,7 @@ public class ChangedValueChecker extends AbstractChecker {
 
 		int endOffset;
 
-		int type;
+		TraversalStatus state;
 
 		ASTNode selectedExpression;
 
@@ -356,7 +357,7 @@ public class ChangedValueChecker extends AbstractChecker {
 			this.endOffset= endOffset;
 			this.selectedExpression= node;
 			this.candidateList= candidateList;
-			type= 2;
+			state= TraversalStatus.NOT_YET_BETWEEN_EXPRESSIONS;
 			extend2EndOfLoop(selectedExpression);
 		}
 
@@ -379,13 +380,13 @@ public class ChangedValueChecker extends AbstractChecker {
 
 		@Override
 		public boolean preVisit2(ASTNode node) {
-			if (type == 2 && node.getStartPosition() >= startOffset && node.getStartPosition() + node.getLength() <= endOffset) {
-				type= 1;
-			} else if (type == 1 && node.getStartPosition() > endOffset) {
-				type= 0;
+			if (state == TraversalStatus.NOT_YET_BETWEEN_EXPRESSIONS && node.getStartPosition() >= startOffset && node.getStartPosition() + node.getLength() <= endOffset) {
+				state= TraversalStatus.BETWEEN_EXPRESSIONS;
+			} else if (state == TraversalStatus.BETWEEN_EXPRESSIONS && node.getStartPosition() > endOffset) {
+				state= TraversalStatus.EXITED_BETWEEN_EXPRESSIONS;
 			}
 
-			if (type != 1) {
+			if (state != TraversalStatus.BETWEEN_EXPRESSIONS) {
 				return super.preVisit2(node);
 			}
 
@@ -430,7 +431,6 @@ public class ChangedValueChecker extends AbstractChecker {
 		}
 
 	}
-
 
 
 	class ReadVisitor extends ASTVisitor {
