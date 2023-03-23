@@ -1710,4 +1710,44 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+
+	@Test
+	public void testIssue649() throws Exception {
+		IPackageFragment defaultPackage= fSourceFolder.createPackageFragment("", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("//Comment 1\n");
+		buf.append("//Comment 2\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Date d1= new Date();\n");
+		buf.append("        Date d2;\n");
+		buf.append("        d2=new Date();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= defaultPackage.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 4, 0);
+
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuilder();
+		buf.append("//Comment 1\n");
+		buf.append("//Comment 2\n");
+		buf.append("\n");
+		buf.append("import java.util.Date;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Date d1= new Date();\n");
+		buf.append("        Date d2;\n");
+		buf.append("        d2=new Date();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 }
