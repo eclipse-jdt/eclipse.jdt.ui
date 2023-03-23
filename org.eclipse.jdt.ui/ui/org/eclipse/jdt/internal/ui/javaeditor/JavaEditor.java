@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.lang.StackWalker.StackFrame;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.CharacterIterator;
@@ -27,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 import com.ibm.icu.text.BreakIterator;
 
@@ -4249,19 +4251,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.9
 	 */
 	private static boolean isCalledByOutline() {
-		Class<?>[] elements= new AccessChecker().getClassContext();
-		for (int i= 0; i < elements.length && i < 10; i++) {
-			if (elements[i].equals(ContentOutline.class)) {
-				return true;
-			}
-		}
-		return false;
+		return OutlineAccessChecker.isCalledByOutline();
 	}
 
-	private static final class AccessChecker extends SecurityManager {
-		@Override
-		public Class<?>[] getClassContext() {
-			return super.getClassContext();
+	private static final class OutlineAccessChecker  {
+		private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+		private static final String OUTLINE_NAME = ContentOutline.class.getCanonicalName();
+		private static final Predicate<? super StackFrame> CHECK_OUTLINE = frame -> OUTLINE_NAME.equals(frame.getClassName());
+
+		static boolean isCalledByOutline() {
+			Boolean wasCalled = STACK_WALKER.walk(fs -> Boolean.valueOf(fs.anyMatch(CHECK_OUTLINE)));
+			return wasCalled.booleanValue();
 		}
 	}
 
