@@ -21,12 +21,9 @@ import org.eclipse.osgi.util.TextProcessor;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Point;
-
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
 
@@ -199,14 +196,8 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 					resource= (IResource)element;
 
 				if (resource != null) {
-					IPath location= resource.getLocation();
-					if (location != null) {
-						data= new Object[] { qualifiedName, resource, new String[] { location.toOSString() } };
-						dataTypes= new Transfer[] { TextTransfer.getInstance(), ResourceTransfer.getInstance(), FileTransfer.getInstance() };
-					} else {
-						data= new Object[] { qualifiedName, resource };
-						dataTypes= new Transfer[] { TextTransfer.getInstance(), ResourceTransfer.getInstance() };
-					}
+					data= new Object[] { qualifiedName, resource };
+					dataTypes= new Transfer[] { TextTransfer.getInstance(), ResourceTransfer.getInstance() };
 				} else {
 					data= new Object[] { qualifiedName };
 					dataTypes= new Transfer[] { TextTransfer.getInstance() };
