@@ -134,9 +134,11 @@ public class ChangedValueChecker extends AbstractChecker {
 						fConflict= true;
 				});
 			}
-			threadPool.shutdown();
-			threadPool.awaitTermination(5, TimeUnit.SECONDS);
-			while (!threadPool.isTerminated() && fConflict == true) {
+			if (fConflict == false) {
+				threadPool.shutdown();
+				threadPool.awaitTermination(5, TimeUnit.SECONDS);
+				while (!threadPool.isTerminated() && fConflict == false) {
+				}
 			}
 		} catch (InterruptedException e) {
 		} finally {
@@ -195,7 +197,7 @@ public class ChangedValueChecker extends AbstractChecker {
 			}
 			return null;
 		} catch (JavaModelException e) {
-			;
+		} catch (OperationCanceledException e) {
 		}
 		return null;
 	}
