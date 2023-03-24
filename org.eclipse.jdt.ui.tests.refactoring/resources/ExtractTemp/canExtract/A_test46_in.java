@@ -1,6 +1,6 @@
 package p;
 class A {
-	int f(){
+	int f() {
 		f();
 		int u= f();
 		return 0;

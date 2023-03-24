@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
@@ -47,7 +48,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 
-public class UnsafeCheckTester {
+public class UnsafeCheckTester extends AbstractChecker{
 	private ASTNode fExpression;
 
 	private int fStartOffset;
@@ -67,47 +68,6 @@ public class UnsafeCheckTester {
 	private HashMap<IBinding, ITypeBinding> fInvocationHashMap;
 
 	private HashMap<Position, ITypeBinding> fMatchNodePosHashMap;
-
-	class Position {
-		int start;
-
-		int length;
-
-		public Position(int start, int length) {
-			this.start= start;
-			this.length= length;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + getEnclosingInstance().hashCode();
-			result= prime * result + length;
-			result= prime * result + start;
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (!(obj instanceof Position))
-				return false;
-			Position other= (Position) obj;
-			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))
-				return false;
-			if (length != other.length)
-				return false;
-			if (start != other.start)
-				return false;
-			return true;
-		}
-
-		private UnsafeCheckTester getEnclosingInstance() {
-			return UnsafeCheckTester.this;
-		}
-	}
 
 	public UnsafeCheckTester(CompilationUnit fCompilationUnitNode, ICompilationUnit fCu, ASTNode commonNode, ASTNode expression, int startOffset, int endOffset) {
 		this.fCompilationUnitNode= fCompilationUnitNode;
@@ -239,14 +199,12 @@ public class UnsafeCheckTester {
 		}
 
 		public boolean hasNullCheck() {
-			return this.nullFlag;
+			return nullFlag;
 		}
-
 
 		public boolean hasCastCheck() {
-			return this.castFlag;
+			return castFlag;
 		}
-
 
 		@Override
 		public boolean preVisit2(ASTNode node) {
@@ -267,10 +225,10 @@ public class UnsafeCheckTester {
 				if (leftOperand instanceof Name &&
 						(targetBinding= ((Name) leftOperand).resolveBinding()) != null &&
 						hasInheritanceRelationship(fInvocationHashMap.get(targetBinding), resolveBinding)) {
-					this.castFlag= true;
+					castFlag= true;
 					return false;
 				} else if (hasInheritanceRelationship(fMatchNodePosHashMap.get(new Position(leftOperand.getStartPosition(), leftOperand.getLength())), resolveBinding)) {
-					this.castFlag= true;
+					castFlag= true;
 					return false;
 				}
 				return super.preVisit2(node);
@@ -295,10 +253,10 @@ public class UnsafeCheckTester {
 				target= getOriginalExpression(target);
 				IBinding targetBinding= null;
 				if (target instanceof Name && (targetBinding= ((Name) target).resolveBinding()) != null && fInvocationSet.contains(targetBinding)) {
-					this.nullFlag= true;
+					nullFlag= true;
 					return false;
 				} else if (fMatchNodePosSet.contains(new Position(target.getStartPosition(), target.getLength()))) {
-					this.nullFlag= true;
+					nullFlag= true;
 					return false;
 				}
 			}
@@ -326,3 +284,4 @@ public class UnsafeCheckTester {
 	}
 
 }
+

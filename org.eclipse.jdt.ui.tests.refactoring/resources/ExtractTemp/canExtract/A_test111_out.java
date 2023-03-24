@@ -12,6 +12,6 @@ class A {
 		calculateCount();
 	}
 	private int calculateCount() {
-		return 1;
+		return 0;
 	}
 }

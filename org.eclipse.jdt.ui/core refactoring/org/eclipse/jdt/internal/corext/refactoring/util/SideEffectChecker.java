@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Xiaye Chi <xychichina@gmail.com> - [extract local] Extract to local variable may result in NullPointerException. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+ *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety by Identifying the Side Effect of Selected Expression - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
@@ -55,9 +55,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class SideEffectChecker extends ASTVisitor {
 
-	public SideEffectChecker(ASTNode astNode) {
+	public SideEffectChecker(ASTNode astNode, String enclosingMethodSignature) {
 		fExpression= astNode;
 		fSideEffect= false;
+		fEnclosingMethodSignature= enclosingMethodSignature;
 	}
 
 	boolean fSideEffect;
@@ -65,6 +66,8 @@ public class SideEffectChecker extends ASTVisitor {
 	ASTNode fExpression;
 
 	private final int THRESHOLD= 2500;
+
+	private String fEnclosingMethodSignature;
 
 	static private HashSet<String> MARKEDMETHODSET= new HashSet<>();
 	static {
@@ -96,6 +99,9 @@ public class SideEffectChecker extends ASTVisitor {
 				fSideEffect= true;
 				return false;
 			}
+			if (resolveMethodBinding.getMethodDeclaration() != null && fEnclosingMethodSignature != null &&
+					fEnclosingMethodSignature.equals(resolveMethodBinding.getMethodDeclaration().getKey()))
+				return super.preVisit2(node);
 			MethodDeclaration md= findFunctionDefinition(resolveMethodBinding.getDeclaringClass(), resolveMethodBinding);
 			if (md != null && md.getLength() < THRESHOLD) {
 				MethodVisitor mv= new MethodVisitor();
@@ -141,7 +147,7 @@ public class SideEffectChecker extends ASTVisitor {
 			for (IType t : iTypes) {
 				IMethod tmp= JavaModelUtil.findMethod(iMethod.getElementName(),
 						iMethod.getParameterTypes(), false, t);
-				if (tmp != null ) {
+				if (tmp != null) {
 					ICompilationUnit icu= tmp.getCompilationUnit();
 					if (icu == null || icu.getSource() == null) {
 						return null;
