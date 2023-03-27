@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -944,6 +944,37 @@ public class MoveTest extends GenericRefactoringTest {
 		String oldSource= "package p;class A{void foo(){}class Inner{}}";
 		String newSource= "package otherPackage;class A{void foo(){}class Inner{}}";
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", oldSource, false, new NullProgressMonitor());
+		ParticipantTesting.reset();
+		IJavaElement[] javaElements= { cu1};
+		IResource[] resources= {};
+		String[] handles= ParticipantTesting.createHandles(new Object[] {cu1, cu1.getTypes()[0], cu1.getResource()});
+		JavaMoveProcessor processor= verifyEnabled(resources, javaElements, createReorgQueries());
+
+		Object destination= otherPackage;
+		verifyValidDestination(processor, destination);
+
+		assertTrue("source file does not exist before moving", cu1.exists());
+		RefactoringStatus status= performRefactoring(processor, true);
+		assertNull(status);
+		assertFalse("source file exists after moving", cu1.exists());
+		ICompilationUnit newCu= otherPackage.getCompilationUnit(cu1.getElementName());
+		assertTrue("new file does not exist after moving", newCu.exists());
+		assertEqualLines("source differs", newSource, newCu.getSource());
+		ParticipantTesting.testMove(
+				handles,
+				new MoveArguments[] {
+						new MoveArguments(otherPackage, processor.getUpdateReferences()),
+						new MoveArguments(otherPackage, processor.getUpdateReferences()),
+						new MoveArguments(otherPackage.getResource(), processor.getUpdateReferences())});
+	}
+
+	@Test
+	public void testDestination_yes_cuFromRootIssue649() throws Exception {
+		IPackageFragment otherPackage= getRoot().createPackageFragment("otherPackage", true, new NullProgressMonitor());
+		String oldSource= "//Comment1\n//Comment2\nclass A{void foo(){}class Inner{}}";
+		String newSource= "//Comment1\n//Comment2\npackage otherPackage;\n\nclass A{void foo(){}class Inner{}}";
+		IPackageFragment defaultPackage= getRoot().createPackageFragment("", true, new NullProgressMonitor());
+		ICompilationUnit cu1= defaultPackage.createCompilationUnit("A.java", oldSource, false, new NullProgressMonitor());
 		ParticipantTesting.reset();
 		IJavaElement[] javaElements= { cu1};
 		IResource[] resources= {};
