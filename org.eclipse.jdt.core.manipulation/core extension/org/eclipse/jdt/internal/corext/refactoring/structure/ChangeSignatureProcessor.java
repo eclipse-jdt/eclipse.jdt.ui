@@ -113,10 +113,12 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
-import org.eclipse.jdt.internal.corext.Corext;
+import org.eclipse.jdt.internal.corext.CorextCore;
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -133,7 +135,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComme
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -163,10 +165,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class ChangeSignatureProcessor extends RefactoringProcessor implements IDelegateUpdating {
@@ -251,7 +249,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			}
 			return result;
 		} catch(JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaManipulationPlugin.log(e);
 			return new ArrayList<>(0);
 		}
 	}
@@ -287,7 +285,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		try {
 			return ! fMethod.isConstructor();
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaManipulationPlugin.log(e);
 			return false;
 		}
 	}
@@ -748,12 +746,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					RefactoringStatusContext context= JavaStatusContext.create(fTopMethod);
 					String message= Messages.format(RefactoringCoreMessages.MethodChecks_implements,
 							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), BasicElementLabels.getJavaElementName(fTopMethod.getDeclaringType().getFullyQualifiedName('.'))});
-					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, fTopMethod);
+					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, CorextCore.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, fTopMethod);
 				} else {
 					RefactoringStatusContext context= JavaStatusContext.create(fTopMethod);
 					String message= Messages.format(RefactoringCoreMessages.MethodChecks_overrides,
 							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), BasicElementLabels.getJavaElementName(fTopMethod.getDeclaringType().getFullyQualifiedName('.'))});
-					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, fTopMethod);
+					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, CorextCore.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, fTopMethod);
 				}
 			}
 
@@ -795,7 +793,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				}
 				fExceptionInfos= result;
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaManipulationPlugin.log(e);
 			}
 		}
 		return null;
@@ -899,7 +897,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			buff.append(fReturnTypeInfo.getOldTypeName())
 				.append(' ');
 
-		buff.append(JavaElementLabels.getElementLabel(fMethod.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED));
+		buff.append(JavaElementLabelsCore.getElementLabel(fMethod.getParent(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
 		buff.append('.');
 		buff.append(fMethod.getElementName())
 			.append(Signature.C_PARAM_START)
@@ -1255,7 +1253,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (!isVisibilitySameAsInitial())
 					arguments.put(ATTRIBUTE_VISIBILITY, Integer.toString(fVisibility));
 			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
+				JavaManipulationPlugin.log(exception);
 			}
 			int count= 1;
 			for (ParameterInfo info : fParameterInfos) {
@@ -1296,7 +1294,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				count++;
 			}
 		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
+			JavaManipulationPlugin.log(exception);
 			return null;
 		}
 		return descriptor;
@@ -1311,7 +1309,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			if (declaring.isAnonymous() || declaring.isLocal())
 				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
+			JavaManipulationPlugin.log(exception);
 		}
 		return flags;
 	}
@@ -2734,7 +2732,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			int length= fNode.getLength();
 			String msg= "Cannot update found node: nodeType=" + fNode.getNodeType() + "; "  //$NON-NLS-1$//$NON-NLS-2$
 					+ fNode.toString() + "[" + start + ", " + length + "] in " + fCuRewrite.getCu();  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-			JavaPlugin.log(new Exception(msg + ":\n" + fCuRewrite.getCu().getSource().substring(start, start + length))); //$NON-NLS-1$
+			JavaManipulationPlugin.log(new Exception(msg + ":\n" + fCuRewrite.getCu().getSource().substring(start, start + length))); //$NON-NLS-1$
 			fResult.addError(msg, JavaStatusContext.create(fCuRewrite.getCu(), fNode));
 		}
 		@Override
@@ -2905,7 +2903,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	@Override
 	public boolean isApplicable() throws CoreException {
-		return RefactoringAvailabilityTester.isChangeSignatureAvailable(fMethod);
+		return RefactoringAvailabilityTesterCore.isChangeSignatureAvailable(fMethod);
 	}
 
 	@Override

@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -37,13 +36,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 
-	public static final String DUMMY_CLASS_NAME= "$$__$$"; //$NON-NLS-1$
+	public static final String DUMMY_CLASS_NAME= JavaTypeCompletionProcessorCore.DUMMY_CLASS_NAME;
 
 	/**
 	 * The CU name to be used if no parent ICompilationUnit is available.
 	 * The main type of this class will be filtered out from the proposals list.
 	 */
-	public static final String DUMMY_CU_NAME= DUMMY_CLASS_NAME + JavaModelUtil.DEFAULT_CU_SUFFIX;
+	public static final String DUMMY_CU_NAME= JavaTypeCompletionProcessorCore.DUMMY_CU_NAME;
 
 	/**
 	 * Creates a <code>JavaTypeCompletionProcessor</code>.

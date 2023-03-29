@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -86,8 +87,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnit
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ParameterObjectFactory {
 
@@ -669,7 +668,7 @@ public class ParameterObjectFactory {
 				TextEdit rewriteImports= importRewrite.rewriteImports(null);
 				rewriteImports.apply(document);
 			} catch (BadLocationException e) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), RefactoringCoreMessages.IntroduceParameterObjectRefactoring_parameter_object_creation_error, e));
+				throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), RefactoringCoreMessages.IntroduceParameterObjectRefactoring_parameter_object_creation_error, e));
 			}
 			String docContent= document.get();
 			CreateCompilationUnitChange compilationUnitChange= new CreateCompilationUnitChange(unit, docContent, charset);
