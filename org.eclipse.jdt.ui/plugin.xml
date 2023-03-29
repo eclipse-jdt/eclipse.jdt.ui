@@ -6172,18 +6172,22 @@
 					id="org.eclipse.jdt.ui.navigator.actions.StandardActions"
 					overrides="org.eclipse.ui.navigator.resources.actions.EditActions">
 				<enablement>
-					<or>
-						<and>
-							<instanceof value="org.eclipse.core.resources.IResource" />
-							<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
-						</and>
-						<instanceof value="org.eclipse.jdt.core.IJavaElement" />
-						<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
-						<instanceof	value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
-						<adapt type="java.util.Collection">
-							<count value="0" />
-						</adapt>
-					</or>
+ 					<with variable="selection">
+						<iterate operator="or" ifEmpty="false">
+							<or>
+								<and>
+									<instanceof value="org.eclipse.core.resources.IResource" />
+									<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
+								</and>
+								<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+								<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
+								<instanceof	value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
+								<adapt type="java.util.Collection">
+									<count value="0" />
+								</adapt>
+							</or>
+						</iterate>
+					</with>
 				</enablement>
 			</actionProvider>
 			<actionProvider
