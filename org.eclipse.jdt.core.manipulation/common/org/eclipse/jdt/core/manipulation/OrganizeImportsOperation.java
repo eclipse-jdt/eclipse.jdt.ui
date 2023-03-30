@@ -558,7 +558,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	 * @param save If set, the result will be saved
 	 * @param allowSyntaxErrors If set, the operation will only proceed when the compilation unit has no syntax errors
 	 * @param chooseImportQuery Query element to be used for UI interaction or <code>null</code> to not select anything
-	 * @since 1.17
+	 * @since 1.19
 	 */
 	public OrganizeImportsOperation(ICompilationUnit cu, CompilationUnit astRoot, boolean ignoreLowerCaseNames, boolean preserveStarImports, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
 		this(cu, astRoot, ignoreLowerCaseNames, save, allowSyntaxErrors, chooseImportQuery);

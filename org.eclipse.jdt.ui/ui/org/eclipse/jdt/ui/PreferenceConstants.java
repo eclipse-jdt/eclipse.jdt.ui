@@ -449,7 +449,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * @since 3.27
+	 * @since 3.29
 	 */
 	public static final String ORGIMPORTS_PRESERVESTARIMPORTS= CodeGenerationSettingsConstants.ORGIMPORTS_PRESERVESTARIMPORTS;
 
