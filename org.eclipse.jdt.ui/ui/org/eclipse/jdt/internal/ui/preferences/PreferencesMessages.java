@@ -80,6 +80,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ImportOrganizeConfigurationBlock_order_load_button;
 	public static String ImportOrganizeConfigurationBlock_order_save_button;
 	public static String ImportOrganizeConfigurationBlock_ignoreLowerCase_label;
+	public static String ImportOrganizeConfigurationBlock_preserveStarImports;
 	public static String ImportOrganizeConfigurationBlock_threshold_label;
 	public static String ImportOrganizeConfigurationBlock_error_invalidthreshold;
 	public static String ImportOrganizeConfigurationBlock_loadDialog_title;

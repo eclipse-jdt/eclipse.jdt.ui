@@ -276,7 +276,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		CompilationUnit astRoot= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu);
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery(editor[0]));
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, settings.preserveStarImports, !cu.isWorkingCopy(), true, createChooseImportQuery(editor[0]));
 
 		IRewriteTarget target= editor[0].getAdapter(IRewriteTarget.class);
 		if (target != null) {

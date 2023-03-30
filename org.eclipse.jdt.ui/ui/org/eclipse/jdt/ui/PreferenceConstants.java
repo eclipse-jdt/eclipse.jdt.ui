@@ -445,6 +445,15 @@ public class PreferenceConstants {
 	public static final String ORGIMPORTS_IGNORELOWERCASE= CodeGenerationSettingsConstants.ORGIMPORTS_IGNORELOWERCASE;
 
 	/**
+	 * A named preferences that preserves .* imports for an "Organize Import" operation.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.27
+	 */
+	public static final String ORGIMPORTS_PRESERVESTARIMPORTS= CodeGenerationSettingsConstants.ORGIMPORTS_PRESERVESTARIMPORTS;
+
+	/**
 	 * A named preference that specifies whether children of a compilation unit are shown in the package explorer.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.

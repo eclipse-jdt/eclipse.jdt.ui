@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ public class CodeGenerationSettings {
 	public boolean useKeywordThis= false;
 
 	public boolean importIgnoreLowercase= true;
+	public boolean preserveStarImports= false;
 	public boolean overrideAnnotation= false;
 
 	public int tabWidth;
@@ -30,6 +31,7 @@ public class CodeGenerationSettings {
 		settings.createComments= createComments;
 		settings.useKeywordThis= useKeywordThis;
 		settings.importIgnoreLowercase= importIgnoreLowercase;
+		settings.preserveStarImports= preserveStarImports;
 		settings.overrideAnnotation= overrideAnnotation;
 		settings.tabWidth= tabWidth;
 		settings.indentWidth= indentWidth;

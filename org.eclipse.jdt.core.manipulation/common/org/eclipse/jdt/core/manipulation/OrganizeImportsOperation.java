@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -226,6 +226,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private ImportRewrite fImpStructure;
 
 		private boolean fDoIgnoreLowerCaseNames;
+		private boolean fPreserveStarImports;
 
 		private final UnresolvableImportMatcher fUnresolvableImportMatcher;
 
@@ -240,11 +241,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private SourceRange[] fSourceRanges;
 
 
-		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, UnresolvableImportMatcher unresolvableImportMatcher) {
+		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, boolean preserveStarImports, UnresolvableImportMatcher unresolvableImportMatcher) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
 			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
+			fPreserveStarImports= preserveStarImports;
 			fUnresolvableImportMatcher= unresolvableImportMatcher;
 
 			ICompilationUnit cu= impStructure.getCompilationUnit();
@@ -411,8 +413,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (nFound == 0) {
 				// nothing found
 				return null;
-			// You may want to make preserving star imports depending on user preference. In this case use something like fDoPreserveDemandImports from new preferences setting.
-			} else if (fOldDemandImports.contains(typeRefsFound.get(0).getTypeContainerName())) {
+			} else if (fPreserveStarImports && fOldDemandImports.contains(typeRefsFound.get(0).getTypeContainerName())) {
 				// The original code had a * import for this type. Preserve it!
 				TypeNameMatch typeRef= typeRefsFound.get(0);
 				String containerName= typeRef.getTypeContainerName();
@@ -506,6 +507,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private boolean fDoSave;
 
 	private boolean fIgnoreLowerCaseNames;
+	private boolean fPreserveStarImports;
 	private boolean fRestoreExistingImports;
 
 	private IChooseImportQuery fChooseImportQuery;
@@ -546,6 +548,22 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fParsingError= null;
 	}
 
+	/**
+	 * Creates a new OrganizeImportsOperation operation.
+	 *
+	 * @param cu The compilation unit
+	 * @param astRoot the compilation unit AST node
+	 * @param ignoreLowerCaseNames when true, type names starting with a lower case are ignored
+	 * @param preserveStarImports when true, leave existing .* imports alone
+	 * @param save If set, the result will be saved
+	 * @param allowSyntaxErrors If set, the operation will only proceed when the compilation unit has no syntax errors
+	 * @param chooseImportQuery Query element to be used for UI interaction or <code>null</code> to not select anything
+	 * @since 1.17
+	 */
+	public OrganizeImportsOperation(ICompilationUnit cu, CompilationUnit astRoot, boolean ignoreLowerCaseNames, boolean preserveStarImports, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
+		this(cu, astRoot, ignoreLowerCaseNames, save, allowSyntaxErrors, chooseImportQuery);
+		fPreserveStarImports= preserveStarImports;
+	}
 	/**
 	 * Creates a new OrganizeImportsOperation operation.
 	 *
@@ -613,6 +631,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				astRoot,
 				importsRewrite,
 				fIgnoreLowerCaseNames,
+				fPreserveStarImports,
 				unresolvableImportMatcher);
 
 		Iterator<SimpleName> refIterator= typeReferences.iterator();
