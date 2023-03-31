@@ -610,22 +610,67 @@
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
       </perspectiveExtension>
 
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+      <perspectiveExtension
+            editorOnboardingImage="$nl$/icons/full/onboarding_jperspective.png"
+            editorOnboardingText="%perspectiveExtension.editorOnboardingText"
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
          <showInPart id="org.eclipse.ui.navigator.ProjectExplorer"/>
+         <editorOnboardingCommand
+               id="org.eclipse.ui.window.quickAccess">
+         </editorOnboardingCommand>
+         <editorOnboardingCommand
+               id="org.eclipse.ui.window.showKeyAssist">
+         </editorOnboardingCommand>
+         <editorOnboardingCommand
+               id="org.eclipse.ui.newWizard">
+         </editorOnboardingCommand>
+         <editorOnboardingCommand
+               id="org.eclipse.jdt.ui.navigate.open.type">
+         </editorOnboardingCommand>         
       </perspectiveExtension>
 
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+      <perspectiveExtension 
+            editorOnboardingImage="$nl$/icons/full/onboarding_browse_persp.png"
+            editorOnboardingText="%perspectiveExtension.editorOnboardingText"
+			targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
          <showInPart id="org.eclipse.ui.navigator.ProjectExplorer"/>
+         <editorOnboardingCommand
+               id="org.eclipse.ui.window.quickAccess">
+         </editorOnboardingCommand>
+         <editorOnboardingCommand
+               id="org.eclipse.ui.window.showKeyAssist">
+         </editorOnboardingCommand>
+         <editorOnboardingCommand
+               id="org.eclipse.ui.newWizard">
+         </editorOnboardingCommand>
+         <editorOnboardingCommand
+               id="org.eclipse.jdt.ui.navigate.open.type">
+         </editorOnboardingCommand>     
       </perspectiveExtension>
 
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+      <perspectiveExtension
+            editorOnboardingImage="$nl$/icons/full/onboarding_hierch_persp.png"
+            editorOnboardingText="%perspectiveExtension.editorOnboardingText"
+            targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
          <showInPart id="org.eclipse.ui.navigator.ProjectExplorer"/>
+         <editorOnboardingCommand
+               id="org.eclipse.ui.window.quickAccess">
+         </editorOnboardingCommand>
+         <editorOnboardingCommand
+               id="org.eclipse.ui.window.showKeyAssist">
+         </editorOnboardingCommand>
+         <editorOnboardingCommand
+               id="org.eclipse.ui.newWizard">
+         </editorOnboardingCommand>
+         <editorOnboardingCommand
+               id="org.eclipse.jdt.ui.navigate.open.type">
+         </editorOnboardingCommand>              
       </perspectiveExtension>
    </extension>
 
