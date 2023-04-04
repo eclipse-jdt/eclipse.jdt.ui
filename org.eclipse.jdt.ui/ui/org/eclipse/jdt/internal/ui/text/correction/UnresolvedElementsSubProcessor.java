@@ -907,7 +907,8 @@ public class UnresolvedElementsSubProcessor {
 
 						if (qualifiedTypeBinding != null) {
 							if (!qualifiedTypeBinding.getName().equals(simpleBinding.getName()) && !qualifiedTypeBinding.isGenericType() &&
-									!qualifiedTypeBinding.isParameterizedType() && !qualifiedTypeBinding.isWildcardType() && !isInherited(qualifiedTypeBinding, simpleBinding)) {
+									!qualifiedTypeBinding.isParameterizedType() && !qualifiedTypeBinding.isWildcardType() &&
+									!qualifiedTypeBinding.isRawType() && !isInherited(qualifiedTypeBinding, simpleBinding)) {
 								continue;
 							}
 						}
