@@ -2518,4 +2518,150 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		assertProposalDoesNotExist(assists, CorrectionMessages.QuickAssistProcessor_convert_to_try_with_resource);
 	}
 
+	// issue 352 : make suggested imports smarter
+	@Test
+	public void testIssue352_smarterImports() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack3= fSourceFolder.createPackageFragment("test2", false, null);
+		IPackageFragment pack4= fSourceFolder.createPackageFragment("test3", false, null);
+
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test2;\n");
+		buf.append("\n");
+		buf.append("public interface ISomePath {\n");
+		buf.append("    \n");
+		buf.append("    public String getPath();\n");
+		buf.append("\n");
+		buf.append("}\n");
+		buf.append("");
+
+
+		pack3.createCompilationUnit("ISomePath.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test2;\n");
+		buf.append("\n");
+		buf.append("public class BundleInfo extends BundleInfoBasic implements ISomePath {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public String getPath() {\n");
+		buf.append("        // TODO Auto-generated method stub\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		pack3.createCompilationUnit("BundleInfo.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test3;\n");
+		buf.append("\n");
+		buf.append("public class BundleInfo {\n");
+		buf.append("    \n");
+		buf.append("    public int getInt() {\n");
+		buf.append("        return 43;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		pack4.createCompilationUnit("BundleInfo.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import test2.ISomePath;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    \n");
+		buf.append("    public ISomePath getSomePath() {\n");
+		buf.append("        return new BundleInfo();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import test2.BundleInfo;\n");
+		buf.append("import test2.ISomePath;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    \n");
+		buf.append("    public ISomePath getSomePath() {\n");
+		buf.append("        return new BundleInfo();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected});
+	}
+
+	// issue 485 : don't check inheritance for equivalent types
+	@Test
+	public void testIssue485_smarterImports() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack3= fSourceFolder.createPackageFragment("test2", false, null);
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test2;\n");
+		buf.append("\n");
+		buf.append("public class Date {\n");
+		buf.append("    \n");
+		buf.append("    public String getDateString();\n");
+		buf.append("\n");
+		buf.append("}\n");
+		buf.append("");
+
+		pack3.createCompilationUnit("Date.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        Date d1= new Date();\n");
+		buf.append("\n");
+		buf.append("        Date d2;\n");
+		buf.append("        d2=new Date();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 4, null);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import test2.Date;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        Date d1= new Date();\n");
+		buf.append("\n");
+		buf.append("        Date d2;\n");
+		buf.append("        d2=new Date();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected});
+	}
+
 }
