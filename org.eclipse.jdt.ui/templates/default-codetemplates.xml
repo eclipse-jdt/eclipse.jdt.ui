@@ -35,8 +35,6 @@
  */</template>
 
 <template name="typecomment" id="org.eclipse.jdt.ui.text.codetemplates.typecomment" description="%CodeTemplates.typecomment" context="typecomment_context" enabled="true">/**
- * @author ${user}
- *
  * ${tags}
  */</template>
  
@@ -49,8 +47,6 @@
  */</template>
 
 <template name="modulecomment" id="org.eclipse.jdt.ui.text.codetemplates.modulecomment" description="%CodeTemplates.modulecomment" context="modulecomment_context" enabled="true">/**
- * @author ${user}
- *
  * ${tags}
  */</template>
 
