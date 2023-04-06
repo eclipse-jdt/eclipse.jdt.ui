@@ -332,7 +332,7 @@ public abstract class BuildPathBasePage {
 				if (rootCPListElement.isTargetRootNode(changeNodeDirection)) {
 					if (rootCPListElement.getChildren().contains(selElement))
 						break;
-					if (indexOfSelElement != -1) {
+					if (indexOfSelElement != -1 && indexOfSelElement < rootCPListElement.getChildren().size()) {
 						rootCPListElement.getChildren().add(indexOfSelElement, selElement);
 					} else {
 						rootCPListElement.addCPListElement(selElement);
