@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -481,6 +481,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				int prevTokenOffset= scanner.getPosition() + 1;
 				String previous= prevToken == Symbols.TokenEOF ? null : document.get(prevTokenOffset, offset - prevTokenOffset).trim();
 
+				ICompilationUnit cu= (ICompilationUnit)getInputJavaElement();
+				IJavaProject project= cu.getJavaProject();
+				boolean textBlockSupported= JavaModelUtil.is15OrHigher(project);
+
 				switch (event.character) {
 					case '(':
 						if (!fCloseBrackets
@@ -518,7 +522,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 								|| nextToken == Symbols.TokenIDENT
 								|| prevToken == Symbols.TokenIDENT
 								|| next != null && next.length() > 1
-								|| previous != null && previous.length() > 1)
+								|| previous != null && previous.length() > 1
+								|| textBlockSupported && previous == null && offset > 2 && document.get(offset - 2, 2).equals("\"\"")) //$NON-NLS-1$
 							return;
 						break;
 
@@ -529,7 +534,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()))
 					return;
-
 				if (!validateEditorInputState())
 					return;
 
