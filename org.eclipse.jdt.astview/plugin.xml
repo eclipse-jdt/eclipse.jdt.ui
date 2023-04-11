@@ -5,7 +5,7 @@
      <extension
          point="org.eclipse.ui.views">
       <view
-            name="Abstract Syntax Tree"
+            name="%ast.view.name"
             icon="$nl$/icons/view.png"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.astview.views.ASTView"
