@@ -1688,6 +1688,13 @@
             id="org.eclipse.jdt.ui.preferences.PropertiesFileEditorPreferencePage">
             <keywordReference id="org.eclipse.jdt.ui.propertieseditor"/>
       </page>
+      <page
+            name="%launchingPrefName"
+            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.LaunchingPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.LaunchingPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.launching"/>
+      </page>
 
       <page
             name="%compliancePrefName"
@@ -1892,6 +1899,9 @@
       <keyword
             label="%preferenceKeywords.propertieseditor"
             id="org.eclipse.jdt.ui.propertieseditor"/>
+      <keyword
+            label="%preferenceKeywords.launching"
+            id="org.eclipse.jdt.ui.launching"/>
       <keyword
             label="%preferenceKeywords.folding"
             id="org.eclipse.jdt.ui.folding"/>
