@@ -477,7 +477,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public Control createControl(Composite composite) {
 			fGroup= new Group(composite, SWT.NONE);
 			fGroup.setFont(composite.getFont());
-			fGroup.setLayout(initGridLayout(new GridLayout(3, true), true));
+			fGroup.setLayout(initGridLayout(new GridLayout(3, false), true));
 			fGroup.setText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_title);
 
 			fUseEEJRE.doFillIntoGrid(fGroup, 1);
