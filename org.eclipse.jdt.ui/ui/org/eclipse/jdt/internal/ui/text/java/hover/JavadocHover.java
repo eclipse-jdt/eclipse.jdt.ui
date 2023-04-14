@@ -22,6 +22,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.osgi.framework.Bundle;
 
@@ -413,7 +415,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			fAdditionalInfoAffordance= additionalInfoAffordance;
 		}
 
-		private BrowserInformationControl iControl;
+		private static Map<Shell, JavadocHoverInformationControl> iControls = new HashMap<>();
+
+		private JavadocHoverInformationControl iControl;
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
@@ -421,16 +426,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			String tooltipAffordanceString= fAdditionalInfoAffordance ? JavaPlugin.getAdditionalInfoAffordanceString() : EditorsUI.getTooltipAffordanceString();
 			if (BrowserInformationControl.isAvailable(parent)) {
-				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
-				iControl= new BrowserInformationControl(parent, font, tooltipAffordanceString) {
-					/*
-					 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
-					 */
-					@Override
-					public IInformationControlCreator getInformationPresenterControlCreator() {
-						return fInformationPresenterControlCreator;
-					}
-				};
+				iControl = iControls.get(parent);
+				if (iControl != null && iControl.refCount > 0) {
+					++iControl.refCount;
+					return iControl;
+				}
+				iControl= new JavadocHoverInformationControl(parent, tooltipAffordanceString, fInformationPresenterControlCreator);
+				iControls.put(parent, iControl);
 
 				JFaceResources.getColorRegistry().addListener(this); // So propertyChange() method is triggered in context of IPropertyChangeListener
 				setHoverColors();
@@ -1358,5 +1360,28 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
+	private static class JavadocHoverInformationControl extends BrowserInformationControl {
 
+		private final IInformationControlCreator fInformationPresenterControlCreator;
+		private int refCount = 0;
+
+		JavadocHoverInformationControl(Shell parent, String tooltipAffordanceString, IInformationControlCreator informationPresenterControlCreator) {
+			super(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, tooltipAffordanceString);
+			this.fInformationPresenterControlCreator = informationPresenterControlCreator;
+			refCount = 1;
+		}
+
+		@Override
+		public IInformationControlCreator getInformationPresenterControlCreator() {
+			return fInformationPresenterControlCreator;
+		}
+
+		@Override
+		public void dispose() {
+			--refCount;
+			if (refCount == 0) {
+				super.dispose();
+			}
+		}
+	}
 }
