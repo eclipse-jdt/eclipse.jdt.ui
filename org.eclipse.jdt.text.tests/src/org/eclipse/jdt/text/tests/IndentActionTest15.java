@@ -17,31 +17,25 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ListResourceBundle;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.internal.ui.actions.IndentAction;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TestName;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
-import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.SourceViewer;
-
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
-import org.eclipse.jdt.internal.ui.actions.IndentAction;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  *
@@ -223,6 +217,19 @@ public class IndentActionTest15 {
 
 	@Test
 	public void testIssue414_4() throws Exception {
+		IJavaProject project= indentTestSetup.getProject();
+		String value= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, true);
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, Integer.toString(DefaultCodeFormatterConstants.INDENT_PRESERVE));
+		try {
+			selectAll();
+			assertIndentResult();
+		} finally {
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, value);
+		}
+	}
+
+	@Test
+	public void testIssue414_5() throws Exception {
 		IJavaProject project= indentTestSetup.getProject();
 		String value= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, true);
 		project.setOption(DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION, Integer.toString(DefaultCodeFormatterConstants.INDENT_PRESERVE));
