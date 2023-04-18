@@ -2653,7 +2653,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 3.29
 	 */
-	public final static String LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLICATIONS= "launch_application_name_fully_qualified"; //$NON-NLS-1$
+	public final static String LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLICATION= "launch_name_fully_qualified_for_application"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether a new Java Applet launch configuration name be fully qualified or not.
@@ -2662,7 +2662,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 3.29
 	 */
-	public final static String LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLET= "launch_applet_name_fully_qualified"; //$NON-NLS-1$
+	public final static String LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLET= "launch_name_fully_qualified_for_applet"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether new JUnit launch configurations names are fully qualified or not.
@@ -2671,7 +2671,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 3.29
 	 */
-	public final static String LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TESTS= "launch_junit_test_name_fully_qualified"; //$NON-NLS-1$
+	public final static String LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TEST= "launch_name_fully_qualified_for_junit_test"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether Java comments should be
@@ -4064,9 +4064,9 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER, false);
 
 		// LaunchingPreferencePage
-		store.setDefault(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLICATIONS, false);
+		store.setDefault(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLICATION, false);
 		store.setDefault(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLET, false);
-		store.setDefault(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TESTS, false);
+		store.setDefault(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TEST, false);
 
 		// JavaEditorPreferencePage
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);

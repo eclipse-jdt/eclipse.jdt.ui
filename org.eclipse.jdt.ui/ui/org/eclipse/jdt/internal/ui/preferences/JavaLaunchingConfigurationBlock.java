@@ -33,11 +33,11 @@ public class JavaLaunchingConfigurationBlock extends OptionsConfigurationBlock {
 	// --------------------- General
 
 	private static final Key PREF_APPLICATION_NAME_FULLY_QUALIFIED_ENABLED= getJDTUIKey(
-			PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLICATIONS);
+			PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLICATION);
 	private static final Key PREF_APPLET_NAME_FULLY_QUALIFIED_ENABLED= getJDTUIKey(
 			PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLET);
 	private static final Key PREF_JUNIT_TESTS_NAME_FULLY_QUALIFIED_ENABLED= getJDTUIKey(
-			PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TESTS);
+			PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TEST);
 
 	private static final String[] TRUE_FALSE= new String[] { "true", "false" }; //$NON-NLS-1$ //$NON-NLS-2$
 

@@ -271,10 +271,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	}
 
 	private IType chooseType(Set<IType> types, String mode) throws InterruptedException {
-		var dialog = new ElementTreeSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED), new TreeProvider(types)) {
+		var dialog= new ElementTreeSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED), new TreeProvider(types)) {
 			@Override
 			protected TreeViewer createTreeViewer(Composite parent) {
-				var tree = super.createTreeViewer(parent);
+				var tree= super.createTreeViewer(parent);
 				tree.expandAll();
 				return tree;
 			}
@@ -447,8 +447,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * @since 3.8
 	 */
 	protected String suggestLaunchConfigurationName(IJavaElement element, String fullTestName) {
-		IPreferenceStore preferenceStore = JavaPlugin.getDefault().getPreferenceStore();
-		boolean useQualification = preferenceStore.getBoolean(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TESTS);
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		boolean useQualification= preferenceStore.getBoolean(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TEST);
 		switch (element.getElementType()) {
 			case IJavaElement.JAVA_PROJECT:
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
