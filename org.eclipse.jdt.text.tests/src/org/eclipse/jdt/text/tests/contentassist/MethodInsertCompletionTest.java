@@ -147,9 +147,14 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	public void testIssue417() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		String oldPrefs= getJDTUIPrefs().getString(PreferenceConstants.TYPEFILTER_ENABLED);
 		getJDTUIPrefs().setValue(PreferenceConstants.TYPEFILTER_ENABLED, "java.lang.String");
-		addLocalVariables("java.lang.String s;");
-		assertMethodBodyIncrementalCompletion("s.ind|", "s.indexOf|");
+		try {
+			addLocalVariables("java.lang.String s;");
+			assertMethodBodyIncrementalCompletion("s.ind|", "s.indexOf|");
+		} finally {
+			getJDTUIPrefs().setValue(PreferenceConstants.TYPEFILTER_ENABLED, oldPrefs);
+		}
 	}
 
 	@Test
