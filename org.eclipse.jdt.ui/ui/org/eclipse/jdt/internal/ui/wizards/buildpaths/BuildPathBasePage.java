@@ -292,11 +292,14 @@ public abstract class BuildPathBasePage {
 	}
 
 	protected void setRootExpansionState(TreeListDialogField<CPListElement> list, boolean state, boolean isClassPathRoot) {
+		if (list.getTreeViewer() == null) {
+			return;
+		}
 		for (CPListElement cpListElement : list.getElements()) {
-			if (cpListElement.isClassPathRootNode() && isClassPathRoot) {
+			if (cpListElement.isClassPathRootNode() && isClassPathRoot && list.getTreeViewer() != null) {
 				list.getTreeViewer().setExpandedState(cpListElement, state);
 			}
-			if (cpListElement.isModulePathRootNode() && !isClassPathRoot) {
+			if (cpListElement.isModulePathRootNode() && !isClassPathRoot && list.getTreeViewer() != null) {
 				list.getTreeViewer().setExpandedState(cpListElement, state);
 			}
 		}
