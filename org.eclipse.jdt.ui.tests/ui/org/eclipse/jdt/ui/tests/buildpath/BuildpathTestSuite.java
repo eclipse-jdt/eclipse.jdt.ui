@@ -25,7 +25,8 @@ import org.junit.runners.Suite;
 	BuildpathModifierActionEnablementTest.class,
 	BuildpathModifierActionTest.class,
 	CPUserLibraryTest.class,
-	BuildpathProblemQuickFixTest.class
+	BuildpathProblemQuickFixTest.class,
+	ClassPathElementsOrderTest.class
 })
 public class BuildpathTestSuite {
 }
