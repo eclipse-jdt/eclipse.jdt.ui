@@ -88,10 +88,10 @@ import org.eclipse.unittest.ui.ConfigureViewerSupport;
  */
 public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
-	private static final String EMPTY_STRING= ""; //$NON-NLS-1$
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	// see org.junit.runner.Description.METHOD_AND_CLASS_NAME_PATTERN
-	private static final Pattern METHOD_AND_CLASS_NAME_PATTERN= Pattern.compile("(.*)\\((.*)\\)"); //$NON-NLS-1$
+	private static final Pattern METHOD_AND_CLASS_NAME_PATTERN = Pattern.compile("(.*)\\((.*)\\)"); //$NON-NLS-1$
 
 	/**
 	 * Default constructor.
@@ -101,9 +101,9 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	@Override
 	public void launch(IEditorPart editor, String mode) {
-		ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+		ITypeRoot element = JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element != null) {
-			IMember selectedMember= resolveSelectedMemberName(editor, element);
+			IMember selectedMember = resolveSelectedMemberName(editor, element);
 			if (selectedMember != null) {
 				launch(new Object[] { selectedMember }, mode);
 			} else {
@@ -116,23 +116,23 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private IMember resolveSelectedMemberName(IEditorPart editor, ITypeRoot element) {
 		try {
-			ISelectionProvider selectionProvider= editor.getSite().getSelectionProvider();
+			ISelectionProvider selectionProvider = editor.getSite().getSelectionProvider();
 			if (selectionProvider == null)
 				return null;
 
-			ISelection selection= selectionProvider.getSelection();
+			ISelection selection = selectionProvider.getSelection();
 			if (!(selection instanceof ITextSelection))
 				return null;
 
-			ITextSelection textSelection= (ITextSelection) selection;
+			ITextSelection textSelection = (ITextSelection) selection;
 
-			IJavaElement elementAtOffset= SelectionConverter.getElementAtOffset(element, textSelection);
+			IJavaElement elementAtOffset = SelectionConverter.getElementAtOffset(element, textSelection);
 			if (!(elementAtOffset instanceof IMethod) && !(elementAtOffset instanceof IType))
 				return null;
 
-			IMember member= (IMember) elementAtOffset;
+			IMember member = (IMember) elementAtOffset;
 
-			ISourceRange nameRange= member.getNameRange();
+			ISourceRange nameRange = member.getNameRange();
 			if (nameRange.getOffset() <= textSelection.getOffset() && textSelection.getOffset()
 					+ textSelection.getLength() <= nameRange.getOffset() + nameRange.getLength())
 				return member;
@@ -153,29 +153,29 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private void launch(Object[] elements, String mode) {
 		try {
-			IJavaElement elementToLaunch= null;
+			IJavaElement elementToLaunch = null;
 
 			if (elements.length == 1) {
-				Object selected= elements[0];
+				Object selected = elements[0];
 				if (!(selected instanceof IJavaElement) && selected instanceof IAdaptable) {
-					selected= ((IAdaptable) selected).getAdapter(IJavaElement.class);
+					selected = ((IAdaptable) selected).getAdapter(IJavaElement.class);
 				}
 				if (selected instanceof IJavaElement) {
-					IJavaElement element= (IJavaElement) selected;
+					IJavaElement element = (IJavaElement) selected;
 					switch (element.getElementType()) {
 					case IJavaElement.JAVA_PROJECT:
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 					case IJavaElement.PACKAGE_FRAGMENT:
 					case IJavaElement.TYPE:
 					case IJavaElement.METHOD:
-						elementToLaunch= element;
+						elementToLaunch = element;
 						break;
 					case IJavaElement.CLASS_FILE:
 						if (element instanceof IOrdinaryClassFile)
-							elementToLaunch= ((IOrdinaryClassFile) element).getType();
+							elementToLaunch = ((IOrdinaryClassFile) element).getType();
 						break;
 					case IJavaElement.COMPILATION_UNIT:
-						elementToLaunch= findTypeToLaunch((ICompilationUnit) element, mode);
+						elementToLaunch = findTypeToLaunch((ICompilationUnit) element, mode);
 						break;
 					}
 				}
@@ -203,7 +203,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private IType findTypeToLaunch(ICompilationUnit cu, String mode)
 			throws InterruptedException, InvocationTargetException {
-		var types= findTypesToLaunch(cu);
+		var types = findTypesToLaunch(cu);
 		if (types.isEmpty()) {
 			return null;
 		} else if (types.size() > 1) {
@@ -218,26 +218,26 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	}
 
 	private void performLaunch(IJavaElement element, String mode) throws InterruptedException, CoreException {
-		ILaunchConfigurationWorkingCopy temparary= createLaunchConfiguration(element);
-		ILaunchConfiguration config= findExistingLaunchConfiguration(temparary, mode);
+		ILaunchConfigurationWorkingCopy temparary = createLaunchConfiguration(element);
+		ILaunchConfiguration config = findExistingLaunchConfiguration(temparary, mode);
 		if (config == null) {
 			// no existing found: create a new one
-			config= temparary.doSave();
+			config = temparary.doSave();
 		}
 		DebugUITools.launch(config, mode);
 	}
 
 	static class TreeProvider implements ITreeContentProvider {
-		private final static Object ROOT= new Object();
+		private final static Object ROOT = new Object();
 
-		private final Map<Object, List<IType>> tree= new HashMap<>();
+		private final Map<Object, List<IType>> tree = new HashMap<>();
 
 		public TreeProvider(Set<IType> types) {
 			for (var type : types) {
-				var parent= type.getParent();
-				var parentInTree= types.contains(parent) ? parent : ROOT;
+				var parent = type.getParent();
+				var parentInTree = types.contains(parent) ? parent : ROOT;
 				tree.compute(parentInTree, (key, value) -> {
-					var list= value != null ? value : new ArrayList<IType>();
+					var list = value != null ? value : new ArrayList<IType>();
 					list.add(type);
 					return list;
 				});
@@ -251,7 +251,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 		@Override
 		public Object[] getChildren(Object parentElement) {
-			var children= tree.get(parentElement);
+			var children = tree.get(parentElement);
 			return children != null ? children.toArray() : new Object[0];
 		}
 
@@ -262,17 +262,17 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 		@Override
 		public boolean hasChildren(Object element) {
-			var children= tree.get(element);
+			var children = tree.get(element);
 			return children != null && !children.isEmpty();
 		}
 	}
 
 	private IType chooseType(Set<IType> types, String mode) throws InterruptedException {
-		var dialog= new ElementTreeSelectionDialog(getShell(),
+		var dialog = new ElementTreeSelectionDialog(getShell(),
 				new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED), new TreeProvider(types)) {
 			@Override
 			protected TreeViewer createTreeViewer(Composite parent) {
-				var tree= super.createTreeViewer(parent);
+				var tree = super.createTreeViewer(parent);
 				tree.expandAll();
 				return tree;
 			}
@@ -311,8 +311,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 */
 	private ILaunchConfiguration chooseConfiguration(List<ILaunchConfiguration> configList, String mode)
 			throws InterruptedException {
-		IDebugModelPresentation labelProvider= DebugUITools.newDebugModelPresentation();
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
+		IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
+		ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setElements(configList.toArray());
 		dialog.setTitle(Messages.UnitTestLaunchShortcut_message_selectConfiguration);
 		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
@@ -321,7 +321,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			dialog.setMessage(Messages.UnitTestLaunchShortcut_message_selectRunConfiguration);
 		}
 		dialog.setMultipleSelection(false);
-		int result= dialog.open();
+		int result = dialog.open();
 		if (result == Window.OK) {
 			return (ILaunchConfiguration) dialog.getFirstResult();
 		}
@@ -396,23 +396,23 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		case IJavaElement.JAVA_PROJECT:
 		case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 		case IJavaElement.PACKAGE_FRAGMENT: {
-			containerHandleId= element.getHandleIdentifier();
-			mainTypeQualifiedName= EMPTY_STRING;
+			containerHandleId = element.getHandleIdentifier();
+			mainTypeQualifiedName = EMPTY_STRING;
 			break;
 		}
 		case IJavaElement.TYPE: {
-			containerHandleId= EMPTY_STRING;
-			mainTypeQualifiedName= ((IType) element).getFullyQualifiedName('.'); // don't replace, fix for binary inner
+			containerHandleId = EMPTY_STRING;
+			mainTypeQualifiedName = ((IType) element).getFullyQualifiedName('.'); // don't replace, fix for binary inner
 																					// types
 			break;
 		}
 		case IJavaElement.METHOD: {
-			IMethod method= (IMethod) element;
-			testName= method.getElementName(); // Test-names can not be specified when launching a Java method.
-			testName+= JUnitStubUtility.getParameterTypes(method, false);
-			containerHandleId= EMPTY_STRING;
-			IType declaringType= method.getDeclaringType();
-			mainTypeQualifiedName= declaringType.getFullyQualifiedName('.');
+			IMethod method = (IMethod) element;
+			testName = method.getElementName(); // Test-names can not be specified when launching a Java method.
+			testName += JUnitStubUtility.getParameterTypes(method, false);
+			containerHandleId = EMPTY_STRING;
+			IType declaringType = method.getDeclaringType();
+			mainTypeQualifiedName = declaringType.getFullyQualifiedName('.');
 			break;
 		}
 		default:
@@ -420,11 +420,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 					"Invalid element type to create a launch configuration: " + element.getClass().getName()); //$NON-NLS-1$
 		}
 
-		ILaunchConfigurationType configType= getLaunchManager()
+		ILaunchConfigurationType configType = getLaunchManager()
 				.getLaunchConfigurationType(getLaunchConfigurationTypeId());
-		String configName= getLaunchManager()
+		String configName = getLaunchManager()
 				.generateLaunchConfigurationName(suggestLaunchConfigurationName(element, testName));
-		ILaunchConfigurationWorkingCopy wc= configType.newInstance(null, configName);
+		ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, configName);
 
 		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, mainTypeQualifiedName);
 		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, element.getJavaProject().getElementName());
@@ -448,7 +448,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		if (testName != null) {
 			wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, testName);
 		}
-		boolean isRunWithJUnitPlatform= JUnitTestPlugin.isRunWithJUnitPlatform(element);
+		boolean isRunWithJUnitPlatform = JUnitTestPlugin.isRunWithJUnitPlatform(element);
 		if (isRunWithJUnitPlatform) {
 			wc.setAttribute(JUnitLaunchConfigurationConstants.ATTR_RUN_WITH_JUNIT_PLATFORM_ANNOTATION, true);
 		}
@@ -467,23 +467,23 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * @return The suggested name for the launch configuration.
 	 */
 	protected String suggestLaunchConfigurationName(IJavaElement element, String fullTestName) {
-		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
-		boolean useQualification= preferenceStore
+		IPreferenceStore preferenceStore = PreferenceConstants.getPreferenceStore();
+		boolean useQualification = preferenceStore
 				.getBoolean(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TEST);
 		switch (element.getElementType()) {
 		case IJavaElement.JAVA_PROJECT:
 		case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 		case IJavaElement.PACKAGE_FRAGMENT:
-			String name= JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED);
+			String name = JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED);
 			return name.substring(name.lastIndexOf(IPath.SEPARATOR) + 1);
 		case IJavaElement.TYPE:
 			if (fullTestName != null) {
-				Matcher matcher= METHOD_AND_CLASS_NAME_PATTERN.matcher(fullTestName);
+				Matcher matcher = METHOD_AND_CLASS_NAME_PATTERN.matcher(fullTestName);
 				if (matcher.matches()) {
-					String typeFQN= matcher.group(2);
-					String testName= matcher.group(1);
-					int typeFQNDot= typeFQN.lastIndexOf('.');
-					String typeName= typeFQNDot >= 0 ? typeFQN.substring(typeFQNDot + 1) : typeFQN;
+					String typeFQN = matcher.group(2);
+					String testName = matcher.group(1);
+					int typeFQNDot = typeFQN.lastIndexOf('.');
+					String typeName = typeFQNDot >= 0 ? typeFQN.substring(typeFQNDot + 1) : typeFQN;
 					return typeName + " " + testName; //$NON-NLS-1$
 				}
 				return (useQualification ? ((IType) element).getFullyQualifiedName('.') : element.getElementName())
@@ -491,9 +491,9 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			}
 			return useQualification ? ((IType) element).getFullyQualifiedName('.') : element.getElementName();
 		case IJavaElement.METHOD:
-			IMethod method= (IMethod) element;
-			String methodName= method.getElementName();
-			methodName+= JUnitStubUtility.getParameterTypes(method, true); // use simple names of parameter types
+			IMethod method = (IMethod) element;
+			String methodName = method.getElementName();
+			methodName += JUnitStubUtility.getParameterTypes(method, true); // use simple names of parameter types
 			return useQualification ? method.getDeclaringType().getFullyQualifiedName('.')
 					: method.getDeclaringType().getElementName() + '.' + methodName;
 		default:
@@ -520,8 +520,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			String[] attributeToCompare) {
 		try {
 			for (String element : attributeToCompare) {
-				String val1= config1.getAttribute(element, EMPTY_STRING);
-				String val2= config2.getAttribute(element, EMPTY_STRING);
+				String val1 = config1.getAttribute(element, EMPTY_STRING);
+				String val2 = config2.getAttribute(element, EMPTY_STRING);
 				if (!val1.equals(val2)) {
 					return false;
 				}
@@ -535,7 +535,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private ILaunchConfiguration findExistingLaunchConfiguration(ILaunchConfigurationWorkingCopy temporary, String mode)
 			throws InterruptedException, CoreException {
-		List<ILaunchConfiguration> candidateConfigs= findExistingLaunchConfigurations(temporary);
+		List<ILaunchConfiguration> candidateConfigs = findExistingLaunchConfigurations(temporary);
 
 		// If there are no existing configs associated with the IType, create
 		// one.
@@ -543,7 +543,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		// Otherwise, if there is more than one config associated with the
 		// IType, prompt the
 		// user to choose one.
-		int candidateCount= candidateConfigs.size();
+		int candidateCount = candidateConfigs.size();
 		switch (candidateCount) {
 		case 0:
 			return null;
@@ -554,7 +554,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			// cancelled the dialog, in which case this method returns null,
 			// since cancelling the dialog should also cancel launching
 			// anything.
-			ILaunchConfiguration config= chooseConfiguration(candidateConfigs, mode);
+			ILaunchConfiguration config = chooseConfiguration(candidateConfigs, mode);
 			if (config != null) {
 				return config;
 			}
@@ -565,12 +565,12 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private List<ILaunchConfiguration> findExistingLaunchConfigurations(ILaunchConfigurationWorkingCopy temporary)
 			throws CoreException {
-		ILaunchConfigurationType configType= temporary.getType();
+		ILaunchConfigurationType configType = temporary.getType();
 
-		ILaunchConfiguration[] configs= getLaunchManager().getLaunchConfigurations(configType);
-		String[] attributeToCompare= getAttributeNamesToCompare();
+		ILaunchConfiguration[] configs = getLaunchManager().getLaunchConfigurations(configType);
+		String[] attributeToCompare = getAttributeNamesToCompare();
 
-		ArrayList<ILaunchConfiguration> candidateConfigs= new ArrayList<>(configs.length);
+		ArrayList<ILaunchConfiguration> candidateConfigs = new ArrayList<>(configs.length);
 		for (ILaunchConfiguration config : configs) {
 			if (hasSameAttributes(config, temporary, attributeToCompare)) {
 				candidateConfigs.add(config);
@@ -585,7 +585,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	@Override
 	public ILaunchConfiguration[] getLaunchConfigurations(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection ss= (IStructuredSelection) selection;
+			IStructuredSelection ss = (IStructuredSelection) selection;
 			if (ss.size() == 1) {
 				return findExistingLaunchConfigurations(ss.getFirstElement());
 			}
@@ -598,20 +598,20 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 */
 	@Override
 	public ILaunchConfiguration[] getLaunchConfigurations(final IEditorPart editor) {
-		final ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+		final ITypeRoot element = JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element != null) {
-			IMember selectedMember= null;
+			IMember selectedMember = null;
 			if (Display.getCurrent() == null) {
-				final AtomicReference<IMember> temp= new AtomicReference<>();
-				Runnable runnable= () -> temp.set(resolveSelectedMemberName(editor, element));
+				final AtomicReference<IMember> temp = new AtomicReference<>();
+				Runnable runnable = () -> temp.set(resolveSelectedMemberName(editor, element));
 				Display.getDefault().syncExec(runnable);
-				selectedMember= temp.get();
+				selectedMember = temp.get();
 			} else {
-				selectedMember= resolveSelectedMemberName(editor, element);
+				selectedMember = resolveSelectedMemberName(editor, element);
 			}
-			Object candidate= element;
+			Object candidate = element;
 			if (selectedMember != null) {
-				candidate= selectedMember;
+				candidate = selectedMember;
 			}
 			return findExistingLaunchConfigurations(candidate);
 		}
@@ -620,11 +620,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private ILaunchConfiguration[] findExistingLaunchConfigurations(Object candidate) {
 		if (!(candidate instanceof IJavaElement) && candidate instanceof IAdaptable) {
-			candidate= ((IAdaptable) candidate).getAdapter(IJavaElement.class);
+			candidate = ((IAdaptable) candidate).getAdapter(IJavaElement.class);
 		}
 		if (candidate instanceof IJavaElement) {
-			IJavaElement element= (IJavaElement) candidate;
-			IJavaElement elementToLaunch= null;
+			IJavaElement element = (IJavaElement) candidate;
+			IJavaElement elementToLaunch = null;
 			try {
 				switch (element.getElementType()) {
 				case IJavaElement.JAVA_PROJECT:
@@ -632,21 +632,21 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.TYPE:
 				case IJavaElement.METHOD:
-					elementToLaunch= element;
+					elementToLaunch = element;
 					break;
 				case IJavaElement.CLASS_FILE:
 					if (element instanceof IOrdinaryClassFile)
-						elementToLaunch= ((IOrdinaryClassFile) element).getType();
+						elementToLaunch = ((IOrdinaryClassFile) element).getType();
 					break;
 				case IJavaElement.COMPILATION_UNIT:
-					elementToLaunch= ((ICompilationUnit) element).findPrimaryType();
+					elementToLaunch = ((ICompilationUnit) element).findPrimaryType();
 					break;
 				}
 				if (elementToLaunch == null) {
 					return null;
 				}
-				ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(elementToLaunch);
-				List<ILaunchConfiguration> list= findExistingLaunchConfigurations(workingCopy);
+				ILaunchConfigurationWorkingCopy workingCopy = createLaunchConfiguration(elementToLaunch);
+				List<ILaunchConfiguration> list = findExistingLaunchConfigurations(workingCopy);
 				return list.toArray(new ILaunchConfiguration[list.size()]);
 			} catch (CoreException e) {
 			}
@@ -660,11 +660,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	@Override
 	public IResource getLaunchableResource(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection ss= (IStructuredSelection) selection;
+			IStructuredSelection ss = (IStructuredSelection) selection;
 			if (ss.size() == 1) {
-				Object selected= ss.getFirstElement();
+				Object selected = ss.getFirstElement();
 				if (!(selected instanceof IJavaElement) && selected instanceof IAdaptable) {
-					selected= ((IAdaptable) selected).getAdapter(IJavaElement.class);
+					selected = ((IAdaptable) selected).getAdapter(IJavaElement.class);
 				}
 				if (selected instanceof IJavaElement) {
 					return ((IJavaElement) selected).getResource();
@@ -679,7 +679,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 */
 	@Override
 	public IResource getLaunchableResource(IEditorPart editor) {
-		ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+		ITypeRoot element = JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element != null) {
 			try {
 				return element.getCorrespondingResource();
