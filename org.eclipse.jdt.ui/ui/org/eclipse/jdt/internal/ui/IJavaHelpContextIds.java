@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -362,6 +362,7 @@ public interface IJavaHelpContextIds {
 	String PROBLEM_SEVERITIES_PREFERENCE_PAGE= 							PREFIX + "problem_severities_preference_page_context"; //$NON-NLS-1$
 	String TODOTASK_PREFERENCE_PAGE= 									PREFIX + "tasktags_preference_page_context"; //$NON-NLS-1$
 	String TYPING_PREFERENCE_PAGE= 										PREFIX + "typing_preference_page_context"; //$NON-NLS-1$
+	String LAUNCHING_PREFERENCE_PAGE=									PREFIX + "launching_preference_page_context"; //$NON-NLS-1$
 
 	String TEMPLATE_PREFERENCE_PAGE= 									PREFIX + "template_preference_page_context"; //$NON-NLS-1$
 	String NEW_JAVA_PROJECT_PREFERENCE_PAGE= 							PREFIX + "new_java_project_preference_page_context"; //$NON-NLS-1$

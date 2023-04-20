@@ -915,4 +915,10 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_onMethods_label;
 	public static String JavaEditorCodeMiningConfigurationBlock_showImplementations_label;
 	public static String JavaEditorCodeMiningConfigurationBlock_showParameterNames_label;
+
+	public static String JavaLaunchingConfigurationBlock_application_name_fully_qualified_label;
+	public static String JavaLaunchingConfigurationBlock_applet_name_fully_qualified_label;
+	public static String JavaLaunchingConfigurationBlock_junit_name_fully_qualified_label;
+	public static String JavaLaunchingConfigurationBlock_name_description;
+
 }
