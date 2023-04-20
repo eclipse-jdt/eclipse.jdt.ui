@@ -278,7 +278,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			if (isIgnored(proposal.getKind())) {
 				return;
 			}
-
+			getDeclaringType(proposal);
 			if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
 				acceptPotentialMethodDeclaration(proposal);
 			} else {
