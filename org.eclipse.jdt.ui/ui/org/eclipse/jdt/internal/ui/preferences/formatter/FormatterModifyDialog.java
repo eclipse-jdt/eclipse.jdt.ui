@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,26 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
+import org.eclipse.jdt.internal.ui.preferences.PreferenceHighlight;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SectionBuilder;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SimpleTreeBuilder;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.FocusAdapter;
@@ -45,32 +65,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.jface.resource.ImageDescriptor;
-
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
-import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
-import org.eclipse.jdt.internal.ui.preferences.PreferenceHighlight;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SectionBuilder;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SimpleTreeBuilder;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 
 public class FormatterModifyDialog extends ModifyDialog {
@@ -1586,7 +1580,11 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_never_indent_block_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN)
 				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_never_join_lines, DefaultCodeFormatterConstants.FORMATTER_JOIN_LINES_IN_COMMENTS)
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_comments_tree_javadocs, "-javadocs") //$NON-NLS-1$
-						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_format_html, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML)
+						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_format_html, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML, pref -> {
+							CheckboxPreference child= fTree.addCheckbox(pref, FormatterMessages.FormatterModifyDialog_comments_pref_javadoc_do_not_put_block_tags_on_separate_lines,
+									DefaultCodeFormatterConstants.FORMATTER_COMMENT_JAVADOC_DO_NOT_SEPARATE_BLOCK_TAGS, CheckboxPreference.FALSE_TRUE);
+							pref.addDependant(child, valueAcceptor(DefaultCodeFormatterConstants.TRUE));
+						})
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_format_code_snippets, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE)
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_blank_line_before_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS)
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_blank_line_beftween_different_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS)
