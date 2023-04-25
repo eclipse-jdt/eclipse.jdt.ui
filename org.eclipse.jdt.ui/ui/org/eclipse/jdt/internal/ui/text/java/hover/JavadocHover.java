@@ -66,6 +66,7 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -298,6 +299,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 	}
 
+	/**
+	 * @return timeout that we want to have on javadoc hover to avoid two browser instances hanging
+	 *         around for every opened java editor
+	 */
+	private static int getDisposeHoverTimeout() {
+		String key = IWorkbenchPreferenceConstants.DISPOSE_CLOSED_BROWSER_HOVER_TIMEOUT;
+		int timeout = Platform.getPreferencesService().getInt("org.eclipse.ui", key, -1, null);  //$NON-NLS-1$
+		return timeout;
+	}
 
 	/**
 	 * Presenter control creator.
@@ -318,16 +328,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			fSite= site;
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
-		 */
 		@Override
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			if (BrowserInformationControl.isAvailable(parent)) {
 				ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
 				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tbm);
-
+				iControl.setDisposeTimeout(getDisposeHoverTimeout());
 				final BackAction backAction= new BackAction(iControl);
 				backAction.setEnabled(false);
 				tbm.add(backAction);
@@ -423,15 +430,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			if (BrowserInformationControl.isAvailable(parent)) {
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
 				iControl= new BrowserInformationControl(parent, font, tooltipAffordanceString) {
-					/*
-					 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
-					 */
+
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
 						return fInformationPresenterControlCreator;
 					}
 				};
-
+				iControl.setDisposeTimeout(getDisposeHoverTimeout());
 				JFaceResources.getColorRegistry().addListener(this); // So propertyChange() method is triggered in context of IPropertyChangeListener
 				setHoverColors();
 
