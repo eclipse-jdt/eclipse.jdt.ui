@@ -1002,13 +1002,16 @@ public class IndentAction extends TextEditorAction {
 					}
 				}
 			}
-		} else if (minIndent > 0) {
+		}
+		if (minIndent > 0) {
 			IRegion commandLine= document.getLineInformationOfOffset(commandOffset);
-			// handle extra indentation but ignore empty lines or short lines with only white-space
-			if (commandLine.getLength() > minIndent) {
-				String currentLineIndent= getLineIndentation(document, commandLine.getOffset());
-				if (currentLineIndent.length() > minIndent) {
-					commandIndent= currentLineIndent.substring(minIndent);
+			if (commandLine.getOffset() != line.getOffset()) {
+				// handle extra indentation but ignore empty lines or short lines with only white-space
+				if (commandLine.getLength() > minIndent) {
+					String currentLineIndent= getLineIndentation(document, commandLine.getOffset());
+					if (currentLineIndent.length() > minIndent) {
+						commandIndent= currentLineIndent.substring(minIndent);
+					}
 				}
 			}
 		}

@@ -45,7 +45,7 @@ public class IndentActionTest15 {
 	@Rule
 	public TestName tn= new TestName();
 
-	private static final String PROJECT= "IndentTests";
+	private static final String PROJECT= "IndentTests15";
 
 	private final static class IndentTestSetup extends ExternalResource {
 		private IJavaProject fJavaProject;

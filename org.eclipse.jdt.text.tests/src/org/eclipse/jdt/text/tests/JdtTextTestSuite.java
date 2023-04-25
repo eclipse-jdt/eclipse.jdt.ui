@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,14 +14,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-
 import org.eclipse.jdt.text.tests.codemining.CodeMiningTriggerTest;
 import org.eclipse.jdt.text.tests.codemining.ParameterNamesCodeMiningTest;
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.spelling.SpellCheckEngineTestCase;
 import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 
 /**
@@ -69,6 +68,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 	EnumConstructorTargetFinderTest.class,
 	ContentAssistTestSuite.class,
 	IndentActionTest.class,
+	IndentActionTest15.class,
 	TemplatesTestSuite.class,
 	JavaElementPrefixPatternMatcherTest.class,
 	CodeMiningTriggerTest.class,
