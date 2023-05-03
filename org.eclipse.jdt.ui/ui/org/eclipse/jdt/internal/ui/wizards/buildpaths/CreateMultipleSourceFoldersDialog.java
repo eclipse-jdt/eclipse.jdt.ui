@@ -168,6 +168,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 						return wizard;
 					}
 				};
+				action.setShell(getShell());
 				action.addPropertyChangeListener(event -> {
 					if (IAction.RESULT.equals(event.getProperty())) {
 						if (event.getNewValue().equals(Boolean.TRUE)) {
