@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,21 +22,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.jface.text.Position;
-
-import org.eclipse.search.ui.text.Match;
-
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -51,13 +44,13 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchRequestor;
-
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
+import org.eclipse.jface.text.Position;
+import org.eclipse.search.ui.text.Match;
 
 
 class NLSSearchResultRequestor extends SearchRequestor {
@@ -84,6 +77,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	private NLSSearchResult fResult;
 	private IFile fPropertiesFile;
 	private Properties fProperties;
+	private Properties fSpecifiedAsUsedProperties;
 	private HashSet<String> fUsedPropertyNames;
 
 	public NLSSearchResultRequestor(IFile propertiesFile, NLSSearchResult result) {
@@ -165,7 +159,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 
 		for (Enumeration<?> enumeration= fProperties.propertyNames(); enumeration.hasMoreElements();) {
 			String propertyName= (String) enumeration.nextElement();
-			if (!fUsedPropertyNames.contains(propertyName)) {
+			if (!fUsedPropertyNames.contains(propertyName) && !fSpecifiedAsUsedProperties.containsKey(propertyName)) {
 				addMatch(groupElement, propertyName);
 				hasUnused= true;
 			}
@@ -224,6 +218,10 @@ class NLSSearchResultRequestor extends SearchRequestor {
 
 	public boolean isUsedPropertyKey(String key) {
 		return fUsedPropertyNames.contains(key);
+	}
+
+	public boolean isSpecifiedAsUsed(String key) {
+		return fSpecifiedAsUsedProperties.containsKey(key);
 	}
 
 	/**
@@ -401,24 +399,29 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	private void loadProperties() {
 		Set<Object> duplicateKeys= new HashSet<>();
 		fProperties= new Properties(duplicateKeys);
-		InputStream stream;
-		try {
-			stream= new BufferedInputStream(createInputStream(fPropertiesFile));
-		} catch (CoreException ex) {
-			fProperties= new Properties();
-			return;
-		}
-		try {
+		Set<Object> duplicateKeys2= new HashSet<>();
+		fSpecifiedAsUsedProperties= new Properties(duplicateKeys2);
+		try (InputStream stream= new BufferedInputStream(createInputStream(fPropertiesFile))) {
 			fProperties.load(stream);
-		} catch (IOException ex) {
+		} catch (CoreException | IOException ex) {
 			fProperties= new Properties();
 			return;
 		} finally {
-			try {
-				stream.close();
-			} catch (IOException ex) {
-			}
 			reportDuplicateKeys(duplicateKeys);
+		}
+		if (!"properties".equalsIgnoreCase(fPropertiesFile.getFileExtension())) { //$NON-NLS-1$
+			return;
+		}
+		String propertyFileName= fPropertiesFile.getName();
+		String ignorePropertyFileName=
+				propertyFileName.substring(0, propertyFileName.length() - ".properties".length()).concat(NLSSearchQuery.NLS_USED_PROPERTIES_EXT); //$NON-NLS-1$
+		IFile ignoredPropertiesFile= (IFile) fPropertiesFile.getParent().findMember(ignorePropertyFileName);
+		if (ignoredPropertiesFile != null) {
+			try (InputStream stream= new BufferedInputStream(createInputStream(ignoredPropertiesFile))) {
+				fSpecifiedAsUsedProperties.load(stream);
+			} catch (CoreException | IOException ex) {
+				fSpecifiedAsUsedProperties= new Properties();
+			}
 		}
 	}
 
