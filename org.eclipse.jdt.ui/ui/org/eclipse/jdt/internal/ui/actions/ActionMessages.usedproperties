@@ -1,0 +1,21 @@
+###############################################################################
+# Copyright (c) 2000, 2023 IBM Corporation and others.
+#
+# This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License 2.0
+# which accompanies this distribution, and is available at
+# https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#     IBM Corporation - initial API and implementation
+#     Sebastian Davids <sdavids@gmx.de> - Bug 114276
+#     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+#     Pierre-Yves B. <pyvesdev@gmail.com> - Check whether enclosing instance implements hashCode and equals - https://bugs.eclipse.org/539900
+###############################################################################
+# DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/296836
+OrganizeImportsAction_summary_added={0} import(s) added.
+
+# DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/296836
+OrganizeImportsAction_summary_removed={0} import(s) removed.
