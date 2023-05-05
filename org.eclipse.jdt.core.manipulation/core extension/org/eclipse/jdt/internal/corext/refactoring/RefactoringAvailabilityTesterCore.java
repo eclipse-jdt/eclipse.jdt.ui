@@ -180,6 +180,10 @@ public final class RefactoringAvailabilityTesterCore  {
 		return null;
 	}
 
+	public static boolean isChangeSignatureAvailable(final IMethod method) throws JavaModelException {
+		return (method != null) && Checks.isAvailable(method) && !Flags.isAnnotation(method.getDeclaringType().getFlags());
+	}
+
 	private RefactoringAvailabilityTesterCore() {
 	}
 }

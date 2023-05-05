@@ -292,11 +292,14 @@ public abstract class BuildPathBasePage {
 	}
 
 	protected void setRootExpansionState(TreeListDialogField<CPListElement> list, boolean state, boolean isClassPathRoot) {
+		if (list.getTreeViewer() == null) {
+			return;
+		}
 		for (CPListElement cpListElement : list.getElements()) {
-			if (cpListElement.isClassPathRootNode() && isClassPathRoot) {
+			if (cpListElement.isClassPathRootNode() && isClassPathRoot && list.getTreeViewer() != null) {
 				list.getTreeViewer().setExpandedState(cpListElement, state);
 			}
-			if (cpListElement.isModulePathRootNode() && !isClassPathRoot) {
+			if (cpListElement.isModulePathRootNode() && !isClassPathRoot && list.getTreeViewer() != null) {
 				list.getTreeViewer().setExpandedState(cpListElement, state);
 			}
 		}
@@ -332,7 +335,7 @@ public abstract class BuildPathBasePage {
 				if (rootCPListElement.isTargetRootNode(changeNodeDirection)) {
 					if (rootCPListElement.getChildren().contains(selElement))
 						break;
-					if (indexOfSelElement != -1) {
+					if (indexOfSelElement != -1 && indexOfSelElement < rootCPListElement.getChildren().size()) {
 						rootCPListElement.getChildren().add(indexOfSelElement, selElement);
 					} else {
 						rootCPListElement.addCPListElement(selElement);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2023 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,22 +18,17 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.junit.Rule;
-import org.junit.Test;
-
 import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.ui.tests.core.rules.Java16ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-
-import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+import org.junit.Rule;
+import org.junit.Test;
 
 /**
  * Tests the cleanup features related to Java 16.
@@ -232,7 +227,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long matchPatternForInstanceofOnFinalVariable(Object object) {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        if (object instanceof Date date) {\n" //
+				+ "        if (object instanceof final Date date) {\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //

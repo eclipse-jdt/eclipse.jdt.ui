@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,19 +18,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.StyledString;
-
-import org.eclipse.jface.text.contentassist.IContextInformation;
-
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
@@ -43,11 +35,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
-
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.text.java.AnnotationAtttributeProposalInfo;
@@ -71,6 +61,10 @@ import org.eclipse.jdt.internal.ui.text.java.RelevanceComputer;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocInlineTagCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocLinkTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.graphics.Image;
 
 /**
  * Java UI implementation of <code>CompletionRequestor</code>. Produces
@@ -281,9 +275,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	public void accept(CompletionProposal proposal) {
 		long start= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 		try {
-			if (isFiltered(proposal))
+			if (isIgnored(proposal.getKind())) {
 				return;
-
+			}
+			getDeclaringType(proposal);
 			if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
 				acceptPotentialMethodDeclaration(proposal);
 			} else {

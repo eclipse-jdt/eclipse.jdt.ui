@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2023 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,9 +18,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -30,6 +27,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -40,11 +39,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
-
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+import org.eclipse.text.edits.TextEditGroup;
 
 public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteOperationsFixCore {
 	public static final class PatternMatchingForInstanceofFinder extends ASTVisitor {
@@ -201,6 +199,9 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			SingleVariableDeclaration newSVDecl= ast.newSingleVariableDeclaration();
 			newSVDecl.setName(ASTNodes.createMoveTarget(rewrite, expressionToMove));
 			newSVDecl.setType(ASTNodes.createMoveTarget(rewrite, nodeToComplete.getRightOperand()));
+			if (Modifier.isFinal(statementToRemove.getModifiers())) {
+				newSVDecl.modifiers().add(ast.newModifier(ModifierKeyword.fromFlagValue(Modifier.FINAL)));
+			}
 			newInstanceof.setRightOperand(newSVDecl);
 
 			ASTNodes.replaceButKeepComment(rewrite, nodeToComplete, newInstanceof, group);

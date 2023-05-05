@@ -22,38 +22,17 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.RGB;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.JFacePreferences;
-import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.resource.JFaceResources;
-
-import org.eclipse.jface.text.contentassist.ContentAssistant;
-
-import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
-
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettingsConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstantsOptions;
-
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer;
 import org.eclipse.jdt.internal.ui.PreferenceConstantsCore;
@@ -65,6 +44,18 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 
 /**
@@ -2656,6 +2647,33 @@ public class PreferenceConstants {
 	public static final String EDITOR_SMART_TAB= "smart_tab"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether a new Java Application launch configuration name be fully qualified or not.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.29
+	 */
+	public final static String LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLICATION= "launch_name_fully_qualified_for_application"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether a new Java Applet launch configuration name be fully qualified or not.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.29
+	 */
+	public final static String LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLET= "launch_name_fully_qualified_for_applet"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether new JUnit launch configurations names are fully qualified or not.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.29
+	 */
+	public final static String LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TEST= "launch_name_fully_qualified_for_junit_test"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls whether Java comments should be
 	 * spell checked.
 	 * <p>
@@ -4044,6 +4062,11 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SF,SI,SM,F,I,C,M"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER, "B,V,R,D"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER, false);
+
+		// LaunchingPreferencePage
+		store.setDefault(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLICATION, false);
+		store.setDefault(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_APPLET, false);
+		store.setDefault(PreferenceConstants.LAUNCH_NAME_FULLY_QUALIFIED_FOR_JUNIT_TEST, false);
 
 		// JavaEditorPreferencePage
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);

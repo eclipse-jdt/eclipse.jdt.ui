@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2020 IBM Corporation and others.
+ * Copyright (c) 2005, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import org.junit.Test;
-
 import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.junit.Test;
 
 /**
  *
@@ -143,6 +141,20 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 		addLocalVariables("String s;");
 		assertMethodBodyIncrementalCompletion("s.Su|", "s.sub|");
+	}
+
+	@Test
+	public void testIssue417() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		String oldPrefs= getJDTUIPrefs().getString(PreferenceConstants.TYPEFILTER_ENABLED);
+		getJDTUIPrefs().setValue(PreferenceConstants.TYPEFILTER_ENABLED, "java.lang.String");
+		try {
+			addLocalVariables("java.lang.String s;");
+			assertMethodBodyIncrementalCompletion("s.ind|", "s.indexOf|");
+		} finally {
+			getJDTUIPrefs().setValue(PreferenceConstants.TYPEFILTER_ENABLED, oldPrefs);
+		}
 	}
 
 	@Test
