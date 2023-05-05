@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchQuery;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.search.ui.ISearchResultViewPart;
@@ -267,6 +268,7 @@ public class NLSSearchTest {
 		buf.append("public class Accessor extends NLS {\n");
 		buf.append("\n");
 		buf.append("    public static String Client_s1;\n");
+		buf.append("    public static String Client_s2;\n");
 		buf.append("\n");
 		buf.append("    private Accessor() {}\n");
 		buf.append("    private static final String BUNDLE_NAME = \"test.Accessor\"; //$NON-NLS-1$\n");
@@ -282,13 +284,18 @@ public class NLSSearchTest {
 
 		buf= new StringBuilder();
 		buf.append("Client_s1=foo\n");
+		buf.append("Client_s2=foo2\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
+		// mark Client_s1 as used so it won't be flagged
 		buf= new StringBuilder();
 		buf.append("Client_s1=foo\n");
-		write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.usedproperties");
+		write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor" + NLSSearchQuery.NLS_USED_PROPERTIES_EXT);
 
-		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
+		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 2);
+
+		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s2", (IFile)accessor.getCorrespondingResource(), true);
+		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s2", propertiesFile, false);
 	}
 
 	@Test

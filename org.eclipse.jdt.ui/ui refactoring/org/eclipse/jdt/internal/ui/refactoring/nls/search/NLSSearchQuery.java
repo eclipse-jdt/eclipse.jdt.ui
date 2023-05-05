@@ -47,6 +47,12 @@ import org.eclipse.search.ui.text.Match;
 
 public class NLSSearchQuery implements ISearchQuery {
 
+	/**
+	 * File extension of properties file containing message keys known to be used and
+	 * therefore should not be flagged by an NLS search.
+	 */
+	public static final String NLS_USED_PROPERTIES_EXT= ".usedproperties"; //$NON-NLS-1$
+
 	private NLSSearchResult fResult;
 	private IJavaElement[] fWrapperClass;
 	private IFile[] fPropertiesFile;

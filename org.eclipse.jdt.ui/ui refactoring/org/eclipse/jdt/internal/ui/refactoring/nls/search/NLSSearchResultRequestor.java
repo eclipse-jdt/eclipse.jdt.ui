@@ -414,7 +414,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		}
 		String propertyFileName= fPropertiesFile.getName();
 		String ignorePropertyFileName=
-				propertyFileName.substring(0, propertyFileName.length() - ".properties".length()).concat(".usedproperties"); //$NON-NLS-1$ //$NON-NLS-2$
+				propertyFileName.substring(0, propertyFileName.length() - ".properties".length()).concat(NLSSearchQuery.NLS_USED_PROPERTIES_EXT); //$NON-NLS-1$
 		IFile ignoredPropertiesFile= (IFile) fPropertiesFile.getParent().findMember(ignorePropertyFileName);
 		if (ignoredPropertiesFile != null) {
 			try (InputStream stream= new BufferedInputStream(createInputStream(ignoredPropertiesFile))) {
