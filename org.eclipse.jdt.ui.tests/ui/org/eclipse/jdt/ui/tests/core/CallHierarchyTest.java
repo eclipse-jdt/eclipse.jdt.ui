@@ -521,6 +521,16 @@ public class CallHierarchyTest {
         helper.assertCalls(Arrays.asList(helper.getAbsI1FooMethod(), helper.getAbsI2FooMethod()), secondLevel);
     }
 
+    @Test
+    public void record_testGH571_callHierarchyOfComponent() throws Exception {
+		helper.createRecordWithCalleeClasses();
+
+		IType type= helper.getType1();
+		IMember component= (IMember) type.getChildren()[0];
+		IMethod expectedCaller= helper.getType2().getMethods()[0];
+		checkCalls(component, expectedCaller);
+    }
+
     private void checkCalls(IMember memberToCheck, IMethod... expectedCallers) {
         MethodWrapper[] methodWrappers = CallHierarchy.getDefault().getCallerRoots(new IMember[] { memberToCheck });
         MethodWrapper[] callers = methodWrappers[0].getCalls(new NullProgressMonitor());
