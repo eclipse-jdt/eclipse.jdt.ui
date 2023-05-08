@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
@@ -846,6 +850,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_version_18;
 	public static String ComplianceConfigurationBlock_version_19;
 	public static String ComplianceConfigurationBlock_version_20;
+	public static String ComplianceConfigurationBlock_version_21;
 	public static String ComplianceConfigurationBlock_versionCLDC11;
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;
