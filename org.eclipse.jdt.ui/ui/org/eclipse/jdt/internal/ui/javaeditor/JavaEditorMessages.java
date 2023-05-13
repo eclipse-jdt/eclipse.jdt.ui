@@ -113,6 +113,7 @@ final class JavaEditorMessages extends NLS {
 	public static String SourceAttachmentForm_attach_error_title;
 	public static String SourceAttachmentForm_attach_error_message;
 	public static String EditorUtility_concatModifierStrings;
+	public static String OpenCallHierarchyHyperlinkDetector_hyperlinkText;
 	public static String OverrideIndicatorManager_implements;
 	public static String OverrideIndicatorManager_intallJob;
 	public static String OverrideIndicatorManager_overrides;
