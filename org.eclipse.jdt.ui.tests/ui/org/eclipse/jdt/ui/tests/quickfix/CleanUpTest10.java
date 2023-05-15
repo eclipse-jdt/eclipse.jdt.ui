@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2023 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,20 +14,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import org.junit.Rule;
-import org.junit.Test;
-
 import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-
 import org.eclipse.jdt.ui.tests.core.rules.Java10ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.junit.Rule;
+import org.junit.Test;
 
 /**
  * Tests the cleanup features related to Java 10.
@@ -241,6 +237,45 @@ public class CleanUpTest10 extends CleanUpTestCase {
 				+ "}\n";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
+
+	@Test
+	public void testUseLocalVariableTypeInferenceRemoveUnusedImport() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/573
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Date;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        Date x = E2.value;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		String sample2= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Date;\n" //
+				+ "\n" //
+				+ "public class E2 {\n" //
+				+ "    public static Date value = null;\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample2, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        var x = E2.value;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected, sample2 }, null);
 	}
 
 	@Test
@@ -516,7 +551,6 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "import java.util.Collection;\n" //
 				+ "import java.util.HashMap;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
@@ -549,7 +583,6 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		String expected= "" //
 				+ "package test1;\n" //
 				+ "\n" //
-				+ "import java.util.Collection;\n" //
 				+ "import java.util.HashMap;\n" //
 				+ "\n" //
 				+ "public class E extends HashMap<Integer, String> {\n" //
