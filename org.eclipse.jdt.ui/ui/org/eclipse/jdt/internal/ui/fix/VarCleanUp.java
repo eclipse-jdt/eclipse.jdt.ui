@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2023 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,9 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -50,18 +47,18 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.text.edits.TextEditGroup;
 
 /**
  * A fix that uses the Local variable type inference:
@@ -381,6 +378,7 @@ public class VarCleanUp extends AbstractMultiFix {
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			ImportRemover remover= cuRewrite.getImportRemover();
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.VarCleanUp_description, cuRewrite);
 
@@ -395,6 +393,7 @@ public class VarCleanUp extends AbstractMultiFix {
 
 			SimpleType replacement= ast.newSimpleType(ast.newSimpleName("var")); //$NON-NLS-1$
 			ASTNodes.replaceButKeepComment(rewrite, node, replacement, group);
+			remover.registerRemovedNode(node);
 		}
 	}
 }
