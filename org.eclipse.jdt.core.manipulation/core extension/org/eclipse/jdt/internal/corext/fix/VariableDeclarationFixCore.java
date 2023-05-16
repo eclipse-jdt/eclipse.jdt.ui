@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 IBM Corporation and others.
+ * Copyright (c) 2019, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,13 +22,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -44,18 +43,17 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
-
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.text.edits.TextEditGroup;
 
 public class VariableDeclarationFixCore extends CompilationUnitRewriteOperationsFixCore {
 
@@ -252,12 +250,13 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
             }
 
 			MethodDeclaration constructor= writingConstructors.get(0);
-			TypeDeclaration typeDecl= ASTNodes.getParent(constructor, TypeDeclaration.class);
+			AbstractTypeDeclaration typeDecl= ASTNodes.getParent(constructor, AbstractTypeDeclaration.class);
 			if (typeDecl == null)
 				return false;
 
-			for (MethodDeclaration method : typeDecl.getMethods()) {
-	            if (method.isConstructor()) {
+			List<BodyDeclaration> bodyDeclarations= typeDecl.bodyDeclarations();
+			for (BodyDeclaration bodyDeclaration : bodyDeclarations) {
+				if (bodyDeclaration instanceof MethodDeclaration method && method.isConstructor()) {
 	            	IMethodBinding methodBinding= method.resolveBinding();
 	            	if (methodBinding == null)
 	            		return false;
