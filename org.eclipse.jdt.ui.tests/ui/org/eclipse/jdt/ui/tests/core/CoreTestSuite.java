@@ -18,6 +18,9 @@ import org.junit.runners.Suite;
 
 import org.eclipse.jdt.ui.tests.core.source.SourceActionTests;
 
+import org.eclipse.jdt.internal.ui.compare.JavaIgnoreWhitespaceContributorTest;
+import org.eclipse.jdt.internal.ui.compare.JavaTokenComparatorTest;
+
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 AddImportTest.class,
@@ -56,6 +59,8 @@ IndentManipulationTest.class,
 SelectionHistoryTest.class,
 ASTProviderTest.class,
 JDTFlagsTest18.class,
+JavaTokenComparatorTest.class,
+JavaIgnoreWhitespaceContributorTest.class,
 })
 public class CoreTestSuite {
 }
