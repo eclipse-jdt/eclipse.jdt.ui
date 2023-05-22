@@ -32,9 +32,9 @@ public class VectorTest extends TestCase {
 	protected void setUp() {
 		fEmpty = new Vector<Object>();
 		fFull = new Vector<Integer>();
-		fFull.addElement(new Integer(1));
-		fFull.addElement(new Integer(2));
-		fFull.addElement(new Integer(3));
+		fFull.addElement(Integer.valueOf(1));
+		fFull.addElement(Integer.valueOf(2));
+		fFull.addElement(Integer.valueOf(3));
 	}
 
 	public static Test suite() {
@@ -44,19 +44,19 @@ public class VectorTest extends TestCase {
 	public void testCapacity() {
 		int size = fFull.size();
 		for (int i = 0; i < 100; i++)
-			fFull.addElement(new Integer(i));
+			fFull.addElement(Integer.valueOf(i));
 		assertTrue(fFull.size() == 100 + size);
 	}
 
 	public void testClone() {
 		Vector<Integer> clone = (Vector<Integer>) fFull.clone();
 		assertTrue(clone.size() == fFull.size());
-		assertTrue(clone.contains(new Integer(1)));
+		assertTrue(clone.contains(Integer.valueOf(1)));
 	}
 
 	public void testContains() {
-		assertTrue(fFull.contains(new Integer(1)));
-		assertTrue(!fEmpty.contains(new Integer(1)));
+		assertTrue(fFull.contains(Integer.valueOf(1)));
+		assertTrue(!fEmpty.contains(Integer.valueOf(1)));
 	}
 
 	public void testElementAt() {
@@ -79,7 +79,7 @@ public class VectorTest extends TestCase {
 	}
 
 	public void testRemoveElement() {
-		fFull.removeElement(new Integer(3));
-		assertTrue(!fFull.contains(new Integer(3)));
+		fFull.removeElement(Integer.valueOf(3));
+		assertTrue(!fFull.contains(Integer.valueOf(3)));
 	}
 }
