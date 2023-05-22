@@ -121,9 +121,9 @@ public class Assert {
 		// the following test fails
 		if (Double.isInfinite(expected)) {
 			if ((expected != actual))
-				failNotEquals(message, new Double(expected), new Double(actual));
+				failNotEquals(message,  Double.valueOf(expected), Double.valueOf(actual));
 		} else if ((Math.abs(expected - actual) > delta)) // Because comparison with NaN always returns false
-			failNotEquals(message, new Double(expected), new Double(actual));
+			failNotEquals(message, Double.valueOf(expected), Double.valueOf(actual));
 	}
 
 	/**
@@ -145,9 +145,9 @@ public class Assert {
 		// the following test fails
 		if (Float.isInfinite(expected)) {
 			if ((expected != actual))
-				failNotEquals(message, new Float(expected), new Float(actual));
+				failNotEquals(message, Float.valueOf(expected),  Float.valueOf(actual));
 		} else if ((Math.abs(expected - actual) > delta))
-			failNotEquals(message, new Float(expected), new Float(actual));
+			failNotEquals(message, Float.valueOf(expected), Float.valueOf(actual));
 	}
 
 	/**
@@ -163,7 +163,7 @@ public class Assert {
 	 * thrown with the given message.
 	 */
 	static public void assertEquals(String message, long expected, long actual) {
-		assertEquals(message, new Long(expected), new Long(actual));
+		assertEquals(message,  Long.valueOf(expected), Long.valueOf(actual));
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class Assert {
 	 * is thrown with the given message.
 	 */
 	static public void assertEquals(String message, boolean expected, boolean actual) {
-		assertEquals(message, new Boolean(expected), new Boolean(actual));
+		assertEquals(message, Boolean.valueOf(expected), Boolean.valueOf(actual));
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class Assert {
 	 * thrown with the given message.
 	 */
 	static public void assertEquals(String message, byte expected, byte actual) {
-		assertEquals(message, new Byte(expected), new Byte(actual));
+		assertEquals(message,  Byte.valueOf(expected), Byte.valueOf(actual));
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class Assert {
 	 * thrown with the given message.
 	 */
 	static public void assertEquals(String message, char expected, char actual) {
-		assertEquals(message, new Character(expected), new Character(actual));
+		assertEquals(message,  Character.valueOf(expected), Character.valueOf(actual));
 	}
 
 	/**
@@ -223,7 +223,7 @@ public class Assert {
 	 * thrown with the given message.
 	 */
 	static public void assertEquals(String message, short expected, short actual) {
-		assertEquals(message, new Short(expected), new Short(actual));
+		assertEquals(message,  Short.valueOf(expected), Short.valueOf(actual));
 	}
 
 	/**
@@ -238,7 +238,7 @@ public class Assert {
 	 * thrown with the given message.
 	 */
 	static public void assertEquals(String message, int expected, int actual) {
-		assertEquals(message, new Integer(expected), new Integer(actual));
+		assertEquals(message, Integer.valueOf(expected), Integer.valueOf(actual));
 	}
 
 	/**
