@@ -419,9 +419,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewContainerDialog_error_invalidpath;
 	public static String NewContainerDialog_error_enterpath;
 	public static String NewContainerDialog_error_pathexists;
-	public static String NewSourceFolderDialog_error_invalidpath;
-	public static String NewSourceFolderDialog_error_enterpath;
-	public static String NewSourceFolderDialog_error_pathexists;
 
 	public static String SourceAttachmentBlock_message;
 	public static String SourceAttachmentBlock_filename_description;
@@ -794,15 +791,10 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_modular_modifiesContents_label;
 	public static String CPListLabelProvider_not_modular_label;
 
-	public static String CPListLabelProvider_add_exports_name_label;
 	public static String CPListLabelProvider_patch_module_full_label;
 	public static String CPListLabelProvider_add_exports_full_label;
 	public static String CPListLabelProvider_add_reads_full_label;
 	public static String CPListLabelProvider_limitModules_full_label;
-
-	public static String NewSourceFolderDialog_useproject_button;
-	public static String NewSourceFolderDialog_usefolder_button;
-	public static String NewSourceFolderDialog_sourcefolder_label;
 
 	public static String CPListLabelProvider_test_sources_label;
 	public static String CPListLabelProvider_test_dependency_label;
