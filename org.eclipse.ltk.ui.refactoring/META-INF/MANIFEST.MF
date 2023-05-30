@@ -30,5 +30,6 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
  org.eclipse.ui.navigator;bundle-version="[3.3.200,4.0.0)",
  org.eclipse.compare;bundle-version="[3.5.0,4.0.0)",
  org.eclipse.team.core;bundle-version="[3.4.100,4.0.0)",
- org.eclipse.team.ui;bundle-version="[3.4.100,4.0.0)"
+ org.eclipse.team.ui;bundle-version="[3.4.100,4.0.0)",
+ org.eclipse.jdt.core;bundle-version="3.34.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17

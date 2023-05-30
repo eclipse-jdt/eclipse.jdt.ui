@@ -42,6 +42,7 @@ import org.eclipse.ltk.internal.core.refactoring.resource.RenameResourceProcesso
 import org.eclipse.ltk.internal.ui.refactoring.InternalAPI;
 import org.eclipse.ltk.internal.ui.refactoring.RefactoringUIMessages;
 import org.eclipse.ltk.internal.ui.refactoring.RefactoringUIPlugin;
+import org.eclipse.ltk.ti.refactoring.rename.suggest.SuggestRenameField;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 import org.eclipse.ltk.ui.refactoring.resource.RenameResourceWizard;
 
@@ -83,6 +84,12 @@ public class RenameResourceHandler extends AbstractResourcesHandler {
 			newName= (String) newNameValue;
 		}
 		ISelection sel= HandlerUtil.getCurrentSelection(event);
+		try {
+			newName = SuggestRenameField.getFieldNameSuggestions(sel,event);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (sel instanceof IStructuredSelection) {
 			IResource resource= getCurrentResource((IStructuredSelection) sel);
 			if (resource != null) {
