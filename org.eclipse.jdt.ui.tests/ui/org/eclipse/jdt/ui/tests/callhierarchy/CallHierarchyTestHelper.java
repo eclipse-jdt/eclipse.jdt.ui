@@ -381,6 +381,52 @@ public class CallHierarchyTestHelper {
         assertBuildWithoutErrors(fJavaProject3);
     }
 
+	/**
+	 * Creates a record class and a type that references a field of the record.
+	 */
+	public void createRecordWithCalleeClasses() throws Exception {
+		ProjectTestSetup projectsetup= new Java17ProjectTestSetup(false);
+		fJavaProject3.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set17CompilerOptions(fJavaProject3, false);
+
+		IPackageFragmentRoot fSourceFolder= JavaProjectHelper.addSourceContainer(fJavaProject3, "src");
+
+		String MODULE_INFO_FILE_CONTENT= ""
+				+ "module test {\n"
+				+ "}\n";
+
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+
+		fPack3= fSourceFolder.createPackageFragment("test", false, null);
+
+		JavaProjectHelper.set16CompilerOptions(fJavaProject1, true);
+
+		ICompilationUnit cu1= fPack3.getCompilationUnit("RecordTest.java");
+		ICompilationUnit cu2= fPack3.getCompilationUnit("CallerTest.java");
+
+		fType1= cu1.createType(
+				"""
+				record RecordTest(int number1) {
+				}
+				""",
+				null,
+				true,
+				null);
+		fType2= cu2.createType(
+				"""
+				public class CallerTest {
+					void foo(RecordTest r) {
+						var n = r.number1();
+					}
+				}
+				""",
+				null,
+				true,
+				null);
+		assertBuildWithoutErrors(fJavaProject3);
+	}
+
     public void createCalleeClasses() throws Exception {
         createPackages();
 

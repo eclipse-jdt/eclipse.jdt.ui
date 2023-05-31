@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,11 +34,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
-
 import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -47,10 +43,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
-
 import org.eclipse.jdt.internal.core.manipulation.dom.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.junit.Rule;
+import org.junit.Test;
 
 public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	private static final boolean BUG_82166= true;
@@ -418,6 +415,11 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 
 	@Test
 	public void test_314407_2() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_394725() throws Exception {
 		performBugTest();
 	}
 

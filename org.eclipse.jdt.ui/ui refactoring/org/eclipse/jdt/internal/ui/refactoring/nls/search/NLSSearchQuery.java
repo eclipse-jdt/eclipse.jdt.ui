@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,19 +14,12 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
-import org.eclipse.search.ui.text.Match;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -39,19 +32,26 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
-
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.Match;
 
 
 public class NLSSearchQuery implements ISearchQuery {
+
+	/**
+	 * File extension of properties file containing message keys known to be used and
+	 * therefore should not be flagged by an NLS search.
+	 */
+	public static final String NLS_USED_PROPERTIES_EXT= ".usedproperties"; //$NON-NLS-1$
 
 	private NLSSearchResult fResult;
 	private IJavaElement[] fWrapperClass;
@@ -109,7 +109,7 @@ public class NLSSearchQuery implements ISearchQuery {
 								if (!requestor.hasPropertyKey(fieldName)) {
 									fResult.addMatch(new Match(compilationUnit, sourceRange.getOffset(), sourceRange.getLength()));
 								}
-								if (!requestor.isUsedPropertyKey(fieldName)) {
+								if (!requestor.isUsedPropertyKey(fieldName) && !requestor.isSpecifiedAsUsed(fieldName)) {
 									hasUnusedPropertie= true;
 									fResult.addMatch(new Match(groupElement, sourceRange.getOffset(), sourceRange.getLength()));
 								}
@@ -118,7 +118,6 @@ public class NLSSearchQuery implements ISearchQuery {
 					}
 					if (hasUnusedPropertie)
 						fResult.addCompilationUnitGroup(groupElement);
-
 				} catch (CoreException e) {
 					return new Status(e.getStatus().getSeverity(), JavaPlugin.getPluginId(), IStatus.OK, NLSSearchMessages.NLSSearchQuery_error, e);
 				}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 IBM Corporation and others.
+ * Copyright (c) 2006, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,33 +18,27 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.search.ui.ISearchResultViewPart;
-import org.eclipse.search.ui.NewSearchUI;
-
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
+import org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchQuery;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.eclipse.search.ui.ISearchResultViewPart;
+import org.eclipse.search.ui.NewSearchUI;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 public class NLSSearchTest {
 
@@ -263,6 +257,45 @@ public class NLSSearchTest {
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 1);
 
 		NLSSearchTestHelper.assertHasDuplicateKey(accessor, propertiesFile, "Client_s1", propertiesFile);
+	}
+
+	@Test
+	public void test07() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("import org.eclipse.osgi.util.NLS;\n");
+		buf.append("public class Accessor extends NLS {\n");
+		buf.append("\n");
+		buf.append("    public static String Client_s1;\n");
+		buf.append("    public static String Client_s2;\n");
+		buf.append("\n");
+		buf.append("    private Accessor() {}\n");
+		buf.append("    private static final String BUNDLE_NAME = \"test.Accessor\"; //$NON-NLS-1$\n");
+		buf.append("    static {NLS.initializeMessages(BUNDLE_NAME, Accessor.class);}\n");
+		buf.append("}\n");
+		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Client {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("Client_s1=foo\n");
+		buf.append("Client_s2=foo2\n");
+		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
+
+		// mark Client_s1 as used so it won't be flagged
+		buf= new StringBuilder();
+		buf.append("Client_s1=foo\n");
+		write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor" + NLSSearchQuery.NLS_USED_PROPERTIES_EXT);
+
+		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 2);
+
+		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s2", (IFile)accessor.getCorrespondingResource(), true);
+		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s2", propertiesFile, false);
 	}
 
 	@Test
