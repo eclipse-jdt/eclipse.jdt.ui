@@ -124,9 +124,9 @@ public class SuggestRenameField {
 	public static void handleCommand(ISelection sel) throws Exception {
 		String str= sel.toString();
 		String[] splitStr= str.split("[, :]"); //$NON-NLS-1$
-		textOffset= Integer.parseInt(splitStr[3]);
-		textStartLine= Integer.parseInt(splitStr[7]);
-		textLength= Integer.parseInt(splitStr[11]);
+		setTextOffset(Integer.parseInt(splitStr[3]));
+		setTextStartLine(Integer.parseInt(splitStr[7]));
+		setTextLength(Integer.parseInt(splitStr[11]));
 		textSelect= splitStr[15];
 	}
 
@@ -154,12 +154,44 @@ public class SuggestRenameField {
 
 	public static void getFieldDeclaration(ASTNode cu, final List<FieldDeclaration> types) {
 		cu.accept(new ASTVisitor() {
-			@SuppressWarnings("unchecked")
+			@Override
 			public boolean visit(FieldDeclaration node) {
 				types.add(node);
 				return true;
 			}
 		});
+	}
+
+	public static int getTextLength() {
+		return textLength;
+	}
+
+	public static void setTextLength(int textLength) {
+		SuggestRenameField.textLength = textLength;
+	}
+
+	public ITextSelection getSelection() {
+		return selection;
+	}
+
+	public void setSelection(ITextSelection selection) {
+		this.selection = selection;
+	}
+
+	public static int getTextStartLine() {
+		return textStartLine;
+	}
+
+	public static void setTextStartLine(int textStartLine) {
+		SuggestRenameField.textStartLine = textStartLine;
+	}
+
+	public static int getTextOffset() {
+		return textOffset;
+	}
+
+	public static void setTextOffset(int textOffset) {
+		SuggestRenameField.textOffset = textOffset;
 	}
 
 	private static class ExcludedCollection extends AbstractList<String> {
