@@ -295,6 +295,11 @@ public class RenamePrivateFieldTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test12() throws Exception{
+		helper2("x", "webMvc", true, false, true, true, false, false);
+	}
+
+	@Test
 	public void testUnicode01() throws Exception{
 		//regression test for 180331
 		helper2("field", "feel", true, false, true, true, true, true);

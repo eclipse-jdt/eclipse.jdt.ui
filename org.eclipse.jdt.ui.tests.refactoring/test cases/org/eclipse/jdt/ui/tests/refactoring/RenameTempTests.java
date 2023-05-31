@@ -496,7 +496,10 @@ public class RenameTempTests extends GenericRefactoringTest{
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=144426
 		helper1("xxx");
 	}
-
+	@Test
+	public void test65() throws Exception {
+		helper1("webMvc");
+	}
 // -----
 	@Ignore("BUG_checkDeclInNestedClass fails - must revisit")
 	@Test
