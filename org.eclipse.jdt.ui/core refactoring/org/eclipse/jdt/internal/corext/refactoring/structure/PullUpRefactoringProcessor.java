@@ -643,12 +643,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private class AddParameterVisitor extends ASTVisitor {
 		final CompilationUnitRewrite fRewrite;
 		final String fMethodName;
-		final String fNewArgument;
-
-		public AddParameterVisitor(CompilationUnitRewrite rewrite, String methodName, String newArgument) {
+		public AddParameterVisitor(CompilationUnitRewrite rewrite, String methodName) {
 			fRewrite= rewrite;
 			fMethodName= methodName;
-			fNewArgument= newArgument;
 		}
 
 		@Override
@@ -1839,7 +1836,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				for (SearchMatch result : match.getSearchResults()) {
 					if (result instanceof MethodReferenceMatch methodMatch) {
 						final MethodDeclaration methodDecl= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) methodMatch.getElement(), rewriter.getRoot());
-						methodDecl.accept(new AddParameterVisitor(rewriter, oldMethod.getName().getFullyQualifiedName(), newArgument));
+						methodDecl.accept(new AddParameterVisitor(rewriter, oldMethod.getName().getFullyQualifiedName()));
 					}
 				}
 			}
