@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,18 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.jface.text.templates.Template;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -42,17 +32,20 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class PullUpTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "PullUp/";
@@ -1190,6 +1183,166 @@ public class PullUpTests extends GenericRefactoringTest {
 		setTargetClass(processor, 0);
 		processor.setDestinationType(typeA);
 		processor.setMembersToMove(fields);
+
+		assertTrue("final", ref.checkFinalConditions(new NullProgressMonitor()).isOK());
+
+		performChange(ref, false);
+
+		assertEqualLines("A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+		assertEqualLines("B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+		assertEqualLines("C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+	}
+
+	@Test
+	public void test56() throws Exception {
+		// test for bug 241035
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
+
+		IType typeA= getType(cuA, "A");
+		IType typeB= getType(cuB, "B");
+		String[] methodNames= new String[] { "m" };
+		String[][] signatures= new String[][] { new String[0] };
+		IMethod[] methods= getMethods(typeB, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+
+		setTargetClass(processor, 0);
+		processor.setDestinationType(typeA);
+		processor.setMembersToMove(methods);
+		processor.setDeletedMethods(methods);
+		processor.setReplace(true);
+
+		assertTrue("final", ref.checkFinalConditions(new NullProgressMonitor()).isOK());
+
+		performChange(ref, false);
+
+		assertEqualLines("A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+		assertEqualLines("B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+		assertEqualLines("C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+	}
+
+	@Test
+	public void test57() throws Exception {
+		// test for bug 241035
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
+
+		IType typeA= getType(cuA, "A");
+		IType typeB= getType(cuB, "B");
+		String[] methodNames= new String[] { "m", "foo2" };
+		String[][] signatures= new String[][] { new String[0], new String[0] };
+		IMethod[] methods= getMethods(typeB, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+
+		setTargetClass(processor, 0);
+		processor.setDestinationType(typeA);
+		processor.setMembersToMove(methods);
+		processor.setDeletedMethods(methods);
+		processor.setReplace(true);
+
+		assertTrue("final", ref.checkFinalConditions(new NullProgressMonitor()).isOK());
+
+		performChange(ref, false);
+
+		assertEqualLines("A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+		assertEqualLines("B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+		assertEqualLines("C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+	}
+
+	@Test
+	public void test58() throws Exception {
+		// test for bug 241035
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
+
+		IType typeA= getType(cuA, "A");
+		IType typeB= getType(cuB, "B");
+		String[] methodNames= new String[] { "m", "foo2" };
+		String[][] signatures= new String[][] { new String[0], new String[0] };
+		IMethod[] methods= getMethods(typeB, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+
+		setTargetClass(processor, 0);
+		processor.setDestinationType(typeA);
+		processor.setMembersToMove(methods);
+		processor.setDeletedMethods(methods);
+		processor.setReplace(true);
+
+		assertTrue("final", ref.checkFinalConditions(new NullProgressMonitor()).isOK());
+
+		performChange(ref, false);
+
+		assertEqualLines("A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+		assertEqualLines("B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+		assertEqualLines("C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+	}
+
+	@Test
+	public void test59() throws Exception {
+		// test for bug 241035
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
+
+		IType typeA= getType(cuA, "A");
+		IType typeB= getType(cuB, "B");
+		String[] methodNames= new String[] { "m", "foo2" };
+		String[][] signatures= new String[][] { new String[0], new String[0] };
+		IMethod[] methods= getMethods(typeB, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+
+		setTargetClass(processor, 0);
+		processor.setDestinationType(typeA);
+		processor.setMembersToMove(methods);
+		processor.setDeletedMethods(methods);
+		processor.setReplace(true);
+
+		assertTrue("final", ref.checkFinalConditions(new NullProgressMonitor()).isOK());
+
+		performChange(ref, false);
+
+		assertEqualLines("A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+		assertEqualLines("B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+		assertEqualLines("C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+	}
+
+	@Test
+	public void test60() throws Exception {
+		// test for bug 241035
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
+
+		IType typeA= getType(cuA, "A");
+		IType typeB= getType(cuB, "B");
+		String[] methodNames= new String[] { "m" };
+		String[][] signatures= new String[][] { new String[0] };
+		IMethod[] methods= getMethods(typeB, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+
+		setTargetClass(processor, 0);
+		processor.setDestinationType(typeA);
+		processor.setMembersToMove(methods);
+		processor.setDeletedMethods(methods);
+		processor.setReplace(true);
 
 		assertTrue("final", ref.checkFinalConditions(new NullProgressMonitor()).isOK());
 
