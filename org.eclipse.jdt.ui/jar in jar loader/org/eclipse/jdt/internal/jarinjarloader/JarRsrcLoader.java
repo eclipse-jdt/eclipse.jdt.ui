@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -77,12 +77,10 @@ public class JarRsrcLoader {
 	}
 
 	private static ManifestInfo getManifestInfo() throws IOException {
-		Enumeration resEnum;
+		Enumeration<URL> resEnum;
 		resEnum = Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME);
 		while (resEnum.hasMoreElements()) {
-			try {
-				URL url = (URL)resEnum.nextElement();
-				InputStream is = url.openStream();
+			try (InputStream is =  resEnum.nextElement().openStream()){
 				if (is != null) {
 					ManifestInfo result = new ManifestInfo();
 					Manifest manifest = new Manifest(is);
