@@ -155,7 +155,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		if (fInstantiatedTextHovers == null)
 			return null;
 
-		for (ITextHover hover : fInstantiatedTextHovers) {
+		for (IJavaEditorTextHover hover : fInstantiatedTextHovers) {
 			if (hover == null)
 				continue;
 
