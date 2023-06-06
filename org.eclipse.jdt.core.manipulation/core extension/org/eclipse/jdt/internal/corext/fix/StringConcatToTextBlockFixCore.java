@@ -150,7 +150,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				return false;
 			}
 			StringLiteral rightLiteral= (StringLiteral)leftHand;
-			hasComments= hasComments | ASTNodes.getTrailingComments(rightLiteral).size() > 0;
+			hasComments= hasComments || !ASTNodes.getTrailingComments(rightLiteral).isEmpty();
 			literal= rightLiteral.getLiteralValue();
 			if (!literal.isEmpty() && !fAllConcats && !literal.endsWith("\n")) { //$NON-NLS-1$
 				return false;
@@ -161,17 +161,17 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			}
 			int lineNo= getLineOfOffset(cUnit, leftLiteral.getStartPosition());
 			int endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
-			hasComments= hasComments | ASTNodes.getCommentsForRegion(cUnit, leftLiteral.getStartPosition(), endPosition - leftLiteral.getStartPosition()).size() > 0;
+			hasComments= hasComments || !ASTNodes.getCommentsForRegion(cUnit, leftLiteral.getStartPosition(), endPosition - leftLiteral.getStartPosition()).isEmpty();
 			lineNo= getLineOfOffset(cUnit, rightLiteral.getStartPosition());
 			endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
-			hasComments= hasComments | ASTNodes.getCommentsForRegion(cUnit, rightLiteral.getStartPosition(), endPosition - rightLiteral.getStartPosition()).size() > 0;
+			hasComments= hasComments || !ASTNodes.getCommentsForRegion(cUnit, rightLiteral.getStartPosition(), endPosition - rightLiteral.getStartPosition()).isEmpty();
 			for (int i= 0; i < extendedOperands.size(); ++i) {
 				Expression operand= extendedOperands.get(i);
 				if (operand instanceof StringLiteral) {
 					StringLiteral stringLiteral= (StringLiteral)operand;
 					lineNo= getLineOfOffset(cUnit, stringLiteral.getStartPosition());
 					endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
-					hasComments= hasComments | ASTNodes.getCommentsForRegion(cUnit, stringLiteral.getStartPosition(), endPosition - stringLiteral.getStartPosition()).size() > 0;
+					hasComments= hasComments || !ASTNodes.getCommentsForRegion(cUnit, stringLiteral.getStartPosition(), endPosition - stringLiteral.getStartPosition()).isEmpty();
 					String string= stringLiteral.getLiteralValue();
 					if (!string.isEmpty() && (fAllConcats || string.endsWith("\n") || i == extendedOperands.size() - 1)) { //$NON-NLS-1$
 						continue;
