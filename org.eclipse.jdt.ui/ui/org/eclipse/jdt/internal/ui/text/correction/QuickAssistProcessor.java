@@ -198,7 +198,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
-import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -334,7 +333,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getAddStaticImportProposals(context, coveringNode, null)
 					|| getDoWhileRatherThanWhileProposal(context, coveringNode, null)
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
-					|| getAddStaticMemberFavoritesProposals(context, coveringNode, null)
+					|| getAddStaticMemberFavoritesProposals(coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null);
 		}
 		return false;
@@ -405,7 +404,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertVarTypeToResolvedTypeProposal(context, coveringNode, resultingCollections);
 				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, resultingCollections);
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
-				getAddStaticMemberFavoritesProposals(context, coveringNode, resultingCollections);
+				getAddStaticMemberFavoritesProposals(coveringNode, resultingCollections);
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
@@ -2046,182 +2045,28 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
-		VariableDeclarationFragment fragment;
-		if (node instanceof VariableDeclarationFragment) {
-			fragment= (VariableDeclarationFragment) node;
-		} else if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
-			fragment= (VariableDeclarationFragment) node.getParent();
-		} else {
-			return false;
-		}
-
-		if (fragment.getInitializer() == null) {
-			return false;
-		}
-
-		Statement statement;
-		ASTNode fragParent= fragment.getParent();
-		boolean isVarType= false;
-		if (fragParent instanceof VariableDeclarationStatement) {
-			statement= (VariableDeclarationStatement) fragParent;
-			Type type= ((VariableDeclarationStatement)fragParent).getType();
-			isVarType = (type == null) ? false : type.isVar();
-		} else if (fragParent instanceof VariableDeclarationExpression) {
-			if (fragParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
-				return false;
-			}
-			statement= (Statement) fragParent.getParent();
-			Type type= ((VariableDeclarationExpression)fragParent).getType();
-			isVarType = (type == null) ? false : type.isVar();
-		} else {
-			return false;
-		}
-		if (!(statement instanceof ForStatement) &&
-				!(statement instanceof VariableDeclarationStatement)){
-			return false;
-		}
-		// statement is ForStatement or VariableDeclarationStatement
-		ASTNode statementParent= statement.getParent();
-		StructuralPropertyDescriptor property= statement.getLocationInParent();
-		if (!property.isChildListProperty()) {
-			return false;
-		}
-
-		List<? extends ASTNode> list= ASTNodes.getChildListProperty(statementParent, (ChildListPropertyDescriptor) property);
-
-		AST ast= statement.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-
-		String label= CorrectionMessages.QuickAssistProcessor_splitdeclaration_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.SPLIT_VARIABLE_DECLARATION, image);
-		boolean commandConflict= false;
-		for (ICommandAccess completionProposal : resultingCollections) {
-			if (completionProposal instanceof ChangeCorrectionProposal) {
-				if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(((ChangeCorrectionProposal) completionProposal).getCommandId())) {
-					commandConflict= true;
-				}
-			}
-		}
-		if (!commandConflict) {
-			proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
-		}
-
-		// for multiple declarations; all must be moved outside, leave none behind
-		if (statement instanceof ForStatement) {
-			IBuffer buffer= context.getCompilationUnit().getBuffer();
-			ForStatement forStatement= (ForStatement) statement;
-			VariableDeclarationExpression oldVarDecl= (VariableDeclarationExpression) fragParent;
-			Type type= oldVarDecl.getType();
-			ITypeBinding tBinding= type.resolveBinding();
-			List<VariableDeclarationFragment> oldFragments= oldVarDecl.fragments();
-			CompilationUnit cup= (CompilationUnit) fragment.getRoot();
-			ListRewrite forListRewrite= rewrite.getListRewrite(forStatement, ForStatement.INITIALIZERS_PROPERTY);
-			// create the new initializers
-			for (VariableDeclarationFragment oldFragment : oldFragments) {
-				int extendedStartPositionFragment= cup.getExtendedStartPosition(oldFragment);
-				int extendedLengthFragment= cup.getExtendedLength(oldFragment);
-				StringBuilder codeFragment= new StringBuilder(buffer.getText(extendedStartPositionFragment, extendedLengthFragment));
-				if (oldFragment.getInitializer() == null) {
-					ITypeBinding typeBinding= type.resolveBinding();
-					if ("Z".equals(typeBinding.getBinaryName())) { //$NON-NLS-1$
-						codeFragment.append(" = false"); //$NON-NLS-1$
-					} else if (type.isPrimitiveType()) {
-						codeFragment.append(" = 0"); //$NON-NLS-1$
-					} else {
-						codeFragment.append(" = null"); //$NON-NLS-1$
+		VariableDeclarationFixCore fix= VariableDeclarationFixCore.createSplitVariableFix(context.getASTRoot(), node);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			Map<String, String> options= new HashMap<>();
+			options.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
+			ICleanUp cleanUp= new ConvertLoopCleanUp(options);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_FOR_LOOP_TO_ENHANCED, image, context);
+			boolean commandConflict= false;
+			for (ICommandAccess completionProposal : resultingCollections) {
+				if (completionProposal instanceof FixCorrectionProposal) {
+					if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(((FixCorrectionProposal) completionProposal).getCommandId())) {
+						commandConflict= true;
 					}
 				}
-				Assignment newAssignmentFragment= (Assignment) rewrite.createStringPlaceholder(codeFragment.toString(), ASTNode.ASSIGNMENT);
-				forListRewrite.insertLast(newAssignmentFragment, null);
 			}
-
-			// create the new declarations
-			Type nType= null;
-			if (isVarType) {
-				ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
-				ImportRewriteContext icontext= new ContextSensitiveImportRewriteContext(cup, importRewrite);
-				nType= importRewrite.addImport(tBinding, ast, icontext, TypeLocation.LOCAL_VARIABLE);
-				String codeDeclaration= tBinding.getName();
-				String commentToken= ""; //$NON-NLS-1$
-				int extendedStatementStart= cup.getExtendedStartPosition(oldVarDecl);
-				if (oldVarDecl.getStartPosition() > extendedStatementStart) {
-					commentToken= buffer.getText(extendedStatementStart, oldVarDecl.getStartPosition() - extendedStatementStart);
-				}
-				codeDeclaration= commentToken + codeDeclaration;
-				nType= (Type) rewrite.createStringPlaceholder(codeDeclaration.trim(), type.getNodeType());
-			} else {
-				int extendedStartPositionDeclaration= cup.getExtendedStartPosition(oldVarDecl);
-				int firstFragmentStart= ((ASTNode) oldVarDecl.fragments().get(0)).getStartPosition();
-				String codeDeclaration= buffer.getText(extendedStartPositionDeclaration, firstFragmentStart - extendedStartPositionDeclaration);
-				nType= (Type) rewrite.createStringPlaceholder(codeDeclaration.trim(), type.getNodeType());
+			if (!commandConflict) {
+				proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
+				resultingCollections.add(proposal);
+				return true;
 			}
-
-			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
-			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
-			newVarDec.setType(nType);
-			newFrag.setName(ast.newSimpleName(oldFragments.get(0).getName().getIdentifier()));
-			newFrag.extraDimensions().addAll(DimensionRewrite.copyDimensions(oldFragments.get(0).extraDimensions(), rewrite));
-
-			for (int i= 1; i < oldFragments.size(); i++) {
-				VariableDeclarationFragment oldFragment= oldFragments.get(i);
-				newFrag= ast.newVariableDeclarationFragment();
-				newFrag.setName(ast.newSimpleName(oldFragment.getName().getIdentifier()));
-				newFrag.extraDimensions().addAll(DimensionRewrite.copyDimensions(oldFragment.extraDimensions(), rewrite));
-				newVarDec.fragments().add(newFrag);
-			}
-			newVarDec.modifiers().addAll(ASTNodeFactory.newModifiers(ast, oldVarDecl.getModifiers()));
-
-			ListRewrite listRewriter= rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
-			listRewriter.insertBefore(newVarDec, statement, null);
-
-			rewrite.remove(oldVarDecl, null);
-
-			resultingCollections.add(proposal);
-			return true;
 		}
-
-		int insertIndex= list.indexOf(statement);
-		ITypeBinding binding= fragment.getInitializer().resolveTypeBinding();
-		Expression placeholder= (Expression) rewrite.createMoveTarget(fragment.getInitializer());
-		if (placeholder instanceof ArrayInitializer && binding != null && binding.isArray()) {
-			ArrayCreation creation= ast.newArrayCreation();
-			creation.setInitializer((ArrayInitializer) placeholder);
-			final ITypeBinding componentType= binding.getElementType();
-			Type type= null;
-			if (componentType.isPrimitive()) {
-				type= ast.newPrimitiveType(PrimitiveType.toCode(componentType.getName()));
-			} else {
-				type= ast.newSimpleType(ast.newSimpleName(componentType.getName()));
-			}
-			creation.setType(ast.newArrayType(type, binding.getDimensions()));
-			placeholder= creation;
-		}
-
-		Assignment assignment= ast.newAssignment();
-		assignment.setRightHandSide(placeholder);
-		assignment.setLeftHandSide(ast.newSimpleName(fragment.getName().getIdentifier()));
-
-		// statement is VariableDeclarationStatement
-		Statement newStatement= ast.newExpressionStatement(assignment);
-		insertIndex+= 1; // add after declaration
-
-		if (isVarType) {
-			VariableDeclarationStatement varDecl= (VariableDeclarationStatement) statement;
-			CompilationUnit cup= (CompilationUnit) fragment.getRoot();
-			Type type= varDecl.getType();
-			ITypeBinding tBinding= type.resolveBinding();
-			ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
-			ImportRewriteContext icontext= new ContextSensitiveImportRewriteContext(cup, importRewrite);
-			Type nType= importRewrite.addImport(tBinding, ast, icontext, TypeLocation.LOCAL_VARIABLE);
-			rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, nType, null);
-			DimensionRewrite.removeAllChildren(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
-		}
-
-		ListRewrite listRewriter= rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
-		listRewriter.insertAt(newStatement, insertIndex, null);
-		resultingCollections.add(proposal);
-		return true;
+		return false;
 	}
 
 	public static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
@@ -3596,7 +3441,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddStaticMemberFavoritesProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getAddStaticMemberFavoritesProposals(ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof ImportDeclaration)) {
 			node= ASTNodes.getFirstAncestorOrNull(node, ImportDeclaration.class);
 		}
