@@ -114,12 +114,12 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 							}
 							hit.whileStatement= whilestatement;
 							if (hit.self) {
-								hit.loopVarName= ConvertLoopOperation.modifybasename("i"); //$NON-NLS-1$
+								hit.loopVarName= ConvertLoopOperation.modifyBaseName("i"); //$NON-NLS-1$
 							} else {
 								if (hit.collectionExpression instanceof SimpleName) {
-									hit.loopVarName= ConvertLoopOperation.modifybasename(((SimpleName)hit.collectionExpression).getIdentifier());
+									hit.loopVarName= ConvertLoopOperation.modifyBaseName(((SimpleName)hit.collectionExpression).getIdentifier());
 								} else {
-									hit.loopVarName= ConvertLoopOperation.modifybasename("element"); //$NON-NLS-1$
+									hit.loopVarName= ConvertLoopOperation.modifyBaseName("element"); //$NON-NLS-1$
 								}
 							}
 							operationsMap.put(whilestatement, hit);
@@ -165,12 +165,12 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 									hit.loopVarName= vdf.getName().getIdentifier();
 								} else {
 									if (hit.self) {
-										hit.loopVarName= ConvertLoopOperation.modifybasename("i"); //$NON-NLS-1$
+										hit.loopVarName= ConvertLoopOperation.modifyBaseName("i"); //$NON-NLS-1$
 									} else {
 										if (hit.collectionExpression instanceof SimpleName) {
-											hit.loopVarName= ConvertLoopOperation.modifybasename(((SimpleName)hit.collectionExpression).getIdentifier());
+											hit.loopVarName= ConvertLoopOperation.modifyBaseName(((SimpleName)hit.collectionExpression).getIdentifier());
 										} else {
-											hit.loopVarName= ConvertLoopOperation.modifybasename("element"); //$NON-NLS-1$
+											hit.loopVarName= ConvertLoopOperation.modifyBaseName("element"); //$NON-NLS-1$
 										}
 									}
 									hit.nextWithoutVariableDeclaration= true;
