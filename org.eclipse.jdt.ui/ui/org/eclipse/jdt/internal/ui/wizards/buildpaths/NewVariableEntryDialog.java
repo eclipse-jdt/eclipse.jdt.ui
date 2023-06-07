@@ -98,7 +98,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 
 	}
 
-	private final int IDX_EXTEND= 0;
+	private static final int IDX_EXTEND= 0;
 
 	private ListDialogField<CPVariableElement> fVariablesList;
 	private boolean fCanExtend;

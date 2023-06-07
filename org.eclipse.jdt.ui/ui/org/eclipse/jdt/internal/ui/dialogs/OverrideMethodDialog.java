@@ -117,9 +117,9 @@ public class OverrideMethodDialog extends SourceActionDialog {
 
 		private ContainerCheckedTreeViewer fViewer;
 
-		private final String SETTINGS_SECTION= "OverrideMethodDialog"; //$NON-NLS-1$
+		private static final String SETTINGS_SECTION= "OverrideMethodDialog"; //$NON-NLS-1$
 
-		private final String SETTINGS_SHOWTYPES= "showtypes"; //$NON-NLS-1$
+		private static final String SETTINGS_SHOWTYPES= "showtypes"; //$NON-NLS-1$
 
 		/**
 		 * Constructor for OverrideMethodContentProvider.

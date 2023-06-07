@@ -111,11 +111,11 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	public static final int FIELD= 2;
 	public static final int TRY_WITH_RESOURCES= 3;
 
-	private final String KEY_NAME= "name";  //$NON-NLS-1$
-	private final String KEY_TYPE= "type";  //$NON-NLS-1$
-	private final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
-	private final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
-	private final String VAR_TYPE= "var";  //$NON-NLS-1$
+	private static final String KEY_NAME= "name";  //$NON-NLS-1$
+	private static final String KEY_TYPE= "type";  //$NON-NLS-1$
+	private static final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
+	private static final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
+	private static final String VAR_TYPE= "var";  //$NON-NLS-1$
 
 	private final int  fVariableKind;
 	private final List<ASTNode> fNodesToAssign; // ExpressionStatement or SingleVariableDeclaration(s)

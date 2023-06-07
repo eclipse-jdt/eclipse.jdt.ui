@@ -100,17 +100,17 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private final IWorkbenchPreferenceContainer fPageContainer;
 
-	private final int IDX_ADDJAR= 0;
-	protected final int IDX_ADDEXT= 1;
-	private final int IDX_ADDVAR= 2;
-	private final int IDX_ADDLIB= 3;
-	private final int IDX_ADDFOL= 4;
-	private final int IDX_ADDEXTFOL= 5;
+	private static final int IDX_ADDJAR= 0;
+	protected static final int IDX_ADDEXT= 1;
+	private static final int IDX_ADDVAR= 2;
+	private static final int IDX_ADDLIB= 3;
+	private static final int IDX_ADDFOL= 4;
+	private static final int IDX_ADDEXTFOL= 5;
 
-	private final int IDX_EDIT= 7;
-	private final int IDX_REMOVE= 8;
+	private static final int IDX_EDIT= 7;
+	private static final int IDX_REMOVE= 8;
 
-	private final int IDX_REPLACE= 10;
+	private static final int IDX_REPLACE= 10;
 
 	private boolean dragDropEnabled;
 	private Object draggedItemsLibrary;

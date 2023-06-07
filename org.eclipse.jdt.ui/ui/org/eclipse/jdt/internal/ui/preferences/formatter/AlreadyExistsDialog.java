@@ -44,7 +44,7 @@ public class AlreadyExistsDialog extends StatusDialog {
 	protected Text fNameText;
 	private Button fRenameRadio, fOverwriteRadio;
 
-	private final int NUM_COLUMNS= 2;
+	private static final int NUM_COLUMNS= 2;
 
 	private final StatusInfo fOk;
 	private final StatusInfo fEmpty;

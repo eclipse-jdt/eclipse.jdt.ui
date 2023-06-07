@@ -63,10 +63,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class ProjectsWorkbookPage extends BuildPathBasePage {
 
-	private final int IDX_ADDPROJECT= 0;
+	private static final int IDX_ADDPROJECT= 0;
 
-	private final int IDX_EDIT= 2;
-	private final int IDX_REMOVE= 3;
+	private static final int IDX_EDIT= 2;
+	private static final int IDX_REMOVE= 3;
 
 	private final ListDialogField<CPListElement> fClassPathList;
 	private IJavaProject fCurrJProject;

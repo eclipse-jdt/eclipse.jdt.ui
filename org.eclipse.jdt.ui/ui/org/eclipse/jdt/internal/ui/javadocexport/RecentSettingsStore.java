@@ -36,11 +36,11 @@ import org.eclipse.jdt.ui.JavaUI;
 
 public class RecentSettingsStore {
 
-	private final String HREF= "href"; //$NON-NLS-1$
-	private final String DESTINATION= "destdir"; //$NON-NLS-1$
-	private final String ANTPATH= "antpath"; //$NON-NLS-1$
+	private static final String HREF= "href"; //$NON-NLS-1$
+	private static final String DESTINATION= "destdir"; //$NON-NLS-1$
+	private static final String ANTPATH= "antpath"; //$NON-NLS-1$
 
-	private final String SECTION_PROJECTS= "projects"; //$NON-NLS-1$
+	private static final String SECTION_PROJECTS= "projects"; //$NON-NLS-1$
 
 	private final static char REF_SEPARATOR= ';';
 

@@ -94,7 +94,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	private final class LinkFields implements IStringButtonAdapter, IDialogFieldListener{
 		private StringButtonDialogField fLinkLocation;
 
-		private final String DIALOGSTORE_LAST_EXTERNAL_LOC= JavaUI.ID_PLUGIN + ".last.external.project"; //$NON-NLS-1$
+		private static final String DIALOGSTORE_LAST_EXTERNAL_LOC= JavaUI.ID_PLUGIN + ".last.external.project"; //$NON-NLS-1$
 
 		private RootFieldAdapter fAdapter;
 

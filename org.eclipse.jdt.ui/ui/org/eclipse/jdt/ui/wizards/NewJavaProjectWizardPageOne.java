@@ -808,8 +808,8 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	@SuppressWarnings("deprecation")
 	private final class ModuleGroup extends Observable implements IDialogFieldListener{
 
-		private final String LAST_SELECTED_CREATE_MODULEINFO_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.create.moduleinfo"; //$NON-NLS-1$
-		private final String LAST_SELECTED_CREATE_MODULEINFO_COMMENT_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.create.moduleinfo.comments"; //$NON-NLS-1$
+		private static final String LAST_SELECTED_CREATE_MODULEINFO_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.create.moduleinfo"; //$NON-NLS-1$
+		private static final String LAST_SELECTED_CREATE_MODULEINFO_COMMENT_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.create.moduleinfo.comments"; //$NON-NLS-1$
 		private final SelectionButtonDialogField fCreateModuleInfo;
 		private final SelectionButtonDialogField fAddCommentButton;
 		private final StringDialogField fModuleNameDialogField;
