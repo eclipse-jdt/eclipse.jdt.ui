@@ -160,9 +160,9 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		String baseName= FOR_LOOP_ELEMENT_IDENTIFIER;
 		if (fExpression != null) {
 			if  (fExpression instanceof SimpleName) {
-				baseName= ConvertLoopOperation.modifybasename(((SimpleName)fExpression).getFullyQualifiedName());
+				baseName= ConvertLoopOperation.modifyBaseName(((SimpleName)fExpression).getFullyQualifiedName());
 			} else if (fExpression instanceof QualifiedName) {
-				baseName= ConvertLoopOperation.modifybasename(((QualifiedName)fExpression).getName().getFullyQualifiedName());
+				baseName= ConvertLoopOperation.modifyBaseName(((QualifiedName)fExpression).getName().getFullyQualifiedName());
 			}
 		}
 		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), baseName, 0, variableNames);

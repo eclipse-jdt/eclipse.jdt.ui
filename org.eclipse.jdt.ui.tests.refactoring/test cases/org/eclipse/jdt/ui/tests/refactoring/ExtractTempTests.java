@@ -16,6 +16,7 @@
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by Identifying the Side Effect of Selected Expression. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -1039,6 +1040,19 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	public void test152() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
 		helper1(10, 17, 10, 20, true, false, "f", "f");
+	}
+
+
+	@Test
+	public void test153() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+		helper1(23, 32, 23, 49, true, false, "iterPerson", "iterPerson");
+	}
+
+	@Test
+	public void test154() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+		helper1(23, 32, 23, 45, true, false, "person", "person");
 	}
 
 	@Test

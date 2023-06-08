@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.manipulation;
 
@@ -88,6 +89,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -106,6 +108,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.fix.ConvertLoopOperation;
 
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
@@ -1156,7 +1159,14 @@ public class StubUtility {
 
 			return ASTNodes.getSimpleNameIdentifier(simpleNode);
 		} else if (assignedExpression instanceof MethodInvocation) {
-			name= ((MethodInvocation)assignedExpression).getName().getIdentifier();
+			MethodInvocation methodInvocation= (MethodInvocation)assignedExpression;
+			name= methodInvocation.getName().getIdentifier();
+			if (name.equals("next")) { //$NON-NLS-1$
+				Expression receiver= methodInvocation.getExpression();
+				String modifiedName= getBaseNameFromReceiver(receiver);
+				if (!modifiedName.equals("element")) //$NON-NLS-1$
+					return modifiedName;
+			}
 		} else if (assignedExpression instanceof SuperMethodInvocation) {
 			name= ((SuperMethodInvocation)assignedExpression).getName().getIdentifier();
 		} else if (assignedExpression instanceof FieldAccess) {
@@ -1192,6 +1202,16 @@ public class StubUtility {
 			}
 		}
 		return name;
+	}
+
+	private static String getBaseNameFromReceiver(Expression receiver) {
+		if (receiver != null) {
+			if (receiver instanceof SimpleName) {
+				String receiverStr= receiver.toString();
+				return ConvertLoopOperation.modifyBaseName(receiverStr);
+			}
+		}
+		return "element"; //$NON-NLS-1$
 	}
 
 	private static String getBaseNameFromLocationInParent(Expression assignedExpression, List<Expression> arguments, IMethodBinding binding) {
@@ -1577,3 +1597,5 @@ public class StubUtility {
 	}
 
 }
+
+

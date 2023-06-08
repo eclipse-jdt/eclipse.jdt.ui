@@ -78,7 +78,7 @@ public class ConvertLoopOperationTest extends ConvertForLoopOperation {
 
 	@Test
 	public void testModifybasename() {
-		Assert.assertEquals(expectedResult, ConvertLoopOperation.modifybasename(name));
+		Assert.assertEquals(expectedResult, ConvertLoopOperation.modifyBaseName(name));
 	}
 
 }
