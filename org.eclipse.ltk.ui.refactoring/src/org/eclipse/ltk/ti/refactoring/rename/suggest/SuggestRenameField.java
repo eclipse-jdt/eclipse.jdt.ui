@@ -1,4 +1,5 @@
 package org.eclipse.ltk.ti.refactoring.rename.suggest;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +31,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
 public class SuggestRenameField {
 	private ITextSelection selection;
 
@@ -45,21 +47,21 @@ public class SuggestRenameField {
 
 	public static String getFieldNameSuggestions(ISelection sel, ExecutionEvent event) throws Exception {
 		handleCommand(sel);
-		IEditorPart editorPart1 = HandlerUtil.getActiveEditor(event);
-		IFile file = editorPart1.getEditorInput().getAdapter(IFile.class);
+		IEditorPart editorPart1= HandlerUtil.getActiveEditor(event);
+		IFile file= editorPart1.getEditorInput().getAdapter(IFile.class);
 		IJavaProject javaProject= JavaCore.create(file.getProject());
-		ICompilationUnit compilationUnit = JavaCore.createCompilationUnitFrom(file);
-		ASTParser astParser = ASTParser.newParser(AST.JLS20);
+		ICompilationUnit compilationUnit= JavaCore.createCompilationUnitFrom(file);
+		ASTParser astParser= ASTParser.newParser(AST.JLS20);
 		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setResolveBindings(true);
 		astParser.setBindingsRecovery(true);
 		astParser.setSource(compilationUnit);
-		CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
+		CompilationUnit astRoot= (CompilationUnit) astParser.createAST(null);
 
-		return getFieldName(astRoot,javaProject);
+		return getFieldName(astRoot, javaProject);
 	}
 
-	public static String getFieldName(CompilationUnit cu,IJavaProject javaProject) {
+	public static String getFieldName(CompilationUnit cu, IJavaProject javaProject) {
 		String fieldName= ""; //$NON-NLS-1$
 		if (!fieldDeclarations.isEmpty()) {
 			fieldDeclarations.clear();
@@ -73,17 +75,24 @@ public class SuggestRenameField {
 			string[i]= fieldName;
 			if (fieldName.equals(textSelect)) {
 				Type fieldType= fd.getType();
-				if(fieldType.toString().equals("float")||fieldType.toString().equals("int") //$NON-NLS-1$ //$NON-NLS-2$
-						||fieldType.toString().equals("char")||fieldType.toString().equals("boolean") //$NON-NLS-1$ //$NON-NLS-2$
-						||fieldType.toString().equals("long")||fieldType.toString().equals("double") //$NON-NLS-1$ //$NON-NLS-2$
-						||fieldType.toString().equals("String")||fieldType.toString().equals("byte")) { //$NON-NLS-1$ //$NON-NLS-2$
+				if (fieldType.toString().equals("float") || fieldType.toString().equals("int") //$NON-NLS-1$ //$NON-NLS-2$
+						|| fieldType.toString().equals("char") || fieldType.toString().equals("boolean") //$NON-NLS-1$ //$NON-NLS-2$
+						|| fieldType.toString().equals("long") || fieldType.toString().equals("double") //$NON-NLS-1$ //$NON-NLS-2$
+						|| fieldType.toString().equals("String") || fieldType.toString().equals("byte")) { //$NON-NLS-1$ //$NON-NLS-2$
 					return textSelect;
-				}else {
-				  int modifier= fd.getModifiers();
-                  String[] suggestedNames=getFieldNameSuggestions(javaProject,fieldType.toString(),0, modifier, string);
-        		  if (suggestedNames.length > 0) {
-        			  return suggestedNames[0];
-        		   }
+				} else {
+					int modifier= fd.getModifiers();
+					if (vdf.getInitializer() != null) {
+						String[] suggestedNames= getFieldNameSuggestions(javaProject, fieldType.toString(), 0, modifier, string);
+						if (suggestedNames.length > 0) {
+							return suggestedNames[suggestedNames.length-1];
+						}
+                } else {
+						String[] suggestedNames= getFieldNameSuggestions(javaProject, fieldType.toString(), 0, modifier, string);
+						if (suggestedNames.length > 0) {
+							return suggestedNames[0];
+						}
+					}
 				}
 			}
 		}
@@ -167,7 +176,7 @@ public class SuggestRenameField {
 	}
 
 	public static void setTextLength(int textLength) {
-		SuggestRenameField.textLength = textLength;
+		SuggestRenameField.textLength= textLength;
 	}
 
 	public ITextSelection getSelection() {
@@ -175,7 +184,7 @@ public class SuggestRenameField {
 	}
 
 	public void setSelection(ITextSelection selection) {
-		this.selection = selection;
+		this.selection= selection;
 	}
 
 	public static int getTextStartLine() {
@@ -183,7 +192,7 @@ public class SuggestRenameField {
 	}
 
 	public static void setTextStartLine(int textStartLine) {
-		SuggestRenameField.textStartLine = textStartLine;
+		SuggestRenameField.textStartLine= textStartLine;
 	}
 
 	public static int getTextOffset() {
@@ -191,7 +200,7 @@ public class SuggestRenameField {
 	}
 
 	public static void setTextOffset(int textOffset) {
-		SuggestRenameField.textOffset = textOffset;
+		SuggestRenameField.textOffset= textOffset;
 	}
 
 	private static class ExcludedCollection extends AbstractList<String> {
