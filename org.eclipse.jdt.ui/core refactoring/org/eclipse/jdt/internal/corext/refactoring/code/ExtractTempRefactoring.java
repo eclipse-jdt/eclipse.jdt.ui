@@ -928,7 +928,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				break;
 			}
 		}
-		if (node instanceof SwitchStatement) {
+		if (node instanceof SwitchStatement || node instanceof EnhancedForStatement) {
 			/* must insert above switch statement */
 			fStartPoint= 0;
 			fEndPoint= retainOnlyReplacableMatches.length - 1;

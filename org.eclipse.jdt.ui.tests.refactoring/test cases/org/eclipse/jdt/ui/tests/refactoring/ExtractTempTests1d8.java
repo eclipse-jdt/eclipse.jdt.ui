@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2020 IBM Corporation and others.
+ * Copyright (c) 2014, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,14 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d8Setup;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -95,6 +93,11 @@ public class ExtractTempTests1d8 extends ExtractTempTests {
 	@Test
 	public void test119() throws Exception {
 		helper1(7, 30, 7, 63, true, false, "supplier", "supplier");
+	}
+
+	@Test
+	public void test120() throws Exception {
+		helper1(13, 25, 13, 34, true, false, "list", "list");
 	}
 
 	// -- testing failing preconditions
