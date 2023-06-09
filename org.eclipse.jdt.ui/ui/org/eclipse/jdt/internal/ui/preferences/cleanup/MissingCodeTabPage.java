@@ -15,15 +15,13 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
-
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 
 public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 
@@ -44,6 +42,7 @@ public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
     	Group annotationsGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_Annotations);
 
 		final CheckboxPreference annotationsPref= createCheckboxPref(annotationsGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(annotationsPref);
 
 		intent(annotationsGroup);
 		final CheckboxPreference overridePref= createCheckboxPref(annotationsGroup, numColumns - 1, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingOverrideAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpModifyDialog.FALSE_TRUE);
@@ -63,6 +62,7 @@ public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 			Group pppGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_PotentialProgrammingProblems);
 
 			final CheckboxPreference addSUIDPref= createCheckboxPref(pppGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpModifyDialog.FALSE_TRUE);
+			registerPreference(addSUIDPref);
 			intent(pppGroup);
 			final RadioPreference generatedPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddGeneratedSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpModifyDialog.FALSE_TRUE);
 			final RadioPreference defaultPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddDefaultSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpModifyDialog.FALSE_TRUE);
