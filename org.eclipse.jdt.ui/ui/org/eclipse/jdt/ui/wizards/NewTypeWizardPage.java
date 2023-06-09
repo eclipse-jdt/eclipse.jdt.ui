@@ -2379,7 +2379,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * @return returns true if the super class is final
-	 * @since 3.29
+	 * @since 3.30
 	 */
 	protected boolean isSuperClassFinal() {
 		try {
