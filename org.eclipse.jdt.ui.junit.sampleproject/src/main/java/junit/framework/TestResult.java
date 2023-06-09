@@ -47,8 +47,8 @@ public class TestResult extends Object {
 	 */
 	public synchronized void addError(Test test, Throwable t) {
 		fErrors.addElement(new TestFailure(test, t));
-		for (Object element : cloneListeners()) {
-			((TestListener) element).addError(test, t);
+		for (TestListener listener : cloneListeners()) {
+			listener.addError(test, t);
 		}
 	}
 
@@ -58,8 +58,8 @@ public class TestResult extends Object {
 	 */
 	public synchronized void addFailure(Test test, AssertionFailedError t) {
 		fFailures.addElement(new TestFailure(test, t));
-		for (Object element : cloneListeners()) {
-			((TestListener) element).addFailure(test, t);
+		for (TestListener listener : cloneListeners()) {
+			listener.addFailure(test, t);
 		}
 	}
 
@@ -88,8 +88,8 @@ public class TestResult extends Object {
 	 * Informs the result that a test was completed.
 	 */
 	public void endTest(Test test) {
-		for (Object element : cloneListeners()) {
-			((TestListener) element).endTest(test);
+		for (TestListener listener : cloneListeners()) {
+			listener.endTest(test);
 		}
 	}
 
@@ -173,8 +173,8 @@ public class TestResult extends Object {
 		synchronized (this) {
 			fRunTests += count;
 		}
-		for (Object element : cloneListeners()) {
-			((TestListener) element).startTest(test);
+		for (TestListener listener : cloneListeners()) {
+			listener.startTest(test);
 		}
 	}
 

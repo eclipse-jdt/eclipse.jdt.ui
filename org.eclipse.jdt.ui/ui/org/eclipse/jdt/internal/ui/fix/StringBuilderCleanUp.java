@@ -667,8 +667,8 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 
 				Expression createdExpression= ASTNodes.createMoveTarget(rewrite, assignment.getLeftHandSide());
 
-				for (Object operand : operands) {
-					createdExpression= newAppending(rewrite, ast, createdExpression, (Expression) operand);
+				for (Expression operand : operands) {
+					createdExpression= newAppending(rewrite, ast, createdExpression, operand);
 				}
 
 				ASTNodes.replaceButKeepComment(rewrite, assignment, createdExpression, group);
@@ -730,8 +730,8 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 
 						Expression appending= ASTNodes.createMoveTarget(rewrite, finalSerialization);
 
-						for (Object operand : nextOperands) {
-							appending= newAppending(rewrite, ast, appending, (Expression) operand);
+						for (Expression operand : nextOperands) {
+							appending= newAppending(rewrite, ast, appending, operand);
 						}
 
 						MethodInvocation toStringMethod= ast.newMethodInvocation();

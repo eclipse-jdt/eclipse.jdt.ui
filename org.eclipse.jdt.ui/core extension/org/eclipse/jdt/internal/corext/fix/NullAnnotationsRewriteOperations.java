@@ -142,7 +142,7 @@ public class NullAnnotationsRewriteOperations {
 
 		boolean checkExisting(ListRewrite listRewrite, TextEditGroup editGroup) {
 			List<IExtendedModifier> existingModifiers= listRewrite.getOriginalList();
-			for (Object mod : existingModifiers) {
+			for (IExtendedModifier mod : existingModifiers) {
 				if (mod instanceof MarkerAnnotation) {
 					MarkerAnnotation annotation= (MarkerAnnotation) mod;
 					String existingName= annotation.getTypeName().getFullyQualifiedName();
