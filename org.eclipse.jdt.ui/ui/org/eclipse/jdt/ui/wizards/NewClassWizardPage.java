@@ -14,30 +14,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Wizard page to  create a new class.
@@ -108,7 +103,10 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	}
 
 	// ------ validation --------
-	private void doStatusUpdate() {
+	/**
+	 * @since 3.30
+	 */
+	public final void doStatusUpdate() {
 		// status of all used components
 		IStatus[] status= new IStatus[] {
 			fContainerStatus,
@@ -196,7 +194,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		super.setVisible(visible);
 		if (visible) {
 			setFocus();
-			if (isSuperTypeSealed()) {
+			if (isSuperTypeSealed() || isSuperClassFinal()) {
 				doStatusUpdate();
 			}
 		}
