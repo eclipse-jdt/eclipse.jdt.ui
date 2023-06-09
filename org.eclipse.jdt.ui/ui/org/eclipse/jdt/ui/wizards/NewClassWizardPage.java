@@ -104,7 +104,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 
 	// ------ validation --------
 	/**
-	 * @since 3.29
+	 * @since 3.30
 	 */
 	public final void doStatusUpdate() {
 		// status of all used components
