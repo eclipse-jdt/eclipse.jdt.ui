@@ -33,8 +33,6 @@ public final class FatJarPackagerMessages extends NLS {
 
 	public static String JarPackageWizardPage_title;
 
-	public static String FatJarBuilder_error_readingArchiveFile;
-
 	public static String FatJarPackageWizard_JarExportProblems_message;
 
 	public static String FatJarPackageWizardPage_destinationGroupTitle;

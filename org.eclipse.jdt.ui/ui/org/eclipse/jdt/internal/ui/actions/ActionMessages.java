@@ -112,10 +112,6 @@ public final class ActionMessages extends NLS {
 	public static String ShowInPackageViewAction_tooltip;
 	public static String ShowInPackageViewAction_dialog_title;
 	public static String ShowInPackageViewAction_error_message;
-	public static String ShowInNavigatorView_label;
-	public static String ShowInNavigatorView_dialog_title;
-	public static String ShowInNavigatorView_dialog_message;
-	public static String ShowInNavigatorView_error_activation_failed;
 	public static String OverrideMethodsAction_label;
 	public static String OverrideMethodsAction_description;
 	public static String OverrideMethodsAction_tooltip;
@@ -247,7 +243,6 @@ public final class ActionMessages extends NLS {
 	public static String AddTextBlockAction_label;
 	public static String AddTextBlockAction_description;
 	public static String AddTextBlockAction_tooltip;
-	public static String AddTextBlockAction_not_applicable;
 	public static String ExternalizeStringsAction_label;
 	public static String ExternalizeStringsAction_dialog_title;
 	public static String FindStringsToExternalizeAction_label;
@@ -284,7 +279,6 @@ public final class ActionMessages extends NLS {
 	public static String OrganizeImportsAction_selectiondialog_title;
 	public static String OrganizeImportsAction_selectiondialog_message;
 	public static String OrganizeImportsAction_error_title;
-	public static String OrganizeImportsAction_error_message;
 	public static String OrganizeImportsAction_single_error_parse;
 
 	/**

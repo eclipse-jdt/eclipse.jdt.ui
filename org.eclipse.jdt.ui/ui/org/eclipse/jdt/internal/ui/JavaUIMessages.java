@@ -105,7 +105,6 @@ public final class JavaUIMessages extends NLS {
 	public static String PackageSelectionDialog_error3Message;
 	public static String PackageSelectionDialog_nopackages_title;
 	public static String PackageSelectionDialog_nopackages_message;
-	public static String ProblemMarkerManager_problem_marker_update_job_description;
 
 	public static String OverrideMethodDialog_groupMethodsByTypes;
 	public static String OverrideMethodDialog_dialog_title;
@@ -181,16 +180,8 @@ public final class JavaUIMessages extends NLS {
 	public static String GenerateToStringDialog_teplatesManagerEditButton;
 	public static String GenerateToStringDialog_up_button;
 
-	public static String JavaElementLabels_default_package;
-	public static String JavaElementLabels_anonym_type;
-	public static String JavaElementLabels_anonym;
-	public static String JavaElementLabels_import_container;
 	public static String JavaElementLabels_initializer;
 	public static String JavaElementLabels_category;
-	public static String JavaElementLabels_concat_string;
-	public static String JavaElementLabels_comma_string;
-	public static String JavaElementLabels_declseparator_string;
-	public static String JavaElementLabels_category_separator_string;
 	public static String JavaElementLabels_onClassPathOf;
 	public static String JavaElementLinks_title;
 
@@ -244,12 +235,10 @@ public final class JavaUIMessages extends NLS {
 	public static String CoreUtility_buildall_taskname;
 	public static String CoreUtility_buildproject_taskname;
 
-	public static String FilteredTypesSelectionDialog_default_package;
 	public static String FilteredTypesSelectionDialog_dialogMessage;
 	public static String FilteredTypesSelectionDialog_error_type_doesnot_exist;
 	public static String FilteredTypesSelectionDialog_library_name_format;
 	public static String FilteredTypesSelectionDialog_searchJob_taskName;
-	public static String FilteredTypeSelectionDialog_showContainerForDuplicatesAction;
 	public static String FilteredTypeSelectionDialog_titleFormat;
 
 	public static String InitializeAfterLoadJob_starter_job_name;
