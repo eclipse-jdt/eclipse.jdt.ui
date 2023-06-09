@@ -67,35 +67,22 @@ public class SuggestRenameField {
 			fieldDeclarations.clear();
 		}
 		getFieldDeclaration(cu, fieldDeclarations);
-		String[] string= new String[fieldDeclarations.size()];
+		String[] excludedField= new String[fieldDeclarations.size()];
 		for (int i= 0; i < fieldDeclarations.size(); i++) {
 			FieldDeclaration fd= fieldDeclarations.get(i);
+			Type fieldType= fd.getType();
+			int fieldModifier= fd.getModifiers();
 			VariableDeclarationFragment vdf= (VariableDeclarationFragment) fd.fragments().get(0);
 			fieldName= vdf.getName().getIdentifier();
-			string[i]= fieldName;
+			excludedField[i]= fieldName;
 			if (fieldName.equals(textSelect)) {
-				Type fieldType= fd.getType();
-				if (fieldType.toString().equals("float") || fieldType.toString().equals("int") //$NON-NLS-1$ //$NON-NLS-2$
-						|| fieldType.toString().equals("char") || fieldType.toString().equals("boolean") //$NON-NLS-1$ //$NON-NLS-2$
-						|| fieldType.toString().equals("long") || fieldType.toString().equals("double") //$NON-NLS-1$ //$NON-NLS-2$
-						|| fieldType.toString().equals("String") || fieldType.toString().equals("byte")) { //$NON-NLS-1$ //$NON-NLS-2$
-					return textSelect;
-				} else {
-					int modifier= fd.getModifiers();
-					if (vdf.getInitializer() != null) {
-						String[] suggestedNames= getFieldNameSuggestions(javaProject, fieldType.toString(), 0, modifier, string);
-						if (suggestedNames.length > 0) {
-							return suggestedNames[suggestedNames.length-1];
-						}
-                } else {
-						String[] suggestedNames= getFieldNameSuggestions(javaProject, fieldType.toString(), 0, modifier, string);
-						if (suggestedNames.length > 0) {
-							return suggestedNames[0];
-						}
-					}
+				String[] suggestedNames= getFieldNameSuggestions(javaProject, textSelect, 0, fieldModifier, excludedField);
+				if (suggestedNames.length > 0) {
+					return suggestedNames[0];
 				}
 			}
 		}
+
 		return textSelect;
 
 	}
