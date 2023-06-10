@@ -158,13 +158,21 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 
 	private boolean skipParameterNamesCodeMinings(IMethod method, String[] parameterNames) {
 		// add default filtering to skip parameter names (based on original plug-in defaults)
-		String packageName= method.getDeclaringType().getPackageFragment().getElementName();
-		if (packageName.startsWith("java.lang.Math.") || packageName.startsWith("org.slf4j.Logger.")) { //$NON-NLS-1$ //$NON-NLS-2$
-			return true;
+		String typeName= method.getDeclaringType().getTypeQualifiedName();
+		if (typeName.equals("Math")) { //$NON-NLS-1$
+			String packageName= method.getDeclaringType().getPackageFragment().getElementName();
+			if (packageName.equals("java.lang")) { //$NON-NLS-1$
+				return true;
+			}
+		}
+		if (typeName.equals("Logger")) { //$NON-NLS-1$
+			String packageName= method.getDeclaringType().getPackageFragment().getElementName();
+			if (packageName.equals("org.slf4j")) { //$NON-NLS-1$
+				return true;
+			}
 		}
 		String methodName= method.getElementName();
 		if (methodName.equals("of")) { //$NON-NLS-1$
-			String typeName= method.getDeclaringType().getTypeQualifiedName();
 			if (typeName.startsWith("Set") || typeName.startsWith("ImmutableList")  //$NON-NLS-1$ //$NON-NLS-2$
 					|| typeName.startsWith("ImmutableMultiset") || typeName.startsWith("ImmutableSortedMultiset") //$NON-NLS-1$ //$NON-NLS-2$
 					|| typeName.startsWith("ImmutableSortedSet") || typeName.startsWith("List")) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -172,7 +180,6 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 			}
 		}
 		if (methodName.equals("asList")) { //$NON-NLS-1$
-			String typeName= method.getDeclaringType().getTypeQualifiedName();
 			if (typeName.startsWith("Arrays")) { //$NON-NLS-1$
 				return true;
 			}
@@ -193,13 +200,13 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 		}
 		if (parameterNames[0].startsWith("from") && parameterNames[1].startsWith("to")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return true;
-		} else if (parameterNames[0].startsWith("min") && parameterNames[0].startsWith("max")) { //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (parameterNames[0].startsWith("min") && parameterNames[1].startsWith("max")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return true;
 		} else if (parameterNames[0].equals("format") && parameterNames[1].startsWith("arg")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return true;
 		} else if (parameterNames[0].equals("key") && parameterNames[1].equals("value")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return true;
-		} else if (parameterNames[1].equals("message") && parameterNames[1].equals("error")) { //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (parameterNames[0].equals("message") && parameterNames[1].equals("error")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return true;
 		}
 		return false;
