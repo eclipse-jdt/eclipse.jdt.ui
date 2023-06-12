@@ -54,18 +54,35 @@ import org.eclipse.ltk.ui.refactoring.resource.RenameResourceWizard;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 
 public class RenameResourceHandler extends AbstractResourcesHandler {
 	private static final String LTK_RENAME_COMMAND_NEWNAME_PARAMETER_KEY= "org.eclipse.ltk.ui.refactoring.commands.renameResource.newName.parameter.key"; //$NON-NLS-1$
+
 	private static final String LTK_CHECK_COMPOSITE_RENAME_PARAMETER_KEY= "org.eclipse.ltk.ui.refactoring.commands.checkCompositeRename.parameter.key"; //$NON-NLS-1$
-	private IField fSelectedField;
+
+	private static IField fSelectedField;
+
+	private static int fTextLength;
+
+	private static int fTextStartLine;
+
+	private static int fTextOffset;
+
+	private static ASTNode foundNode;
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -85,7 +102,7 @@ public class RenameResourceHandler extends AbstractResourcesHandler {
 			IResource resource= getCurrentResource((IStructuredSelection) sel);
 			if (resource != null) {
 				// A new name is required in order to compute whether the change is composite or not
-				String placeHolderFileName = 'a' + resource.getName();
+				String placeHolderFileName= 'a' + resource.getName();
 				RenameResourceWizard refactoringWizard= new RenameResourceWizard(resource, placeHolderFileName);
 				Change change= getChange(refactoringWizard);
 				return isCompositeChange(change);
@@ -103,45 +120,13 @@ public class RenameResourceHandler extends AbstractResourcesHandler {
 		}
 
 		ISelection sel= HandlerUtil.getCurrentSelection(event);
-		fSelectedField= null;
-		ICompilationUnit compilationUnit = null;
-		if (sel instanceof IStructuredSelection) {
-		    Object firstElement = ((IStructuredSelection) sel).getFirstElement();
-		    if (firstElement instanceof IJavaElement) {
-		        IJavaElement javaElement = (IJavaElement) firstElement;
-		        fSelectedField = javaElement.getAdapter(IField.class);
-		        compilationUnit = javaElement.getAdapter(ICompilationUnit.class);
-		    }
+		try {
+			newName= getFieldNameSuggestions(event, sel, newName);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		IEditorPart editorPart = HandlerUtil.getActiveEditor(event);
-		IFile file = editorPart.getEditorInput().getAdapter(IFile.class);
-		IJavaProject project= JavaCore.create(file.getProject());
-
-		String[] excluded = new String[0];
-		if (compilationUnit != null) {
-		        IType[] types;
-				try {
-					types= compilationUnit.getAllTypes();
-					 for (IType type : types) {
-				            IField[] fields = type.getFields();
-				            for (IField field : fields) {
-				                String fieldName = field.getElementName();
-				                excluded = Arrays.copyOf(excluded, excluded.length + 1);
-				                excluded[excluded.length - 1] = fieldName;
-				            }
-				        }
-					 int fieldModifiers = fSelectedField.getFlags();
-						String[] newNames = getFieldNameSuggestions(project, newName,fieldModifiers, excluded);
-						if(newNames.length>0) {
-							newName = newNames[0];
-						}
-				} catch (JavaModelException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-		}
 		if (sel instanceof IStructuredSelection) {
 			IResource resource= getCurrentResource((IStructuredSelection) sel);
 			if (resource != null) {
@@ -198,9 +183,54 @@ public class RenameResourceHandler extends AbstractResourcesHandler {
 		}
 		return null;
 	}
-	public static String[] getFieldNameSuggestions(IJavaProject project,String originalField, int fieldModifiers, String[] excluded) {
+
+	public static String getFieldNameSuggestions(ExecutionEvent event, ISelection sel, String newName) throws Exception {
+		getOffsetAndLength(sel);
+		IEditorPart editorPart= HandlerUtil.getActiveEditor(event);
+		IFile file= editorPart.getEditorInput().getAdapter(IFile.class);
+		IJavaProject project= JavaCore.create(file.getProject());
+		ICompilationUnit compilationUnit= file.getAdapter(ICompilationUnit.class);
+
+		ASTNode selectedNode= findNodeByOffsetAndLength(convertToCompilationUnit(compilationUnit), getfTextOffset(), getfTextLength());
+		if (selectedNode instanceof SimpleName) {
+			ASTNode parent= selectedNode.getParent();
+			if (parent instanceof VariableDeclarationFragment) {
+				ASTNode fieldDeclaration= parent.getParent();
+				if (fieldDeclaration instanceof FieldDeclaration) {
+					String[] excluded= new String[0];
+					if (compilationUnit != null) {
+						IType[] types;
+						try {
+							types= compilationUnit.getAllTypes();
+							for (IType type : types) {
+								IField[] fields= type.getFields();
+								for (IField field : fields) {
+									String fieldName= field.getElementName();
+									excluded= Arrays.copyOf(excluded, excluded.length + 1);
+									excluded[excluded.length - 1]= fieldName;
+								}
+							}
+							int fieldModifiers= fSelectedField.getFlags();
+							String[] newNames= getFieldNameSuggestions(project, newName, fieldModifiers, excluded);
+							if (newNames.length > 0) {
+								return newNames[0];
+							}
+						} catch (JavaModelException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+					}
+				}
+			}
+		}
+		return newName;
+	}
+
+	public static String[] getFieldNameSuggestions(IJavaProject project, String originalField, int fieldModifiers, String[] excluded) {
 		return getFieldNameSuggestions(project, originalField, 0, fieldModifiers, excluded);
 	}
+
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int dimensions, int modifiers, String[] excluded) {
 		if (Flags.isFinal(modifiers) && Flags.isStatic(modifiers)) {
 			return getVariableNameSuggestions(NamingConventions.VK_STATIC_FINAL_FIELD, project, baseName, dimensions, new ExcludedCollection(excluded), true);
@@ -209,9 +239,89 @@ public class RenameResourceHandler extends AbstractResourcesHandler {
 		}
 		return getVariableNameSuggestions(NamingConventions.VK_INSTANCE_FIELD, project, baseName, dimensions, new ExcludedCollection(excluded), true);
 	}
+
 	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, String baseName, int dimensions, Collection<String> excluded, boolean evaluateDefault) {
 		return NamingConventions.suggestVariableNames(variableKind, NamingConventions.BK_TYPE_NAME, removeTypeArguments(baseName), project, dimensions, getExcludedArray(excluded), evaluateDefault);
 	}
+
+	private static String removeTypeArguments(String baseName) {
+		int idx= baseName.indexOf('<');
+		if (idx != -1) {
+			return baseName.substring(0, idx);
+		}
+		return baseName;
+	}
+
+	private static String[] getExcludedArray(Collection<String> excluded) {
+		if (excluded == null) {
+			return null;
+		} else if (excluded instanceof ExcludedCollection) {
+			return ((ExcludedCollection) excluded).getExcludedArray();
+		}
+		return excluded.toArray(new String[excluded.size()]);
+	}
+
+	public static void getOffsetAndLength(ISelection sel) throws Exception {
+		String str= sel.toString();
+		String[] splitStr= str.split("[, :]"); //$NON-NLS-1$
+		setfTextOffset(Integer.parseInt(splitStr[3]));
+		setfTextStartLine(Integer.parseInt(splitStr[7]));
+		setfTextLength(Integer.parseInt(splitStr[11]));
+	}
+
+	public static ASTNode findNodeByOffsetAndLength(CompilationUnit compilationUnit, int offset, int length) {
+		foundNode= null;
+		compilationUnit.accept(new ASTVisitor() {
+			@SuppressWarnings("unused")
+			public boolean visit(ASTNode node) {
+				int nodeStart= node.getStartPosition();
+				int nodeEnd= nodeStart + node.getLength();
+
+				if (offset >= nodeStart && (offset + length) <= nodeEnd) {
+					foundNode= node;
+					return false;
+				}
+
+				return true;
+			}
+		});
+
+		return foundNode;
+	}
+
+	public static CompilationUnit convertToCompilationUnit(ICompilationUnit compilationUnit) {
+		ASTParser parser= ASTParser.newParser(AST.JLS20);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(compilationUnit);
+		parser.setResolveBindings(true);
+
+		return (CompilationUnit) parser.createAST(null);
+	}
+
+	public static int getfTextLength() {
+		return fTextLength;
+	}
+
+	public static void setfTextLength(int fTextLength) {
+		RenameResourceHandler.fTextLength= fTextLength;
+	}
+
+	public static int getfTextStartLine() {
+		return fTextStartLine;
+	}
+
+	public static void setfTextStartLine(int fTextStartLine) {
+		RenameResourceHandler.fTextStartLine= fTextStartLine;
+	}
+
+	public static int getfTextOffset() {
+		return fTextOffset;
+	}
+
+	public static void setfTextOffset(int fTextOffset) {
+		RenameResourceHandler.fTextOffset= fTextOffset;
+	}
+
 	private static class ExcludedCollection extends AbstractList<String> {
 		private String[] fExcluded;
 
@@ -248,20 +358,5 @@ public class RenameResourceHandler extends AbstractResourcesHandler {
 		public boolean contains(Object o) {
 			return indexOf(o) != -1;
 		}
-	}
-	private static String removeTypeArguments(String baseName) {
-		int idx= baseName.indexOf('<');
-		if (idx != -1) {
-			return baseName.substring(0, idx);
-		}
-		return baseName;
-	}
-	private static String[] getExcludedArray(Collection<String> excluded) {
-		if (excluded == null) {
-			return null;
-		} else if (excluded instanceof ExcludedCollection) {
-			return ((ExcludedCollection)excluded).getExcludedArray();
-		}
-		return excluded.toArray(new String[excluded.size()]);
 	}
 }
