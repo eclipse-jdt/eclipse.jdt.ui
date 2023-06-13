@@ -186,9 +186,8 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			else
 				throw new IllegalStateException(element.toString());
 
-		} else {
-			throw new IllegalArgumentException(String.valueOf(element));
 		}
+		return null;
 	}
 
 	public void setShowTime(boolean showTime) {

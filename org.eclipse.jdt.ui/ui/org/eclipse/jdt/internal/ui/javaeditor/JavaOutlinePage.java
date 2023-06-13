@@ -88,6 +88,7 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.part.ShowInContext;
+import org.eclipse.ui.views.WorkbenchViewerSetup;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -423,6 +424,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				 */
 				@Override
 				public boolean isExpandable(Object element) {
+					if (isExpandableNode(element)) {
+						return false;
+					}
 					if (hasFilters()) {
 						return getFilteredChildren(element).length > 0;
 					}
@@ -938,6 +942,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		);
 
 		fOutlineViewer= new JavaOutlineViewer(tree);
+		WorkbenchViewerSetup.setupViewer(fOutlineViewer);
 		initDragAndDrop();
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(new DecoratingJavaLabelProvider(lprovider));

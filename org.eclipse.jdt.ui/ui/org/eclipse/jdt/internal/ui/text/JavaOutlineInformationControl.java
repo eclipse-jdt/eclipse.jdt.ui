@@ -56,6 +56,7 @@ import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.views.WorkbenchViewerSetup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -575,6 +576,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		tree.setLayoutData(gd);
 
 		final TreeViewer treeViewer= new OutlineTreeViewer(tree);
+		WorkbenchViewerSetup.setupViewer(treeViewer);
 
 		// Hard-coded filters
 		treeViewer.addFilter(new NamePatternFilter());

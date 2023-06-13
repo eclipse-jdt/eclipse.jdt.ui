@@ -62,6 +62,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
+import org.eclipse.ui.views.WorkbenchViewerSetup;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -243,6 +244,7 @@ public class TestViewer {
 
 		fTreeViewer= new TreeViewer(fViewerbook, SWT.V_SCROLL | SWT.SINGLE);
 		fTreeViewer.setUseHashlookup(true);
+		WorkbenchViewerSetup.setupViewer(fTreeViewer);
 		fTreeContentProvider= new TestSessionTreeContentProvider();
 		fTreeViewer.setContentProvider(fTreeContentProvider);
 		fTreeLabelProvider= new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_HIERARCHICAL);
