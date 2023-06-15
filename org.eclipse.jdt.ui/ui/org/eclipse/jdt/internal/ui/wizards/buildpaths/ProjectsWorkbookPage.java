@@ -195,7 +195,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 						if (element instanceof CPListElement) {
 							CPListElement cpe= (CPListElement) element;
 							List<CPListElement> elements= fProjectsList.getElements();
-							for (Object cpListElement : elements) {
+							for (CPListElement cpListElement : elements) {
 								if (cpListElement instanceof RootCPListElement) {
 									RootCPListElement root= (RootCPListElement) cpListElement;
 									if (root.getChildren().contains(cpe)) {

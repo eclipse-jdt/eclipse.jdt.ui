@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc. - refactored to jdt.core.manipulation
+ *     Taiming Wang - add some plural words frequently used in code.
  *******************************************************************************/
 /**
  *
@@ -59,7 +60,21 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 			new AbstractMap.SimpleImmutableEntry<>("Children", "Child"), //$NON-NLS-1$ //$NON-NLS-2$
 			new AbstractMap.SimpleImmutableEntry<>("Entries", "Entry"), //$NON-NLS-1$ //$NON-NLS-2$
 			new AbstractMap.SimpleImmutableEntry<>("Proxies", "Proxy"), //$NON-NLS-1$ //$NON-NLS-2$
-			new AbstractMap.SimpleImmutableEntry<>("Indices", "Index")) //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Indices", "Index"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("People", "Person"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Properties", "Property"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Factories", "Factory"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Archives", "archive"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Aliases", "Alias"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Alternatives", "Alternative"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Capabilities", "Capability"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Hashes", "Hash"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Directories", "Directory"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Statuses", "Status"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Instances", "Instance"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Classes", "Class"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Deliveries", "Delivery"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Vertices", "Vertex")) //$NON-NLS-1$ //$NON-NLS-2$
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 	private static final Set<String> NO_BASE_TYPES	= Stream.of(
@@ -179,7 +194,7 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 		ASTNodes.replaceButKeepComment(rewrite, node, statement, group);
 	}
 
-	public static String modifybasename(String suggestedName) {
+	public static String modifyBaseName(String suggestedName) {
 		String name= suggestedName;
 		for(String prefix : CUT_PREFIX) {
 			if(prefix.length() >= suggestedName.length()) {

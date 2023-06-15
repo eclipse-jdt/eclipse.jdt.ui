@@ -16,6 +16,7 @@
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by Identifying the Side Effect of Selected Expression. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -25,25 +26,20 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Hashtable;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class ExtractTempTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "ExtractTemp/";
@@ -1039,6 +1035,31 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	public void test152() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
 		helper1(10, 17, 10, 20, true, false, "f", "f");
+	}
+
+
+	@Test
+	public void test153() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+		helper1(23, 32, 23, 49, true, false, "iterPerson", "iterPerson");
+	}
+
+	@Test
+	public void test154() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+		helper1(23, 32, 23, 45, true, false, "person", "person");
+	}
+
+	@Test
+	public void test155() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=573643
+		helper1(11, 13, 11, 32, true, false, "lowerCase", "lowerCase");
+	}
+
+	@Test
+	public void test156() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=573643
+		helper1(11, 13, 11, 32, true, false, "lowerCase", "lowerCase");
 	}
 
 	@Test

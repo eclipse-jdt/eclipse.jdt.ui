@@ -23,8 +23,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ChangeExceptionHandler_dialog_message;
 
-	public static String ChangeExceptionHandler_dialog_title;
-
 	public static String ChangeExceptionHandler_message;
 
 	public static String ChangeExceptionHandler_status_without_detail;

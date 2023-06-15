@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Angelo Zerr and others.
+ * Copyright (c) 2017, 2023 Angelo Zerr and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,11 @@
  *
  * Contributors:
  * - Angelo Zerr: initial API and implementation
+ * - Red Hat Inc.: add default method parameter filtering (https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/457)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
 import java.util.List;
-
-import org.eclipse.jface.text.codemining.ICodeMining;
-import org.eclipse.jface.text.codemining.ICodeMiningProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -27,10 +25,10 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jface.text.codemining.ICodeMining;
+import org.eclipse.jface.text.codemining.ICodeMiningProvider;
 
 public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 
@@ -109,9 +107,11 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 		if (!skipParameterNamesCodeMinings(method)) {
 			try {
 				String[] parameterNames= method.getParameterNames();
-				for (int i= 0; i < Math.min(arguments.size(), parameterNames.length); i++) {
-					if (!skipParameterNameCodeMining(parameterNames, arguments, i)) {
-						minings.add(new JavaMethodParameterCodeMining((Expression) arguments.get(i), i, parameterNames, isVarArgs, provider));
+				if (!skipParameterNamesCodeMinings(method, parameterNames)) {
+					for (int i= 0; i < Math.min(arguments.size(), parameterNames.length); i++) {
+						if (!skipParameterNameCodeMining(parameterNames, arguments, i)) {
+							minings.add(new JavaMethodParameterCodeMining((Expression) arguments.get(i), i, parameterNames, isVarArgs, provider));
+						}
 					}
 				}
 			} catch (Exception e) {
@@ -154,6 +154,62 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 
 	private boolean skipParameterNamesCodeMinings(IMethod method) {
 		return method.getNumberOfParameters() <= 1;
+	}
+
+	private boolean skipParameterNamesCodeMinings(IMethod method, String[] parameterNames) {
+		// add default filtering to skip parameter names (based on original plug-in defaults)
+		String typeName= method.getDeclaringType().getTypeQualifiedName();
+		if (typeName.equals("Math")) { //$NON-NLS-1$
+			String packageName= method.getDeclaringType().getPackageFragment().getElementName();
+			if (packageName.equals("java.lang")) { //$NON-NLS-1$
+				return true;
+			}
+		}
+		if (typeName.equals("Logger")) { //$NON-NLS-1$
+			String packageName= method.getDeclaringType().getPackageFragment().getElementName();
+			if (packageName.equals("org.slf4j")) { //$NON-NLS-1$
+				return true;
+			}
+		}
+		String methodName= method.getElementName();
+		if (methodName.equals("of")) { //$NON-NLS-1$
+			if (typeName.startsWith("Set") || typeName.startsWith("ImmutableList")  //$NON-NLS-1$ //$NON-NLS-2$
+					|| typeName.startsWith("ImmutableMultiset") || typeName.startsWith("ImmutableSortedMultiset") //$NON-NLS-1$ //$NON-NLS-2$
+					|| typeName.startsWith("ImmutableSortedSet") || typeName.startsWith("List")) { //$NON-NLS-1$ //$NON-NLS-2$
+				return true;
+			}
+		}
+		if (methodName.equals("asList")) { //$NON-NLS-1$
+			if (typeName.startsWith("Arrays")) { //$NON-NLS-1$
+				return true;
+			}
+
+		}
+		if (parameterNames.length != 2) {
+			return false;
+		}
+		if (methodName.equals("set") || methodName.equals("setProperties")  //$NON-NLS-1$ //$NON-NLS-2$
+				|| methodName.equals("compare")) { //$NON-NLS-1$
+			return true;
+		}
+		if (parameterNames[0].startsWith("first")) { //$NON-NLS-1$
+			return parameterNames[1].startsWith("second") || parameterNames[1].startsWith("last"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if (parameterNames[1].startsWith("end")) { //$NON-NLS-1$
+			return parameterNames[0].startsWith("begin") || parameterNames[0].startsWith("start"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if (parameterNames[0].startsWith("from") && parameterNames[1].startsWith("to")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return true;
+		} else if (parameterNames[0].startsWith("min") && parameterNames[1].startsWith("max")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return true;
+		} else if (parameterNames[0].equals("format") && parameterNames[1].startsWith("arg")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return true;
+		} else if (parameterNames[0].equals("key") && parameterNames[1].equals("value")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return true;
+		} else if (parameterNames[0].equals("message") && parameterNames[1].equals("error")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return true;
+		}
+		return false;
 	}
 
 }

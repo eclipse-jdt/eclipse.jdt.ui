@@ -36,18 +36,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.text.edits.CopySourceEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-import org.eclipse.text.edits.TextEditVisitor;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -115,7 +103,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractLocalDescriptor;
-
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -147,11 +134,18 @@ import org.eclipse.jdt.internal.corext.refactoring.util.SideEffectChecker;
 import org.eclipse.jdt.internal.corext.refactoring.util.UnsafeCheckTester;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.text.edits.CopySourceEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.text.edits.TextEditVisitor;
 
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
@@ -222,6 +216,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (isReferringToLocalVariableFromFor((Expression) node))
 			return false;
 		if (isUsedInForInitializerOrUpdater((Expression) node))
+			return false;
+		if (parent instanceof SuperConstructorInvocation)
+			return false;
+		if (parent instanceof ConstructorInvocation)
 			return false;
 		if (parent instanceof SwitchCase)
 			return true;
@@ -930,7 +928,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				break;
 			}
 		}
-		if (node instanceof SwitchStatement) {
+		if (node instanceof SwitchStatement || node instanceof EnhancedForStatement) {
 			/* must insert above switch statement */
 			fStartPoint= 0;
 			fEndPoint= retainOnlyReplacableMatches.length - 1;

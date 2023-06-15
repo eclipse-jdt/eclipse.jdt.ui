@@ -825,7 +825,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 
 	private String[] getVariableNameProposals(ITypeBinding arrayTypeBinding, IJavaProject project) {
 		String[] variableNames= getUsedVariableNames();
-		String baseName= modifybasename(fArrayBinding.getName());
+		String baseName= modifyBaseName(fArrayBinding.getName());
 		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, baseName, 0, variableNames);
 
 		String type= arrayTypeBinding.getElementType().getName();
@@ -841,7 +841,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		String[] variableNames= getUsedVariableNames();
 		Expression exp= sizeMethodAccess.getExpression();
 		String name= exp instanceof SimpleName ? ((SimpleName)exp).getFullyQualifiedName() : ""; //$NON-NLS-1$
-		String baseName= modifybasename(name);
+		String baseName= modifyBaseName(name);
 		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, baseName, 0, variableNames);
 
 		ITypeBinding[] typeArgs= fSizeMethodBinding.getDeclaringClass().getTypeArguments();

@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.tests.refactoring
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests.refactoring; singleton:=true
-Bundle-Version: 3.15.0.qualifier
+Bundle-Version: 3.15.100.qualifier
 Bundle-Activator: org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName

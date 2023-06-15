@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2021, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,10 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -41,18 +38,16 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 
 /**
  * <pre>
@@ -146,6 +141,9 @@ public class CreateObjectReferenceProposal extends LinkedCorrectionProposal {
 		Set<SimpleName> localVariableIdentifiers= ASTNodes.getLocalVariableIdentifiers(parent, true);
 		for (SimpleName name : localVariableIdentifiers) {
 			Type type2= ASTNodes.getType((VariableDeclaration) name.getParent());
+			if (type2 == null || type == null) {
+				return null;
+			}
 			String qualifiedTypeName= ASTNodes.getQualifiedTypeName(type);
 			String qualifiedTypeName2= ASTNodes.getQualifiedTypeName(type2);
 			if (qualifiedTypeName.equals(qualifiedTypeName2) && node.getStartPosition() > name.getStartPosition()) {

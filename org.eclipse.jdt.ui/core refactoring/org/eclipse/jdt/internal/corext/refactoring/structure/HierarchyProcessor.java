@@ -26,20 +26,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -81,7 +67,6 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
-
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -104,10 +89,18 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 /**
  * Partial implementation of a hierarchy refactoring processor used in pull up,
@@ -609,7 +602,8 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		fCachedReferencedTypes= null;
 	}
 
-	protected void copyParameters(final ASTRewrite rewrite, final ICompilationUnit unit, final MethodDeclaration oldMethod, final MethodDeclaration newMethod, final TypeVariableMaplet[] mapping) throws JavaModelException {
+	protected void copyParameters(final ASTRewrite rewrite, final ICompilationUnit unit, final MethodDeclaration oldMethod, final MethodDeclaration newMethod,
+			final TypeVariableMaplet[] mapping) throws JavaModelException {
 		SingleVariableDeclaration newDeclaration= null;
 		for (Object parameter : oldMethod.parameters()) {
 			final SingleVariableDeclaration oldDeclaration= (SingleVariableDeclaration) parameter;
@@ -617,6 +611,18 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 				newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, mapping, rewrite);
 			else
 				newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, rewrite);
+			newMethod.parameters().add(newDeclaration);
+		}
+	}
+
+	protected void addParameter(final ASTRewrite rewrite, final MethodDeclaration oldMethod, final MethodDeclaration newMethod, final CompilationUnitRewrite targetRewrite, String addedArgument) {
+		if (addedArgument != null) {
+			AST ast= rewrite.getAST();
+			SingleVariableDeclaration newDeclaration= ast.newSingleVariableDeclaration();
+			newDeclaration.setName(ast.newSimpleName(addedArgument));
+			ITypeBinding oldTypeBinding= oldMethod.resolveBinding().getDeclaringClass();
+			Type oldType= targetRewrite.getImportRewrite().addImport(oldTypeBinding, ast);
+			newDeclaration.setType(oldType);
 			newMethod.parameters().add(newDeclaration);
 		}
 	}

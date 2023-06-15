@@ -182,6 +182,7 @@ public final class FixMessages extends NLS {
 	public static String ConstantsCleanUpFix_refactor;
 	public static String StringBufferToStringBuilderFix_convert_msg;
 	public static String StringConcatToTextBlockFix_convert_msg;
+	public static String LambdaExpressionAndMethodRefFix_clean_up_expression_msg;
 
 	static {
 		// initialize resource bundle
