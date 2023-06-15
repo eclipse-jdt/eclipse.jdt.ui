@@ -261,7 +261,7 @@ public class FatJarExportTests {
 				majorVersion = ((in.read() << 8) + in.read());
 			}
 			assertEquals("loader is a class file", 0xCAFEBABE, magic); //$NON-NLS-1$
-			assertEquals("loader compiled with JDK 1.6", "50.0", majorVersion + "." + minorVersion); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			assertEquals("loader compiled with JDK 1.8", "52.0", majorVersion + "." + minorVersion); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null); //$NON-NLS-1$
