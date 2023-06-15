@@ -31,7 +31,8 @@ import java.util.jar.Manifest;
 
 /**
  * This class will be compiled into the binary jar-in-jar-loader.zip. This ZIP is used for the
- * "Runnable JAR File Exporter"
+ * "Runnable JAR File Exporter".
+ * Source has to comply to java 1.8 - see <a href="file:../../../../../../scripts/build_jar-in-jar-loader.xml">build_jar-in-jar-loader.xml</a>
  *
  * @since 3.5
  */
@@ -56,7 +57,7 @@ public class JarRsrcLoader {
 		}
 		ClassLoader jceClassLoader = new URLClassLoader(rsrcUrls, getParentClassLoader());
 		Thread.currentThread().setContextClassLoader(jceClassLoader);
-		Class c = Class.forName(mi.rsrcMainClass, true, jceClassLoader);
+		Class<?> c = Class.forName(mi.rsrcMainClass, true, jceClassLoader);
 		Method main = c.getMethod(JIJConstants.MAIN_METHOD_NAME, args.getClass());
 		main.invoke((Object) null, new Object[] {args});
 	}
@@ -112,7 +113,7 @@ public class JarRsrcLoader {
 	private static String[] splitSpaces(String line) {
 		if (line == null)
 			return null;
-		List result = new ArrayList();
+		List<String> result = new ArrayList<>();
 		int firstPos = 0;
 		while (firstPos < line.length()) {
 			int lastPos = line.indexOf(' ', firstPos);
@@ -123,7 +124,7 @@ public class JarRsrcLoader {
 			}
 			firstPos = lastPos+1;
 		}
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 }
