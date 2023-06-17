@@ -207,6 +207,7 @@ public class CleanUpMessages extends NLS {
 	public static String JavaFeatureTabPage_CheckboxName_ConvertFunctionalInterfaces;
 	public static String JavaFeatureTabPage_RadioName_UseLambdaWherePossible;
 	public static String JavaFeatureTabPage_RadioName_UseAnonymous;
+	public static String JavaFeatureTabPage_CheckboxName_AlsoSimplifyLambda;
 	public static String JavaFeatureTabPage_CheckboxName_ComparingOnCriteria;
 	public static String JavaFeatureTabPage_CheckboxName_Join;
 
