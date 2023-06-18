@@ -49,6 +49,9 @@
               <version>0.0.0</version>
             </dependency>
           </dependencies>
+          <systemProperties>
+            <DetectVMInstallationsJob.disabled>true</DetectVMInstallationsJob.disabled>
+          </systemProperties>
         </configuration>
       </plugin>
     </plugins>

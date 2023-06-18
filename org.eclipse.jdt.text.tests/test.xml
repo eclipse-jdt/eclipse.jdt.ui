@@ -29,6 +29,7 @@
       <property name="data-dir" value="${jdt-text-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.text.tests.JdtTextTestSuite"/>
+      <property name="vmargs" value="-DDetectVMInstallationsJob.disabled=true"/>
     </ant>
   </target>
 
