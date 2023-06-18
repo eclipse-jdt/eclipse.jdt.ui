@@ -14,14 +14,12 @@
 package org.eclipse.jdt.ui.tests.wizardapi;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.junit.Assert;
@@ -71,9 +69,9 @@ public class ImporterTest{
 		}
 	}
 
-	private void unzip(File source, File target) throws ZipException, IOException {
-		try (ZipFile zip = new ZipFile(source)) {
-			ILeveledImportStructureProvider importStructureProvider = new ZipLeveledStructureProvider(zip);
+	private void unzip(File source, File target) throws Exception {
+		try (ZipFile zip = new ZipFile(source); ILeveledImportStructureProvider importStructureProvider = new ZipLeveledStructureProvider(zip)) {
+
 			LinkedList<Object> toProcess = new LinkedList<>();
 			toProcess.add(importStructureProvider.getRoot());
 			while (!toProcess.isEmpty()) {
