@@ -2203,7 +2203,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		assignment.setLeftHandSide(ast.newSimpleName(fragment.getName().getIdentifier()));
 
 		// statement is VariableDeclarationStatement
-		Statement newStatement= ast.newExpressionStatement(assignment);;
+		Statement newStatement= ast.newExpressionStatement(assignment);
 		insertIndex+= 1; // add after declaration
 
 		if (isVarType) {

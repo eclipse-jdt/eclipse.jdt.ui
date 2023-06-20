@@ -330,7 +330,7 @@ public class ChangedValueChecker extends AbstractChecker {
 
 	enum TraversalStatus {
 		NOT_YET_BETWEEN_EXPRESSIONS, BETWEEN_EXPRESSIONS, EXITED_BETWEEN_EXPRESSIONS
-	};
+	}
 
 	/*
 	 * This class calculates the path between two expressions in AST.
