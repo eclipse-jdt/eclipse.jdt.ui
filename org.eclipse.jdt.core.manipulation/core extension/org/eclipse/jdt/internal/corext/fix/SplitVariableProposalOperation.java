@@ -176,7 +176,6 @@ public class SplitVariableProposalOperation extends CompilationUnitRewriteOperat
 
 			// statement is VariableDeclarationStatement
 			Statement newStatement = ast.newExpressionStatement(assignment);
-			;
 			insertIndex += 1; // add after declaration
 
 			if (isVarType) {

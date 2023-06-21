@@ -198,6 +198,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -333,7 +334,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getAddStaticImportProposals(context, coveringNode, null)
 					|| getDoWhileRatherThanWhileProposal(context, coveringNode, null)
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
-					|| getAddStaticMemberFavoritesProposals(coveringNode, null)
+					|| getAddStaticMemberFavoritesProposals(context, coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null);
 		}
 		return false;
@@ -404,7 +405,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertVarTypeToResolvedTypeProposal(context, coveringNode, resultingCollections);
 				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, resultingCollections);
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
-				getAddStaticMemberFavoritesProposals(coveringNode, resultingCollections);
+				getAddStaticMemberFavoritesProposals(context, coveringNode, resultingCollections);
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
@@ -2045,22 +2046,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
-		VariableDeclarationFixCore fix= VariableDeclarationFixCore.createSplitVariableFix(context.getASTRoot(), node);
-		if (fix != null) {
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			Map<String, String> options= new HashMap<>();
-			options.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
-			ICleanUp cleanUp= new ConvertLoopCleanUp(options);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_FOR_LOOP_TO_ENHANCED, image, context);
-			boolean commandConflict= false;
-			for (ICommandAccess completionProposal : resultingCollections) {
-				if (completionProposal instanceof FixCorrectionProposal) {
-					if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(((FixCorrectionProposal) completionProposal).getCommandId())) {
-						commandConflict= true;
-					}
+		boolean commandConflict= false;
+		for (ICommandAccess completionProposal : resultingCollections) {
+			if (completionProposal instanceof ChangeCorrectionProposal ccp) {
+				if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(ccp.getCommandId())) {
+					commandConflict= true;
 				}
 			}
-			if (!commandConflict) {
+		}
+		if (!commandConflict) {
+			VariableDeclarationFixCore fix= VariableDeclarationFixCore.createSplitVariableFix(context.getASTRoot(), node);
+			if (fix != null) {
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_FOR_LOOP_TO_ENHANCED, image, context);
 				proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
 				resultingCollections.add(proposal);
 				return true;
@@ -3441,7 +3439,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddStaticMemberFavoritesProposals(ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getAddStaticMemberFavoritesProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof ImportDeclaration)) {
 			node= ASTNodes.getFirstAncestorOrNull(node, ImportDeclaration.class);
 		}
