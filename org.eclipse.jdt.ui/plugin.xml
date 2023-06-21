@@ -563,6 +563,12 @@
             class="org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"
             id="org.eclipse.jdt.ui.JavaSourceHover">
       </hover>
+       <hover
+            label="%constantHover"
+            description="%constantHoverDescription"
+            class="org.eclipse.jdt.internal.ui.text.java.hover.JavaConstantHover"
+            id="org.eclipse.jdt.ui.JavaConstantHover">
+      </hover>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
