@@ -2055,15 +2055,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				}
 			}
 		}
-		if (!commandConflict) {
-			SplitVariableFixCore fix= SplitVariableFixCore.createSplitVariableFix(context.getASTRoot(), node);
-			if (fix != null) {
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.SPLIT_VARIABLE_DECLARATION, image, context);
+		SplitVariableFixCore fix= SplitVariableFixCore.createSplitVariableFix(context.getASTRoot(), node);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.SPLIT_VARIABLE_DECLARATION, image, context);
+			if (!commandConflict) {
 				proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
-				resultingCollections.add(proposal);
-				return true;
 			}
+			resultingCollections.add(proposal);
+			return true;
 		}
 		return false;
 	}
