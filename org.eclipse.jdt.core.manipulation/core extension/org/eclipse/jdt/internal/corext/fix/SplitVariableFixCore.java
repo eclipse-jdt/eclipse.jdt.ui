@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -40,19 +41,22 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-public final class SplitVariableFixCore {
-	private SplitVariableFixCore() {
+public final class SplitVariableFixCore extends CompilationUnitRewriteOperationsFixCore {
+
+	public SplitVariableFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) {
+		super(name, compilationUnit, operations);
 	}
 
-	public static VariableDeclarationFixCore createSplitVariableFix(CompilationUnit compilationUnit, ASTNode node) {
+	public static SplitVariableFixCore createSplitVariableFix(CompilationUnit compilationUnit, ASTNode node) {
 		VariableDeclarationFragment fragment;
 		if (node instanceof VariableDeclarationFragment) {
 			fragment= (VariableDeclarationFragment) node;
@@ -92,7 +96,7 @@ public final class SplitVariableFixCore {
 		if (!property.isChildListProperty()) {
 			return null;
 		}
-		return new VariableDeclarationFixCore(CorrectionMessages.QuickAssistProcessor_splitdeclaration_description, compilationUnit,
+		return new SplitVariableFixCore(CorrectionMessages.QuickAssistProcessor_splitdeclaration_description, compilationUnit,
 				new CompilationUnitRewriteOperation[] { new SplitVariableProposalOperation(statement, fragment, fragParent, isVarType, statementParent, property) });
 	}
 

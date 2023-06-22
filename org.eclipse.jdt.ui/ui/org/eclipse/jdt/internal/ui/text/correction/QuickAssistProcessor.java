@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -335,7 +335,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getAddStaticImportProposals(context, coveringNode, null)
 					|| getDoWhileRatherThanWhileProposal(context, coveringNode, null)
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
-					|| getAddStaticMemberFavoritesProposals(context, coveringNode, null)
+					|| getAddStaticMemberFavoritesProposals(coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null);
 		}
 		return false;
@@ -406,7 +406,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertVarTypeToResolvedTypeProposal(context, coveringNode, resultingCollections);
 				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, resultingCollections);
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
-				getAddStaticMemberFavoritesProposals(context, coveringNode, resultingCollections);
+				getAddStaticMemberFavoritesProposals(coveringNode, resultingCollections);
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
@@ -2056,7 +2056,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		if (!commandConflict) {
-			VariableDeclarationFixCore fix= SplitVariableFixCore.createSplitVariableFix(context.getASTRoot(), node);
+			SplitVariableFixCore fix= SplitVariableFixCore.createSplitVariableFix(context.getASTRoot(), node);
 			if (fix != null) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.SPLIT_VARIABLE_DECLARATION, image, context);
@@ -3440,7 +3440,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddStaticMemberFavoritesProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getAddStaticMemberFavoritesProposals(ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof ImportDeclaration)) {
 			node= ASTNodes.getFirstAncestorOrNull(node, ImportDeclaration.class);
 		}
