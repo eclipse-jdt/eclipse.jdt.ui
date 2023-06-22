@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2021 IBM Corporation and others.
+ * Copyright (c) 2013, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1633,7 +1633,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		buf.append("\n");
 		buf.append("public class Test {\n");
 		buf.append("    void foo(ArrayList<String> list) {\n");
-		buf.append("        list.removeIf(t -> t.isEmpty());\n");
+		buf.append("        list.removeIf(String::isEmpty);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
