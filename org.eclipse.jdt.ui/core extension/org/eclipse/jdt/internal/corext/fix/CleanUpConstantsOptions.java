@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2022 IBM Corporation and others.
+ * Copyright (c) 2018, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,13 +16,10 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.Assert;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 public class CleanUpConstantsOptions extends CleanUpConstants {
 	private static void setEclipseDefaultSettings(CleanUpOptions options) {
@@ -183,6 +180,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
 		options.setOption(USE_VAR, CleanUpOptions.FALSE);
 		options.setOption(USE_LAMBDA, CleanUpOptions.TRUE);
+		options.setOption(ALSO_SIMPLIFY_LAMBDA, CleanUpOptions.TRUE);
 		options.setOption(USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.FALSE);
 		options.setOption(COMPARING_ON_CRITERIA, CleanUpOptions.FALSE);
 		options.setOption(JOIN, CleanUpOptions.FALSE);
@@ -366,6 +364,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
 		options.setOption(USE_VAR, CleanUpOptions.FALSE);
 		options.setOption(USE_LAMBDA, CleanUpOptions.TRUE);
+		options.setOption(ALSO_SIMPLIFY_LAMBDA, CleanUpOptions.TRUE);
 		options.setOption(USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.FALSE);
 		options.setOption(COMPARING_ON_CRITERIA, CleanUpOptions.FALSE);
 		options.setOption(JOIN, CleanUpOptions.FALSE);
