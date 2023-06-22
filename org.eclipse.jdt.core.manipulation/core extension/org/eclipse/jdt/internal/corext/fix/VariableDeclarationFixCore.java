@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -44,9 +43,6 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -58,7 +54,6 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.text.edits.TextEditGroup;
-import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class VariableDeclarationFixCore extends CompilationUnitRewriteOperationsFixCore {
 
@@ -562,50 +557,6 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		}
 
 		return true;
-	}
-
-	public static VariableDeclarationFixCore createSplitVariableFix(CompilationUnit compilationUnit, ASTNode node) {
-		VariableDeclarationFragment fragment;
-		if (node instanceof VariableDeclarationFragment) {
-			fragment= (VariableDeclarationFragment) node;
-		} else if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
-			fragment= (VariableDeclarationFragment) node.getParent();
-		} else {
-			return null;
-		}
-		if (fragment.getInitializer() == null) {
-			return null;
-		}
-
-		Statement statement;
-		ASTNode fragParent= fragment.getParent();
-		boolean isVarType= false;
-		if (fragParent instanceof VariableDeclarationStatement) {
-			statement= (VariableDeclarationStatement) fragParent;
-			Type type= ((VariableDeclarationStatement) fragParent).getType();
-			isVarType= (type == null) ? false : type.isVar();
-		} else if (fragParent instanceof VariableDeclarationExpression) {
-			if (fragParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
-				return null;
-			}
-			statement= (Statement) fragParent.getParent();
-			Type type= ((VariableDeclarationExpression) fragParent).getType();
-			isVarType= (type == null) ? false : type.isVar();
-		} else {
-			return null;
-		}
-		if (!(statement instanceof ForStatement) &&
-				!(statement instanceof VariableDeclarationStatement)) {
-			return null;
-		}
-		// statement is ForStatement or VariableDeclarationStatement
-		ASTNode statementParent= statement.getParent();
-		StructuralPropertyDescriptor property= statement.getLocationInParent();
-		if (!property.isChildListProperty()) {
-			return null;
-		}
-		return new VariableDeclarationFixCore(CorrectionMessages.QuickAssistProcessor_splitdeclaration_description, compilationUnit,
-				new CompilationUnitRewriteOperation[] { new SplitVariableProposalOperation(statement, fragment, fragParent, isVarType, statementParent, property) });
 	}
 
 	protected VariableDeclarationFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {

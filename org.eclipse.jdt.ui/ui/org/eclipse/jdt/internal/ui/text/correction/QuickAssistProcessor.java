@@ -169,6 +169,7 @@ import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
@@ -2055,10 +2056,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		if (!commandConflict) {
-			VariableDeclarationFixCore fix= VariableDeclarationFixCore.createSplitVariableFix(context.getASTRoot(), node);
+			VariableDeclarationFixCore fix= SplitVariableFixCore.createSplitVariableFix(context.getASTRoot(), node);
 			if (fix != null) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_FOR_LOOP_TO_ENHANCED, image, context);
+				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.SPLIT_VARIABLE_DECLARATION, image, context);
 				proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
 				resultingCollections.add(proposal);
 				return true;
