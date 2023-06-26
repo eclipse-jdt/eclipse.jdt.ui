@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -157,7 +156,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
-import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -167,6 +165,7 @@ import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
 import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.JoinVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
@@ -181,7 +180,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactori
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesAnalyzer;
@@ -1815,232 +1813,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getJoinVariableProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
-		ASTNode parent= node.getParent();
-
-		VariableDeclarationFragment fragment= null;
-		boolean onFirstAccess= false;
-		if (node instanceof SimpleName && node.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			onFirstAccess= true;
-			SimpleName name= (SimpleName) node;
-			IBinding binding= name.resolveBinding();
-			if (!(binding instanceof IVariableBinding)) {
-				return false;
-			}
-			ASTNode declaring= context.getASTRoot().findDeclaringNode(binding);
-			if (declaring instanceof VariableDeclarationFragment) {
-				fragment= (VariableDeclarationFragment) declaring;
-			} else {
-				return false;
-			}
-		} else if (parent instanceof VariableDeclarationFragment) {
-			fragment= (VariableDeclarationFragment) parent;
-		} else {
-			return false;
-		}
-
-		IVariableBinding binding= fragment.resolveBinding();
-		Expression initializer= fragment.getInitializer();
-		if ((initializer != null && initializer.getNodeType() != ASTNode.NULL_LITERAL) || binding == null || binding.isField()) {
-			return false;
-		}
-
-		if (!(fragment.getParent() instanceof VariableDeclarationStatement)) {
-			return false;
-		}
-		VariableDeclarationStatement statement= (VariableDeclarationStatement) fragment.getParent();
-
-		SimpleName[] names= LinkedNodeFinder.findByBinding(statement.getParent(), binding);
-		if (names.length <= 1 || names[0] != fragment.getName()) {
-			return false;
-		}
-		SimpleName firstAccess= names[1];
-		if (onFirstAccess) {
-			if (firstAccess != node) {
-				return false;
-			}
-		} else {
-			if (firstAccess.getLocationInParent() != Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				return false;
-			}
-		}
-		Assignment assignment= (Assignment) firstAccess.getParent();
-		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return false;
-		}
-		ExpressionStatement assignParent= (ExpressionStatement) assignment.getParent();
-		IfStatement ifStatement= null;
-		Expression thenExpression= null;
-		Expression elseExpression= null;
-		ITypeBinding exprBinding= null;
-
-		ASTNode assignParentParent= assignParent.getParent();
-		if (assignParentParent instanceof IfStatement
-				|| (assignParentParent.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY
-						&& !(assignParentParent.subtreeMatch(new ASTMatcher(), statement.getParent())))) {
-			if (assignParentParent.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY) {
-				assignParentParent= assignParentParent.getParent();
-			}
-			ifStatement= (IfStatement) assignParentParent;
-			Statement thenStatement= getSingleStatement(ifStatement.getThenStatement());
-			Statement elseStatement= getSingleStatement(ifStatement.getElseStatement());
-			if (thenStatement == null || elseStatement == null) {
-				return false;
-			}
-
-			if (thenStatement instanceof ExpressionStatement && elseStatement instanceof ExpressionStatement) {
-				Expression inner1= ((ExpressionStatement) thenStatement).getExpression();
-				Expression inner2= ((ExpressionStatement) elseStatement).getExpression();
-				if (inner1 instanceof Assignment && inner2 instanceof Assignment) {
-					Assignment assign1= (Assignment) inner1;
-					Assignment assign2= (Assignment) inner2;
-					Expression left1= assign1.getLeftHandSide();
-					Expression left2= assign2.getLeftHandSide();
-					if (left1 instanceof Name && left2 instanceof Name && assign1.getOperator() == assign2.getOperator()) {
-						IBinding bind1= ((Name) left1).resolveBinding();
-						IBinding bind2= ((Name) left2).resolveBinding();
-						if (bind1 == bind2 && bind1 instanceof IVariableBinding) {
-							exprBinding= ((IVariableBinding) bind1).getType();
-							thenExpression= assign1.getRightHandSide();
-							elseExpression= assign2.getRightHandSide();
-						}
-					}
-				}
-			}
-			if (thenExpression == null || elseExpression == null) {
-				return false;
-			}
-		} else {
-			// Be conservative and don't allow anything but Blocks between the
-			// VariableDeclarationStatement and the ExpressionStatement to join
-			ASTNode n= assignParent.getParent();
-			ASTNode statementParent= statement.getParent();
-			ASTMatcher matcher= new ASTMatcher();
-			boolean complete= false;
-			while (!complete) {
-				if (n != null && n.getNodeType() == statementParent.getNodeType()) {
-					if (n.subtreeMatch(matcher, statementParent)) {
-						break;
-					}
-				}
-				if (n instanceof Block) {
-					n= n.getParent();
-				}
-				return false;
-			}
-		}
-
 		if (resultingCollections == null) {
 			return true;
 		}
-
-		AST ast= statement.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
-		sourceRangeComputer.addTightSourceNode(ifStatement != null ? ifStatement : assignParent);
-		rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
-
-		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.JOIN_VARIABLE_DECLARATION, image);
-		proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
-
-		if (ifStatement != null) {
-			// prepare conditional expression
-			ConditionalExpression conditionalExpression= ast.newConditionalExpression();
-			Expression conditionCopy= (Expression) rewrite.createCopyTarget(ifStatement.getExpression());
-			conditionalExpression.setExpression(conditionCopy);
-			Expression thenCopy= (Expression) rewrite.createCopyTarget(thenExpression);
-			Expression elseCopy= (Expression) rewrite.createCopyTarget(elseExpression);
-
-			IJavaProject project= context.getCompilationUnit().getJavaProject();
-			if (!JavaModelUtil.is50OrHigher(project)) {
-				ITypeBinding thenBinding= thenExpression.resolveTypeBinding();
-				ITypeBinding elseBinding= elseExpression.resolveTypeBinding();
-				if (thenBinding != null && elseBinding != null && exprBinding != null && !elseBinding.isAssignmentCompatible(thenBinding)) {
-					CastExpression castException= ast.newCastExpression();
-					ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
-					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
-					castException.setType(importRewrite.addImport(exprBinding, ast, importRewriteContext, TypeLocation.CAST));
-					castException.setExpression(elseCopy);
-					elseCopy= castException;
-				}
-			} else if (JavaModelUtil.is1d7OrHigher(project)) {
-				addExplicitTypeArgumentsIfNecessary(rewrite, proposal, thenExpression);
-				addExplicitTypeArgumentsIfNecessary(rewrite, proposal, elseExpression);
-			}
-			conditionalExpression.setThenExpression(thenCopy);
-			conditionalExpression.setElseExpression(elseCopy);
-			rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, conditionalExpression, null);
-			rewrite.remove(ifStatement, null);
-		} else {
-			Expression placeholder= (Expression) rewrite.createMoveTarget(assignment.getRightHandSide());
-			rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
-
-			if (onFirstAccess) {
-				// replace assignment with variable declaration
-				rewrite.replace(assignParent, rewrite.createMoveTarget(statement), null);
-			} else {
-				// different scopes -> remove assignments, set variable initializer
-				if (ASTNodes.isControlStatementBody(assignParent.getLocationInParent())) {
-					Block block= ast.newBlock();
-					rewrite.replace(assignParent, block, null);
-				} else {
-					rewrite.remove(assignParent, null);
-				}
-			}
+		JoinVariableFixCore fix= JoinVariableFixCore.createJoinVariableFix(context.getASTRoot(), node);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.JOIN_VARIABLE_DECLARATION, image, context);
+			proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
+			resultingCollections.add(proposal);
+			return true;
 		}
-
-		proposal.setEndPosition(rewrite.track(fragment.getName()));
-		resultingCollections.add(proposal);
-		return true;
-
-	}
-
-	private static void addExplicitTypeArgumentsIfNecessary(ASTRewrite rewrite, ASTRewriteCorrectionProposal proposal, Expression invocation) {
-		if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
-			ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
-			if (typeArguments == null)
-				return;
-
-			ImportRewrite importRewrite= proposal.getImportRewrite();
-			if (importRewrite == null) {
-				importRewrite= proposal.createImportRewrite((CompilationUnit) invocation.getRoot());
-			}
-			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(invocation, importRewrite);
-
-			AST ast= invocation.getAST();
-			ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
-
-			for (ITypeBinding typeArgument : typeArguments) {
-				Type typeArgumentNode= importRewrite.addImport(typeArgument, ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
-				typeArgsRewrite.insertLast(typeArgumentNode, null);
-			}
-
-			if (invocation instanceof MethodInvocation) {
-				MethodInvocation methodInvocation= (MethodInvocation) invocation;
-				Expression expression= methodInvocation.getExpression();
-				if (expression == null) {
-					IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-					if (methodBinding != null && Modifier.isStatic(methodBinding.getModifiers())) {
-						expression= ast.newName(importRewrite.addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), importRewriteContext));
-					} else {
-						expression= ast.newThisExpression();
-					}
-					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
-				}
-			}
-		}
-	}
-
-	private static Statement getSingleStatement(Statement statement) {
-		if (statement instanceof Block) {
-			List<Statement> blockStatements= ((Block) statement).statements();
-			if (blockStatements.size() != 1) {
-				return null;
-			}
-			return blockStatements.get(0);
-		}
-		return statement;
+		return false;
 	}
 
 	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) throws JavaModelException {
