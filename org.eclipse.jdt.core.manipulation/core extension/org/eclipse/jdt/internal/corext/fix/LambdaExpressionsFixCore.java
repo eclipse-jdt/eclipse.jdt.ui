@@ -25,6 +25,9 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -47,6 +50,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -69,6 +73,7 @@ import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -78,6 +83,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.util.IModifierConstants;
+
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -92,8 +98,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.text.edits.TextEditGroup;
 
 public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFixCore {
 	public static final class FunctionalAnonymousClassesFinder extends ASTVisitor {
@@ -769,6 +775,16 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 							SuperMethodReference superMethodRef= ast.newSuperMethodReference();
 							superMethodRef.setName(ASTNodes.createMoveTarget(rewrite, superMethodInvocation.getName()));
 							cicReplacement= superMethodRef;
+						}
+					} else if (lambdaBody instanceof InstanceofExpression instanceofExpression) {
+						Expression leftOp= instanceofExpression.getLeftOperand();
+						if (methodDeclaration.parameters().size() == 1 && areSameIdentifiers(methodDeclaration, List.of(leftOp))) {
+							ExpressionMethodReference instanceofMethodReference= ast.newExpressionMethodReference();
+							TypeLiteral typeLiteral= ast.newTypeLiteral();
+							typeLiteral.setType(copyType(cuRewrite, ast, instanceofExpression, instanceofExpression.getRightOperand().resolveBinding()));
+							instanceofMethodReference.setName(ast.newSimpleName("isInstance")); //$NON-NLS-1$
+							instanceofMethodReference.setExpression(typeLiteral);
+							cicReplacement= instanceofMethodReference;
 						}
 					}
 				}

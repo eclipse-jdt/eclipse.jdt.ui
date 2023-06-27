@@ -95,6 +95,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -130,6 +131,7 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
@@ -953,6 +955,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			if (!matches(lambdaParameters, superMethodInvocation.arguments()))
 				return false;
+		} else if (exprBody instanceof InstanceofExpression) {
+			InstanceofExpression instanceofExpression= (InstanceofExpression) exprBody;
+			if (instanceofExpression.getRightOperand().resolveBinding() == null)
+				return false;
+			if (!matches(lambdaParameters, List.of(instanceofExpression.getLeftOperand())))
+				return false;
 		} else { // MethodInvocation
 			MethodInvocation methodInvocation= (MethodInvocation) exprBody;
 			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
@@ -1035,6 +1043,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				superMethodReference.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
 				superMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, superMethodInvocation.typeArguments()));
 			}
+		} else if (exprBody instanceof InstanceofExpression) {
+			InstanceofExpression instanceofExpression= (InstanceofExpression) exprBody;
+			ExpressionMethodReference expMethodReference= ast.newExpressionMethodReference();
+			TypeLiteral typeLiteral= ast.newTypeLiteral();
+			importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+			ITypeBinding instanceofTypeBinding= instanceofExpression.getRightOperand().resolveBinding();
+			typeLiteral.setType(importRewrite.addImport(instanceofTypeBinding.getTypeDeclaration(), ast));
+			expMethodReference.setName(ast.newSimpleName("isInstance")); //$NON-NLS-1$
+			expMethodReference.setExpression(typeLiteral);
+			replacement= expMethodReference;
 		} else { // MethodInvocation
 			MethodInvocation methodInvocation= (MethodInvocation) exprBody;
 			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
@@ -1207,7 +1225,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return expression instanceof ClassInstanceCreation
 				|| expression instanceof ArrayCreation
 				|| expression instanceof SuperMethodInvocation
-				|| expression instanceof MethodInvocation;
+				|| expression instanceof MethodInvocation
+				|| expression instanceof InstanceofExpression;
 	}
 
 	private static boolean matches(List<Expression> expected, List<Expression> toMatch) {
