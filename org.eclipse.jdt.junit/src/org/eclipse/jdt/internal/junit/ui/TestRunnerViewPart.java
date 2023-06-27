@@ -76,6 +76,7 @@ import org.eclipse.core.commands.IHandler;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -1545,7 +1546,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private void logMessageIfNoTests() {
 		if (fTestRunSession != null && TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId()) && fTestRunSession.getTotalCount() == 0) {
 			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
-			Platform.getLog(getClass()).error(msg);
+			ILog.of(getClass()).error(msg);
 		}
 	}
 
