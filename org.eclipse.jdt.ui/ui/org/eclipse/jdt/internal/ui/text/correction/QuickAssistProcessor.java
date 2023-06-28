@@ -1119,7 +1119,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		rewrite.replace(lambda, replacement, null);
+		ASTNodes.replaceButKeepComment(rewrite, lambda, replacement, null);
 
 		// add correction proposal
 		String label= CorrectionMessages.QuickAssistProcessor_convert_to_method_reference;

@@ -18,21 +18,26 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
-import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 public class CleanUpTest1d8 extends CleanUpTestCase {
 	@Rule
@@ -363,6 +368,48 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    public void foo() {\n" //
 				+ "        Runnable r = this::foo2;\n" //
 				+ "        J c = K::routine;\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testConvertToLambda07() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    private interface Blah {\n" //
+				+ "        public boolean isCorrect(Object z //\n" //
+				+ "    }\n" //
+				+ "    public boolean foo() {\n" //
+				+ "        Blah x = new Blah() {\n" //
+				+ "            @Override\n" //
+				+ "            public boolean isCorrect(Object z) {\n" //
+				+ "                return z instanceof String;\n" //
+				+ "            }\n" //
+				+ "        }; // comment 1\n" //
+				+ "        return x.isCorrect(this //\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String original= sample;
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+		enable(CleanUpConstants.ALSO_SIMPLIFY_LAMBDA);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    private interface Blah {\n" //
+				+ "        public boolean isCorrect(Object z //\n" //
+				+ "    }\n" //
+				+ "    public boolean foo() {\n" //
+				+ "        Blah x = String.class::isInstance; // comment 1\n" //
+				+ "        return x.isCorrect(this //\n" //
 				+ "    }\n" //
 				+ "}\n"; //
 		String expected1= sample;

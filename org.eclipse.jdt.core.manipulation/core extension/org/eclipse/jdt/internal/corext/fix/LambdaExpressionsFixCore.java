@@ -953,7 +953,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					importRemover.registerAddedImports(castType);
 					cicReplacement= cast;
 				}
-				rewrite.replace(classInstanceCreation, cicReplacement, group);
+				ASTNodes.replaceButKeepComment(rewrite, classInstanceCreation, cicReplacement, group);
 
 				importRemover.registerRemovedNode(classInstanceCreation);
 				importRemover.registerRetainedNode(lambdaBody);
