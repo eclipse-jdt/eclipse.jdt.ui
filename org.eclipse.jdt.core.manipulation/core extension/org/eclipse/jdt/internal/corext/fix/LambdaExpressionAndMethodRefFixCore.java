@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022, 2023 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2023 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -46,6 +47,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -77,7 +79,7 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 	}
 
 
-	private enum ActionType { DO_NOTHING, REMOVE_RETURN, CLASS_INSTANCE_REF, TYPE_REF, SUPER_METHOD_REF, METHOD_REF }
+	private enum ActionType { DO_NOTHING, REMOVE_RETURN, CLASS_INSTANCE_REF, TYPE_REF, SUPER_METHOD_REF, METHOD_REF, INSTANCEOF_REF }
 
 	public static final class LambdaExpressionFinder extends ASTVisitor {
 
@@ -290,6 +292,15 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 						}
 					}
 				}
+			} else if (bodyExpression instanceof InstanceofExpression) {
+				InstanceofExpression exp= (InstanceofExpression) bodyExpression;
+				Expression leftOp= exp.getLeftOperand();
+				if (visited.parameters().size() == 1 && areSameIdentifiers(visited, List.of(leftOp))) {
+					if (exp.getRightOperand().resolveBinding() != null) {
+						actionType= ActionType.INSTANCEOF_REF;
+						classBinding= exp.getRightOperand().resolveBinding();
+					}
+				}
 			}
 
 			if (removeParamParentheses || actionType != ActionType.DO_NOTHING) {
@@ -421,6 +432,17 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 
 					creationRef.setType(copyType(cuRewrite, ast, classInstanceCreation, classInstanceCreation.resolveTypeBinding()));
 					ASTNodes.replaceButKeepComment(rewrite, visited, creationRef, group);
+					break;
+
+				case INSTANCEOF_REF:
+
+					ExpressionMethodReference instanceOfMethodRef= ast.newExpressionMethodReference();
+					TypeLiteral typeLiteral= ast.newTypeLiteral();
+					typeLiteral.setType(copyType(cuRewrite, ast, bodyExpression, classBinding));
+
+					instanceOfMethodRef.setExpression(typeLiteral);
+					instanceOfMethodRef.setName(ast.newSimpleName("isInstance")); //$NON-NLS-1$
+					ASTNodes.replaceButKeepComment(rewrite, visited, instanceOfMethodRef, group);
 					break;
 
 				case DO_NOTHING:

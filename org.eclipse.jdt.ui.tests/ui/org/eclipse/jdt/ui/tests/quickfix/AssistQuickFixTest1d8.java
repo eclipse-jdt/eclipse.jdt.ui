@@ -4904,6 +4904,48 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
+	public void testConvertLambdaToMethodReference6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E6 {\n");
+		buf.append("\n");
+		buf.append("    private interface I6 {\n");
+		buf.append("        public boolean isCorrect(Object z);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public boolean foo() {\n");
+		buf.append("        I6 x = z -> z instanceof String;\n");
+		buf.append("        return x.isCorrect(this);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E6.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("z ->");
+		AssistContext context= getCorrectionContext(cu, offset, 4);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E6 {\n");
+		buf.append("\n");
+		buf.append("    private interface I6 {\n");
+		buf.append("        public boolean isCorrect(Object z);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public boolean foo() {\n");
+		buf.append("        I6 x = String.class::isInstance;\n");
+		buf.append("        return x.isCorrect(this);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
 	public void testFixParenthesesInLambdaExpressionAdd() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
