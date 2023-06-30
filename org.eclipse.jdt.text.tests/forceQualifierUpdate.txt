@@ -7,3 +7,4 @@ Bug 539509 - Comparator errors in jdt.ui bundles in I20180926-0830
 Comparator errors in jdt.ui bundles in Y20200127-1055
 Bug 564399 - [Comparator] Comparator Errors in Y-build Y20200617-2350
 Comparator errors in jdt.ui bundles in I20210317-0330
+Bug 527899 [9] Implement JEP 280: Indify String Concatenation
