@@ -247,7 +247,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	private static int COUNTER= 0;//WORKAROUND for Bug 132669 https://bugs.eclipse.org/bugs/show_bug.cgi?id=132669
 
 	private static final String FILTER_CATEGORY_ACTION_ID= "FilterCategoryActionId"; //$NON-NLS-1$
-	private final String CATEGORY_MENU_GROUP_NAME= "CategoryMenuGroup" + (COUNTER++); //$NON-NLS-1$
+	private static final String CATEGORY_MENU_GROUP_NAME= "CategoryMenuGroup" + (COUNTER++); //$NON-NLS-1$
 	private static final int MAX_NUMBER_OF_CATEGORIES_IN_MENU= 5;
 
 	private final StructuredViewer fViewer;

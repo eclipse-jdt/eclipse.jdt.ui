@@ -886,9 +886,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		private static final int SELECT_GETTERS_ID= IDialogConstants.CLIENT_ID + 1;
 		private static final int SELECT_SETTERS_ID= IDialogConstants.CLIENT_ID + 2;
-		private final String SETTINGS_SECTION= "AddGetterSetterDialog"; //$NON-NLS-1$
-		private final String SORT_ORDER= "SortOrdering"; //$NON-NLS-1$
-		private final String ALLOW_SETTERS_FOR_FINALS= "RemoveFinal"; //$NON-NLS-1$
+		private static final String SETTINGS_SECTION= "AddGetterSetterDialog"; //$NON-NLS-1$
+		private static final String SORT_ORDER= "SortOrdering"; //$NON-NLS-1$
+		private static final String ALLOW_SETTERS_FOR_FINALS= "RemoveFinal"; //$NON-NLS-1$
 
 		private IDialogSettings fSettings;
 		private SettersForFinalFieldsFilter fSettersForFinalFieldsFilter;

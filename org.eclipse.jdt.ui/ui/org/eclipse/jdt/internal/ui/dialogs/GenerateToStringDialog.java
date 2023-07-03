@@ -544,13 +544,13 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			}
 		}
 
-		private final int ADD_BUTTON= IDialogConstants.CLIENT_ID + 1;
+		private static final int ADD_BUTTON= IDialogConstants.CLIENT_ID + 1;
 
-		private final int REMOVE_BUTTON= IDialogConstants.CLIENT_ID + 2;
+		private static final int REMOVE_BUTTON= IDialogConstants.CLIENT_ID + 2;
 
-		private final int APPLY_BUTTON= IDialogConstants.CLIENT_ID + 3;
+		private static final int APPLY_BUTTON= IDialogConstants.CLIENT_ID + 3;
 
-		private final int EDIT_BUTTON= IDialogConstants.CLIENT_ID + 4;
+		private static final int EDIT_BUTTON= IDialogConstants.CLIENT_ID + 4;
 
 		private Text templateTextControl;
 

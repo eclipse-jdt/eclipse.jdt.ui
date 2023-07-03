@@ -103,9 +103,9 @@ import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessorUtil;
  */
 public class SurroundWithTryWithResourcesRefactoringCore extends Refactoring {
 
-	public final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
-	public final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
-	public final String GROUP_TRY_STATEMENT= "try_stmt"; //$NON-NLS-1$
+	public static final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
+	public static final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
+	public static final String GROUP_TRY_STATEMENT= "try_stmt"; //$NON-NLS-1$
 
 	private Selection fSelection;
 	private SurroundWithTryWithResourcesAnalyzer fAnalyzer;

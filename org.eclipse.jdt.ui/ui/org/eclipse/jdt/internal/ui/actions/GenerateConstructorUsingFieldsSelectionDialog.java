@@ -102,9 +102,9 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 
 	int fWidth= 60;
 
-	final String OMIT_SUPER= "OmitCallToSuper"; //$NON-NLS-1$
+	static final String OMIT_SUPER= "OmitCallToSuper"; //$NON-NLS-1$
 
-	final String SETTINGS_SECTION= "GenerateConstructorUsingFieldsSelectionDialog"; //$NON-NLS-1$
+	static final String SETTINGS_SECTION= "GenerateConstructorUsingFieldsSelectionDialog"; //$NON-NLS-1$
 
 	private static final int DOWN_INDEX= 1;
 

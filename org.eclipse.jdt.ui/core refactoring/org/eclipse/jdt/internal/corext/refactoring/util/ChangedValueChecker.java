@@ -78,7 +78,7 @@ public class ChangedValueChecker extends AbstractChecker {
 
 	private ASTNode fBodyNode;
 
-	private final int THRESHOLD= 2500;
+	private static final int THRESHOLD= 2500;
 
 	private ArrayList<ASTNode> fMiddleNodes;
 

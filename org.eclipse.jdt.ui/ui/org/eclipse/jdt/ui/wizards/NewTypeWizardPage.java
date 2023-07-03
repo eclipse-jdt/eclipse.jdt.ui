@@ -463,9 +463,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	private TypeFieldsAdapter fTypeFieldAdapter;
 
-	private final int PUBLIC_INDEX= 0, DEFAULT_INDEX= 1, PRIVATE_INDEX= 2, PROTECTED_INDEX= 3;
-	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1, STATIC_INDEX= 2, ENUM_ANNOT_STATIC_INDEX= 1;
-	private final int SEALED_FINAL_INDEX= 3, SEALED_INDEX= 1, NON_SEALED_INDEX= 2;
+	private static final int PUBLIC_INDEX= 0, DEFAULT_INDEX= 1, PRIVATE_INDEX= 2, PROTECTED_INDEX= 3;
+	private static final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1, STATIC_INDEX= 2, ENUM_ANNOT_STATIC_INDEX= 1;
+	private static final int SEALED_FINAL_INDEX= 3, SEALED_INDEX= 1, NON_SEALED_INDEX= 2;
 
 	private int fTypeKind;
 
