@@ -548,13 +548,13 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
-		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, binding, expression, getUsedVariableNames(fNodesToAssign.get(0)));
+		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, binding, expression, getUsedVariableNames(fNodesToAssign.get(0)),null);
 	}
 
 	private String[] suggestFieldNames(ITypeBinding binding, Expression expression, int modifiers, ASTNode nodeToAssign) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		int varKind= Modifier.isStatic(modifiers) ? NamingConventions.VK_STATIC_FIELD : NamingConventions.VK_INSTANCE_FIELD;
-		return StubUtility.getVariableNameSuggestions(varKind, project, binding, expression, getUsedVariableNames(nodeToAssign));
+		return StubUtility.getVariableNameSuggestions(varKind, project, binding, expression, getUsedVariableNames(nodeToAssign),null);
 	}
 
 	private Collection<String> getUsedVariableNames(ASTNode nodeToAssign) {

@@ -778,7 +778,7 @@ public class JavaPostfixContext extends JavaContext {
 		if (selectedNode instanceof Expression) {
 			ITypeBinding tb= resolveNodeToBinding(selectedNode);
 			List<String> excludes= Arrays.asList(computeExcludes());
-			String[] names= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, getJavaProject(), tb, (Expression)selectedNode, excludes);
+			String[] names= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, getJavaProject(), tb, (Expression)selectedNode, excludes,null);
 			res.addAll(Arrays.asList(names));
 		}
 		res.addAll(Arrays.asList(super.suggestVariableNames(type)));
