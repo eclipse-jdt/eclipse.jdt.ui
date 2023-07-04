@@ -402,6 +402,12 @@ public class RenameNonPrivateFieldTests extends GenericRefactoringTest {
 		helper2();
 	}
 
+	@Test
+	public void test24() throws Exception{
+		fRenameGetter= false;
+		fRenameSetter= false;
+		helper2("x", "list");
+	}
 //--- end test 1.5 features. ---
 
 	@Test
