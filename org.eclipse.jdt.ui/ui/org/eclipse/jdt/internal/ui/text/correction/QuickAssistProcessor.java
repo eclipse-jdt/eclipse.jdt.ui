@@ -3532,7 +3532,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				varNameGenerated= false;
 			} else {
 				VariableDeclarationFragment varFragment= ast.newVariableDeclarationFragment();
-				String[] varNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, initializerTypeBinding, initializer, usedVarNames);
+				String[] varNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, initializerTypeBinding, initializer, usedVarNames,null);
 				varName= varNames[0];
 				usedVarNames= new ArrayList<>(usedVarNames);
 				usedVarNames.add(varName);

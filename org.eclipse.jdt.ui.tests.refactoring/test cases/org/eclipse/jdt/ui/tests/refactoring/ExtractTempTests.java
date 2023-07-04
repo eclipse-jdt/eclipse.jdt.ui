@@ -26,20 +26,25 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Hashtable;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class ExtractTempTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "ExtractTemp/";
@@ -97,7 +102,6 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength());
-
 		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful", activationResult.isOK());
 
@@ -1061,6 +1065,19 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=573643
 		helper1(11, 13, 11, 32, true, false, "lowerCase", "lowerCase");
 	}
+
+	@Test
+	public void test157() throws Exception {
+
+		helper1(27, 19, 27, 31, true, false, "element", "element");
+	}
+
+	@Test
+	public void test158() throws Exception {
+
+		helper1(27, 19, 27, 31, true, false, "person", "person");
+	}
+
 
 	@Test
 	public void testZeroLengthSelection0() throws Exception {

@@ -36,6 +36,18 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.CopySourceEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.text.edits.TextEditVisitor;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -103,6 +115,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractLocalDescriptor;
+
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -134,18 +147,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.SideEffectChecker;
 import org.eclipse.jdt.internal.corext.refactoring.util.UnsafeCheckTester;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.text.edits.CopySourceEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-import org.eclipse.text.edits.TextEditVisitor;
 
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
@@ -180,6 +186,39 @@ public class ExtractTempRefactoring extends Refactoring {
 				fReferringToForVariable= true;
 			}
 			return false;
+		}
+	}
+
+	private static final class IdenticalLocalVariableNameVisitor extends ASTVisitor {
+		private ArrayList<String> identicalNames;
+
+		private String expression;
+
+		public IdenticalLocalVariableNameVisitor(String expression) {
+			identicalNames= new ArrayList<>();
+			this.expression= expression;
+		}
+
+		public ArrayList<String> getidenticalNames() {
+			return this.identicalNames;
+		}
+
+		public void setidenticalNames(String identicalName) {
+			this.identicalNames.add(identicalName);
+		}
+
+		@Override
+		public boolean visit(VariableDeclarationStatement node) {
+			for (Object obj : node.fragments()) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment)obj;
+				if (fragment.getInitializer() != null) {
+					String initializer= fragment.getInitializer().toString();
+					if (this.expression.equals(initializer)) {
+						setidenticalNames(fragment.getName().toString());
+					}
+				}
+			}
+			return true;
 		}
 	}
 
@@ -774,6 +813,30 @@ public class ExtractTempRefactoring extends Refactoring {
 		return localUsedNames;
 	}
 
+	/**
+	 * Retrieves used names for the whole compilation unit that contains node.
+	 *
+	 * @param selected the selected node
+	 *
+	 * @return an array of used variable names for recommending new names.
+	 */
+	private Collection<String> getUsedIdenticalNames(ASTNode selected) {
+		ASTNode surroundingBlock= selected;
+		while ((surroundingBlock= surroundingBlock.getParent()) != null) {
+			if (surroundingBlock instanceof CompilationUnit) {
+				break;
+			}
+		}
+		if (surroundingBlock == null) {
+			return new ArrayList<>();
+		}
+		CompilationUnit cu= (CompilationUnit)surroundingBlock;
+		IdenticalLocalVariableNameVisitor localVariableNameVisitor= new IdenticalLocalVariableNameVisitor(selected.toString());
+		cu.accept(localVariableNameVisitor);
+		List<String> identicalNames= localVariableNameVisitor.getidenticalNames();
+		return identicalNames;
+	}
+
 
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -1356,7 +1419,9 @@ public class ExtractTempRefactoring extends Refactoring {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
 					ITypeBinding binding= guessBindingForReference(expression);
-					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
+					Collection<String> identicalNames= getUsedIdenticalNames(fSelectedExpression.getAssociatedNode());
+					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()),
+							identicalNames);
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);

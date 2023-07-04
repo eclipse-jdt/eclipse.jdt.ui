@@ -21,6 +21,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -1014,8 +1015,13 @@ public class StubUtility {
 
 	// --------------------------- name suggestions --------------------------
 
-	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection<String> excluded) {
+	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection<String> excluded,Collection<String> identicalNames) {
 		LinkedHashSet<String> res= new LinkedHashSet<>(); // avoid duplicates but keep order
+
+		String recycledName= recycleNames(identicalNames);
+		if (recycledName != null) {
+			add(getVariableNameSuggestions(variableKind, project, recycledName, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
+		}
 
 		if (assignedExpression != null) {
 			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, variableKind);
@@ -1048,8 +1054,26 @@ public class StubUtility {
 		if (res.isEmpty()) {
 			return getDefaultVariableNameSuggestions(variableKind, excluded);
 		}
+		for(String s:res)
+		System.out.println(s);
 		return res.toArray(new String[res.size()]);
 	}
+
+	private static String recycleNames(Collection<String> identicalNames) {
+		String generated_name= null;
+		if (identicalNames.size() != 0) {
+			HashSet<String> unique_name= new HashSet<>(identicalNames);
+			for (String name : unique_name) {
+				int count= Collections.frequency(identicalNames, name);
+				// recycle variable names accounting for more than 70%
+				if (count >= identicalNames.size() * 0.7)
+					generated_name= name;
+			}
+		}
+		return generated_name;
+	}
+
+
 
 	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, Type expectedType, Expression assignedExpression, Collection<String> excluded) {
 		LinkedHashSet<String> res= new LinkedHashSet<>(); // avoid duplicates but keep order
@@ -1278,7 +1302,7 @@ public class StubUtility {
 	}
 
 	public static String[] getArgumentNameSuggestions(IJavaProject project, ITypeBinding binding, String[] excluded) {
-		return getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, binding, null, new ExcludedCollection(excluded));
+		return getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, binding, null, new ExcludedCollection(excluded), null);
 	}
 
 	public static String[] getArgumentNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {
