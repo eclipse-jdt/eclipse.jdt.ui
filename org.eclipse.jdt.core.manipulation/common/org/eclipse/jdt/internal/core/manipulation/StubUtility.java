@@ -1054,14 +1054,13 @@ public class StubUtility {
 		if (res.isEmpty()) {
 			return getDefaultVariableNameSuggestions(variableKind, excluded);
 		}
-		for(String s:res)
-		System.out.println(s);
 		return res.toArray(new String[res.size()]);
 	}
 
 	private static String recycleNames(Collection<String> identicalNames) {
 		String generated_name= null;
-		if (identicalNames.size() != 0) {
+
+		if (identicalNames!=null&&identicalNames.size() != 0) {
 			HashSet<String> unique_name= new HashSet<>(identicalNames);
 			for (String name : unique_name) {
 				int count= Collections.frequency(identicalNames, name);
