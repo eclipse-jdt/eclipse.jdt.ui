@@ -1600,6 +1600,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 1);
 
 		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
 		buf= new StringBuilder();
