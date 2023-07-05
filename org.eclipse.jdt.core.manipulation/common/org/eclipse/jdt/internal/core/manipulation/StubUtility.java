@@ -1015,10 +1015,48 @@ public class StubUtility {
 
 	// --------------------------- name suggestions --------------------------
 
-	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection<String> excluded,Collection<String> identicalNames) {
+	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection<String> excluded) {
 		LinkedHashSet<String> res= new LinkedHashSet<>(); // avoid duplicates but keep order
 
-		String recycledName= recycleNames(identicalNames);
+		if (assignedExpression != null) {
+			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, variableKind);
+			if (nameFromExpression != null) {
+				add(getVariableNameSuggestions(variableKind, project, nameFromExpression, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
+			}
+
+			String nameFromParent= getBaseNameFromLocationInParent(assignedExpression);
+			if (nameFromParent != null) {
+				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
+			}
+		}
+		if (expectedType != null) {
+			expectedType= Bindings.normalizeTypeBinding(expectedType);
+			if (expectedType != null) {
+				int dim= 0;
+				if (expectedType.isArray()) {
+					dim= expectedType.getDimensions();
+					expectedType= expectedType.getElementType();
+				}
+				if (expectedType.isParameterizedType()) {
+					expectedType= expectedType.getTypeDeclaration();
+				}
+				String typeName= expectedType.getName();
+				if (typeName.length() > 0) {
+					add(getVariableNameSuggestions(variableKind, project, typeName, dim, excluded, false), res);
+				}
+			}
+		}
+		if (res.isEmpty()) {
+			return getDefaultVariableNameSuggestions(variableKind, excluded);
+		}
+		return res.toArray(new String[res.size()]);
+	}
+
+	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection<String> excluded,
+			Collection<String> identicalNames, Collection<String> namesInSameMethod) {
+		LinkedHashSet<String> res= new LinkedHashSet<>(); // avoid duplicates but keep order
+
+		String recycledName= recycleNames(excluded, identicalNames, namesInSameMethod);
 		if (recycledName != null) {
 			add(getVariableNameSuggestions(variableKind, project, recycledName, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
 		}
@@ -1057,10 +1095,10 @@ public class StubUtility {
 		return res.toArray(new String[res.size()]);
 	}
 
-	private static String recycleNames(Collection<String> identicalNames) {
+	private static String recycleNames(Collection<String> excludedNames, Collection<String> identicalNames, Collection<String> namesInSameMethod) {
 		String generated_name= null;
 
-		if (identicalNames!=null&&identicalNames.size() != 0) {
+		if (identicalNames != null && identicalNames.size() != 0) {
 			HashSet<String> unique_name= new HashSet<>(identicalNames);
 			for (String name : unique_name) {
 				int count= Collections.frequency(identicalNames, name);
@@ -1069,7 +1107,10 @@ public class StubUtility {
 					generated_name= name;
 			}
 		}
-		return generated_name;
+		if (excludedNames.contains(generated_name) || namesInSameMethod.contains(generated_name))
+			return null;
+		else
+			return generated_name;
 	}
 
 
@@ -1301,7 +1342,7 @@ public class StubUtility {
 	}
 
 	public static String[] getArgumentNameSuggestions(IJavaProject project, ITypeBinding binding, String[] excluded) {
-		return getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, binding, null, new ExcludedCollection(excluded), null);
+		return getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, binding, null, new ExcludedCollection(excluded));
 	}
 
 	public static String[] getArgumentNameSuggestions(IJavaProject project, String baseName, int dimensions, String[] excluded) {

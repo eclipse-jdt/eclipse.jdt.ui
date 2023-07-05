@@ -109,7 +109,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		ref.setDeclareFinal(makeFinal);
 		ref.setTempName(tempName);
 
-		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
+		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempNameWithContext());
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
@@ -136,7 +136,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		ref.setDeclareFinal(makeFinal);
 		ref.setTempName(tempName);
 
-		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
+		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempNameWithContext());
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 		assertEquals("status", expectedStatus, checkInputResult.getSeverity());
@@ -1069,13 +1069,13 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	@Test
 	public void test157() throws Exception {
 
-		helper1(27, 19, 27, 31, true, false, "element", "element");
+		helper1(29, 28, 29, 71, true, false, "bootVersion", "bootVersion");
 	}
 
 	@Test
 	public void test158() throws Exception {
 
-		helper1(27, 19, 27, 31, true, false, "person", "person");
+		helper1(29, 28, 29, 71, true, false, "safeParse", "safeParse");
 	}
 
 

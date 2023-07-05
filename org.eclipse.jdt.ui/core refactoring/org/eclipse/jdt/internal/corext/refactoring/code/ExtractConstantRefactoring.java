@@ -247,7 +247,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
 					ITypeBinding binding= guessBindingForReference(expression);
-					fGuessedConstNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_STATIC_FINAL_FIELD, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()),null);
+					fGuessedConstNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_STATIC_FINAL_FIELD, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
 				}
 			} catch (JavaModelException e) {
 			}

@@ -1659,7 +1659,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static String[] suggestLocalVariableNames(ICompilationUnit cu, ITypeBinding binding, List<String> excluded) {
-		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, cu.getJavaProject(), binding, null, excluded,null);
+		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, cu.getJavaProject(), binding, null, excluded);
 	}
 
 	private static boolean getCombineStringProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
@@ -2723,7 +2723,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		} else {
 			// Switch expression could have side effects, see bug 252040
 			VariableDeclarationFragment variableDeclarationFragment= ast.newVariableDeclarationFragment();
-			String[] varNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, context.getCompilationUnit().getJavaProject(), expressionType, switchExpression, null,null);
+			String[] varNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, context.getCompilationUnit().getJavaProject(), expressionType, switchExpression, null);
 			varName= ast.newSimpleName(varNames[0]);
 			variableDeclarationFragment.setName((SimpleName) varName);
 			variableDeclarationFragment.setStructuralProperty(VariableDeclarationFragment.INITIALIZER_PROPERTY, rewrite.createCopyTarget(switchExpression));

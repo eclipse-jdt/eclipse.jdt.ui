@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -192,9 +193,9 @@ public class ExtractTempRefactoring extends Refactoring {
 	private static final class IdenticalLocalVariableNameVisitor extends ASTVisitor {
 		private ArrayList<String> identicalNames;
 
-		private String expression;
+		private ASTNode expression;
 
-		public IdenticalLocalVariableNameVisitor(String expression) {
+		public IdenticalLocalVariableNameVisitor(ASTNode expression) {
 			identicalNames= new ArrayList<>();
 			this.expression= expression;
 		}
@@ -210,10 +211,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		@Override
 		public boolean visit(VariableDeclarationStatement node) {
 			for (Object obj : node.fragments()) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment)obj;
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) obj;
 				if (fragment.getInitializer() != null) {
-					String initializer= fragment.getInitializer().toString();
-					if (this.expression.equals(initializer)) {
+					Expression initializer= fragment.getInitializer();
+					if (initializer.subtreeMatch(new ASTMatcher(), this.expression)) {
 						setidenticalNames(fragment.getName().toString());
 					}
 				}
@@ -831,8 +832,24 @@ public class ExtractTempRefactoring extends Refactoring {
 			return new ArrayList<>();
 		}
 		CompilationUnit cu= (CompilationUnit)surroundingBlock;
-		IdenticalLocalVariableNameVisitor localVariableNameVisitor= new IdenticalLocalVariableNameVisitor(selected.toString());
+		IdenticalLocalVariableNameVisitor localVariableNameVisitor= new IdenticalLocalVariableNameVisitor(selected);
 		cu.accept(localVariableNameVisitor);
+		List<String> identicalNames= localVariableNameVisitor.getidenticalNames();
+		return identicalNames;
+	}
+
+	private Collection<String> getDeclaredNames(ASTNode selected) {
+		ASTNode surroundingBlock= selected;
+		while ((surroundingBlock= surroundingBlock.getParent()) != null) {
+			if (surroundingBlock instanceof MethodDeclaration) {
+				break;
+			}
+		}
+		if (surroundingBlock == null) {
+			return new ArrayList<>();
+		}
+		IdenticalLocalVariableNameVisitor localVariableNameVisitor= new IdenticalLocalVariableNameVisitor(selected);
+		surroundingBlock.accept(localVariableNameVisitor);
 		List<String> identicalNames= localVariableNameVisitor.getidenticalNames();
 		return identicalNames;
 	}
@@ -1139,7 +1156,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
 			nameGroup.addPosition(rewrite.track(vdf.getName()), true);
 
-			String[] nameSuggestions= guessTempNames();
+			String[] nameSuggestions= guessTempNamesWithContext();
 			if (nameSuggestions.length > 0 && !nameSuggestions[0].equals(fTempName)) {
 				nameGroup.addProposal(fTempName, null, nameSuggestions.length + 1);
 			}
@@ -1408,6 +1425,13 @@ public class ExtractTempRefactoring extends Refactoring {
 		else
 			return proposals[0];
 	}
+	public String guessTempNameWithContext() {
+		String[] proposals= guessTempNamesWithContext();
+		if (proposals.length == 0)
+			return fTempName;
+		else
+			return proposals[0];
+	}
 
 	/**
 	 * @return proposed variable names (may be empty, but not null). The first proposal should be
@@ -1419,9 +1443,31 @@ public class ExtractTempRefactoring extends Refactoring {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
 					ITypeBinding binding= guessBindingForReference(expression);
+					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+			if (fGuessedTempNames == null)
+				fGuessedTempNames= new String[0];
+		}
+		return fGuessedTempNames;
+	}
+
+	/**
+	 * @return proposed variable names based on context (may be empty, but not null). The first proposal should be
+	 *         used as "best guess" (if it exists).
+	 */
+	public String[] guessTempNamesWithContext() {
+		if (fGuessedTempNames == null) {
+			try {
+				Expression expression= getSelectedExpression().getAssociatedExpression();
+				if (expression != null) {
+					ITypeBinding binding= guessBindingForReference(expression);
 					Collection<String> identicalNames= getUsedIdenticalNames(fSelectedExpression.getAssociatedNode());
+					Collection<String> namesInSameMethod= getDeclaredNames(fSelectedExpression.getAssociatedNode());
 					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()),
-							identicalNames);
+							identicalNames, namesInSameMethod);
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
