@@ -1817,6 +1817,24 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		IfStatement ifStatement= (IfStatement) node;
 		Statement thenStatement= getSingleStatement(ifStatement.getThenStatement());
 		Statement elseStatement= getSingleStatement(ifStatement.getElseStatement());
+		ReturnStatement followingReturn= null;
+		if (ifStatement.getElseStatement() == null && thenStatement instanceof ReturnStatement) {
+			ASTNode parent= ifStatement.getParent();
+			if (parent instanceof Block block) {
+				List<Statement> statements= block.statements();
+				int i= 0;
+				for (Statement statement : statements) {
+					if (statement.equals(ifStatement)) {
+						break;
+					}
+					++i;
+				}
+				if (++i < statements.size() && statements.get(i) instanceof ReturnStatement) {
+					followingReturn= (ReturnStatement)statements.get(i);
+					elseStatement= followingReturn;
+				}
+			}
+		}
 		if (thenStatement == null || elseStatement == null) {
 			return false;
 		}
@@ -1868,7 +1886,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		sourceRangeComputer.addTightSourceNode(ifStatement);
 		rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
 
-		String label= CorrectionMessages.AdvancedQuickAssistProcessor_replaceIfWithConditional;
+		String label= ifStatement.getElseStatement() == null ? CorrectionMessages.AdvancedQuickAssistProcessor_replaceIfNoElseWithConditional : CorrectionMessages.AdvancedQuickAssistProcessor_replaceIfWithConditional;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REPLACE_IF_ELSE_WITH_CONDITIONAL, image);
 
@@ -1921,6 +1939,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 			ExpressionStatement expressionStatement= ast.newExpressionStatement(assignment);
 			rewrite.replace(ifStatement, expressionStatement, null);
+		}
+
+		// if we have replaced if (a == b) {return x;} return y; with conditional, we need to remove
+		// return y; statement
+		if (followingReturn != null) {
+			rewrite.remove(followingReturn, null);
 		}
 
 		// add correction proposal
