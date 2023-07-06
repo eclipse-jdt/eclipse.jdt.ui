@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1098,6 +1098,13 @@ public class ExtractInterfaceTests extends GenericRefactoringTest {
 		String[][] signatures= {new String[0], new String[0], new String[0], new String[0]};
 		String[] fieldNames= null;
 		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames, getPackageQ());
+	}
+
+	@Test
+	public void testDeprecated1() throws Exception{
+		String[] names= new String[]{"foo", "foo2"};
+		String[][] signatures= new String[][]{new String[0], new String[0]};
+		validatePassingTest("A", new String[]{"A"},"I", true, names, signatures, null);
 	}
 
 	@Test
