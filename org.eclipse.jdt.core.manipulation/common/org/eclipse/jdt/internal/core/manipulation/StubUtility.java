@@ -21,7 +21,6 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -1053,10 +1052,26 @@ public class StubUtility {
 	}
 
 	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection<String> excluded,
-			Collection<String> identicalNames, Collection<String> namesInSameMethod) {
+			String identicalName, Collection<String> namesInSameMethod) {
 		LinkedHashSet<String> res= new LinkedHashSet<>(); // avoid duplicates but keep order
 
-		String recycledName= recycleNames(excluded, identicalNames, namesInSameMethod);
+		String typeName= null;
+		int dim= 0;
+		if (expectedType != null) {
+			expectedType= Bindings.normalizeTypeBinding(expectedType);
+			if (expectedType != null) {
+				if (expectedType.isArray()) {
+					dim= expectedType.getDimensions();
+					expectedType= expectedType.getElementType();
+				}
+				if (expectedType.isParameterizedType()) {
+					expectedType= expectedType.getTypeDeclaration();
+				}
+				typeName= expectedType.getName();
+			}
+		}
+
+		String recycledName= recycleNames(typeName, assignedExpression, excluded, identicalName, namesInSameMethod);
 		if (recycledName != null) {
 			add(getVariableNameSuggestions(variableKind, project, recycledName, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
 		}
@@ -1072,45 +1087,50 @@ public class StubUtility {
 				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
 			}
 		}
-		if (expectedType != null) {
-			expectedType= Bindings.normalizeTypeBinding(expectedType);
-			if (expectedType != null) {
-				int dim= 0;
-				if (expectedType.isArray()) {
-					dim= expectedType.getDimensions();
-					expectedType= expectedType.getElementType();
-				}
-				if (expectedType.isParameterizedType()) {
-					expectedType= expectedType.getTypeDeclaration();
-				}
-				String typeName= expectedType.getName();
-				if (typeName.length() > 0) {
-					add(getVariableNameSuggestions(variableKind, project, typeName, dim, excluded, false), res);
-				}
-			}
+
+		if (typeName != null && typeName.length() > 0) {
+			add(getVariableNameSuggestions(variableKind, project, typeName, dim, excluded, false), res);
 		}
+
+
 		if (res.isEmpty()) {
 			return getDefaultVariableNameSuggestions(variableKind, excluded);
 		}
 		return res.toArray(new String[res.size()]);
 	}
 
-	private static String recycleNames(Collection<String> excludedNames, Collection<String> identicalNames, Collection<String> namesInSameMethod) {
-		String generated_name= null;
-
-		if (identicalNames != null && identicalNames.size() != 0) {
-			HashSet<String> unique_name= new HashSet<>(identicalNames);
-			for (String name : unique_name) {
-				int count= Collections.frequency(identicalNames, name);
-				// recycle variable names accounting for more than 70%
-				if (count >= identicalNames.size() * 0.7)
-					generated_name= name;
+	private static String recycleNames(String typeName, Expression assignedExpression, Collection<String> excluded,
+			String identicalName, Collection<String> namesInSameMethod) {
+		if (typeName != null && typeName.length() > 0) {
+			if (assignedExpression != null && assignedExpression instanceof MethodInvocation) {
+				MethodInvocation methodInvocation= (MethodInvocation)assignedExpression;
+				String name= methodInvocation.getName().getIdentifier();
+				if (!name.toLowerCase().contains(typeName.toLowerCase())) {
+					List<Expression> arguments= methodInvocation.arguments();
+					List<Integer> argumentTypes= new ArrayList<>();
+					for (Expression argument : arguments)
+						argumentTypes.add(Integer.valueOf(argument.getNodeType()));
+					if (arguments.size() > 1 || argumentTypes.contains(Integer.valueOf(ASTNode.METHOD_INVOCATION))) {
+						String recycledName= recycleNames(excluded, identicalName, namesInSameMethod);
+						return recycledName;
+					}
+				}
 			}
+
 		}
-		if (excludedNames.contains(generated_name) || namesInSameMethod.contains(generated_name))
-			return null;
-		else
-			return generated_name;
+		return null;
+	}
+
+	private static String recycleNames(Collection<String> excludedNames, String identicalName, Collection<String> namesInSameMethod) {
+
+		if (identicalName != null) {
+			if (excludedNames.contains(identicalName) || namesInSameMethod.contains(identicalName))
+				return null;
+			else
+				return identicalName;
+		}
+		return null;
+
 	}
 
 
@@ -1231,6 +1251,7 @@ public class StubUtility {
 				if (!modifiedName.equals("element")) //$NON-NLS-1$
 					return modifiedName;
 			}
+
 		} else if (assignedExpression instanceof SuperMethodInvocation) {
 			name= ((SuperMethodInvocation)assignedExpression).getName().getIdentifier();
 		} else if (assignedExpression instanceof FieldAccess) {

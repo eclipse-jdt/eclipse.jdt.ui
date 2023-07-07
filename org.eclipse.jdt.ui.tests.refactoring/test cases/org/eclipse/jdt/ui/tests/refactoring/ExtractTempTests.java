@@ -1075,7 +1075,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	@Test
 	public void test158() throws Exception {
 
-		helper1(29, 28, 29, 71, true, false, "safeParse", "safeParse");
+		helper1(17, 28, 17, 71, true, false, "safeParse", "safeParse");
 	}
 
 

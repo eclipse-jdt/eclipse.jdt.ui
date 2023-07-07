@@ -1,4 +1,4 @@
-package p; // 29, 28, 29, 71
+package p; // 17, 28, 17, 71
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,35 +10,11 @@ public class A {
 
 	private static final Version VERSION_2_0_0_M6= Version.parse("2.0.0.M6");
 
-	protected String getServletInitializrClass(ProjectRequest request) {
-		Version bootVersion= Version.safeParse(request.getBootVersion());
-		assert bootVersion != null;
-		if (VERSION_1_4_0_M3.compareTo(bootVersion) > 0) {
-			return "org.springframework.boot.context.web.SpringBootServletInitializer";
-		} else if (VERSION_2_0_0_M1.compareTo(bootVersion) > 0) {
-			return "org.springframework.boot.web.support.SpringBootServletInitializer";
-		} else {
-			return "org.springframework.boot.web.servlet.support.SpringBootServletInitializer";
-		}
-	}
-
 	protected void resolveModel(ProjectRequest originalRequest) {
 		ProjectRequest request= new ProjectRequest();
 		// Kotlin supported as of M6
 		final boolean kotlinSupport= VERSION_2_0_0_M6
 				.compareTo(Version.safeParse(request.getBootVersion())) <= 0;
-	}
-	
-	protected String getServletInitializrClass1(ProjectRequest request) {
-		Version version= Version.safeParse(request.getBootVersion());
-		assert version != null;
-		if (VERSION_1_4_0_M3.compareTo(version) > 0) {
-			return "org.springframework.boot.context.web.SpringBootServletInitializer";
-		} else if (VERSION_2_0_0_M1.compareTo(version) > 0) {
-			return "org.springframework.boot.web.support.SpringBootServletInitializer";
-		} else {
-			return "org.springframework.boot.web.servlet.support.SpringBootServletInitializer";
-		}
 	}
 }
 

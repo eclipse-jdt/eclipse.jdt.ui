@@ -191,20 +191,54 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private static final class IdenticalLocalVariableNameVisitor extends ASTVisitor {
-		private ArrayList<String> identicalNames;
+		private String identicalName;
 
 		private ASTNode expression;
 
 		public IdenticalLocalVariableNameVisitor(ASTNode expression) {
+			identicalName= null;
+			this.expression= expression;
+		}
+
+		public String getIdenticalName() {
+			return this.identicalName;
+		}
+
+		public void setIdenticalName(String identicalName) {
+			this.identicalName= identicalName;
+		}
+
+		@Override
+		public boolean visit(VariableDeclarationStatement node) {
+			for (Object obj : node.fragments()) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) obj;
+				if (fragment.getInitializer() != null) {
+					Expression initializer= fragment.getInitializer();
+					if (initializer.subtreeMatch(new ASTMatcher(), this.expression)) {
+						setIdenticalName(fragment.getName().toString());
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+	}
+
+	private static final class IdenticalLocalVariableNameInMethodVisitor extends ASTVisitor {
+		private ArrayList<String> identicalNames;
+
+		private ASTNode expression;
+
+		public IdenticalLocalVariableNameInMethodVisitor(ASTNode expression) {
 			identicalNames= new ArrayList<>();
 			this.expression= expression;
 		}
 
-		public ArrayList<String> getidenticalNames() {
+		public ArrayList<String> getIdenticalNames() {
 			return this.identicalNames;
 		}
 
-		public void setidenticalNames(String identicalName) {
+		public void setIdenticalNames(String identicalName) {
 			this.identicalNames.add(identicalName);
 		}
 
@@ -215,7 +249,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				if (fragment.getInitializer() != null) {
 					Expression initializer= fragment.getInitializer();
 					if (initializer.subtreeMatch(new ASTMatcher(), this.expression)) {
-						setidenticalNames(fragment.getName().toString());
+						setIdenticalNames(fragment.getName().toString());
 					}
 				}
 			}
@@ -821,7 +855,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	 *
 	 * @return an array of used variable names for recommending new names.
 	 */
-	private Collection<String> getUsedIdenticalNames(ASTNode selected) {
+	private String getUsedIdenticalName(ASTNode selected) {
 		ASTNode surroundingBlock= selected;
 		while ((surroundingBlock= surroundingBlock.getParent()) != null) {
 			if (surroundingBlock instanceof CompilationUnit) {
@@ -829,13 +863,13 @@ public class ExtractTempRefactoring extends Refactoring {
 			}
 		}
 		if (surroundingBlock == null) {
-			return new ArrayList<>();
+			return null;
 		}
 		CompilationUnit cu= (CompilationUnit)surroundingBlock;
 		IdenticalLocalVariableNameVisitor localVariableNameVisitor= new IdenticalLocalVariableNameVisitor(selected);
 		cu.accept(localVariableNameVisitor);
-		List<String> identicalNames= localVariableNameVisitor.getidenticalNames();
-		return identicalNames;
+		String identicalName= localVariableNameVisitor.getIdenticalName();
+		return identicalName;
 	}
 
 	private Collection<String> getDeclaredNames(ASTNode selected) {
@@ -848,9 +882,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (surroundingBlock == null) {
 			return new ArrayList<>();
 		}
-		IdenticalLocalVariableNameVisitor localVariableNameVisitor= new IdenticalLocalVariableNameVisitor(selected);
-		surroundingBlock.accept(localVariableNameVisitor);
-		List<String> identicalNames= localVariableNameVisitor.getidenticalNames();
+		IdenticalLocalVariableNameInMethodVisitor identicalLocalVariableNameInMethodVisitor= new IdenticalLocalVariableNameInMethodVisitor(selected);
+		surroundingBlock.accept(identicalLocalVariableNameInMethodVisitor);
+		List<String> identicalNames= identicalLocalVariableNameInMethodVisitor.getIdenticalNames();
 		return identicalNames;
 	}
 
@@ -1464,10 +1498,10 @@ public class ExtractTempRefactoring extends Refactoring {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
 					ITypeBinding binding= guessBindingForReference(expression);
-					Collection<String> identicalNames= getUsedIdenticalNames(fSelectedExpression.getAssociatedNode());
+					String identicalName= getUsedIdenticalName(fSelectedExpression.getAssociatedNode());
 					Collection<String> namesInSameMethod= getDeclaredNames(fSelectedExpression.getAssociatedNode());
 					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()),
-							identicalNames, namesInSameMethod);
+							identicalName, namesInSameMethod);
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
