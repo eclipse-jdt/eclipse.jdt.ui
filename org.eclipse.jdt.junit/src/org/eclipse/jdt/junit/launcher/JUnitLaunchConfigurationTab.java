@@ -993,7 +993,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				if (methodName.length() > 0) {
 					Set<String> methodsForType= getMethodsForType(javaProject, type, getSelectedTestKind());
 					if (!methodsForType.contains(methodName)) {
-						super.setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_method_not_found, new String[] { className, methodName, projectName }));
+						setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_method_not_found, new String[] { className, methodName, projectName }));
 						return;
 					}
 				}
