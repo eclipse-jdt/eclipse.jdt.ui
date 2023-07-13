@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2020 IBM Corporation and others.
+ * Copyright (c) 2007, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1116,6 +1116,82 @@ public class SaveParticipantTest extends CleanUpTestCase {
 				+ "}";
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		// When
+		editCUInEditor(cu1, fileOnEditor);
+
+		// Then
+		assertEquals(expected1, cu1.getBuffer().getContents());
+	}
+
+	@Test
+	public void testIssue313_1() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    private void m1(Object p1) {\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    private void m1(Object p1) {\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    private void m1() {\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS);
+
+		// When
+		editCUInEditor(cu1, fileOnEditor);
+
+		// Then
+		assertEquals(expected1, cu1.getBuffer().getContents());
+	}
+
+	@Test
+	public void testIssue313_2() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    private void m1(Object p1) {\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    private void m1(Object p1) {\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    private void m1(Object p1) {\n" //
+				+ "    }\n" //
+				+ "}\n"; //
 
 		// When
 		editCUInEditor(cu1, fileOnEditor);
