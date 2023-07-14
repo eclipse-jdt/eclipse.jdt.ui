@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.ILog;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -262,7 +262,7 @@ public class SemanticHighlightingPresenterCore {
 		try {
 			event.fDocument.addPosition(category, highlightedPosition);
 		} catch (BadLocationException | BadPositionCategoryException e) {
-			Platform.getLog(this.getClass()).error("Error when adding new highlighting position to the document", e); //$NON-NLS-1$
+			ILog.of(this.getClass()).error("Error when adding new highlighting position to the document", e); //$NON-NLS-1$
 		}
 
 	}

@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.core.expressions.PropertyTester;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -181,7 +182,7 @@ public class CodeMiningTriggerTest {
 									}
 								}
 							} catch (Exception e) {
-								Platform.getLog(Platform.getBundle("org.eclipse.jdt.text.tests")).log(
+								ILog.of(Platform.getBundle("org.eclipse.jdt.text.tests")).log(
 									new Status(IStatus.ERROR, "org.eclipse.jdt.text.tests", e.getMessage(), e)
 								);
 								return false;

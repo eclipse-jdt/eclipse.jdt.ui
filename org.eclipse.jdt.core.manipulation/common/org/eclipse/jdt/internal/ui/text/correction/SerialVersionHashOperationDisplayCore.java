@@ -13,7 +13,7 @@
   *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.ILog;
 
 public class SerialVersionHashOperationDisplayCore {
 
@@ -24,7 +24,7 @@ public class SerialVersionHashOperationDisplayCore {
 	 *            The message to display
 	 */
 	public void displayErrorMessage(final String message) {
-		Platform.getLog(this.getClass()).error(message);
+		ILog.of(this.getClass()).error(message);
 	}
 
 	/**

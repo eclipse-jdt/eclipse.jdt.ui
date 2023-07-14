@@ -18,8 +18,8 @@ import org.osgi.framework.BundleContext;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 
@@ -99,11 +99,11 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	}
 
 	public static void log(Throwable e) {
-		Platform.getLog(JavaManipulationPlugin.class).log(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IStatusConstants.INTERNAL_ERROR, JavaManipulationMessages.JavaManipulationMessages_internalError, e));
+		ILog.of(JavaManipulationPlugin.class).log(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IStatusConstants.INTERNAL_ERROR, JavaManipulationMessages.JavaManipulationMessages_internalError, e));
 	}
 
 	public static void log(IStatus status) {
-		Platform.getLog(JavaManipulationPlugin.class).log(status);
+		ILog.of(JavaManipulationPlugin.class).log(status);
 	}
 
 	public static String getPluginId() {
