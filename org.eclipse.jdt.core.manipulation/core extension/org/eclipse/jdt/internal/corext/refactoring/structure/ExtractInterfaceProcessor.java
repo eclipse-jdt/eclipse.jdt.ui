@@ -663,7 +663,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			} else if (extended.isAnnotation()) {
 				annotation= (Annotation) extended;
 				ITypeBinding binding= annotation.resolveTypeBinding();
-				if (binding != null && "java.lang.Override".equals(binding.getQualifiedName()) || ! Bindings.isAnyNullAnnotation(binding, sourceProject)) //$NON-NLS-1$
+				if (binding != null && !"java.lang.Deprecated".equals(binding.getQualifiedName()) && ("java.lang.Override".equals(binding.getQualifiedName()) || ! Bindings.isAnyNullAnnotation(binding, sourceProject))) //$NON-NLS-1$ //$NON-NLS-2$
 					list.remove(annotation, null);
 			}
 		}
