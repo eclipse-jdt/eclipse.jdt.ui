@@ -1400,14 +1400,11 @@ public class RenameTypeTests extends GenericRefactoringTest {
 
 		ICompilationUnit newcu= getPackageP().getCompilationUnit(newName + ".java");
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newName)), newcu.getSource());
-		InputStreamReader reader= new InputStreamReader(file.getContents(true));
 		StringBuilder newContent= new StringBuilder();
-		try {
+		try (InputStreamReader reader= new InputStreamReader(file.getContents(true))) {
 			int ch;
-			while((ch= reader.read()) != -1)
-				newContent.append((char)ch);
-		} finally {
-			reader.close();
+			while ((ch= reader.read()) != -1)
+				newContent.append((char) ch);
 		}
 		String definedContent= getFileContents(getTestPath() + getName() + TEST_OUTPUT_INFIX + textFileName);
 		assertEqualLines("invalid updating", definedContent, newContent.toString());
@@ -1526,14 +1523,11 @@ public class RenameTypeTests extends GenericRefactoringTest {
 
 		helper3("SomeClass", "SomeDifferentClass", true, true, true, "test.html");
 
-		InputStreamReader reader= new InputStreamReader(file.getContents(true));
 		StringBuilder newContent= new StringBuilder();
-		try {
+		try (InputStreamReader reader= new InputStreamReader(file.getContents(true))) {
 			int ch;
 			while((ch= reader.read()) != -1)
 				newContent.append((char)ch);
-		} finally {
-			reader.close();
 		}
 		String definedContent= getFileContents(getTestPath() + "testSimilarElements05/out/test.html");
 		assertEqualLines("invalid updating test.html", newContent.toString(), definedContent);

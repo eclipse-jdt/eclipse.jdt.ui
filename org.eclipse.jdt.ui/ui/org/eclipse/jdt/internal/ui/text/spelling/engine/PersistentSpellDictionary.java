@@ -52,20 +52,18 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 		if (isCorrect(word))
 			return;
 
-		FileOutputStream fileStream= null;
-		try {
-			Charset charset= Charset.forName(getEncoding());
-			ByteBuffer byteBuffer= charset.encode(word + "\n"); //$NON-NLS-1$
-			int size= byteBuffer.limit();
-			final byte[] byteArray;
-			if (byteBuffer.hasArray())
-				byteArray= byteBuffer.array();
-			else {
-				byteArray= new byte[size];
-				byteBuffer.get(byteArray);
-			}
+		Charset charset= Charset.forName(getEncoding());
+		ByteBuffer byteBuffer= charset.encode(word + "\n"); //$NON-NLS-1$
+		int size= byteBuffer.limit();
+		final byte[] byteArray;
+		if (byteBuffer.hasArray())
+			byteArray= byteBuffer.array();
+		else {
+			byteArray= new byte[size];
+			byteBuffer.get(byteArray);
+		}
 
-			fileStream= new FileOutputStream(fLocation.getPath(), true);
+		try (FileOutputStream fileStream= new FileOutputStream(fLocation.getPath(), true)) {
 
 			// Encoding UTF-16 charset writes a BOM. In which case we need to cut it away if the file isn't empty
 			int bomCutSize= 0;
@@ -76,12 +74,6 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 		} catch (IOException exception) {
 			JavaPlugin.log(exception);
 			return;
-		} finally {
-			try {
-				if (fileStream != null)
-					fileStream.close();
-			} catch (IOException e) {
-			}
 		}
 
 		hashWord(word);

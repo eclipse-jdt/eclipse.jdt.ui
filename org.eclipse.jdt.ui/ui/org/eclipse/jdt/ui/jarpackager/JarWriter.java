@@ -40,12 +40,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * Creates a JAR file for the given JAR package data.
@@ -124,26 +124,13 @@ public class JarWriter {
 	 * 								in the status object.
 	 */
 	public void write(IFile resource, IPath destinationPath) throws CoreException {
-		ByteArrayOutputStream output= new ByteArrayOutputStream();
-		BufferedInputStream contentStream= null;
-		try {
-			contentStream= new BufferedInputStream(resource.getContents(false));
+		try (ByteArrayOutputStream output= new ByteArrayOutputStream();
+				BufferedInputStream contentStream= new BufferedInputStream(resource.getContents(false))) {
 			int chunkSize= 4096;
 			byte[] readBuffer= new byte[chunkSize];
 			int count;
 			while ((count= contentStream.read(readBuffer, 0, chunkSize)) != -1)
 				output.write(readBuffer, 0, count);
-		} catch (IOException ex) {
-			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
-		} finally {
-			try {
-				if (contentStream != null)
-					contentStream.close();
-			} catch (IOException ex) {
-				throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
-			}
-		}
-		try {
 			IPath fileLocation= resource.getLocation();
 			long lastModified= System.currentTimeMillis();
 			File file= null;

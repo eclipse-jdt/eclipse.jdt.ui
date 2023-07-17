@@ -16,9 +16,10 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,7 +62,7 @@ public class TextPerformanceTestCase extends TestCase {
 	}
 	static boolean DEBUG= false;
 
-	private static final SimpleDateFormat DATE_FORMAT= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.US);
+	private static final DateTimeFormatter DATE_FORMAT= DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.US).withZone(ZoneId.systemDefault());
 
 
 	/** containing plug-in id */
@@ -127,7 +128,7 @@ public class TextPerformanceTestCase extends TestCase {
 		EditorsUI.getPreferenceStore().putValue(SpellingService.PREFERENCE_SPELLING_ENABLED, IPreferenceStore.FALSE);
 
 		if (DEBUG)
-			System.out.println(DATE_FORMAT.format(new Date()) + ": " + getClass().getName() + "." + getName());
+			System.out.println(DATE_FORMAT.format(Instant.now()) + ": " + getClass().getName() + "." + getName());
 	}
 
 	/*

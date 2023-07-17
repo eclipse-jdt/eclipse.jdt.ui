@@ -155,23 +155,21 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 
 	private static int getFileLength(IFile file) throws CoreException {
 		// Cannot use file buffers here, since they are not yet in sync at this point.
-		InputStream contents= file.getContents();
-		InputStreamReader reader;
-		try {
-			reader= new InputStreamReader(contents, file.getCharset());
-		} catch (UnsupportedEncodingException e) {
-			JavaPlugin.log(e);
-			reader= new InputStreamReader(contents);
-		}
-		try {
-			return (int) reader.skip(Integer.MAX_VALUE);
+		try (InputStream contents= file.getContents()) {
+			InputStreamReader reader;
+			try {
+				reader= new InputStreamReader(contents, file.getCharset());
+			} catch (UnsupportedEncodingException e) {
+				JavaPlugin.log(e);
+				reader= new InputStreamReader(contents);
+			}
+			try {
+				return (int) reader.skip(Integer.MAX_VALUE);
+			} finally {
+				reader.close();
+			}
 		} catch (IOException e) {
 			throw new CoreException(new Status(IStatus.ERROR, Corext.getPluginId(), e.getMessage(), e));
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-			}
 		}
 	}
 

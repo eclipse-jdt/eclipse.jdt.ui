@@ -186,19 +186,12 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		for (IResource iResource : fClassFiles) {
 			IFile file= (IFile) iResource;
 			IClassFileReader reader= null;
-			InputStream content= null;
-			try {
-				content= file.getContents();
+			try (InputStream content= file.getContents()) {
 				reader= ToolFactory.createDefaultClassFileReader(content, IClassFileReader.CLASSFILE_ATTRIBUTES);
-			} finally {
-				try {
-					if (content != null)
-						content.close();
-				} catch (IOException e) {
-					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-						Messages.format(NewWizardMessages.ClassPathDetector_error_closing_file, BasicElementLabels.getPathLabel(file.getFullPath(), false)),
-						e));
-				}
+			} catch (IOException e) {
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+					Messages.format(NewWizardMessages.ClassPathDetector_error_closing_file, BasicElementLabels.getPathLabel(file.getFullPath(), false)),
+					e));
 			}
 			if (reader == null) {
 				continue; // problematic class file

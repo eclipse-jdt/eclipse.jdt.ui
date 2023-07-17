@@ -87,22 +87,10 @@ public class TemplateSet {
 	 * @see #addFromStream(InputStream, boolean)
 	 */
 	public void addFromFile(File file, boolean allowDuplicates) throws CoreException {
-		InputStream stream= null;
-
-		try {
-			stream= new FileInputStream(file);
+		try (InputStream stream= new FileInputStream(file)) {
 			addFromStream(stream, allowDuplicates);
-
 		} catch (IOException e) {
 			throwReadException(e);
-
-		} finally {
-			try {
-				if (stream != null)
-					stream.close();
-			} catch (IOException e) {
-				// just exit
-			}
 		}
 	}
 
@@ -202,22 +190,10 @@ public class TemplateSet {
 	 * @see #saveToStream(OutputStream)
 	 */
 	public void saveToFile(File file) throws CoreException {
-		OutputStream stream= null;
-
-		try {
-			stream= new FileOutputStream(file);
+		try (OutputStream stream= new FileOutputStream(file)) {
 			saveToStream(stream);
-
 		} catch (IOException e) {
 			throwWriteException(e);
-
-		} finally {
-			try {
-				if (stream != null)
-					stream.close();
-			} catch (IOException e) {
-				// just exit
-			}
 		}
 	}
 

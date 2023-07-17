@@ -41,6 +41,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jdt.junit.TestRunListener;
 
 import org.eclipse.core.runtime.Assert;
@@ -65,7 +66,6 @@ import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
-import org.eclipse.jdt.junit.ITestRunListener;
 
 /**
  * Central registry for JUnit test runs.
@@ -495,23 +495,12 @@ public final class JUnitModel {
 	 * @throws CoreException if an error occurred
 	 */
 	public static void exportTestRunSession(TestRunSession testRunSession, File file) throws CoreException {
-		FileOutputStream out= null;
-		try {
-			out= new FileOutputStream(file);
-            exportTestRunSession(testRunSession, out);
-
+		try (FileOutputStream out= new FileOutputStream(file)) {
+			exportTestRunSession(testRunSession, out);
 		} catch (IOException | TransformerConfigurationException e) {
 			throwExportError(file, e);
 		} catch (TransformerException e) {
 			throwExportError(file, e);
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException e2) {
-					JUnitCorePlugin.log(e2);
-				}
-			}
 		}
 	}
 
