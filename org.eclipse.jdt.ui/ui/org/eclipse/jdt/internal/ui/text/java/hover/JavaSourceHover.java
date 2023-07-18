@@ -165,6 +165,8 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			if (fVisibleRange == null) {
 				return false;
 			}
+			// do not show changes made to viewer document required only for semantic coloring job
+			fSourceViewer.getControl().setRedraw(false);
 
 			// replace viewer content (was fHoverInfo) with full content (for which semantic coloring will be prepared)
 			fSourceViewer.getDocument().set(fFullContent);
@@ -178,7 +180,12 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			fSourceViewer.setVisibleRegion(fVisibleRange.getOffset(), fVisibleRange.getLength());
 		}
 
-		public abstract void postSemanticColoring();
+		public final void postSemanticColoring() {
+			doPostSemanticColoring();
+			fSourceViewer.getControl().setRedraw(true);
+		}
+
+		public abstract void doPostSemanticColoring();
 	}
 
 	/**
@@ -220,7 +227,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		}
 
 		@Override
-		public void postSemanticColoring() {
+		public void doPostSemanticColoring() {
 			if (fTrimRegions == null) {
 				return;
 			}
@@ -310,8 +317,8 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		}
 
 		@Override
-		public void postSemanticColoring() {
-			super.postSemanticColoring();
+		public void doPostSemanticColoring() {
+			super.doPostSemanticColoring();
 
 			// apply skipped lines substitutions
 			if (fKeptLines != null && !fKeptLines.isEmpty()) {
@@ -368,12 +375,14 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		public boolean prepareSemanticColoring(SourceViewer sourceViewer) {
 			// replace text and set visible region
 			super.prepareSemanticColoring(sourceViewer);
+			// enable redraw
+			postSemanticColoring();
 			// don't trigger semantic coloring job since viewer already renders the content with proper color
 			return false;
 		}
 
 		@Override
-		public void postSemanticColoring() {
+		public void doPostSemanticColoring() {
 			// no-op
 		}
 	}

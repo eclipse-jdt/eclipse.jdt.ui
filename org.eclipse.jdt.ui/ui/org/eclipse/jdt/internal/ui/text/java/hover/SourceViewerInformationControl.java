@@ -149,8 +149,6 @@ public class SourceViewerInformationControl
 	private volatile JavaSourceSemanticInformationInput fJavaSourceSemanticInformationInput;
 	/** Root element passed to semantic highlighting reconciler */
 	private volatile ITypeRoot fHoverElementTypeRoot;
-	/** Visibility status to apply after semantic coloring is finished */
-	private volatile boolean fDelayedVisible;
 
 	/**
 	 * Creates a source viewer information control with the given shell as parent. The given
@@ -440,14 +438,12 @@ public class SourceViewerInformationControl
 	 */
 	@Override
 	public void setVisible(boolean visible) {
-		fDelayedVisible= visible;
+		fShell.setVisible(visible);
 		// at this moment viewer size is already computed from final text (getHoverInfo()) that will be displayed in viewer,
 		// so we can now replace content (done inside prepareSemanticColoring()) in preparation for semantic coloring
 		if (visible && fJavaSourceSemanticInformationInput != null && fJavaSourceSemanticInformationInput.prepareSemanticColoring(fViewer)) {
 			fSemanticHighlightingManager.getReconciler().refresh(); // triggers semantic coloring job
 			fHoverElementTypeRoot= null; // not needed once job is triggered
-		} else {
-			fShell.setVisible(visible);
 		}
 	}
 
@@ -729,13 +725,15 @@ public class SourceViewerInformationControl
 				@Override
 				public Runnable createUpdateRunnable(TextPresentation textPresentation, List<Position> addedPositions, List<Position> removedPositions) {
 					Runnable parentRunnable= super.createUpdateRunnable(textPresentation, addedPositions, removedPositions);
-					if (parentRunnable == null || fJavaSourceSemanticInformationInput == null || !fDelayedVisible) {
+					if (parentRunnable == null || fJavaSourceSemanticInformationInput == null) {
 						return null;
 					}
 					return () -> {
+						if (!fShell.isVisible()) {
+							return;
+						}
 						parentRunnable.run(); // applies semantic highlighting
 						fJavaSourceSemanticInformationInput.postSemanticColoring(); // then modifies source viewer content (preserving highlighting)
-						fShell.setVisible(true); // then show source viewer
 					};
 				}
 			};
