@@ -376,9 +376,7 @@ public final class JarImportWizardPage extends WizardPage {
 						setPageComplete(true);
 						return;
 					}
-					InputStream stream= null;
-					try {
-						stream= zip.getInputStream(entry);
+					try (InputStream stream= zip.getInputStream(entry)) {
 						data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING));
 					} catch (IOException exception) {
 						setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
@@ -389,14 +387,6 @@ public final class JarImportWizardPage extends WizardPage {
 						setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 						setPageComplete(false);
 						return;
-					} finally {
-						if (stream != null) {
-							try {
-								stream.close();
-							} catch (IOException exception) {
-								// Do nothing
-							}
-						}
 					}
 				} finally {
 					if (zip != null) {

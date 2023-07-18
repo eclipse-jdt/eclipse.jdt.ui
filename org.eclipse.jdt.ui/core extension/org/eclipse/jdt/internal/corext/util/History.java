@@ -168,19 +168,10 @@ public abstract class History<K, V> {
 		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(fFileName);
 		File file= stateLocation.toFile();
 		if (file.exists()) {
-			InputStreamReader reader= null;
-	        try {
-				reader = new InputStreamReader(new FileInputStream(file), "utf-8");//$NON-NLS-1$
+			try (InputStreamReader reader= new InputStreamReader(new FileInputStream(file), "utf-8")) {//$NON-NLS-1$
 				load(new InputSource(reader));
 			} catch (IOException | CoreException e) {
 				JavaPlugin.log(e);
-			} finally {
-				try {
-					if (reader != null)
-						reader.close();
-				} catch (IOException e) {
-					JavaPlugin.log(e);
-				}
 			}
 		}
 	}
@@ -188,22 +179,12 @@ public abstract class History<K, V> {
 	public synchronized void save() {
 		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(fFileName);
 		File file= stateLocation.toFile();
-		OutputStream out= null;
-		try {
-			out= new FileOutputStream(file);
+		try (OutputStream out= new FileOutputStream(file)) {
 			save(out);
 		} catch (IOException | CoreException | TransformerFactoryConfigurationError e) {
 			// The XML library can be misconficgured (e.g. via
 			// -Djava.endorsed.dirs=C:\notExisting\xerces-2_7_1)
 			JavaPlugin.log(e);
-		} finally {
-			try {
-				if (out != null) {
-					out.close();
-				}
-			} catch (IOException e) {
-				JavaPlugin.log(e);
-			}
 		}
 	}
 

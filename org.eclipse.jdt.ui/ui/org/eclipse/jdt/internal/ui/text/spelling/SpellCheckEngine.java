@@ -427,13 +427,10 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 					return;
 
 				final URL url= new URL("file", null, filePath); //$NON-NLS-1$
-				InputStream stream= url.openStream();
-				if (stream != null) {
-					try {
+				try (InputStream stream= url.openStream()) {
+					if (stream != null) {
 						fUserDictionary= new PersistentSpellDictionary(url);
 						fChecker.addDictionary(fUserDictionary);
-					} finally {
-						stream.close();
 					}
 				}
 			} catch (IOException exception) {
