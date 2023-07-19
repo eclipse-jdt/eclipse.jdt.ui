@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -67,6 +68,12 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			} finally {
 				fFlowContext.setLoopReentranceMode(false);
 			}
+		}
+		@Override
+		public void endVisit(BreakStatement node) {
+			if (node.getStartPosition() + node.getLength() <= fSelection.getExclusiveEnd())
+				return;
+			super.endVisit(node);
 		}
 		@Override
 		public void endVisit(DoStatement node) {

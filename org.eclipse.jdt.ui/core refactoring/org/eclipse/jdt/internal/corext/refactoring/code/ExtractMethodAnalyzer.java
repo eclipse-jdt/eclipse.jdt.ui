@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -646,7 +646,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		outer: for (int i= 0; i < returnValues.length && localReads.size() < returnValues.length; i++) {
 			IVariableBinding binding= returnValues[i];
 			for (IVariableBinding read : reads) {
-				if (read == binding) {
+				if (read.isEqualTo(binding)) {
 					localReads.add(binding);
 					fReturnValue= binding;
 					continue outer;
