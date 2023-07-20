@@ -35,7 +35,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -116,6 +115,7 @@ import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.AccessRulesDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
@@ -559,7 +559,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		protected static void saveLibraries(List<CPUserLibraryElement> libraries, File file, String encoding, IProgressMonitor monitor) throws IOException {
 			OutputStream stream= new FileOutputStream(file);
 			try {
-				DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+				DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 				factory.setValidating(false);
 				DocumentBuilder docBuilder= factory.newDocumentBuilder();
 				Document document= docBuilder.newDocument();
@@ -613,7 +613,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				}
 
 				// Write the document to the stream
-				Transformer transformer=TransformerFactory.newInstance().newTransformer();
+				Transformer transformer= XmlProcessorFactoryJdtUi.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 				transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 				transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
@@ -640,7 +640,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			InputStream stream= new FileInputStream(file);
 			Element cpElement;
 			try {
-				DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+				DocumentBuilder parser = XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE().newDocumentBuilder();
 				parser.setErrorHandler(new DefaultHandler());
 				cpElement = parser.parse(new InputSource(stream)).getDocumentElement();
 			} catch (SAXException | ParserConfigurationException e) {
