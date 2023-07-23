@@ -17,6 +17,8 @@
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by Identifying the Side Effect of Selected Expression. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -124,6 +126,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
@@ -190,73 +193,48 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 	}
 
-	private static final class IdenticalLocalVariableNameVisitor extends ASTVisitor {
-		private String identicalName;
+	private static final class LocalVariableWithIdenticalExpressionFinder extends ASTVisitor {
+		private ArrayList<String> usedNames;
 
 		private ASTNode expression;
 
-		public IdenticalLocalVariableNameVisitor(ASTNode expression) {
-			identicalName= null;
+		private Boolean ifStopOnFirstMatch;
+
+
+		public LocalVariableWithIdenticalExpressionFinder(ASTNode expression, Boolean ifStopOnFirstMatch) {
+			usedNames= new ArrayList<>();
 			this.expression= expression;
+			this.ifStopOnFirstMatch= ifStopOnFirstMatch;
 		}
 
-		public String getIdenticalName() {
-			return this.identicalName;
+		public String getUsedName() {
+			return this.usedNames.get(0);
 		}
 
-		public void setIdenticalName(String identicalName) {
-			this.identicalName= identicalName;
+		public ArrayList<String> getUsedNames() {
+			return this.usedNames;
+		}
+
+		public void setUsedName(String usedName) {
+			this.usedNames.add(usedName);
 		}
 
 		@Override
 		public boolean visit(VariableDeclarationStatement node) {
 			for (Object obj : node.fragments()) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment) obj;
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment)obj;
 				if (fragment.getInitializer() != null) {
 					Expression initializer= fragment.getInitializer();
 					if (initializer.subtreeMatch(new ASTMatcher(), this.expression)) {
-						setIdenticalName(fragment.getName().toString());
-						return false;
+						setUsedName(fragment.getName().toString());
+						if (this.ifStopOnFirstMatch.booleanValue())
+							throw new AbortSearchException();
 					}
 				}
 			}
 			return true;
 		}
 	}
-
-	private static final class IdenticalLocalVariableNameInMethodVisitor extends ASTVisitor {
-		private ArrayList<String> identicalNames;
-
-		private ASTNode expression;
-
-		public IdenticalLocalVariableNameInMethodVisitor(ASTNode expression) {
-			identicalNames= new ArrayList<>();
-			this.expression= expression;
-		}
-
-		public ArrayList<String> getIdenticalNames() {
-			return this.identicalNames;
-		}
-
-		public void setIdenticalNames(String identicalName) {
-			this.identicalNames.add(identicalName);
-		}
-
-		@Override
-		public boolean visit(VariableDeclarationStatement node) {
-			for (Object obj : node.fragments()) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment) obj;
-				if (fragment.getInitializer() != null) {
-					Expression initializer= fragment.getInitializer();
-					if (initializer.subtreeMatch(new ASTMatcher(), this.expression)) {
-						setIdenticalNames(fragment.getName().toString());
-					}
-				}
-			}
-			return true;
-		}
-	}
-
 
 
 	private static boolean allArraysEqual(ASTNode[][] arrays, int position) {
@@ -268,6 +246,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 		return true;
 	}
+
 
 	private static boolean canReplace(IASTFragment fragment) {
 		ASTNode node= fragment.getAssociatedNode();
@@ -849,43 +828,46 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	/**
-	 * Retrieves used names for the whole compilation unit that contains node.
+	 * Retrieves a used name in the whole compilation unit that is assigned with the same
+	 * expression.
 	 *
 	 * @param selected the selected node
 	 *
-	 * @return an array of used variable names for recommending new names.
+	 * @return a used variable name for recommending new names.
 	 */
-	private String getUsedIdenticalName(ASTNode selected) {
+	private String getUsedNameForIdenticalExpressionInCu(ASTNode selected) {
 		ASTNode surroundingBlock= selected;
-		while ((surroundingBlock= surroundingBlock.getParent()) != null) {
-			if (surroundingBlock instanceof CompilationUnit) {
-				break;
-			}
-		}
+		surroundingBlock= ASTNodes.getFirstAncestorOrNull(surroundingBlock, CompilationUnit.class);
 		if (surroundingBlock == null) {
 			return null;
 		}
-		CompilationUnit cu= (CompilationUnit)surroundingBlock;
-		IdenticalLocalVariableNameVisitor localVariableNameVisitor= new IdenticalLocalVariableNameVisitor(selected);
-		cu.accept(localVariableNameVisitor);
-		String identicalName= localVariableNameVisitor.getIdenticalName();
-		return identicalName;
+		LocalVariableWithIdenticalExpressionFinder localVariableWithIdenticalExpressionFinder= new LocalVariableWithIdenticalExpressionFinder(selected, Boolean.TRUE);
+		String usedNameForIdenticalExpressionInCu= null;
+		try {
+			surroundingBlock.accept(localVariableWithIdenticalExpressionFinder);
+		} catch (AbortSearchException e) {
+			usedNameForIdenticalExpressionInCu= localVariableWithIdenticalExpressionFinder.getUsedName();
+		}
+		return usedNameForIdenticalExpressionInCu;
 	}
 
-	private Collection<String> getDeclaredNames(ASTNode selected) {
+	/**
+	 * Retrieves used names in the method declaration that is assigned with the same expression.
+	 *
+	 * @param selected the selected node
+	 *
+	 * @return an array of used variable names for avoiding conflicts.
+	 */
+	private Collection<String> getUsedNameForIdenticalExpressionInMethod(ASTNode selected) {
 		ASTNode surroundingBlock= selected;
-		while ((surroundingBlock= surroundingBlock.getParent()) != null) {
-			if (surroundingBlock instanceof MethodDeclaration) {
-				break;
-			}
-		}
+		surroundingBlock= ASTNodes.getFirstAncestorOrNull(surroundingBlock, MethodDeclaration.class);
 		if (surroundingBlock == null) {
 			return new ArrayList<>();
 		}
-		IdenticalLocalVariableNameInMethodVisitor identicalLocalVariableNameInMethodVisitor= new IdenticalLocalVariableNameInMethodVisitor(selected);
-		surroundingBlock.accept(identicalLocalVariableNameInMethodVisitor);
-		List<String> identicalNames= identicalLocalVariableNameInMethodVisitor.getIdenticalNames();
-		return identicalNames;
+		LocalVariableWithIdenticalExpressionFinder localVariableWithIdenticalExpressionFinder= new LocalVariableWithIdenticalExpressionFinder(selected, Boolean.FALSE);
+		surroundingBlock.accept(localVariableWithIdenticalExpressionFinder);
+		List<String> UsedNameForIdenticalExpressionInMethod= localVariableWithIdenticalExpressionFinder.getUsedNames();
+		return UsedNameForIdenticalExpressionInMethod;
 	}
 
 
@@ -1498,10 +1480,10 @@ public class ExtractTempRefactoring extends Refactoring {
 				Expression expression= getSelectedExpression().getAssociatedExpression();
 				if (expression != null) {
 					ITypeBinding binding= guessBindingForReference(expression);
-					String identicalName= getUsedIdenticalName(fSelectedExpression.getAssociatedNode());
-					Collection<String> namesInSameMethod= getDeclaredNames(fSelectedExpression.getAssociatedNode());
+					String usedNameForIdenticalExpressionInCu= getUsedNameForIdenticalExpressionInCu(fSelectedExpression.getAssociatedNode());
+					Collection<String> usedNamesForIdenticalExpressionInMethod= getUsedNameForIdenticalExpressionInMethod(fSelectedExpression.getAssociatedNode());
 					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()),
-							identicalName, namesInSameMethod);
+							usedNameForIdenticalExpressionInCu, usedNamesForIdenticalExpressionInMethod);
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);

@@ -11,7 +11,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
- *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.manipulation;
 
@@ -1052,7 +1053,7 @@ public class StubUtility {
 	}
 
 	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection<String> excluded,
-			String identicalName, Collection<String> namesInSameMethod) {
+			String usedNameForIdenticalExpressionInCu, Collection<String> usedNamesForIdenticalExpressionInMethod) {
 		LinkedHashSet<String> res= new LinkedHashSet<>(); // avoid duplicates but keep order
 
 		String typeName= null;
@@ -1071,12 +1072,18 @@ public class StubUtility {
 			}
 		}
 
-		String recycledName= recycleNames(typeName, assignedExpression, excluded, identicalName, namesInSameMethod);
-		if (recycledName != null) {
-			add(getVariableNameSuggestions(variableKind, project, recycledName, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
-		}
-
+		boolean isTypeAvailable= typeName != null && typeName.length() > 0;
 		if (assignedExpression != null) {
+			if (isTypeAvailable) {
+				if (assignedExpression instanceof MethodInvocation) {
+					// if we have a method invocation, see if we can recycle some previously used variable name that is assigned with the same expression.
+					String recycledName= recycleNames(typeName, assignedExpression, excluded, usedNameForIdenticalExpressionInCu, usedNamesForIdenticalExpressionInMethod);
+					if (recycledName != null) {
+						add(getVariableNameSuggestions(variableKind, project, recycledName, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
+					}
+				}
+			}
+
 			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, variableKind);
 			if (nameFromExpression != null) {
 				add(getVariableNameSuggestions(variableKind, project, nameFromExpression, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
@@ -1088,7 +1095,7 @@ public class StubUtility {
 			}
 		}
 
-		if (typeName != null && typeName.length() > 0) {
+		if (isTypeAvailable) {
 			add(getVariableNameSuggestions(variableKind, project, typeName, dim, excluded, false), res);
 		}
 
@@ -1100,37 +1107,26 @@ public class StubUtility {
 	}
 
 	private static String recycleNames(String typeName, Expression assignedExpression, Collection<String> excluded,
-			String identicalName, Collection<String> namesInSameMethod) {
-		if (typeName != null && typeName.length() > 0) {
-			if (assignedExpression != null && assignedExpression instanceof MethodInvocation) {
-				MethodInvocation methodInvocation= (MethodInvocation)assignedExpression;
-				String name= methodInvocation.getName().getIdentifier();
-				if (!name.toLowerCase().contains(typeName.toLowerCase())) {
-					List<Expression> arguments= methodInvocation.arguments();
-					List<Integer> argumentTypes= new ArrayList<>();
-					for (Expression argument : arguments)
-						argumentTypes.add(Integer.valueOf(argument.getNodeType()));
-					if (arguments.size() > 1 || argumentTypes.contains(Integer.valueOf(ASTNode.METHOD_INVOCATION))) {
-						String recycledName= recycleNames(excluded, identicalName, namesInSameMethod);
-						return recycledName;
-					}
+			String usedNameForIdenticalExpressionInCu, Collection<String> usedNamesForIdenticalExpressionInMethod) {
+
+		MethodInvocation methodInvocation= (MethodInvocation)assignedExpression;
+		String name= methodInvocation.getName().getIdentifier();
+		if (!name.toLowerCase().contains(typeName.toLowerCase())) {
+			List<Expression> arguments= methodInvocation.arguments();
+			List<Integer> argumentTypes= new ArrayList<>();
+			for (Expression argument : arguments)
+				argumentTypes.add(Integer.valueOf(argument.getNodeType()));
+			if (arguments.size() > 1 || argumentTypes.contains(Integer.valueOf(ASTNode.METHOD_INVOCATION))) {
+				if (usedNameForIdenticalExpressionInCu != null) {
+					if (excluded.contains(usedNameForIdenticalExpressionInCu) || usedNamesForIdenticalExpressionInMethod.contains(usedNameForIdenticalExpressionInCu))
+						return null;
+					else
+						return usedNameForIdenticalExpressionInCu;
 				}
 			}
-
 		}
+
 		return null;
-	}
-
-	private static String recycleNames(Collection<String> excludedNames, String identicalName, Collection<String> namesInSameMethod) {
-
-		if (identicalName != null) {
-			if (excludedNames.contains(identicalName) || namesInSameMethod.contains(identicalName))
-				return null;
-			else
-				return identicalName;
-		}
-		return null;
-
 	}
 
 
