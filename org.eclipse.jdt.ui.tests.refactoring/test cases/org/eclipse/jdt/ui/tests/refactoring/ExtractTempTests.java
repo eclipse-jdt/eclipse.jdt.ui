@@ -16,7 +16,8 @@
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by Identifying the Side Effect of Selected Expression. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
- *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -26,20 +27,25 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Hashtable;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class ExtractTempTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "ExtractTemp/";
@@ -97,7 +103,6 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength());
-
 		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful", activationResult.isOK());
 
@@ -105,7 +110,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		ref.setDeclareFinal(makeFinal);
 		ref.setTempName(tempName);
 
-		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
+		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempNameWithContext());
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
@@ -132,7 +137,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		ref.setDeclareFinal(makeFinal);
 		ref.setTempName(tempName);
 
-		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempName());
+		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempNameWithContext());
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 		assertEquals("status", expectedStatus, checkInputResult.getSeverity());
@@ -1061,6 +1066,19 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=573643
 		helper1(11, 13, 11, 32, true, false, "lowerCase", "lowerCase");
 	}
+
+	@Test
+	public void test157() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
+		helper1(29, 28, 29, 71, true, false, "bootVersion", "bootVersion");
+	}
+
+	@Test
+	public void test158() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
+		helper1(17, 28, 17, 71, true, false, "safeParse", "safeParse");
+	}
+
 
 	@Test
 	public void testZeroLengthSelection0() throws Exception {
