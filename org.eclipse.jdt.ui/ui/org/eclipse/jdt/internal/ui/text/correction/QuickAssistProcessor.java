@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -87,7 +88,9 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IDocElement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -96,15 +99,18 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -126,6 +132,8 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -154,6 +162,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
@@ -183,6 +192,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoringCore;
@@ -336,7 +346,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getDoWhileRatherThanWhileProposal(context, coveringNode, null)
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
 					|| getAddStaticMemberFavoritesProposals(coveringNode, null)
-					|| getSplitSwitchLabelProposal(context, coveringNode, null);
+					|| getSplitSwitchLabelProposal(context, coveringNode, null)
+					|| getDeprecatedProposal(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -410,6 +421,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
+				getDeprecatedProposal(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -610,6 +622,113 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	@SuppressWarnings("unused")
+	private static boolean getDeprecatedProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals) {
+		if (!(node instanceof MethodInvocation)) {
+			node= node.getParent();
+			if (!(node instanceof MethodInvocation)) {
+				return false;
+			}
+		}
+		MethodInvocation methodInvocation= (MethodInvocation) node;
+		IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+		IMethod method= (IMethod)methodBinding.getJavaElement();
+		if (method == null) {
+			return false;
+		}
+		IAnnotationBinding[] annotations= methodBinding.getAnnotations();
+		for (IAnnotationBinding annotation : annotations) {
+			if (annotation.getAnnotationType().getQualifiedName().equals("java.lang.Deprecated")) { //$NON-NLS-1$
+				CompilationUnit cu= (CompilationUnit)node.getRoot();
+				try {
+					MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cu);
+					Javadoc javadoc= methodDeclaration.getJavadoc();
+					List<TagElement> tags= javadoc.tags();
+					List<Expression> parmList= new ArrayList<>();
+					for (TagElement tag : tags) {
+						if (tag.getTagName().equals("@deprecated")) { //$NON-NLS-1$
+							List<IDocElement> fragments= tag.fragments();
+							if (fragments.size() < 2) {
+								return false;
+							}
+							if (fragments.get(0) instanceof TextElement textElement) {
+								String text= textElement.getText().toLowerCase().trim();
+								if (text.endsWith("use") || text.endsWith("replace by")) { //$NON-NLS-1$ //$NON-NLS-2$
+									if (fragments.get(1) instanceof TagElement tagElement) {
+										if (tagElement.getTagName().equals("@link")) { //$NON-NLS-1$
+											List<IDocElement> linkFragments= tagElement.fragments();
+											if (linkFragments.size() == 1) {
+												IDocElement linkFragment= linkFragments.get(0);
+												if (linkFragment instanceof MethodRef methodRef) {
+													IMethodBinding refBinding= (IMethodBinding) methodRef.resolveBinding();
+													if (refBinding != null) {
+														ASTVisitor findNewMethodVisitor= new ASTVisitor() {
+															@Override
+															public boolean visit(MethodInvocation node) {
+																IMethodBinding binding= node.resolveMethodBinding();
+																if (binding != null) {
+																	if (binding.isEqualTo(refBinding)) {
+																		List<SingleVariableDeclaration> methodParmNames= methodDeclaration.parameters();
+																		List<Expression> deprecatedArgs= methodInvocation.arguments();
+																		List<Expression> args= node.arguments();
+																		for (int i= 0; i < args.size(); ++i) {
+																			Expression argExp= args.get(i);
+																			if (argExp instanceof SimpleName argName) {
+																				for (int j= 0; j < methodParmNames.size(); ++j) {
+																					if (methodParmNames.get(j).getName().getFullyQualifiedName().equals(argName.getFullyQualifiedName())) {
+																						parmList.add(deprecatedArgs.get(j));
+																						break;
+																					}
+																				}
+																			} else if (argExp instanceof NullLiteral nullLiteral) {
+																				parmList.add(nullLiteral);
+																			} else if (argExp instanceof ThisExpression thisExpression) {
+																				parmList.add(thisExpression);																			throw new AbortSearchException();
+																			} else {
+																				throw new AbortSearchException();
+																			}
+																		}
+																		return false;
+																	} else {
+																		String bindingName= binding.getName();
+																		ITypeBinding bindingClass= binding.getDeclaringClass();
+																		if (bindingClass != null && bindingClass.getQualifiedName().equals("System.out")) { //$NON-NLS-1$
+																			return false;
+																		}
+																	}
+																}
+																parmList.clear();
+																throw new AbortSearchException();
+															}
+														};
+														try {
+															methodDeclaration.accept(findNewMethodVisitor);
+														} catch (AbortSearchException e) {
+															// ignore
+														}
+														if (parmList.size() != refBinding.getParameterNames().length) {
+															return false;
+														}
+														break;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				} catch (JavaModelException e) {
+					// ignore
+				}
+			}
+		}
+		return false;
+	}
 
 	private static boolean getConvertAnonymousToNestedProposal(IInvocationContext context, final ASTNode node, Collection<ICommandAccess> proposals) throws CoreException {
 		if (!(node instanceof Name))
