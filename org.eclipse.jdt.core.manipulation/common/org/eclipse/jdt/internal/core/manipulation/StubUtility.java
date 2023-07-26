@@ -1219,7 +1219,8 @@ public class StubUtility {
 	}
 
 
-	private static final String[] KNOWN_METHOD_NAME_PREFIXES= { "get", "is", "to" }; //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-1$
+	private static final String[] KNOWN_METHOD_NAME_PREFIXES= { "get", "is", "to", "create", "load", "find", "list", "open", "build", "generate", "aggregate", "obtain", "read", "write", "make", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$//$NON-NLS-7$//$NON-NLS-8$//$NON-NLS-9$//$NON-NLS-10$//$NON-NLS-11$//$NON-NLS-12$//$NON-NLS-13$//$NON-NLS-14$//$NON-NLS-15$
+			"fetch", "calculate", "calc", "as", "extract", "clone", "compute" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 
 
 	private static void add(String[] names, Set<String> result) {
