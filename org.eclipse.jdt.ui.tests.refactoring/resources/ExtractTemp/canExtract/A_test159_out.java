@@ -10,6 +10,7 @@ public class A extends RelOptCost{
 		RelOptCost computeSelfCost= super.computeSelfCost(a1, b1);
 		return computeSelfCost.multiplyBy(1);
 	}
+
 }
 
 class A1 extends RelOptCost{
