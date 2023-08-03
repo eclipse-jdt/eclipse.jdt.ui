@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManagerCore;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 /**
@@ -95,6 +96,129 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
  * @since 1.10
  */
 public final class StubUtility2Core {
+
+	/* This method should work with all AST levels. */
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context,
+			IMethodBinding binding, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface, ASTNode astNode) throws CoreException {
+		return createImplementationStub(unit, rewrite, imports, context, binding, null, targetType, settings, inInterface, astNode);
+	}
+
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context,
+			IMethodBinding binding, String[] parameterNames, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface, ASTNode astNode) throws CoreException {
+		Assert.isNotNull(imports);
+		Assert.isNotNull(rewrite);
+
+		AST ast= rewrite.getAST();
+		String type= Bindings.getTypeQualifiedName(targetType);
+
+		IJavaProject javaProject= unit.getJavaProject();
+		EnumSet<TypeLocation> nullnessDefault= null;
+		if (astNode != null && JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true)))
+			nullnessDefault= RedundantNullnessTypeAnnotationsFilter.determineNonNullByDefaultLocations(astNode, RedundantNullnessTypeAnnotationsFilter.determineNonNullByDefaultNames(javaProject));
+
+		MethodDeclaration decl= ast.newMethodDeclaration();
+		decl.modifiers().addAll(StubUtility2Core.getImplementationModifiers(ast, binding, inInterface, imports, context, nullnessDefault));
+
+		decl.setName(ast.newSimpleName(binding.getName()));
+		decl.setConstructor(false);
+
+		ITypeBinding bindingReturnType= binding.getReturnType();
+		bindingReturnType = StubUtility2Core.replaceWildcardsAndCaptures(bindingReturnType);
+
+		if (JavaModelUtil.is50OrHigher(javaProject)) {
+			StubUtility2Core.createTypeParameters(imports, context, ast, binding, decl);
+
+		} else {
+			bindingReturnType= bindingReturnType.getErasure();
+		}
+
+		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context, TypeLocation.RETURN_TYPE));
+
+		List<SingleVariableDeclaration> parameters= StubUtility2Core.createParameters(javaProject, imports, context, ast, binding, parameterNames, decl, nullnessDefault);
+
+		StubUtility2Core.createThrownExceptions(decl, binding, imports, context, ast);
+
+		String delimiter= unit.findRecommendedLineSeparator();
+		int modifiers= binding.getModifiers();
+		ITypeBinding declaringType= binding.getDeclaringClass();
+		ITypeBinding typeObject= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is1d8OrHigher(javaProject))) {
+			// generate a method body
+
+			Map<String, String> options= FormatterProfileManagerCore.getProjectSettings(javaProject);
+
+			Block body= ast.newBlock();
+			decl.setBody(body);
+
+			String bodyStatement= ""; //$NON-NLS-1$
+			if (Modifier.isAbstract(modifiers)) {
+				Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), bindingReturnType, decl.getExtraDimensions());
+				if (expression != null) {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expression);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
+				}
+			} else {
+				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
+				if (declaringType.isInterface()) {
+					ITypeBinding supertype= Bindings.findImmediateSuperTypeInHierarchy(targetType, declaringType.getTypeDeclaration().getQualifiedName());
+					if (supertype == null) { // should not happen, but better use the type we have rather than failing
+						supertype= declaringType;
+					}
+					if (supertype.isInterface()) {
+						String qualifier= imports.addImport(supertype.getTypeDeclaration(), context);
+						Name name= ASTNodeFactory.newName(ast, qualifier);
+						invocation.setQualifier(name);
+					}
+				}
+				invocation.setName(ast.newSimpleName(binding.getName()));
+				SingleVariableDeclaration varDecl= null;
+				for (Iterator<SingleVariableDeclaration> iterator= parameters.iterator(); iterator.hasNext();) {
+					varDecl= iterator.next();
+					invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
+				}
+				Expression expression= invocation;
+				Type returnType= decl.getReturnType2();
+				if (returnType instanceof PrimitiveType && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
+					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter, options);
+				} else {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expression);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
+				}
+			}
+
+			String placeHolder= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), false, bodyStatement, delimiter);
+			if (placeHolder != null) {
+				ReturnStatement todoNode= (ReturnStatement) rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
+				body.statements().add(todoNode);
+			}
+		}
+
+		if (settings != null && settings.createComments) {
+			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
+			if (string != null) {
+				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
+				decl.setJavadoc(javadoc);
+			}
+		}
+
+		// According to JLS8 9.2, an interface doesn't implicitly declare non-public members of Object,
+		// and JLS8 9.6.4.4 doesn't allow @Override for these methods (clone and finalize).
+		boolean skipOverride= inInterface && declaringType == typeObject && !Modifier.isPublic(modifiers);
+
+		if (!skipOverride) {
+			StubUtility2Core.addOverrideAnnotation(settings, javaProject, rewrite, imports, decl, binding.getDeclaringClass().isInterface(), null);
+		}
+
+		return decl;
+	}
+
+
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type, int modifiers, boolean omitSuperForDefConst, boolean todo, CodeGenerationSettings settings) throws CoreException {
+		return StubUtility2Core.createConstructorStub(unit, rewrite, imports, context, binding, type, modifiers, omitSuperForDefConst, todo, settings, FormatterProfileManagerCore.getProjectSettings(unit.getJavaProject()));
+	}
+
 
 	/* This method should work with all AST levels. */
 	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type,
