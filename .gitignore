@@ -9,3 +9,6 @@ Snap.*
 # maven
 /*/target/
 .DS_Store
+org.eclipse.jdt.ui.examples.projects/archive/junit/org.eclipse.jdt.ui.junit.sampleproject-*.jar
+org.eclipse.jdt.ui.examples.projects/jdtexamples.jar
+
