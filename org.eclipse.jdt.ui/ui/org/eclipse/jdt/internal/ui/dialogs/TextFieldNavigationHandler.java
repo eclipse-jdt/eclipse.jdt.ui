@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.ui.dialogs;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ibm.icu.text.BreakIterator;
+import java.text.BreakIterator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;

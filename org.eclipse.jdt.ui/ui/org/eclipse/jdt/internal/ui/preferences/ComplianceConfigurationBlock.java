@@ -21,7 +21,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import com.ibm.icu.text.MessageFormat;
+import java.text.MessageFormat;
 
 import org.osgi.service.prefs.Preferences;
 

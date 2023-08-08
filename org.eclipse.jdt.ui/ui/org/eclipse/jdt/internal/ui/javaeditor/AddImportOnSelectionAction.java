@@ -18,7 +18,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 
-import com.ibm.icu.text.Collator;
+import java.text.Collator;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;

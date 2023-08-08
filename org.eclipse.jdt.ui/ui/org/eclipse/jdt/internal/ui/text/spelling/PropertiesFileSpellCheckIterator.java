@@ -15,7 +15,7 @@ package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.util.Locale;
 
-import com.ibm.icu.text.BreakIterator;
+import java.text.BreakIterator;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 

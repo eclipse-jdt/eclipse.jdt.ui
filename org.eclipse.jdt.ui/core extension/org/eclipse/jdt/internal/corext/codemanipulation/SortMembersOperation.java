@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.Comparator;
 import java.util.List;
 
-import com.ibm.icu.text.Collator;
+import java.text.Collator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
