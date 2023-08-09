@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
@@ -160,7 +160,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 			}
 			if (methodToOverride != null) {
 				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fCompilationUnit);
-				MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), astNode);
+				MethodDeclaration stub= StubUtility2Core.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), astNode);
 				ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 				rewriter.insertFirst(stub, null);
 

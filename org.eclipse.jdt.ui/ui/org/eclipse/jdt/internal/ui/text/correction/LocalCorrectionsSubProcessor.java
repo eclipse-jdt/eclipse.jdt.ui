@@ -134,7 +134,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.NecessaryParenthesesChecke
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -2374,7 +2374,7 @@ public class LocalCorrectionsSubProcessor {
 
 		try {
 			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(astRoot, problem.getOffset(), importRewrite);
-			MethodDeclaration hashCode= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importContext, superHashCode, binding, settings, false, null);
+			MethodDeclaration hashCode= StubUtility2Core.createImplementationStub(cu, rewrite, importRewrite, importContext, superHashCode, binding, settings, false, null);
 			BodyDeclarationRewrite.create(rewrite, typeDeclaration).insert(hashCode, null);
 
 			proposal2.setEndPosition(rewrite.track(hashCode));
@@ -2531,7 +2531,7 @@ public class LocalCorrectionsSubProcessor {
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(astRoot, typeNode.getStartPosition(), importRewrite);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu);
 		try {
-			MethodDeclaration stub= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importRewriteContext, methodToOverride, typeBinding, settings,
+			MethodDeclaration stub= StubUtility2Core.createImplementationStub(cu, rewrite, importRewrite, importRewriteContext, methodToOverride, typeBinding, settings,
 					typeBinding.isInterface(), new NodeFinder(astRoot, typeNode.getStartPosition(), 0).getCoveringNode());
 			BodyDeclarationRewrite.create(rewrite, typeNode).insert(stub, null);
 

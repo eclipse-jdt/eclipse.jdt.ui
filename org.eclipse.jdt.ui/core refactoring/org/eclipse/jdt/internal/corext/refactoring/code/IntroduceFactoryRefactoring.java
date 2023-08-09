@@ -94,7 +94,6 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -649,7 +648,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fCUHandle.getJavaProject());
 			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fFactoryCU, decl.getStartPosition(), fImportRewriter);
 			for (IMethodBinding unImplementedMethod : getUnimplementedMethods(declaringClass)) {
-				MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(fCUHandle, unitRewriter, fImportRewriter, context,
+				MethodDeclaration newMethodDecl= StubUtility2Core.createImplementationStub(fCUHandle, unitRewriter, fImportRewriter, context,
 					unImplementedMethod, unImplementedMethod.getDeclaringClass(), settings, false, new NodeFinder(fFactoryCU, decl.getStartPosition(), 0).getCoveringNode());
 				decl.bodyDeclarations().add(newMethodDecl);
 			}
