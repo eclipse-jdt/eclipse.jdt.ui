@@ -110,7 +110,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
-import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -175,7 +174,9 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
 import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
 import org.eclipse.jdt.internal.corext.fix.JoinVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
@@ -647,7 +648,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cu);
 					Javadoc javadoc= methodDeclaration.getJavadoc();
 					List<TagElement> tags= javadoc.tags();
-					List<Expression> parmList= new ArrayList<>();
 					for (TagElement tag : tags) {
 						if (tag.getTagName().equals("@deprecated")) { //$NON-NLS-1$
 							List<IDocElement> fragments= tag.fragments();
@@ -665,54 +665,40 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 												if (linkFragment instanceof MethodRef methodRef) {
 													IMethodBinding refBinding= (IMethodBinding) methodRef.resolveBinding();
 													if (refBinding != null) {
-														ASTVisitor findNewMethodVisitor= new ASTVisitor() {
+														class FindNewMethodVisitor extends ASTVisitor {
+															private boolean useMethodIsUsed= false;
 															@Override
 															public boolean visit(MethodInvocation node) {
 																IMethodBinding binding= node.resolveMethodBinding();
 																if (binding != null) {
 																	if (binding.isEqualTo(refBinding)) {
-																		List<SingleVariableDeclaration> methodParmNames= methodDeclaration.parameters();
-																		List<Expression> deprecatedArgs= methodInvocation.arguments();
-																		List<Expression> args= node.arguments();
-																		for (int i= 0; i < args.size(); ++i) {
-																			Expression argExp= args.get(i);
-																			if (argExp instanceof SimpleName argName) {
-																				for (int j= 0; j < methodParmNames.size(); ++j) {
-																					if (methodParmNames.get(j).getName().getFullyQualifiedName().equals(argName.getFullyQualifiedName())) {
-																						parmList.add(deprecatedArgs.get(j));
-																						break;
-																					}
-																				}
-																			} else if (argExp instanceof NullLiteral nullLiteral) {
-																				parmList.add(nullLiteral);
-																			} else if (argExp instanceof ThisExpression thisExpression) {
-																				parmList.add(thisExpression);																			throw new AbortSearchException();
-																			} else {
-																				throw new AbortSearchException();
-																			}
-																		}
-																		return false;
-																	} else {
-																		String bindingName= binding.getName();
-																		ITypeBinding bindingClass= binding.getDeclaringClass();
-																		if (bindingClass != null && bindingClass.getQualifiedName().equals("System.out")) { //$NON-NLS-1$
-																			return false;
-																		}
+																		useMethodIsUsed= true;
+																		throw new AbortSearchException();
 																	}
 																}
-																parmList.clear();
-																throw new AbortSearchException();
+																return false;
 															}
-														};
+															public boolean isUseMethodUsed() {
+																return useMethodIsUsed;
+															}
+														}
+														FindNewMethodVisitor findNewMethodVisitor= new FindNewMethodVisitor();
 														try {
 															methodDeclaration.accept(findNewMethodVisitor);
 														} catch (AbortSearchException e) {
 															// ignore
 														}
-														if (parmList.size() != refBinding.getParameterNames().length) {
+														if (!findNewMethodVisitor.isUseMethodUsed()) {
 															return false;
 														}
-														break;
+														if (proposals != null) {
+															IProposableFix fix= InlineMethodFixCore.create(FixMessages.InlineDeprecatedMethod_msg, (CompilationUnit)methodInvocation.getRoot(), methodInvocation);
+															if (fix != null) {
+																Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+																proposals.add(new FixCorrectionProposal(fix, null, IProposalRelevance.INLINE_DEPRECATED_METHOD, image, context));
+															}
+														}
+														return true;
 													}
 												}
 											}

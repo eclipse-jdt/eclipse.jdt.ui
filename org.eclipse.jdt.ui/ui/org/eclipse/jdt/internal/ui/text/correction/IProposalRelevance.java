@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2022 IBM Corporation and others.
+ * Copyright (c) 2012, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -142,6 +142,7 @@ public interface IProposalRelevance {
 	int CREATE_NEW_SUB_TYPE= 5;
 
 	int ADD_ALL_MISSING_TAGS= 5;
+	int INLINE_DEPRECATED_METHOD= 5;
 	int QUALIFY_INNER_TYPE_NAME= 5;
 	int REMOVE_TAG= 5;
 	int INVALID_OPERATOR= 5;
