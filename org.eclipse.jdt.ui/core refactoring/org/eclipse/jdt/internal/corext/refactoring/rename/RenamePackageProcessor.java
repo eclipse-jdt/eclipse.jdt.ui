@@ -109,7 +109,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -203,7 +203,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 
 	@Override
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_ALL;
+		return IRefactoringSaveModes.SAVE_ALL;
 	}
 
 	//---- ITextUpdating -------------------------------------------------

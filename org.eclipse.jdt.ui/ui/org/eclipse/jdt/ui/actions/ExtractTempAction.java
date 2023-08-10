@@ -20,7 +20,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -82,6 +82,6 @@ public class ExtractTempAction extends SelectionDispatchAction {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
 		ExtractTempRefactoring refactoring= new ExtractTempRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-		new RefactoringStarter().activate(new ExtractTempWizard(refactoring), getShell(), RefactoringMessages.ExtractTempAction_extract_temp, RefactoringSaveHelper.SAVE_NOTHING);
+		new RefactoringStarter().activate(new ExtractTempWizard(refactoring), getShell(), RefactoringMessages.ExtractTempAction_extract_temp, IRefactoringSaveModes.SAVE_NOTHING);
 	}
 }

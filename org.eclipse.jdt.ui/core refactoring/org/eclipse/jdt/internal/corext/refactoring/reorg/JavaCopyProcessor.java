@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcesso
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 
 public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator {
 
@@ -204,7 +204,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.COPY_PROCESSOR;
+		return IRefactoringProcessorIdsCore.COPY_PROCESSOR;
 	}
 
 	public IJavaElement[] getJavaElements() {

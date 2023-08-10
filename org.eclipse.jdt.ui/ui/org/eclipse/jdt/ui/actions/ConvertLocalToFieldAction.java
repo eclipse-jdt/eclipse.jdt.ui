@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -89,6 +89,6 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 			return;
 		ICompilationUnit cunit= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring(cunit, selection.getOffset(), selection.getLength());
-		new RefactoringStarter().activate(new PromoteTempWizard(refactoring), getShell(), RefactoringMessages.ConvertLocalToField_title, RefactoringSaveHelper.SAVE_NOTHING);
+		new RefactoringStarter().activate(new PromoteTempWizard(refactoring), getShell(), RefactoringMessages.ConvertLocalToField_title, IRefactoringSaveModes.SAVE_NOTHING);
 	}
 }

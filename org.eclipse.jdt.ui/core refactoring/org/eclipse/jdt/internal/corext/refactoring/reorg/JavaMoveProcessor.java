@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolic
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 
 public final class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUpdating, IReorgDestinationValidator {
 
@@ -256,7 +256,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.MOVE_PROCESSOR;
+		return IRefactoringProcessorIdsCore.MOVE_PROCESSOR;
 	}
 
 	public IJavaElement[] getJavaElements() {

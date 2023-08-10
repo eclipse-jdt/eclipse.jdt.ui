@@ -154,7 +154,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -3424,7 +3424,7 @@ public final class ReorgPolicyFactory {
 
 		@Override
 		public int getSaveMode() {
-			return RefactoringSaveHelper.SAVE_ALL;
+			return IRefactoringSaveModes.SAVE_ALL;
 		}
 
 		@Override
@@ -3689,7 +3689,7 @@ public final class ReorgPolicyFactory {
 
 		@Override
 		public int getSaveMode() {
-			return RefactoringSaveHelper.SAVE_REFACTORING;
+			return IRefactoringSaveModes.SAVE_REFACTORING;
 		}
 
 		private void copyImportsToDestination(IImportContainer container, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {

@@ -75,8 +75,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -354,7 +354,7 @@ public class RenameModuleProcessor extends JavaRenameProcessor implements IRefer
 
 	@Override
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_REFACTORING;
+		return IRefactoringSaveModes.SAVE_REFACTORING;
 	}
 
 	@Override
@@ -364,7 +364,7 @@ public class RenameModuleProcessor extends JavaRenameProcessor implements IRefer
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.RENAME_MODULE_PROCESSOR;
+		return IRefactoringProcessorIdsCore.RENAME_MODULE_PROCESSOR;
 	}
 
 	@Override

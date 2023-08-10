@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -48,10 +49,8 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
-
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 
@@ -78,7 +77,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.RENAME_SOURCE_FOLDER_PROCESSOR;
+		return IRefactoringProcessorIdsCore.RENAME_SOURCE_FOLDER_PROCESSOR;
 	}
 
 	@Override
@@ -113,7 +112,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 
 	@Override
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_ALL;
+		return IRefactoringSaveModes.SAVE_ALL;
 	}
 
 	@Override

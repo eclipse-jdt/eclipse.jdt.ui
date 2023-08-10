@@ -88,7 +88,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -130,7 +130,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.DELETE_PROCESSOR;
+		return IRefactoringProcessorIdsCore.DELETE_PROCESSOR;
 	}
 
 	@Override
