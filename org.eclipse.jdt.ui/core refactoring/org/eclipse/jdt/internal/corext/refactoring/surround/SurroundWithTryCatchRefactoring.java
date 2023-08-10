@@ -77,7 +77,7 @@ import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -115,7 +115,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private CodeScopeBuilder.Scope fScope;
 	private ASTNode[] fSelectedNodes;
 
-	private LinkedProposalModel fLinkedProposalModel;
+	private LinkedProposalModelCore fLinkedProposalModel;
 
 	private final boolean fIsMultiCatch;
 
@@ -134,7 +134,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length), isMultiCatch);
 	}
 
-	public LinkedProposalModel getLinkedProposalModel() {
+	public LinkedProposalModelCore getLinkedProposalModel() {
 		return fLinkedProposalModel;
 	}
 
@@ -210,7 +210,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				fAnalyzer.getSelectedNodes(), fCUnit.getBuffer(), fSelection.getOffset(), fSelection.getLength()));
 			fImportRewrite= StubUtility.createImportRewrite(fRootNode, true);
 
-			fLinkedProposalModel= new LinkedProposalModel();
+			fLinkedProposalModel= createLinkedProposalModel();
 
 			BodyDeclaration enclosingBodyDeclaration= fAnalyzer.getEnclosingBodyDeclaration();
 			Selection ignoreSelection= Selection.createFromStartEnd(fSelection.getOffset(),
@@ -236,6 +236,11 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			pm.done();
 		}
 	}
+
+	protected LinkedProposalModelCore createLinkedProposalModel() {
+		return new LinkedProposalModelCore();
+	}
+
 
 	private AST getAST() {
 		return fRootNode.getAST();

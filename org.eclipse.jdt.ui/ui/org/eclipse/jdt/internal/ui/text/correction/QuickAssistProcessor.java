@@ -178,7 +178,7 @@ import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
 import org.eclipse.jdt.internal.corext.fix.JoinVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
@@ -466,7 +466,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				return true;
 			}
 			String label= CorrectionMessages.QuickAssistProcessor_extractmethod_description;
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
@@ -497,7 +497,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				return true;
 			}
 			String label= CorrectionMessages.QuickAssistProcessor_extractmethod_from_lambda_description;
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
@@ -537,7 +537,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
 		if (extractTempRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			extractTempRefactoring.setReplaceAllOccurrences(true);
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractTempRefactoring.setLinkedProposalModel(linkedProposalModel);
 			extractTempRefactoring.setCheckResultForCompileProblems(false);
 
@@ -566,7 +566,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ExtractTempRefactoring extractTempRefactoringSelectedOnly= new ExtractTempRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
 		extractTempRefactoringSelectedOnly.setReplaceAllOccurrences(false);
 		if (extractTempRefactoringSelectedOnly.checkInitialConditions(new NullProgressMonitor()).isOK()) {
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractTempRefactoringSelectedOnly.setLinkedProposalModel(linkedProposalModel);
 			extractTempRefactoringSelectedOnly.setCheckResultForCompileProblems(false);
 
@@ -594,7 +594,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
 		if (extractConstRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractConstRefactoring.setLinkedProposalModel(linkedProposalModel);
 			extractConstRefactoring.setCheckResultForCompileProblems(false);
 
@@ -795,7 +795,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		refactoring.setClassName(i == 1 ? className : className + i);
 
 		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			refactoring.setLinkedProposalModel(linkedProposalModel);
 
 			String label= CorrectionMessages.QuickAssistProcessor_convert_anonym_to_nested;
@@ -894,7 +894,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 
 		ASTRewrite rewrite= ASTRewrite.create(methodReference.getAST());
-		LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+		LinkedProposalModelCore linkedProposalModel= createProposalModel();
 
 		LambdaExpression lambda= QuickAssistProcessorUtil.convertMethodRefernceToLambda(methodReference, functionalMethod, context.getASTRoot(), rewrite, linkedProposalModel, false);
 
@@ -3070,7 +3070,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (catchExceptions.size() > 0) {
 			final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
 			final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 
 			int i= 0;
 			if (!modifyExistingTry) {
@@ -4291,7 +4291,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			String label= CorrectionMessages.QuickAssistProcessor_convert_local_to_field_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			refactoring.setLinkedProposalModel(linkedProposalModel);
 
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, context.getCompilationUnit(), refactoring, IProposalRelevance.CONVERT_LOCAL_TO_FIELD, image);
@@ -4300,6 +4300,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposals.add(proposal);
 		}
 		return true;
+	}
+
+	private static LinkedProposalModelCore createProposalModel() {
+		return new LinkedProposalModelCore();
 	}
 
 	/**

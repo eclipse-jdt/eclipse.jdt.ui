@@ -52,21 +52,20 @@ public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteO
 	}
 
 	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) {
-		super(name, compilationUnit, operations);
-		fLinkedProposalModel= new LinkedProposalModel();
+		this(name, compilationUnit, operations, new LinkedProposalModelCore());
 	}
 
 	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] operations) {
+		this(name, compilationUnit, operations, new LinkedProposalModelCore());
+	}
+
+	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] operations, LinkedProposalModelCore proposalModel) {
 		super(name, compilationUnit, operations);
-		fLinkedProposalModel= new LinkedProposalModel();
+		fLinkedProposalModel= proposalModel;
 	}
 
 	@Override
-	public LinkedProposalModel getLinkedPositions() {
-		if (!fLinkedProposalModel.hasLinkedPositions())
-			return null;
-
-		return (LinkedProposalModel)fLinkedProposalModel;
+	public LinkedProposalModelCore getLinkedPositions() {
+		return super.getLinkedPositionsCore();
 	}
-
 }

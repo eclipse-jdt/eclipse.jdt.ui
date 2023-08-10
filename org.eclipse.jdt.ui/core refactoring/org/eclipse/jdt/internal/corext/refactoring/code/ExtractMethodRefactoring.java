@@ -119,8 +119,8 @@ import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -171,7 +171,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private ASTNode fDestination;
 	// either of type TypeDeclaration or AnonymousClassDeclaration
 	private ASTNode[] fDestinations;
-	private LinkedProposalModel fLinkedProposalModel;
+	private LinkedProposalModelCore fLinkedProposalModel;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
 
@@ -277,7 +277,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fRoot= astRoot;
 	}
 
-	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
+	public void setLinkedProposalModel(LinkedProposalModelCore linkedProposalModel) {
 		fLinkedProposalModel= linkedProposalModel;
 	}
 
@@ -508,7 +508,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			MethodDeclaration mm= createNewMethod(selectedNodes, fCUnit.findRecommendedLineSeparator(), substituteDesc);
 
 			if (fLinkedProposalModel != null) {
-				LinkedProposalPositionGroup typeGroup= fLinkedProposalModel.getPositionGroup(KEY_TYPE, true);
+				LinkedProposalPositionGroupCore typeGroup= fLinkedProposalModel.getPositionGroup(KEY_TYPE, true);
 				typeGroup.addPosition(fRewriter.track(mm.getReturnType2()), false);
 
 				ITypeBinding typeBinding= fAnalyzer.getReturnTypeBinding();
@@ -519,7 +519,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 					}
 				}
 
-				LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
+				LinkedProposalPositionGroupCore nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
 				nameGroup.addPosition(fRewriter.track(mm.getName()), false);
 
 				ModifierCorrectionSubProcessorCore.installLinkedVisibilityProposals(fLinkedProposalModel, fRewriter, mm.modifiers(), false);
@@ -977,7 +977,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			arguments.add(ASTNodeFactory.newName(fAST, getMappedName(duplicate, parameter)));
 		}
 		if (fLinkedProposalModel != null) {
-			LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
+			LinkedProposalPositionGroupCore nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
 			nameGroup.addPosition(fRewriter.track(invocation.getName()), false);
 		}
 
