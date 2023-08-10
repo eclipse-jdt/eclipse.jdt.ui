@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,8 +28,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -99,8 +97,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
+import org.eclipse.jdt.internal.ui.util.JavaProjectUtilities;
 
 
 public class IntroduceParameterRefactoring extends Refactoring implements IDelegateUpdating {
@@ -189,7 +187,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			if (! fSourceCU.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_syntax_error);
 
-			IJavaElement enclosingElement= SelectionConverter.resolveEnclosingElement(fSourceCU, new TextSelection(fSelectionStart, fSelectionLength));
+			IJavaElement enclosingElement= JavaProjectUtilities.resolveEnclosingElement(fSourceCU, fSelectionStart, fSelectionLength);
 			if (! (enclosingElement instanceof IMethod))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
 

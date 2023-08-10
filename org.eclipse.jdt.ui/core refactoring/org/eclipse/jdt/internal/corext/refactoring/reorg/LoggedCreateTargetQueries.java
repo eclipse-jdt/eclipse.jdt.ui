@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -23,16 +20,13 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
+import org.eclipse.jdt.internal.ui.util.JavaProjectUtilities;
+import org.eclipse.jdt.internal.ui.util.ResourcesUtility;
 
 /**
  * Logged implementation of new create target queries.
@@ -45,22 +39,11 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 	private final class CreateTargetQuery implements ICreateTargetQuery {
 
 		private void createJavaProject(IProject project) throws CoreException {
-			if (!project.exists()) {
-				BuildPathsBlock.createProject(project, null, new NullProgressMonitor());
-				BuildPathsBlock.addJavaNature(project, new NullProgressMonitor());
-			}
+			JavaProjectUtilities.createJavaProject(project);
 		}
 
 		private void createPackageFragmentRoot(IPackageFragmentRoot root) throws CoreException {
-			final IJavaProject project= root.getJavaProject();
-			if (!project.exists())
-				createJavaProject(project.getProject());
-			final IFolder folder= project.getProject().getFolder(root.getElementName());
-			if (!folder.exists())
-				CoreUtility.createFolder(folder, true, true, new NullProgressMonitor());
-			final List<IClasspathEntry> list= Arrays.asList(project.getRawClasspath());
-			list.add(JavaCore.newSourceEntry(folder.getFullPath()));
-			project.setRawClasspath(list.toArray(new IClasspathEntry[list.size()]), new NullProgressMonitor());
+			JavaProjectUtilities.createPackageFragmentRoot(root);
 		}
 
 		@Override
@@ -88,7 +71,7 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 					if (!project.exists())
 						createJavaProject(project);
 					if (!folder.exists())
-						CoreUtility.createFolder(folder, true, true, new NullProgressMonitor());
+						ResourcesUtility.createFolder(folder, true, true, new NullProgressMonitor());
 				} catch (CoreException exception) {
 					JavaPlugin.log(exception);
 					return null;

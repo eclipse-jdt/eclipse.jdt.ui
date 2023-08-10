@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -243,7 +243,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
 		RefactoringStatus result= new RefactoringStatus();
-		IResource[] resources= ReorgUtils.getNotLinked(fResources);
+		IResource[] resources= ReorgUtilsCore.getNotLinked(fResources);
 		IStatus status= Resources.checkInSync(resources);
 		if (!status.isOK()) {
 			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
@@ -259,8 +259,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			}
 		}
 		result.merge(RefactoringStatus.create(status));
-		IResource[] javaResources= ReorgUtils.getResources(fJavaElements);
-		resources= ReorgUtils.getNotNulls(javaResources);
+		IResource[] javaResources= ReorgUtilsCore.getResources(fJavaElements);
+		resources= ReorgUtilsCore.getNotNulls(javaResources);
 		status= Resources.checkInSync(resources);
 		if (!status.isOK()) {
 			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
@@ -424,7 +424,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private void addDeletableParentPackagesOnPackageDeletion() throws CoreException {
 
 		@SuppressWarnings("unchecked")
-		final List<IPackageFragment> initialPackagesToDelete= (List<IPackageFragment>) ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.PACKAGE_FRAGMENT);
+		final List<IPackageFragment> initialPackagesToDelete= (List<IPackageFragment>) ReorgUtilsCore.getElementsOfType(fJavaElements, IJavaElement.PACKAGE_FRAGMENT);
 
 		if (initialPackagesToDelete.isEmpty())
 			return;
@@ -435,7 +435,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		// Get resources and java elements which will be deleted as well
 		final Set<IResource> deletedChildren= new HashSet<>(Arrays.asList(fResources));
 		for (IJavaElement javaElement : fJavaElements) {
-			if (!ReorgUtils.isInsideCompilationUnit(javaElement)) {
+			if (!ReorgUtilsCore.isInsideCompilationUnit(javaElement)) {
 				deletedChildren.add(javaElement.getResource());
 			}
 		}
@@ -675,15 +675,15 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	private void addToSetToDelete(IJavaElement[] newElements){
-		fJavaElements= ReorgUtils.union(fJavaElements, newElements);
+		fJavaElements= ReorgUtilsCore.union(fJavaElements, newElements);
 	}
 
 	private void removeFromSetToDelete(IResource[] resourcesToNotDelete) {
-		fResources= ReorgUtils.setMinus(fResources, resourcesToNotDelete);
+		fResources= ReorgUtilsCore.setMinus(fResources, resourcesToNotDelete);
 	}
 
 	private void removeFromSetToDelete(IJavaElement[] elementsToNotDelete) {
-		fJavaElements= ReorgUtils.setMinus(fJavaElements, elementsToNotDelete);
+		fJavaElements= ReorgUtilsCore.setMinus(fJavaElements, elementsToNotDelete);
 	}
 
 	private void addGettersSetters() throws JavaModelException {
@@ -810,7 +810,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		Set<IJavaElement> deletedElements= new HashSet<>(Arrays.asList(fJavaElements));
 		Set<ICompilationUnit> result= new HashSet<>();
 		for (IJavaElement element : fJavaElements) {
-			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
+			ICompilationUnit cu= ReorgUtilsCore.getCompilationUnit(element);
 			if (cu != null && !result.contains(cu) && deletedElements.containsAll(topLevelTypes(cu)))
 				result.add(cu);
 		}

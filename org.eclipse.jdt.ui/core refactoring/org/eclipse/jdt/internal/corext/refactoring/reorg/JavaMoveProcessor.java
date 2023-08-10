@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -131,7 +131,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			RefactoringStatus result= new RefactoringStatus();
-			IResource[] resources= ReorgUtils.getNotNulls(fMovePolicy.getResources());
+			IResource[] resources= ReorgUtilsCore.getNotNulls(fMovePolicy.getResources());
 			IStatus status= Resources.checkInSync(resources);
 			if (!status.isOK()) {
 				boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
@@ -147,8 +147,8 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 				}
 			}
 			result.merge(RefactoringStatus.create(status));
-			IResource[] javaResources= ReorgUtils.getResources(fMovePolicy.getJavaElements());
-			resources= ReorgUtils.getNotNulls(javaResources);
+			IResource[] javaResources= ReorgUtilsCore.getResources(fMovePolicy.getJavaElements());
+			resources= ReorgUtilsCore.getNotNulls(javaResources);
 			status= Resources.checkInSync(resources);
 			if (!status.isOK()) {
 				boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);

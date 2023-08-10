@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -251,7 +251,7 @@ public class ParentChecker {
 	}
 
 	private void removeFromSetToDelete(IResource[] resourcesToNotDelete) {
-		fResources= ReorgUtils.setMinus(fResources, resourcesToNotDelete);
+		fResources= ReorgUtilsCore.setMinus(fResources, resourcesToNotDelete);
 	}
 
 	public static boolean isDescendantOf(IResource subResource, IJavaElement superElement) {

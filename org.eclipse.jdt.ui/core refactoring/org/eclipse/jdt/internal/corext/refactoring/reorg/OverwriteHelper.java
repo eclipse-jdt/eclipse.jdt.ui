@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -122,7 +122,7 @@ class OverwriteHelper {
 			}
 		}
 		IPackageFragmentRoot[] roots= toNotOverwrite.toArray(new IPackageFragmentRoot[toNotOverwrite.size()]);
-		fRoots= ArrayTypeConverter.toPackageFragmentRootArray(ReorgUtils.setMinus(fRoots, roots));
+		fRoots= ArrayTypeConverter.toPackageFragmentRootArray(ReorgUtilsCore.setMinus(fRoots, roots));
 	}
 
 	private void confirmCuOverwritting(IConfirmQuery overwriteQuery) {
@@ -132,7 +132,7 @@ class OverwriteHelper {
 				cusToNotOverwrite.add(cu);
 		}
 		ICompilationUnit[] cus= cusToNotOverwrite.toArray(new ICompilationUnit[cusToNotOverwrite.size()]);
-		fCus= ArrayTypeConverter.toCuArray(ReorgUtils.setMinus(fCus, cus));
+		fCus= ArrayTypeConverter.toCuArray(ReorgUtilsCore.setMinus(fCus, cus));
 	}
 
 	private void confirmFolderOverwritting(IConfirmQuery overwriteQuery) {
@@ -142,7 +142,7 @@ class OverwriteHelper {
 				foldersToNotOverwrite.add(folder);
 		}
 		IFolder[] folders= foldersToNotOverwrite.toArray(new IFolder[foldersToNotOverwrite.size()]);
-		fFolders= ArrayTypeConverter.toFolderArray(ReorgUtils.setMinus(fFolders, folders));
+		fFolders= ArrayTypeConverter.toFolderArray(ReorgUtilsCore.setMinus(fFolders, folders));
 	}
 
 	private void confirmFileOverwritting(IConfirmQuery overwriteQuery, IConfirmQuery skipQuery) {
@@ -160,7 +160,7 @@ class OverwriteHelper {
 			}
 		}
 		IFile[] files= filesToNotOverwrite.toArray(new IFile[filesToNotOverwrite.size()]);
-		fFiles= ArrayTypeConverter.toFileArray(ReorgUtils.setMinus(fFiles, files));
+		fFiles= ArrayTypeConverter.toFileArray(ReorgUtilsCore.setMinus(fFiles, files));
 	}
 
 	private void confirmPackageOverwritting(IConfirmQuery overwriteQuery){
@@ -170,7 +170,7 @@ class OverwriteHelper {
 				toNotOverwrite.add(pack);
 		}
 		IPackageFragment[] packages= toNotOverwrite.toArray(new IPackageFragment[toNotOverwrite.size()]);
-		fPackageFragments= ArrayTypeConverter.toPackageArray(ReorgUtils.setMinus(fPackageFragments, packages));
+		fPackageFragments= ArrayTypeConverter.toPackageArray(ReorgUtilsCore.setMinus(fPackageFragments, packages));
 	}
 
 	private boolean canOverwrite(IPackageFragment pack) {
@@ -223,7 +223,7 @@ class OverwriteHelper {
 			IPackageFragment destination= (IPackageFragment)fDestination;
 			return ! destination.equals(cu.getParent()) && destination.getCompilationUnit(cu.getElementName()).exists();
 		} else {
-			return willOverwrite(ReorgUtils.getResource(cu));
+			return willOverwrite(ReorgUtilsCore.getResource(cu));
 		}
 	}
 
