@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -135,11 +135,11 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 		//Do not allow to drop on itself, bug 14228
 		if (getCurrentLocation() == LOCATION_ON) {
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
+			IJavaElement[] javaElements= ReorgUtilsCore.getJavaElements(fElements);
 			if (contains(javaElements, target))
 				return DND.DROP_NONE;
 
-			IResource[] resources= ReorgUtils.getResources(fElements);
+			IResource[] resources= ReorgUtilsCore.getResources(fElements);
 			if (contains(resources, target))
 				return DND.DROP_NONE;
 		}
@@ -232,7 +232,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	private int handleValidateMove(Object target) throws JavaModelException{
 		if (fMoveProcessor == null) {
-			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(ReorgUtilsCore.getResources(fElements), ReorgUtilsCore.getJavaElements(fElements));
 			if (policy.canEnable())
 				fMoveProcessor= new JavaMoveProcessor(policy);
 		}
@@ -260,8 +260,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 
 	private boolean handleDropMove(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
-		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-		IResource[] resources= ReorgUtils.getResources(fElements);
+		IJavaElement[] javaElements= ReorgUtilsCore.getJavaElements(fElements);
+		IResource[] resources= ReorgUtilsCore.getResources(fElements);
 		ReorgMoveStarter starter= ReorgMoveStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target, getCurrentLocation()));
 
 		if (starter != null)
@@ -272,7 +272,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private int handleValidateCopy(Object target) throws JavaModelException{
 
 		if (fCopyProcessor == null) {
-			final ICopyPolicy policy= ReorgPolicyFactory.createCopyPolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+			final ICopyPolicy policy= ReorgPolicyFactory.createCopyPolicy(ReorgUtilsCore.getResources(fElements), ReorgUtilsCore.getJavaElements(fElements));
 			fCopyProcessor= policy.canEnable() ? new JavaCopyProcessor(policy) : null;
 		}
 
@@ -298,8 +298,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 
 	private boolean handleDropCopy(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
-		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-		IResource[] resources= ReorgUtils.getResources(fElements);
+		IJavaElement[] javaElements= ReorgUtilsCore.getJavaElements(fElements);
+		IResource[] resources= ReorgUtilsCore.getResources(fElements);
 		ReorgCopyStarter starter= ReorgCopyStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target, getCurrentLocation()));
 
 		if (starter != null) {

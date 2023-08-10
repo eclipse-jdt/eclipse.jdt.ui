@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -95,14 +95,14 @@ class DeleteChangeCreator {
 		}
 
 		for (IJavaElement element : javaElements) {
-			if (! ReorgUtils.isInsideCompilationUnit(element))
+			if (! ReorgUtilsCore.isInsideCompilationUnit(element))
 				result.add(createDeleteChange(element));
 		}
 		for (IResource resource : resources) {
 			result.add(createDeleteChange(resource));
 		}
 
-		Map<ICompilationUnit, List<IJavaElement>> grouped= ReorgUtils.groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
+		Map<ICompilationUnit, List<IJavaElement>> grouped= ReorgUtilsCore.groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
 		if (!grouped.isEmpty() ){
 			Assert.isNotNull(manager);
 			for (Map.Entry<ICompilationUnit, List<IJavaElement>> entry : grouped.entrySet()) {
@@ -152,14 +152,14 @@ class DeleteChangeCreator {
 	private static List<IJavaElement> getElementsSmallerThanCu(IJavaElement[] javaElements){
 		List<IJavaElement> result= new ArrayList<>();
 		for (IJavaElement element : javaElements) {
-			if (ReorgUtils.isInsideCompilationUnit(element))
+			if (ReorgUtilsCore.isInsideCompilationUnit(element))
 				result.add(element);
 		}
 		return result;
 	}
 
 	private static Change createDeleteChange(IJavaElement javaElement) throws JavaModelException {
-		Assert.isTrue(! ReorgUtils.isInsideCompilationUnit(javaElement));
+		Assert.isTrue(! ReorgUtilsCore.isInsideCompilationUnit(javaElement));
 
 		switch(javaElement.getElementType()){
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
@@ -199,7 +199,7 @@ class DeleteChangeCreator {
 		if (element instanceof ICompilationUnit || element instanceof IPackageFragment){
 			IResource resource;
 			if (element instanceof ICompilationUnit)
-				resource= ReorgUtils.getResource((ICompilationUnit)element);
+				resource= ReorgUtilsCore.getResource((ICompilationUnit)element);
 			else
 				resource= ((IPackageFragment)element).getResource();
 			if (resource != null && resource.isLinked())

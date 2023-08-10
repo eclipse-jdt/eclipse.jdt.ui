@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -52,14 +52,14 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
-			if (ReorgUtils.containsOnlyProjects(selection.toList())) {
+			if (ReorgUtilsCore.containsOnlyProjects(selection.toList())) {
 				setEnabled(createWorkbenchAction(selection).isEnabled());
 				return;
 			}
 			try {
 				List<?> elements= selection.toList();
-				IResource[] resources= ReorgUtils.getResources(elements);
-				IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
+				IResource[] resources= ReorgUtilsCore.getResources(elements);
+				IJavaElement[] javaElements= ReorgUtilsCore.getJavaElements(elements);
 				if (elements.size() != resources.length + javaElements.length)
 					setEnabled(false);
 				else
@@ -83,14 +83,14 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 
 	@Override
 	public void run(IStructuredSelection selection) {
-		if (ReorgUtils.containsOnlyProjects(selection.toList())){
+		if (ReorgUtilsCore.containsOnlyProjects(selection.toList())){
 			createWorkbenchAction(selection).run();
 			return;
 		}
 		try {
 			List<?> elements= selection.toList();
-			IResource[] resources= ReorgUtils.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
+			IResource[] resources= ReorgUtilsCore.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtilsCore.getJavaElements(elements);
 			if (RefactoringAvailabilityTester.isCopyAvailable(resources, javaElements))
 				RefactoringExecutionStarter.startCopyRefactoring(resources, javaElements, getShell());
 		} catch (JavaModelException e) {

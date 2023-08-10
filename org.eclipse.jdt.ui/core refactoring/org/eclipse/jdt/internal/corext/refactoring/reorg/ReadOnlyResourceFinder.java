@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -71,12 +71,12 @@ class ReadOnlyResourceFinder{
 		switch(javaElement.getElementType()){
 			case IJavaElement.CLASS_FILE:
 			case IJavaElement.COMPILATION_UNIT:
-				IResource resource= ReorgUtils.getResource(javaElement);
+				IResource resource= ReorgUtilsCore.getResource(javaElement);
 				//if this assert fails, it means that a precondition is missing
 				Assert.isTrue(resource instanceof IFile);
 				return (Resources.isReadOnly(resource));
 			case IJavaElement.PACKAGE_FRAGMENT:
-				IResource packResource= ReorgUtils.getResource(javaElement);
+				IResource packResource= ReorgUtilsCore.getResource(javaElement);
 				if (packResource == null)
 					return false;
 				IPackageFragment pack= (IPackageFragment)javaElement;
@@ -91,7 +91,7 @@ class ReadOnlyResourceFinder{
 				IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
 				if (root.isArchive() || root.isExternal())
 					return false;
-				IResource pfrResource= ReorgUtils.getResource(javaElement);
+				IResource pfrResource= ReorgUtilsCore.getResource(javaElement);
 				if (pfrResource == null)
 					return false;
 				if (Resources.isReadOnly(pfrResource))

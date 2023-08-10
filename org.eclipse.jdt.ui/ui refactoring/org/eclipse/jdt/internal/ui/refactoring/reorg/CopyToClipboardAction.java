@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,7 +52,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -96,9 +96,9 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		List<?> elements= selection.toList();
-		IResource[] resources= ReorgUtils.getResources(elements);
-		IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-		IJarEntryResource[] jarEntryResources= ReorgUtils.getJarEntryResources(elements);
+		IResource[] resources= ReorgUtilsCore.getResources(elements);
+		IJavaElement[] javaElements= ReorgUtilsCore.getJavaElements(elements);
+		IJarEntryResource[] jarEntryResources= ReorgUtilsCore.getJarEntryResources(elements);
 		if (elements.size() != resources.length + javaElements.length + jarEntryResources.length)
 			setEnabled(false);
 		else
@@ -109,9 +109,9 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	public void run(IStructuredSelection selection) {
 		try {
 			List<?> elements= selection.toList();
-			IResource[] resources= ReorgUtils.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			IJarEntryResource[] jarEntryResources= ReorgUtils.getJarEntryResources(elements);
+			IResource[] resources= ReorgUtilsCore.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtilsCore.getJavaElements(elements);
+			IJarEntryResource[] jarEntryResources= ReorgUtilsCore.getJarEntryResources(elements);
 			if (elements.size() == resources.length + javaElements.length + jarEntryResources.length && canEnable(resources, javaElements, jarEntryResources))
 				doRun(resources, javaElements, jarEntryResources);
 		} catch (CoreException e) {
@@ -174,16 +174,16 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				processResources(fileNames, namesBuf);
 				processJavaElements(fileNames, namesBuf);
 
-				IType[] mainTypes= ReorgUtils.getMainTypes(fJavaElements);
-				ICompilationUnit[] cusOfMainTypes= ReorgUtils.getCompilationUnits(mainTypes);
-				IResource[] resourcesOfMainTypes= ReorgUtils.getResources(cusOfMainTypes);
+				IType[] mainTypes= ReorgUtilsCore.getMainTypes(fJavaElements);
+				ICompilationUnit[] cusOfMainTypes= ReorgUtilsCore.getCompilationUnits(mainTypes);
+				IResource[] resourcesOfMainTypes= ReorgUtilsCore.getResources(cusOfMainTypes);
 				addFileNames(fileNames, resourcesOfMainTypes);
 
-				IResource[] cuResources= ReorgUtils.getResources(getCompilationUnits(fJavaElements));
+				IResource[] cuResources= ReorgUtilsCore.getResources(getCompilationUnits(fJavaElements));
 				addFileNames(fileNames, cuResources);
 
-				IResource[] resourcesForClipboard= ReorgUtils.union(fResources, ReorgUtils.union(cuResources, resourcesOfMainTypes));
-				IJavaElement[] javaElementsForClipboard= ReorgUtils.union(fJavaElements, cusOfMainTypes);
+				IResource[] resourcesForClipboard= ReorgUtilsCore.union(fResources, ReorgUtilsCore.union(cuResources, resourcesOfMainTypes));
+				IJavaElement[] javaElementsForClipboard= ReorgUtilsCore.union(fJavaElements, cusOfMainTypes);
 
 				TypedSource[] typedSources= TypedSource.createTypedSources(javaElementsForClipboard);
 				String[] fileNameArray= fileNames.toArray(new String[fileNames.size()]);
@@ -192,7 +192,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 
 		private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
-			List<?> cus= ReorgUtils.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
+			List<?> cus= ReorgUtilsCore.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
 			return cus.toArray(new ICompilationUnit[cus.size()]);
 		}
 
@@ -216,7 +216,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 					case IJavaElement.PACKAGE_FRAGMENT :
 					case IJavaElement.COMPILATION_UNIT :
 					case IJavaElement.CLASS_FILE :
-						addFileName(fileNames, ReorgUtils.getResource(element));
+						addFileName(fileNames, ReorgUtilsCore.getResource(element));
 						break;
 					default :
 						break;
@@ -395,12 +395,12 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 		private boolean hasProjects() {
 			for (IResource resource : fResources) {
-				if (ReorgUtils.isProject(resource)) {
+				if (ReorgUtilsCore.isProject(resource)) {
 					return true;
 				}
 			}
 			for (IJavaElement javaElement : fJavaElements) {
-				if (ReorgUtils.isProject(javaElement)) {
+				if (ReorgUtilsCore.isProject(javaElement)) {
 					return true;
 				}
 			}
@@ -409,12 +409,12 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 		private boolean hasNonProjects() {
 			for (IResource resource : fResources) {
-				if (!ReorgUtils.isProject(resource)) {
+				if (!ReorgUtilsCore.isProject(resource)) {
 					return true;
 				}
 			}
 			for (IJavaElement javaElement : fJavaElements) {
-				if (!ReorgUtils.isProject(javaElement)) {
+				if (!ReorgUtilsCore.isProject(javaElement)) {
 					return true;
 				}
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -41,7 +41,7 @@ import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
@@ -139,15 +139,15 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 
 			List<IJavaElement> realJavaElements= new ArrayList<>();
 			List<IResource> realResource= new ArrayList<>();
-			ReorgUtils.splitIntoJavaElementsAndResources(fElementsToAdds, realJavaElements, realResource);
+			ReorgUtilsCore.splitIntoJavaElementsAndResources(fElementsToAdds, realJavaElements, realResource);
 			if (fElementsToAdds.length != realJavaElements.size() + realResource.size())
 				return DND.DROP_NONE;
 			for (IJavaElement element : realJavaElements) {
-				if (ReorgUtils.containsElementOrParent(fCurrentElements, element))
+				if (ReorgUtilsCore.containsElementOrParent(fCurrentElements, element))
 					return DND.DROP_NONE;
 			}
 			for (IResource element : realResource) {
-				if (ReorgUtils.containsElementOrParent(fCurrentElements, element))
+				if (ReorgUtilsCore.containsElementOrParent(fCurrentElements, element))
 					return DND.DROP_NONE;
 			}
 			if (!(fSelection instanceof ITreeSelection)) {

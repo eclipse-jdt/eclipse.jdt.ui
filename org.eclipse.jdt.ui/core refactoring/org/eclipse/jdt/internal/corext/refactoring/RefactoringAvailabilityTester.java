@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2022 IBM Corporation and others.
+ * Copyright (c) 2005, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -334,7 +335,7 @@ public final class RefactoringAvailabilityTester {
 							return true;
 						case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 							IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement;
-							if (!root.isExternal() && !ReorgUtils.isClassFolder(root))
+							if (!root.isExternal() && !ReorgUtilsCore.isClassFolder(root))
 								return true;
 							break;
 						case IJavaElement.COMPILATION_UNIT:
@@ -1256,8 +1257,8 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isWorkingCopyElement(final IJavaElement element) {
 		if (element instanceof ICompilationUnit)
 			return ((ICompilationUnit) element).isWorkingCopy();
-		if (ReorgUtils.isInsideCompilationUnit(element))
-			return ReorgUtils.getCompilationUnit(element).isWorkingCopy();
+		if (ReorgUtilsCore.isInsideCompilationUnit(element))
+			return ReorgUtilsCore.getCompilationUnit(element).isWorkingCopy();
 		return false;
 	}
 
@@ -1282,7 +1283,7 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (!type.exists())
 			return false;
-		return ReorgUtils.isInsideCompilationUnit(type) && type.isClass() && !type.isAnonymous()  && !type.isLambda();
+		return ReorgUtilsCore.isInsideCompilationUnit(type) && type.isClass() && !type.isAnonymous()  && !type.isLambda();
 	}
 
 }

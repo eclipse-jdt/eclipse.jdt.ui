@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -95,7 +95,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		IResource[] resources= ReorgUtils.getNotNulls(fCopyPolicy.getResources());
+		IResource[] resources= ReorgUtilsCore.getNotNulls(fCopyPolicy.getResources());
 		IStatus status= Resources.checkInSync(resources);
 		if (!status.isOK()) {
 			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
@@ -111,8 +111,8 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 			}
 		}
 		result.merge(RefactoringStatus.create(status));
-		IResource[] javaResources= ReorgUtils.getResources(fCopyPolicy.getJavaElements());
-		resources= ReorgUtils.getNotNulls(javaResources);
+		IResource[] javaResources= ReorgUtilsCore.getResources(fCopyPolicy.getJavaElements());
+		resources= ReorgUtilsCore.getNotNulls(javaResources);
 		status= Resources.checkInSync(resources);
 		if (!status.isOK()) {
 			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
