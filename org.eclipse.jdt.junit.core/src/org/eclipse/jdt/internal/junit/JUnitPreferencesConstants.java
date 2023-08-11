@@ -79,6 +79,11 @@ public class JUnitPreferencesConstants {
 	public static final String HAMCREST_CORE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit4.hamcrest.core.javadoclocation"; //$NON-NLS-1$
 
 	/**
+	 * Javadoc location for org.hamcrest (JUnit 4)
+	 */
+	public static final String HAMCREST_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit4.hamcrest.javadoclocation"; //$NON-NLS-1$
+
+	/**
 	 * Javadoc location for org.junit.jupiter.api (JUnit 5)
 	 */
 	public static final String JUNIT_JUPITER_API_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.api.javadoclocation"; //$NON-NLS-1$

@@ -106,20 +106,16 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 
 	private static JUnitContainer getNewContainer(IPath containerPath) {
 		List<IClasspathEntry> entriesList= new ArrayList<>();
-		IClasspathEntry entry= null;
-		IClasspathEntry entry2= null;
 		String version= containerPath.segment(1);
 		if (null != version) switch (version) {
 		case JUNIT3_8_1:
 		case JUNIT3:
-			entry= BuildPathSupport.getJUnit3LibraryEntry();
-			if (entry == null) { // JUnit 4 includes most of JUnit 3, so let's cheat
-				entry= BuildPathSupport.getJUnit4as3LibraryEntry();
-			}
+			entriesList.add(BuildPathSupport.getJUnit4as3LibraryEntry());
 			break;
 		case JUNIT4:
-			entry= BuildPathSupport.getJUnit4LibraryEntry();
-			entry2= BuildPathSupport.getHamcrestCoreLibraryEntry();
+			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
+			entriesList.add(BuildPathSupport.getHamcrestLibraryEntry());
+			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
 			break;
 		case JUNIT5:
 			entriesList.add(BuildPathSupport.getJUnitJupiterApiLibraryEntry());
@@ -137,21 +133,15 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitApiGuardianLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
-			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
+			entriesList.add(BuildPathSupport.getHamcrestLibraryEntry());
+ 			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
+			// errors will be reported above
+			entriesList.removeIf(e -> e == null);
 			break;
 		default:
 			break;
 		}
-		IClasspathEntry[] entries;
-		if (!entriesList.isEmpty() ) {
-			entries= entriesList.toArray(new IClasspathEntry[entriesList.size()]);
-		} else if (entry == null) {
-			entries= new IClasspathEntry[] { };
-		} else if (entry2 == null) {
-			entries= new IClasspathEntry[] { entry };
-		} else {
-			entries= new IClasspathEntry[] { entry, entry2 };
-		}
+		IClasspathEntry[] entries= entriesList.toArray(new IClasspathEntry[entriesList.size()]);
 		return new JUnitContainer(containerPath, entries);
 	}
 
