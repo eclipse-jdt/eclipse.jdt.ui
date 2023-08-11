@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -83,7 +83,17 @@ public class TestSearchEngine extends CoreTestSearchEngine {
 			return;
 		}
 
-		SubMonitor subMonitor= SubMonitor.convert(monitor, 3);
+		SubMonitor subMonitor= SubMonitor.convert(monitor, 3 + 3); // Add +3
+
+		// Add this idle wait of 3 seconds and advance the progress in the subMonitor
+		for (int i= 0; i < 3; i++) {
+			try {
+				Thread.sleep(1_000);
+				subMonitor.split(1);
+			} catch (InterruptedException e) {
+				// ignore
+			}
+		}
 
 		collectDeclaredMethodNames(type, javaProject, testKindId, methodNames);
 		subMonitor.split(1);

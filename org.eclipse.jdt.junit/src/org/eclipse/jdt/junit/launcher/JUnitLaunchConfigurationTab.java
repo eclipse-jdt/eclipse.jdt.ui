@@ -808,7 +808,6 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		} catch (InterruptedException e) {
 			// the user probably canceled the operation. Sadly there is no way to know it for sure since ModalContext::run
 			// doesn't throw the original OperationCanceledException, it throws a new InterruptedException.
-			JUnitPlugin.log(e);
 			fTestMethodsCache.setCanceled(true);
 		}
 	}
@@ -934,7 +933,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	protected void setErrorMessage(String errorMessage) {
 		fIsValid= errorMessage == null;
 		if (fTestMethodsCache.isCanceled()) {
-			super.setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_operation_canceled + " " + errorMessage); //$NON-NLS-1$
+			super.setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_operation_canceled +
+					(errorMessage != null ? (" " + errorMessage) : "")); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			super.setErrorMessage(errorMessage);
 		}
