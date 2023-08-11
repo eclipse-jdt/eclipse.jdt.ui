@@ -232,6 +232,8 @@ public class BuildPathSupport {
 
 				return JavaCore.newLibraryEntry(bundleRootLocation, srcLocation, null, getAccessRules(), attributes, false);
 			}
+			String message = "Unable to compute bundle location for '" + bundleId + "' with range " + versionRange;  //$NON-NLS-1$//$NON-NLS-2$
+			JUnitCorePlugin.log(Status.error(message, new IllegalStateException(message)));
 			return null;
 		}
 
@@ -303,7 +305,10 @@ public class BuildPathSupport {
 			"org.junit", new VersionRange("[4.13.0,5.0.0)"), null, "org.junit_4.*.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT4_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
 	private static final JUnitPluginDescription HAMCREST_CORE_PLUGIN= new JUnitPluginDescription(
-			"org.hamcrest.core", new VersionRange("[1.1.0,2.0.0)"), null, "org.hamcrest.core_1.*.jar", "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			"org.hamcrest.core", new VersionRange("[2.2.0,2.3.0)"), null, "org.hamcrest.core_2.*.jar", "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+
+	private static final JUnitPluginDescription HAMCREST_PLUGIN= new JUnitPluginDescription(
+			"org.hamcrest", new VersionRange("[2.2.0,2.3.0)"), null, "org.hamcrest_2.*.jar", "org.hamcrest.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
 	public static final JUnitPluginDescription JUNIT_JUPITER_API_PLUGIN= new JUnitPluginDescription(
 			"junit-jupiter-api", new VersionRange("[5.0.0,6.0.0)"), null, "junit-jupiter-api_5.*.jar", "junit-jupiter-api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
@@ -421,6 +426,13 @@ public class BuildPathSupport {
 	 */
 	public static IClasspathEntry getHamcrestCoreLibraryEntry() {
 		return HAMCREST_CORE_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.hamcrest library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getHamcrestLibraryEntry() {
+		return HAMCREST_PLUGIN.getLibraryEntry();
 	}
 
 	/**
