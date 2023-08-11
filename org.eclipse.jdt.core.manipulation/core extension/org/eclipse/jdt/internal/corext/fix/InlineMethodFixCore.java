@@ -36,13 +36,11 @@ public class InlineMethodFixCore implements IProposableFix, ICleanUpFixCore {
 
 	private final String fName;
 	private final ICompilationUnit fCompilationUnit;
-	private final MethodInvocation fMethodInvocation;
 	private final InlineMethodRefactoring fRefactoring;
 
-	private InlineMethodFixCore(String name, CompilationUnit compilationUnit, MethodInvocation methodInvocation, InlineMethodRefactoring refactoring) {
+	private InlineMethodFixCore(String name, CompilationUnit compilationUnit, InlineMethodRefactoring refactoring) {
 		this.fName= name;
 		this.fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
-		this.fMethodInvocation= methodInvocation;
 		this.fRefactoring= refactoring;
 	}
 
@@ -58,7 +56,7 @@ public class InlineMethodFixCore implements IProposableFix, ICleanUpFixCore {
 		} catch (OperationCanceledException | CoreException e) {
 			return null;
 		}
-		InlineMethodFixCore fix= new InlineMethodFixCore(name, compilationUnit, methodInvocation, refactoring);
+		InlineMethodFixCore fix= new InlineMethodFixCore(name, compilationUnit, refactoring);
 		return fix;
 	}
 	@Override
