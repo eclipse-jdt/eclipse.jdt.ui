@@ -6503,5 +6503,284 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
+	public void testInlineDeprecated_1() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"class E {\n" +
+				"    private class E1 {\n" +
+				"        public int foo(int a, int b) {\n" +
+				"            return a + b;\n" +
+				"        }\n" +
+				"        /**\n" +
+				"         * @deprecated use {@link #foo(int, int)} instead\n" +
+				"         * @param x - x\n" +
+				"         * @param y - y\n" +
+				"         * @param z - z\n" +
+				"         */\n" +
+				"        @Deprecated\n" +
+				"        public int foo(int x, int y, int z) {\n" +
+				"            int k = 2*y + 3*z;\n" +
+				"            return foo(x, k);\n" +
+				"        }\n" +
+				"    }\n" +
+				"    public int callfoo(int a, int b, int c) {\n" +
+				"        E1 e1= new E1();\n" +
+				"        return e1.foo(a, b, c);\n" +
+				"    }\n" +
+				"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", src, false, null);
+		int offset= src.indexOf("e1.foo");
+		AssistContext context= getCorrectionContext(cu, offset + 3, 3);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+
+		String expected=
+				"package test1;\n" +
+				"\n" +
+				"class E {\n" +
+				"    private class E1 {\n" +
+				"        public int foo(int a, int b) {\n" +
+				"            return a + b;\n" +
+				"        }\n" +
+				"        /**\n" +
+				"         * @deprecated use {@link #foo(int, int)} instead\n" +
+				"         * @param x - x\n" +
+				"         * @param y - y\n" +
+				"         * @param z - z\n" +
+				"         */\n" +
+				"        @Deprecated\n" +
+				"        public int foo(int x, int y, int z) {\n" +
+				"            int k = 2*y + 3*z;\n" +
+				"            return foo(x, k);\n" +
+				"        }\n" +
+				"    }\n" +
+				"    public int callfoo(int a, int b, int c) {\n" +
+				"        E1 e1= new E1();\n" +
+				"        int k = 2*b + 3*c;\n" +
+				"        return e1.foo(a, k);\n" +
+				"    }\n" +
+				"}\n";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+	}
+
+	@Test
+	public void testInlineDeprecated_2() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"class E {\n" +
+				"    private class E1 {\n" +
+				"        public int foo(int a, int b) {\n" +
+				"            return a + b;\n" +
+				"        }\n" +
+				"        /**\n" +
+				"         * @deprecated use {@link #foo(int, int)} instead\n" +
+				"         * @param x - x\n" +
+				"         * @param y - y\n" +
+				"         * @param z - z\n" +
+				"         */\n" +
+				"        @Deprecated\n" +
+				"        public int foo(int x, int y, int z) {\n" +
+				"            int k = 2*y + 3*z;\n" +
+				"            return k;\n" +
+				"        }\n" +
+				"    }\n" +
+				"    public int callfoo(int a, int b, int c) {\n" +
+				"        E1 e1= new E1();\n" +
+				"        return e1.foo(a, b, c);\n" +
+				"    }\n" +
+				"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", src, false, null);
+		int offset= src.indexOf("e1.foo");
+		AssistContext context= getCorrectionContext(cu, offset + 3, 3);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	@Test
+	public void testInlineDeprecated_3() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"class E {\n" +
+				"    private class E1 {\n" +
+				"        private int v = 5;\n" +
+				"        public int foo(int a, int b) {\n" +
+				"            return a + b;\n" +
+				"        }\n" +
+				"        /**\n" +
+				"         * @deprecated use {@link #foo(int, int)} instead\n" +
+				"         * @param x - x\n" +
+				"         * @param y - y\n" +
+				"         * @param z - z\n" +
+				"         */\n" +
+				"        @Deprecated\n" +
+				"        public int foo(int x, int y, int z) {\n" +
+				"            int k = 2*y + 3*z + v;\n" +
+				"            return foo(x, k);\n" +
+				"        }\n" +
+				"    }\n" +
+				"    public int callfoo(int a, int b, int c) {\n" +
+				"        E1 e1= new E1();\n" +
+				"        return e1.foo(a, b, c);\n" +
+				"    }\n" +
+				"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", src, false, null);
+		int offset= src.indexOf("e1.foo");
+		AssistContext context= getCorrectionContext(cu, offset + 3, 3);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+
+		String expected=
+				"package test1;\n" +
+				"\n" +
+				"class E {\n" +
+				"    private class E1 {\n" +
+				"        private int v = 5;\n" +
+				"        public int foo(int a, int b) {\n" +
+				"            return a + b;\n" +
+				"        }\n" +
+				"        /**\n" +
+				"         * @deprecated use {@link #foo(int, int)} instead\n" +
+				"         * @param x - x\n" +
+				"         * @param y - y\n" +
+				"         * @param z - z\n" +
+				"         */\n" +
+				"        @Deprecated\n" +
+				"        public int foo(int x, int y, int z) {\n" +
+				"            int k = 2*y + 3*z + v;\n" +
+				"            return foo(x, k);\n" +
+				"        }\n" +
+				"    }\n" +
+				"    public int callfoo(int a, int b, int c) {\n" +
+				"        E1 e1= new E1();\n" +
+				"        int k = 2*b + 3*c + e1.v;\n" +
+				"        return e1.foo(a, k);\n" +
+				"    }\n" +
+				"}\n";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testInlineDeprecated_4() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"public class E1 {\n" +
+				"    private int v = 5;\n" +
+				"    public int foo(int a, int b) {\n" +
+				"        return a + b;\n" +
+				"    }\n" +
+				"    /**\n" +
+				"     * @deprecated use {@link #foo(int, int)} instead\n" +
+				"     * @param x - x\n" +
+				"     * @param y - y\n" +
+				"     * @param z - z\n" +
+				"     */\n" +
+				"    @Deprecated\n" +
+				"    public int foo(int x, int y, int z) {\n" +
+				"        int k = 2*y + 3*z + v;\n" +
+				"        return foo(x, k);\n" +
+				"    }\n" +
+				"}\n";
+		pack1.createCompilationUnit("E1.java", src, false, null);
+		String src1=
+				"package test1;\n" +
+				"\n" +
+				"class E {\n" +
+				"    public int callfoo(int a, int b, int c) {\n" +
+				"        E1 e1= new E1();\n" +
+				"        return e1.foo(a, b, c);\n" +
+				"    }\n" +
+				"}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", src1, false, null);
+		int offset= src1.indexOf("e1.foo");
+		AssistContext context= getCorrectionContext(cu1, offset + 3, 3);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	@Test
+	public void testInlineDeprecated_5() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"public class E1 {\n" +
+				"    public int v = 5;\n" +
+				"    public int foo(int a, int b) {\n" +
+				"        return a + b;\n" +
+				"    }\n" +
+				"    /**\n" +
+				"     * @deprecated use {@link #foo(int, int)} instead\n" +
+				"     * @param x - x\n" +
+				"     * @param y - y\n" +
+				"     * @param z - z\n" +
+				"     */\n" +
+				"    @Deprecated\n" +
+				"    public int foo(int x, int y, int z) {\n" +
+				"        int k = 2*y + 3*z + v;\n" +
+				"        return foo(x, k);\n" +
+				"    }\n" +
+				"}\n";
+		pack1.createCompilationUnit("E1.java", src, false, null);
+		String src1=
+				"package test1;\n" +
+				"\n" +
+				"class E {\n" +
+				"    public int callfoo(int a, int b, int c) {\n" +
+				"        E1 e1= new E1();\n" +
+				"        return e1.foo(a, b, c);\n" +
+				"    }\n" +
+				"}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", src1, false, null);
+		int offset= src1.indexOf("e1.foo");
+		AssistContext context= getCorrectionContext(cu1, offset + 3, 3);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+
+		String expected=
+				"package test1;\n" +
+				"\n" +
+				"class E {\n" +
+				"    public int callfoo(int a, int b, int c) {\n" +
+				"        E1 e1= new E1();\n" +
+				"        int k = 2*b + 3*c + e1.v;\n" +
+				"        return e1.foo(a, k);\n" +
+				"    }\n" +
+				"}\n";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
 }
 
