@@ -45,7 +45,7 @@ public class SurroundWithTests16 extends SurroundWithTests {
 
 	@Override
 	protected SurroundWithTryCatchRefactoring createRefactoring(ICompilationUnit unit) {
-		return SurroundWithTryCatchRefactoring.create(unit, getTextSelection(), true);
+		return SurroundWithTryCatchRefactoring.create(unit, getTextSelection().getOffset(), getTextSelection().getLength(), true);
 	}
 
 	@Override

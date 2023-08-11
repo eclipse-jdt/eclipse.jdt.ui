@@ -63,7 +63,7 @@ public class SurroundWithResourcesTests1d8 extends AbstractJunit4SelectionTestCa
 	}
 
 	protected SurroundWithTryWithResourcesRefactoring createRefactoring(ICompilationUnit unit) {
-		return SurroundWithTryWithResourcesRefactoring.create(unit, getTextSelection());
+		return SurroundWithTryWithResourcesRefactoring.create(unit, getTextSelection().getOffset(), getTextSelection().getLength());
 	}
 
 	protected void tryResourcesInvalidTest() throws Exception {
