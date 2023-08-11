@@ -38,8 +38,6 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.jface.util.Util;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IResourceMapper;
@@ -112,6 +110,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.JFaceStringUtility;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements
 		IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, IResourceMapper, IJavaElementMapper {
@@ -337,7 +336,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				for (int i= 0; i < oldParameterTypes.length; i++) {
 					newparams[i]= oldParameterTypes[i];
 					for (int j= 0; j < possibleOldSigs.length; j++) {
-						newparams[i]= Util.replaceAll(newparams[i], possibleOldSigs[j], possibleNewSigs[j]);
+						newparams[i]= JFaceStringUtility.replaceAll(newparams[i], possibleOldSigs[j], possibleNewSigs[j]);
 					}
 				}
 				return newparams;
