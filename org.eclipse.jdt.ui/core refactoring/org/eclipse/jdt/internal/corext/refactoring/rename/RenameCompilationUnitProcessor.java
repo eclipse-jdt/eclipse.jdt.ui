@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -62,7 +63,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
@@ -439,7 +439,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 			return new DynamicValidationStateChange(resourceChange);
 		}
 
-		String label= JavaElementLabels.getTextLabel(fCu, JavaElementLabels.ALL_FULLY_QUALIFIED);
+		String label= JavaElementLabelsCore.getTextLabel(fCu, JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
 
 		final String name= fCu.getJavaProject().getElementName();
 		final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, BasicElementLabels.getFileName(fCu));

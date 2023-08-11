@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -121,8 +122,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -756,11 +755,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			JavaPlugin.log(exception);
 		}
 		final String description= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fTargetMethod.getElementName()));
-		final String header= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final String header= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabelsCore.getTextLabel(fTargetMethod, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), JavaElementLabelsCore.getTextLabel(declaring, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_original_pattern, JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_original_pattern, JavaElementLabelsCore.getTextLabel(fTargetMethod, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_method_pattern, BasicElementLabels.getJavaElementName(fIntermediaryMethodName)));
-		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_declaring_pattern, JavaElementLabels.getTextLabel(fIntermediaryType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_declaring_pattern, JavaElementLabelsCore.getTextLabel(fIntermediaryType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 		if (fUpdateReferences)
 			comment.addSetting(RefactoringCoreMessages.JavaRefactoringDescriptor_update_references);
 		final IntroduceIndirectionDescriptor descriptor= RefactoringSignatureDescriptorFactory.createIntroduceIndirectionDescriptor(project, description, comment.asString(), arguments, flags);
@@ -1198,8 +1197,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus createWarningAboutCall(IMember enclosing, ASTNode concreteNode, String message) {
-		String name= JavaElementLabels.getElementLabel(enclosing, JavaElementLabels.ALL_DEFAULT);
-		String container= JavaElementLabels.getElementLabel(enclosing.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED);
+		String name= JavaElementLabelsCore.getElementLabel(enclosing, JavaElementLabelsCore.ALL_DEFAULT);
+		String container= JavaElementLabelsCore.getElementLabel(enclosing.getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
 		return RefactoringStatus.createWarningStatus(Messages.format(message, new String[] { name, container }), JavaStatusContext.create(enclosing.getCompilationUnit(), concreteNode));
 	}
 
@@ -1326,8 +1325,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 		boolean hasNewAdjustments= (adjustments.size() - existingAdjustments) > 0;
 		if (hasNewAdjustments && ( (whoToAdjust.isReadOnly() || whoToAdjust.isBinary())))
-			return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_update_binary_target_visibility, new String[] { JavaElementLabels
-					.getElementLabel(whoToAdjust, JavaElementLabels.ALL_DEFAULT) }), JavaStatusContext.create(whoToAdjust));
+			return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_update_binary_target_visibility, new String[] { JavaElementLabelsCore
+					.getElementLabel(whoToAdjust, JavaElementLabelsCore.ALL_DEFAULT) }), JavaStatusContext.create(whoToAdjust));
 
 		RefactoringStatus status= new RefactoringStatus();
 

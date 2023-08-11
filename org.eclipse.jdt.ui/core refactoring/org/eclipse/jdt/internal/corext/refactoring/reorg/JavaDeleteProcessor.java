@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.DeleteDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
@@ -87,7 +88,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -570,7 +570,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private static boolean skipDeletingReferencedRoot(IConfirmQuery query, IPackageFragmentRoot root, List<IJavaProject> referencingProjects) throws OperationCanceledException {
 		if (referencingProjects.isEmpty() || root == null || ! root.exists() ||! root.isArchive())
 			return false;
-		String label= JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
+		String label= JavaElementLabelsCore.getElementLabel(root, JavaElementLabelsCore.ALL_DEFAULT);
 		String question= referencingProjects.size() == 1 ? Messages.format(RefactoringCoreMessages.DeleteRefactoring_3_singular, label) : Messages.format(
 				RefactoringCoreMessages.DeleteRefactoring_3_plural, label);
 		return ! query.confirm(question, referencingProjects.toArray());

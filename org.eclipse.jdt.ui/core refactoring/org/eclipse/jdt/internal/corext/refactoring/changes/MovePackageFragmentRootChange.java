@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
@@ -45,7 +45,7 @@ public class MovePackageFragmentRootChange extends PackageFragmentRootReorgChang
 
 	@Override
 	public String getName() {
-		String rootName= JavaElementLabels.getElementLabel(getRoot(), JavaElementLabels.ALL_DEFAULT);
+		String rootName= JavaElementLabelsCore.getElementLabel(getRoot(), JavaElementLabelsCore.ALL_DEFAULT);
 		String destinationName= BasicElementLabels.getResourceName(getDestination());
 		return Messages.format(RefactoringCoreMessages.MovePackageFragmentRootChange_move, new String[] { rootName, destinationName });
 	}

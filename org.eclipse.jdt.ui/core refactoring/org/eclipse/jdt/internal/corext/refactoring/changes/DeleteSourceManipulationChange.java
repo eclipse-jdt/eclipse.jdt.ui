@@ -35,7 +35,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 /**
  * Caveat: undo of package fragment deletes is provided by a wrapping
@@ -68,7 +68,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	@Override
 	public String getName() {
 		IJavaElement javaElement= getJavaElement(getSourceManipulation());
-		return Messages.format(RefactoringCoreMessages.DeleteSourceManipulationChange_0, JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_DEFAULT));
+		return Messages.format(RefactoringCoreMessages.DeleteSourceManipulationChange_0, JavaElementLabelsCore.getElementLabel(javaElement, JavaElementLabelsCore.ALL_DEFAULT));
 	}
 
 	/*

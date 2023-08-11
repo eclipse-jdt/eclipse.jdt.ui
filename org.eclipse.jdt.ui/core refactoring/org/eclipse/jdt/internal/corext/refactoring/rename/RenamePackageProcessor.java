@@ -106,7 +106,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -534,7 +534,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		Set<String> topLevelTypeNames= getTopLevelTypeNames();
 		for (IPackageFragmentRoot root : fPackage.getJavaProject().getPackageFragmentRoots()) {
 			if (! isPackageNameOkInRoot(newName, root)) {
-				String rootLabel = JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
+				String rootLabel = JavaElementLabelsCore.getElementLabel(root, JavaElementLabelsCore.ALL_DEFAULT);
 				String newPackageName= BasicElementLabels.getJavaElementName(getNewElementName());
 				String message= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_aleady_exists, new Object[]{ newPackageName, rootLabel});
 				status.merge(RefactoringStatus.createWarningStatus(message));
@@ -634,7 +634,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	}
 
 	private static String getElementLabel(IJavaElement javaElement) {
-		return JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_DEFAULT);
+		return JavaElementLabelsCore.getElementLabel(javaElement, JavaElementLabelsCore.ALL_DEFAULT);
 	}
 
 	@Override

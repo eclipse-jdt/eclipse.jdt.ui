@@ -94,10 +94,10 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManagerCore;
 import org.eclipse.jdt.internal.ui.util.JavaProjectUtilities;
 
 
@@ -288,7 +288,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 				Type type= importRewrite.addImport(typeBinding, ast, importRewriteContext);
 				classInstanceCreation.setType(type);    // Should not touch the original AST ...
 				defaultValue= ASTNodes.asFormattedString(classInstanceCreation, 0, StubUtility.getLineDelimiterUsed(cuRewrite.getCu()),
-						FormatterProfileManager.getProjectSettings(cuRewrite.getCu().getJavaProject()));
+						FormatterProfileManagerCore.getProjectSettings(cuRewrite.getCu().getJavaProject()));
 				classInstanceCreation.setType(cicType); // ... so let's restore it right away.
 			}
 		}
@@ -578,8 +578,8 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		final String description= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fChangeSignatureProcessor.getMethod().getElementName()));
 		final String header= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fParameter.getNewName()), signature, BasicElementLabels.getJavaCodeString(ASTNodes.asString(fSelectedExpression))});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(extended.getProject(), this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureProcessor.getMethod(),
-				JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabelsCore.getTextLabel(fChangeSignatureProcessor.getMethod(),
+				JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, BasicElementLabels.getJavaCodeString(ASTNodes.asString(fSelectedExpression))));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, BasicElementLabels.getJavaElementName(getAddedParameterInfo().getNewName())));
 		return RefactoringSignatureDescriptorFactory.createIntroduceParameterDescriptor(extended.getProject(), description, comment.asString(), arguments, extended.getFlags());
