@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.surround;
 
-import org.eclipse.jface.text.ITextSelection;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -41,10 +39,6 @@ public class SurroundWithTryWithResourcesRefactoring extends SurroundWithTryWith
 
 	public static SurroundWithTryWithResourcesRefactoring create(ICompilationUnit cu, int offset, int length) {
 		return new SurroundWithTryWithResourcesRefactoring(cu, Selection.createFromStartLength(offset, length));
-	}
-
-	public static SurroundWithTryWithResourcesRefactoring create(ICompilationUnit cu, ITextSelection selection) {
-		return new SurroundWithTryWithResourcesRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()));
 	}
 
 	@Override

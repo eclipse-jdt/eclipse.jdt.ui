@@ -54,7 +54,7 @@ public class SurroundWithTests extends AbstractJunit4SelectionTestCase {
 	}
 
 	protected SurroundWithTryCatchRefactoring createRefactoring(ICompilationUnit unit) {
-		return SurroundWithTryCatchRefactoring.create(unit, getTextSelection());
+		return SurroundWithTryCatchRefactoring.create(unit, getTextSelection().getOffset(), getTextSelection().getLength());
 	}
 
 	protected void tryCatchInvalidTest() throws Exception {

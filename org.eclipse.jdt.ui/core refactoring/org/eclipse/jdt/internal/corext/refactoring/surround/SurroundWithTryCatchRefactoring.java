@@ -28,8 +28,6 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.jface.text.ITextSelection;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -128,16 +126,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		fLeaveDirty= false;
 	}
 
-	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection) {
-		return create(cu, selection, false);
-	}
-
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length) {
 		return create(cu, offset, length, false);
-	}
-
-	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection, boolean isMultiCatch) {
-		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()), isMultiCatch);
 	}
 
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length, boolean isMultiCatch) {

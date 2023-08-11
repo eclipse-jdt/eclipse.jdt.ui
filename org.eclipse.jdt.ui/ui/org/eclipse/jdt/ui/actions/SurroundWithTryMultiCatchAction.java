@@ -20,6 +20,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -28,7 +29,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * Action to surround a set of statements with a try/multi-catch block.
@@ -68,7 +68,7 @@ public class SurroundWithTryMultiCatchAction extends SurroundWithTryCatchAction 
 
 	@Override
 	SurroundWithTryCatchRefactoring createRefactoring(ITextSelection selection, ICompilationUnit cu) {
-		return SurroundWithTryCatchRefactoring.create(cu, selection, true);
+		return SurroundWithTryCatchRefactoring.create(cu, selection.getOffset(), selection.getLength(), true);
 	}
 
 	@Override
