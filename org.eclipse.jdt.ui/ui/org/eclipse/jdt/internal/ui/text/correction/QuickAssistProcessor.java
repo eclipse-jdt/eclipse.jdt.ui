@@ -161,7 +161,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
@@ -623,6 +622,26 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	private static CompilationUnit findCUForMethod(CompilationUnit compilationUnit, ICompilationUnit cu, IMethodBinding methodBinding) {
+		ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getMethodDeclaration());
+		if (methodDecl == null) {
+			// is methodDecl defined in another CU?
+			ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getTypeDeclaration();
+			if (declaringTypeDecl.isFromSource()) {
+				ICompilationUnit targetCU= null;
+				try {
+					targetCU= ASTResolving.findCompilationUnitForBinding(cu, compilationUnit, declaringTypeDecl);
+				} catch (JavaModelException e) { /* can't do better */
+				}
+				if (targetCU != null) {
+					return ASTResolving.createQuickFixAST(targetCU, null);
+				}
+			}
+			return null;
+		}
+		return compilationUnit;
+	}
+
 	@SuppressWarnings("unused")
 	private static boolean getDeprecatedProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals) {
 		if (!(node instanceof MethodInvocation)) {
@@ -643,7 +662,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		IAnnotationBinding[] annotations= methodBinding.getAnnotations();
 		for (IAnnotationBinding annotation : annotations) {
 			if (annotation.getAnnotationType().getQualifiedName().equals("java.lang.Deprecated")) { //$NON-NLS-1$
-				CompilationUnit cu= (CompilationUnit)node.getRoot();
+				CompilationUnit sourceCu= (CompilationUnit)node.getRoot();
+				CompilationUnit cu= findCUForMethod(sourceCu, (ICompilationUnit)sourceCu.getJavaElement(), methodBinding);
+				if (cu == null) {
+					return false;
+				}
 				try {
 					MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cu);
 					Javadoc javadoc= methodDeclaration.getJavadoc();
@@ -667,29 +690,45 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 													if (refBinding != null) {
 														class FindNewMethodVisitor extends ASTVisitor {
 															private boolean useMethodIsUsed= false;
+															private boolean referencesPrivate= false;
 															@Override
-															public boolean visit(MethodInvocation node) {
-																IMethodBinding binding= node.resolveMethodBinding();
+															public boolean visit(MethodInvocation invocation) {
+																IMethodBinding binding= invocation.resolveMethodBinding();
 																if (binding != null) {
 																	if (binding.isEqualTo(refBinding)) {
 																		useMethodIsUsed= true;
-																		throw new AbortSearchException();
 																	}
 																}
 																return false;
 															}
-															public boolean isUseMethodUsed() {
+															@Override
+															public boolean visit(SimpleName name) {
+																IBinding binding= name.resolveBinding();
+																if (binding instanceof IVariableBinding varBinding
+																		&& varBinding.isField()) {
+																	int modifiers= varBinding.getModifiers();
+																	if (Modifier.isPrivate(modifiers)) {
+																		referencesPrivate= true;
+																	}
+																}
+																return false;
+															}
+														public boolean isUseMethodUsed() {
 																return useMethodIsUsed;
+															}
+															public boolean referencesPrivateField() {
+																return referencesPrivate;
 															}
 														}
 														FindNewMethodVisitor findNewMethodVisitor= new FindNewMethodVisitor();
-														try {
-															methodDeclaration.accept(findNewMethodVisitor);
-														} catch (AbortSearchException e) {
-															// ignore
-														}
+														methodDeclaration.accept(findNewMethodVisitor);
 														if (!findNewMethodVisitor.isUseMethodUsed()) {
 															return false;
+														}
+														if (findNewMethodVisitor.referencesPrivateField()) {
+															if (methodInvocation.getRoot() != methodDeclaration.getRoot()) {
+																return false;
+															}
 														}
 														if (proposals != null) {
 															IProposableFix fix= InlineMethodFixCore.create(FixMessages.InlineDeprecatedMethod_msg, (CompilationUnit)methodInvocation.getRoot(), methodInvocation);
