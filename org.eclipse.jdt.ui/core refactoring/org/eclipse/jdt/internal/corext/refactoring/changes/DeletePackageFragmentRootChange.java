@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootMan
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -86,7 +86,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 
 	@Override
 	public String getName() {
-		String rootName= JavaElementLabels.getElementLabel(getRoot(), JavaElementLabels.ALL_DEFAULT);
+		String rootName= JavaElementLabelsCore.getElementLabel(getRoot(), JavaElementLabelsCore.ALL_DEFAULT);
 		return Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_delete, rootName);
 	}
 

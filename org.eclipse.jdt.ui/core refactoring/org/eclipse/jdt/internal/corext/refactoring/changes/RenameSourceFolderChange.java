@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChan
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
@@ -75,7 +75,7 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 	}
 
 	private static String getRootLabel(IPackageFragmentRoot root) {
-		return JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
+		return JavaElementLabelsCore.getElementLabel(root, JavaElementLabelsCore.ALL_DEFAULT);
 	}
 
 	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) {

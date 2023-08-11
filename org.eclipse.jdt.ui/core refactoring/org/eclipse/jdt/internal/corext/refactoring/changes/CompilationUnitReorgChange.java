@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 abstract class CompilationUnitReorgChange extends ResourceChange {
 
@@ -108,7 +108,7 @@ abstract class CompilationUnitReorgChange extends ResourceChange {
 	}
 
 	static String getPackageName(IPackageFragment pack) {
-		return JavaElementLabels.getElementLabel(pack, JavaElementLabels.ALL_DEFAULT);
+		return JavaElementLabelsCore.getElementLabel(pack, JavaElementLabelsCore.ALL_DEFAULT);
 	}
 
 	private void markAsExecuted(ICompilationUnit unit, ResourceMapping mapping) {

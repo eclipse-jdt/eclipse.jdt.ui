@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 /**
  * Change to create move targets during scripting of move refactorings.
@@ -72,11 +72,11 @@ public final class LoggedCreateTargetChange extends ResourceChange {
 		if (fSelection instanceof IJavaElement) {
 			final IJavaElement element= (IJavaElement) fSelection;
 			if (!Checks.isAvailable(element))
-				RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameResourceChange_does_not_exist, JavaElementLabels.getTextLabel(fSelection, JavaElementLabels.ALL_DEFAULT)));
+				RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameResourceChange_does_not_exist, JavaElementLabelsCore.getTextLabel(fSelection, JavaElementLabelsCore.ALL_DEFAULT)));
 		} else if (fSelection instanceof IResource) {
 			final IResource resource= (IResource) fSelection;
 			if (!resource.exists())
-				RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameResourceChange_does_not_exist, JavaElementLabels.getTextLabel(fSelection, JavaElementLabels.ALL_DEFAULT)));
+				RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameResourceChange_does_not_exist, JavaElementLabelsCore.getTextLabel(fSelection, JavaElementLabelsCore.ALL_DEFAULT)));
 		}
 		return new RefactoringStatus();
 	}
