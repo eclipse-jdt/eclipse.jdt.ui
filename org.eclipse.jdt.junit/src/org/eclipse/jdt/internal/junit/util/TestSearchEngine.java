@@ -83,17 +83,7 @@ public class TestSearchEngine extends CoreTestSearchEngine {
 			return;
 		}
 
-		SubMonitor subMonitor= SubMonitor.convert(monitor, 3 + 3); // Add +3
-
-		// Add this idle wait of 3 seconds and advance the progress in the subMonitor
-		for (int i= 0; i < 3; i++) {
-			try {
-				Thread.sleep(1_000);
-				subMonitor.split(1);
-			} catch (InterruptedException e) {
-				// ignore
-			}
-		}
+		SubMonitor subMonitor= SubMonitor.convert(monitor, 3);
 
 		collectDeclaredMethodNames(type, javaProject, testKindId, methodNames);
 		subMonitor.split(1);
