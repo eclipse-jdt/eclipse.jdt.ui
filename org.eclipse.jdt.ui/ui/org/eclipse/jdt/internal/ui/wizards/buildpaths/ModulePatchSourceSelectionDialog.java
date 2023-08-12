@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ibm.icu.text.MessageFormat;
+import java.text.MessageFormat;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

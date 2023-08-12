@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import com.ibm.icu.text.Collator;
+import java.text.Collator;
 
 import org.eclipse.swt.widgets.Shell;
 

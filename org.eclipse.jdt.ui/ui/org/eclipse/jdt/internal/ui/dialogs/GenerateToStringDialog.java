@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import com.ibm.icu.text.Collator;
+import java.text.Collator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;

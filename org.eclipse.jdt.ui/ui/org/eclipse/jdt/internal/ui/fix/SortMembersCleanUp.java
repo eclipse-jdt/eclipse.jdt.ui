@@ -17,7 +17,7 @@ package org.eclipse.jdt.internal.ui.fix;
 import java.util.HashSet;
 import java.util.Map;
 
-import com.ibm.icu.text.MessageFormat;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;

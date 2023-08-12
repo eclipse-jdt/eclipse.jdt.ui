@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.ibm.icu.text.MessageFormat;
+import java.text.MessageFormat;
 
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 

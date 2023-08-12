@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.ibm.icu.text.MessageFormat;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.CoreException;
 
