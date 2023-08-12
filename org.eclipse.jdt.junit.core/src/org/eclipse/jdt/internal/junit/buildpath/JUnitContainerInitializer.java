@@ -114,8 +114,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			break;
 		case JUNIT4:
 			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
-			entriesList.add(BuildPathSupport.getHamcrestLibraryEntry());
-			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
+			addHamcrest(entriesList);
 			break;
 		case JUNIT5:
 			entriesList.add(BuildPathSupport.getJUnitJupiterApiLibraryEntry());
@@ -133,10 +132,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitApiGuardianLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
-			entriesList.add(BuildPathSupport.getHamcrestLibraryEntry());
- 			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
-			// errors will be reported above
-			entriesList.removeIf(e -> e == null);
+			addHamcrest(entriesList);
 			break;
 		default:
 			break;
@@ -145,6 +141,20 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 		return new JUnitContainer(containerPath, entries);
 	}
 
+	private static void addHamcrest(List<IClasspathEntry> entriesList) {
+		IClasspathEntry hamcrestLibraryEntry= BuildPathSupport.getHamcrestLibraryEntry();
+		if (hamcrestLibraryEntry != null) {
+			entriesList.add(hamcrestLibraryEntry);
+		} else {
+			IClasspathEntry hamcrestCoreLibraryEntry= BuildPathSupport.getHamcrestCoreLibraryEntry();
+			if (hamcrestCoreLibraryEntry != null) {
+				entriesList.add(hamcrestCoreLibraryEntry);
+			} else {
+				String message = "Either org.hamcrest.core 1.x or org.hamcrest 2.x must be present.";  //$NON-NLS-1$
+				JUnitCorePlugin.log(Status.error(message, new IllegalStateException(message)));
+			}
+		}
+	}
 
 	private static boolean isValidJUnitContainerPath(IPath path) {
 		return path != null && path.segmentCount() == 2 && JUnitCore.JUNIT_CONTAINER_ID.equals(path.segment(0));
