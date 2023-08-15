@@ -72,7 +72,9 @@ Require-Bundle:
  org.junit,
  org.eclipse.jdt.bcoview,
  org.eclipse.jdt.jeview,
- org.eclipse.jdt.astview
+ org.eclipse.jdt.astview,
+ org.eclipse.compare.core,
+ org.eclipse.compare
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Eclipse-BundleShape: dir
 Bundle-ActivationPolicy: lazy

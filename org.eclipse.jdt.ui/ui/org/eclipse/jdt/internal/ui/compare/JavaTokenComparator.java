@@ -38,13 +38,10 @@ public class JavaTokenComparator implements ITokenComparator {
 	private int fCount;
 	private int[] fStarts;
 	private int[] fLengths;
+	private boolean fIgnoreWhitespace;
 
-	/**
-	 * Creates a token comparator for the given string.
-	 *
-	 * @param text the text to be tokenized
-	 */
-	public JavaTokenComparator(String text) {
+	public JavaTokenComparator(String text,boolean ignoreWhitespace) {
+		fIgnoreWhitespace = ignoreWhitespace;
 		Assert.isLegal(text != null);
 
 		fText= text;
@@ -63,7 +60,7 @@ public class JavaTokenComparator implements ITokenComparator {
 				int start= scanner.getCurrentTokenStartPosition();
 				int end= scanner.getCurrentTokenEndPosition()+1;
 				// Comments and strings should not be treated as a single token, see https://bugs.eclipse.org/78063
-				if (TokenScanner.isComment(tokenType) || tokenType == ITerminalSymbols.TokenNameStringLiteral) {
+				if (TokenScanner.isComment(tokenType) || (fIgnoreWhitespace==false && tokenType == ITerminalSymbols.TokenNameStringLiteral)) {
 					// Line comments are often commented code, so lets treat them as code. See https://bugs.eclipse.org/216707
 					boolean parseAsJava= tokenType == ITerminalSymbols.TokenNameCOMMENT_LINE;
 					int dl= parseAsJava ? getCommentStartTokenLength(tokenType) : 0;
@@ -82,6 +79,15 @@ public class JavaTokenComparator implements ITokenComparator {
 		if (endPos < length) {
 			recordTokenRange(endPos, length - endPos);
 		}
+	}
+
+	/**
+	 * Creates a token comparator for the given string.
+	 *
+	 * @param text the text to be tokenized
+	 */
+	public JavaTokenComparator(String text) {
+		this(text,false);
 	}
 
 	/**
@@ -178,12 +184,31 @@ public class JavaTokenComparator implements ITokenComparator {
 	public boolean rangesEqual(int thisIndex, IRangeComparator other, int otherIndex) {
 		if (other != null && getClass() == other.getClass()) {
 			JavaTokenComparator tc= (JavaTokenComparator) other;	// safe cast
+			if (fIgnoreWhitespace) {
+				String thisStr = getTrimmedTokenString(this,thisIndex,this.fText);
+				String otherStr = getTrimmedTokenString(tc,otherIndex,tc.fText);
+				if (thisStr.equals(otherStr)) {
+					return true;
+				}else {
+					return false;
+				}
+			}
 			int thisLen= getTokenLength(thisIndex);
 			int otherLen= tc.getTokenLength(otherIndex);
+			int thisStart = getTokenStart(thisIndex);
+			int otherStart=tc.getTokenStart(otherIndex);
 			if (thisLen == otherLen)
-				return fText.regionMatches(false, getTokenStart(thisIndex), tc.fText, tc.getTokenStart(otherIndex), thisLen);
+				return fText.regionMatches(false, thisStart, tc.fText, otherStart, thisLen);
 		}
 		return false;
+	}
+
+	private String getTrimmedTokenString(JavaTokenComparator comparator,int index,String text) {
+		int otherLen= comparator.getTokenLength(index);
+		int otherStart=comparator.getTokenStart(index);
+		String sub= text.substring(otherStart, otherStart + otherLen);
+		sub = sub.trim();
+		return sub;
 	}
 
 	/**
