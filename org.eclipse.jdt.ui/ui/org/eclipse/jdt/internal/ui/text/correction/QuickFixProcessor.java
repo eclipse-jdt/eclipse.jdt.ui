@@ -420,8 +420,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, null, proposals);
 				break;
 			case IProblem.UnresolvedVariable:
-				ICompilationUnit cu= context.getCompilationUnit();
-
 				CompilationUnit astRoot= context.getASTRoot();
 				ASTNode selectedNode= problem.getCoveredNode(astRoot);
 				if (selectedNode != null) {
