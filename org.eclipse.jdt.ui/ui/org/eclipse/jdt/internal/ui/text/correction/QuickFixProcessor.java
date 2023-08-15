@@ -37,9 +37,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
@@ -412,8 +417,26 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UndefinedField:
 			case IProblem.UndefinedName:
-			case IProblem.UnresolvedVariable:
 				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, null, proposals);
+				break;
+			case IProblem.UnresolvedVariable:
+				ICompilationUnit cu= context.getCompilationUnit();
+
+				CompilationUnit astRoot= context.getASTRoot();
+				ASTNode selectedNode= problem.getCoveredNode(astRoot);
+				if (selectedNode != null) {
+					// type that defines the variable
+					ITypeBinding declaringTypeBinding= Bindings.getBindingOfParentTypeContext(selectedNode);
+					if (declaringTypeBinding == null) {
+						if (selectedNode.getParent() instanceof QualifiedName &&
+								(selectedNode.getParent().getParent() instanceof SingleMemberAnnotation ||
+										selectedNode.getParent().getParent() instanceof MemberValuePair)) {
+							UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
+						} else {
+							UnresolvedElementsSubProcessor.getVariableProposals(context, problem, null, proposals);
+						}
+					}
+				}
 				break;
 			case IProblem.UninitializedBlankFinalField:
 				UnInitializedFinalFieldSubProcessor.getProposals(context, problem, proposals);
