@@ -425,14 +425,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				if (selectedNode != null) {
 					// type that defines the variable
 					ITypeBinding declaringTypeBinding= Bindings.getBindingOfParentTypeContext(selectedNode);
-					if (declaringTypeBinding == null) {
-						if (selectedNode.getParent() instanceof QualifiedName &&
+					if (declaringTypeBinding == null && selectedNode.getParent() instanceof QualifiedName &&
 								(selectedNode.getParent().getParent() instanceof SingleMemberAnnotation ||
 										selectedNode.getParent().getParent() instanceof MemberValuePair)) {
-							UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
-						} else {
-							UnresolvedElementsSubProcessor.getVariableProposals(context, problem, null, proposals);
-						}
+						UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
+					} else {
+						UnresolvedElementsSubProcessor.getVariableProposals(context, problem, null, proposals);
 					}
 				}
 				break;
