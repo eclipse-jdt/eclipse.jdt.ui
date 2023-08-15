@@ -77,7 +77,7 @@ public class TypeAnnotationRewriteOperations {
 
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 			TextEditGroup group= createTextEditGroup(isMove() ? FixMessages.TypeAnnotationFix_move : FixMessages.TypeAnnotationFix_remove, cuRewrite);
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 
