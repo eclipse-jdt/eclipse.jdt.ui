@@ -33,17 +33,16 @@ import org.eclipse.core.filebuffers.FileBuffers;
 
 import org.eclipse.text.edits.ReplaceEdit;
 
-import org.eclipse.search.core.text.TextSearchEngine;
-import org.eclipse.search.core.text.TextSearchMatchAccess;
-import org.eclipse.search.core.text.TextSearchRequestor;
-import org.eclipse.search.core.text.TextSearchScope;
-
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.manipulation.internal.search.ITextSearchCollector;
+import org.eclipse.jdt.core.manipulation.internal.search.ITextSearchMatchResult;
+import org.eclipse.jdt.core.manipulation.internal.search.ITextSearchRunner;
+import org.eclipse.jdt.core.manipulation.internal.search.TextSearchAssistantSingleton;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -57,7 +56,7 @@ public class QualifiedNameFinder {
 			RefactoringCoreMessages.QualifiedNameFinder_qualifiedNames_name,
 			RefactoringCoreMessages.QualifiedNameFinder_qualifiedNames_description));
 
-	private static class ResultCollector extends TextSearchRequestor {
+	private static class ResultCollector implements ITextSearchCollector {
 
 		private final String fNewValue;
 		private final QualifiedNameSearchResult fResult;
@@ -91,7 +90,7 @@ public class QualifiedNameFinder {
 		}
 
 		@Override
-		public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
+		public boolean acceptPatternMatch(ITextSearchMatchResult matchAccess) throws CoreException {
 			int start= matchAccess.getMatchOffset();
 			int length= matchAccess.getMatchLength();
 
@@ -120,6 +119,30 @@ public class QualifiedNameFinder {
 
 			return true;
 		}
+
+		@Override
+		public void beginReporting() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void endReporting() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void flushMatches(IFile file) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public boolean reportBinaryFile(IFile file) {
+			// TODO Auto-generated method stub
+			return false;
+		}
 	}
 
 	private QualifiedNameFinder() {
@@ -139,22 +162,16 @@ public class QualifiedNameFinder {
 			monitor.worked(1);
 			return;
 		}
-
 		ResultCollector collector= new ResultCollector(result, newValue);
-		TextSearchEngine engine= TextSearchEngine.create();
-		Pattern searchPattern= PatternConstructor.createPattern(pattern, true, false);
-
-		engine.search(createScope(filePatterns, root), collector, searchPattern, monitor);
+		IResource[] roots = getSearchProjects(root);
+		ITextSearchRunner runner = TextSearchAssistantSingleton.getDefault().getRunner();
+		if( runner != null ) {
+			runner.search(roots, getFilePattern(filePatterns), false, collector, getSearchPattern(pattern), monitor);
+		}
 	}
 
-	private static TextSearchScope createScope(String filePatterns, IProject root) {
-		HashSet<IProject> res= new HashSet<>();
-		res.add(root);
-		addReferencingProjects(root, res);
-		IResource[] resArr= res.toArray(new IResource[res.size()]);
-		Pattern filePattern= getFilePattern(filePatterns);
-
-		return TextSearchScope.newSearchScope(resArr, filePattern, false);
+	private static Pattern getSearchPattern(String searchPattern) {
+		return PatternConstructor.createPattern(searchPattern, true, false);
 	}
 
 	private static Pattern getFilePattern(String filePatterns) {
@@ -165,6 +182,14 @@ public class QualifiedNameFinder {
 			filePatternArray[i++]= tokenizer.nextToken().trim();
 		}
 		return PatternConstructor.createPattern(filePatternArray, true, false);
+	}
+
+	private static IResource[] getSearchProjects(IProject p) {
+		HashSet<IProject> res= new HashSet<>();
+		res.add(p);
+		addReferencingProjects(p, res);
+		IResource[] resArr= res.toArray(new IResource[res.size()]);
+		return resArr;
 	}
 
 	private static void addReferencingProjects(IProject root, Set<IProject> res) {

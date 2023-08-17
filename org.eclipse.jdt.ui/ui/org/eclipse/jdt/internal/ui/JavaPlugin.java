@@ -91,6 +91,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
+import org.eclipse.jdt.core.manipulation.internal.search.TextSearchAssistantSingleton;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
@@ -119,6 +120,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantReg
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileStore;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentProvider;
+import org.eclipse.jdt.internal.ui.search.UISearchRunner;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory;
@@ -373,6 +375,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		fBundleContext= context;
+
+		TextSearchAssistantSingleton.getDefault().setRunner(new UISearchRunner());
 
 		// register debug options listener
 		Hashtable<String, String> properties= new Hashtable<>(2);

@@ -15,12 +15,11 @@
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import java.text.Collator;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -33,6 +32,8 @@ import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
@@ -62,13 +63,12 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.search.core.text.TextSearchEngine;
-import org.eclipse.search.core.text.TextSearchMatchAccess;
-import org.eclipse.search.core.text.TextSearchRequestor;
-import org.eclipse.search.core.text.TextSearchScope;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.manipulation.internal.search.ITextSearchCollector;
+import org.eclipse.jdt.core.manipulation.internal.search.ITextSearchMatchResult;
+import org.eclipse.jdt.core.manipulation.internal.search.ITextSearchRunner;
+import org.eclipse.jdt.core.manipulation.internal.search.TextSearchAssistantSingleton;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -195,7 +195,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	}
 
 
-	private static class ResultCollector extends TextSearchRequestor {
+	private static class ResultCollector implements ITextSearchCollector {
 
 		private final List<KeyReference> fResult;
 		private final boolean fIsKeyDoubleQuoted;
@@ -211,7 +211,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		}
 
 		@Override
-		public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
+		public boolean acceptPatternMatch(ITextSearchMatchResult matchAccess) throws CoreException {
 			int start= matchAccess.getMatchOffset();
 			int length= matchAccess.getMatchLength();
 
@@ -223,6 +223,31 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				fResult.add(new KeyReference(matchAccess.getFile(), null, start, length, true));
 			}
 			return true;
+		}
+
+		@Override
+		public void beginReporting() {
+			// do nothing
+		}
+
+		@Override
+		public void endReporting() {
+			// do nothing
+		}
+
+		@Override
+		public boolean acceptFile(IFile file) throws CoreException {
+			return false;
+		}
+
+		@Override
+		public void flushMatches(IFile file) {
+			// do nothing
+		}
+
+		@Override
+		public boolean reportBinaryFile(IFile file) {
+			return false;
 		}
 	}
 
@@ -468,17 +493,21 @@ public class PropertyKeyHyperlink implements IHyperlink {
 								searchString= buf.toString();
 							} else
 								searchString= key;
-							ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
-							TextSearchEngine engine= TextSearchEngine.create();
-							Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
 
-							/* <p>
-							 * XXX: This does not work for properties files coming from a JAR.
-							 * For details see https://bugs.eclipse.org/bugs/show_bug.cgi?id=23341
-							 * </p>
-							*/
 							if (fStorage instanceof IResource) {
-								engine.search(createScope(((IResource)fStorage).getProject()), collector, searchPattern, new SubProgressMonitor(monitor, 4));
+								ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
+								IProject p = ((IResource)fStorage).getProject();
+								IResource[] roots = new IResource[] {p};
+								Pattern filenamePattern = getFileNamesPattern();
+								/* <p>
+								 * XXX: This does not work for properties files coming from a JAR.
+								 * For details see https://bugs.eclipse.org/bugs/show_bug.cgi?id=23341
+								 * </p>
+								*/
+								ITextSearchRunner runner = TextSearchAssistantSingleton.getDefault().getRunner();
+								if( runner != null ) {
+									runner.search(roots, filenamePattern, false, collector, getSearchPattern(searchString), monitor);
+								}
 							}
 						} else {
 							monitor.worked(1);
@@ -498,7 +527,12 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		return result.toArray(new KeyReference[result.size()]);
 	}
 
-	private static TextSearchScope createScope(IResource scope) {
+	private static Pattern getSearchPattern(String searchPattern) {
+		return PatternConstructor.createPattern(searchPattern, true, false);
+
+	}
+
+	private static Pattern getFileNamesPattern() {
 		ArrayList<String> fileNamePatternStrings= new ArrayList<>();
 
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
@@ -510,8 +544,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		String[] allPatternStrings= fileNamePatternStrings.toArray(new String[fileNamePatternStrings.size()]);
 		Pattern fileNamePattern= PatternConstructor.createPattern(allPatternStrings, false, false);
-
-		return TextSearchScope.newSearchScope(new IResource[] { scope }, fileNamePattern, false);
+		return fileNamePattern;
 	}
 
 	/*
