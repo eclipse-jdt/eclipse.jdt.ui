@@ -114,6 +114,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 					builder.swapAnnotations();
 				}
 				break;
+			case IProblem.NullityUncheckedTypeAnnotation:
 			case IProblem.RequiredNonNullButProvidedNull:
 			case IProblem.RequiredNonNullButProvidedPotentialNull:
 			case IProblem.RequiredNonNullButProvidedUnknown:

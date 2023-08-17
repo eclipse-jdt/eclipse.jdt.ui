@@ -601,6 +601,7 @@ public class NullAnnotationsRewriteOperations {
 							}
 						}
 						break;
+					case IProblem.NullityUncheckedTypeAnnotation:
 					case IProblem.SpecdNonNullLocalVariableComparisonYieldsFalse:
 					case IProblem.RedundantNullCheckOnSpecdNonNullLocalVariable:
 					case IProblem.RequiredNonNullButProvidedNull:

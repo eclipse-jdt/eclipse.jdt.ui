@@ -69,6 +69,7 @@ import org.junit.runners.Suite;
 	NullAnnotationsQuickFixTest.class,
 	NullAnnotationsQuickFixTest1d8.class,
 	NullAnnotationsQuickFixTest1d8Mix.class,
+	NullAnnotationsQuickFixTest9.class,
 	AnnotateAssistTest1d5.class,
 	AnnotateAssistTest1d8.class,
 	TypeAnnotationQuickFixTest.class
