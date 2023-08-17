@@ -2410,4 +2410,73 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			}
 		}
 	}
+	@Test
+	public void testGH1294() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final String refPrefix,
+							final boolean errorOnEmptyName) {
+						return new IInputValidator() {
+							public String isValid(String newText) {
+								String validationStatus = validateNewRefName(newText, this,
+										refPrefix, errorOnEmptyName);
+								return validationStatus;
+							}
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(String refNameInput,
+							@NonNull Object repo, @NonNull String refPrefix,
+							final boolean errorOnEmptyName) {
+						return "";
+					}
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 5);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 'refPrefix' to '@NonNull'");
+
+		String preview= getPreviewContent(proposal);
+
+		assertEqualString(preview,
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final @NonNull String refPrefix,
+							final boolean errorOnEmptyName) {
+						return new IInputValidator() {
+							public String isValid(String newText) {
+								String validationStatus = validateNewRefName(newText, this,
+										refPrefix, errorOnEmptyName);
+								return validationStatus;
+							}
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(String refNameInput,
+							@NonNull Object repo, @NonNull String refPrefix,
+							final boolean errorOnEmptyName) {
+						return "";
+					}
+				}
+				""");
+	}
 }
