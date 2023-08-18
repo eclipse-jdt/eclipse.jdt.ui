@@ -1807,4 +1807,91 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 				}
 				""");
 	}
+
+	@Test
+	public void testGH1294_varargs() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(@NonNull String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final String refPrefix,
+							final boolean errorOnEmptyName) {
+						return new IInputValidator() {
+							public String isValid(@NonNull String newText) {
+								String validationStatus = validateNewRefName(newText, refPrefix);
+								return validationStatus;
+							}
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(@NonNull String... refPrefix) {
+						return "";
+					}
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		// should not propose to change signature of varargs method validateNewRefName(String...)
+		assertNumberOfProposals(proposals, 4);
+		String actualProposals = proposals.stream().map(IJavaCompletionProposal::getDisplayString).sorted().collect(Collectors.joining("\n"));
+		assertEquals("proposals:",
+				"""
+				Add @SuppressWarnings 'null' to 'isValid()'
+				Add @SuppressWarnings 'null' to 'validationStatus'
+				Change parameter 'refPrefix' to '@NonNull'
+				Configure problem severity""",
+				actualProposals);
+	}
+
+	@Test
+	public void testGH1294_varargs_ok() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(@NonNull String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final String refPrefix,
+							final boolean errorOnEmptyName) {
+						return new IInputValidator() {
+							public String isValid(@NonNull String newText) {
+								String validationStatus = validateNewRefName(newText, refPrefix);
+								return validationStatus;
+							}
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(String s1, @NonNull String s2, @NonNull String... refPrefix) {
+						return "";
+					}
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		// should propose to change signature of validateNewRefName(String...) since non-varargs parameter is concerned
+		assertNumberOfProposals(proposals, 5);
+		String actualProposals = proposals.stream().map(IJavaCompletionProposal::getDisplayString).sorted().collect(Collectors.joining("\n"));
+		assertEquals("proposals:",
+				"""
+				Add @SuppressWarnings 'null' to 'isValid()'
+				Add @SuppressWarnings 'null' to 'validationStatus'
+				Change parameter 'refPrefix' to '@NonNull'
+				Change parameter of 'validateNewRefName(..)' to '@Nullable'
+				Configure problem severity""",
+				actualProposals);
+	}
 }

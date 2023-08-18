@@ -564,6 +564,8 @@ public class NullAnnotationsRewriteOperations {
 					if (methodDecl == null)
 						return null;
 					if (fAffectsParameter) {
+						if (methodBinding.isVarargs() && paramIdx >= methodDecl.parameters().size()-1)
+							return null; // cowardly refuse to add annotation, which would need to be placed on a type detail
 						String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_target_method_parameter_nullness,
 								new Object[] {methodInvocation.getName(), annotationNameLabel});
 						return new ParameterAnnotationRewriteOperation(methodDecl, paramIdx, message, this);
