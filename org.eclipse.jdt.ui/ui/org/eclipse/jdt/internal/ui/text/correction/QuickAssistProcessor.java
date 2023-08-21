@@ -670,6 +670,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				try {
 					MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cu);
 					Javadoc javadoc= methodDeclaration.getJavadoc();
+					if (javadoc == null) {
+						return false;
+					}
 					List<TagElement> tags= javadoc.tags();
 					for (TagElement tag : tags) {
 						if (tag.getTagName().equals("@deprecated")) { //$NON-NLS-1$
