@@ -6796,6 +6796,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				"    public int foo(int a, int b) {\n" +
 				"        return a + b;\n" +
 				"    }\n" +
+				"    @Deprecated\n" +
 				"    public int foo(int x, int y, int z) {\n" +
 				"        int k = 2*y + 3*z + v;\n" +
 				"        return foo(x, k);\n" +
