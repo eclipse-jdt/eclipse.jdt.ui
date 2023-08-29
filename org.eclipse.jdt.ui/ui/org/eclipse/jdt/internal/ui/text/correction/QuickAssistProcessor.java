@@ -1845,6 +1845,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
 		ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
+		if (index >= parameterTypes.length) {
+			// node not found
+			return false;
+		}
 		ITypeBinding[] parameterTypesFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getParameterTypes();
 		ITypeBinding returnTypeBindingFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getReturnType();
 		MethodDeclaration newMethodDeclaration= ast.newMethodDeclaration();
