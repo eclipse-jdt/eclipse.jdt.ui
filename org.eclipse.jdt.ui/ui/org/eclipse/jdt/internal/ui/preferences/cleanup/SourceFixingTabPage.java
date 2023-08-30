@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2021, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
+import org.eclipse.jdt.internal.ui.fix.InlineDeprecatedMethodCleanUp;
 import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp;
 
@@ -38,7 +39,8 @@ public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
 		return new AbstractCleanUp[] {
 				new InvertEqualsCleanUp(values),
 				new StandardComparisonCleanUp(values),
-				new BitwiseConditionalExpressionCleanup(values)
+				new BitwiseConditionalExpressionCleanup(values),
+				new InlineDeprecatedMethodCleanUp(values)
 		};
 	}
 
@@ -59,5 +61,10 @@ public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference bitwiseComparisonPref= createCheckboxPref(standardCodeGroup, numColumns, CleanUpMessages.SourceFixingTabPage_CheckboxName_CheckSignOfBitwiseOperation, CleanUpConstants.CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(bitwiseComparisonPref);
+
+		Group deprecatedCodeGroup= createGroup(numColumns, composite, CleanUpMessages.SourceFixingTabPage_GroupName_deprecated);
+
+		final CheckboxPreference inlineDeprecatedMethodCallPref= createCheckboxPref(deprecatedCodeGroup, numColumns, CleanUpMessages.SourceFixingTabPage_CheckboxName_ReplaceDeprecatedMethodCall, CleanUpConstants.REPLACE_DEPRECATED_CALLS, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(inlineDeprecatedMethodCallPref);
 	}
 }

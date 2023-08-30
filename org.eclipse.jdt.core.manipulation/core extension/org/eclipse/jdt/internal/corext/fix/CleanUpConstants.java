@@ -1286,6 +1286,18 @@ public class CleanUpConstants {
 	public static final String STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS= "cleanup.stringbuilder_for_local_vars"; //$NON-NLS-1$
 
 	/**
+	 * Replace deprecated method call with specified replacement if possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.30
+	 */
+	public static final String REPLACE_DEPRECATED_CALLS= "cleanup.replace_deprecated_calls"; //$NON-NLS-1$
+
+	/**
 	 * Replaces <code>String.replaceAll()</code> by <code>String.replace()</code>.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

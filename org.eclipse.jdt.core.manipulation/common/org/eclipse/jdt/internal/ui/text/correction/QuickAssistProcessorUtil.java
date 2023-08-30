@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -550,15 +551,28 @@ public class QuickAssistProcessorUtil {
 														class FindNewMethodVisitor extends ASTVisitor {
 															private boolean useMethodIsUsed= false;
 															private boolean referencesPrivate= false;
+															private boolean referencesProtected= false;
+															private boolean referencesPackagePrivate= false;
 															@Override
 															public boolean visit(MethodInvocation invocation) {
 																IMethodBinding binding= invocation.resolveMethodBinding();
 																if (binding != null) {
 																	if (binding.isEqualTo(refBinding)) {
 																		useMethodIsUsed= true;
+																	} else {
+																		int modifiers= binding.getModifiers();
+																		if (Modifier.isPrivate(modifiers)) {
+																			referencesPrivate= true;
+																		} else if (Modifier.isProtected(modifiers)) {
+																			referencesProtected= true;
+																		} else if (Modifier.isPublic(modifiers)) {
+																			// do nothing
+																		} else {
+																			referencesPackagePrivate= true;
+																		}
 																	}
 																}
-																return false;
+																return true;
 															}
 															@Override
 															public boolean visit(SimpleName name) {
@@ -568,15 +582,28 @@ public class QuickAssistProcessorUtil {
 																	int modifiers= varBinding.getModifiers();
 																	if (Modifier.isPrivate(modifiers)) {
 																		referencesPrivate= true;
+																	} else if (Modifier.isProtected(modifiers)) {
+																		referencesProtected= true;
+																	} else if (Modifier.isPublic(modifiers)) {
+																		// do nothing
+																	} else {
+																		referencesPackagePrivate= true;
 																	}
 																}
-																return false;
+																return true;
 															}
 														public boolean isUseMethodUsed() {
 																return useMethodIsUsed;
 															}
-															public boolean referencesPrivateField() {
+															public boolean referencesPrivate() {
 																return referencesPrivate;
+															}
+															public boolean referencesProtected() {
+																return referencesProtected;
+															}
+															public boolean referencesPackagePrivate() {
+																return referencesPackagePrivate;
+
 															}
 														}
 														FindNewMethodVisitor findNewMethodVisitor= new FindNewMethodVisitor();
@@ -584,10 +611,53 @@ public class QuickAssistProcessorUtil {
 														if (!findNewMethodVisitor.isUseMethodUsed()) {
 															return false;
 														}
-														if (findNewMethodVisitor.referencesPrivateField()) {
+														// check access modifiers to ensure that method can be inlined
+														// without causing an error
+														CompilationUnit cu1= (CompilationUnit)methodInvocation.getRoot();
+														CompilationUnit cu2= (CompilationUnit)methodDeclaration.getRoot();
+														TypeDeclaration typeDecl2= ASTNodes.getFirstAncestorOrNull(methodDeclaration, TypeDeclaration.class);
+														if (typeDecl2 == null) {
+															return false;
+														}
+														int methodDeclarationTypeModifiers= typeDecl2.getModifiers();
+														ITypeBinding typeDeclBinding2= typeDecl2.resolveBinding();
+														if (findNewMethodVisitor.referencesPrivate() ||
+																Modifier.isPrivate(methodDeclarationTypeModifiers)) {
 															if (methodInvocation.getRoot() != methodDeclaration.getRoot()) {
 																return false;
 															}
+														} else if (findNewMethodVisitor.referencesProtected() ||
+																Modifier.isProtected(methodDeclarationTypeModifiers) ||
+																findNewMethodVisitor.referencesPackagePrivate() ||
+																!Modifier.isPublic(methodDeclarationTypeModifiers)) {
+															String pkgName1= cu1.getPackage().getName().getFullyQualifiedName();
+															String pkgName2= cu2.getPackage().getName().getFullyQualifiedName();
+															if (pkgName1 == null || pkgName2 == null) {
+																return false;
+															}
+															if (pkgName1.equals(pkgName2)) {
+																return true;
+															}
+															if (findNewMethodVisitor.referencesPackagePrivate() ||
+																	!Modifier.isProtected(methodDeclarationTypeModifiers)) {
+																return false;
+															}
+															TypeDeclaration typeDecl1= ASTNodes.getFirstAncestorOrNull(methodInvocation, TypeDeclaration.class);
+															if (typeDecl1 == null) {
+																return false;
+															}
+															ITypeBinding typeDeclBinding1= typeDecl1.resolveBinding();
+															if (typeDeclBinding1 == null || typeDeclBinding2 == null) {
+																return false;
+															}
+															// if methodDeclaration is in superclass, that is ok, otherwise no
+															while (typeDeclBinding1 != null) {
+																if (typeDeclBinding1.isEqualTo(typeDeclBinding2)) {
+																	return true;
+																}
+																typeDeclBinding1= typeDeclBinding1.getSuperclass();
+															}
+															return false;
 														}
 														return true;
 													}
@@ -608,7 +678,7 @@ public class QuickAssistProcessorUtil {
 
 	}
 
-	private static CompilationUnit findCUForMethod(CompilationUnit compilationUnit, ICompilationUnit cu, IMethodBinding methodBinding) {
+	public static CompilationUnit findCUForMethod(CompilationUnit compilationUnit, ICompilationUnit cu, IMethodBinding methodBinding) {
 		ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getMethodDeclaration());
 		if (methodDecl == null) {
 			// is methodDecl defined in another CU?
