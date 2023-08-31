@@ -33,20 +33,23 @@ public class JavaConstantHover extends AbstractJavaEditorTextHover {
 			}
 			if (hoverSource != null && hoverSource.startsWith("0")) { //$NON-NLS-1$
 				try {
-					long longValue= hoverSource.startsWith("0b") ? //$NON-NLS-1$
-							Long.parseLong(hoverSource.substring(2), 2) : Long.decode(hoverSource).longValue();
+					long longValue= hoverSource.startsWith("0b") || hoverSource.startsWith("0B") ? //$NON-NLS-1$ //$NON-NLS-2$
+							Long.parseLong(withoutUnderscoreInfixes(hoverSource.substring(2)), 2)
+							: Long.decode(withoutUnderscoreInfixes(hoverSource)).longValue();
 					return "<body><p>" + Long.toString(longValue) + "<b> : [0x" + Long.toHexString(longValue) + "]</p></body>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				} catch (NumberFormatException e) {
-					try {
-						double doubleValue= Double.valueOf(hoverSource).doubleValue();
-						return "<body><p>" + Double.toString(doubleValue) + "</p></body>"; //$NON-NLS-1$ //$NON-NLS-2$
-					} catch (NumberFormatException e1) {
-						// do nothing
-					}
+					// do nothing
 				}
 			}
 		}
 		return null;
+	}
+
+	private static String withoutUnderscoreInfixes(String s) {
+		if ((s.length() > 0) && (s.indexOf('_') <= 0 || s.lastIndexOf('_') == s.length() - 1) || s.startsWith("0x_") || s.startsWith("0X_")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return s;
+		}
+		return s.replace("_", ""); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }
