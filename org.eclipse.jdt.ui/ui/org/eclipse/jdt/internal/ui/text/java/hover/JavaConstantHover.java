@@ -26,8 +26,27 @@ public class JavaConstantHover extends AbstractJavaEditorTextHover {
 		if (hoverRegion.getLength() > 1) {
 			String hoverSource= null;
 			IDocument document= textViewer.getDocument();
+			int offset= hoverRegion.getOffset();
+			int length= hoverRegion.getLength();
 			try {
-				hoverSource= document.get(hoverRegion.getOffset(), hoverRegion.getLength());
+				if (offset > 1) {
+					if (document.get(offset - 1, 1).equals(".")) { //$NON-NLS-1$
+						--offset;
+						++length;
+						while (offset > 1 && !Character.isWhitespace(document.get(offset - 1, 1).charAt(0))) {
+							--offset;
+							++length;
+						}
+					}
+					if (document.get(offset + length, 1).equals(".")) { //$NON-NLS-1$
+						++length;
+						while (offset + length <= document.getLength() && !Character.isWhitespace(document.get(offset + length + 1, 1).charAt(0))) {
+							++length;
+						}
+					}
+				}
+				hoverSource= document.get(offset, length);
+
 			} catch (BadLocationException e) {
 				// should never happen
 			}
@@ -38,7 +57,14 @@ public class JavaConstantHover extends AbstractJavaEditorTextHover {
 							: Long.decode(withoutUnderscoreInfixes(hoverSource)).longValue();
 					return "<body><p>" + Long.toString(longValue) + "<b> : [0x" + Long.toHexString(longValue) + "]</p></body>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				} catch (NumberFormatException e) {
-					// do nothing
+					try {
+						if (hoverSource.startsWith("0x")) { //$NON-NLS-1$
+							double doubleValue= Double.valueOf(hoverSource).doubleValue();
+							return "<body><p>" + Double.toString(doubleValue) + "</p></body>"; //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					} catch (NumberFormatException e1) {
+						// do nothing
+					}
 				}
 			}
 		}
