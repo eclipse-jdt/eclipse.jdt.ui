@@ -15,11 +15,11 @@ package org.eclipse.jdt.core.manipulation;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 
@@ -302,7 +302,7 @@ public final class CoreASTProvider {
 			@Override
 			public void handleException(Throwable ex) {
 				IStatus status= new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IStatus.OK, "Error in JDT Core during AST creation", ex);  //$NON-NLS-1$
-				Platform.getLog(CoreASTProvider.class).log(status);
+				ILog.of(CoreASTProvider.class).log(status);
 			}
 		});
 		return root[0];
@@ -393,7 +393,7 @@ public final class CoreASTProvider {
 			return je.getBuffer() != null;
 		} catch (JavaModelException ex) {
 			IStatus status= new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IStatus.OK, "Error in JDT Core during AST creation", ex);  //$NON-NLS-1$
-			Platform.getLog(CoreASTProvider.class).log(status);
+			ILog.of(CoreASTProvider.class).log(status);
 		}
 		return false;
 	}

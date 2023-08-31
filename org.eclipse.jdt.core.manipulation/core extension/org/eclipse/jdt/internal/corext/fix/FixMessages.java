@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -183,6 +183,7 @@ public final class FixMessages extends NLS {
 	public static String StringBufferToStringBuilderFix_convert_msg;
 	public static String StringConcatToTextBlockFix_convert_msg;
 	public static String LambdaExpressionAndMethodRefFix_clean_up_expression_msg;
+	public static String InlineDeprecatedMethod_msg;
 
 	static {
 		// initialize resource bundle

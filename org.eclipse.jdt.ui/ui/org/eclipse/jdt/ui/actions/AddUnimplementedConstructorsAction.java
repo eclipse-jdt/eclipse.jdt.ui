@@ -197,9 +197,9 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 		private int fWidth= 60;
 
-		private final String OMIT_SUPER= "OmitCallToSuper"; //$NON-NLS-1$
+		private static final String OMIT_SUPER= "OmitCallToSuper"; //$NON-NLS-1$
 
-		private final String SETTINGS_SECTION= "AddUnimplementedConstructorsDialog"; //$NON-NLS-1$
+		private static final String SETTINGS_SECTION= "AddUnimplementedConstructorsDialog"; //$NON-NLS-1$
 
 		public AddUnimplementedConstructorsDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) throws JavaModelException {
 			super(parent, labelProvider, contentProvider, editor, type, true);

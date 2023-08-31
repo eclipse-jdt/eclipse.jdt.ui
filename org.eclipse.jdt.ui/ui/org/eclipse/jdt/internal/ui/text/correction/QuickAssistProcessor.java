@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,13 +54,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -88,7 +88,9 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IDocElement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -96,10 +98,13 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
@@ -126,11 +131,14 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
@@ -157,7 +165,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
-import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -166,9 +173,13 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
 import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
+import org.eclipse.jdt.internal.corext.fix.JoinVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
@@ -180,8 +191,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactori
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoringCore;
@@ -334,8 +345,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getAddStaticImportProposals(context, coveringNode, null)
 					|| getDoWhileRatherThanWhileProposal(context, coveringNode, null)
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
-					|| getAddStaticMemberFavoritesProposals(context, coveringNode, null)
-					|| getSplitSwitchLabelProposal(context, coveringNode, null);
+					|| getAddStaticMemberFavoritesProposals(coveringNode, null)
+					|| getSplitSwitchLabelProposal(context, coveringNode, null)
+					|| getDeprecatedProposal(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -405,10 +417,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertVarTypeToResolvedTypeProposal(context, coveringNode, resultingCollections);
 				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, resultingCollections);
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
-				getAddStaticMemberFavoritesProposals(context, coveringNode, resultingCollections);
+				getAddStaticMemberFavoritesProposals(coveringNode, resultingCollections);
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
+				getDeprecatedProposal(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -609,6 +622,141 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	private static CompilationUnit findCUForMethod(CompilationUnit compilationUnit, ICompilationUnit cu, IMethodBinding methodBinding) {
+		ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getMethodDeclaration());
+		if (methodDecl == null) {
+			// is methodDecl defined in another CU?
+			ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getTypeDeclaration();
+			if (declaringTypeDecl.isFromSource()) {
+				ICompilationUnit targetCU= null;
+				try {
+					targetCU= ASTResolving.findCompilationUnitForBinding(cu, compilationUnit, declaringTypeDecl);
+				} catch (JavaModelException e) { /* can't do better */
+				}
+				if (targetCU != null) {
+					return ASTResolving.createQuickFixAST(targetCU, null);
+				}
+			}
+			return null;
+		}
+		return compilationUnit;
+	}
+
+	@SuppressWarnings("unused")
+	private static boolean getDeprecatedProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals) {
+		if (!(node instanceof MethodInvocation)) {
+			node= node.getParent();
+			if (!(node instanceof MethodInvocation)) {
+				return false;
+			}
+		}
+		MethodInvocation methodInvocation= (MethodInvocation) node;
+		IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+		IMethod method= (IMethod)methodBinding.getJavaElement();
+		if (method == null) {
+			return false;
+		}
+		IAnnotationBinding[] annotations= methodBinding.getAnnotations();
+		for (IAnnotationBinding annotation : annotations) {
+			if (annotation.getAnnotationType().getQualifiedName().equals("java.lang.Deprecated")) { //$NON-NLS-1$
+				CompilationUnit sourceCu= (CompilationUnit)node.getRoot();
+				CompilationUnit cu= findCUForMethod(sourceCu, (ICompilationUnit)sourceCu.getJavaElement(), methodBinding);
+				if (cu == null) {
+					return false;
+				}
+				try {
+					MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cu);
+					Javadoc javadoc= methodDeclaration.getJavadoc();
+					if (javadoc == null) {
+						return false;
+					}
+					List<TagElement> tags= javadoc.tags();
+					for (TagElement tag : tags) {
+						if (tag.getTagName().equals("@deprecated")) { //$NON-NLS-1$
+							List<IDocElement> fragments= tag.fragments();
+							if (fragments.size() < 2) {
+								return false;
+							}
+							if (fragments.get(0) instanceof TextElement textElement) {
+								String text= textElement.getText().toLowerCase().trim();
+								if (text.endsWith("use") || text.endsWith("replace by")) { //$NON-NLS-1$ //$NON-NLS-2$
+									if (fragments.get(1) instanceof TagElement tagElement) {
+										if (tagElement.getTagName().equals("@link")) { //$NON-NLS-1$
+											List<IDocElement> linkFragments= tagElement.fragments();
+											if (linkFragments.size() == 1) {
+												IDocElement linkFragment= linkFragments.get(0);
+												if (linkFragment instanceof MethodRef methodRef) {
+													IMethodBinding refBinding= (IMethodBinding) methodRef.resolveBinding();
+													if (refBinding != null) {
+														class FindNewMethodVisitor extends ASTVisitor {
+															private boolean useMethodIsUsed= false;
+															private boolean referencesPrivate= false;
+															@Override
+															public boolean visit(MethodInvocation invocation) {
+																IMethodBinding binding= invocation.resolveMethodBinding();
+																if (binding != null) {
+																	if (binding.isEqualTo(refBinding)) {
+																		useMethodIsUsed= true;
+																	}
+																}
+																return false;
+															}
+															@Override
+															public boolean visit(SimpleName name) {
+																IBinding binding= name.resolveBinding();
+																if (binding instanceof IVariableBinding varBinding
+																		&& varBinding.isField()) {
+																	int modifiers= varBinding.getModifiers();
+																	if (Modifier.isPrivate(modifiers)) {
+																		referencesPrivate= true;
+																	}
+																}
+																return false;
+															}
+														public boolean isUseMethodUsed() {
+																return useMethodIsUsed;
+															}
+															public boolean referencesPrivateField() {
+																return referencesPrivate;
+															}
+														}
+														FindNewMethodVisitor findNewMethodVisitor= new FindNewMethodVisitor();
+														methodDeclaration.accept(findNewMethodVisitor);
+														if (!findNewMethodVisitor.isUseMethodUsed()) {
+															return false;
+														}
+														if (findNewMethodVisitor.referencesPrivateField()) {
+															if (methodInvocation.getRoot() != methodDeclaration.getRoot()) {
+																return false;
+															}
+														}
+														if (proposals != null) {
+															IProposableFix fix= InlineMethodFixCore.create(FixMessages.InlineDeprecatedMethod_msg, (CompilationUnit)methodInvocation.getRoot(), methodInvocation);
+															if (fix != null) {
+																Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+																proposals.add(new FixCorrectionProposal(fix, null, IProposalRelevance.INLINE_DEPRECATED_METHOD, image, context));
+															}
+														}
+														return true;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				} catch (JavaModelException e) {
+					// ignore
+				}
+			}
+		}
+		return false;
+	}
 
 	private static boolean getConvertAnonymousToNestedProposal(IInvocationContext context, final ASTNode node, Collection<ICommandAccess> proposals) throws CoreException {
 		if (!(node instanceof Name))
@@ -954,6 +1102,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			if (!matches(lambdaParameters, superMethodInvocation.arguments()))
 				return false;
+		} else if (exprBody instanceof InstanceofExpression) {
+			InstanceofExpression instanceofExpression= (InstanceofExpression) exprBody;
+			if (instanceofExpression.getRightOperand().resolveBinding() == null)
+				return false;
+			if (!matches(lambdaParameters, List.of(instanceofExpression.getLeftOperand())))
+				return false;
 		} else { // MethodInvocation
 			MethodInvocation methodInvocation= (MethodInvocation) exprBody;
 			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
@@ -1036,6 +1190,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				superMethodReference.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
 				superMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, superMethodInvocation.typeArguments()));
 			}
+		} else if (exprBody instanceof InstanceofExpression) {
+			InstanceofExpression instanceofExpression= (InstanceofExpression) exprBody;
+			ExpressionMethodReference expMethodReference= ast.newExpressionMethodReference();
+			TypeLiteral typeLiteral= ast.newTypeLiteral();
+			importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+			ITypeBinding instanceofTypeBinding= instanceofExpression.getRightOperand().resolveBinding();
+			typeLiteral.setType(importRewrite.addImport(instanceofTypeBinding.getTypeDeclaration(), ast));
+			expMethodReference.setName(ast.newSimpleName("isInstance")); //$NON-NLS-1$
+			expMethodReference.setExpression(typeLiteral);
+			replacement= expMethodReference;
 		} else { // MethodInvocation
 			MethodInvocation methodInvocation= (MethodInvocation) exprBody;
 			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
@@ -1102,7 +1266,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		rewrite.replace(lambda, replacement, null);
+		ASTNodes.replaceButKeepComment(rewrite, lambda, replacement, null);
 
 		// add correction proposal
 		String label= CorrectionMessages.QuickAssistProcessor_convert_to_method_reference;
@@ -1208,7 +1372,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return expression instanceof ClassInstanceCreation
 				|| expression instanceof ArrayCreation
 				|| expression instanceof SuperMethodInvocation
-				|| expression instanceof MethodInvocation;
+				|| expression instanceof MethodInvocation
+				|| expression instanceof InstanceofExpression;
 	}
 
 	private static boolean matches(List<Expression> expected, List<Expression> toMatch) {
@@ -1814,414 +1979,43 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getJoinVariableProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
-		ASTNode parent= node.getParent();
-
-		VariableDeclarationFragment fragment= null;
-		boolean onFirstAccess= false;
-		if (node instanceof SimpleName && node.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-			onFirstAccess= true;
-			SimpleName name= (SimpleName) node;
-			IBinding binding= name.resolveBinding();
-			if (!(binding instanceof IVariableBinding)) {
-				return false;
-			}
-			ASTNode declaring= context.getASTRoot().findDeclaringNode(binding);
-			if (declaring instanceof VariableDeclarationFragment) {
-				fragment= (VariableDeclarationFragment) declaring;
-			} else {
-				return false;
-			}
-		} else if (parent instanceof VariableDeclarationFragment) {
-			fragment= (VariableDeclarationFragment) parent;
-		} else {
-			return false;
-		}
-
-		IVariableBinding binding= fragment.resolveBinding();
-		Expression initializer= fragment.getInitializer();
-		if ((initializer != null && initializer.getNodeType() != ASTNode.NULL_LITERAL) || binding == null || binding.isField()) {
-			return false;
-		}
-
-		if (!(fragment.getParent() instanceof VariableDeclarationStatement)) {
-			return false;
-		}
-		VariableDeclarationStatement statement= (VariableDeclarationStatement) fragment.getParent();
-
-		SimpleName[] names= LinkedNodeFinder.findByBinding(statement.getParent(), binding);
-		if (names.length <= 1 || names[0] != fragment.getName()) {
-			return false;
-		}
-		SimpleName firstAccess= names[1];
-		if (onFirstAccess) {
-			if (firstAccess != node) {
-				return false;
-			}
-		} else {
-			if (firstAccess.getLocationInParent() != Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				return false;
-			}
-		}
-		Assignment assignment= (Assignment) firstAccess.getParent();
-		if (assignment.getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
-			return false;
-		}
-		ExpressionStatement assignParent= (ExpressionStatement) assignment.getParent();
-		IfStatement ifStatement= null;
-		Expression thenExpression= null;
-		Expression elseExpression= null;
-		ITypeBinding exprBinding= null;
-
-		ASTNode assignParentParent= assignParent.getParent();
-		if (assignParentParent instanceof IfStatement
-				|| (assignParentParent.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY
-						&& !(assignParentParent.subtreeMatch(new ASTMatcher(), statement.getParent())))) {
-			if (assignParentParent.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY) {
-				assignParentParent= assignParentParent.getParent();
-			}
-			ifStatement= (IfStatement) assignParentParent;
-			Statement thenStatement= getSingleStatement(ifStatement.getThenStatement());
-			Statement elseStatement= getSingleStatement(ifStatement.getElseStatement());
-			if (thenStatement == null || elseStatement == null) {
-				return false;
-			}
-
-			if (thenStatement instanceof ExpressionStatement && elseStatement instanceof ExpressionStatement) {
-				Expression inner1= ((ExpressionStatement) thenStatement).getExpression();
-				Expression inner2= ((ExpressionStatement) elseStatement).getExpression();
-				if (inner1 instanceof Assignment && inner2 instanceof Assignment) {
-					Assignment assign1= (Assignment) inner1;
-					Assignment assign2= (Assignment) inner2;
-					Expression left1= assign1.getLeftHandSide();
-					Expression left2= assign2.getLeftHandSide();
-					if (left1 instanceof Name && left2 instanceof Name && assign1.getOperator() == assign2.getOperator()) {
-						IBinding bind1= ((Name) left1).resolveBinding();
-						IBinding bind2= ((Name) left2).resolveBinding();
-						if (bind1 == bind2 && bind1 instanceof IVariableBinding) {
-							exprBinding= ((IVariableBinding) bind1).getType();
-							thenExpression= assign1.getRightHandSide();
-							elseExpression= assign2.getRightHandSide();
-						}
-					}
-				}
-			}
-			if (thenExpression == null || elseExpression == null) {
-				return false;
-			}
-		} else {
-			// Be conservative and don't allow anything but Blocks between the
-			// VariableDeclarationStatement and the ExpressionStatement to join
-			ASTNode n= assignParent.getParent();
-			ASTNode statementParent= statement.getParent();
-			ASTMatcher matcher= new ASTMatcher();
-			boolean complete= false;
-			while (!complete) {
-				if (n != null && n.getNodeType() == statementParent.getNodeType()) {
-					if (n.subtreeMatch(matcher, statementParent)) {
-						break;
-					}
-				}
-				if (n instanceof Block) {
-					n= n.getParent();
-				}
-				return false;
-			}
-		}
-
 		if (resultingCollections == null) {
 			return true;
 		}
-
-		AST ast= statement.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
-		sourceRangeComputer.addTightSourceNode(ifStatement != null ? ifStatement : assignParent);
-		rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
-
-		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.JOIN_VARIABLE_DECLARATION, image);
-		proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
-
-		if (ifStatement != null) {
-			// prepare conditional expression
-			ConditionalExpression conditionalExpression= ast.newConditionalExpression();
-			Expression conditionCopy= (Expression) rewrite.createCopyTarget(ifStatement.getExpression());
-			conditionalExpression.setExpression(conditionCopy);
-			Expression thenCopy= (Expression) rewrite.createCopyTarget(thenExpression);
-			Expression elseCopy= (Expression) rewrite.createCopyTarget(elseExpression);
-
-			IJavaProject project= context.getCompilationUnit().getJavaProject();
-			if (!JavaModelUtil.is50OrHigher(project)) {
-				ITypeBinding thenBinding= thenExpression.resolveTypeBinding();
-				ITypeBinding elseBinding= elseExpression.resolveTypeBinding();
-				if (thenBinding != null && elseBinding != null && exprBinding != null && !elseBinding.isAssignmentCompatible(thenBinding)) {
-					CastExpression castException= ast.newCastExpression();
-					ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
-					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
-					castException.setType(importRewrite.addImport(exprBinding, ast, importRewriteContext, TypeLocation.CAST));
-					castException.setExpression(elseCopy);
-					elseCopy= castException;
-				}
-			} else if (JavaModelUtil.is1d7OrHigher(project)) {
-				addExplicitTypeArgumentsIfNecessary(rewrite, proposal, thenExpression);
-				addExplicitTypeArgumentsIfNecessary(rewrite, proposal, elseExpression);
-			}
-			conditionalExpression.setThenExpression(thenCopy);
-			conditionalExpression.setElseExpression(elseCopy);
-			rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, conditionalExpression, null);
-			rewrite.remove(ifStatement, null);
-		} else {
-			Expression placeholder= (Expression) rewrite.createMoveTarget(assignment.getRightHandSide());
-			rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
-
-			if (onFirstAccess) {
-				// replace assignment with variable declaration
-				rewrite.replace(assignParent, rewrite.createMoveTarget(statement), null);
-			} else {
-				// different scopes -> remove assignments, set variable initializer
-				if (ASTNodes.isControlStatementBody(assignParent.getLocationInParent())) {
-					Block block= ast.newBlock();
-					rewrite.replace(assignParent, block, null);
-				} else {
-					rewrite.remove(assignParent, null);
-				}
-			}
+		JoinVariableFixCore fix= JoinVariableFixCore.createJoinVariableFix(context.getASTRoot(), node);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.JOIN_VARIABLE_DECLARATION, image, context);
+			proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
+			resultingCollections.add(proposal);
+			return true;
 		}
-
-		proposal.setEndPosition(rewrite.track(fragment.getName()));
-		resultingCollections.add(proposal);
-		return true;
-
-	}
-
-	private static void addExplicitTypeArgumentsIfNecessary(ASTRewrite rewrite, ASTRewriteCorrectionProposal proposal, Expression invocation) {
-		if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
-			ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
-			if (typeArguments == null)
-				return;
-
-			ImportRewrite importRewrite= proposal.getImportRewrite();
-			if (importRewrite == null) {
-				importRewrite= proposal.createImportRewrite((CompilationUnit) invocation.getRoot());
-			}
-			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(invocation, importRewrite);
-
-			AST ast= invocation.getAST();
-			ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
-
-			for (ITypeBinding typeArgument : typeArguments) {
-				Type typeArgumentNode= importRewrite.addImport(typeArgument, ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
-				typeArgsRewrite.insertLast(typeArgumentNode, null);
-			}
-
-			if (invocation instanceof MethodInvocation) {
-				MethodInvocation methodInvocation= (MethodInvocation) invocation;
-				Expression expression= methodInvocation.getExpression();
-				if (expression == null) {
-					IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-					if (methodBinding != null && Modifier.isStatic(methodBinding.getModifiers())) {
-						expression= ast.newName(importRewrite.addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), importRewriteContext));
-					} else {
-						expression= ast.newThisExpression();
-					}
-					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
-				}
-			}
-		}
-	}
-
-	private static Statement getSingleStatement(Statement statement) {
-		if (statement instanceof Block) {
-			List<Statement> blockStatements= ((Block) statement).statements();
-			if (blockStatements.size() != 1) {
-				return null;
-			}
-			return blockStatements.get(0);
-		}
-		return statement;
+		return false;
 	}
 
 	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) throws JavaModelException {
 		if (resultingCollections == null) {
 			return true;
 		}
-		VariableDeclarationFragment fragment;
-		if (node instanceof VariableDeclarationFragment) {
-			fragment= (VariableDeclarationFragment) node;
-		} else if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
-			fragment= (VariableDeclarationFragment) node.getParent();
-		} else {
-			return false;
-		}
-
-		if (fragment.getInitializer() == null) {
-			return false;
-		}
-
-		Statement statement;
-		ASTNode fragParent= fragment.getParent();
-		boolean isVarType= false;
-		if (fragParent instanceof VariableDeclarationStatement) {
-			statement= (VariableDeclarationStatement) fragParent;
-			Type type= ((VariableDeclarationStatement)fragParent).getType();
-			isVarType = (type == null) ? false : type.isVar();
-		} else if (fragParent instanceof VariableDeclarationExpression) {
-			if (fragParent.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
-				return false;
-			}
-			statement= (Statement) fragParent.getParent();
-			Type type= ((VariableDeclarationExpression)fragParent).getType();
-			isVarType = (type == null) ? false : type.isVar();
-		} else {
-			return false;
-		}
-		if (!(statement instanceof ForStatement) &&
-				!(statement instanceof VariableDeclarationStatement)){
-			return false;
-		}
-		// statement is ForStatement or VariableDeclarationStatement
-		ASTNode statementParent= statement.getParent();
-		StructuralPropertyDescriptor property= statement.getLocationInParent();
-		if (!property.isChildListProperty()) {
-			return false;
-		}
-
-		List<? extends ASTNode> list= ASTNodes.getChildListProperty(statementParent, (ChildListPropertyDescriptor) property);
-
-		AST ast= statement.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-
-		String label= CorrectionMessages.QuickAssistProcessor_splitdeclaration_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.SPLIT_VARIABLE_DECLARATION, image);
 		boolean commandConflict= false;
 		for (ICommandAccess completionProposal : resultingCollections) {
-			if (completionProposal instanceof ChangeCorrectionProposal) {
-				if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(((ChangeCorrectionProposal) completionProposal).getCommandId())) {
+			if (completionProposal instanceof ChangeCorrectionProposal ccp) {
+				if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(ccp.getCommandId())) {
 					commandConflict= true;
 				}
 			}
 		}
-		if (!commandConflict) {
-			proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
-		}
-
-		// for multiple declarations; all must be moved outside, leave none behind
-		if (statement instanceof ForStatement) {
-			IBuffer buffer= context.getCompilationUnit().getBuffer();
-			ForStatement forStatement= (ForStatement) statement;
-			VariableDeclarationExpression oldVarDecl= (VariableDeclarationExpression) fragParent;
-			Type type= oldVarDecl.getType();
-			ITypeBinding tBinding= type.resolveBinding();
-			List<VariableDeclarationFragment> oldFragments= oldVarDecl.fragments();
-			CompilationUnit cup= (CompilationUnit) fragment.getRoot();
-			ListRewrite forListRewrite= rewrite.getListRewrite(forStatement, ForStatement.INITIALIZERS_PROPERTY);
-			// create the new initializers
-			for (VariableDeclarationFragment oldFragment : oldFragments) {
-				int extendedStartPositionFragment= cup.getExtendedStartPosition(oldFragment);
-				int extendedLengthFragment= cup.getExtendedLength(oldFragment);
-				StringBuilder codeFragment= new StringBuilder(buffer.getText(extendedStartPositionFragment, extendedLengthFragment));
-				if (oldFragment.getInitializer() == null) {
-					ITypeBinding typeBinding= type.resolveBinding();
-					if ("Z".equals(typeBinding.getBinaryName())) { //$NON-NLS-1$
-						codeFragment.append(" = false"); //$NON-NLS-1$
-					} else if (type.isPrimitiveType()) {
-						codeFragment.append(" = 0"); //$NON-NLS-1$
-					} else {
-						codeFragment.append(" = null"); //$NON-NLS-1$
-					}
-				}
-				Assignment newAssignmentFragment= (Assignment) rewrite.createStringPlaceholder(codeFragment.toString(), ASTNode.ASSIGNMENT);
-				forListRewrite.insertLast(newAssignmentFragment, null);
+		SplitVariableFixCore fix= SplitVariableFixCore.createSplitVariableFix(context.getASTRoot(), node);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.SPLIT_VARIABLE_DECLARATION, image, context);
+			if (!commandConflict) {
+				proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
 			}
-
-			// create the new declarations
-			Type nType= null;
-			if (isVarType) {
-				ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
-				ImportRewriteContext icontext= new ContextSensitiveImportRewriteContext(cup, importRewrite);
-				nType= importRewrite.addImport(tBinding, ast, icontext, TypeLocation.LOCAL_VARIABLE);
-				String codeDeclaration= tBinding.getName();
-				String commentToken= ""; //$NON-NLS-1$
-				int extendedStatementStart= cup.getExtendedStartPosition(oldVarDecl);
-				if (oldVarDecl.getStartPosition() > extendedStatementStart) {
-					commentToken= buffer.getText(extendedStatementStart, oldVarDecl.getStartPosition() - extendedStatementStart);
-				}
-				codeDeclaration= commentToken + codeDeclaration;
-				nType= (Type) rewrite.createStringPlaceholder(codeDeclaration.trim(), type.getNodeType());
-			} else {
-				int extendedStartPositionDeclaration= cup.getExtendedStartPosition(oldVarDecl);
-				int firstFragmentStart= ((ASTNode) oldVarDecl.fragments().get(0)).getStartPosition();
-				String codeDeclaration= buffer.getText(extendedStartPositionDeclaration, firstFragmentStart - extendedStartPositionDeclaration);
-				nType= (Type) rewrite.createStringPlaceholder(codeDeclaration.trim(), type.getNodeType());
-			}
-
-			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
-			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
-			newVarDec.setType(nType);
-			newFrag.setName(ast.newSimpleName(oldFragments.get(0).getName().getIdentifier()));
-			newFrag.extraDimensions().addAll(DimensionRewrite.copyDimensions(oldFragments.get(0).extraDimensions(), rewrite));
-
-			for (int i= 1; i < oldFragments.size(); i++) {
-				VariableDeclarationFragment oldFragment= oldFragments.get(i);
-				newFrag= ast.newVariableDeclarationFragment();
-				newFrag.setName(ast.newSimpleName(oldFragment.getName().getIdentifier()));
-				newFrag.extraDimensions().addAll(DimensionRewrite.copyDimensions(oldFragment.extraDimensions(), rewrite));
-				newVarDec.fragments().add(newFrag);
-			}
-			newVarDec.modifiers().addAll(ASTNodeFactory.newModifiers(ast, oldVarDecl.getModifiers()));
-
-			ListRewrite listRewriter= rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
-			listRewriter.insertBefore(newVarDec, statement, null);
-
-			rewrite.remove(oldVarDecl, null);
-
 			resultingCollections.add(proposal);
 			return true;
 		}
-
-		int insertIndex= list.indexOf(statement);
-		ITypeBinding binding= fragment.getInitializer().resolveTypeBinding();
-		Expression placeholder= (Expression) rewrite.createMoveTarget(fragment.getInitializer());
-		if (placeholder instanceof ArrayInitializer && binding != null && binding.isArray()) {
-			ArrayCreation creation= ast.newArrayCreation();
-			creation.setInitializer((ArrayInitializer) placeholder);
-			final ITypeBinding componentType= binding.getElementType();
-			Type type= null;
-			if (componentType.isPrimitive()) {
-				type= ast.newPrimitiveType(PrimitiveType.toCode(componentType.getName()));
-			} else {
-				type= ast.newSimpleType(ast.newSimpleName(componentType.getName()));
-			}
-			creation.setType(ast.newArrayType(type, binding.getDimensions()));
-			placeholder= creation;
-		}
-
-		Assignment assignment= ast.newAssignment();
-		assignment.setRightHandSide(placeholder);
-		assignment.setLeftHandSide(ast.newSimpleName(fragment.getName().getIdentifier()));
-
-		// statement is VariableDeclarationStatement
-		Statement newStatement= ast.newExpressionStatement(assignment);;
-		insertIndex+= 1; // add after declaration
-
-		if (isVarType) {
-			VariableDeclarationStatement varDecl= (VariableDeclarationStatement) statement;
-			CompilationUnit cup= (CompilationUnit) fragment.getRoot();
-			Type type= varDecl.getType();
-			ITypeBinding tBinding= type.resolveBinding();
-			ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
-			ImportRewriteContext icontext= new ContextSensitiveImportRewriteContext(cup, importRewrite);
-			Type nType= importRewrite.addImport(tBinding, ast, icontext, TypeLocation.LOCAL_VARIABLE);
-			rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, nType, null);
-			DimensionRewrite.removeAllChildren(fragment, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
-		}
-
-		ListRewrite listRewriter= rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
-		listRewriter.insertAt(newStatement, insertIndex, null);
-		resultingCollections.add(proposal);
-		return true;
+		return false;
 	}
 
 	public static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
@@ -3596,7 +3390,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddStaticMemberFavoritesProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getAddStaticMemberFavoritesProposals(ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof ImportDeclaration)) {
 			node= ASTNodes.getFirstAncestorOrNull(node, ImportDeclaration.class);
 		}

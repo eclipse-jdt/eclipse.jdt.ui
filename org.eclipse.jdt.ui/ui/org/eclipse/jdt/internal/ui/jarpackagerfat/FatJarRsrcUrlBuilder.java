@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -123,16 +122,16 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 	}
 
 	public void writeRsrcUrlClasses() throws IOException {
-		InputStream is= JavaPlugin.getDefault().getBundle().getEntry(JAR_RSRC_LOADER_ZIP).openStream();
-		ZipInputStream zis= new ZipInputStream(is);
-		ZipEntry zipEntry= zis.getNextEntry();
-		while (zipEntry != null) {
-			if (!zipEntry.isDirectory()) {
-				String entryName= zipEntry.getName();
-				byte[] content= FatJarPackagerUtil.readInputStream(zis);
-				getJarWriter().addZipEntryStream(zipEntry, new ByteArrayInputStream(content), entryName);
+		try (ZipInputStream zis= new ZipInputStream(JavaPlugin.getDefault().getBundle().getEntry(JAR_RSRC_LOADER_ZIP).openStream())){
+			ZipEntry zipEntry= zis.getNextEntry();
+			while (zipEntry != null) {
+				if (!zipEntry.isDirectory()) {
+					String entryName= zipEntry.getName();
+					byte[] content= FatJarPackagerUtil.readInputStream(zis);
+					getJarWriter().addZipEntryStream(zipEntry, new ByteArrayInputStream(content), entryName);
+				}
+				zipEntry= zis.getNextEntry();
 			}
-			zipEntry= zis.getNextEntry();
 		}
 	}
 }

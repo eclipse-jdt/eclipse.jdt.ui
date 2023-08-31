@@ -620,7 +620,10 @@ public class UnresolvedElementsSubProcessor {
 		int kind= evauateTypeKind(selectedNode, javaProject);
 
 		if (kind == TypeKinds.REF_TYPES) {
-			addEnhancedForWithoutTypeProposals(cu, selectedNode, proposals);
+			SimpleName s= addEnhancedForWithoutTypeProposals(cu, selectedNode, proposals);
+			if (s != null && Character.isLowerCase(s.getFullyQualifiedName().charAt(0))) {
+				return;
+			}
 		}
 
 		while (selectedNode.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
@@ -719,7 +722,7 @@ public class UnresolvedElementsSubProcessor {
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 	}
 
-	private static void addEnhancedForWithoutTypeProposals(ICompilationUnit cu, ASTNode selectedNode, Collection<ICommandAccess> proposals) {
+	private static SimpleName addEnhancedForWithoutTypeProposals(ICompilationUnit cu, ASTNode selectedNode, Collection<ICommandAccess> proposals) {
 		if (selectedNode instanceof SimpleName && (selectedNode.getLocationInParent() == SimpleType.NAME_PROPERTY || selectedNode.getLocationInParent() == NameQualifiedType.NAME_PROPERTY)) {
 			ASTNode type= selectedNode.getParent();
 			if (type.getLocationInParent() == SingleVariableDeclaration.TYPE_PROPERTY) {
@@ -733,10 +736,12 @@ public class UnresolvedElementsSubProcessor {
 						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 
 						proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.LOCAL, simpleName, null, relevance, image));
+						return simpleName;
 					}
 				}
 			}
 		}
+		return null;
 	}
 
 	private static void addNullityAnnotationTypesProposals(ICompilationUnit cu, Name node, Collection<ICommandAccess> proposals) throws CoreException {

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -67,6 +68,7 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.IResourceProvider;
 import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.contentmergeviewer.IIgnoreWhitespaceContributor;
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
@@ -184,7 +186,22 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	@Override
 	public ITokenComparator createTokenComparator(String s) {
-		return new JavaTokenComparator(s);
+		boolean ignoreWhitespace = getBoolean(getCompareConfiguration(), CompareConfiguration.IGNORE_WHITESPACE, false);
+		return new JavaTokenComparator(s,ignoreWhitespace);
+	}
+
+	private static boolean getBoolean(CompareConfiguration cc, String key, boolean dflt) {
+		if (cc != null) {
+			Object value= cc.getProperty(key);
+			if (value instanceof Boolean)
+				return ((Boolean) value).booleanValue();
+		}
+		return dflt;
+	}
+
+	@Override
+	protected Optional<IIgnoreWhitespaceContributor> createIgnoreWhitespaceContributor(IDocument document) {
+		return Optional.of(new JavaIgnoreWhitespaceContributor(document));
 	}
 
 	@Override

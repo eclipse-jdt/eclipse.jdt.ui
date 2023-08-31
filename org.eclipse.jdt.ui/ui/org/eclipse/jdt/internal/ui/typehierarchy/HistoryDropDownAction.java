@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -101,7 +102,7 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 			if (entries == null || entries.length == 0)
 				continue;
 			HistoryAction action= new HistoryAction(fHierarchyView, entries);
-			action.setChecked(entries.equals(fHierarchyView.getInputElements()));
+			action.setChecked(Arrays.equals(entries, fHierarchyView.getInputElements()));
 			checked= checked || action.isChecked();
 			addActionToMenu(menu, action);
 		}

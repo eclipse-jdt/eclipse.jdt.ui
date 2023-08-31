@@ -230,17 +230,11 @@ public abstract class BaseTestRunner implements TestListener {
 	}
 
 	private static void readPreferences() {
-		InputStream is = null;
-		try {
-			is = new FileInputStream(getPreferencesFile());
+		try (InputStream is = new FileInputStream(getPreferencesFile())) {
 			setPreferences(new Properties(getPreferences()));
 			getPreferences().load(is);
 		} catch (IOException e) {
-			try {
-				if (is != null)
-					is.close();
-			} catch (IOException e1) {
-			}
+			// ignore
 		}
 	}
 

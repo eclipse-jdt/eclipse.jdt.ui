@@ -47,6 +47,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.views.WorkbenchViewerSetup;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -205,6 +206,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			viewer.setLabelProvider(createDropDownLabelProvider());
 			viewer.setComparator(new JavaElementComparator());
 			viewer.addFilter(new SyntheticMembersFilter());
+			WorkbenchViewerSetup.setupViewer(viewer);
 			viewer.addFilter(new ViewerFilter() {
 				@Override
 				public boolean select(Viewer viewer1, Object parentElement, Object element) {

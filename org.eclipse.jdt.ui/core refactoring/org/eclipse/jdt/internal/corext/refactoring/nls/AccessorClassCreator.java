@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import com.ibm.icu.text.Collator;
+import java.text.Collator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;

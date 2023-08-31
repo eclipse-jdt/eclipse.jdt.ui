@@ -44,9 +44,8 @@ import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class CreateFileChange extends ResourceChange {
 
@@ -149,8 +148,6 @@ public class CreateFileChange extends ResourceChange {
 
 	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-
-		InputStream is= null;
 		try {
 			pm.beginTask(NLSChangesMessages.createFile_creating_resource, 3);
 
@@ -164,8 +161,7 @@ public class CreateFileChange extends ResourceChange {
 				pm.worked(1);
 				return composite.perform(new SubProgressMonitor(pm, 1));
 			} else { */
-			try {
-				is= new ByteArrayInputStream(fSource.getBytes(fEncoding));
+			try (InputStream is= new ByteArrayInputStream(fSource.getBytes(fEncoding))) {
 				file.create(is, false, new SubProgressMonitor(pm, 1));
 				if (fStampToRestore != IResource.NULL_STAMP) {
 					file.revertModificationStamp(fStampToRestore);
@@ -179,17 +175,12 @@ public class CreateFileChange extends ResourceChange {
 			} catch (UnsupportedEncodingException e) {
 				throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
 			}
-		} finally {
-			try {
-				if (is != null)
-					is.close();
-			} catch (IOException ioe) {
+		} catch (IOException ioe) {
 				throw new JavaModelException(ioe, IJavaModelStatusConstants.IO_EXCEPTION);
-			} finally {
-				pm.done();
-			}
+		} finally {
+			pm.done();
 		}
-	}
+}
 
 	protected IFile getOldFile(IProgressMonitor pm) throws OperationCanceledException {
 		pm.beginTask("", 1); //$NON-NLS-1$

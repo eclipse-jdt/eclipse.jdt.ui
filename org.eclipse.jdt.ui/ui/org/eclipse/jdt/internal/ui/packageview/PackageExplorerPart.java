@@ -90,6 +90,7 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.views.WorkbenchViewerSetup;
 import org.eclipse.ui.views.framelist.Frame;
 import org.eclipse.ui.views.framelist.FrameAction;
 import org.eclipse.ui.views.framelist.FrameList;
@@ -282,6 +283,9 @@ public class PackageExplorerPart extends ViewPart
 				return false;
 			}
 			if (parent instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) parent).isArchive()) {
+				return false;
+			}
+			if(isExpandableNode(parent)) {
 				return false;
 			}
 			return true;
@@ -492,6 +496,7 @@ public class PackageExplorerPart extends ViewPart
 
 		fViewer= createViewer(fDisplayArea);
 		fViewer.setUseHashlookup(true);
+		WorkbenchViewerSetup.setupViewer(fViewer);
 
 		fEmptyWorkspaceHelper.setNonEmptyControl(fViewer.getControl());
 

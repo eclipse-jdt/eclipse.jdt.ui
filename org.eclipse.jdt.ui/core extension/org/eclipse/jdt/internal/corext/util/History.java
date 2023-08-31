@@ -32,7 +32,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -56,6 +55,7 @@ import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 
 /**
  * History stores a list of key, object pairs. The list is bounded at size
@@ -168,19 +168,10 @@ public abstract class History<K, V> {
 		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(fFileName);
 		File file= stateLocation.toFile();
 		if (file.exists()) {
-			InputStreamReader reader= null;
-	        try {
-				reader = new InputStreamReader(new FileInputStream(file), "utf-8");//$NON-NLS-1$
+			try (InputStreamReader reader= new InputStreamReader(new FileInputStream(file), "utf-8")) {//$NON-NLS-1$
 				load(new InputSource(reader));
 			} catch (IOException | CoreException e) {
 				JavaPlugin.log(e);
-			} finally {
-				try {
-					if (reader != null)
-						reader.close();
-				} catch (IOException e) {
-					JavaPlugin.log(e);
-				}
 			}
 		}
 	}
@@ -188,22 +179,12 @@ public abstract class History<K, V> {
 	public synchronized void save() {
 		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(fFileName);
 		File file= stateLocation.toFile();
-		OutputStream out= null;
-		try {
-			out= new FileOutputStream(file);
+		try (OutputStream out= new FileOutputStream(file)) {
 			save(out);
 		} catch (IOException | CoreException | TransformerFactoryConfigurationError e) {
 			// The XML library can be misconficgured (e.g. via
 			// -Djava.endorsed.dirs=C:\notExisting\xerces-2_7_1)
 			JavaPlugin.log(e);
-		} finally {
-			try {
-				if (out != null) {
-					out.close();
-				}
-			} catch (IOException e) {
-				JavaPlugin.log(e);
-			}
 		}
 	}
 
@@ -251,7 +232,7 @@ public abstract class History<K, V> {
 	private void load(InputSource inputSource) throws CoreException {
 		Element root;
 		try {
-			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			DocumentBuilder parser = XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE().newDocumentBuilder();
 			parser.setErrorHandler(new DefaultHandler());
 			root = parser.parse(inputSource).getDocumentElement();
 		} catch (SAXException | ParserConfigurationException | IOException e) {
@@ -281,7 +262,7 @@ public abstract class History<K, V> {
 
 	private void save(OutputStream stream) throws CoreException {
 		try {
-			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 			DocumentBuilder builder= factory.newDocumentBuilder();
 			Document document= builder.newDocument();
 
@@ -296,7 +277,7 @@ public abstract class History<K, V> {
 				rootElement.appendChild(element);
 			}
 
-			Transformer transformer=TransformerFactory.newInstance().newTransformer();
+			Transformer transformer= XmlProcessorFactoryJdtUi.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$

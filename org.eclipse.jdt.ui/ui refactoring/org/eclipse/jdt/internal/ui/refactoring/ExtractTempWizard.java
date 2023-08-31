@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
@@ -54,7 +55,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 	 */
 	@Override
 	protected void addUserInputPages(){
-		addPage(new ExtractTempInputPage(getExtractTempRefactoring().guessTempNames()));
+		addPage(new ExtractTempInputPage(getExtractTempRefactoring().guessTempNamesWithContext()));
 	}
 
 	private ExtractTempRefactoring getExtractTempRefactoring(){

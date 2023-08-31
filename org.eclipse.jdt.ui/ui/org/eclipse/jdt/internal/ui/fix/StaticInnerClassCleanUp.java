@@ -72,7 +72,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class StaticInnerClassCleanUp extends AbstractMultiFix {
 
-	private final String JUPITER_NESTED= "org.junit.jupiter.api.Nested"; //$NON-NLS-1$
+	private static final String JUPITER_NESTED= "org.junit.jupiter.api.Nested"; //$NON-NLS-1$
 
 	public StaticInnerClassCleanUp() {
 		this(Collections.emptyMap());

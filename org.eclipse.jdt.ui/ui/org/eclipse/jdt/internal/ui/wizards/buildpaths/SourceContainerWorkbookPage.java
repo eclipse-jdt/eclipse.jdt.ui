@@ -140,10 +140,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	private final SelectionButtonDialogField fUseFolderOutputs;
 
-	private final int IDX_ADD= 0;
-	private final int IDX_ADD_LINK= 1;
-	private final int IDX_EDIT= 3;
-	private final int IDX_REMOVE= 4;
+	private static final int IDX_ADD= 0;
+	private static final int IDX_ADD_LINK= 1;
+	private static final int IDX_EDIT= 3;
+	private static final int IDX_REMOVE= 4;
 
 	public SourceContainerWorkbookPage(ListDialogField<CPListElement> classPathList, StringDialogField outputLocationField) {
 		fClassPathList= classPathList;

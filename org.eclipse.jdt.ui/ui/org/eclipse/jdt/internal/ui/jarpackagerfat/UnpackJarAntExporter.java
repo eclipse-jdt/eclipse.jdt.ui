@@ -28,7 +28,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -39,6 +38,8 @@ import org.w3c.dom.Node;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
+
+import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 
 /**
  * Create an ANT script for a runnable JAR wit libraries in a sub-folder. The script is generated
@@ -60,7 +61,7 @@ public class UnpackJarAntExporter extends FatJarAntExporter {
 			String absSubfolder= absJarfile.removeLastSegments(1).append(subfolder).toString();
 
 			DocumentBuilder docBuilder= null;
-			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 			factory.setValidating(false);
 			try {
 				docBuilder= factory.newDocumentBuilder();
@@ -147,7 +148,7 @@ public class UnpackJarAntExporter extends FatJarAntExporter {
 
 			try {
 				// Write the document to the stream
-				Transformer transformer= TransformerFactory.newInstance().newTransformer();
+				Transformer transformer= XmlProcessorFactoryJdtUi.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 				transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 				transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$

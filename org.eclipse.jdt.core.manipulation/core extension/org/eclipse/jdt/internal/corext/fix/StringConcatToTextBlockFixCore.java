@@ -400,8 +400,8 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private List<Statement> statementList= new ArrayList<>();
 		private SimpleName originalVarName;
 		private Map<ExpressionStatement, ChangeStringBufferToTextBlock> conversions= new HashMap<>();
-		private final String APPEND= "append"; //$NON-NLS-1$
-		private final String TO_STRING= "toString"; //$NON-NLS-1$
+		private static final String APPEND= "append"; //$NON-NLS-1$
+		private static final String TO_STRING= "toString"; //$NON-NLS-1$
 		private final Set<String> fExcludedNames;
 
 		public StringBufferFinder(List<CompilationUnitRewriteOperation> operations, Set<String> excludedNames) {

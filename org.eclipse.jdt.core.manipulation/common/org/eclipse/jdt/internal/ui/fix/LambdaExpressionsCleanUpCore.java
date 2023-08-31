@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,12 +18,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
 import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
-
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 
@@ -63,7 +61,9 @@ public class LambdaExpressionsCleanUpCore extends AbstractCleanUpCore {
 
 		return LambdaExpressionsFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.USE_LAMBDA),
-				isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION));
+				isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION),
+				isEnabled(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF) ||
+				isEnabled(CleanUpConstants.USE_LAMBDA) && isEnabled(CleanUpConstants.ALSO_SIMPLIFY_LAMBDA));
 	}
 
 	@Override
@@ -71,7 +71,11 @@ public class LambdaExpressionsCleanUpCore extends AbstractCleanUpCore {
 		List<String> result= new ArrayList<>();
 		if (isEnabled(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES)) {
 			if (isEnabled(CleanUpConstants.USE_LAMBDA)) {
-				result.add(MultiFixMessages.LambdaExpressionsCleanUp_use_lambda_where_possible);
+				if (isEnabled(CleanUpConstants.ALSO_SIMPLIFY_LAMBDA)) {
+					result.add(MultiFixMessages.LambdaExpressionsCleanUp_use_lambda_and_simplify);
+				} else {
+					result.add(MultiFixMessages.LambdaExpressionsCleanUp_use_lambda_where_possible);
+				}
 			}
 			if (isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION)) {
 				result.add(MultiFixMessages.LambdaExpressionsCleanUp_use_anonymous);
@@ -88,16 +92,26 @@ public class LambdaExpressionsCleanUpCore extends AbstractCleanUpCore {
 		boolean convert= isEnabled(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		boolean useLambda= isEnabled(CleanUpConstants.USE_LAMBDA);
 		boolean useAnonymous= isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		boolean simplifyLambda= isEnabled(CleanUpConstants.ALSO_SIMPLIFY_LAMBDA);
 
 		boolean firstLambda= convert && useLambda;
 		boolean secondLambda= !convert || !useAnonymous;
 
 		if (firstLambda) {
-			buf.append("IntConsumer c = i -> {\n"); //$NON-NLS-1$
-			buf.append("    System.out.println(i);\n"); //$NON-NLS-1$
-			buf.append("};\n"); //$NON-NLS-1$
-			buf.append("\n"); //$NON-NLS-1$
-			buf.append("\n"); //$NON-NLS-1$
+			if (simplifyLambda) {
+				buf.append("IntConsumer c = System.out::println;\n"); //$NON-NLS-1$
+				buf.append("\n"); //$NON-NLS-1$
+				buf.append("\n"); //$NON-NLS-1$
+				buf.append("\n"); //$NON-NLS-1$
+				buf.append("\n"); //$NON-NLS-1$
+
+			} else {
+				buf.append("IntConsumer c = i -> {\n"); //$NON-NLS-1$
+				buf.append("    System.out.println(i);\n"); //$NON-NLS-1$
+				buf.append("};\n"); //$NON-NLS-1$
+				buf.append("\n"); //$NON-NLS-1$
+				buf.append("\n"); //$NON-NLS-1$
+			}
 		} else {
 			buf.append("IntConsumer c = new IntConsumer() {\n"); //$NON-NLS-1$
 			buf.append("    @Override public void accept(int value) {\n"); //$NON-NLS-1$

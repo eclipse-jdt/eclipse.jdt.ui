@@ -563,6 +563,12 @@
             class="org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"
             id="org.eclipse.jdt.ui.JavaSourceHover">
       </hover>
+       <hover
+            label="%constantHover"
+            description="%constantHoverDescription"
+            class="org.eclipse.jdt.internal.ui.text.java.hover.JavaConstantHover"
+            id="org.eclipse.jdt.ui.JavaConstantHover">
+      </hover>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
@@ -7224,14 +7230,9 @@
             runAfter="org.eclipse.jdt.ui.cleanup.reduce_indentation">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref"
-            runAfter="org.eclipse.jdt.ui.cleanup.expressions">
-      </cleanUp>
-      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ExtractIncrementCleanUp"
             id="org.eclipse.jdt.ui.cleanup.extract_increment"
-            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
+            runAfter="org.eclipse.jdt.ui.cleanup.expressions">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp"
@@ -7574,9 +7575,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.var">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref"
+            runAfter="org.eclipse.jdt.ui.cleanup.lambda">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp"
             id="org.eclipse.jdt.ui.cleanup.comparing_on_criteria"
-            runAfter="org.eclipse.jdt.ui.cleanup.lambda">
+            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.JoinCleanUp"

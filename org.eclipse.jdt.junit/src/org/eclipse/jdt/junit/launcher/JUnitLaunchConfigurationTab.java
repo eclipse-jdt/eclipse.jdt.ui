@@ -22,32 +22,69 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.SelectionDialog;
+
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jdt.core.IAnnotation;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
@@ -64,14 +101,12 @@ import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+
 import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -80,39 +115,11 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.ui.dialogs.SelectionDialog;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 
 
 /**
@@ -175,9 +182,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 	private boolean fIsValid= true;
 
-	private Set<String> fMethodsCache;
-
-	private String fMethodsCacheKey;
+	private TestMethodsCache fTestMethodsCache= new TestMethodsCache();
 
 	/**
 	 * Creates a JUnit launch configuration tab.
@@ -260,7 +265,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestLoaderViewer.setInput(items);
 		fTestLoaderViewer.addSelectionChangedListener(event -> {
 			setEnableTagsGroup(event);
-			validatePage();
+			try (var __= fTestMethodsCache.runNestedCancelable()) {
+				calculateMethodsCache();
+				validatePage();
+			}
 			updateLaunchConfigurationDialog();
 		});
 	}
@@ -309,7 +317,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fProjText= new Text(comp, SWT.SINGLE | SWT.BORDER);
 		fProjText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fProjText.addModifyListener(evt -> {
-			validatePage();
+			try (var __= fTestMethodsCache.runNestedCancelable()) {
+				calculateMethodsCache();
+				validatePage();
+			}
 			updateLaunchConfigurationDialog();
 			fSearchButton.setEnabled(fTestRadioButton.getSelection() && fProjText.getText().length() > 0);
 		});
@@ -334,8 +345,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestText= new Text(comp, SWT.SINGLE | SWT.BORDER);
 		fTestText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fTestText.addModifyListener(evt -> {
-			fTestMethodSearchButton.setEnabled(fTestText.getText().length() > 0);
-			validatePage();
+			try (var __= fTestMethodsCache.runNestedCancelable()) {
+				calculateMethodsCache();
+				validatePage();
+			}
 			updateLaunchConfigurationDialog();
 		});
 
@@ -369,7 +382,6 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 
 		fTestMethodSearchButton= new Button(comp, SWT.PUSH);
-		fTestMethodSearchButton.setEnabled(fTestText.getText().length() > 0);
 		fTestMethodSearchButton.setText(JUnitMessages.JUnitLaunchConfigurationTab_label_search_method);
 		fTestMethodSearchButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -457,23 +469,27 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration config) {
-		fLaunchConfiguration= config;
+		try (var __= fTestMethodsCache.runNestedCancelable()) {
+			fLaunchConfiguration= config;
 
-		updateProjectFromConfig(config);
-		String containerHandle= ""; //$NON-NLS-1$
-		try {
-			containerHandle= config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
-		} catch (CoreException ce) {
+			updateProjectFromConfig(config);
+			String containerHandle= ""; //$NON-NLS-1$
+			try {
+				containerHandle= config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
+			} catch (CoreException ce) {
+			}
+
+			if (containerHandle.length() > 0) {
+				updateTestContainerFromConfig(config);
+			} else {
+				updateTestTypeFromConfig(config);
+			}
+			updateKeepRunning(config);
+			updateTestLoaderFromConfig(config);
+
+			calculateMethodsCache();
+			validatePage();
 		}
-
-		if (containerHandle.length() > 0)
-			updateTestContainerFromConfig(config);
-		else
-			updateTestTypeFromConfig(config);
-		updateKeepRunning(config);
-		updateTestLoaderFromConfig(config);
-
-		validatePage();
 	}
 
 
@@ -487,7 +503,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				testKind= TestKindRegistry.getDefault().getKind(TestKindRegistry.JUNIT3_TEST_KIND_ID);
 			}
 		}
-		fTestLoaderViewer.setSelection(new StructuredSelection(testKind));
+		try (var __= fTestMethodsCache.runNestedCancelable()) {
+			fTestLoaderViewer.setSelection(new StructuredSelection(testKind));
+		}
 	}
 
 	private TestKind getSelectedTestKind() {
@@ -510,7 +528,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			projectName= config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {
 		}
-		fProjText.setText(projectName);
+		try (var __= fTestMethodsCache.runNestedCancelable()) {
+			fProjText.setText(projectName);
+		}
 	}
 
 	private void updateTestTypeFromConfig(ILaunchConfiguration config) {
@@ -525,9 +545,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		setEnableSingleTestGroup(true);
 		setEnableContainerTestGroup(false);
 		fTestContainerRadioButton.setSelection(false);
-		fTestText.setText(testTypeName);
-		fContainerText.setText(""); //$NON-NLS-1$
-		fTestMethodText.setText(fOriginalTestMethodName);
+
+		try (var __= fTestMethodsCache.runNestedCancelable()) {
+			fTestText.setText(testTypeName);
+			fContainerText.setText(""); //$NON-NLS-1$
+			fTestMethodText.setText(fOriginalTestMethodName);
+		}
 	}
 
 	private void updateTestContainerFromConfig(ILaunchConfiguration config) {
@@ -548,7 +571,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestRadioButton.setSelection(false);
 		if (fContainerElement != null)
 			fContainerText.setText(getPresentationName(fContainerElement));
-		fTestText.setText(""); //$NON-NLS-1$
+
+		try (var __= fTestMethodsCache.runNestedCancelable()) {
+			fTestText.setText(""); //$NON-NLS-1$
+		}
 	}
 
 	@Override
@@ -667,9 +693,11 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		IType type= (IType) results[0];
 
 		if (type != null) {
-			fTestText.setText(type.getFullyQualifiedName('.'));
-			javaProject= type.getJavaProject();
-			fProjText.setText(javaProject.getElementName());
+			try (var __= fTestMethodsCache.runNestedCancelable()) {
+				fTestText.setText(type.getFullyQualifiedName('.'));
+				javaProject= type.getJavaProject();
+				fProjText.setText(javaProject.getElementName());
+			}
 		}
 	}
 
@@ -684,142 +712,108 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			return;
 		}
 
-		String projectName= project.getElementName();
-		fProjText.setText(projectName);
+		try (var __= fTestMethodsCache.runNestedCancelable()) {
+			String projectName= project.getElementName();
+			fProjText.setText(projectName);
+		}
 	}
 
 	private void handleTestMethodSearchButtonSelected() {
-		try {
+		try (var __= fTestMethodsCache.runNestedCancelable()) {
 			IJavaProject javaProject= getJavaProject();
 			IType testType= javaProject.findType(fTestText.getText());
 			Set<String> methodNames= getMethodsForType(javaProject, testType, getSelectedTestKind());
+
+			// I can't put this logic inside getMethodsForType because that would cause
+			// a bug, making it necessary to cancel the search twice when first opening
+			// a JUnit configuration
+			if (methodNames.isEmpty()) {
+				calculateMethodsCache();
+				methodNames= getMethodsForType(javaProject, testType, getSelectedTestKind());
+			}
+
+			if (fTestMethodsCache.isCanceled()) {
+				return;
+			}
+
 			String methodName= chooseMethodName(methodNames);
 
 			if (methodName != null) {
 				fTestMethodText.setText(methodName);
-				validatePage();
-				updateLaunchConfigurationDialog();
 			}
+			validatePage();
+			updateLaunchConfigurationDialog();
 		} catch (JavaModelException e) {
 			JUnitPlugin.log(e.getStatus());
 		}
 	}
 
-	private Set<String> getMethodsForType(IJavaProject javaProject, IType type, TestKind testKind) throws JavaModelException {
+	private Set<String> getMethodsForType(IJavaProject javaProject, IType type, TestKind testKind) {
 		if (javaProject == null || type == null || testKind == null)
 			return Collections.emptySet();
 
 		String testKindId= testKind.getId();
-		String methodsCacheKey= javaProject.getElementName() + '\n' + type.getFullyQualifiedName() + '\n' + testKindId;
-		if (methodsCacheKey.equals(fMethodsCacheKey))
-			return fMethodsCache;
+		String methodsCacheKey= getMethodsCacheKey(javaProject, type, testKindId);
+		if (fTestMethodsCache.containsKey(methodsCacheKey)) {
+			return fTestMethodsCache.get(methodsCacheKey);
+		}
 
-		Set<String> methodNames= new HashSet<>();
-		fMethodsCache= methodNames;
-		fMethodsCacheKey= methodsCacheKey;
-
-		collectMethodNames(type, javaProject, testKindId, methodNames);
-
-		return methodNames;
+		return Collections.emptySet();
 	}
 
-	private void collectMethodNames(IType type, IJavaProject javaProject, String testKindId, Set<String> methodNames) throws JavaModelException {
-		if (type == null) {
+	private void calculateMethodsCache() {
+		fTestMethodText.setEnabled(false);
+
+		if (fTestMethodsCache.isCanceled()) {
 			return;
 		}
-		collectDeclaredMethodNames(type, javaProject, testKindId, methodNames);
 
-		String superclassName= type.getSuperclassName();
-		IType superType= getResolvedType(superclassName, type, javaProject);
-		collectMethodNames(superType, javaProject, testKindId, methodNames);
+		try {
+			IJavaProject javaProject= getJavaProject();
 
-		String[] superInterfaceNames= type.getSuperInterfaceNames();
-		for (String interfaceName : superInterfaceNames) {
-			superType= getResolvedType(interfaceName, type, javaProject);
-			collectMethodNames(superType, javaProject, testKindId, methodNames);
+			if (javaProject == null) {
+				// can't find methods if the project
+				return;
+			}
+
+			IType testClass= javaProject.findType(fTestText.getText());
+
+			if (testClass == null) {
+				// can't find methods if the class doesn't exist
+				return;
+			}
+
+			TestKind testKind= getSelectedTestKind();
+
+			if (testKind == null) {
+				// no need to search for methods if the type (JUnit3/4/5) is not set
+				return;
+			}
+
+			String methodsCacheKey= getMethodsCacheKey(javaProject, testClass, testKind.getId());
+
+			if (fTestMethodsCache.containsKey(methodsCacheKey)) {
+				// no need to recalculate since the source code can't change while the dialog is open.
+				fTestMethodText.setEnabled(true);
+				return;
+			}
+
+			fTestMethodsCache.put(methodsCacheKey, //
+					TestSearchEngine.findTestMethods(getLaunchConfigurationDialog(), javaProject, testClass, testKind));
+
+			// calculation successful, reactivate the UI
+			fTestMethodText.setEnabled(true);
+		} catch (InvocationTargetException | JavaModelException e) {
+			JUnitPlugin.log(e);
+		} catch (InterruptedException e) {
+			// the user probably canceled the operation. Sadly there is no way to know it for sure since ModalContext::run
+			// doesn't throw the original OperationCanceledException, it throws a new InterruptedException.
+			fTestMethodsCache.setCanceled(true);
 		}
 	}
 
-	private IType getResolvedType(String typeName, IType type, IJavaProject javaProject) throws JavaModelException {
-		IType resolvedType= null;
-		if (typeName != null) {
-			int pos= typeName.indexOf('<');
-			if (pos != -1) {
-				typeName= typeName.substring(0, pos);
-			}
-			String[][] resolvedTypeNames= type.resolveType(typeName);
-			if (resolvedTypeNames != null && resolvedTypeNames.length > 0) {
-				String[] resolvedTypeName= resolvedTypeNames[0];
-				resolvedType= javaProject.findType(resolvedTypeName[0], resolvedTypeName[1]); // secondary types not found by this API
-			}
-		}
-		return resolvedType;
-	}
-
-	private void collectDeclaredMethodNames(IType type, IJavaProject javaProject, String testKindId, Set<String> methodNames) throws JavaModelException {
-		IMethod[] methods= type.getMethods();
-		for (IMethod method : methods) {
-			String methodName= method.getElementName();
-			int flags= method.getFlags();
-			// Only include public, non-static, no-arg methods that return void and start with "test":
-			if (Modifier.isPublic(flags) && !Modifier.isStatic(flags) &&
-					method.getNumberOfParameters() == 0 && Signature.SIG_VOID.equals(method.getReturnType()) &&
-					methodName.startsWith("test")) { //$NON-NLS-1$
-				methodNames.add(methodName);
-			}
-			boolean isJUnit3= TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKindId);
-			boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId);
-			if (!isJUnit3 && !Modifier.isPrivate(flags) && !Modifier.isStatic(flags)) {
-				IAnnotation annotation= method.getAnnotation("Test"); //$NON-NLS-1$
-				if (annotation.exists()) {
-					methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
-				} else if (isJUnit5) {
-					boolean hasAnyTestAnnotation= method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
-							|| method.getAnnotation("Testable").exists() //$NON-NLS-1$
-							|| method.getAnnotation("TestTemplate").exists() //$NON-NLS-1$
-							|| method.getAnnotation("ParameterizedTest").exists() //$NON-NLS-1$
-							|| method.getAnnotation("RepeatedTest").exists(); //$NON-NLS-1$
-					if (hasAnyTestAnnotation || isAnnotatedWithTestable(method, type, javaProject)) {
-						methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
-					}
-				}
-			}
-		}
-	}
-
-	// See JUnit5TestFinder.Annotation#annotates also.
-	private boolean isAnnotatedWithTestable(IMethod method, IType declaringType, IJavaProject javaProject) throws JavaModelException {
-		for (IAnnotation annotation : method.getAnnotations()) {
-			IType annotationType= getResolvedType(annotation.getElementName(), declaringType, javaProject);
-			if (annotationType != null) {
-				if (matchesTestable(annotationType)) {
-					return true;
-				}
-				Set<IType> hierarchy= new HashSet<>();
-				if (matchesTestableInAnnotationHierarchy(annotationType, javaProject, hierarchy)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private boolean matchesTestable(IType annotationType) {
-		return annotationType != null && JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME.equals(annotationType.getFullyQualifiedName());
-	}
-
-	private boolean matchesTestableInAnnotationHierarchy(IType annotationType, IJavaProject javaProject, Set<IType> hierarchy) throws JavaModelException {
-		if (annotationType != null) {
-			for (IAnnotation annotation : annotationType.getAnnotations()) {
-				IType annType= getResolvedType(annotation.getElementName(), annotationType, javaProject);
-				if (annType != null && hierarchy.add(annType)) {
-					if (matchesTestable(annType) || matchesTestableInAnnotationHierarchy(annType, javaProject, hierarchy)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
+	private String getMethodsCacheKey(IJavaProject javaProject, IType type, String testKindId) {
+		return javaProject.getElementName() + '\n' + type.getFullyQualifiedName() + '\n' + testKindId;
 	}
 
 	private String chooseMethodName(Set<String> methodNames) {
@@ -938,7 +932,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	@Override
 	protected void setErrorMessage(String errorMessage) {
 		fIsValid= errorMessage == null;
-		super.setErrorMessage(errorMessage);
+		if (fTestMethodsCache.isCanceled()) {
+			super.setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_operation_canceled +
+					(errorMessage != null ? (" " + errorMessage) : "")); //$NON-NLS-1$ //$NON-NLS-2$
+		} else {
+			super.setErrorMessage(errorMessage);
+		}
 	}
 
 	private void validatePage() {
@@ -993,7 +992,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				if (methodName.length() > 0) {
 					Set<String> methodsForType= getMethodsForType(javaProject, type, getSelectedTestKind());
 					if (!methodsForType.contains(methodName)) {
-						super.setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_method_not_found, new String[] { className, methodName, projectName }));
+						setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_method_not_found, new String[] { className, methodName, projectName }));
 						return;
 					}
 				}
@@ -1067,8 +1066,6 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		boolean projectTextHasContents= fProjText.getText().length() > 0;
 		fSearchButton.setEnabled(enabled && projectTextHasContents);
 		fTestMethodLabel.setEnabled(enabled);
-		fTestMethodText.setEnabled(enabled);
-		fTestMethodSearchButton.setEnabled(enabled && projectTextHasContents && fTestText.getText().length() > 0);
 	}
 
 	@Override

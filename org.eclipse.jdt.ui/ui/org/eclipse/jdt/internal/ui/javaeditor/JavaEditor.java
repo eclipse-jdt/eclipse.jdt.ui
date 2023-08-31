@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
-import com.ibm.icu.text.BreakIterator;
+import java.text.BreakIterator;
 
 import org.osgi.service.prefs.BackingStoreException;
 

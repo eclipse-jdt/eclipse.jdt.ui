@@ -27,7 +27,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -38,6 +37,8 @@ import org.w3c.dom.Node;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
+
+import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 
 /**
  * @since 3.5
@@ -54,7 +55,7 @@ public class UnpackFatJarAntExporter extends FatJarAntExporter {
 			String absJarname= absJarfile.toString();
 
 			DocumentBuilder docBuilder= null;
-			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 			factory.setValidating(false);
 			try {
 				docBuilder= factory.newDocumentBuilder();
@@ -114,7 +115,7 @@ public class UnpackFatJarAntExporter extends FatJarAntExporter {
 
 			try {
 				// Write the document to the stream
-				Transformer transformer= TransformerFactory.newInstance().newTransformer();
+				Transformer transformer= XmlProcessorFactoryJdtUi.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 				transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 				transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$

@@ -27,7 +27,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -56,6 +55,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 
 /**
  * Writes a JarPackage to an underlying OutputStream
@@ -97,7 +97,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	public void writeXML(JarPackageData jarPackage) throws IOException {
 		Assert.isNotNull(jarPackage);
 		DocumentBuilder docBuilder= null;
-		DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 		factory.setValidating(false);
 		try {
 	    	docBuilder= factory.newDocumentBuilder();
@@ -119,7 +119,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 
 		try {
 			// Write the document to the stream
-			Transformer transformer=TransformerFactory.newInstance().newTransformer();
+			Transformer transformer= XmlProcessorFactoryJdtUi.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 			transformer.setOutputProperty(OutputKeys.ENCODING, fEncoding);
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$

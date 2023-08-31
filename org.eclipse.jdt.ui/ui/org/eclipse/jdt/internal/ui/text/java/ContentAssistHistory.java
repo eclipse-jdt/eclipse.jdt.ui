@@ -34,7 +34,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -62,6 +61,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 
 /**
  * An LRU cache for code assist.
@@ -85,7 +85,7 @@ public final class ContentAssistHistory {
 
 		public void store(ContentAssistHistory history, StreamResult result) throws CoreException {
 			try {
-				DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+				DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 				DocumentBuilder builder= factory.newDocumentBuilder();
 				Document document= builder.newDocument();
 
@@ -106,7 +106,7 @@ public final class ContentAssistHistory {
 					}
 				}
 
-				Transformer transformer=TransformerFactory.newInstance().newTransformer();
+				Transformer transformer= XmlProcessorFactoryJdtUi.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 				transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 				transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
 				transformer.setOutputProperty(OutputKeys.INDENT, "no"); //$NON-NLS-1$
@@ -121,7 +121,7 @@ public final class ContentAssistHistory {
 		public ContentAssistHistory load(InputSource source) throws CoreException {
 			Element root;
 			try {
-				DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+				DocumentBuilder parser = XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE().newDocumentBuilder();
 				parser.setErrorHandler(new DefaultHandler());
 				root = parser.parse(source).getDocumentElement();
 			} catch (SAXException | ParserConfigurationException | IOException e) {

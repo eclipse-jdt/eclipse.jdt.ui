@@ -65,7 +65,7 @@ public class SideEffectChecker extends ASTVisitor {
 
 	ASTNode fExpression;
 
-	private final int THRESHOLD= 2500;
+	private static final int THRESHOLD= 2500;
 
 	private String fEnclosingMethodSignature;
 

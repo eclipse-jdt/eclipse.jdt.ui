@@ -34,7 +34,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.junit.After;
 import org.junit.Before;
@@ -81,6 +80,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.junit.util.XmlProcessorFactoryJdtJunit;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMInstall;
@@ -261,7 +261,7 @@ public class FatJarExportTests {
 				majorVersion = ((in.read() << 8) + in.read());
 			}
 			assertEquals("loader is a class file", 0xCAFEBABE, magic); //$NON-NLS-1$
-			assertEquals("loader compiled with JDK 1.6", "50.0", majorVersion + "." + minorVersion); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			assertEquals("loader compiled with JDK 1.8", "52.0", majorVersion + "." + minorVersion); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null); //$NON-NLS-1$
@@ -673,7 +673,7 @@ public class FatJarExportTests {
 	 */
 	private static Element readXML(IPath xmlFilePath) throws Exception {
 		try (InputStream in = new FileInputStream(xmlFilePath.toFile())) {
-			DocumentBuilder parser= DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			DocumentBuilder parser= XmlProcessorFactoryJdtJunit.createDocumentBuilderFactoryWithErrorOnDOCTYPE().newDocumentBuilder();
 			parser.setErrorHandler(new DefaultHandler());
 			Element root= parser.parse(new InputSource(in)).getDocumentElement();
 			in.close();

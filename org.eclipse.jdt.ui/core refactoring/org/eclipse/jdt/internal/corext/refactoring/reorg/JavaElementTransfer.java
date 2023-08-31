@@ -73,9 +73,8 @@ public class JavaElementTransfer extends ByteArrayTransfer {
 		 *  (String) handle identifier
 		 */
 
-		try {
-			ByteArrayOutputStream out= new ByteArrayOutputStream();
-			DataOutputStream dataOut= new DataOutputStream(out);
+		try (ByteArrayOutputStream out= new ByteArrayOutputStream();
+				DataOutputStream dataOut= new DataOutputStream(out)) {
 
 			//write the number of elements
 			dataOut.writeInt(javaElements.length);
@@ -86,8 +85,6 @@ public class JavaElementTransfer extends ByteArrayTransfer {
 			}
 
 			//cleanup
-			dataOut.close();
-			out.close();
 			byte[] bytes= out.toByteArray();
 			super.javaToNative(bytes, transferData);
 		} catch (IOException e) {

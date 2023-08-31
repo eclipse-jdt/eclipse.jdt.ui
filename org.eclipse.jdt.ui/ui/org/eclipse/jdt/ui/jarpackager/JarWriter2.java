@@ -39,12 +39,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * Creates a JAR file for the given JAR package data.
@@ -172,17 +172,11 @@ public class JarWriter2 {
 		// Set modification time
 		newEntry.setTime(lastModified);
 
-		InputStream contentStream = resource.getContents(false);
-
-		try {
+		try (InputStream contentStream = resource.getContents(false)) {
 			fJarOutputStream.putNextEntry(newEntry);
 			int count;
 			while ((count= contentStream.read(readBuffer, 0, readBuffer.length)) != -1)
 				fJarOutputStream.write(readBuffer, 0, count);
-		} finally  {
-			if (contentStream != null)
-				contentStream.close();
-
 			/*
 			 * Commented out because some JREs throw an NPE if a stream
 			 * is closed twice. This works because
@@ -204,21 +198,17 @@ public class JarWriter2 {
 	 * @throws	CoreException 	if the resource can-t be accessed
 	 */
 	private void calculateCrcAndSize(JarEntry jarEntry, IFile resource, byte[] readBuffer) throws IOException, CoreException {
-		InputStream contentStream = resource.getContents(false);
-		int size = 0;
-		CRC32 checksumCalculator= new CRC32();
-		int count;
-		try {
+		try (InputStream contentStream= resource.getContents(false)) {
+			int size= 0;
+			CRC32 checksumCalculator= new CRC32();
+			int count;
 			while ((count= contentStream.read(readBuffer, 0, readBuffer.length)) != -1) {
 				checksumCalculator.update(readBuffer, 0, count);
-				size += count;
+				size+= count;
 			}
-		} finally {
-			if (contentStream != null)
-				contentStream.close();
+			jarEntry.setSize(size);
+			jarEntry.setCrc(checksumCalculator.getValue());
 		}
-		jarEntry.setSize(size);
-		jarEntry.setCrc(checksumCalculator.getValue());
 	}
 
 	/**

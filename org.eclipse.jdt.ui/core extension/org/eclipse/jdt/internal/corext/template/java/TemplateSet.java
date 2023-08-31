@@ -28,7 +28,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -51,6 +50,8 @@ import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
+
+import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 
 /**
  * <code>TemplateSet</code> manages a collection of templates and makes them
@@ -87,22 +88,10 @@ public class TemplateSet {
 	 * @see #addFromStream(InputStream, boolean)
 	 */
 	public void addFromFile(File file, boolean allowDuplicates) throws CoreException {
-		InputStream stream= null;
-
-		try {
-			stream= new FileInputStream(file);
+		try (InputStream stream= new FileInputStream(file)) {
 			addFromStream(stream, allowDuplicates);
-
 		} catch (IOException e) {
 			throwReadException(e);
-
-		} finally {
-			try {
-				if (stream != null)
-					stream.close();
-			} catch (IOException e) {
-				// just exit
-			}
 		}
 	}
 
@@ -120,7 +109,7 @@ public class TemplateSet {
 	 */
 	public void addFromStream(InputStream stream, boolean allowDuplicates) throws CoreException {
 		try {
-			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 			DocumentBuilder parser= factory.newDocumentBuilder();
 			parser.setErrorHandler(new DefaultHandler());
 			Document document= parser.parse(new InputSource(stream));
@@ -202,22 +191,10 @@ public class TemplateSet {
 	 * @see #saveToStream(OutputStream)
 	 */
 	public void saveToFile(File file) throws CoreException {
-		OutputStream stream= null;
-
-		try {
-			stream= new FileOutputStream(file);
+		try (OutputStream stream= new FileOutputStream(file)) {
 			saveToStream(stream);
-
 		} catch (IOException e) {
 			throwWriteException(e);
-
-		} finally {
-			try {
-				if (stream != null)
-					stream.close();
-			} catch (IOException e) {
-				// just exit
-			}
 		}
 	}
 
@@ -229,7 +206,7 @@ public class TemplateSet {
 	 */
 	public void saveToStream(OutputStream stream) throws CoreException {
 		try {
-			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+			DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 			DocumentBuilder builder= factory.newDocumentBuilder();
 			Document document= builder.newDocument();
 
@@ -259,7 +236,7 @@ public class TemplateSet {
 			}
 
 
-			Transformer transformer=TransformerFactory.newInstance().newTransformer();
+			Transformer transformer= XmlProcessorFactoryJdtUi.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
 			DOMSource source = new DOMSource(document);

@@ -52,6 +52,8 @@ public class StringCleanUp extends AbstractMultiFix {
 		super();
 	}
 
+	private CompilationUnit fSavedCompilationUnit= null;
+
 	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
@@ -69,7 +71,7 @@ public class StringCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(compilationUnit,
+		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
 		return coreFix == null ? null : new CleanUpFixWrapper(coreFix);
@@ -143,6 +145,7 @@ public class StringCleanUp extends AbstractMultiFix {
 			return 0;
 		}
 
+		fSavedCompilationUnit= compilationUnit;
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
 		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS))

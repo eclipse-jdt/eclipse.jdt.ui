@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -480,10 +480,10 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			IWorkingSet editedWorkingSet= iterator.next();
 			IWorkingSet originalWorkingSet= fEditedWorkingSets.get(editedWorkingSet);
 
-			if (editedWorkingSet.getName().equals(originalWorkingSet.getName()) == false) {
+			if (!editedWorkingSet.getName().equals(originalWorkingSet.getName())) {
 				editedWorkingSet.setName(originalWorkingSet.getName());
 			}
-			if (editedWorkingSet.getElements().equals(originalWorkingSet.getElements()) == false) {
+			if (!Arrays.equals(editedWorkingSet.getElements(), originalWorkingSet.getElements())) {
 				editedWorkingSet.setElements(originalWorkingSet.getElements());
 			}
 		}

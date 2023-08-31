@@ -56,7 +56,7 @@ public class FilterManager {
 			activefilters = getActiveList(store);
 			inactivefilters = getInactiveList(store);
 		}
-		Filter[] filters = new Filter[activefilters.length + inactivefilters.length];;
+		Filter[] filters = new Filter[activefilters.length + inactivefilters.length];
 		for (int i = 0; i < activefilters.length; i++) {
 			filters[i] = new Filter(activefilters[i], true);
 		}

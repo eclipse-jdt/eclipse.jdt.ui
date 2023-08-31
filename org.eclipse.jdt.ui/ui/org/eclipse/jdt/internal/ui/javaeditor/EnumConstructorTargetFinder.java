@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2021, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,16 +26,13 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 
@@ -144,8 +141,6 @@ public class EnumConstructorTargetFinder extends ASTVisitor {
 				ITypeBinding nodeTypeArgument= null;
 				if (nodeArgument.getNodeType() == ASTNode.METHOD_INVOCATION) {
 					nodeTypeArgument= ((Expression) nodeArgument).resolveTypeBinding();
-				} else if (nodeArgument.getNodeType() == ASTNode.METHOD_INVOCATION) {
-					nodeTypeArgument= ((MethodInvocation) nodeArgument).resolveMethodBinding().getReturnType();
 				} else if (nodeArgument.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
 					nodeTypeArgument= ((ClassInstanceCreation) nodeArgument).resolveTypeBinding();
 				} else if (nodeArgument.getParent().getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION) {

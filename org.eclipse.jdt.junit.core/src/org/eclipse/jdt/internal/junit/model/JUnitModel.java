@@ -33,7 +33,6 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
@@ -41,6 +40,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jdt.junit.TestRunListener;
 
 import org.eclipse.core.runtime.Assert;
@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
-import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.jdt.internal.junit.util.XmlProcessorFactoryJdtJunit;
 
 /**
  * Central registry for JUnit test runs.
@@ -385,7 +385,7 @@ public final class JUnitModel {
 	 */
 	public static TestRunSession importTestRunSession(File file) throws CoreException {
 		try {
-			SAXParserFactory parserFactory= SAXParserFactory.newInstance();
+			SAXParserFactory parserFactory= XmlProcessorFactoryJdtJunit.createSAXFactoryWithErrorOnDOCTYPE();
 //			parserFactory.setValidating(true); // TODO: add DTD and debug flag
 			SAXParser parser= parserFactory.newSAXParser();
 			TestRunHandler handler= new TestRunHandler();
@@ -426,7 +426,7 @@ public final class JUnitModel {
 			@Override
 			public void run() {
 				try {
-					SAXParserFactory parserFactory= SAXParserFactory.newInstance();
+					SAXParserFactory parserFactory= XmlProcessorFactoryJdtJunit.createSAXFactoryWithErrorOnDOCTYPE();
 //					parserFactory.setValidating(true); // TODO: add DTD and debug flag
 					SAXParser parser= parserFactory.newSAXParser();
 					parser.parse(trimmedUrl, handler);
@@ -472,7 +472,7 @@ public final class JUnitModel {
 
 	public static void importIntoTestRunSession(File swapFile, TestRunSession testRunSession) throws CoreException {
 		try {
-			SAXParserFactory parserFactory= SAXParserFactory.newInstance();
+			SAXParserFactory parserFactory= XmlProcessorFactoryJdtJunit.createSAXFactoryWithErrorOnDOCTYPE();
 //			parserFactory.setValidating(true); // TODO: add DTD and debug flag
 			SAXParser parser= parserFactory.newSAXParser();
 			TestRunHandler handler= new TestRunHandler(testRunSession);
@@ -495,30 +495,19 @@ public final class JUnitModel {
 	 * @throws CoreException if an error occurred
 	 */
 	public static void exportTestRunSession(TestRunSession testRunSession, File file) throws CoreException {
-		FileOutputStream out= null;
-		try {
-			out= new FileOutputStream(file);
-            exportTestRunSession(testRunSession, out);
-
+		try (FileOutputStream out= new FileOutputStream(file)) {
+			exportTestRunSession(testRunSession, out);
 		} catch (IOException | TransformerConfigurationException e) {
 			throwExportError(file, e);
 		} catch (TransformerException e) {
 			throwExportError(file, e);
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException e2) {
-					JUnitCorePlugin.log(e2);
-				}
-			}
 		}
 	}
 
 	public static void exportTestRunSession(TestRunSession testRunSession, OutputStream out)
 			throws TransformerFactoryConfigurationError, TransformerException {
 
-		Transformer transformer= TransformerFactory.newInstance().newTransformer();
+		Transformer transformer= XmlProcessorFactoryJdtJunit.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 		InputSource inputSource= new InputSource();
 		SAXSource source= new SAXSource(new TestRunSessionSerializer(testRunSession), inputSource);
 		StreamResult result= new StreamResult(out);

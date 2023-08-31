@@ -118,6 +118,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationTab_error_notJavaProject;
 
+	public static String JUnitLaunchConfigurationTab_error_operation_canceled;
+
 	public static String JUnitLaunchConfigurationTab_error_projectnotdefined;
 
 	public static String JUnitLaunchConfigurationTab_error_projectnotexists;
@@ -372,4 +374,6 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_JUnitPasteAction_label;
 
 	public static String TestRunnerViewPart_layout_menu;
+
+	public static String TestSearchEngine_search_message_progress_monitor;
 }

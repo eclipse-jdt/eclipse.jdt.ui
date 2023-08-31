@@ -69,6 +69,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 
 /**
  * Reads data from an InputStream and returns a JarPackage
@@ -120,7 +121,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	}
 
 	public JarPackageData readXML(JarPackageData jarPackage) throws IOException, SAXException {
-	  	DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+	  	DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
     	factory.setValidating(false);
 		DocumentBuilder parser= null;
 

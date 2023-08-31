@@ -17,6 +17,8 @@
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings concering ClassCasts. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/331
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by Identifying the Side Effect of Selected Expression. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -36,6 +38,18 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.CopySourceEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.text.edits.TextEditVisitor;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -43,6 +57,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -103,6 +118,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractLocalDescriptor;
+
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -110,6 +126,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
@@ -134,18 +151,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.SideEffectChecker;
 import org.eclipse.jdt.internal.corext.refactoring.util.UnsafeCheckTester;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.text.edits.CopySourceEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-import org.eclipse.text.edits.TextEditVisitor;
 
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
@@ -183,6 +193,48 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 	}
 
+	private static final class LocalVariableWithIdenticalExpressionFinder extends ASTVisitor {
+		private ArrayList<String> usedNames;
+
+		private ASTNode expression;
+
+		private Boolean ifStopOnFirstMatch;
+
+
+		public LocalVariableWithIdenticalExpressionFinder(ASTNode expression, Boolean ifStopOnFirstMatch) {
+			usedNames= new ArrayList<>();
+			this.expression= expression;
+			this.ifStopOnFirstMatch= ifStopOnFirstMatch;
+		}
+
+		public String getUsedName() {
+			return this.usedNames.get(0);
+		}
+
+		public ArrayList<String> getUsedNames() {
+			return this.usedNames;
+		}
+
+		public void setUsedName(String usedName) {
+			this.usedNames.add(usedName);
+		}
+
+		@Override
+		public boolean visit(VariableDeclarationStatement node) {
+			for (Object obj : node.fragments()) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment)obj;
+				if (fragment.getInitializer() != null) {
+					Expression initializer= fragment.getInitializer();
+					if (initializer.subtreeMatch(new ASTMatcher(), this.expression)) {
+						setUsedName(fragment.getName().toString());
+						if (this.ifStopOnFirstMatch.booleanValue())
+							throw new AbortSearchException();
+					}
+				}
+			}
+			return true;
+		}
+	}
 
 
 	private static boolean allArraysEqual(ASTNode[][] arrays, int position) {
@@ -194,6 +246,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 		return true;
 	}
+
 
 	private static boolean canReplace(IASTFragment fragment) {
 		ASTNode node= fragment.getAssociatedNode();
@@ -774,6 +827,49 @@ public class ExtractTempRefactoring extends Refactoring {
 		return localUsedNames;
 	}
 
+	/**
+	 * Retrieves a used name in the whole compilation unit that is assigned with the same
+	 * expression.
+	 *
+	 * @param selected the selected node
+	 *
+	 * @return a used variable name for recommending new names.
+	 */
+	private String getUsedNameForIdenticalExpressionInCu(ASTNode selected) {
+		ASTNode surroundingBlock= selected;
+		surroundingBlock= ASTNodes.getFirstAncestorOrNull(surroundingBlock, CompilationUnit.class);
+		if (surroundingBlock == null) {
+			return null;
+		}
+		LocalVariableWithIdenticalExpressionFinder localVariableWithIdenticalExpressionFinder= new LocalVariableWithIdenticalExpressionFinder(selected, Boolean.TRUE);
+		String usedNameForIdenticalExpressionInCu= null;
+		try {
+			surroundingBlock.accept(localVariableWithIdenticalExpressionFinder);
+		} catch (AbortSearchException e) {
+			usedNameForIdenticalExpressionInCu= localVariableWithIdenticalExpressionFinder.getUsedName();
+		}
+		return usedNameForIdenticalExpressionInCu;
+	}
+
+	/**
+	 * Retrieves used names in the method declaration that is assigned with the same expression.
+	 *
+	 * @param selected the selected node
+	 *
+	 * @return an array of used variable names for avoiding conflicts.
+	 */
+	private Collection<String> getUsedNameForIdenticalExpressionInMethod(ASTNode selected) {
+		ASTNode surroundingBlock= selected;
+		surroundingBlock= ASTNodes.getFirstAncestorOrNull(surroundingBlock, MethodDeclaration.class);
+		if (surroundingBlock == null) {
+			return new ArrayList<>();
+		}
+		LocalVariableWithIdenticalExpressionFinder localVariableWithIdenticalExpressionFinder= new LocalVariableWithIdenticalExpressionFinder(selected, Boolean.FALSE);
+		surroundingBlock.accept(localVariableWithIdenticalExpressionFinder);
+		List<String> UsedNameForIdenticalExpressionInMethod= localVariableWithIdenticalExpressionFinder.getUsedNames();
+		return UsedNameForIdenticalExpressionInMethod;
+	}
+
 
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -1076,7 +1172,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
 			nameGroup.addPosition(rewrite.track(vdf.getName()), true);
 
-			String[] nameSuggestions= guessTempNames();
+			String[] nameSuggestions= guessTempNamesWithContext();
 			if (nameSuggestions.length > 0 && !nameSuggestions[0].equals(fTempName)) {
 				nameGroup.addProposal(fTempName, null, nameSuggestions.length + 1);
 			}
@@ -1345,6 +1441,13 @@ public class ExtractTempRefactoring extends Refactoring {
 		else
 			return proposals[0];
 	}
+	public String guessTempNameWithContext() {
+		String[] proposals= guessTempNamesWithContext();
+		if (proposals.length == 0)
+			return fTempName;
+		else
+			return proposals[0];
+	}
 
 	/**
 	 * @return proposed variable names (may be empty, but not null). The first proposal should be
@@ -1357,6 +1460,30 @@ public class ExtractTempRefactoring extends Refactoring {
 				if (expression != null) {
 					ITypeBinding binding= guessBindingForReference(expression);
 					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()));
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+			if (fGuessedTempNames == null)
+				fGuessedTempNames= new String[0];
+		}
+		return fGuessedTempNames;
+	}
+
+	/**
+	 * @return proposed variable names based on context (may be empty, but not null). The first proposal should be
+	 *         used as "best guess" (if it exists).
+	 */
+	public String[] guessTempNamesWithContext() {
+		if (fGuessedTempNames == null) {
+			try {
+				Expression expression= getSelectedExpression().getAssociatedExpression();
+				if (expression != null) {
+					ITypeBinding binding= guessBindingForReference(expression);
+					String usedNameForIdenticalExpressionInCu= getUsedNameForIdenticalExpressionInCu(fSelectedExpression.getAssociatedNode());
+					Collection<String> usedNamesForIdenticalExpressionInMethod= getUsedNameForIdenticalExpressionInMethod(fSelectedExpression.getAssociatedNode());
+					fGuessedTempNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fCu.getJavaProject(), binding, expression, Arrays.asList(getExcludedVariableNames()),
+							usedNameForIdenticalExpressionInCu, usedNamesForIdenticalExpressionInMethod);
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);

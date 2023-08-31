@@ -317,32 +317,14 @@ public class JarWriter3 {
 				return -1;
 			return 0;
 		});
-		File file= null;
-		OutputStream output= null;
-		try {
-			file= File.createTempFile("history", null); //$NON-NLS-1$
-			output= new BufferedOutputStream(new FileOutputStream(file));
-			try {
-				RefactoringCore.getHistoryService().writeRefactoringDescriptors(proxies, output, RefactoringDescriptor.NONE, false, monitor);
-				try {
-					output.close();
-					output= null;
-				} catch (IOException exception) {
-					// Do nothing
-				}
-				writeMetaData(data, file, path);
-			} finally {
-				if (output != null) {
-					try {
-						output.close();
-					} catch (IOException exception) {
-						// Do nothing
-					}
-				}
-			}
+		File file= File.createTempFile("history", null); //$NON-NLS-1$
+		try (OutputStream output= new BufferedOutputStream(new FileOutputStream(file))) {
+			RefactoringCore.getHistoryService().writeRefactoringDescriptors(proxies, output, RefactoringDescriptor.NONE, false, monitor);
+			writeMetaData(data, file, path);
+		} catch (IOException exception) {
+			// Do nothing
 		} finally {
-			if (file != null)
-				file.delete();
+			file.delete();
 		}
 	}
 
@@ -470,21 +452,18 @@ public class JarWriter3 {
 			entry.setMethod(ZipEntry.DEFLATED);
 		else {
 			entry.setMethod(ZipEntry.STORED);
-			JarPackagerUtil.calculateCrcAndSize(entry, new BufferedInputStream(new FileInputStream(file)), buffer);
+			try (BufferedInputStream stream= new BufferedInputStream(new FileInputStream(file))) {
+				JarPackagerUtil.calculateCrcAndSize(entry, stream, buffer);
+			}
 		}
 		entry.setTime(System.currentTimeMillis());
-		final InputStream stream= new BufferedInputStream(new FileInputStream(file));
-		try {
+		try (InputStream stream= new BufferedInputStream(new FileInputStream(file))) {
 			fJarOutputStream.putNextEntry(entry);
 			int count;
 			while ((count= stream.read(buffer, 0, buffer.length)) != -1)
 				fJarOutputStream.write(buffer, 0, count);
-		} finally {
-			try {
-				stream.close();
-			} catch (IOException exception) {
-				// Do nothing
-			}
+		} catch (IOException exception) {
+			// Do nothing
 		}
 	}
 }

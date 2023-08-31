@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 IBM Corporation and others.
+ * Copyright (c) 2020, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,11 +15,7 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
-
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp;
@@ -37,6 +33,8 @@ import org.eclipse.jdt.internal.ui.fix.TryWithResourceCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VarCleanUp;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 
 public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.java_feature"; //$NON-NLS-1$
@@ -91,10 +89,15 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 		Group java1d8Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java1d8);
 
 		CheckboxPreference convertFunctionalInterfaces= createCheckboxPref(java1d8Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ConvertFunctionalInterfaces, CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(convertFunctionalInterfaces);
 		intent(java1d8Group);
 		RadioPreference useLambdaPref= createRadioPref(java1d8Group, 1, CleanUpMessages.JavaFeatureTabPage_RadioName_UseLambdaWherePossible, CleanUpConstants.USE_LAMBDA, CleanUpModifyDialog.FALSE_TRUE);
 		RadioPreference useAnonymousPref= createRadioPref(java1d8Group, 1, CleanUpMessages.JavaFeatureTabPage_RadioName_UseAnonymous, CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(convertFunctionalInterfaces, new RadioPreference[] { useLambdaPref, useAnonymousPref });
+		intent(java1d8Group);
+		intent(java1d8Group);
+		CheckboxPreference simplifyLambda= createCheckboxPref(java1d8Group, 2, CleanUpMessages.JavaFeatureTabPage_CheckboxName_AlsoSimplifyLambda, CleanUpConstants.ALSO_SIMPLIFY_LAMBDA, CleanUpModifyDialog.FALSE_TRUE);
+		registerSlavePreference(convertFunctionalInterfaces, new CheckboxPreference[] { simplifyLambda });
 
 		CheckboxPreference comparingOnCriteria= createCheckboxPref(java1d8Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ComparingOnCriteria, CleanUpConstants.COMPARING_ON_CRITERIA, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(comparingOnCriteria);

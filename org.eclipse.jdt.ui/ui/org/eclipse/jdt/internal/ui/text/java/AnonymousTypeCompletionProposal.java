@@ -66,7 +66,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -249,7 +248,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 			ListRewrite rewriter= rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 			for (IMethodBinding curr : methodsToOverride) {
-				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, context, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface(), focusNode);
+				MethodDeclaration stub= StubUtility2Core.createImplementationStub(workingCopy, rewrite, importRewrite, context, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface(), focusNode);
 				rewriter.insertFirst(stub, null);
 			}
 

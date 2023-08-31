@@ -38,7 +38,6 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -62,6 +61,7 @@ import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 
 
 /**
@@ -238,7 +238,7 @@ public class ProfileStore {
 
 		final ProfileDefaultHandler handler= new ProfileDefaultHandler();
 		try {
-		    final SAXParserFactory factory= SAXParserFactory.newInstance();
+		    final SAXParserFactory factory= XmlProcessorFactoryJdtUi.createSAXFactoryWithErrorOnDOCTYPE();
 			final SAXParser parser= factory.newSAXParser();
 			parser.parse(inputSource, handler);
 		} catch (SAXException | IOException | ParserConfigurationException e) {
@@ -278,7 +278,7 @@ public class ProfileStore {
 	public static void writeProfilesToStream(Collection<Profile> profiles, OutputStream stream, String encoding, IProfileVersioner profileVersioner) throws CoreException {
 
 		try {
-			final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+			final DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 			final DocumentBuilder builder= factory.newDocumentBuilder();
 			final Document document= builder.newDocument();
 
@@ -294,7 +294,7 @@ public class ProfileStore {
 				}
 			}
 
-			Transformer transformer=TransformerFactory.newInstance().newTransformer();
+			Transformer transformer= XmlProcessorFactoryJdtUi.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
 			transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$

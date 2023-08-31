@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Till Brychcy and others.
+ * Copyright (c) 2018, 2023 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -279,10 +280,10 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater2 {
 		IAdaptable[] productionArray= mainResult.toArray(new IAdaptable[mainResult.size()]);
 		data.put(MAIN_NAME, productionArray);
 		data.put(TEST_NAME, testArray);
-		if(NOT_INIALIZED.equals(fInitialContents.get(MAIN_NAME))) {
+		if(Arrays.equals(NOT_INIALIZED, fInitialContents.get(MAIN_NAME))) {
 			fInitialContents.put(MAIN_NAME, data.get(MAIN_NAME));
 		}
-		if(NOT_INIALIZED.equals(fInitialContents.get(TEST_NAME))) {
+		if(Arrays.equals(NOT_INIALIZED, fInitialContents.get(TEST_NAME))) {
 			fInitialContents.put(TEST_NAME, data.get(TEST_NAME));
 		}
 		return data;
@@ -300,7 +301,7 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater2 {
 			return NOT_INIALIZED;
 		}
 		IAdaptable[] data= fInitialContents.get(name);
-		if(data == null || NOT_INIALIZED.equals(data)) {
+		if(data == null || Arrays.equals(NOT_INIALIZED, data)) {
 			try {
 				data = collectData(new NullProgressMonitor()).get(name);
 			} catch (CoreException e) {

@@ -15,7 +15,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.Comparator;
 
-import com.ibm.icu.text.Collator;
+import java.text.Collator;
 
 import org.eclipse.ui.IWorkingSet;
 
