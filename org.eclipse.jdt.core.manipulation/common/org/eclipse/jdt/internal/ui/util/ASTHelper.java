@@ -57,7 +57,8 @@ public class ASTHelper {
 				return ast.apiLevel() >= AST.JLS18;
 			case ASTNode.TYPE_PATTERN:
 			case ASTNode.RECORD_PATTERN:
-				return ast.isPreviewEnabled();
+			case ASTNode.PATTERN_INSTANCEOF_EXPRESSION:
+				return ast.apiLevel() >= JLS21;
 			default:
 				break;
 		}
