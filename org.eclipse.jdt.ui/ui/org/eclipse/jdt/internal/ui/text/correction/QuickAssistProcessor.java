@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -283,6 +285,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	public static final String REMOVE_UNNECESSARY_ARRAY_CREATION_ID= "org.eclipse.jdt.ui.correction.removeArrayCreation.assist"; //$NON-NLS-1$
 
+	public static final String FIELD_NAMING_CONVENTION= "org.eclipse.jdt.ui.correction.CustomQuickAssistProcessor.assist"; //$NON-NLS-1$
+
 	public QuickAssistProcessor() {
 		super();
 	}
@@ -320,6 +324,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getExtractMethodProposal(context, coveringNode, false, null)
 					|| getExtractMethodFromLambdaProposal(context, coveringNode, false, null)
 					|| getInlineLocalProposal(context, coveringNode, null)
+					|| getConvertFieldNamingConventionProposal(context, coveringNode, null)
 					|| getConvertLocalToFieldProposal(context, coveringNode, null)
 					|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 					|| getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, null)
@@ -394,6 +399,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getExtractMethodProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getExtractMethodFromLambdaProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
+				getConvertFieldNamingConventionProposal(context, coveringNode, resultingCollections);
 				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, resultingCollections);
@@ -4635,4 +4641,77 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		return true;
 	}
+	private boolean getConvertFieldNamingConventionProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) throws CoreException {
+		if (!(node instanceof SimpleName)) {
+			return false;
+		}
+		SimpleName name= (SimpleName) node;
+		String selectedField = name.toString();
+		int offset = node.getStartPosition();
+		int length = node.getLength();
+		if (name.getAST().apiLevel() >= ASTHelper.JLS10 && name.isVar()) {
+			return false;
+		}
+
+		IEditorPart editor= ((AssistContext) context).getEditor();
+		if (!(editor instanceof JavaEditor))
+			return false;
+
+        @SuppressWarnings("unused")
+		List<String> fieldList = new ArrayList<String>();
+		CompilationUnit astRoot= context.getASTRoot();
+        TypeDeclaration typeDec = (TypeDeclaration) astRoot.types().get(0);
+        for(FieldDeclaration fd:typeDec.getFields()) {
+        	VariableDeclarationFragment fragment= (VariableDeclarationFragment) fd.fragments().get(0);
+			String fieldName= fragment.getName().getIdentifier();
+			if(fieldName.equals(name.toString())) {
+				if(!fd.toString().contains("static")||!fd.toString().contains("final")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return false;
+					}
+				if(isValidConstantName(fieldName)) {
+					return false;
+				}
+			}
+			fieldList.add(fieldName);
+        }
+        if(fieldList.size()<1 || !fieldList.contains(name.toString())) {
+        	return false;
+        }
+
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		for(FieldDeclaration fd:typeDec.getFields()) {
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) fd.fragments().get(0);
+			String fieldName= fragment.getName().getIdentifier();
+			if(fieldName.equals(selectedField) && fd.toString().contains("static") && fd.toString().contains("final") && isValidConstantName(fieldName) == false) { //$NON-NLS-1$ //$NON-NLS-2$
+				String newName= convertToConstantName(fieldName);
+				if (!newName.equals(fieldName)) {
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
+					ConvertFieldNamingConventionProposal proposal= new ConvertFieldNamingConventionProposal(newName, offset, length, offset, image, fieldName, context);
+					proposal.setCommandId(FIELD_NAMING_CONVENTION);
+					resultingCollections.add(proposal);
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean isValidConstantName(String identifier) {
+		Pattern pattern= Pattern.compile("^[A-Z_]+$"); //$NON-NLS-1$
+		Matcher matcher= pattern.matcher(identifier);
+		return matcher.matches();
+	}
+	public static String convertToConstantName(String identifier) {
+        String[] words = identifier.split("(?=[A-Z])"); //$NON-NLS-1$
+        StringBuilder constantName = new StringBuilder();
+        for (String word : words) {
+            if (constantName.length() > 0) {
+                constantName.append("_"); //$NON-NLS-1$
+            }
+            constantName.append(word.toUpperCase());
+        }
+        return constantName.toString();
+    }
 }
