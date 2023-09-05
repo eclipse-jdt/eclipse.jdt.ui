@@ -10,7 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     ChunHao Dong <m15231670380@163.com> - [Rename field] Add quick assist for field rename refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/749
+ *     ChunHao Dong <2692679350@qq.com> - [Rename field] Add quick assist for field rename refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/749
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
