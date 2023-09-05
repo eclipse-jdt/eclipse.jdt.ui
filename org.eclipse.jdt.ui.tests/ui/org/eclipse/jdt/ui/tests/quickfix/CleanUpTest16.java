@@ -18,17 +18,22 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+
 import org.eclipse.jdt.ui.tests.core.rules.Java16ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-import org.junit.Rule;
-import org.junit.Test;
+
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 /**
  * Tests the cleanup features related to Java 16.
@@ -126,6 +131,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "    public long matchPatternForInstanceof(Object object) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (object instanceof Date) {\n" //
+				+ "            // Keep this comment too\n" //
 				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
@@ -136,6 +142,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "    public long matchPatternForInstanceofOnFinalVariable(Object object) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (object instanceof Date) {\n" //
+				+ "            // Keep this comment too\n" //
 				+ "            final Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
@@ -145,6 +152,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long matchPatternInConditionalAndExpression(Object object, boolean isValid) {\n" //
 				+ "        if (isValid && object instanceof Date) {\n" //
+				+ "            // Keep this comment\n" //
 				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
@@ -155,6 +163,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long matchPatternInAndExpression(Object object, boolean isValid) {\n" //
 				+ "        if (object instanceof Date & isValid) {\n" //
+				+ "            // Keep this comment\n" //
 				+ "            Date date = (Date) object;\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
@@ -219,6 +228,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "    public long matchPatternForInstanceof(Object object) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (object instanceof Date date) {\n" //
+				+ "            // Keep this comment too\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -228,6 +238,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "    public long matchPatternForInstanceofOnFinalVariable(Object object) {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        if (object instanceof final Date date) {\n" //
+				+ "            // Keep this comment too\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -236,6 +247,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long matchPatternInConditionalAndExpression(Object object, boolean isValid) {\n" //
 				+ "        if (isValid && object instanceof Date date) {\n" //
+				+ "            // Keep this comment\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //
@@ -245,6 +257,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long matchPatternInAndExpression(Object object, boolean isValid) {\n" //
 				+ "        if (object instanceof Date date & isValid) {\n" //
+				+ "            // Keep this comment\n" //
 				+ "            return date.getTime();\n" //
 				+ "        }\n" //
 				+ "\n" //

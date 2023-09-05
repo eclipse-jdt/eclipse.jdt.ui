@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -39,10 +42,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
-import org.eclipse.text.edits.TextEditGroup;
 
 public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteOperationsFixCore {
 	public static final class PatternMatchingForInstanceofFinder extends ASTVisitor {
@@ -207,7 +211,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			ASTNodes.replaceButKeepComment(rewrite, nodeToComplete, newInstanceof, group);
 
 			if (ASTNodes.canHaveSiblings(statementToRemove) || statementToRemove.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
-				rewrite.remove(statementToRemove, group);
+				ASTNodes.removeButKeepComment(rewrite, statementToRemove, group);
 			} else {
 				ASTNodes.replaceButKeepComment(rewrite, statementToRemove, ast.newBlock(), group);
 			}
