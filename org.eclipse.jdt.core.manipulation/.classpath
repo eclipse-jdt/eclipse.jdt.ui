@@ -7,6 +7,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="refactoring"/>
+	<classpathentry kind="src" path="proposals"/>
 	<classpathentry kind="src" path="common"/>
 	<classpathentry kind="src" path="core extension"/>
 	<classpathentry kind="output" path="bin"/>

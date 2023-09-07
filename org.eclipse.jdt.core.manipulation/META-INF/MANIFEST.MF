@@ -79,5 +79,6 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.internal.ui.text.correction.proposals;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.text.template.contentassist;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.util;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.astview,org.eclipse.jdt.junit.core",
- org.eclipse.jdt.ui.refactoring;manipulation=split;mandatory:=manipulation
+ org.eclipse.jdt.ui.refactoring;manipulation=split;mandatory:=manipulation,
+ org.eclipse.jdt.ui.text.java.correction;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
