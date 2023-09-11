@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -229,6 +231,7 @@ import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteRemoveImportsCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddStaticFavoriteProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectProjectSpecificNamingConventionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
@@ -282,6 +285,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String EXTRACT_METHOD_INPLACE_ID= "org.eclipse.jdt.ui.correction.extractMethodInplace.assist"; //$NON-NLS-1$
 
 	public static final String REMOVE_UNNECESSARY_ARRAY_CREATION_ID= "org.eclipse.jdt.ui.correction.removeArrayCreation.assist"; //$NON-NLS-1$
+
+	public static final String CONVERT_PROJECT_NAMING_CONVENTION_ID= "org.eclipse.jdt.ui.correction.convertProjectNamingConvention.assist"; //$NON-NLS-1$
 
 	public QuickAssistProcessor() {
 		super();
@@ -347,7 +352,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
 					|| getAddStaticMemberFavoritesProposals(coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null)
-					|| getDeprecatedProposal(context, coveringNode, null);
+					|| getDeprecatedProposal(context, coveringNode, null)
+					|| getConvertProjectNamingConvention(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -422,12 +428,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
 				getDeprecatedProposal(context, coveringNode, resultingCollections);
+				getConvertProjectNamingConvention(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
 	}
-
 	static boolean noErrorsAtLocation(IProblemLocation[] locations) {
 		if (locations != null) {
 			for (IProblemLocation location : locations) {
@@ -4634,5 +4640,127 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		return true;
+	}
+
+	private boolean getConvertProjectNamingConvention(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+		// TODO Auto-generated method stub
+		if (!(coveringNode instanceof SimpleName)) {
+			return false;
+		}
+		SimpleName name= (SimpleName) coveringNode;
+		String selectedField = name.toString();
+		int offset = coveringNode.getStartPosition();
+		if (name.getAST().apiLevel() >= ASTHelper.JLS10 && name.isVar()) {
+			return false;
+		}
+		IEditorPart editor= ((AssistContext) context).getEditor();
+		if (!(editor instanceof JavaEditor))
+			return false;
+		CompilationUnit cu= context.getASTRoot();
+		List<String> fieldNames = new ArrayList<>();
+        getFieldName(cu,fieldNames,selectedField);
+        List<String> selectField = splitField(selectedField);
+        String newName= null;
+        if(fieldNames.size()<2) {
+        	return false;
+        }else if(fieldNames.size()==2) {
+        	List<String> tempList1= splitField(fieldNames.get(0));
+        	List<String> tempList2= splitField(fieldNames.get(1));
+        	if(tempList1.get(0).equals(tempList2.get(0)) && !tempList1.get(0).equals(selectField.get(0))) {
+        		selectField.add(0, tempList1.get(0));
+        		newName = joinToCamelCase(selectField);
+        		if(!fieldNames.contains(newName)) {
+        			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
+        			CorrectProjectSpecificNamingConventionProposal proposal= new CorrectProjectSpecificNamingConventionProposal(newName, offset, offset, image, selectedField, context);
+        			proposal.setCommandId(CONVERT_PROJECT_NAMING_CONVENTION_ID);
+        			resultingCollections.add(proposal);
+        		}
+        		return true;
+        	}
+        	return false;
+        }else {
+        	List<String> firstNames = new ArrayList<>();
+        	for(int i=0;i<fieldNames.size();i++) {
+        		List<String> tempList = splitField(fieldNames.get(0));
+        		firstNames.add(tempList.get(0));
+        	}
+         String firstField = findMostFrequentElement(firstNames);
+         if(!firstField.equals("null") && !selectField.contains(firstField)) { //$NON-NLS-1$
+        	 selectField.add(0, firstField);
+           	 newName = joinToCamelCase(selectField);
+           	 if(!fieldNames.contains(newName)) {
+    			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
+    			CorrectProjectSpecificNamingConventionProposal proposal= new CorrectProjectSpecificNamingConventionProposal(newName, offset, offset, image, selectedField, context);
+    			proposal.setCommandId(CONVERT_PROJECT_NAMING_CONVENTION_ID);
+    			resultingCollections.add(proposal);
+    		 }
+        	 return true;
+         }
+ 		return false;
+        }
+	}
+	public static List<String> splitField(String input) {
+        List<String> words = new ArrayList<>();
+        Pattern pattern = Pattern.compile("([a-z]+|[A-Z][a-z]*|\\d+|_+)"); //$NON-NLS-1$
+        Matcher matcher = pattern.matcher(input);
+        while (matcher.find()) {
+            String word = matcher.group();
+            words.add(word);
+        }
+        return words;
+    }
+	 public static String joinToCamelCase(List<String> elements) {
+	        if (elements == null || elements.isEmpty()) {
+	            return ""; //$NON-NLS-1$
+	        }
+	        StringBuilder result = new StringBuilder();
+	        result.append(elements.get(0));
+	        String camelCaseElement = null;
+	        for (int i = 1; i < elements.size(); i++) {
+	            String element = elements.get(i);
+	            if(i-1>=0 && elements.get(i-1).equals("_")) { //$NON-NLS-1$
+	            	camelCaseElement = element;
+	            }else {
+	            	camelCaseElement = element.substring(0, 1).toUpperCase() + element.substring(1).toLowerCase();
+	            }
+	            result.append(camelCaseElement);
+	        }
+	        return result.toString();
+	    }
+	@SuppressWarnings({ "boxing" })
+	public static String findMostFrequentElement(List<String> list) {
+	        if (list.isEmpty()) {
+	            return null;
+	        }
+	        Map<String, Integer> elementCountMap = new HashMap<>();
+	        for (String element : list) {
+	            elementCountMap.put(element, elementCountMap.getOrDefault(element, 0) + 1);
+	        }
+	        String mostFrequentElement = null;
+	        int maxCount = 0;
+	        for (Map.Entry<String, Integer> entry : elementCountMap.entrySet()) {
+	            if (entry.getValue() > maxCount) {
+	                mostFrequentElement = entry.getKey();
+	                maxCount = entry.getValue();
+	            }
+	        }
+	        if(maxCount>list.size()/2) {
+	        	return mostFrequentElement;
+	        }else {
+	        	return null;
+	        }
+	    }
+	private static void getFieldName(ASTNode cuu, final List<String> fieldNames, String selectedField) {
+		cuu.accept(new ASTVisitor() {
+		@Override
+		public boolean visit(FieldDeclaration node) {
+			VariableDeclarationFragment vdfs = (VariableDeclarationFragment) node.fragments().get(0);
+			String fieldName = vdfs.getName().getIdentifier();
+			if(!fieldName.equals(selectedField)) {
+				fieldNames.add(fieldName);
+			}
+			return true;
+			}
+		});
 	}
 }
