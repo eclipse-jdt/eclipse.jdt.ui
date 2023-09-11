@@ -1817,7 +1817,9 @@ public class LocalCorrectionsSubProcessor {
 		} else if (node instanceof MethodInvocation) {
 			MethodInvocation invocation= (MethodInvocation)node;
 			SimpleType rawReference= Java50FixCore.getRawReference(invocation, compilationUnit);
-			return rawReference.isVar();
+			if (rawReference != null) {
+				return rawReference.isVar();
+			}
 		}
 		return false;
 	}
