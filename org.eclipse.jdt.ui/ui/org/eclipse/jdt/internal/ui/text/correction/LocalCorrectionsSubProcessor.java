@@ -97,6 +97,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -1766,6 +1767,9 @@ public class LocalCorrectionsSubProcessor {
 		}
 		if (!hasInferTypeArgumentsProposal) {
 			final ICompilationUnit cu= context.getCompilationUnit();
+			if (referencesVar(problem, context.getASTRoot()))  {
+				return;
+			}
 			ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments, null,
 					IProposalRelevance.INFER_GENERIC_TYPE_ARGUMENTS, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 				@Override
@@ -1794,6 +1798,30 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		addTypeArgumentsFromContext(context, problem, proposals);
+	}
+
+	private static boolean referencesVar(IProblemLocation problem, CompilationUnit compilationUnit) {
+		ASTNode node= problem.getCoveredNode(compilationUnit);
+		if (node instanceof ClassInstanceCreation) {
+			Type rawReference= (Type)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
+			return rawReference.isVar();
+		} else if (node instanceof SimpleName) {
+			ASTNode rawReference= node.getParent();
+			if (Java50FixCore.isRawTypeReference(rawReference)) {
+				ASTNode parent= rawReference.getParent();
+				if (!(parent instanceof ArrayType)
+						&& !(parent instanceof ParameterizedType)) {
+					return ((SimpleType)rawReference).isVar();
+				}
+			}
+		} else if (node instanceof MethodInvocation) {
+			MethodInvocation invocation= (MethodInvocation)node;
+			SimpleType rawReference= Java50FixCore.getRawReference(invocation, compilationUnit);
+			if (rawReference != null) {
+				return rawReference.isVar();
+			}
+		}
+		return false;
 	}
 
 	private static void addTypeArgumentsFromContext(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
