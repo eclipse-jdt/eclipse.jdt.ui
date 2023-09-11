@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
  *
  * @see org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds
  *
- * @since 3.0
+ * @since 1.19.200
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @noextend This interface is not intended to be extended by clients.
@@ -81,7 +81,7 @@ public interface IRefactoringProcessorIdsCore {
 	 *       fragment to be renamed.</li>
 	 * </ul>
 	 *
-	 * <p>Since 3.3:</p>
+	 * <p>Since 1.19.200:</p>
 	 *
 	 * <p>The refactoring processor moves and renames Java elements and resources.
 	 * Rename package fragment participants can retrieve the new location of
@@ -118,7 +118,7 @@ public interface IRefactoringProcessorIdsCore {
 	 *       unit gets rename as well.</li>
 	 * </ul>
 	 *
-	 * <p>Since 3.2:</p>
+	 * <p>Since 1.19.200:</p>
 	 *
 	 * Participants that declare <pre> &lt;param name="handlesSimilarDeclarations" value="false"/&gt; </pre>
 	 * in their extension contribution will not be loaded if the user selects the
@@ -168,7 +168,7 @@ public interface IRefactoringProcessorIdsCore {
 	 * <ul>
 	 *   <li>participants registered for renaming <code>IModuleDescription</code>.</li>
 	 * </ul>
-	 * @since 3.24
+	 * @since 1.19.200
 	 */
 	String RENAME_MODULE_PROCESSOR= "org.eclipse.jdt.ui.renameModuleProcessor"; //$NON-NLS-1$
 
@@ -180,7 +180,7 @@ public interface IRefactoringProcessorIdsCore {
 	 * <ul>
 	 *   <li>participants registered for renaming <code>IField</code>.</li>
 	 * </ul>
-	 * @since 3.1
+	 * @since 1.19.200
 	 */
 	String RENAME_ENUM_CONSTANT_PROCESSOR= "org.eclipse.jdt.ui.renameEnumConstProcessor"; //$NON-NLS-1$
 
@@ -281,7 +281,7 @@ public interface IRefactoringProcessorIdsCore {
 	 * should be use as the <code>ResourceMappingContext</code> passed to the accept method.
 	 * </p>
 	 * @see org.eclipse.core.resources.mapping.ResourceMapping
-	 * @since 3.3
+	 * @since 1.19.200
 	 */
 	String COPY_PROCESSOR= "org.eclipse.jdt.ui.CopyProcessor"; //$NON-NLS-1$
 }
