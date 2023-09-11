@@ -16,10 +16,13 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
-import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 public class CleanUpConstantsOptions extends CleanUpConstants {
 	private static void setEclipseDefaultSettings(CleanUpOptions options) {
@@ -39,7 +42,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
 
 		//Control Statements
-		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.FALSE);
+		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS_NEVER, CleanUpOptions.FALSE);
@@ -221,7 +224,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
 
 		//Control Statements
-		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.FALSE);
+		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_USE_BLOCKS_NEVER, CleanUpOptions.FALSE);
