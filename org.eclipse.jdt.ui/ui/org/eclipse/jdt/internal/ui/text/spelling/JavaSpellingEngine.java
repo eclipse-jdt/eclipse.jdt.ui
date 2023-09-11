@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -53,7 +53,7 @@ public class JavaSpellingEngine extends SpellingEngine {
 					if (listener.isProblemsThresholdReached())
 						return;
 					final String type= partition.getType();
-					if (isIgnoringJavaStrings && IJavaPartitions.JAVA_STRING.equals(type))
+					if (isIgnoringJavaStrings && (IJavaPartitions.JAVA_STRING.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(type)))
 						continue;
 					if (!IDocument.DEFAULT_CONTENT_TYPE.equals(type) && !IJavaPartitions.JAVA_CHARACTER.equals(type))
 						checker.execute(listener, new SpellCheckIterator(document, partition, checker.getLocale(), monitor));
