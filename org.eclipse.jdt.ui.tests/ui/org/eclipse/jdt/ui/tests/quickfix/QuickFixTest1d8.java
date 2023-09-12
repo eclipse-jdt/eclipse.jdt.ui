@@ -2779,4 +2779,96 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, FixMessages.InlineDeprecatedMethod_msg);
 	}
 
+	// issue 717 : support import quick fix for annotations
+	@Test
+	public void testIssue717_1() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java1d8ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Documented;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@Documented\n");
+		buf.append("@interface NonCritical { }\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Documented;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@Documented\n");
+		buf.append("@interface NonCritical { }\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		String expected1 = buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
+	// issue 717 : support import quick fix for annotations
+	@Test
+	public void testIssue717_2() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java1d8ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Documented;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(value=ElementType.TYPE_USE)\n");
+		buf.append("@Documented\n");
+		buf.append("@interface NonCritical { }\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Documented;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(value=ElementType.TYPE_USE)\n");
+		buf.append("@Documented\n");
+		buf.append("@interface NonCritical { }\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		String expected1 = buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
 }
