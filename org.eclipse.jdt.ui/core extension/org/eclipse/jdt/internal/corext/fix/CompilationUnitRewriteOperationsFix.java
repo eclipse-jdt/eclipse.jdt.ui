@@ -27,8 +27,7 @@ public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteO
 	public static final String UNTOUCH_COMMENT= "untouchComment"; //$NON-NLS-1$
 
 	public abstract static class CompilationUnitRewriteOperation extends CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation {
-
-		public abstract void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException;
+		public abstract void rewriteASTInternal(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException;
 
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
@@ -42,7 +41,7 @@ public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteO
 					return super.computeSourceRange(node);
 				}
 			});
-			rewriteAST(cuRewrite, (LinkedProposalModel)linkedModel);
+			rewriteASTInternal(cuRewrite, linkedModel);
 		}
 	}
 
@@ -52,21 +51,20 @@ public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteO
 	}
 
 	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) {
-		super(name, compilationUnit, operations);
-		fLinkedProposalModel= new LinkedProposalModel();
+		this(name, compilationUnit, operations, new LinkedProposalModelCore());
 	}
 
 	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] operations) {
+		this(name, compilationUnit, operations, new LinkedProposalModelCore());
+	}
+
+	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] operations, LinkedProposalModelCore proposalModel) {
 		super(name, compilationUnit, operations);
-		fLinkedProposalModel= new LinkedProposalModel();
+		fLinkedProposalModel= proposalModel;
 	}
 
 	@Override
-	public LinkedProposalModel getLinkedPositions() {
-		if (!fLinkedProposalModel.hasLinkedPositions())
-			return null;
-
-		return (LinkedProposalModel)fLinkedProposalModel;
+	public LinkedProposalModelCore getLinkedPositions() {
+		return super.getLinkedPositionsCore();
 	}
-
 }

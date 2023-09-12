@@ -219,7 +219,7 @@ public class NullAnnotationsRewriteOperations {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
 			ListRewrite listRewrite= getAnnotationListRewrite(fBodyDeclaration.getReturnType2(), cuRewrite,
 										fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
@@ -282,7 +282,7 @@ public class NullAnnotationsRewriteOperations {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
 			ListRewrite listRewrite= getAnnotationListRewrite(fArgument.getType(), cuRewrite, fArgument, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
 			TextEditGroup group= createTextEditGroup(fMessage, cuRewrite);
@@ -311,7 +311,7 @@ public class NullAnnotationsRewriteOperations {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.NullAnnotationsRewriteOperations_remove_redundant_nullness_annotation, cuRewrite);
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 
@@ -367,7 +367,7 @@ public class NullAnnotationsRewriteOperations {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 
 			if (fProblem.getProblemId() == IProblem.MissingNonNullByDefaultAnnotationOnPackage) {
 				PackageDeclaration packageDeclaration= fCompilationUnit.getPackage();

@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.refactoring.surround;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 
 /**
@@ -43,11 +42,11 @@ public class SurroundWithTryWithResourcesRefactoring extends SurroundWithTryWith
 
 	@Override
 	protected LinkedProposalModelCore createLinkedProposalModel() {
-		return new LinkedProposalModel();
+		return new LinkedProposalModelCore();
 	}
 
-	public LinkedProposalModel getLinkedProposalModel() {
-		return (LinkedProposalModel)getLinkedProposalModelCore();
+	public LinkedProposalModelCore getLinkedProposalModel() {
+		return getLinkedProposalModelCore();
 	}
 
 }

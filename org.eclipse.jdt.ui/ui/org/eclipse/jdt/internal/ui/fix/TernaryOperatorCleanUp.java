@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
@@ -196,7 +196,7 @@ public class TernaryOperatorCleanUp extends AbstractMultiFix {
 		}
 
 		@Override
-		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
+		public void rewriteASTInternal(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.TernaryOperatorCleanUp_description, cuRewrite);
