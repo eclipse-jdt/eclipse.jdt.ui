@@ -5463,6 +5463,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    };\n" //
 				+ "    public E() {\n" //
 				+ "        this.f= \"abc\";\n" //
+				+ "        this.g= \"def\";\n" //
 				+ "    }\n" //
 				+ "    public void foo() {\n" //
 				+ "        x.run( //\n" //
@@ -5491,6 +5492,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    };\n" //
 				+ "    public E() {\n" //
 				+ "        this.f= \"abc\";\n" //
+				+ "        this.g= \"def\";\n" //
 				+ "    }\n" //
 				+ "    public void foo() {\n" //
 				+ "        x.run( //\n" //
