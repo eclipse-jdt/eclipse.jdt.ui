@@ -1011,8 +1011,16 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		}
 
 		IResource resource= original.getResource();
-		if (JavaModelUtil.isPrimary(original) && (resource == null || resource.exists()))
-			original.becomeWorkingCopy(requestor, getProgressMonitor());
+		if (JavaModelUtil.isPrimary(original) && (resource == null || resource.exists())) {
+			IProgressMonitor progressMonitor= getProgressMonitor();
+			try {
+				original.becomeWorkingCopy(requestor, progressMonitor);
+			} finally {
+				if (progressMonitor!=null) {
+					progressMonitor.done();
+				}
+			}
+		}
 		cuInfo.fCopy= original;
 
 		if (cuInfo.fModel instanceof CompilationUnitAnnotationModel)   {
@@ -1051,6 +1059,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 * @since 3.2
 	 */
 	private ICompilationUnit createFakeCompiltationUnit(IStorageEditorInput editorInput, boolean setContents) {
+		IProgressMonitor progressMonitor= getProgressMonitor();
 		try {
 			final IStorage storage= editorInput.getStorage();
 			final IPath storagePath= storage.getFullPath();
@@ -1084,7 +1093,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			if (cpEntries == null || cpEntries.length == 0)
 				cpEntries= new IClasspathEntry[] { JavaRuntime.getDefaultJREContainerEntry() };
 
-			final ICompilationUnit cu= woc.newWorkingCopy(storage.getName(), cpEntries, getProgressMonitor());
+			final ICompilationUnit cu= woc.newWorkingCopy(storage.getName(), cpEntries, progressMonitor);
 			if (setContents) {
 				int READER_CHUNK_SIZE= 2048;
 				int BUFFER_SIZE= 8 * READER_CHUNK_SIZE;
@@ -1124,11 +1133,14 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 			if (!isModifiable(editorInput))
 				JavaModelUtil.reconcile(cu);
-
 			return cu;
 		} catch (CoreException ex) {
 			JavaPlugin.log(ex.getStatus());
 			return null;
+		} finally {
+			if (progressMonitor!=null) {
+				progressMonitor.done();
+			}
 		}
 	}
 
@@ -1161,6 +1173,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 * @since 3.3
 	 */
 	private ICompilationUnit createFakeCompiltationUnit(IURIEditorInput editorInput) {
+		IProgressMonitor progressMonitor= getProgressMonitor();
 		try {
 			final URI uri= editorInput.getURI();
 			final IFileStore fileStore= EFS.getStore(uri);
@@ -1188,7 +1201,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			if (cpEntries == null || cpEntries.length == 0)
 				cpEntries= new IClasspathEntry[] { JavaRuntime.getDefaultJREContainerEntry() };
 
-			final ICompilationUnit cu= woc.newWorkingCopy(fileStoreName, cpEntries, getProgressMonitor());
+			final ICompilationUnit cu= woc.newWorkingCopy(fileStoreName, cpEntries, progressMonitor);
 
 			if (!isModifiable(editorInput))
 				JavaModelUtil.reconcile(cu);
@@ -1196,6 +1209,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			return cu;
 		} catch (CoreException ex) {
 			return null;
+		} finally {
+			if (progressMonitor!=null) {
+				progressMonitor.done();
+			}
 		}
 	}
 
