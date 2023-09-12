@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -137,7 +137,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	 */
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.RENAME_ENUM_CONSTANT_PROCESSOR;
+		return IRefactoringProcessorIdsCore.RENAME_ENUM_CONSTANT_PROCESSOR;
 	}
 
 	/*

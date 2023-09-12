@@ -95,8 +95,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -165,7 +165,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.RENAME_METHOD_PROCESSOR;
+		return IRefactoringProcessorIdsCore.RENAME_METHOD_PROCESSOR;
 	}
 
 	@Override
@@ -207,7 +207,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	@Override
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_REFACTORING;
+		return IRefactoringSaveModes.SAVE_REFACTORING;
 	}
 
 	//---- INameUpdating -------------------------------------

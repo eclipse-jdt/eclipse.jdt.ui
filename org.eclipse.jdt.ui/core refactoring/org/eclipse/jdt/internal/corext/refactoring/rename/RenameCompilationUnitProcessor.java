@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -62,11 +63,10 @@ import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public final class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
@@ -94,7 +94,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.RENAME_COMPILATION_UNIT_PROCESSOR;
+		return IRefactoringProcessorIdsCore.RENAME_COMPILATION_UNIT_PROCESSOR;
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 
 	@Override
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_REFACTORING;
+		return IRefactoringSaveModes.SAVE_REFACTORING;
 	}
 
 	//---- IRenameProcessor -------------------------------------

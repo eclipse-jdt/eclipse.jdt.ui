@@ -53,7 +53,7 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -169,7 +169,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, RefactoringSaveHelper.SAVE_NOTHING, shell, context);
+			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, IRefactoringSaveModes.SAVE_NOTHING, shell, context);
 			try {
 				executer.perform(true, true);
 			} catch (InterruptedException e) {
@@ -206,7 +206,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		IRunnableContext context= (fork, cancelable, runnable) -> runnable.run(monitor == null ? new NullProgressMonitor() : monitor);
 
 		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, RefactoringSaveHelper.SAVE_REFACTORING, shell, context);
+		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, IRefactoringSaveModes.SAVE_REFACTORING, shell, context);
 		try {
 			helper.perform(true, true);
 		} catch (InterruptedException e) {

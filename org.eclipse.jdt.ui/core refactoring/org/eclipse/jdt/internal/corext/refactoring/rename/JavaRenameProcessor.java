@@ -31,7 +31,7 @@ import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 
 public abstract class JavaRenameProcessor extends RenameProcessor implements INameUpdating {
@@ -80,9 +80,9 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 	}
 
 	/**
-	 * @return a save mode from {@link RefactoringSaveHelper}
+	 * @return a save mode from {@link IRefactoringSaveModes}
 	 *
-	 * @see RefactoringSaveHelper
+	 * @see IRefactoringSaveModes
 	 */
 	public abstract int getSaveMode();
 

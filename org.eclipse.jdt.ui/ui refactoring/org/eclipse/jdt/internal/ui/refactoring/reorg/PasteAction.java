@@ -157,7 +157,7 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
@@ -1473,7 +1473,7 @@ public class PasteAction extends SelectionDispatchAction{
 
 			public void run(Shell parent) throws InterruptedException, InvocationTargetException {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
-				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), RefactoringSaveHelper.SAVE_NOTHING, parent, context).perform(false, false);
+				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), IRefactoringSaveModes.SAVE_NOTHING, parent, context).perform(false, false);
 			}
 		}
 		private static class PasteTypedSourcesRefactoring extends Refactoring {

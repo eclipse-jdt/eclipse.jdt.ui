@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -52,10 +53,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
-
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 public final class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
@@ -81,7 +80,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.RENAME_JAVA_PROJECT_PROCESSOR;
+		return IRefactoringProcessorIdsCore.RENAME_JAVA_PROJECT_PROCESSOR;
 	}
 
 	@Override
@@ -128,7 +127,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 
 	@Override
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_ALL;
+		return IRefactoringSaveModes.SAVE_ALL;
 	}
 
 	//---- IReferenceUpdating --------------------------------------
