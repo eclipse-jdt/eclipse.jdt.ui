@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - Moved logic from various UI classes
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
@@ -50,7 +51,9 @@ public class JavaProjectUtilities {
 		}
 	}
 
-
+	/*
+	 * Moved from org.eclipse.jdt.internal.corext.refactoring.reorg.LoggedCreateTargetQueries
+	 */
 	public static void createPackageFragmentRoot(IPackageFragmentRoot root) throws CoreException {
 		final IJavaProject project= root.getJavaProject();
 		if (!project.exists())
@@ -64,6 +67,9 @@ public class JavaProjectUtilities {
 	}
 
 
+	/*
+	 * Moved from org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock
+	 */
 	public static void addJavaNature(IProject project, IProgressMonitor monitor) throws CoreException {
 		if (monitor != null && monitor.isCanceled()) {
 			throw new OperationCanceledException();
@@ -83,6 +89,9 @@ public class JavaProjectUtilities {
 		}
 	}
 
+	/*
+	 * Moved from org.eclipse.jdt.internal.ui.actions.SelectionConverter
+	 */
 	public static IJavaElement resolveEnclosingElement(IJavaElement input, int offset, int length) throws JavaModelException {
 		IJavaElement atOffset= null;
 		if (input instanceof ICompilationUnit) {
