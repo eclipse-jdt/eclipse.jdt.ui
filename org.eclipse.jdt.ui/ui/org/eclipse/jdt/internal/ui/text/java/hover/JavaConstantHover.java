@@ -50,11 +50,13 @@ public class JavaConstantHover extends AbstractJavaEditorTextHover {
 			} catch (BadLocationException e) {
 				// should never happen
 			}
+			hoverSource= hoverSource.toLowerCase();
 			if (hoverSource != null && hoverSource.startsWith("0")) { //$NON-NLS-1$
 				try {
-					long longValue= hoverSource.startsWith("0b") || hoverSource.startsWith("0B") ? //$NON-NLS-1$ //$NON-NLS-2$
-							Long.parseLong(withoutUnderscoreInfixes(hoverSource.substring(2)), 2)
-							: Long.decode(withoutUnderscoreInfixes(hoverSource)).longValue();
+					String temp= hoverSource.charAt(hoverSource.length() - 1) == 'l' ? hoverSource.substring(0, hoverSource.length() - 1) : hoverSource;
+					long longValue= temp.startsWith("0b") ? //$NON-NLS-1$
+							Long.parseLong(withoutUnderscoreInfixes(temp.substring(2)), 2)
+							: Long.decode(withoutUnderscoreInfixes(temp)).longValue();
 					return "<body><p>" + Long.toString(longValue) + "<b> : [0x" + Long.toHexString(longValue) + "]</p></body>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				} catch (NumberFormatException e) {
 					try {
