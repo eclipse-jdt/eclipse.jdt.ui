@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 public class CorrectProjectSpecificNamingConventionProposal implements IJavaCompletionProposal, ICommandAccess {
 
 	private int fRelevance;
-
 	@SuppressWarnings("unused")
 	private String fCommandId;
 
