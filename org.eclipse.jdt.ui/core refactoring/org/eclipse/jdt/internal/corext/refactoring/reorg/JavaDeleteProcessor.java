@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -114,8 +114,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	public JavaDeleteProcessor(Object[] elements) {
 		fElements= elements;
 		if (fElements != null) {
-			fResources= RefactoringAvailabilityTester.getResources(elements);
-			fJavaElements= RefactoringAvailabilityTester.getJavaElements(elements);
+			fResources= RefactoringAvailabilityTesterCore.getResources(elements);
+			fJavaElements= RefactoringAvailabilityTesterCore.getJavaElements(elements);
 		}
 		fSuggestGetterSetterDeletion= true;
 		fDeleteSubPackages= false;
@@ -140,12 +140,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		if (fElements.length != fResources.length + fJavaElements.length)
 			return false;
 		for (IResource resource : fResources) {
-			if (!RefactoringAvailabilityTester.isDeleteAvailable(resource)) {
+			if (!RefactoringAvailabilityTesterCore.isDeleteAvailable(resource)) {
 				return false;
 			}
 		}
 		for (IJavaElement javaElement : fJavaElements) {
-			if (!RefactoringAvailabilityTester.isDeleteAvailable(javaElement)) {
+			if (!RefactoringAvailabilityTesterCore.isDeleteAvailable(javaElement)) {
 				return false;
 			}
 		}

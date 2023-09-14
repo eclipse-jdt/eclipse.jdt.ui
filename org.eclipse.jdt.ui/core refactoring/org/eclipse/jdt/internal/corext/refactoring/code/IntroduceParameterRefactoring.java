@@ -84,7 +84,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComme
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
@@ -210,7 +210,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 				}
 			} else {
 				// first try:
-				fChangeSignatureProcessor= RefactoringAvailabilityTester.isChangeSignatureAvailable(fMethod) ? new ChangeSignatureProcessor(fMethod) : null;
+				fChangeSignatureProcessor= RefactoringAvailabilityTesterCore.isChangeSignatureAvailable(fMethod) ? new ChangeSignatureProcessor(fMethod) : null;
 				if (fChangeSignatureProcessor == null)
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
 				fChangeSignatureRefactoring= new ProcessorBasedRefactoring(fChangeSignatureProcessor);
@@ -221,7 +221,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 					if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
 						// second try:
 						IMethod method= (IMethod) entry.getData();
-						fChangeSignatureProcessor= RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureProcessor(method) : null;
+						fChangeSignatureProcessor= RefactoringAvailabilityTesterCore.isChangeSignatureAvailable(method) ? new ChangeSignatureProcessor(method) : null;
 						if (fChangeSignatureProcessor == null) {
 							String msg= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_cannot_introduce, entry.getMessage());
 							return RefactoringStatus.createFatalErrorStatus(msg);

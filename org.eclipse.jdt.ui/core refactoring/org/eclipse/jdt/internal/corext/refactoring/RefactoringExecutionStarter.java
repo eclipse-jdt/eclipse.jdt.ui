@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2021 IBM Corporation and others.
+ * Copyright (c) 2005, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -183,7 +183,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startChangeSignatureRefactoring(final IMethod method, final SelectionDispatchAction action, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isChangeSignatureAvailable(method))
+		if (!RefactoringAvailabilityTesterCore.isChangeSignatureAvailable(method))
 			return;
 		try {
 			ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
@@ -298,7 +298,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startExtractSupertypeRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isExtractSupertypeAvailable(members))
+		if (!RefactoringAvailabilityTesterCore.isExtractSupertypeAvailable(members))
 			return;
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
@@ -311,7 +311,7 @@ public final class RefactoringExecutionStarter {
 
 	public static void startInferTypeArgumentsRefactoring(final IJavaElement[] elements, final Shell shell) {
 		try {
-			if (!RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements))
+			if (!RefactoringAvailabilityTesterCore.isInferTypeArgumentsAvailable(elements))
 				return;
 			final InferTypeArgumentsRefactoring refactoring= new InferTypeArgumentsRefactoring(elements);
 			new RefactoringStarter()
@@ -378,7 +378,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startMoveInnerRefactoring(final IType type, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isMoveInnerAvailable(type))
+		if (!RefactoringAvailabilityTesterCore.isMoveInnerAvailable(type))
 			return;
 		final MoveInnerToTopRefactoring refactoring= new MoveInnerToTopRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
 		new RefactoringStarter().activate(new MoveInnerToTopWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, IRefactoringSaveModes.SAVE_REFACTORING);
@@ -404,7 +404,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startMoveStaticMembersRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isMoveStaticAvailable(members))
+		if (!RefactoringAvailabilityTesterCore.isMoveStaticAvailable(members))
 			return;
 		final Set<IMember> set= new HashSet<>(Arrays.asList(members));
 		final IMember[] elements= set.toArray(new IMember[set.size()]);
@@ -418,7 +418,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startPullUpRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isPullUpAvailable(members))
+		if (!RefactoringAvailabilityTesterCore.isPullUpAvailable(members))
 			return;
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
@@ -429,7 +429,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startPushDownRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isPushDownAvailable(members))
+		if (!RefactoringAvailabilityTesterCore.isPushDownAvailable(members))
 			return;
 		PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(members);
 		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
@@ -460,7 +460,7 @@ public final class RefactoringExecutionStarter {
 
 	public static void startSelfEncapsulateRefactoring(final IField field, final Shell shell) {
 		try {
-			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field))
+			if (!RefactoringAvailabilityTesterCore.isSelfEncapsulateAvailable(field))
 				return;
 			final SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field);
 			new RefactoringStarter().activate(new SelfEncapsulateFieldWizard(refactoring), shell, "", IRefactoringSaveModes.SAVE_REFACTORING); //$NON-NLS-1$

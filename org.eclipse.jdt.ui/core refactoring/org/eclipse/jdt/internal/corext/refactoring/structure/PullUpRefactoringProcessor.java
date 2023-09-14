@@ -36,6 +36,24 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -96,6 +114,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.MethodReferenceMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
+
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
@@ -115,7 +134,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -137,24 +156,12 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.GroupCategory;
-import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
 
 /**
  * Refactoring processor for the pull up refactoring.
@@ -854,10 +861,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	protected PullUpRefactoringProcessor(final IMember[] members, final CodeGenerationSettings settings, final boolean layer) {
 		super(members, settings, layer);
 		if (members != null) {
-			final IType type= RefactoringAvailabilityTester.getTopLevelType(fMembersToMove);
+			final IType type= RefactoringAvailabilityTesterCore.getTopLevelType(fMembersToMove);
 			try {
-				if (type != null && RefactoringAvailabilityTester.getPullUpMembers(type).length != 0) {
-					fCachedDeclaringType= RefactoringAvailabilityTester.getTopLevelType(fMembersToMove);
+				if (type != null && RefactoringAvailabilityTesterCore.getPullUpMembers(type).length != 0) {
+					fCachedDeclaringType= RefactoringAvailabilityTesterCore.getTopLevelType(fMembersToMove);
 					fMembersToMove= new IMember[0];
 				}
 			} catch (JavaModelException exception) {
@@ -2162,7 +2169,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	public IMember[] getPullableMembersOfDeclaringType() {
 		try {
-			return RefactoringAvailabilityTester.getPullUpMembers(getDeclaringType());
+			return RefactoringAvailabilityTesterCore.getPullUpMembers(getDeclaringType());
 		} catch (JavaModelException e) {
 			return new IMember[0];
 		}
@@ -2298,7 +2305,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	@Override
 	public boolean isApplicable() throws CoreException {
-		return RefactoringAvailabilityTester.isPullUpAvailable(fMembersToMove);
+		return RefactoringAvailabilityTesterCore.isPullUpAvailable(fMembersToMove);
 	}
 
 	private boolean isAvailableInDestination(final IMethod method, final IProgressMonitor monitor) throws JavaModelException {
@@ -2319,7 +2326,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IType declaring= member.getDeclaringType();
 		if (declaring == null) // not a member
 			return false;
-		return declaring.equals(getDeclaringType()) && !queue.contains(member) && RefactoringAvailabilityTester.isPullUpAvailable(member);
+		return declaring.equals(getDeclaringType()) && !queue.contains(member) && RefactoringAvailabilityTesterCore.isPullUpAvailable(member);
 	}
 
 	protected void registerChanges(final TextEditBasedChangeManager manager) throws CoreException {

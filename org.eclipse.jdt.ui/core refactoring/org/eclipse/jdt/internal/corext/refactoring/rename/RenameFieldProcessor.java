@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -203,7 +203,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	@Override
 	public boolean isApplicable() throws CoreException {
-		return RefactoringAvailabilityTester.isRenameFieldAvailable(fField);
+		return RefactoringAvailabilityTesterCore.isRenameFieldAvailable(fField);
 	}
 
 	@Override
@@ -483,7 +483,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	public int getDelegateCount() {
 		int count= 0;
 		try {
-			if (RefactoringAvailabilityTester.isDelegateCreationAvailable(getField()))
+			if (RefactoringAvailabilityTesterCore.isDelegateCreationAvailable(getField()))
 				count++;
 			if (fRenameGetter && getGetter() != null)
 				count++;
@@ -857,7 +857,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		if (fIsRecordComponent) {
 			addAccessorOccurrences(new SubProgressMonitor(pm, 1), result);
 			if (fRenameLocalVariableProcessor != null) {
-				addLocalVariableOccurrences(new SubProgressMonitor(pm, 1), getNewElementName(), result);
+				addLocalVariableOccurrences(getNewElementName(), result);
 			}
 		} else {
 			pm.worked(1);
@@ -887,7 +887,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		rewrite.setResolveBindings(true);
 
 		// add delegate for the field
-		if (RefactoringAvailabilityTester.isDelegateCreationAvailable(fField)) {
+		if (RefactoringAvailabilityTesterCore.isDelegateCreationAvailable(fField)) {
 			FieldDeclaration fieldDeclaration= ASTNodeSearchUtil.getFieldDeclarationNode(fField, rewrite.getRoot());
 			if (fieldDeclaration.fragments().size() > 1) {
 				status.addWarning(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_more_than_one_fragment, BasicElementLabels.getJavaElementName(fField.getElementName())),
@@ -1000,7 +1000,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		}
 	}
 
-	private void addLocalVariableOccurrences(IProgressMonitor pm, String newName, RefactoringStatus status) throws CoreException {
+	private void addLocalVariableOccurrences(String newName, RefactoringStatus status) throws CoreException {
 		Assert.isTrue(this.fRenameLocalVariableProcessor != null);
 
 		int current= 0;
@@ -1114,7 +1114,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return new SearchResultGroup[0];
 
 		CollectingSearchRequestor requestor= null;
-		if (fDelegateUpdating && RefactoringAvailabilityTester.isDelegateCreationAvailable(getField())) {
+		if (fDelegateUpdating && RefactoringAvailabilityTesterCore.isDelegateCreationAvailable(getField())) {
 			// There will be two new matches inside the delegate (the invocation
 			// and the javadoc) which are OK and must not be reported.
 			final IField oldField= getFieldInWorkingCopy(declaringCuWorkingCopy, getCurrentElementName());
