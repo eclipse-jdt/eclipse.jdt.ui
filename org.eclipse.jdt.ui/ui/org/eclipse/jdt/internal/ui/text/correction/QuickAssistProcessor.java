@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -51,6 +53,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
@@ -221,6 +224,7 @@ import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteRemoveImportsCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddStaticFavoriteProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ConvertFieldNamingConventionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
@@ -275,6 +279,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	public static final String REMOVE_UNNECESSARY_ARRAY_CREATION_ID= "org.eclipse.jdt.ui.correction.removeArrayCreation.assist"; //$NON-NLS-1$
 
+	public static final String FIELD_NAMING_CONVENTION_ID= "org.eclipse.jdt.ui.correction.convertToConstantNamingConvention.assist"; //$NON-NLS-1$
+
 	public QuickAssistProcessor() {
 		super();
 	}
@@ -312,6 +318,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getExtractMethodProposal(context, coveringNode, false, null)
 					|| getExtractMethodFromLambdaProposal(context, coveringNode, false, null)
 					|| getInlineLocalProposal(context, coveringNode, null)
+					|| getConvertFieldNamingConventionProposal(context, coveringNode, null)
 					|| getConvertLocalToFieldProposal(context, coveringNode, null)
 					|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 					|| getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, null)
@@ -387,6 +394,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getExtractMethodProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getExtractMethodFromLambdaProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
+				getConvertFieldNamingConventionProposal(context, coveringNode, resultingCollections);
 				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, resultingCollections);
@@ -4522,5 +4530,75 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		return true;
+	}
+	private boolean getConvertFieldNamingConventionProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+		if (!(node instanceof SimpleName)) {
+			return false;
+		}
+		SimpleName simpleName= (SimpleName) node;
+		String selectedField = simpleName.toString();
+		int offset = node.getStartPosition();
+		int length = node.getLength();
+		if (simpleName.getAST().apiLevel() >= ASTHelper.JLS10 && simpleName.isVar()) {
+			return false;
+		}
+
+		IEditorPart editor= ((AssistContext) context).getEditor();
+		if (!(editor instanceof JavaEditor))
+			return false;
+
+		IVariableBinding  binding = (IVariableBinding) simpleName.resolveBinding();
+	    if (binding == null || !binding.isField()) {
+	    	return false;
+	    }
+
+	    CompilationUnit cu= context.getASTRoot();
+		VariableDeclarationFragment vdf = (VariableDeclarationFragment) ASTNodes.findDeclaration(binding, cu);
+		FieldDeclaration fd = (FieldDeclaration) vdf.getParent();
+		int modifier = fd.getModifiers();
+		if(!Flags.isStatic(modifier) || !Flags.isFinal(modifier)) {
+			return false;
+		}
+        if(isValidConstantName(selectedField)) {
+        	return false;
+        }
+
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		String newName= convertToConstantName(selectedField);
+		if (!newName.equals(selectedField)) {
+			IField iField = (IField) binding.getJavaElement();
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
+			ConvertFieldNamingConventionProposal proposal= new ConvertFieldNamingConventionProposal(newName, offset, length, offset, image, iField, context);
+			proposal.setCommandId(FIELD_NAMING_CONVENTION_ID);
+			resultingCollections.add(proposal);
+				}
+
+		return true;
+	}
+	private boolean isValidConstantName(String identifier) {
+		Pattern pattern= Pattern.compile("^[A-Z0-9]+(_[A-Z0-9]+)*$"); //$NON-NLS-1$
+		Matcher matcher= pattern.matcher(identifier);
+		return matcher.matches();
+	}
+
+	public static String convertToConstantName(String identifier) {
+		StringBuilder constantNaming = new StringBuilder();
+		boolean lastCharWasUpperCase = false;
+		for (char c : identifier.toCharArray()) {
+		   if (Character.isUpperCase(c)) {
+		       if (!lastCharWasUpperCase && constantNaming.length() > 0) {
+		            constantNaming.append("_"); //$NON-NLS-1$
+		            }
+		       constantNaming.append(Character.toUpperCase(c));
+		       lastCharWasUpperCase = true;
+		   } else {
+		       constantNaming.append(Character.toUpperCase(c));
+		       lastCharWasUpperCase = false;
+		       }
+		  }
+	    return constantNaming.toString().replaceAll("_{2,}", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
