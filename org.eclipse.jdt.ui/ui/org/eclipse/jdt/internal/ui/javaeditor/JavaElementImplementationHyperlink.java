@@ -269,15 +269,13 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 				}
 				try {
 					String typeLabel= JavaElementLabels.getElementLabel(type, JavaElementLabels.DEFAULT_QUALIFIED);
-					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, typeLabel), 10);
+					monitor.setTaskName(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, typeLabel));
 					links.addAll(Arrays.asList(type.newTypeHierarchy(monitor).getAllSubtypes(type)));
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
-				} finally {
-					monitor.done();
 				}
 			};
 
