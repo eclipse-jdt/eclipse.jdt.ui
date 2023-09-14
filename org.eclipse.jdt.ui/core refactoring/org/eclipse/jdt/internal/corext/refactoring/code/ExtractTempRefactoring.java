@@ -879,15 +879,16 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (fEnclosingKeySet.contains(enclsingKeyMap.get(fragment))) {
 				continue;
 			}
-			if ((fragment instanceof InfixExpression )) {
+			if (fragment instanceof InfixExpression) {
 				InfixExpression infixFragment= (InfixExpression)fragment;
-				if (infixFragment.extendedOperands().size() == 0) {
+				if (infixFragment.extendedOperands().isEmpty()) {
 					fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(fragment);
 					processSelectedExpression();
 				}
-
+			} else {
+				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(fragment);
+				processSelectedExpression();
 			}
-
 		}
 	}
 
