@@ -21,10 +21,10 @@ import java.net.URL;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 
 import org.eclipse.equinox.frameworkadmin.BundleInfo;
 import org.eclipse.equinox.simpleconfigurator.manipulator.SimpleConfiguratorManipulator;
-import org.eclipse.osgi.service.resolver.VersionRange;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.FileLocator;
@@ -57,7 +57,7 @@ class P2Utils {
 		Assert.isLegal(symbolicName != null);
 		Assert.isLegal(version != null);
 
-		return findBundle(symbolicName, new VersionRange(version, true, version, true), isSourceBundle);
+		return findBundle(symbolicName, new VersionRange(VersionRange.LEFT_CLOSED, version, version, VersionRange.RIGHT_CLOSED), isSourceBundle);
 	}
 
 	/**
@@ -75,7 +75,7 @@ class P2Utils {
 		Assert.isLegal(symbolicName != null);
 		Assert.isLegal(versionRange != null);
 
-		SimpleConfiguratorManipulator manipulator= (SimpleConfiguratorManipulator)JUnitCorePlugin.getDefault().getService(SimpleConfiguratorManipulator.class.getName());
+		SimpleConfiguratorManipulator manipulator= (SimpleConfiguratorManipulator) JUnitCorePlugin.getDefault().getService(SimpleConfiguratorManipulator.class.getName());
 		if (manipulator == null)
 			return null;
 
@@ -88,7 +88,7 @@ class P2Utils {
 			bundleInfoPath= SimpleConfiguratorManipulator.SOURCE_INFO;
 
 		BundleContext context= JUnitCorePlugin.getDefault().getBundle().getBundleContext();
-		BundleInfo bundles[]= null;
+		BundleInfo[] bundles= null;
 		try {
 			bundles= manipulator.loadConfiguration(context, bundleInfoPath);
 		} catch (IOException e) {
@@ -99,13 +99,11 @@ class P2Utils {
 			for (BundleInfo bundleInfo : bundles) {
 				if (symbolicName.equals(bundleInfo.getSymbolicName())) {
 					Version version= new Version(bundleInfo.getVersion());
-					if (versionRange.isIncluded(version)) {
+					if (versionRange.includes(version)) {
 						IPath path= getBundleLocationPath(bundleInfo);
-						if (path.toFile().exists()) {
-							if (bestMatch == null || bestVersion.compareTo(version) < 0) {
-								bestMatch= bundleInfo;
-								bestVersion= version;
-							}
+						if ((bestVersion == null || bestVersion.compareTo(version) < 0) && path != null && path.toFile().exists()) {
+							bestMatch= bundleInfo;
+							bestVersion= version;
 						}
 					}
 				}
