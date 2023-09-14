@@ -17,6 +17,7 @@
  *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
  *     Nikolay Metchev - <nikolaymetchev@gmail.com> - [inline] Inline Local Variable does not qualify accesses to obscured types - https://bugs.eclipse.org/367536
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of "Extract Local Variable" Refactorings by Identifying the Side Effect of Selected Expression - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/348
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
  ********************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
@@ -701,6 +702,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_replace;
 
 	public static String ExtractTempRefactoring_replace_occurrences;
+
+	public static String ExtractTempRefactoring_replace_occurrences_in_this_file;
 
 	public static String ExtractTempRefactoring_resource_in_try_with_resources;
 

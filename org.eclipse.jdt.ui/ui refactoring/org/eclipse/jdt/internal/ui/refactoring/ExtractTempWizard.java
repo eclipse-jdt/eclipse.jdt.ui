@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
@@ -66,6 +67,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 
 		private static final String DECLARE_FINAL= "declareFinal";  //$NON-NLS-1$
 		private static final String REPLACE_ALL= "replaceOccurrences";  //$NON-NLS-1$
+		private static final String REPLACE_ALL_IN_FILE= "replaceOccurrencesInThisFile";  //$NON-NLS-1$
 		private static final String DECLARE_TYPE_VAR= "declarevariableTypeVar"; //$NON-NLS-1$
 
 		private final boolean fInitialValid;
@@ -102,8 +104,11 @@ public class ExtractTempWizard extends RefactoringWizard {
 			layouter.perform(label, text, 1);
 
 			addReplaceAllCheckbox(result, layouter);
-			addDeclareFinalCheckbox(result, layouter);
+			addReplaceAllInFileCheckbox(result, layouter);
 			addDeclareTypeVarCheckbox(result, layouter);
+			addDeclareFinalCheckbox(result, layouter);
+
+
 
 			validateTextField(text.getText());
 
@@ -118,10 +123,12 @@ public class ExtractTempWizard extends RefactoringWizard {
 				fSettings.put(DECLARE_FINAL, false);
 				fSettings.put(DECLARE_TYPE_VAR, false);
 				fSettings.put(REPLACE_ALL, true);
+				fSettings.put(REPLACE_ALL_IN_FILE, false);
 			}
 			getExtractTempRefactoring().setDeclareFinal(fSettings.getBoolean(DECLARE_FINAL));
 			getExtractTempRefactoring().setDeclareVarType(fSettings.getBoolean(DECLARE_TYPE_VAR));
 			getExtractTempRefactoring().setReplaceAllOccurrences(fSettings.getBoolean(REPLACE_ALL));
+			getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(fSettings.getBoolean(REPLACE_ALL_IN_FILE));
 		}
 
 		private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
@@ -134,6 +141,24 @@ public class ExtractTempWizard extends RefactoringWizard {
 				public void widgetSelected(SelectionEvent e) {
 					fSettings.put(REPLACE_ALL, checkBox.getSelection());
 					getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
+				}
+			});
+		}
+
+		private void addReplaceAllInFileCheckbox(Composite result, RowLayouter layouter) {
+			String title= RefactoringMessages.ExtractTempInputPage_replace_all_in_file;
+			boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrencesInThisFile();
+			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+			getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBox.getSelection());
+			checkBox.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					fSettings.put(REPLACE_ALL_IN_FILE, checkBox.getSelection());
+					if (checkBox.getSelection()) {
+						fSettings.put(REPLACE_ALL, true);
+						getExtractTempRefactoring().setReplaceAllOccurrences(true);
+					}
+					getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBox.getSelection());
 				}
 			});
 		}

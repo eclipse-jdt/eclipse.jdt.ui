@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
@@ -338,6 +339,8 @@ public final class RefactoringMessages extends NLS {
 	public static String ExtractTempInputPage_extract_local;
 
 	public static String ExtractTempInputPage_replace_all;
+
+	public static String ExtractTempInputPage_replace_all_in_file;
 
 	public static String ExtractTempInputPage_variable_name;
 

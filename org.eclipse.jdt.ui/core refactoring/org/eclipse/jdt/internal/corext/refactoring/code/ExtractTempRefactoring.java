@@ -19,6 +19,7 @@
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -83,6 +84,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -128,6 +130,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
@@ -163,6 +166,8 @@ import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 public class ExtractTempRefactoring extends Refactoring {
 
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_REPLACE_ALL= "replaceAllInThisFile"; //$NON-NLS-1$
 
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 
@@ -222,7 +227,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		@Override
 		public boolean visit(VariableDeclarationStatement node) {
 			for (Object obj : node.fragments()) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment)obj;
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) obj;
 				if (fragment.getInitializer() != null) {
 					Expression initializer= fragment.getInitializer();
 					if (initializer.subtreeMatch(new ASTMatcher(), this.expression)) {
@@ -236,6 +241,39 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 	}
 
+	private static final class IdenticalExpressionFinder extends GenericVisitor {
+		private ArrayList<ASTNode> identicalFragments;
+
+		private ASTNode expression;
+
+		private HashMap<ASTNode, String> enclosingKeyMap;
+
+		public IdenticalExpressionFinder(ASTNode expression) {
+			this.identicalFragments= new ArrayList<>();
+			this.enclosingKeyMap= new HashMap<>();
+			this.expression= expression;
+		}
+
+		public ASTNode[] getIdenticalFragments() {
+			return this.identicalFragments.toArray(new ASTNode[identicalFragments.size()]);
+		}
+
+		public HashMap<ASTNode, String> getEclosingKeyMap() {
+			return enclosingKeyMap;
+		}
+
+
+		@Override
+		public boolean visitNode(ASTNode node) {
+			if (node.subtreeMatch(new ASTMatcher(), this.expression)) {
+				this.identicalFragments.add(node);
+				MethodDeclaration methodDeclaration= ASTNodes.getFirstAncestorOrNull(node, MethodDeclaration.class);
+				this.enclosingKeyMap.put(node, methodDeclaration.resolveBinding().getMethodDeclaration().getKey());
+			}
+
+			return true;
+		}
+	}
 
 	private static boolean allArraysEqual(ASTNode[][] arrays, int position) {
 		Object element= arrays[0][position];
@@ -475,6 +513,8 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private boolean fReplaceAllOccurrences;
 
+	private boolean fReplaceAllOccurrencesInThisFile;
+
 	// caches:
 	private IExpressionFragment fSelectedExpression;
 
@@ -503,6 +543,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private HashSet<IASTFragment> fSeen= new HashSet<>();
 
 	private String fEnclosingKey;
+	private HashSet<String> fEnclosingKeySet;
 
 	/**
 	 * Creates a new extract temp refactoring
@@ -519,6 +560,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		fCu= unit;
 		fCompilationUnitNode= null;
 		fReplaceAllOccurrences= true; // default
+		fReplaceAllOccurrencesInThisFile= false; //default
 		fDeclareFinal= false; // default
 		fDeclareVarType= false; // default
 		fTempName= ""; //$NON-NLS-1$
@@ -529,6 +571,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		fStartPoint= -1; // default
 		fEndPoint= -1; // default
 		fEnclosingKey= null;
+		fEnclosingKeySet= new HashSet<>();
 	}
 
 	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
@@ -542,6 +585,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		fCompilationUnitNode= astRoot;
 
 		fReplaceAllOccurrences= true; // default
+		fReplaceAllOccurrencesInThisFile= false; //default
 		fDeclareFinal= false; // default
 		fDeclareVarType= false; // default
 		fTempName= ""; //$NON-NLS-1$
@@ -552,6 +596,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		fStartPoint= -1; // default
 		fEndPoint= -1; // default
 		fEnclosingKey= null;
+		fEnclosingKeySet= new HashSet<>();
 	}
 
 	public ExtractTempRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
@@ -560,7 +605,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		fStartPoint= -1; // default
 		fEndPoint= -1; // default
 		fEnclosingKey= null;
-
+		fEnclosingKeySet= new HashSet<>();
 		RefactoringStatus initializeStatus= initialize(arguments);
 		status.merge(initializeStatus);
 
@@ -730,6 +775,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_expression_pattern, BasicElementLabels.getJavaCodeString(expression)));
 		if (fReplaceAllOccurrences)
 			comment.addSetting(RefactoringCoreMessages.ExtractTempRefactoring_replace_occurrences);
+		if (fReplaceAllOccurrencesInThisFile)
+			comment.addSetting(RefactoringCoreMessages.ExtractTempRefactoring_replace_occurrences_in_this_file);
 		if (fDeclareFinal)
 			comment.addSetting(RefactoringCoreMessages.ExtractTempRefactoring_declare_final);
 		if (fDeclareVarType)
@@ -739,65 +786,20 @@ public class ExtractTempRefactoring extends Refactoring {
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fTempName);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.toString(fSelectionStart) + " " + Integer.toString(fSelectionLength)); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_REPLACE, Boolean.toString(fReplaceAllOccurrences));
+		arguments.put(ATTRIBUTE_REPLACE_ALL, Boolean.toString(fReplaceAllOccurrencesInThisFile));
 		arguments.put(ATTRIBUTE_FINAL, Boolean.toString(fDeclareFinal));
 		arguments.put(ATTRIBUTE_TYPE_VAR, Boolean.toString(fDeclareVarType));
 		return descriptor;
 	}
 
-	private void doCreateChange(IProgressMonitor pm) throws CoreException {
+	private void doCreateChange(IProgressMonitor pm) {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 1);
 			try {
-				int cnt= 1;
-				getSelectedExpression();
-				fSelectionStart= fSelectedExpression.getStartPosition();
-				fSelectionLength= fSelectedExpression.getLength();
-				IASTFragment[] retainOnlyReplacableMatches= retainOnlyReplacableMatches(getMatchingFragments());
-				final int tmpFSelectionStart= fSelectionStart;
-				final int tmpFSelectionLength= fSelectionLength;
-				IExpressionFragment tmpFSelectedExpression= fSelectedExpression;
-				Collection<String> usedNames= getUsedLocalNames(fSelectedExpression.getAssociatedNode());
-				String newName= fTempName;
-				if (!replaceAllOccurrences() || shouldReplaceSelectedExpressionWithTempDeclaration()
-						|| retainOnlyReplacableMatches.length == 0) {
-					createTempDeclaration();
-					addReplaceExpressionWithTemp();
-					fTempName= newName + ++cnt;
-					while (usedNames.contains(fTempName)) {
-						fTempName= newName + ++cnt;
-					}
-
+				processSelectedExpression();
+				if (replaceAllOccurrencesInThisFile()) {
+					processOtherIdenticalExpressions();
 				}
-				while (replaceAllOccurrences() &&
-						retainOnlyReplacableMatches.length > fSeen.size()) {
-					fStartPoint= -1;
-					fEndPoint= -1;
-					boolean flag= false;
-					for (int i= 0; i < retainOnlyReplacableMatches.length; ++i) {
-						if (!fSeen.contains(retainOnlyReplacableMatches[i])) {
-							fSelectionStart= retainOnlyReplacableMatches[i].getStartPosition();
-							fSelectionLength= retainOnlyReplacableMatches[i].getLength();
-							fSelectedExpression= null;
-							getSelectedExpression();
-							flag= true;
-							break;
-						}
-					}
-					if (flag == false)
-						break;
-					createTempDeclaration();
-					if (fStartPoint != -1 && fEndPoint != -1) {
-						addReplaceExpressionWithTemp();
-						fTempName= newName + ++cnt;
-						while (usedNames.contains(fTempName)) {
-							fTempName= newName + ++cnt;
-						}
-					}
-				}
-				fSelectionStart= tmpFSelectionStart;
-				fSelectionLength= tmpFSelectionLength;
-				fSelectedExpression= tmpFSelectedExpression;
-				fTempName= newName;
 			} catch (CoreException exception) {
 				JavaPlugin.log(exception);
 			}
@@ -805,6 +807,90 @@ public class ExtractTempRefactoring extends Refactoring {
 			pm.done();
 		}
 	}
+
+	private void processSelectedExpression() throws CoreException {
+		int cnt= 1;
+		getSelectedExpression();
+		MethodDeclaration methodDeclaration= ASTNodes.getFirstAncestorOrNull(fSelectedExpression.getAssociatedNode(), MethodDeclaration.class);
+		if (methodDeclaration != null && methodDeclaration.resolveBinding() != null && methodDeclaration.resolveBinding().getMethodDeclaration() != null) {
+			fEnclosingKey= methodDeclaration.resolveBinding().getMethodDeclaration().getKey();
+			fEnclosingKeySet.add(fEnclosingKey);
+		}
+		fSelectionStart= fSelectedExpression.getStartPosition();
+		fSelectionLength= fSelectedExpression.getLength();
+		IASTFragment[] retainOnlyReplacableMatches= retainOnlyReplacableMatches(getMatchingFragments());
+		int tmpFSelectionStart= fSelectionStart;
+		int tmpFSelectionLength= fSelectionLength;
+		IExpressionFragment tmpFSelectedExpression= fSelectedExpression;
+		Collection<String> usedNames= getUsedLocalNames(fSelectedExpression.getAssociatedNode());
+		String newName= fTempName;
+		if (!replaceAllOccurrences() || shouldReplaceSelectedExpressionWithTempDeclaration()
+				|| retainOnlyReplacableMatches.length == 0) {
+			createTempDeclaration();
+			addReplaceExpressionWithTemp();
+			fTempName= newName + ++cnt;
+			while (usedNames.contains(fTempName)) {
+				fTempName= newName + ++cnt;
+			}
+
+		}
+		while (replaceAllOccurrences() &&
+				retainOnlyReplacableMatches.length > fSeen.size()) {
+			fStartPoint= -1;
+			fEndPoint= -1;
+			boolean flag= false;
+			for (int i= 0; i < retainOnlyReplacableMatches.length; ++i) {
+				if (!fSeen.contains(retainOnlyReplacableMatches[i])) {
+					fSelectionStart= retainOnlyReplacableMatches[i].getStartPosition();
+					fSelectionLength= retainOnlyReplacableMatches[i].getLength();
+					fSelectedExpression= null;
+					getSelectedExpression();
+					flag= true;
+					break;
+				}
+			}
+			if (flag == false)
+				break;
+			createTempDeclaration();
+			if (fStartPoint != -1 && fEndPoint != -1) {
+				addReplaceExpressionWithTemp();
+				fTempName= newName + ++cnt;
+				while (usedNames.contains(fTempName)) {
+					fTempName= newName + ++cnt;
+				}
+			}
+		}
+		fSelectionStart= tmpFSelectionStart;
+		fSelectionLength= tmpFSelectionLength;
+		fSelectedExpression= tmpFSelectedExpression;
+		fTempName= newName;
+
+	}
+
+	private void processOtherIdenticalExpressions() throws CoreException {
+		ASTNode associatedNode= getSelectedExpression().getAssociatedNode();
+		CompilationUnit cuNode= ASTNodes.getFirstAncestorOrNull(associatedNode, CompilationUnit.class);
+		IdenticalExpressionFinder identicalExpressionFinder= new IdenticalExpressionFinder(associatedNode);
+		cuNode.accept(identicalExpressionFinder);
+		ASTNode[] matchedFragments= identicalExpressionFinder.getIdenticalFragments();
+		HashMap<ASTNode, String> enclsingKeyMap= identicalExpressionFinder.getEclosingKeyMap();
+		for (ASTNode fragment : matchedFragments) {
+			fSeen.clear();
+			if (fEnclosingKeySet.contains(enclsingKeyMap.get(fragment))) {
+				continue;
+			}
+			if ((fragment instanceof InfixExpression )) {
+				InfixExpression infixFragment= (InfixExpression)fragment;
+				if (infixFragment.extendedOperands().size() == 0) {
+					fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(fragment);
+					processSelectedExpression();
+				}
+
+			}
+
+		}
+	}
+
 
 	/**
 	 * Retrieves used names for the block containing a node.
@@ -1248,6 +1334,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			createAndInsertTempDeclaration();
 	}
 
+
 	public boolean declareFinal() {
 		return fDeclareFinal;
 	}
@@ -1352,6 +1439,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			return new IASTFragment[] { getSelectedExpression() };
 	}
 
+
 	private ASTNode[] getMatchNodes() throws JavaModelException {
 		IASTFragment[] matches= retainOnlyReplacableMatches(getMatchingFragments());
 		ASTNode[] result= new ASTNode[matches.length];
@@ -1441,6 +1529,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		else
 			return proposals[0];
 	}
+
 	public String guessTempNameWithContext() {
 		String[] proposals= guessTempNamesWithContext();
 		if (proposals.length == 0)
@@ -1471,8 +1560,8 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	/**
-	 * @return proposed variable names based on context (may be empty, but not null). The first proposal should be
-	 *         used as "best guess" (if it exists).
+	 * @return proposed variable names based on context (may be empty, but not null). The first
+	 *         proposal should be used as "best guess" (if it exists).
 	 */
 	public String[] guessTempNamesWithContext() {
 		if (fGuessedTempNames == null) {
@@ -1527,6 +1616,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		return fReplaceAllOccurrences;
 	}
 
+	public boolean replaceAllOccurrencesInThisFile() {
+		return fReplaceAllOccurrencesInThisFile;
+	}
+
 	private void replaceSelectedExpressionWithTempDeclaration() throws CoreException {
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression(); // whole expression selected
@@ -1573,6 +1666,11 @@ public class ExtractTempRefactoring extends Refactoring {
 	public void setReplaceAllOccurrences(boolean replaceAllOccurrences) {
 		fReplaceAllOccurrences= replaceAllOccurrences;
 	}
+
+	public void setReplaceAllOccurrencesInThisFile(boolean replaceAllOccurrencesInThisFile) {
+		fReplaceAllOccurrencesInThisFile= replaceAllOccurrencesInThisFile;
+	}
+
 
 	public void setTempName(String newName) {
 		fTempName= newName;
@@ -1625,6 +1723,11 @@ public class ExtractTempRefactoring extends Refactoring {
 			fReplaceAllOccurrences= Boolean.parseBoolean(replace);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
+		final String replaceAll= arguments.getAttribute(ATTRIBUTE_REPLACE_ALL);
+		if (replaceAll != null) {
+			fReplaceAllOccurrencesInThisFile= Boolean.parseBoolean(replaceAll);
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE_ALL));
 		final String declareFinal= arguments.getAttribute(ATTRIBUTE_FINAL);
 		if (declareFinal != null) {
 			fDeclareFinal= Boolean.parseBoolean(declareFinal);
