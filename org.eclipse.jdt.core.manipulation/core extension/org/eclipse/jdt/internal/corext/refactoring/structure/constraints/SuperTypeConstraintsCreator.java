@@ -21,6 +21,7 @@ import java.util.Stack;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -859,7 +861,8 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	public void endVisit(final Type node) {
 		final ASTNode parent= node.getParent();
 		if (!(parent instanceof AbstractTypeDeclaration) && !(parent instanceof ClassInstanceCreation) && !(parent instanceof CreationReference) && !(parent instanceof TypeLiteral)
-				&& (!(parent instanceof SingleVariableDeclaration) || parent.getLocationInParent() != PatternInstanceofExpression.RIGHT_OPERAND_PROPERTY) && (!(parent instanceof InstanceofExpression) || fInstanceOf))
+				&& (!(parent instanceof SingleVariableDeclaration) || (node.getAST().apiLevel() >= AST.JLS20 && parent != null && !(parent.getParent() instanceof Pattern)) || (node.getAST().apiLevel() < AST.JLS20 && parent.getLocationInParent() != PatternInstanceofExpression.RIGHT_OPERAND_PROPERTY))
+				&& (!(parent instanceof InstanceofExpression) || fInstanceOf))
 			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, fModel.createTypeVariable(node));
 	}
 
