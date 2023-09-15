@@ -134,9 +134,9 @@ public class ExtractTempWizard extends RefactoringWizard {
 		private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.ExtractTempInputPage_replace_all;
 			boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrences();
-			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+			final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
 			getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
-			checkBox.addSelectionListener(new SelectionAdapter(){
+			checkBox.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fSettings.put(REPLACE_ALL, checkBox.getSelection());
@@ -148,9 +148,9 @@ public class ExtractTempWizard extends RefactoringWizard {
 		private void addReplaceAllInFileCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.ExtractTempInputPage_replace_all_in_file;
 			boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrencesInThisFile();
-			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+			final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
 			getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBox.getSelection());
-			checkBox.addSelectionListener(new SelectionAdapter(){
+			checkBox.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fSettings.put(REPLACE_ALL_IN_FILE, checkBox.getSelection());
@@ -166,9 +166,9 @@ public class ExtractTempWizard extends RefactoringWizard {
 		private void addDeclareFinalCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.ExtractTempInputPage_declare_final;
 			boolean defaultValue= getExtractTempRefactoring().declareFinal();
-			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+			final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
 			getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
-			checkBox.addSelectionListener(new SelectionAdapter(){
+			checkBox.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fSettings.put(DECLARE_FINAL, checkBox.getSelection());
@@ -181,9 +181,9 @@ public class ExtractTempWizard extends RefactoringWizard {
 			if (getExtractTempRefactoring().isVarTypeAllowed()) {
 				String title= RefactoringMessages.ExtractTempInputPage_declare_type_var;
 				boolean defaultValue= getExtractTempRefactoring().declareVarType();
-				final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+				final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
 				getExtractTempRefactoring().setDeclareVarType(checkBox.getSelection());
-				checkBox.addSelectionListener(new SelectionAdapter(){
+				checkBox.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						fSettings.put(DECLARE_TYPE_VAR, checkBox.getSelection());

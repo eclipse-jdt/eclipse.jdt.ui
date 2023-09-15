@@ -84,7 +84,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -227,7 +226,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		@Override
 		public boolean visit(VariableDeclarationStatement node) {
 			for (Object obj : node.fragments()) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment) obj;
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment)obj;
 				if (fragment.getInitializer() != null) {
 					Expression initializer= fragment.getInitializer();
 					if (initializer.subtreeMatch(new ASTMatcher(), this.expression)) {
@@ -873,25 +872,36 @@ public class ExtractTempRefactoring extends Refactoring {
 		IdenticalExpressionFinder identicalExpressionFinder= new IdenticalExpressionFinder(associatedNode);
 		cuNode.accept(identicalExpressionFinder);
 		ASTNode[] matchedFragments= identicalExpressionFinder.getIdenticalFragments();
-		HashMap<ASTNode, String> enclsingKeyMap= identicalExpressionFinder.getEclosingKeyMap();
+		HashMap<ASTNode, String> enclosingKeyMap= identicalExpressionFinder.getEclosingKeyMap();
+		int realStartOffset= getRealStartOffset(matchedFragments, enclosingKeyMap);
+		int realLength= fSelectionLength;
+
 		for (ASTNode fragment : matchedFragments) {
 			fSeen.clear();
-			if (fEnclosingKeySet.contains(enclsingKeyMap.get(fragment))) {
-				continue;
-			}
-			if (fragment instanceof InfixExpression) {
-				InfixExpression infixFragment= (InfixExpression)fragment;
-				if (infixFragment.extendedOperands().isEmpty()) {
-					fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(fragment);
-					processSelectedExpression();
-				}
-			} else {
-				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(fragment);
+			if (!fEnclosingKeySet.contains(enclosingKeyMap.get(fragment))) {
+				fSelectedExpression= getSelectedExpression(fragment.getStartPosition() + realStartOffset, realLength);
 				processSelectedExpression();
 			}
 		}
 	}
 
+	private int getRealStartOffset(ASTNode[] matchedFragments, HashMap<ASTNode, String> enclosingKeyMap) {
+		int realStartOffset= 0;
+		for (ASTNode fragment : matchedFragments) {
+			if (fragment.getLength() == fSelectionLength) {
+				return realStartOffset;
+			}
+			if (fEnclosingKeySet.contains(enclosingKeyMap.get(fragment))) {
+				int startOffset= Math.abs(fSelectionStart - fragment.getStartPosition());
+				if (realStartOffset != 0) {
+					realStartOffset= Math.min(realStartOffset, startOffset);
+				} else {
+					realStartOffset= startOffset;
+				}
+			}
+		}
+		return realStartOffset;
+	}
 
 	/**
 	 * Retrieves used names for the block containing a node.
@@ -1456,21 +1466,43 @@ public class ExtractTempRefactoring extends Refactoring {
 		return RefactoringCoreMessages.ExtractTempRefactoring_name;
 	}
 
+	private IExpressionFragment getSelectedExpression(int startOffset, int length) throws JavaModelException {
+		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(startOffset, length), fCompilationUnitNode, fCu);
+		if (selectedFragment instanceof IExpressionFragment && !Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {
+			fSelectedExpression= (IExpressionFragment)selectedFragment;
+		} else if (selectedFragment != null) {
+			if (selectedFragment.getAssociatedNode() instanceof ExpressionStatement) {
+				ExpressionStatement exprStatement= (ExpressionStatement)selectedFragment.getAssociatedNode();
+				Expression expression= exprStatement.getExpression();
+				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(expression);
+			} else if (selectedFragment.getAssociatedNode() instanceof Assignment) {
+				Assignment assignment= (Assignment)selectedFragment.getAssociatedNode();
+				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(assignment);
+			}
+		}
+
+		if (fSelectedExpression != null && Checks.isEnumCase(fSelectedExpression.getAssociatedExpression().getParent())) {
+			fSelectedExpression= null;
+		}
+
+		return fSelectedExpression;
+	}
+
 
 	private IExpressionFragment getSelectedExpression() throws JavaModelException {
 		if (fSelectedExpression != null)
 			return fSelectedExpression;
 		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(fSelectionStart, fSelectionLength), fCompilationUnitNode, fCu);
 		if (selectedFragment instanceof IExpressionFragment && !Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {
-			fSelectedExpression= (IExpressionFragment) selectedFragment;
+			fSelectedExpression= (IExpressionFragment)selectedFragment;
 		} else if (selectedFragment != null) {
 			if (selectedFragment.getAssociatedNode() instanceof ExpressionStatement) {
-				ExpressionStatement exprStatement= (ExpressionStatement) selectedFragment.getAssociatedNode();
+				ExpressionStatement exprStatement= (ExpressionStatement)selectedFragment.getAssociatedNode();
 				Expression expression= exprStatement.getExpression();
-				fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(expression);
+				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(expression);
 			} else if (selectedFragment.getAssociatedNode() instanceof Assignment) {
-				Assignment assignment= (Assignment) selectedFragment.getAssociatedNode();
-				fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(assignment);
+				Assignment assignment= (Assignment)selectedFragment.getAssociatedNode();
+				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(assignment);
 			}
 		}
 
