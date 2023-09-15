@@ -66,4 +66,13 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core extension/org/eclipse/jdt/internal/corext/fix/PatternMatchingForInstanceofFixCore.java" type="org.eclipse.jdt.internal.corext.fix.PatternMatchingForInstanceofFixCore$PatternMatchingForInstanceofFixOperation">
+        <filter comment="Need to set pattern of TypePatter" id="640712815">
+            <message_arguments>
+                <message_argument value="TypePattern"/>
+                <message_argument value="PatternMatchingForInstanceofFixOperation"/>
+                <message_argument value="setPatternVariable(SingleVariableDeclaration)"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
