@@ -13,6 +13,7 @@
  *     ChunHao Dong <m15231670380@163.com> - [Rename field] Add quick assist for field rename refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/749
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -38,7 +39,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
-public class ConvertFieldNamingConventionProposal implements IJavaCompletionProposal, ICommandAccess{
+public class ConvertFieldNamingConventionProposal implements IJavaCompletionProposal, ICommandAccess {
 
 	private String replacement;
 
@@ -59,6 +60,7 @@ public class ConvertFieldNamingConventionProposal implements IJavaCompletionProp
 
 	@SuppressWarnings("unused")
 	private IInvocationContext context;
+
 	public ConvertFieldNamingConventionProposal(String replacement, int offset, int length, int cursorPosition, Image image, IField selectedField, IInvocationContext context) {
 		this.replacement= replacement;
 		this.offset= offset;
@@ -73,19 +75,19 @@ public class ConvertFieldNamingConventionProposal implements IJavaCompletionProp
 	@Override
 	public void apply(IDocument document) {
 		try {
-			RenameFieldProcessor processor = new RenameFieldProcessor(fSelectedField);
+			RenameFieldProcessor processor= new RenameFieldProcessor(fSelectedField);
 			processor.setNewElementName(replacement);
 			processor.setUpdateReferences(true);
 			processor.setRenameSetter(true);
 			processor.setRenameGetter(true);
 			processor.setUpdateTextualMatches(true);
-			RenameRefactoring refactoring = new RenameRefactoring(processor);
+			RenameRefactoring refactoring= new RenameRefactoring(processor);
 			RefactoringStatus status;
 			status= refactoring.checkAllConditions(new NullProgressMonitor());
 			if (status.isOK()) {
-				PerformRefactoringOperation operation = new PerformRefactoringOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
+				PerformRefactoringOperation operation= new PerformRefactoringOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
 				operation.run(new NullProgressMonitor());
-				}
+			}
 		} catch (OperationCanceledException e) {
 			e.printStackTrace();
 		} catch (CoreException e) {
@@ -132,6 +134,7 @@ public class ConvertFieldNamingConventionProposal implements IJavaCompletionProp
 	public String getCommandId() {
 		return fCommandId;
 	}
+
 	public void setCommandId(String commandId) {
 		fCommandId= commandId;
 	}

@@ -4531,14 +4531,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		return true;
 	}
+
 	private boolean getConvertFieldNamingConventionProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof SimpleName)) {
 			return false;
 		}
 		SimpleName simpleName= (SimpleName) node;
-		String selectedField = simpleName.toString();
-		int offset = node.getStartPosition();
-		int length = node.getLength();
+		String selectedField= simpleName.toString();
+		int offset= node.getStartPosition();
+		int length= node.getLength();
 		if (simpleName.getAST().apiLevel() >= ASTHelper.JLS10 && simpleName.isVar()) {
 			return false;
 		}
@@ -4547,21 +4548,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (!(editor instanceof JavaEditor))
 			return false;
 
-		IVariableBinding  binding = (IVariableBinding) simpleName.resolveBinding();
-	    if (binding == null || !binding.isField()) {
-	    	return false;
-	    }
-
-	    CompilationUnit cu= context.getASTRoot();
-		VariableDeclarationFragment vdf = (VariableDeclarationFragment) ASTNodes.findDeclaration(binding, cu);
-		FieldDeclaration fd = (FieldDeclaration) vdf.getParent();
-		int modifier = fd.getModifiers();
-		if(!Flags.isStatic(modifier) || !Flags.isFinal(modifier)) {
+		IVariableBinding binding= (IVariableBinding) simpleName.resolveBinding();
+		if (binding == null || !binding.isField()) {
 			return false;
 		}
-        if(isValidConstantName(selectedField)) {
-        	return false;
-        }
+
+		CompilationUnit cu= context.getASTRoot();
+		VariableDeclarationFragment vdf= (VariableDeclarationFragment) ASTNodes.findDeclaration(binding, cu);
+		FieldDeclaration fd= (FieldDeclaration) vdf.getParent();
+		int modifier= fd.getModifiers();
+		if (!Flags.isStatic(modifier) || !Flags.isFinal(modifier)) {
+			return false;
+		}
+		if (isValidConstantName(selectedField)) {
+			return false;
+		}
 
 		if (resultingCollections == null) {
 			return true;
@@ -4569,15 +4570,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		String newName= convertToConstantName(selectedField);
 		if (!newName.equals(selectedField)) {
-			IField iField = (IField) binding.getJavaElement();
+			IField iField= (IField) binding.getJavaElement();
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
 			ConvertFieldNamingConventionProposal proposal= new ConvertFieldNamingConventionProposal(newName, offset, length, offset, image, iField, context);
 			proposal.setCommandId(FIELD_NAMING_CONVENTION_ID);
 			resultingCollections.add(proposal);
-				}
+		}
 
 		return true;
 	}
+
 	private boolean isValidConstantName(String identifier) {
 		Pattern pattern= Pattern.compile("^[A-Z0-9]+(_[A-Z0-9]+)*$"); //$NON-NLS-1$
 		Matcher matcher= pattern.matcher(identifier);
@@ -4585,20 +4587,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static String convertToConstantName(String identifier) {
-		StringBuilder constantNaming = new StringBuilder();
-		boolean lastCharWasUpperCase = false;
+		StringBuilder constantNaming= new StringBuilder();
+		boolean lastCharWasUpperCase= false;
 		for (char c : identifier.toCharArray()) {
-		   if (Character.isUpperCase(c)) {
-		       if (!lastCharWasUpperCase && constantNaming.length() > 0) {
-		            constantNaming.append("_"); //$NON-NLS-1$
-		            }
-		       constantNaming.append(Character.toUpperCase(c));
-		       lastCharWasUpperCase = true;
-		   } else {
-		       constantNaming.append(Character.toUpperCase(c));
-		       lastCharWasUpperCase = false;
-		       }
-		  }
-	    return constantNaming.toString().replaceAll("_{2,}", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (Character.isUpperCase(c)) {
+				if (!lastCharWasUpperCase && constantNaming.length() > 0) {
+					constantNaming.append("_"); //$NON-NLS-1$
+				}
+				constantNaming.append(Character.toUpperCase(c));
+				lastCharWasUpperCase= true;
+			} else {
+				constantNaming.append(Character.toUpperCase(c));
+				lastCharWasUpperCase= false;
+			}
+		}
+		return constantNaming.toString().replaceAll("_{2,}", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
