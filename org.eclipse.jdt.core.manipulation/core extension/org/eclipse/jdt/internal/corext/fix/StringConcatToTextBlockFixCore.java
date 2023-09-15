@@ -204,7 +204,11 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					return false;
 				}
 			}
-			fOperations.add(new ChangeStringConcatToTextBlock(visited, isTagged));
+			// check if we are untagged or else if tagged, make sure we have a Statement or FieldDeclaration
+			// ancestor so we can recreate with proper single NLS tag
+			if (!isTagged || ASTNodes.getFirstAncestorOrNull(visited, Statement.class, FieldDeclaration.class) != null) {
+				fOperations.add(new ChangeStringConcatToTextBlock(visited, isTagged));
+			}
 			return false;
 		}
 
@@ -285,18 +289,17 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				buf.append(fIndent);
 			}
 			buf.append("\"\"\""); //$NON-NLS-1$
-			TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
 			if (!isTagged) {
+				TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
 				rewrite.replace(fInfix, textBlock, group);
 			} else {
-				Statement stmt= ASTNodes.getFirstAncestorOrNull(fInfix, Statement.class);
+				ASTNode stmt= ASTNodes.getFirstAncestorOrNull(fInfix, Statement.class, FieldDeclaration.class);
 				ICompilationUnit cu= (ICompilationUnit)((CompilationUnit)fInfix.getRoot()).getJavaElement();
 				StringBuilder buffer= new StringBuilder();
 				buffer.append(cu.getBuffer().getText(stmt.getStartPosition(), fInfix.getStartPosition() - stmt.getStartPosition()));
 				buffer.append(buf.toString());
 				buffer.append(cu.getBuffer().getText(fInfix.getStartPosition() + fInfix.getLength(), stmt.getStartPosition() + stmt.getLength() - fInfix.getStartPosition() - fInfix.getLength()));
-//				buffer.append(" //$NON-NLS-1$"); //$NON-NLS-1$
-				Statement newStmt= (Statement) rewrite.createStringPlaceholder(buffer.toString(), stmt.getNodeType());
+				ASTNode newStmt= rewrite.createStringPlaceholder(buffer.toString(), stmt.getNodeType());
 				ASTNodes.replaceButKeepComment(rewrite, stmt, newStmt, group);
 			}
 		}
