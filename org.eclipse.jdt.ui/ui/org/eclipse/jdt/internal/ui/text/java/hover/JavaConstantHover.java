@@ -26,20 +26,44 @@ public class JavaConstantHover extends AbstractJavaEditorTextHover {
 		if (hoverRegion.getLength() > 1) {
 			String hoverSource= null;
 			IDocument document= textViewer.getDocument();
+			int offset= hoverRegion.getOffset();
+			int length= hoverRegion.getLength();
 			try {
-				hoverSource= document.get(hoverRegion.getOffset(), hoverRegion.getLength());
+				if (offset > 1) {
+					if (document.get(offset - 1, 1).equals(".")) { //$NON-NLS-1$
+						--offset;
+						++length;
+						while (offset > 1 && !Character.isWhitespace(document.get(offset - 1, 1).charAt(0))) {
+							--offset;
+							++length;
+						}
+					}
+					if (document.get(offset + length, 1).equals(".")) { //$NON-NLS-1$
+						++length;
+						while (offset + length <= document.getLength() && !Character.isWhitespace(document.get(offset + length + 1, 1).charAt(0))) {
+							++length;
+						}
+					}
+				}
+				hoverSource= document.get(offset, length);
+
 			} catch (BadLocationException e) {
 				// should never happen
 			}
+			hoverSource= hoverSource.toLowerCase();
 			if (hoverSource != null && hoverSource.startsWith("0")) { //$NON-NLS-1$
 				try {
-					long longValue= hoverSource.startsWith("0b") ? //$NON-NLS-1$
-							Long.parseLong(hoverSource.substring(2), 2) : Long.decode(hoverSource).longValue();
+					String temp= hoverSource.charAt(hoverSource.length() - 1) == 'l' ? hoverSource.substring(0, hoverSource.length() - 1) : hoverSource;
+					long longValue= temp.startsWith("0b") ? //$NON-NLS-1$
+							Long.parseLong(withoutUnderscoreInfixes(temp.substring(2)), 2)
+							: Long.decode(withoutUnderscoreInfixes(temp)).longValue();
 					return "<body><p>" + Long.toString(longValue) + "<b> : [0x" + Long.toHexString(longValue) + "]</p></body>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				} catch (NumberFormatException e) {
 					try {
-						double doubleValue= Double.valueOf(hoverSource).doubleValue();
-						return "<body><p>" + Double.toString(doubleValue) + "</p></body>"; //$NON-NLS-1$ //$NON-NLS-2$
+						if (hoverSource.startsWith("0x")) { //$NON-NLS-1$
+							double doubleValue= Double.valueOf(hoverSource).doubleValue();
+							return "<body><p>" + Double.toString(doubleValue) + "</p></body>"; //$NON-NLS-1$ //$NON-NLS-2$
+						}
 					} catch (NumberFormatException e1) {
 						// do nothing
 					}
@@ -47,6 +71,13 @@ public class JavaConstantHover extends AbstractJavaEditorTextHover {
 			}
 		}
 		return null;
+	}
+
+	private static String withoutUnderscoreInfixes(String s) {
+		if ((s.length() > 0) && (s.indexOf('_') <= 0 || s.lastIndexOf('_') == s.length() - 1) || s.startsWith("0x_") || s.startsWith("0X_")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return s;
+		}
+		return s.replace("_", ""); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }
