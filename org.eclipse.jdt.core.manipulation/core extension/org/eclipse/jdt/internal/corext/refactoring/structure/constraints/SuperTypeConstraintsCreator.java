@@ -862,7 +862,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		final ASTNode parent= node.getParent();
 		final AST ast= node.getAST();
 		if (!(parent instanceof AbstractTypeDeclaration) && !(parent instanceof ClassInstanceCreation) && !(parent instanceof CreationReference) && !(parent instanceof TypeLiteral)
-				&& (!(parent instanceof SingleVariableDeclaration) || ((ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled() || ast.apiLevel() > AST.JLS20) && !(parent.getParent() instanceof Pattern)) || parent.getLocationInParent() != PatternInstanceofExpression.RIGHT_OPERAND_PROPERTY)
+				&& (!(parent instanceof SingleVariableDeclaration) || (((ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled() || ast.apiLevel() > AST.JLS20) && !(parent.getParent() instanceof Pattern)) || (ast.apiLevel() < AST.JLS20 && parent.getLocationInParent() != PatternInstanceofExpression.RIGHT_OPERAND_PROPERTY)))
 				&& (!(parent instanceof InstanceofExpression) || fInstanceOf))
 			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, fModel.createTypeVariable(node));
 	}
