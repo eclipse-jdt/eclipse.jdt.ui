@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -26,9 +27,11 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodReference;
+import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TypePattern;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -88,6 +91,15 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 			@Override
 			public boolean visit(PatternInstanceofExpression node) {
 				SingleVariableDeclaration svd= node.getRightOperand();
+				AST ast= node.getAST();
+				if (ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled() || ast.apiLevel() > AST.JLS20) {
+					Pattern p= node.getPattern();
+					if (p instanceof TypePattern typePattern) {
+						svd= typePattern.getPatternVariable();
+					} else {
+						return false;
+					}
+				}
 				SimpleName name= svd.getName();
 				IBinding binding= name.resolveBinding();
 				if (binding instanceof IVariableBinding) {

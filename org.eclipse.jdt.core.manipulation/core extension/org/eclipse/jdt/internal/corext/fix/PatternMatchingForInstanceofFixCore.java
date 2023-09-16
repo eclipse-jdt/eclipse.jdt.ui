@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypePattern;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -202,7 +203,13 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			if (Modifier.isFinal(statementToRemove.getModifiers())) {
 				newSVDecl.modifiers().add(ast.newModifier(ModifierKeyword.fromFlagValue(Modifier.FINAL)));
 			}
-			newInstanceof.setRightOperand(newSVDecl);
+			if ((ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled()) || ast.apiLevel() > AST.JLS20) {
+				TypePattern newTypePattern= ast.newTypePattern();
+				newTypePattern.setPatternVariable(newSVDecl);
+				newInstanceof.setPattern(newTypePattern);
+			} else {
+				newInstanceof.setRightOperand(newSVDecl);
+			}
 
 			ASTNodes.replaceButKeepComment(rewrite, nodeToComplete, newInstanceof, group);
 
