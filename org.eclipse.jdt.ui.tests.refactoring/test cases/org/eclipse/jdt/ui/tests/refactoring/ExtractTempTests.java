@@ -18,6 +18,7 @@
  *     Xiaye Chi <xychichina@gmail.com> - [extract local] Improve the Safety of Extract Local Variable Refactorings by identifying statements that may change the value of the extracted expressions - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/432
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -107,6 +108,32 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		assertTrue("activation was supposed to be successful", activationResult.isOK());
 
 		ref.setReplaceAllOccurrences(replaceAll);
+		ref.setDeclareFinal(makeFinal);
+		ref.setTempName(tempName);
+
+		assertEquals("temp name incorrectly guessed", guessedTempName, ref.guessTempNameWithContext());
+
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
+
+		performChange(ref, false);
+
+		IPackageFragment pack= (IPackageFragment) cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		assertEqualLines(getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+
+	protected void helper2(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean replaceAllInThisFile,boolean makeFinal, String tempName, String guessedTempName) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength());
+		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());
+		assertTrue("activation was supposed to be successful", activationResult.isOK());
+
+		ref.setReplaceAllOccurrences(replaceAll);
+		ref.setReplaceAllOccurrencesInThisFile(replaceAllInThisFile);
 		ref.setDeclareFinal(makeFinal);
 		ref.setTempName(tempName);
 
@@ -1079,6 +1106,17 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		helper1(17, 28, 17, 71, true, false, "safeParse", "safeParse");
 	}
 
+	@Test
+	public void test159() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
+		helper2(32, 16, 32, 45, true, true, false, "computeSelfCost", "computeSelfCost");
+	}
+
+	@Test
+	public void test160() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
+		helper2(5, 21, 5, 26, true, true, false, "i", "i");
+	}
 
 	@Test
 	public void testZeroLengthSelection0() throws Exception {

@@ -1,27 +1,6 @@
-/*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
- *
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License 2.0
- * which accompanies this distribution, and is available at
- * https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
- *
- * Contributors:
- *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
- *******************************************************************************/
-package org.eclipse.jdt.ui.tests.refactoring;
+package p; //32, 16, 32, 45
 
-public class ExtractMultipleTempTest1 {
-	/*
-	 * this is a test java file for pull request 680: Refactoring history based name recommendation #680
-	 */
-	public static void main(String [] args) {
-		System.out.println("test4PR680");
-	}
-}
-class A extends RelOptCost{
+public class A extends RelOptCost{
 	public A(int a, int b) {
 		super(a, b);
 	}
