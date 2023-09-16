@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -37,6 +40,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -48,12 +52,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.text.edits.TextEditGroup;
 
 public class VariableDeclarationFixCore extends CompilationUnitRewriteOperationsFixCore {
 
@@ -268,6 +272,41 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 	            }
             }
 
+			class SearchException extends RuntimeException {
+				private static final long serialVersionUID= 1L;
+			}
+
+			// check if a field declaration initializes with a lambda that refers to the field in question
+			// in which case we cannot make it final
+			ASTVisitor findFieldLambdasUsingBinding= new ASTVisitor() {
+				@Override
+				public boolean visit(FieldDeclaration node) {
+					ASTVisitor findLambdas= new ASTVisitor() {
+						@Override
+						public boolean visit(LambdaExpression lambda) {
+							ASTVisitor findFieldRef= new ASTVisitor() {
+								@Override
+								public boolean visit(SimpleName name) {
+									IBinding nameBinding= name.resolveBinding();
+									if (nameBinding == null || (nameBinding instanceof IVariableBinding varBinding && varBinding.isEqualTo(binding))) {
+										throw new SearchException();
+									}
+									return false;
+								}
+							};
+							lambda.accept(findFieldRef);
+							return true;
+						}
+					};
+					node.accept(findLambdas);
+					return true;
+				}
+			};
+			try {
+				typeDecl.accept(findFieldLambdasUsingBinding);
+			} catch (SearchException e) {
+				return false;
+			}
 	        return true;
         }
 
@@ -512,7 +551,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 
 		if (decl instanceof SingleVariableDeclaration
 				|| decl instanceof VariableDeclarationExpression) {
-			return new ModifierChangeOperation(decl, new ArrayList<VariableDeclarationFragment>(), Modifier.FINAL, Modifier.NONE);
+			return new ModifierChangeOperation(decl, new ArrayList<>(), Modifier.FINAL, Modifier.NONE);
 		} else if (decl instanceof VariableDeclarationFragment){
 			VariableDeclarationFragment frag= (VariableDeclarationFragment)decl;
 			decl= decl.getParent();
@@ -521,7 +560,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 				list.add(frag);
 				return new ModifierChangeOperation(decl, list, Modifier.FINAL, Modifier.NONE);
 			} else if (decl instanceof VariableDeclarationExpression) {
-				return new ModifierChangeOperation(decl, new ArrayList<VariableDeclarationFragment>(), Modifier.FINAL, Modifier.NONE);
+				return new ModifierChangeOperation(decl, new ArrayList<>(), Modifier.FINAL, Modifier.NONE);
 			}
 		}
 

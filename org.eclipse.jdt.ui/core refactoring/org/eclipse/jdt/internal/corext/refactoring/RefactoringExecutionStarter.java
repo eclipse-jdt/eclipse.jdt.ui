@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2021 IBM Corporation and others.
+ * Copyright (c) 2005, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -101,7 +101,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -183,7 +183,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startChangeSignatureRefactoring(final IMethod method, final SelectionDispatchAction action, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isChangeSignatureAvailable(method))
+		if (!RefactoringAvailabilityTesterCore.isChangeSignatureAvailable(method))
 			return;
 		try {
 			ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
@@ -216,7 +216,7 @@ public final class RefactoringExecutionStarter {
 
 			Refactoring refactoring= new ProcessorBasedRefactoring(processor);
 			ChangeSignatureWizard wizard= new ChangeSignatureWizard(processor, refactoring);
-			new RefactoringStarter().activate(wizard, shell, wizard.getDefaultPageTitle(), RefactoringSaveHelper.SAVE_REFACTORING);
+			new RefactoringStarter().activate(wizard, shell, wizard.getDefaultPageTitle(), IRefactoringSaveModes.SAVE_REFACTORING);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.RefactoringStarter_unexpected_exception);
 		}
@@ -224,7 +224,7 @@ public final class RefactoringExecutionStarter {
 
 	public static void startChangeTypeRefactoring(final ICompilationUnit unit, final Shell shell, final int offset, final int length) {
 		final ChangeTypeRefactoring refactoring= new ChangeTypeRefactoring(unit, offset, length);
-		new RefactoringStarter().activate(new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startCleanupRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps, boolean useOptionsFromProfile, Shell shell, boolean showWizard, String actionName) throws InvocationTargetException {
@@ -246,7 +246,7 @@ public final class RefactoringExecutionStarter {
 				context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			}
 
-			RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, RefactoringSaveHelper.SAVE_REFACTORING, shell, context);
+			RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, IRefactoringSaveModes.SAVE_REFACTORING, shell, context);
 			try {
 				helper.perform(true, true, true);
 			} catch (InterruptedException e) {
@@ -254,14 +254,14 @@ public final class RefactoringExecutionStarter {
 		} else {
 			CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE);
 			RefactoringStarter starter= new RefactoringStarter();
-			starter.activate(refactoringWizard, shell, actionName, RefactoringSaveHelper.SAVE_REFACTORING);
+			starter.activate(refactoringWizard, shell, actionName, IRefactoringSaveModes.SAVE_REFACTORING);
 		}
 	}
 
 	public static void startConvertAnonymousRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) {
 		final ConvertAnonymousToNestedRefactoring refactoring= new ConvertAnonymousToNestedRefactoring(unit, offset, length);
 		new RefactoringStarter().activate(new ConvertAnonymousToNestedWizard(refactoring), shell, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title,
-				RefactoringSaveHelper.SAVE_REFACTORING);
+				IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startCopyRefactoring(IResource[] resources, IJavaElement[] javaElements, Shell shell) throws JavaModelException {
@@ -282,23 +282,23 @@ public final class RefactoringExecutionStarter {
 		processor.setQueries(new ReorgQueries(shell));
 		Refactoring refactoring= new DeleteRefactoring(processor);
 		int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
-		new RefactoringExecutionHelper(refactoring, stopSeverity, RefactoringSaveHelper.SAVE_NOTHING, shell, new ProgressMonitorDialog(shell)).perform(false, false);
+		new RefactoringExecutionHelper(refactoring, stopSeverity, IRefactoringSaveModes.SAVE_NOTHING, shell, new ProgressMonitorDialog(shell)).perform(false, false);
 	}
 
 	public static void startDeleteRefactoring(final Object[] elements, final Shell shell) throws CoreException {
 		Refactoring refactoring= new DeleteRefactoring(new JavaDeleteProcessor(elements));
-		DeleteUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, RefactoringSaveHelper.SAVE_NOTHING);
+		DeleteUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, IRefactoringSaveModes.SAVE_NOTHING);
 	}
 
 	public static void startExtractInterfaceRefactoring(final IType type, final Shell shell) {
 		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
 		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
 		new RefactoringStarter().activate(new ExtractInterfaceWizard(processor, refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring,
-				RefactoringSaveHelper.SAVE_REFACTORING);
+				IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startExtractSupertypeRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isExtractSupertypeAvailable(members))
+		if (!RefactoringAvailabilityTesterCore.isExtractSupertypeAvailable(members))
 			return;
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
@@ -306,16 +306,16 @@ public final class RefactoringExecutionStarter {
 		ExtractSupertypeProcessor processor= new ExtractSupertypeProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
 		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
 		ExtractSupertypeWizard wizard= new ExtractSupertypeWizard(processor, refactoring);
-		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startInferTypeArgumentsRefactoring(final IJavaElement[] elements, final Shell shell) {
 		try {
-			if (!RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements))
+			if (!RefactoringAvailabilityTesterCore.isInferTypeArgumentsAvailable(elements))
 				return;
 			final InferTypeArgumentsRefactoring refactoring= new InferTypeArgumentsRefactoring(elements);
 			new RefactoringStarter()
-					.activate(new InferTypeArgumentsWizard(refactoring), shell, RefactoringMessages.InferTypeArgumentsAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+					.activate(new InferTypeArgumentsWizard(refactoring), shell, RefactoringMessages.InferTypeArgumentsAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.InferTypeArgumentsAction_dialog_title, RefactoringMessages.OpenRefactoringWizardAction_exception);
 		}
@@ -324,7 +324,7 @@ public final class RefactoringExecutionStarter {
 	public static boolean startInlineConstantRefactoring(final ICompilationUnit unit, final CompilationUnit node, final int offset, final int length, final Shell shell) {
 		final InlineConstantRefactoring refactoring= new InlineConstantRefactoring(unit, node, offset, length);
 		if (! refactoring.checkStaticFinalConstantNameSelected().hasFatalError()) {
-			new RefactoringStarter().activate(new InlineConstantWizard(refactoring), shell, RefactoringMessages.InlineConstantAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+			new RefactoringStarter().activate(new InlineConstantWizard(refactoring), shell, RefactoringMessages.InlineConstantAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 			return true;
 		}
 		return false;
@@ -333,7 +333,7 @@ public final class RefactoringExecutionStarter {
 	public static boolean startInlineMethodRefactoring(final ITypeRoot typeRoot, final CompilationUnit node, final int offset, final int length, final Shell shell) {
 		final InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(typeRoot, node, offset, length);
 		if (refactoring != null) {
-			new RefactoringStarter().activate(new InlineMethodWizard(refactoring), shell, RefactoringMessages.InlineMethodAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+			new RefactoringStarter().activate(new InlineMethodWizard(refactoring), shell, RefactoringMessages.InlineMethodAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 			return true;
 		}
 		return false;
@@ -342,7 +342,7 @@ public final class RefactoringExecutionStarter {
 	public static boolean startInlineTempRefactoring(final ICompilationUnit unit, CompilationUnit node, final ITextSelection selection, final Shell shell) {
 		final InlineTempRefactoring refactoring= new InlineTempRefactoring(unit, node, selection.getOffset(), selection.getLength());
 		if (!refactoring.checkIfTempSelected().hasFatalError()) {
-			new RefactoringStarter().activate(new InlineTempWizard(refactoring), shell, RefactoringMessages.InlineTempAction_inline_temp, RefactoringSaveHelper.SAVE_NOTHING);
+			new RefactoringStarter().activate(new InlineTempWizard(refactoring), shell, RefactoringMessages.InlineTempAction_inline_temp, IRefactoringSaveModes.SAVE_NOTHING);
 			return true;
 		}
 		return false;
@@ -351,44 +351,44 @@ public final class RefactoringExecutionStarter {
 	public static void startIntroduceFactoryRefactoring(final ICompilationUnit unit, final ITextSelection selection, final Shell shell) {
 		final IntroduceFactoryRefactoring refactoring= new IntroduceFactoryRefactoring(unit, selection.getOffset(), selection.getLength());
 		new RefactoringStarter().activate(new IntroduceFactoryWizard(refactoring, RefactoringMessages.IntroduceFactoryAction_use_factory), shell,
-				RefactoringMessages.IntroduceFactoryAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+				RefactoringMessages.IntroduceFactoryAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startIntroduceIndirectionRefactoring(final IClassFile file, final int offset, final int length, final Shell shell) {
 		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(file, offset, length);
 		new RefactoringStarter().activate(new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell,
-				RefactoringMessages.IntroduceIndirectionAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+				RefactoringMessages.IntroduceIndirectionAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startIntroduceIndirectionRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) {
 		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(unit, offset, length);
 		new RefactoringStarter().activate(new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell,
-				RefactoringMessages.IntroduceIndirectionAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+				RefactoringMessages.IntroduceIndirectionAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startIntroduceIndirectionRefactoring(final IMethod method, final Shell shell) {
 		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(method);
 		new RefactoringStarter().activate(new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell,
-				RefactoringMessages.IntroduceIndirectionAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+				RefactoringMessages.IntroduceIndirectionAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startIntroduceParameter(ICompilationUnit unit, int offset, int length, Shell shell) {
 		final IntroduceParameterRefactoring refactoring= new IntroduceParameterRefactoring(unit, offset, length);
-		new RefactoringStarter().activate(new IntroduceParameterWizard(refactoring), shell, RefactoringMessages.IntroduceParameterAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(new IntroduceParameterWizard(refactoring), shell, RefactoringMessages.IntroduceParameterAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startMoveInnerRefactoring(final IType type, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isMoveInnerAvailable(type))
+		if (!RefactoringAvailabilityTesterCore.isMoveInnerAvailable(type))
 			return;
 		final MoveInnerToTopRefactoring refactoring= new MoveInnerToTopRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
-		new RefactoringStarter().activate(new MoveInnerToTopWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(new MoveInnerToTopWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startMoveMethodRefactoring(final IMethod method, final Shell shell) {
 		MoveInstanceMethodProcessor processor= new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject()));
 		Refactoring refactoring= new MoveRefactoring(processor);
 		MoveInstanceMethodWizard wizard= new MoveInstanceMethodWizard(processor, refactoring);
-		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.MoveInstanceMethodAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startMoveRefactoring(final IResource[] resources, final IJavaElement[] elements, final Shell shell) throws JavaModelException {
@@ -404,7 +404,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startMoveStaticMembersRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isMoveStaticAvailable(members))
+		if (!RefactoringAvailabilityTesterCore.isMoveStaticAvailable(members))
 			return;
 		final Set<IMember> set= new HashSet<>(Arrays.asList(members));
 		final IMember[] elements= set.toArray(new IMember[set.size()]);
@@ -414,27 +414,27 @@ public final class RefactoringExecutionStarter {
 		MoveStaticMembersProcessor processor= new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(project));
 		Refactoring refactoring= new MoveRefactoring(processor);
 		MoveMembersWizard wizard= new MoveMembersWizard(processor, refactoring);
-		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startPullUpRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isPullUpAvailable(members))
+		if (!RefactoringAvailabilityTesterCore.isPullUpAvailable(members))
 			return;
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
 		PullUpRefactoringProcessor processor= new PullUpRefactoringProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
 		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
-		new RefactoringStarter().activate(new PullUpWizard(processor, refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(new PullUpWizard(processor, refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startPushDownRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isPushDownAvailable(members))
+		if (!RefactoringAvailabilityTesterCore.isPushDownAvailable(members))
 			return;
 		PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(members);
 		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
 		PushDownWizard wizard= new PushDownWizard(processor, refactoring);
-		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startRenameRefactoring(final IJavaElement element, final Shell shell) throws CoreException {
@@ -445,25 +445,25 @@ public final class RefactoringExecutionStarter {
 
 	public static void startRenameResourceRefactoring(final IResource resource, final Shell shell) {
 		RenameResourceWizard wizard= new RenameResourceWizard(resource);
-		new RefactoringStarter().activate(wizard, shell, wizard.getWindowTitle(), RefactoringSaveHelper.SAVE_ALL);
+		new RefactoringStarter().activate(wizard, shell, wizard.getWindowTitle(), IRefactoringSaveModes.SAVE_ALL);
 	}
 
 	public static void startReplaceInvocationsRefactoring(final ITypeRoot typeRoot, final int offset, final int length, final Shell shell) {
 		final ReplaceInvocationsRefactoring refactoring= new ReplaceInvocationsRefactoring(typeRoot, offset, length);
-		new RefactoringStarter().activate(new ReplaceInvocationsWizard(refactoring), shell, RefactoringMessages.ReplaceInvocationsAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(new ReplaceInvocationsWizard(refactoring), shell, RefactoringMessages.ReplaceInvocationsAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startReplaceInvocationsRefactoring(final IMethod method, final Shell shell) {
 		final ReplaceInvocationsRefactoring refactoring= new ReplaceInvocationsRefactoring(method);
-		new RefactoringStarter().activate(new ReplaceInvocationsWizard(refactoring), shell, RefactoringMessages.ReplaceInvocationsAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(new ReplaceInvocationsWizard(refactoring), shell, RefactoringMessages.ReplaceInvocationsAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	public static void startSelfEncapsulateRefactoring(final IField field, final Shell shell) {
 		try {
-			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field))
+			if (!RefactoringAvailabilityTesterCore.isSelfEncapsulateAvailable(field))
 				return;
 			final SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field);
-			new RefactoringStarter().activate(new SelfEncapsulateFieldWizard(refactoring), shell, "", RefactoringSaveHelper.SAVE_REFACTORING); //$NON-NLS-1$
+			new RefactoringStarter().activate(new SelfEncapsulateFieldWizard(refactoring), shell, "", IRefactoringSaveModes.SAVE_REFACTORING); //$NON-NLS-1$
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_cannot_perform);
 		}
@@ -473,7 +473,7 @@ public final class RefactoringExecutionStarter {
 		UseSuperTypeProcessor processor= new UseSuperTypeProcessor(type);
 		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
 		UseSupertypeWizard wizard= new UseSupertypeWizard(processor, refactoring);
-		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 	private RefactoringExecutionStarter() {
@@ -522,7 +522,7 @@ public final class RefactoringExecutionStarter {
 		if (processor != null) {
 			Refactoring refactoring= new ProcessorBasedRefactoring(processor);
 			IntroduceParameterObjectWizard wizard= new IntroduceParameterObjectWizard(processor, refactoring);
-			new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+			new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, IRefactoringSaveModes.SAVE_REFACTORING);
 		}
 	}
 
@@ -531,7 +531,7 @@ public final class RefactoringExecutionStarter {
 		descriptor.setType(type);
 		ExtractClassRefactoring refactoring= new ExtractClassRefactoring(descriptor);
 		ExtractClassWizard wizard= new ExtractClassWizard(descriptor, refactoring);
-		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_REFACTORING);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, IRefactoringSaveModes.SAVE_REFACTORING);
 	}
 
 }

@@ -104,7 +104,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_addParanoiacParentheses_description, cuRewrite);
 
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -128,7 +128,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_removeUnnecessaryParentheses_description, cuRewrite);
 
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();

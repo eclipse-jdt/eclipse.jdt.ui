@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,10 +27,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -46,13 +44,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class CoreUtility {
 
 	public static void createDerivedFolder(IFolder folder, boolean force, boolean local, IProgressMonitor monitor) throws CoreException {
-		if (!folder.exists()) {
-			IContainer parent= folder.getParent();
-			if (parent instanceof IFolder) {
-				createDerivedFolder((IFolder)parent, force, local, null);
-			}
-			folder.create(force ? (IResource.FORCE | IResource.DERIVED) : IResource.DERIVED, local, monitor);
-		}
+		ResourcesUtility.createDerivedFolder(folder, force, local, monitor);
 	}
 
 	/**
@@ -69,13 +61,7 @@ public class CoreUtility {
 	 * @throws CoreException thrown if the creation failed
 	 */
 	public static void createFolder(IFolder folder, boolean force, boolean local, IProgressMonitor monitor) throws CoreException {
-		if (!folder.exists()) {
-			IContainer parent= folder.getParent();
-			if (parent instanceof IFolder) {
-				createFolder((IFolder)parent, force, local, null);
-			}
-			folder.create(force, local, monitor);
-		}
+		ResourcesUtility.createFolder(folder, force, local, monitor);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -325,7 +325,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 				ASTNode node= problem.getCoveredNode(compilationUnit);
 				if (node instanceof ClassInstanceCreation) {
 					Type rawReference= (Type)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
-					if (isRawTypeReference(rawReference)) {
+					if (!rawReference.isVar() && isRawTypeReference(rawReference)) {
 						result.add((SimpleType) rawReference);
 					}
 				} else if (node instanceof SimpleName) {
@@ -333,14 +333,15 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 					if (isRawTypeReference(rawReference)) {
 						ASTNode parent= rawReference.getParent();
 						if (!(parent instanceof ArrayType)
-								&& !(parent instanceof ParameterizedType))
+								&& !(parent instanceof ParameterizedType)
+								&& !((SimpleType)rawReference).isVar())
 							result.add((SimpleType) rawReference);
 					}
 				} else if (node instanceof MethodInvocation) {
 					MethodInvocation invocation= (MethodInvocation)node;
 
 					SimpleType rawReference= getRawReference(invocation, compilationUnit);
-					if (rawReference != null) {
+					if (rawReference != null && !rawReference.isVar()) {
 						result.add(rawReference);
 					}
 				}
@@ -401,7 +402,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	private static SimpleType getRawReference(MethodInvocation invocation, CompilationUnit compilationUnit) {
+	public static SimpleType getRawReference(MethodInvocation invocation, CompilationUnit compilationUnit) {
 		Name name1= (Name)invocation.getStructuralProperty(MethodInvocation.NAME_PROPERTY);
 		if (name1 instanceof SimpleName) {
 			SimpleType rawReference= getRawReference((SimpleName)name1, compilationUnit);
@@ -471,7 +472,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		return null;
 	}
 
-	private static boolean isRawTypeReference(ASTNode node) {
+	public static boolean isRawTypeReference(ASTNode node) {
 		if (!(node instanceof SimpleType))
 			return false;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -70,13 +70,14 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.DeleteDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -87,8 +88,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -114,8 +114,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	public JavaDeleteProcessor(Object[] elements) {
 		fElements= elements;
 		if (fElements != null) {
-			fResources= RefactoringAvailabilityTester.getResources(elements);
-			fJavaElements= RefactoringAvailabilityTester.getJavaElements(elements);
+			fResources= RefactoringAvailabilityTesterCore.getResources(elements);
+			fJavaElements= RefactoringAvailabilityTesterCore.getJavaElements(elements);
 		}
 		fSuggestGetterSetterDeletion= true;
 		fDeleteSubPackages= false;
@@ -130,7 +130,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.DELETE_PROCESSOR;
+		return IRefactoringProcessorIdsCore.DELETE_PROCESSOR;
 	}
 
 	@Override
@@ -140,12 +140,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		if (fElements.length != fResources.length + fJavaElements.length)
 			return false;
 		for (IResource resource : fResources) {
-			if (!RefactoringAvailabilityTester.isDeleteAvailable(resource)) {
+			if (!RefactoringAvailabilityTesterCore.isDeleteAvailable(resource)) {
 				return false;
 			}
 		}
 		for (IJavaElement javaElement : fJavaElements) {
-			if (!RefactoringAvailabilityTester.isDeleteAvailable(javaElement)) {
+			if (!RefactoringAvailabilityTesterCore.isDeleteAvailable(javaElement)) {
 				return false;
 			}
 		}
@@ -243,7 +243,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
 		RefactoringStatus result= new RefactoringStatus();
-		IResource[] resources= ReorgUtils.getNotLinked(fResources);
+		IResource[] resources= ReorgUtilsCore.getNotLinked(fResources);
 		IStatus status= Resources.checkInSync(resources);
 		if (!status.isOK()) {
 			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
@@ -259,8 +259,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			}
 		}
 		result.merge(RefactoringStatus.create(status));
-		IResource[] javaResources= ReorgUtils.getResources(fJavaElements);
-		resources= ReorgUtils.getNotNulls(javaResources);
+		IResource[] javaResources= ReorgUtilsCore.getResources(fJavaElements);
+		resources= ReorgUtilsCore.getNotNulls(javaResources);
 		status= Resources.checkInSync(resources);
 		if (!status.isOK()) {
 			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
@@ -424,7 +424,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private void addDeletableParentPackagesOnPackageDeletion() throws CoreException {
 
 		@SuppressWarnings("unchecked")
-		final List<IPackageFragment> initialPackagesToDelete= (List<IPackageFragment>) ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.PACKAGE_FRAGMENT);
+		final List<IPackageFragment> initialPackagesToDelete= (List<IPackageFragment>) ReorgUtilsCore.getElementsOfType(fJavaElements, IJavaElement.PACKAGE_FRAGMENT);
 
 		if (initialPackagesToDelete.isEmpty())
 			return;
@@ -435,7 +435,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		// Get resources and java elements which will be deleted as well
 		final Set<IResource> deletedChildren= new HashSet<>(Arrays.asList(fResources));
 		for (IJavaElement javaElement : fJavaElements) {
-			if (!ReorgUtils.isInsideCompilationUnit(javaElement)) {
+			if (!ReorgUtilsCore.isInsideCompilationUnit(javaElement)) {
 				deletedChildren.add(javaElement.getResource());
 			}
 		}
@@ -570,7 +570,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private static boolean skipDeletingReferencedRoot(IConfirmQuery query, IPackageFragmentRoot root, List<IJavaProject> referencingProjects) throws OperationCanceledException {
 		if (referencingProjects.isEmpty() || root == null || ! root.exists() ||! root.isArchive())
 			return false;
-		String label= JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
+		String label= JavaElementLabelsCore.getElementLabel(root, JavaElementLabelsCore.ALL_DEFAULT);
 		String question= referencingProjects.size() == 1 ? Messages.format(RefactoringCoreMessages.DeleteRefactoring_3_singular, label) : Messages.format(
 				RefactoringCoreMessages.DeleteRefactoring_3_plural, label);
 		return ! query.confirm(question, referencingProjects.toArray());
@@ -675,15 +675,15 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	private void addToSetToDelete(IJavaElement[] newElements){
-		fJavaElements= ReorgUtils.union(fJavaElements, newElements);
+		fJavaElements= ReorgUtilsCore.union(fJavaElements, newElements);
 	}
 
 	private void removeFromSetToDelete(IResource[] resourcesToNotDelete) {
-		fResources= ReorgUtils.setMinus(fResources, resourcesToNotDelete);
+		fResources= ReorgUtilsCore.setMinus(fResources, resourcesToNotDelete);
 	}
 
 	private void removeFromSetToDelete(IJavaElement[] elementsToNotDelete) {
-		fJavaElements= ReorgUtils.setMinus(fJavaElements, elementsToNotDelete);
+		fJavaElements= ReorgUtilsCore.setMinus(fJavaElements, elementsToNotDelete);
 	}
 
 	private void addGettersSetters() throws JavaModelException {
@@ -810,7 +810,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		Set<IJavaElement> deletedElements= new HashSet<>(Arrays.asList(fJavaElements));
 		Set<ICompilationUnit> result= new HashSet<>();
 		for (IJavaElement element : fJavaElements) {
-			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
+			ICompilationUnit cu= ReorgUtilsCore.getCompilationUnit(element);
 			if (cu != null && !result.contains(cu) && deletedElements.containsAll(topLevelTypes(cu)))
 				result.add(cu);
 		}

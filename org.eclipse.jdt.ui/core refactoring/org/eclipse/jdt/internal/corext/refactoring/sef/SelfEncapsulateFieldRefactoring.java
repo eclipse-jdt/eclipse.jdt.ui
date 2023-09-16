@@ -118,10 +118,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 
 /**
  * Encapsulates a field into getter and setter calls.
@@ -327,7 +327,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			String selector= method.getName();
 			if (selector.equals(name)) {
 				if (!reUseExistingField) {
-					status.addFatalError(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_method_exists, new String[] { BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED), BasicElementLabels.getJavaElementName(type.getElementName()) }));
+					status.addFatalError(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_method_exists, new String[] { BindingLabelProviderCore.getBindingLabel(method, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), BasicElementLabels.getJavaElementName(type.getElementName()) }));
 				} else {
 					boolean methodIsStatic= Modifier.isStatic(method.getModifiers());
 					if (methodIsStatic && !isStatic)
@@ -509,9 +509,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			JavaPlugin.log(exception);
 		}
 		final String description= Messages.format(RefactoringCoreMessages.SelfEncapsulateField_descriptor_description_short, BasicElementLabels.getJavaElementName(fField.getElementName()));
-		final String header= Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final String header= Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] { JavaElementLabelsCore.getElementLabel(fField, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), JavaElementLabelsCore.getElementLabel(declaring, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_original_pattern, JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_original_pattern, JavaElementLabelsCore.getElementLabel(fField, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 		if (fCreateGetter) {
 			comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_getter_pattern, BasicElementLabels.getJavaElementName(fGetterName)));
 		}

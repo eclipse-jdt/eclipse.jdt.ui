@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -68,7 +68,7 @@ public class CutAction extends SelectionDispatchAction{
 	private static boolean containsOnlyElementsInsideCompilationUnits(IStructuredSelection selection) {
 		for (Object object : selection) {
 			if (!(object instanceof IJavaElement)
-					|| !ReorgUtils.isInsideCompilationUnit((IJavaElement)object))
+					|| !ReorgUtilsCore.isInsideCompilationUnit((IJavaElement)object))
 				return false;
 		}
 		return true;

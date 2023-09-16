@@ -117,11 +117,11 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodsSourcePositionComparator;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 
 /**
  * Refactoring class that permits the substitution of a factory method
@@ -1163,11 +1163,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (binding.isNested() && !binding.isMember())
 				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 			final String description= Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fCtorOwningClass.getName().getIdentifier()));
-			final String header= Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fNewMethodName), BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+			final String header= Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fNewMethodName), BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), BindingLabelProviderCore.getBindingLabel(fCtorBinding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_original_pattern, BindingLabelProviderCore.getBindingLabel(fCtorBinding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_factory_pattern, BasicElementLabels.getJavaElementName(fNewMethodName)));
-			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_owner_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_owner_pattern, BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 			if (fProtectConstructor)
 				comment.addSetting(RefactoringCoreMessages.IntroduceFactoryRefactoring_declare_private);
 			final IntroduceFactoryDescriptor descriptor= RefactoringSignatureDescriptorFactory.createIntroduceFactoryDescriptor(project, description, comment.asString(), arguments, flags);

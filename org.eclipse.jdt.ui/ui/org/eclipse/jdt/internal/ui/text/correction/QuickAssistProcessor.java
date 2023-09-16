@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -88,9 +87,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IDocElement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -99,12 +96,10 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
-import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
@@ -131,8 +126,6 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
-import org.eclipse.jdt.core.dom.TagElement;
-import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -178,7 +171,7 @@ import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
 import org.eclipse.jdt.internal.corext.fix.JoinVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
@@ -192,7 +185,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoringCore;
@@ -347,7 +339,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
 					|| getAddStaticMemberFavoritesProposals(coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null)
-					|| getDeprecatedProposal(context, coveringNode, null);
+					|| getDeprecatedProposal(context, coveringNode, null, null);
 		}
 		return false;
 	}
@@ -373,6 +365,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getNewInterfaceImplementationProposal(context, coveringNode, resultingCollections);
 			getSplitSwitchLabelProposal(context, coveringNode, resultingCollections);
 			getAddMethodDeclaration(context, coveringNode, resultingCollections);
+			getDeprecatedProposal(context, coveringNode, locations, resultingCollections);
 
 			if (noErrorsAtLocation) {
 				boolean problemsAtLocation= locations.length != 0;
@@ -421,7 +414,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
-				getDeprecatedProposal(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -466,7 +458,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				return true;
 			}
 			String label= CorrectionMessages.QuickAssistProcessor_extractmethod_description;
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
@@ -497,7 +489,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				return true;
 			}
 			String label= CorrectionMessages.QuickAssistProcessor_extractmethod_from_lambda_description;
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
@@ -537,7 +529,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
 		if (extractTempRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			extractTempRefactoring.setReplaceAllOccurrences(true);
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractTempRefactoring.setLinkedProposalModel(linkedProposalModel);
 			extractTempRefactoring.setCheckResultForCompileProblems(false);
 
@@ -566,7 +558,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ExtractTempRefactoring extractTempRefactoringSelectedOnly= new ExtractTempRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
 		extractTempRefactoringSelectedOnly.setReplaceAllOccurrences(false);
 		if (extractTempRefactoringSelectedOnly.checkInitialConditions(new NullProgressMonitor()).isOK()) {
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractTempRefactoringSelectedOnly.setLinkedProposalModel(linkedProposalModel);
 			extractTempRefactoringSelectedOnly.setCheckResultForCompileProblems(false);
 
@@ -594,7 +586,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
 		if (extractConstRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractConstRefactoring.setLinkedProposalModel(linkedProposalModel);
 			extractConstRefactoring.setCheckResultForCompileProblems(false);
 
@@ -622,28 +614,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
-	private static CompilationUnit findCUForMethod(CompilationUnit compilationUnit, ICompilationUnit cu, IMethodBinding methodBinding) {
-		ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getMethodDeclaration());
-		if (methodDecl == null) {
-			// is methodDecl defined in another CU?
-			ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getTypeDeclaration();
-			if (declaringTypeDecl.isFromSource()) {
-				ICompilationUnit targetCU= null;
-				try {
-					targetCU= ASTResolving.findCompilationUnitForBinding(cu, compilationUnit, declaringTypeDecl);
-				} catch (JavaModelException e) { /* can't do better */
-				}
-				if (targetCU != null) {
-					return ASTResolving.createQuickFixAST(targetCU, null);
-				}
-			}
-			return null;
-		}
-		return compilationUnit;
-	}
-
-	@SuppressWarnings("unused")
-	private static boolean getDeprecatedProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals) {
+	private static boolean getDeprecatedProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> proposals) {
+		// don't add if already added as quick fix
+		if (containsMatchingProblem(locations, IProblem.UsingDeprecatedMethod))
+			return false;
 		if (!(node instanceof MethodInvocation)) {
 			node= node.getParent();
 			if (!(node instanceof MethodInvocation)) {
@@ -651,108 +625,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		MethodInvocation methodInvocation= (MethodInvocation) node;
-		IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-		if (methodBinding == null) {
+		if (!QuickAssistProcessorUtil.isDeprecatedMethodCallWithReplacement(methodInvocation)) {
 			return false;
 		}
-		IMethod method= (IMethod)methodBinding.getJavaElement();
-		if (method == null) {
-			return false;
-		}
-		IAnnotationBinding[] annotations= methodBinding.getAnnotations();
-		for (IAnnotationBinding annotation : annotations) {
-			if (annotation.getAnnotationType().getQualifiedName().equals("java.lang.Deprecated")) { //$NON-NLS-1$
-				CompilationUnit sourceCu= (CompilationUnit)node.getRoot();
-				CompilationUnit cu= findCUForMethod(sourceCu, (ICompilationUnit)sourceCu.getJavaElement(), methodBinding);
-				if (cu == null) {
-					return false;
-				}
-				try {
-					MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cu);
-					Javadoc javadoc= methodDeclaration.getJavadoc();
-					List<TagElement> tags= javadoc.tags();
-					for (TagElement tag : tags) {
-						if (tag.getTagName().equals("@deprecated")) { //$NON-NLS-1$
-							List<IDocElement> fragments= tag.fragments();
-							if (fragments.size() < 2) {
-								return false;
-							}
-							if (fragments.get(0) instanceof TextElement textElement) {
-								String text= textElement.getText().toLowerCase().trim();
-								if (text.endsWith("use") || text.endsWith("replace by")) { //$NON-NLS-1$ //$NON-NLS-2$
-									if (fragments.get(1) instanceof TagElement tagElement) {
-										if (tagElement.getTagName().equals("@link")) { //$NON-NLS-1$
-											List<IDocElement> linkFragments= tagElement.fragments();
-											if (linkFragments.size() == 1) {
-												IDocElement linkFragment= linkFragments.get(0);
-												if (linkFragment instanceof MethodRef methodRef) {
-													IMethodBinding refBinding= (IMethodBinding) methodRef.resolveBinding();
-													if (refBinding != null) {
-														class FindNewMethodVisitor extends ASTVisitor {
-															private boolean useMethodIsUsed= false;
-															private boolean referencesPrivate= false;
-															@Override
-															public boolean visit(MethodInvocation invocation) {
-																IMethodBinding binding= invocation.resolveMethodBinding();
-																if (binding != null) {
-																	if (binding.isEqualTo(refBinding)) {
-																		useMethodIsUsed= true;
-																	}
-																}
-																return false;
-															}
-															@Override
-															public boolean visit(SimpleName name) {
-																IBinding binding= name.resolveBinding();
-																if (binding instanceof IVariableBinding varBinding
-																		&& varBinding.isField()) {
-																	int modifiers= varBinding.getModifiers();
-																	if (Modifier.isPrivate(modifiers)) {
-																		referencesPrivate= true;
-																	}
-																}
-																return false;
-															}
-														public boolean isUseMethodUsed() {
-																return useMethodIsUsed;
-															}
-															public boolean referencesPrivateField() {
-																return referencesPrivate;
-															}
-														}
-														FindNewMethodVisitor findNewMethodVisitor= new FindNewMethodVisitor();
-														methodDeclaration.accept(findNewMethodVisitor);
-														if (!findNewMethodVisitor.isUseMethodUsed()) {
-															return false;
-														}
-														if (findNewMethodVisitor.referencesPrivateField()) {
-															if (methodInvocation.getRoot() != methodDeclaration.getRoot()) {
-																return false;
-															}
-														}
-														if (proposals != null) {
-															IProposableFix fix= InlineMethodFixCore.create(FixMessages.InlineDeprecatedMethod_msg, (CompilationUnit)methodInvocation.getRoot(), methodInvocation);
-															if (fix != null) {
-																Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-																proposals.add(new FixCorrectionProposal(fix, null, IProposalRelevance.INLINE_DEPRECATED_METHOD, image, context));
-															}
-														}
-														return true;
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				} catch (JavaModelException e) {
-					// ignore
-				}
+		if (proposals != null) {
+			IProposableFix fix= InlineMethodFixCore.create(FixMessages.InlineDeprecatedMethod_msg, (CompilationUnit)methodInvocation.getRoot(), methodInvocation);
+			if (fix != null) {
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				proposals.add(new FixCorrectionProposal(fix, null, IProposalRelevance.INLINE_DEPRECATED_METHOD, image, context));
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private static boolean getConvertAnonymousToNestedProposal(IInvocationContext context, final ASTNode node, Collection<ICommandAccess> proposals) throws CoreException {
@@ -792,7 +675,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		refactoring.setClassName(i == 1 ? className : className + i);
 
 		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			refactoring.setLinkedProposalModel(linkedProposalModel);
 
 			String label= CorrectionMessages.QuickAssistProcessor_convert_anonym_to_nested;
@@ -891,7 +774,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 
 		ASTRewrite rewrite= ASTRewrite.create(methodReference.getAST());
-		LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+		LinkedProposalModelCore linkedProposalModel= createProposalModel();
 
 		LambdaExpression lambda= QuickAssistProcessorUtil.convertMethodRefernceToLambda(methodReference, functionalMethod, context.getASTRoot(), rewrite, linkedProposalModel, false);
 
@@ -1842,6 +1725,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
 		ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
+		if (index >= parameterTypes.length) {
+			// node not found
+			return false;
+		}
 		ITypeBinding[] parameterTypesFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getParameterTypes();
 		ITypeBinding returnTypeBindingFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getReturnType();
 		MethodDeclaration newMethodDeclaration= ast.newMethodDeclaration();
@@ -3063,7 +2950,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (catchExceptions.size() > 0) {
 			final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
 			final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 
 			int i= 0;
 			if (!modifyExistingTry) {
@@ -4284,7 +4171,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (refactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			String label= CorrectionMessages.QuickAssistProcessor_convert_local_to_field_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			refactoring.setLinkedProposalModel(linkedProposalModel);
 
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, context.getCompilationUnit(), refactoring, IProposalRelevance.CONVERT_LOCAL_TO_FIELD, image);
@@ -4293,6 +4180,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposals.add(proposal);
 		}
 		return true;
+	}
+
+	private static LinkedProposalModelCore createProposalModel() {
+		return new LinkedProposalModelCore();
 	}
 
 	/**

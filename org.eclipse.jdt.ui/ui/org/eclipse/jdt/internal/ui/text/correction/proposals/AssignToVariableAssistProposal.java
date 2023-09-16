@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoringCore;
@@ -303,7 +303,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			List<ITypeBinding> catchExceptions= analyzer.calculateCatchesAndRethrows(ASTNodes.filterSubtypes(allExceptions), mustRethrowList);
 			if (catchExceptions.size() > 0) {
 				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(analyzer.getEnclosingBodyDeclaration(), importRewrite);
-				LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+				LinkedProposalModelCore linkedProposalModel= createProposalModel();
 				int i= 0;
 				if (!modifyExistingTry) {
 					for (ITypeBinding mustThrow : mustRethrowList) {
@@ -356,6 +356,10 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		addLinkedPosition(rewrite.track(type), false, KEY_TYPE);
 
 		return rewrite;
+	}
+
+	protected LinkedProposalModelCore createProposalModel() {
+		return new LinkedProposalModelCore();
 	}
 
 	private Statement getCatchBody(ASTRewrite rewrite, Expression expression, String type, String name, String lineSeparator) throws CoreException {

@@ -132,8 +132,8 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -152,10 +152,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.UnsafeCheckTester;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
@@ -490,7 +490,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private CompilationUnitChange fChange;
 
-	private LinkedProposalModel fLinkedProposalModel;
+	private LinkedProposalModelCore fLinkedProposalModel;
 
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
 
@@ -572,7 +572,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 
-	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
+	public void setLinkedProposalModel(LinkedProposalModelCore linkedProposalModel) {
 		fLinkedProposalModel= linkedProposalModel;
 	}
 
@@ -723,8 +723,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (decl instanceof MethodDeclaration) {
 			final IMethodBinding method= ((MethodDeclaration) decl).resolveBinding();
 			final String label= method != null
-					? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED)
-					: BasicElementLabels.getJavaElementName('{' + JavaElementLabels.ELLIPSIS_STRING + '}');
+					? BindingLabelProviderCore.getBindingLabel(method, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)
+					: BasicElementLabels.getJavaElementName('{' + JavaElementLabelsCore.ELLIPSIS_STRING + '}');
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_destination_pattern, label));
 		}
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_expression_pattern, BasicElementLabels.getJavaCodeString(expression)));
@@ -1169,15 +1169,15 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		if (fLinkedProposalModel != null) {
 			ASTRewrite rewrite= fCURewrite.getASTRewrite();
-			LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
+			LinkedProposalPositionGroupCore nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
 			nameGroup.addPosition(rewrite.track(vdf.getName()), true);
 
 			String[] nameSuggestions= guessTempNamesWithContext();
 			if (nameSuggestions.length > 0 && !nameSuggestions[0].equals(fTempName)) {
-				nameGroup.addProposal(fTempName, null, nameSuggestions.length + 1);
+				nameGroup.addProposal(fTempName, nameSuggestions.length + 1);
 			}
 			for (int i= 0; i < nameSuggestions.length; i++) {
-				nameGroup.addProposal(nameSuggestions[i], null, nameSuggestions.length - i);
+				nameGroup.addProposal(nameSuggestions[i], nameSuggestions.length - i);
 			}
 		}
 		return vds;
@@ -1422,7 +1422,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			}
 		}
 		if (fLinkedProposalModel != null) {
-			LinkedProposalPositionGroup typeGroup= fLinkedProposalModel.getPositionGroup(KEY_TYPE, true);
+			LinkedProposalPositionGroupCore typeGroup= fLinkedProposalModel.getPositionGroup(KEY_TYPE, true);
 			typeGroup.addPosition(rewrite.track(resultingType), false);
 			if (typeBinding != null) {
 				ITypeBinding[] relaxingTypes= ASTResolving.getNarrowingTypes(ast, typeBinding);

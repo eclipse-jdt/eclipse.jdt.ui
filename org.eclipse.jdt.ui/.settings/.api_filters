@@ -16,6 +16,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/surround/SurroundWithTryCatchAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchAnalyzer">
+        <filter comment="Support new TypePattern" id="640712815">
+            <message_arguments>
+                <message_argument value="TypePattern"/>
+                <message_argument value="SurroundWithTryCatchAnalyzer"/>
+                <message_argument value="getPatternVariable()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="internal compatibility/org/eclipse/jdt/internal/corext/SourceRange.java" type="org.eclipse.jdt.internal.corext.SourceRange">
         <filter id="574619656">
             <message_arguments>

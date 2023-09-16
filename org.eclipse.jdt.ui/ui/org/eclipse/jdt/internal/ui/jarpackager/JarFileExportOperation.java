@@ -87,6 +87,7 @@ import org.eclipse.jdt.ui.jarpackager.IJarBuilderExtension;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
@@ -1067,7 +1068,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fParentShell != null) {
 			final boolean[] res= { false };
 			fParentShell.getDisplay().syncExec(() -> {
-				RefactoringSaveHelper refactoringSaveHelper= new RefactoringSaveHelper(RefactoringSaveHelper.SAVE_ALL_ALWAYS_ASK);
+				RefactoringSaveHelper refactoringSaveHelper= new RefactoringSaveHelper(IRefactoringSaveModes.SAVE_ALL_ALWAYS_ASK);
 				res[0]= refactoringSaveHelper.saveEditors(fParentShell);
 				fFilesSaved= refactoringSaveHelper.didSaveFiles();
 			});

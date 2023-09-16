@@ -13,12 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.surround;
 
-import org.eclipse.jface.text.ITextSelection;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 
 /**
@@ -43,17 +40,13 @@ public class SurroundWithTryWithResourcesRefactoring extends SurroundWithTryWith
 		return new SurroundWithTryWithResourcesRefactoring(cu, Selection.createFromStartLength(offset, length));
 	}
 
-	public static SurroundWithTryWithResourcesRefactoring create(ICompilationUnit cu, ITextSelection selection) {
-		return new SurroundWithTryWithResourcesRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()));
-	}
-
 	@Override
 	protected LinkedProposalModelCore createLinkedProposalModel() {
-		return new LinkedProposalModel();
+		return new LinkedProposalModelCore();
 	}
 
-	public LinkedProposalModel getLinkedProposalModel() {
-		return (LinkedProposalModel)getLinkedProposalModelCore();
+	public LinkedProposalModelCore getLinkedProposalModel() {
+		return getLinkedProposalModelCore();
 	}
 
 }

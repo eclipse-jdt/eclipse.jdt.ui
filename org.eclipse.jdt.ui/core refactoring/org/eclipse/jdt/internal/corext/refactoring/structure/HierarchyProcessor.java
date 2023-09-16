@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2021 IBM Corporation and others.
+ * Copyright (c) 2006, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,20 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -67,13 +81,15 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -89,18 +105,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
 
 /**
  * Partial implementation of a hierarchy refactoring processor used in pull up,
@@ -182,7 +188,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 							boolean reported= false;
 							final IExtendedModifier modifier= iterator.next();
 							if (!reported && modifier.isAnnotation()) {
-								status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_incompatible_langauge_constructs, new String[]{JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_DEFAULT)}), JavaStatusContext.create(member)));
+								status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_incompatible_langauge_constructs, new String[]{JavaElementLabelsCore.getTextLabel(member, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), JavaElementLabelsCore.getTextLabel(destination, JavaElementLabelsCore.ALL_DEFAULT)}), JavaStatusContext.create(member)));
 								reported= true;
 							}
 						}
@@ -194,7 +200,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 					final IMethod method= (IMethod) member;
 					try {
 						if (Flags.isVarargs(method.getFlags())) {
-							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_incompatible_language_constructs1, new String[]{JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_DEFAULT)}), JavaStatusContext.create(member)));
+							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_incompatible_language_constructs1, new String[]{JavaElementLabelsCore.getTextLabel(member, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), JavaElementLabelsCore.getTextLabel(destination, JavaElementLabelsCore.ALL_DEFAULT)}), JavaStatusContext.create(member)));
 						}
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
@@ -267,7 +273,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		if (member instanceof IType
 				|| member instanceof IMethod
 				|| member instanceof IField) {
-			return JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED);
+			return JavaElementLabelsCore.getTextLabel(member, JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
 		} else if (member instanceof IInitializer)
 			return RefactoringCoreMessages.HierarchyRefactoring_initializer;
 		Assert.isTrue(false);
@@ -549,7 +555,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 2);
 			final RefactoringStatus result= new RefactoringStatus();
-			final String message= Messages.format(RefactoringCoreMessages.HierarchyRefactoring_gets_instantiated, new Object[] { JavaElementLabels.getTextLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+			final String message= Messages.format(RefactoringCoreMessages.HierarchyRefactoring_gets_instantiated, new Object[] { JavaElementLabelsCore.getTextLabel(type, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
 
 			for (SearchResultGroup group : ConstructorReferenceFinder.getConstructorReferences(type, fOwner, new SubProgressMonitor(monitor, 1), result)) {
 				ICompilationUnit unit= group.getCompilationUnit();
@@ -644,7 +650,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	public IType getDeclaringType() {
 		if (fCachedDeclaringType != null)
 			return fCachedDeclaringType;
-		fCachedDeclaringType= RefactoringAvailabilityTester.getTopLevelType(fMembersToMove);
+		fCachedDeclaringType= RefactoringAvailabilityTesterCore.getTopLevelType(fMembersToMove);
 		if (fCachedDeclaringType == null)
 			fCachedDeclaringType= fMembersToMove[0].getDeclaringType();
 		return fCachedDeclaringType;

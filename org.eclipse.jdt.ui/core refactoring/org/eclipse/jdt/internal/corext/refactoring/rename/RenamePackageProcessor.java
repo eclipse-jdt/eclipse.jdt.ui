@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,8 +37,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.jface.util.Util;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -82,7 +80,7 @@ import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -108,10 +106,11 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.JFaceStringUtility;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements
 		IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, IResourceMapper, IJavaElementMapper {
@@ -161,7 +160,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 
 	@Override
 	public boolean isApplicable() throws CoreException {
-		return RefactoringAvailabilityTester.isRenameAvailable(fPackage);
+		return RefactoringAvailabilityTesterCore.isRenameAvailable(fPackage);
 	}
 
 	@Override
@@ -203,7 +202,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 
 	@Override
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_ALL;
+		return IRefactoringSaveModes.SAVE_ALL;
 	}
 
 	//---- ITextUpdating -------------------------------------------------
@@ -337,7 +336,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				for (int i= 0; i < oldParameterTypes.length; i++) {
 					newparams[i]= oldParameterTypes[i];
 					for (int j= 0; j < possibleOldSigs.length; j++) {
-						newparams[i]= Util.replaceAll(newparams[i], possibleOldSigs[j], possibleNewSigs[j]);
+						newparams[i]= JFaceStringUtility.replaceAll(newparams[i], possibleOldSigs[j], possibleNewSigs[j]);
 					}
 				}
 				return newparams;
@@ -535,7 +534,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		Set<String> topLevelTypeNames= getTopLevelTypeNames();
 		for (IPackageFragmentRoot root : fPackage.getJavaProject().getPackageFragmentRoots()) {
 			if (! isPackageNameOkInRoot(newName, root)) {
-				String rootLabel = JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
+				String rootLabel = JavaElementLabelsCore.getElementLabel(root, JavaElementLabelsCore.ALL_DEFAULT);
 				String newPackageName= BasicElementLabels.getJavaElementName(getNewElementName());
 				String message= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_aleady_exists, new Object[]{ newPackageName, rootLabel});
 				status.merge(RefactoringStatus.createWarningStatus(message));
@@ -635,7 +634,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	}
 
 	private static String getElementLabel(IJavaElement javaElement) {
-		return JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_DEFAULT);
+		return JavaElementLabelsCore.getElementLabel(javaElement, JavaElementLabelsCore.ALL_DEFAULT);
 	}
 
 	@Override

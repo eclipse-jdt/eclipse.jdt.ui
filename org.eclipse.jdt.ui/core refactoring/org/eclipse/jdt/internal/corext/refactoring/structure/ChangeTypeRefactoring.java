@@ -120,10 +120,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 
 /**
  * @author tip
@@ -506,11 +506,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 			if (javaProject != null)
 				project= javaProject.getElementName();
 			final String description= RefactoringCoreMessages.ChangeTypeRefactoring_descriptor_description_short;
-			final String header= Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(fSelectionBinding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fSelectedType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+			final String header= Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_descriptor_description, new String[] { BindingLabelProviderCore.getBindingLabel(fSelectionBinding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), BindingLabelProviderCore.getBindingLabel(fSelectedType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_original_element_pattern, BindingLabelProvider.getBindingLabel(fSelectionBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_original_type_pattern, BindingLabelProvider.getBindingLabel(getOriginalType(), JavaElementLabels.ALL_FULLY_QUALIFIED)));
-			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_refactored_type_pattern, BindingLabelProvider.getBindingLabel(fSelectedType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_original_element_pattern, BindingLabelProviderCore.getBindingLabel(fSelectionBinding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_original_type_pattern, BindingLabelProviderCore.getBindingLabel(getOriginalType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeTypeRefactoring_refactored_type_pattern, BindingLabelProviderCore.getBindingLabel(fSelectedType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 			final GeneralizeTypeDescriptor descriptor= RefactoringSignatureDescriptorFactory.createGeneralizeTypeDescriptor(project, description, comment.asString(), arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCu));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.toString(fSelectionStart) + " " + Integer.toString(fSelectionLength)); //$NON-NLS-1$

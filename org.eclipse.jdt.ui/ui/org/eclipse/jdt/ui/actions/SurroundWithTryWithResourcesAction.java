@@ -133,7 +133,7 @@ public class SurroundWithTryWithResourcesAction extends SelectionDispatchAction 
 	}
 
 	SurroundWithTryWithResourcesRefactoring createRefactoring(ITextSelection selection, ICompilationUnit cu) {
-		return SurroundWithTryWithResourcesRefactoring.create(cu, selection);
+		return SurroundWithTryWithResourcesRefactoring.create(cu, selection.getOffset(), selection.getLength());
 	}
 
 	@Override

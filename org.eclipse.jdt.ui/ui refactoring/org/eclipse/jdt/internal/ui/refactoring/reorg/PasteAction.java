@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -140,6 +140,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -157,7 +158,7 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
@@ -260,8 +261,8 @@ public class PasteAction extends SelectionDispatchAction{
 		try {
 			TransferData[] availableTypes= clipboard.getAvailableTypes();
 			List<?> elements= selection.toList();
-			IResource[] resources= ReorgUtils.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
+			IResource[] resources= ReorgUtilsCore.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtilsCore.getJavaElements(elements);
 			IWorkingSet[] workingSets= ReorgUtils.getWorkingSets(elements);
 			for (Paster paster : createEnabledPasters(availableTypes, clipboard)) {
 				try {
@@ -1158,7 +1159,7 @@ public class PasteAction extends SelectionDispatchAction{
 			IJavaElement[] javaElements= getClipboardJavaElements(availableTypes);
 			if (javaElements != null) {
 				for (IJavaElement javaElement : javaElements) {
-					if (!ReorgUtils.containsElementOrParent(elements, javaElement)) {
+					if (!ReorgUtilsCore.containsElementOrParent(elements, javaElement)) {
 						elements.add(javaElement);
 					}
 				}
@@ -1167,13 +1168,13 @@ public class PasteAction extends SelectionDispatchAction{
 			if (resources != null) {
 				List<IJavaElement> realJavaElements= new ArrayList<>();
 				List<IResource> realResource= new ArrayList<>();
-				ReorgUtils.splitIntoJavaElementsAndResources(resources, realJavaElements, realResource);
+				ReorgUtilsCore.splitIntoJavaElementsAndResources(resources, realJavaElements, realResource);
 				for (IJavaElement element : realJavaElements) {
-					if (!ReorgUtils.containsElementOrParent(elements, element))
+					if (!ReorgUtilsCore.containsElementOrParent(elements, element))
 						elements.add(element);
 				}
 				for (IResource element : realResource) {
-					if (!ReorgUtils.containsElementOrParent(elements, element))
+					if (!ReorgUtilsCore.containsElementOrParent(elements, element))
 						elements.add(element);
 				}
 			}
@@ -1232,7 +1233,7 @@ public class PasteAction extends SelectionDispatchAction{
 			if (resources != null)
 				result.addAll(Arrays.asList(resources));
 			if (javaElements != null)
-				result.addAll(Arrays.asList(ReorgUtils.getNotNulls(ReorgUtils.getResources(javaElements))));
+				result.addAll(Arrays.asList(ReorgUtilsCore.getNotNulls(ReorgUtilsCore.getResources(javaElements))));
 			Assert.isTrue(result.size() > 0);
 			return result.toArray(new IProject[result.size()]);
 		}
@@ -1246,7 +1247,7 @@ public class PasteAction extends SelectionDispatchAction{
 			IJavaElement[] javaElements= getClipboardJavaElements(availableDataTypes);
 			return 	javaElements != null &&
 					javaElements.length != 0 &&
-					! ReorgUtils.hasElementsNotOfType(javaElements, IJavaElement.JAVA_PROJECT);
+					! ReorgUtilsCore.hasElementsNotOfType(javaElements, IJavaElement.JAVA_PROJECT);
 		}
 
 		private boolean canPasteSimpleProjects(TransferData[] availableDataTypes) {
@@ -1449,7 +1450,7 @@ public class PasteAction extends SelectionDispatchAction{
 			IJavaElement ancestorType= element.getAncestor(IJavaElement.TYPE);
 			if (ancestorType != null)
 				return ancestorType;
-			return ReorgUtils.getCompilationUnit(element);
+			return ReorgUtilsCore.getCompilationUnit(element);
 		}
 		private static class ReorgTypedSourcePasteStarter {
 
@@ -1473,7 +1474,7 @@ public class PasteAction extends SelectionDispatchAction{
 
 			public void run(Shell parent) throws InterruptedException, InvocationTargetException {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
-				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), RefactoringSaveHelper.SAVE_NOTHING, parent, context).perform(false, false);
+				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), IRefactoringSaveModes.SAVE_NOTHING, parent, context).perform(false, false);
 			}
 		}
 		private static class PasteTypedSourcesRefactoring extends Refactoring {
@@ -1488,7 +1489,7 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 			public RefactoringStatus setDestination(IJavaElement destination) {
 				fDestination= destination;
-				if (ReorgUtils.getCompilationUnit(destination) == null)
+				if (ReorgUtilsCore.getCompilationUnit(destination) == null)
 					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.PasteAction_wrong_destination);
 				if (! destination.exists())
 					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.PasteAction_element_doesnot_exist);
@@ -1657,7 +1658,7 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 
 			private ICompilationUnit getDestinationCu() {
-				return ReorgUtils.getCompilationUnit(fDestination);
+				return ReorgUtilsCore.getCompilationUnit(fDestination);
 			}
 
 			@Override

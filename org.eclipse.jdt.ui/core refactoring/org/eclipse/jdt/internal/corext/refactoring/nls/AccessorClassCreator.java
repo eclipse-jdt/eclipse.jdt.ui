@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
-import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManagerCore;
 
 public class AccessorClassCreator {
 
@@ -88,7 +88,7 @@ public class AccessorClassCreator {
 	private String createAccessorCUSource(IProgressMonitor pm) throws CoreException {
 		IProject project= getFileHandle(fAccessorPath).getProject();
 		String lineDelimiter= StubUtility.getLineDelimiterPreference(project);
-		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, lineDelimiter, FormatterProfileManager.getProjectSettings(fCu.getJavaProject()));
+		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, lineDelimiter, FormatterProfileManagerCore.getProjectSettings(fCu.getJavaProject()));
 	}
 
 	private static IFile getFileHandle(IPath filePath) {
