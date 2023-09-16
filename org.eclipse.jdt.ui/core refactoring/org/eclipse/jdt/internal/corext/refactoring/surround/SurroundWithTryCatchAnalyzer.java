@@ -91,7 +91,8 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 			@Override
 			public boolean visit(PatternInstanceofExpression node) {
 				SingleVariableDeclaration svd= node.getRightOperand();
-				if (node.getAST().apiLevel() >= AST.JLS20) {
+				AST ast= node.getAST();
+				if (ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled() || ast.apiLevel() > AST.JLS20) {
 					Pattern p= node.getPattern();
 					if (p instanceof TypePattern typePattern) {
 						svd= typePattern.getPatternVariable();

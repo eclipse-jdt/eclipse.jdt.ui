@@ -207,7 +207,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			if (Modifier.isFinal(statementToRemove.getModifiers())) {
 				newSVDecl.modifiers().add(ast.newModifier(ModifierKeyword.fromFlagValue(Modifier.FINAL)));
 			}
-			if (ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled() || ast.apiLevel() > AST.JLS20) {
+			if ((ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled()) || ast.apiLevel() > AST.JLS20) {
 				TypePattern newTypePattern= ast.newTypePattern();
 				newTypePattern.setPatternVariable(newSVDecl);
 				newInstanceof.setPattern(newTypePattern);
