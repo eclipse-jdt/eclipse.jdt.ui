@@ -7,7 +7,7 @@ public class A extends RelOptCost{
 
 	@Override
 	public RelOptCost computeSelfCost(int a1, int b1) {
-		RelOptCost computeSelfCost = super.computeSelfCost(a1, b1);
+		RelOptCost computeSelfCost= super.computeSelfCost(a1, b1);
 		return computeSelfCost.multiplyBy(1);
 	}
 
@@ -20,7 +20,7 @@ class A1 extends RelOptCost{
 
 	@Override
 	public RelOptCost computeSelfCost(int a1, int b1) {
-		RelOptCost computeSelfCost = super.computeSelfCost(a1, b1);
+		RelOptCost computeSelfCost= super.computeSelfCost(a1, b1);
 		return computeSelfCost.multiplyBy(9);
 	}
 }
@@ -31,7 +31,7 @@ class A2 extends RelOptCost{
 
 	@Override
 	public RelOptCost computeSelfCost(int a1, int b1) {
-		RelOptCost computeSelfCost = super.computeSelfCost(a1, b1);
+		RelOptCost computeSelfCost= super.computeSelfCost(a1, b1);
 		return computeSelfCost.multiplyBy(2);
 	}
 }
@@ -42,7 +42,7 @@ class A3 extends RelOptCost{
 
 	@Override
 	public RelOptCost computeSelfCost(int a1, int b1) {
-		RelOptCost computeSelfCost = super.computeSelfCost(a1, b1);
+		RelOptCost computeSelfCost= super.computeSelfCost(a1, b1);
 		System.out.println(computeSelfCost);
 		return computeSelfCost.multiplyBy(5);
 	}
