@@ -241,7 +241,7 @@ public class NullAnnotationsRewriteOperations {
 	static class ParameterAnnotationRewriteOperation extends SignatureAnnotationRewriteOperation {
 
 		static class IndexedParameter {
-			ASTNode declaration; // MethodDeclaration of LambdaExpression
+			ASTNode declaration; // MethodDeclaration or LambdaExpression
 			int index;
 			String name;
 			IndexedParameter(ASTNode declaration, int index, String name) {
