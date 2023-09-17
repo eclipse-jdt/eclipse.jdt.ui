@@ -865,6 +865,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				//$FALL-THROUGH$
 			case IProblem.RequiredNonNullButProvidedNull:
 			case IProblem.RequiredNonNullButProvidedPotentialNull:
+			case IProblem.NullityUncheckedTypeAnnotation:
 			case IProblem.ParameterLackingNonNullAnnotation:
 			case IProblem.ParameterLackingNullableAnnotation:
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.LOCAL, proposals);

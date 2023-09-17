@@ -241,9 +241,11 @@ public class NullAnnotationsRewriteOperations {
 	static class ParameterAnnotationRewriteOperation extends SignatureAnnotationRewriteOperation {
 
 		static class IndexedParameter {
+			ASTNode declaration; // MethodDeclaration or LambdaExpression
 			int index;
 			String name;
-			IndexedParameter(int index, String name) {
+			IndexedParameter(ASTNode declaration, int index, String name) {
+				this.declaration= declaration;
 				this.index= index;
 				this.name= name;
 			}
@@ -562,6 +564,8 @@ public class NullAnnotationsRewriteOperations {
 					if (methodDecl == null)
 						return null;
 					if (fAffectsParameter) {
+						if (methodBinding.isVarargs() && paramIdx >= methodDecl.parameters().size()-1)
+							return null; // cowardly refuse to add annotation, which would need to be placed on a type detail
 						String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_target_method_parameter_nullness,
 								new Object[] {methodInvocation.getName(), annotationNameLabel});
 						return new ParameterAnnotationRewriteOperation(methodDecl, paramIdx, message, this);
@@ -582,14 +586,14 @@ public class NullAnnotationsRewriteOperations {
 						// problems regarding the argument declaration:
 						ParameterAnnotationRewriteOperation.IndexedParameter parameter= findParameterDeclaration(selectedNode);
 						if (parameter != null) {
-							switch (declaringNode.getNodeType()) {
+							switch (parameter.declaration.getNodeType()) {
 								case ASTNode.METHOD_DECLARATION:
-									MethodDeclaration method= (MethodDeclaration) declaringNode;
+									MethodDeclaration method= (MethodDeclaration) parameter.declaration;
 									String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
 											new Object[] {parameter.name, annotationNameLabel});
 									return new ParameterAnnotationRewriteOperation(method, parameter.index, message, this);
 								case ASTNode.LAMBDA_EXPRESSION:
-									LambdaExpression lambda = (LambdaExpression) declaringNode;
+									LambdaExpression lambda= (LambdaExpression) parameter.declaration;
 									// TODO: specific message for lambda
 									message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
 											new Object[] {parameter.name, annotationNameLabel});
@@ -599,6 +603,7 @@ public class NullAnnotationsRewriteOperations {
 							}
 						}
 						break;
+					case IProblem.NullityUncheckedTypeAnnotation:
 					case IProblem.SpecdNonNullLocalVariableComparisonYieldsFalse:
 					case IProblem.RedundantNullCheckOnSpecdNonNullLocalVariable:
 					case IProblem.RequiredNonNullButProvidedNull:
@@ -613,14 +618,14 @@ public class NullAnnotationsRewriteOperations {
 							if (selectedNode instanceof SimpleName) {
 								parameter= findReferencedParameter(selectedNode);
 								if (parameter != null) {
-									switch (declaringNode.getNodeType()) {
+									switch (parameter.declaration.getNodeType()) {
 										case ASTNode.METHOD_DECLARATION:
-											MethodDeclaration declaration= (MethodDeclaration) declaringNode;
+											MethodDeclaration declaration= (MethodDeclaration) parameter.declaration;
 											String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
 													new Object[] { parameter.name, annotationNameLabel });
 											return new ParameterAnnotationRewriteOperation(declaration, parameter.index, message, this);
 										case ASTNode.LAMBDA_EXPRESSION:
-											LambdaExpression lambda= (LambdaExpression) declaringNode;
+											LambdaExpression lambda= (LambdaExpression) parameter.declaration;
 											// TODO: appropriate message for lambda
 											message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
 													new Object[] { parameter.name, annotationNameLabel });
@@ -727,8 +732,11 @@ public class NullAnnotationsRewriteOperations {
 				StructuralPropertyDescriptor locationInParent= argDecl.getLocationInParent();
 				if (!locationInParent.isChildListProperty())
 					return null;
-				List<?> containingList= (List<?>) argDecl.getParent().getStructuralProperty(locationInParent);
-				return new ParameterAnnotationRewriteOperation.IndexedParameter(containingList.indexOf(argDecl), argDecl.getName().getIdentifier());
+				ASTNode declaration= argDecl.getParent();
+				if (declaration != null && (declaration.getNodeType() == ASTNode.METHOD_DECLARATION || declaration.getNodeType() == ASTNode.LAMBDA_EXPRESSION)) {
+					List<?> containingList= (List<?>) declaration.getStructuralProperty(locationInParent);
+					return new ParameterAnnotationRewriteOperation.IndexedParameter(declaration, containingList.indexOf(argDecl), argDecl.getName().getIdentifier());
+				}
 			}
 			return null;
 		}
@@ -753,8 +761,9 @@ public class NullAnnotationsRewriteOperations {
 						if (parameters != null) {
 							for (int i= 0; i < parameters.size(); i++) {
 								VariableDeclaration parameter= (VariableDeclaration) parameters.get(i);
-								if (parameter.resolveBinding() == binding)
-									return new ParameterAnnotationRewriteOperation.IndexedParameter(i, binding.getName());
+								if (parameter.resolveBinding() == binding) {
+									return new ParameterAnnotationRewriteOperation.IndexedParameter(current, i, binding.getName());
+								}
 							}
 						}
 						current= current.getParent();
