@@ -52,7 +52,6 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -69,6 +68,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry.CleanUpTabPageDescriptor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
@@ -304,7 +304,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 					new ColumnWeightData(1, true)
 			};
 			settingsField.setTableColumns(new ListDialogField.ColumnsDescription(columns , headerNames, true));
-			settingsField.setViewerComparator(new ViewerComparator());
+			settingsField.setViewerComparator(new JavaElementComparator());
 
 			settingsField.doFillIntoGrid(composite, 3);
 
