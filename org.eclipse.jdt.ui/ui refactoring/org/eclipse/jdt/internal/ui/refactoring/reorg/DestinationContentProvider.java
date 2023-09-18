@@ -14,9 +14,12 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -104,6 +107,13 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 				return members;
 			boolean isFolderOnClasspath = javaProject.isOnClasspath(container);
 			List<IResource> nonJavaResources= new ArrayList<>();
+			Set<IPath> classRootPaths= new HashSet<>();
+			for (IPackageFragmentRoot classpathRoot : javaProject.getAllPackageFragmentRoots()) {
+				IPath classRootPath= classpathRoot.getPath();
+				if (classRootPath != null) {
+					classRootPaths.add(classRootPath);
+				}
+			}
 			// Can be on classpath but as a member of non-java resource folder
 			for (IResource member : members) {
 				// A resource can also be a java element
@@ -111,7 +121,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 				// We therefore exclude Java elements from the list
 				// of non-Java resources.
 				if (isFolderOnClasspath) {
-					if (javaProject.findPackageFragmentRoot(member.getFullPath()) == null) {
+					if (!classRootPaths.contains(member.getFullPath())) {
 						nonJavaResources.add(member);
 					}
 				} else if (!javaProject.isOnClasspath(member)) {

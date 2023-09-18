@@ -15,9 +15,12 @@ package org.eclipse.jdt.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -393,6 +396,13 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			return members;
 		boolean isFolderOnClasspath = javaProject.isOnClasspath(folder);
 		List<IResource> nonJavaResources= new ArrayList<>();
+		Set<IPath> classRootPaths= new HashSet<>();
+		for (IPackageFragmentRoot classpathRoot : javaProject.getAllPackageFragmentRoots()) {
+			IPath classRootPath= classpathRoot.getPath();
+			if (classRootPath != null) {
+				classRootPaths.add(classRootPath);
+			}
+		}
 		// Can be on classpath but as a member of non-java resource folder
 		for (IResource member : members) {
 			// A resource can also be a java element
@@ -400,7 +410,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			// We therefore exclude Java elements from the list
 			// of non-Java resources.
 			if (isFolderOnClasspath) {
-				if (javaProject.findPackageFragmentRoot(member.getFullPath()) == null) {
+				if (!classRootPaths.contains(member.getFullPath())) {
 					nonJavaResources.add(member);
 				}
 			} else if (!javaProject.isOnClasspath(member)) {
@@ -417,7 +427,6 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		}
 		return nonJavaResources.toArray();
 	}
-
 	/**
 	 * Tests if the a Java element delta contains a class path change
 	 *
