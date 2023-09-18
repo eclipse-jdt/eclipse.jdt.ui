@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,19 +10,15 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Red Hat Inc. - modified to use PotentialProgrammingProblemsFixCore
+ *     Red Hat Inc. - moved constant from CleanUpPreferenceUtil into core
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import org.eclipse.jdt.core.dom.CompilationUnit;
+/**
+ * Constant moved from CleanUpPreferenceUtil
+ */
+public class CleanUpPreferenceUtilCore {
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
-
-public class PotentialProgrammingProblemsFix {
-
-	public static IProposableFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocation problem) {
-		return PotentialProgrammingProblemsFixCore.createMissingSerialVersionFixes(compilationUnit, problem);
-	}
+	public static final String SAVE_PARTICIPANT_KEY_PREFIX= "sp_"; //$NON-NLS-1$
 
 }

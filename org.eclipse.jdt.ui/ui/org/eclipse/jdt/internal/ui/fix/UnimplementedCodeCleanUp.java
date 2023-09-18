@@ -39,7 +39,6 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 
@@ -128,7 +127,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 
 		HashSet<ASTNode> types= new HashSet<>();
 		for (IProblemLocation location : locations) {
-			ASTNode type= UnimplementedCodeFixCore.getSelectedTypeNode(compilationUnit, (IProblemLocationCore) location);
+			ASTNode type= UnimplementedCodeFixCore.getSelectedTypeNode(compilationUnit, location);
 			if (type != null) {
 				types.add(type);
 			}

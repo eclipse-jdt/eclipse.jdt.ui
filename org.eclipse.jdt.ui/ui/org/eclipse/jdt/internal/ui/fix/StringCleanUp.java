@@ -35,7 +35,6 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Create fixes which can solve problems in connection with Strings
@@ -84,7 +83,7 @@ public class StringCleanUp extends AbstractMultiFix {
 
 		List<IProblemLocationCore> coreProblems= new ArrayList<>();
 		for (IProblemLocation problem : problems) {
-			coreProblems.add((ProblemLocation)problem);
+			coreProblems.add(problem);
 		}
 		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),

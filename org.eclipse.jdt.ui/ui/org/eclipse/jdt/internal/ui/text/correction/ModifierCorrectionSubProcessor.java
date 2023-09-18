@@ -839,7 +839,7 @@ public class ModifierCorrectionSubProcessor {
 	}
 
 	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		IProposableFix fix= Java50FixCore.createAddOverrideAnnotationFix(context.getASTRoot(), (IProblemLocationCore) problem);
+		IProposableFix fix= Java50FixCore.createAddOverrideAnnotationFix(context.getASTRoot(),  problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new Hashtable<>();
@@ -852,7 +852,7 @@ public class ModifierCorrectionSubProcessor {
 	}
 
 	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		IProposableFix fix= Java50FixCore.createAddDeprectatedAnnotation(context.getASTRoot(), (IProblemLocationCore) problem);
+		IProposableFix fix= Java50FixCore.createAddDeprectatedAnnotation(context.getASTRoot(),  problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new Hashtable<>();

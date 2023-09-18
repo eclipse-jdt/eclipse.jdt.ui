@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - Moved from jdt.ui plugin
  *******************************************************************************/
 package org.eclipse.jdt.ui.refactoring;
 
@@ -33,7 +34,7 @@ import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
  *
  * @see org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds
  *
- * @since 3.0
+ * @since 1.20
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @noextend This interface is not intended to be extended by clients.

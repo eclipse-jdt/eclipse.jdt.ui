@@ -20,8 +20,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-
 /**
  * An extension of {@link AbstractCleanUpCoreWrapper} for cases where the wrapped
  * cleanup extends {@link AbstractMultiFixCore}
@@ -41,6 +39,6 @@ public class AbstractMultiFixCoreWrapper<T extends AbstractMultiFixCore> extends
 
 	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
-		return cleanUpCore.canFix(compilationUnit, (ProblemLocation)problem);
+		return cleanUpCore.canFix(compilationUnit, problem);
 	}
 }

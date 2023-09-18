@@ -31,7 +31,6 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Create fixes which can remove unused code
@@ -76,7 +75,7 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 		if (problems != null) {
 			List<IProblemLocationCore> problemsList= new ArrayList<>();
 			for (IProblemLocation problem : problems) {
-				problemsList.add((ProblemLocation)problem);
+				problemsList.add(problem);
 			}
 			problemsCore= problemsList.toArray(new IProblemLocationCore[0]);
 		}
@@ -96,7 +95,7 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 
 	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
-		IProblemLocationCore problemLocation= (ProblemLocation)problem;
+		IProblemLocationCore problemLocation= problem;
 		return cleanUpCore.canFix(compilationUnit, problemLocation);
 	}
 

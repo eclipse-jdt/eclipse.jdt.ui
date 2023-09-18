@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.core.manipulation
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.core.manipulation; singleton:=true
-Bundle-Version: 1.19.200.qualifier
+Bundle-Version: 1.20.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin
 Bundle-Localization: plugin
@@ -64,15 +64,17 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.internal.ui.dialogs;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.junit,org.eclipse.jdt.ui.unittest.junit",
  org.eclipse.jdt.internal.ui.fix;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.javaeditor;x-friends:="org.eclipse.jdt.debug.ui,org.eclipse.jdt.junit,org.eclipse.jdt.ui",
+ org.eclipse.jdt.internal.ui.javaeditor.saveparticipant,
  org.eclipse.jdt.internal.ui.model;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.preferences;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.preferences.formatter;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.propertiesfileeditor;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.refactoring.contentassist;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.text;x-friends:="org.eclipse.jdt.ui",
- org.eclipse.jdt.internal.ui.text.correction;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.debug.ui",
+ org.eclipse.jdt.internal.ui.text.correction;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.debug.ui,org.eclipse.jdt.junit",
  org.eclipse.jdt.internal.ui.text.correction.proposals;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.text.template.contentassist;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.util;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.astview,org.eclipse.jdt.junit.core",
- org.eclipse.jdt.ui.refactoring;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui"
+ org.eclipse.jdt.ui.refactoring;manipulation=split;mandatory:=manipulation,
+ org.eclipse.jdt.ui.text.java;manipulation=split;mandatory:=manipulation
 Bundle-RequiredExecutionEnvironment: JavaSE-17

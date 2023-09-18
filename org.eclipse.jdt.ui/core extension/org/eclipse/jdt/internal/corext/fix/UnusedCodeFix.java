@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,7 +25,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Fix which removes unused code.
@@ -65,7 +64,7 @@ public class UnusedCodeFix implements IProposableFix {
 	}
 
 	public static UnusedCodeFix createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		return wrap(UnusedCodeFixCore.createRemoveUnusedImportFix(compilationUnit, (ProblemLocation)problem));
+		return wrap(UnusedCodeFixCore.createRemoveUnusedImportFix(compilationUnit, problem));
 	}
 
 	private static UnusedCodeFix wrap(UnusedCodeFixCore coreFix) {
@@ -73,19 +72,19 @@ public class UnusedCodeFix implements IProposableFix {
 	}
 
 	public static UnusedCodeFix createUnusedMemberFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean removeAllAssignements) {
-		return wrap(UnusedCodeFixCore.createUnusedMemberFix(compilationUnit, (ProblemLocation)problem, removeAllAssignements));
+		return wrap(UnusedCodeFixCore.createUnusedMemberFix(compilationUnit, problem, removeAllAssignements));
 	}
 
 	public static UnusedCodeFix createUnusedParameterFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		return wrap(UnusedCodeFixCore.createUnusedParameterFix(compilationUnit, (ProblemLocation)problem));
+		return wrap(UnusedCodeFixCore.createUnusedParameterFix(compilationUnit, problem));
 	}
 
 	public static UnusedCodeFix createUnusedTypeParameterFix(CompilationUnit compilationUnit, IProblemLocation problemLoc) {
-		return wrap(UnusedCodeFixCore.createUnusedTypeParameterFix(compilationUnit, (ProblemLocation)problemLoc));
+		return wrap(UnusedCodeFixCore.createUnusedTypeParameterFix(compilationUnit, problemLoc));
 	}
 
 	public static UnusedCodeFix createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		return wrap(UnusedCodeFixCore.createRemoveUnusedCastFix(compilationUnit, (ProblemLocation)problem));
+		return wrap(UnusedCodeFixCore.createRemoveUnusedCastFix(compilationUnit, problem));
 	}
 
 }

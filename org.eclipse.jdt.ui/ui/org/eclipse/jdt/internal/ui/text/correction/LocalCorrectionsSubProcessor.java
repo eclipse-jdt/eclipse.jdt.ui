@@ -617,7 +617,7 @@ public class LocalCorrectionsSubProcessor {
 		};
 		proposals.add(proposal);
 
-		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), (ProblemLocation)problem, false, true);
+		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			Map<String, String> options= new Hashtable<>();
@@ -629,7 +629,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void getUnnecessaryNLSTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
-		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), (ProblemLocation)problem, true, false);
+		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			Map<String, String> options= new Hashtable<>();
@@ -645,7 +645,7 @@ public class LocalCorrectionsSubProcessor {
 	 * Fix instance accesses and indirect (static) accesses to static fields/methods
 	 */
 	public static void addCorrectAccessToStaticProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
-		IProposableFix fix= CodeStyleFixCore.createIndirectAccessToStaticFix(context.getASTRoot(), (IProblemLocationCore) problem);
+		IProposableFix fix= CodeStyleFixCore.createIndirectAccessToStaticFix(context.getASTRoot(),  problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new HashMap<>();
@@ -657,7 +657,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 
-		IProposableFix[] fixes= CodeStyleFixCore.createNonStaticAccessFixes(context.getASTRoot(), (IProblemLocationCore) problem);
+		IProposableFix[] fixes= CodeStyleFixCore.createNonStaticAccessFixes(context.getASTRoot(),  problem);
 		if (fixes != null) {
 			IProposableFix fix1= fixes[0];
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -682,7 +682,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnimplementedMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		IProposableFix addMethodFix= UnimplementedCodeFixCore.createAddUnimplementedMethodsFix(context.getASTRoot(), (IProblemLocationCore) problem);
+		IProposableFix addMethodFix= UnimplementedCodeFixCore.createAddUnimplementedMethodsFix(context.getASTRoot(),  problem);
 		if (addMethodFix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
@@ -693,7 +693,7 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(new FixCorrectionProposal(addMethodFix, cleanUp, IProposalRelevance.ADD_UNIMPLEMENTED_METHODS, image, context));
 		}
 
-		IProposableFix makeAbstractFix= UnimplementedCodeFixCore.createMakeTypeAbstractFix(context.getASTRoot(), (IProblemLocationCore) problem);
+		IProposableFix makeAbstractFix= UnimplementedCodeFixCore.createMakeTypeAbstractFix(context.getASTRoot(),  problem);
 		if (makeAbstractFix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
@@ -1054,7 +1054,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		IProposableFix fix= CodeStyleFixCore.createAddFieldQualifierFix(context.getASTRoot(), (IProblemLocationCore) problem);
+		IProposableFix fix= CodeStyleFixCore.createAddFieldQualifierFix(context.getASTRoot(),  problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new HashMap<>();
@@ -1358,7 +1358,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addTypeAsPermittedSubTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		SealedClassFixCore fix= SealedClassFixCore.addTypeAsPermittedSubTypeProposal(context.getASTRoot(), (IProblemLocationCore) problem);
+		SealedClassFixCore fix= SealedClassFixCore.addTypeAsPermittedSubTypeProposal(context.getASTRoot(),  problem);
 		if (fix != null) {
 			ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 			IType sealedType= SealedClassFixCore.getSealedType(selectedNode);
@@ -1370,7 +1370,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addSealedAsDirectSuperTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		SealedClassFixCore fix= SealedClassFixCore.addSealedAsDirectSuperTypeProposal(context.getASTRoot(), (IProblemLocationCore) problem);
+		SealedClassFixCore fix= SealedClassFixCore.addSealedAsDirectSuperTypeProposal(context.getASTRoot(),  problem);
 		if (fix != null) {
 			ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 			IType permittedType= SealedClassFixCore.getPermittedType(selectedNode);
@@ -1737,7 +1737,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addTypePrametersToRawTypeReference(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		IProposableFix fix= Java50FixCore.createRawTypeReferenceFix(context.getASTRoot(), (IProblemLocationCore) problem);
+		IProposableFix fix= Java50FixCore.createRawTypeReferenceFix(context.getASTRoot(),  problem);
 		if (fix != null) {
 			for (ICommandAccess element : proposals) {
 				if (element instanceof FixCorrectionProposal) {
@@ -1890,7 +1890,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addRemoveRedundantTypeArgumentsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		IProposableFix fix= TypeParametersFixCore.createRemoveRedundantTypeArgumentsFix(context.getASTRoot(), (IProblemLocationCore) problem);
+		IProposableFix fix= TypeParametersFixCore.createRemoveRedundantTypeArgumentsFix(context.getASTRoot(),  problem);
 		if (fix != null) {
 			Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			Map<String, String> options= new HashMap<>();
