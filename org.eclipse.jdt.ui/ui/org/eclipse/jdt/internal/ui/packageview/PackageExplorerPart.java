@@ -1355,6 +1355,22 @@ public class PackageExplorerPart extends ViewPart
             if (revealElementOrParent(element))
 	            return IStatus.OK;
         }
+
+        //we tried removing filters, still element was not found. we can try to select any possible element in it's parent hierarchy. Like 'Link with Editor'
+        ISelection newSelection= new StructuredSelection(element);
+		while (element != null && fViewer.getSelection().isEmpty()) {
+			// Try to select parent in case element is filtered
+			element= getParent(element);
+			if (element != null) {
+				newSelection= new StructuredSelection(element);
+				fViewer.setSelection(newSelection, true);
+			}
+		}
+
+		if (!getSite().getSelectionProvider().getSelection().isEmpty()) {
+			return IStatus.OK;
+		}
+
         return IStatus.ERROR;
     }
 
