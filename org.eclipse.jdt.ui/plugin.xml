@@ -7210,9 +7210,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.switch">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.InlineDeprecatedMethodCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls"
+            runAfter="org.eclipse.jdt.ui.cleanup.add_all">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp"
             id="org.eclipse.jdt.ui.cleanup.variables"
-            runAfter="org.eclipse.jdt.ui.cleanup.add_all">
+            runAfter="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp"
@@ -7220,14 +7225,9 @@
             runAfter="org.eclipse.jdt.ui.cleanup.variables">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.InlineDeprecatedMethodCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls"
-            runAfter="org.eclipse.jdt.ui.cleanup.else_if">
-      </cleanUp>
-      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp"
             id="org.eclipse.jdt.ui.cleanup.reduce_indentation"
-            runAfter="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls">
+            runAfter="org.eclipse.jdt.ui.cleanup.variables">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp"

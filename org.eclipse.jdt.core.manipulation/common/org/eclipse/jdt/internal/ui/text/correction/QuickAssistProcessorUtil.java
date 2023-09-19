@@ -590,9 +590,21 @@ public class QuickAssistProcessorUtil {
 																		referencesPackagePrivate= true;
 																	}
 																}
+																if (binding instanceof ITypeBinding typeBinding) {
+																	int modifiers= typeBinding.getModifiers();
+																	if (Modifier.isPrivate(modifiers)) {
+																		referencesPrivate= true;
+																	} else if (Modifier.isProtected(modifiers)) {
+																		referencesProtected= true;
+																	} else if (Modifier.isPublic(modifiers)) {
+																		// do nothing
+																	} else {
+																		referencesPackagePrivate= true;
+																	}
+																}
 																return true;
 															}
-														public boolean isUseMethodUsed() {
+															public boolean isUseMethodUsed() {
 																return useMethodIsUsed;
 															}
 															public boolean referencesPrivate() {

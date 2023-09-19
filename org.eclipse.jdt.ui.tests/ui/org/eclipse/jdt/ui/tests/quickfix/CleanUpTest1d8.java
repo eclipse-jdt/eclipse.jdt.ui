@@ -5507,4 +5507,462 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description)));
 	}
 
+	@Test
+	public void testDeprecatedCleanup1() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/722
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= ""
+				+ "package test;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    String blah = \"blah\";\n" //
+				+ "    \n" //
+				+ "    class Blah {\n" //
+				+ "        public static String blah2 = \"blah2\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(String a, String b) {\n" //
+				+ "        System.out.println(a + b);\n" //
+				+ "        return a.length() + b.length();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated use {@link #foo(String, String)}\n" //
+				+ "     * @param a\n" //
+				+ "     * @param b\n" //
+				+ "     * @param c\n" //
+				+ "     * @return int\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    public int foo(String a, String b, Object c) {\n" //
+				+ "        String k = a.toLowerCase() + Blah.blah2;\n" //
+				+ "        return foo(k, b);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    public static void depfunc(String a, String b, Object c) {\n" //
+				+ "        E1 d = new E1();\n" //
+				+ "        int k1= 8;\n" //
+				+ "        int y = d.foo(a, b, c);\n" //
+				+ "        System.out.println(y);\n" //
+				+ "        E1 e = new E1();\n" //
+				+ "        int z = e.foo(a, b, c);\n" //
+				+ "        System.out.println(z);\n" //
+				+ "        int v = e.foo(a, b, c);\n" //
+				+ "        System.out.println(v);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void depfunc2(String x, String y, Object z) {\n" //
+				+ "        E1 k = new E1();\n" //
+				+ "        k.foo(x, y, z);\n" //
+				+ "        { E1 e = new E1();\n" //
+				+ "        e.foo(x, y, z); }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.REPLACE_DEPRECATED_CALLS);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    public static void depfunc(String a, String b, Object c) {\n" //
+				+ "        E1 d = new E1();\n" //
+				+ "        int k1= 8;\n" //
+				+ "        String k1_1 = a.toLowerCase() + Blah.blah2;\n"
+				+ "        int y = d.foo(k1_1, b);\n"
+				+ "        System.out.println(y);\n" //
+				+ "        E1 e = new E1();\n" //
+				+ "        String k2 = a.toLowerCase() + Blah.blah2;\n"
+				+ "        int z = e.foo(k2, b);\n"
+				+ "        System.out.println(z);\n" //
+				+ "        String k = a.toLowerCase() + Blah.blah2;\n"
+				+ "        int v = e.foo(k, b);\n"
+				+ "        System.out.println(v);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void depfunc2(String x, String y, Object z) {\n" //
+				+ "        E1 k = new E1();\n" //
+				+ "        String k1_1 = x.toLowerCase() + Blah.blah2;\n" //
+				+ "        k.foo(k1_1, y);\n" //
+				+ "        { E1 e = new E1();\n" //
+				+ "        String k1 = x.toLowerCase() + Blah.blah2;\n" //
+				+ "        e.foo(k1, y); }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu2}, new String[] {expected1},
+				new HashSet<>(Arrays.asList(FixMessages.InlineDeprecatedMethod_msg)));
+	}
+
+	@Test
+	public void testDeprecatedCleanup2() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/722
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample1= ""
+				+ "package test;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    String blah = \"blah\";\n" //
+				+ "    \n" //
+				+ "    public class Blah {\n" //
+				+ "        public static String blah2 = \"blah2\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(String a, String b) {\n" //
+				+ "        System.out.println(a + b);\n" //
+				+ "        return a.length() + b.length();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated use {@link #foo(String, String)}\n" //
+				+ "     * @param a\n" //
+				+ "     * @param b\n" //
+				+ "     * @param c\n" //
+				+ "     * @return int\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    public int foo(String a, String b, Object c) {\n" //
+				+ "        String k = a.toLowerCase() + Blah.blah2;\n" //
+				+ "        return foo(k, b);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", true, null);
+		String sample= "" //
+				+ "package test2;\n" //
+				+ "import test.E1;\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    public static void depfunc(String a, String b, Object c) {\n" //
+				+ "        E1 d = new E1();\n" //
+				+ "        int k1= 8;\n" //
+				+ "        int y = d.foo(a, b, c);\n" //
+				+ "        System.out.println(y);\n" //
+				+ "        E1 e = new E1();\n" //
+				+ "        int z = e.foo(a, b, c);\n" //
+				+ "        System.out.println(z);\n" //
+				+ "        int v = e.foo(a, b, c);\n" //
+				+ "        System.out.println(v);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void depfunc2(String x, String y, Object z) {\n" //
+				+ "        E1 k = new E1();\n" //
+				+ "        k.foo(x, y, z);\n" //
+				+ "        { E1 e = new E1();\n" //
+				+ "        e.foo(x, y, z); }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack2.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.REPLACE_DEPRECATED_CALLS);
+
+		sample= "" //
+				+ "package test2;\n" //
+				+ "import test.E1;\n" //
+				+ "import test.E1.Blah;\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    public static void depfunc(String a, String b, Object c) {\n" //
+				+ "        E1 d = new E1();\n" //
+				+ "        int k1= 8;\n" //
+				+ "        String k1_1 = a.toLowerCase() + Blah.blah2;\n"
+				+ "        int y = d.foo(k1_1, b);\n"
+				+ "        System.out.println(y);\n" //
+				+ "        E1 e = new E1();\n" //
+				+ "        String k2 = a.toLowerCase() + Blah.blah2;\n"
+				+ "        int z = e.foo(k2, b);\n"
+				+ "        System.out.println(z);\n" //
+				+ "        String k = a.toLowerCase() + Blah.blah2;\n"
+				+ "        int v = e.foo(k, b);\n"
+				+ "        System.out.println(v);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void depfunc2(String x, String y, Object z) {\n" //
+				+ "        E1 k = new E1();\n" //
+				+ "        String k1_1 = x.toLowerCase() + Blah.blah2;\n" //
+				+ "        k.foo(k1_1, y);\n" //
+				+ "        { E1 e = new E1();\n" //
+				+ "        String k1 = x.toLowerCase() + Blah.blah2;\n" //
+				+ "        e.foo(k1, y); }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {sample1, expected1},
+				new HashSet<>(Arrays.asList(FixMessages.InlineDeprecatedMethod_msg)));
+	}
+
+	@Test
+	public void testDoNotDoDeprecatedCleanup1() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/722
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= ""
+				+ "package test;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    String blah = \"blah\";\n" //
+				+ "    \n" //
+				+ "    private static class Blah {\n" //
+				+ "        public static String blah2 = \"blah2\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(String a, String b) {\n" //
+				+ "        System.out.println(a + b);\n" //
+				+ "        return a.length() + b.length();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated use {@link #foo(String, String)}\n" //
+				+ "     * @param a\n" //
+				+ "     * @param b\n" //
+				+ "     * @param c\n" //
+				+ "     * @return int\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    public int foo(String a, String b, Object c) {\n" //
+				+ "        String k = a.toLowerCase() + Blah.blah2;\n" //
+				+ "        return foo(k, b);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    public static void depfunc(String a, String b, Object c) {\n" //
+				+ "        E1 d = new E1();\n" //
+				+ "        int k1= 8;\n" //
+				+ "        int y = d.foo(a, b, c);\n" //
+				+ "        System.out.println(y);\n" //
+				+ "        E1 e = new E1();\n" //
+				+ "        int z = e.foo(a, b, c);\n" //
+				+ "        System.out.println(z);\n" //
+				+ "        int v = e.foo(a, b, c);\n" //
+				+ "        System.out.println(v);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void depfunc2(String x, String y, Object z) {\n" //
+				+ "        E1 k = new E1();\n" //
+				+ "        k.foo(x, y, z);\n" //
+				+ "        { E1 e = new E1();\n" //
+				+ "        e.foo(x, y, z); }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack1.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.REPLACE_DEPRECATED_CALLS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1, cu2 });
+	}
+
+	@Test
+	public void testDoNotDoDeprecatedCleanup2() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/722
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample1= ""
+				+ "package test;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    String blah = \"blah\";\n" //
+				+ "    \n" //
+				+ "    protected static class Blah {\n" //
+				+ "        public static String blah2 = \"blah2\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(String a, String b) {\n" //
+				+ "        System.out.println(a + b);\n" //
+				+ "        return a.length() + b.length();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated use {@link #foo(String, String)}\n" //
+				+ "     * @param a\n" //
+				+ "     * @param b\n" //
+				+ "     * @param c\n" //
+				+ "     * @return int\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    public int foo(String a, String b, Object c) {\n" //
+				+ "        String k = a.toLowerCase() + Blah.blah2;\n" //
+				+ "        return foo(k, b);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", true, null);
+		String sample= "" //
+				+ "package test2;\n" //
+				+ "import test.E1;\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    public static void depfunc(String a, String b, Object c) {\n" //
+				+ "        E1 d = new E1();\n" //
+				+ "        int k1= 8;\n" //
+				+ "        int y = d.foo(a, b, c);\n" //
+				+ "        System.out.println(y);\n" //
+				+ "        E1 e = new E1();\n" //
+				+ "        int z = e.foo(a, b, c);\n" //
+				+ "        System.out.println(z);\n" //
+				+ "        int v = e.foo(a, b, c);\n" //
+				+ "        System.out.println(v);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void depfunc2(String x, String y, Object z) {\n" //
+				+ "        E1 k = new E1();\n" //
+				+ "        k.foo(x, y, z);\n" //
+				+ "        { E1 e = new E1();\n" //
+				+ "        e.foo(x, y, z); }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack2.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.REPLACE_DEPRECATED_CALLS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1, cu2 });
+	}
+
+	@Test
+	public void testDoNotDoDeprecatedCleanup3() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/722
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample1= ""
+				+ "package test;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    String blah = \"blah\";\n" //
+				+ "    \n" //
+				+ "    static class Blah {\n" //
+				+ "        public static String blah2 = \"blah2\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(String a, String b) {\n" //
+				+ "        System.out.println(a + b);\n" //
+				+ "        return a.length() + b.length();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated use {@link #foo(String, String)}\n" //
+				+ "     * @param a\n" //
+				+ "     * @param b\n" //
+				+ "     * @param c\n" //
+				+ "     * @return int\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    public int foo(String a, String b, Object c) {\n" //
+				+ "        String k = a.toLowerCase() + Blah.blah2;\n" //
+				+ "        return foo(k, b);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", true, null);
+		String sample= "" //
+				+ "package test2;\n" //
+				+ "import test.E1;\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    public static void depfunc(String a, String b, Object c) {\n" //
+				+ "        E1 d = new E1();\n" //
+				+ "        int k1= 8;\n" //
+				+ "        int y = d.foo(a, b, c);\n" //
+				+ "        System.out.println(y);\n" //
+				+ "        E1 e = new E1();\n" //
+				+ "        int z = e.foo(a, b, c);\n" //
+				+ "        System.out.println(z);\n" //
+				+ "        int v = e.foo(a, b, c);\n" //
+				+ "        System.out.println(v);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void depfunc2(String x, String y, Object z) {\n" //
+				+ "        E1 k = new E1();\n" //
+				+ "        k.foo(x, y, z);\n" //
+				+ "        { E1 e = new E1();\n" //
+				+ "        e.foo(x, y, z); }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack2.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.REPLACE_DEPRECATED_CALLS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1, cu2 });
+	}
+
+	@Test
+	public void testDoNotDoDeprecatedCleanup4() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/722
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample1= ""
+				+ "package test;\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    String blah = \"blah\";\n" //
+				+ "    \n" //
+				+ "    static class Blah {\n" //
+				+ "        public static String blah2 = \"blah2\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo(String a, String b) {\n" //
+				+ "        System.out.println(a + b);\n" //
+				+ "        return a.length() + b.length();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /**\n" //
+				+ "     * @deprecated use {@link #foo(String, String)}\n" //
+				+ "     * @param a\n" //
+				+ "     * @param b\n" //
+				+ "     * @param c\n" //
+				+ "     * @return int\n" //
+				+ "     */\n" //
+				+ "    @Deprecated\n" //
+				+ "    public int foo(String a, String b, Object c) {\n" //
+				+ "        String k = a.toLowerCase() + this.blah;\n" //
+				+ "        return foo(k, b);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", true, null);
+		String sample= "" //
+				+ "package test2;\n" //
+				+ "import test.E1;\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    public static void depfunc(String a, String b, Object c) {\n" //
+				+ "        E1 d = new E1();\n" //
+				+ "        int k1= 8;\n" //
+				+ "        int y = d.foo(a, b, c);\n" //
+				+ "        System.out.println(y);\n" //
+				+ "        E1 e = new E1();\n" //
+				+ "        int z = e.foo(a, b, c);\n" //
+				+ "        System.out.println(z);\n" //
+				+ "        int v = e.foo(a, b, c);\n" //
+				+ "        System.out.println(v);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void depfunc2(String x, String y, Object z) {\n" //
+				+ "        E1 k = new E1();\n" //
+				+ "        k.foo(x, y, z);\n" //
+				+ "        { E1 e = new E1();\n" //
+				+ "        e.foo(x, y, z); }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n";
+		ICompilationUnit cu2= pack2.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.REPLACE_DEPRECATED_CALLS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1, cu2 });
+	}
+
 }
