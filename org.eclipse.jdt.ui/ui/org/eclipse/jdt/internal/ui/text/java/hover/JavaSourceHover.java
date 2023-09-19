@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -29,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.AbstractDocument;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.Document;
@@ -147,7 +147,6 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		final ITypeRoot fRootElement;
 		final String fFullContent;
 		final ISourceRange fVisibleRange;
-		SourceViewer fSourceViewer;
 
 		JavaSourceSemanticInformationInput(IJavaElement javaElement, String hoverInfo, ITypeRoot rootElement, String fullContent, ISourceRange visibleRange) {
 			super(javaElement, hoverInfo);
@@ -156,36 +155,24 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			fVisibleRange= visibleRange;
 		}
 
-		public final ITypeRoot getViewerContentTypeRoot() {
-			return fRootElement;
-		}
-
-		public boolean prepareSemanticColoring(SourceViewer sourceViewer) {
-			fSourceViewer= sourceViewer;
-			if (fVisibleRange == null) {
-				return false;
-			}
-			// do not show changes made to viewer document required only for semantic coloring job
-			fSourceViewer.getControl().setRedraw(false);
-
-			// replace viewer content (was fHoverInfo) with full content (for which semantic coloring will be prepared)
-			fSourceViewer.getDocument().set(fFullContent);
-			// then set viewer's visible region
-			setVisibleRegion();
+		public boolean shouldTriggerSemanticColoring(SourceViewer sourceViewer) {
+			setContentAndVisibleRegion(sourceViewer);
 			return true;
 		}
 
-		void setVisibleRegion() {
+		void setContentAndVisibleRegion(SourceViewer sourceViewer) {
+			// set viewer content with full content for which semantic coloring will be prepared
+			sourceViewer.getDocument().set(fFullContent);
+			// then set viewer's visible region
+			setVisibleRegion(sourceViewer);
+		}
+
+		void setVisibleRegion(SourceViewer sourceViewer) {
 			// limit visible region of whole source content to just area of interest
-			fSourceViewer.setVisibleRegion(fVisibleRange.getOffset(), fVisibleRange.getLength());
+			sourceViewer.setVisibleRegion(fVisibleRange.getOffset(), fVisibleRange.getLength());
 		}
 
-		public final void postSemanticColoring() {
-			doPostSemanticColoring();
-			fSourceViewer.getControl().setRedraw(true);
-		}
-
-		public abstract void doPostSemanticColoring();
+		public abstract void postSemanticColoring(SourceViewer sourceViewer);
 	}
 
 	/**
@@ -199,16 +186,17 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		}
 
 		@Override
-		void setVisibleRegion() {
-			super.setVisibleRegion();
+		void setVisibleRegion(SourceViewer sourceViewer) {
+			super.setVisibleRegion(sourceViewer);
 
 			// prepare lines trimming in visible region
-			fTrimRegions= new LinkedList<>();
+			fTrimRegions= new ArrayList<>(0);
 			try {
-				IDocument document= fSourceViewer.getDocument();
-				IRegion visibleRegion= fSourceViewer.getVisibleRegion(); // fVisibleRange extended to start of first line
+				IDocument document= sourceViewer.getDocument();
+				IRegion visibleRegion= sourceViewer.getVisibleRegion(); // fVisibleRange extended to start of first line
 				String hoverElementSource= document.get(visibleRegion.getOffset(), visibleRegion.getLength());
 				String[] sourceLines= Strings.convertIntoLines(hoverElementSource);
+				fTrimRegions= new ArrayList<>(sourceLines.length);
 				String[] trimmedLines= sourceLines.clone();
 				Strings.trimIndentation(trimmedLines, fRootElement.getJavaProject());
 				int line= document.getLineOfOffset(visibleRegion.getOffset());
@@ -227,14 +215,15 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		}
 
 		@Override
-		public void doPostSemanticColoring() {
-			if (fTrimRegions == null) {
-				return;
-			}
+		public void postSemanticColoring(SourceViewer sourceViewer) {
+			doLineTrimming(sourceViewer);
+		}
+
+		void doLineTrimming(SourceViewer sourceViewer) {
 			// apply lines trimming in visible region
 			try {
 				for (IRegion trimRegion : fTrimRegions) {
-					fSourceViewer.getDocument().replace(trimRegion.getOffset(), trimRegion.getLength(), ""); //$NON-NLS-1$
+					sourceViewer.getDocument().replace(trimRegion.getOffset(), trimRegion.getLength(), ""); //$NON-NLS-1$
 				}
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);
@@ -247,9 +236,12 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	 */
 	static class JavaElementSourceInformationInput extends JavaSourceLineTrimmingInformationInput {
 
+		JavaElementSourceInformationInput(IJavaElement javaElement, String hoverInfo, ITypeRoot rootElement) throws JavaModelException {
+			super(javaElement, hoverInfo, rootElement, rootElement.getSource(), (javaElement instanceof ISourceReference) ? ((ISourceReference) javaElement).getSourceRange() : null);
+		}
+
 		JavaElementSourceInformationInput(String hoverInfo, IJavaElement javaElement) throws Exception {
-			super(javaElement, hoverInfo, findRootElement(javaElement), findRootElement(javaElement).getSource(),
-					(javaElement instanceof ISourceReference) ? ((ISourceReference) javaElement).getSourceRange() : null);
+			this(javaElement, hoverInfo, findRootElement(javaElement));
 		}
 
 		private static ITypeRoot findRootElement(IJavaElement javaElement) {
@@ -264,9 +256,13 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		}
 
 		@Override
-		void setVisibleRegion() {
+		void setVisibleRegion(SourceViewer sourceViewer) {
+			if (fVisibleRange == null) {
+				// should never happen since javaElement should always be ISourceReference
+				return;
+			}
 			// set range indication to actual beginning of element ('scrolls' past any JavaDoc if present) before setting visible region
-			Document doc= (Document) fSourceViewer.getDocument();
+			AbstractDocument doc= (AbstractDocument) sourceViewer.getDocument();
 			int offset= fVisibleRange.getOffset();
 			int lenght= fVisibleRange.getLength();
 			try {
@@ -295,9 +291,9 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 				offset= fVisibleRange.getOffset();
 				lenght= fVisibleRange.getLength();
 			}
-			fSourceViewer.setRangeIndication(offset, lenght, true);
+			sourceViewer.setRangeIndication(offset, lenght, true);
 
-			super.setVisibleRegion();
+			super.setVisibleRegion(sourceViewer);
 		}
 	}
 
@@ -305,56 +301,69 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	 * Java source information input supporting semantic coloring for bracket nodes hover
 	 */
 	static class JavaBracketSourceInformationInput extends JavaSourceLineTrimmingInformationInput {
-		private final int fBracketHoverRegionFirstLine;
-		private final int fBacketHoverRegionLastLine;
 		private final List<Integer> fKeptLines;
 
-		JavaBracketSourceInformationInput(String hoverInfo, ITypeRoot rootElement, IDocument document, ISourceRange nodeRange, List<Integer> keptLines) throws BadLocationException {
-			super(null, hoverInfo, rootElement, document.get(), nodeRange);
-			fBracketHoverRegionFirstLine= document.getLineOfOffset(nodeRange.getOffset());
-			fBacketHoverRegionLastLine= document.getLineOfOffset(nodeRange.getOffset() + nodeRange.getLength());
-			fKeptLines= new LinkedList<>(keptLines);
+		JavaBracketSourceInformationInput(String hoverInfo, ITypeRoot rootElement, IDocument document, ISourceRange nodeRange, List<Integer> keptLines) {
+			super(null, hoverInfo, rootElement, document.get(), adjustVisibleRange(document, nodeRange, keptLines));
+			fKeptLines= new ArrayList<>(keptLines);
+		}
+
+		// handles case when visible area should end with last kept line (no following JavaSourceHover_skippedLinesSymbol)
+		private static ISourceRange adjustVisibleRange(IDocument document, ISourceRange nodeRange, List<Integer> keptLines) {
+			try {
+				int lastNodeRangeLine= document.getLineOfOffset(nodeRange.getOffset() + nodeRange.getLength());
+				boolean noLinesAfterLastKept= keptLines.get(keptLines.size() - 1).intValue() == lastNodeRangeLine - 1;
+				if (noLinesAfterLastKept) {
+					return new SourceRange(nodeRange.getOffset(), document.getLineOffset(lastNodeRangeLine) - 1 - nodeRange.getOffset());
+				}
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+			return nodeRange;
 		}
 
 		@Override
-		public void doPostSemanticColoring() {
-			super.doPostSemanticColoring();
+		public void postSemanticColoring(SourceViewer sourceViewer) {
+			try {
+				IDocument document= sourceViewer.getDocument();
 
-			// apply skipped lines substitutions
-			if (fKeptLines != null && !fKeptLines.isEmpty()) {
-				List<Integer> keptLines= new LinkedList<>(fKeptLines);
-				IDocument document= fSourceViewer.getDocument();
-				try {
-					int currentLine= fBracketHoverRegionFirstLine;
-					int replaceStartOffset= -1;
-					int linesToRemove= 0;
-					int lineShift= 0;
-					for (; currentLine <= fBacketHoverRegionLastLine; currentLine++) {
-						if (!keptLines.remove(Integer.valueOf(currentLine))) { // line to be replaced
-							if (replaceStartOffset == -1) {
-								replaceStartOffset= document.getLineOffset(currentLine - lineShift);
+				// calculate first & last line from node range (fVisibleRange) before lines trimming invalidates range positions
+				int firstLine= document.getLineOfOffset(fVisibleRange.getOffset());
+				int lastLine= document.getLineOfOffset(fVisibleRange.getOffset() + fVisibleRange.getLength());
+
+				doLineTrimming(sourceViewer);
+
+				// apply skipped lines substitutions
+				List<Integer> keptLines= new ArrayList<>(fKeptLines);
+				int currentLine= firstLine;
+				int replaceStartOffset= -1;
+				int linesToRemove= 0;
+				int lineShift= 0;
+				for (; currentLine <= lastLine; currentLine++) {
+					if (!keptLines.remove(Integer.valueOf(currentLine))) { // line to be replaced
+						if (replaceStartOffset == -1) {
+							replaceStartOffset= document.getLineOffset(currentLine - lineShift);
+						}
+						linesToRemove++;
+					} else { // kept line
+						if (replaceStartOffset != -1) {
+							int length= document.getLineOffset(currentLine - lineShift) - 1 - replaceStartOffset;
+							if (document.getChar(replaceStartOffset + length - 1) == '\r') {
+								length--;
 							}
-							linesToRemove++;
-						} else { // kept line
-							if (replaceStartOffset != -1) {
-								int length= document.getLineOffset(currentLine - lineShift) - 1 - replaceStartOffset;
-								if (document.getChar(replaceStartOffset + length - 1) == '\r') {
-									length--;
-								}
-								document.replace(replaceStartOffset, length, JavaHoverMessages.JavaSourceHover_skippedLinesSymbol);
-								replaceStartOffset= -1;
-								lineShift+= linesToRemove - 1;
-								linesToRemove= 0;
-							}
+							document.replace(replaceStartOffset, length, JavaHoverMessages.JavaSourceHover_skippedLinesSymbol);
+							replaceStartOffset= -1;
+							lineShift+= linesToRemove - 1;
+							linesToRemove= 0;
 						}
 					}
-					if (replaceStartOffset != -1) {
-						// replace remaining lines
-						document.replace(replaceStartOffset, document.getLength() - replaceStartOffset, JavaHoverMessages.JavaSourceHover_skippedLinesSymbol);
-					}
-				} catch (BadLocationException e) {
-					JavaPlugin.log(e);
 				}
+				if (replaceStartOffset != -1) {
+					// replace remaining lines
+					document.replace(replaceStartOffset, document.getLength() - replaceStartOffset, JavaHoverMessages.JavaSourceHover_skippedLinesSymbol);
+				}
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
 			}
 		}
 	}
@@ -372,18 +381,15 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		}
 
 		@Override
-		public boolean prepareSemanticColoring(SourceViewer sourceViewer) {
-			// replace text and set visible region
-			super.prepareSemanticColoring(sourceViewer);
-			// enable redraw
-			postSemanticColoring();
-			// don't trigger semantic coloring job since viewer already renders the content with proper color
+		public boolean shouldTriggerSemanticColoring(SourceViewer sourceViewer) {
+			setContentAndVisibleRegion(sourceViewer);
+			// don't trigger semantic coloring job since viewer already renders the content with proper colors
 			return false;
 		}
 
 		@Override
-		public void doPostSemanticColoring() {
-			// no-op
+		public void postSemanticColoring(SourceViewer sourceViewer) {
+			// no-op, never called
 		}
 	}
 
@@ -402,7 +408,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 				// element hover (source may be from other compilation unit)
 				return new JavaElementSourceInformationInput(hoverInfoString, fJavaElement);
 			}
-			if (fKeptLines != null && !fKeptLines.isEmpty()) {
+			if (!fKeptLines.isEmpty()) {
 				// bracket hover (source from visible editor)
 				return new JavaBracketSourceInformationInput(hoverInfoString, getEditorInputJavaElement(), textViewer.getDocument(), fNodeRange, fKeptLines);
 			}
@@ -580,7 +586,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 					noOfSourceLines++;
 					skippedLines= 0;
 				}
-				endLine= document.getLineInformation(nodeStartLine + noOfSourceLines);
+				endLine= document.getLineInformation(nodeStartLine + noOfSourceLines - 1);
 				fUpwardShiftInLines= noOfSourceLines;
 				if (skippedLines > 0) {
 					fBracketHoverStatus= Messages.format(JavaHoverMessages.JavaSourceHover_skippedLines, Integer.valueOf(skippedLines));
@@ -887,15 +893,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			{
 				// Just re-use content of displayed hover viewer when 'entering into' it
 				if (mimicSourceViewer != null) {
-					getViewer().setDocument(mimicSourceViewer.getDocument());
-
-					// replicating previously set range indication with workaround for getRangeIndication() returning null
-					IRegion visibleRegion= mimicSourceViewer.getVisibleRegion();
-					getViewer().setRangeIndication(mimicSourceViewer.getSelectedRange().x, visibleRegion.getLength(), true);
-
-					getViewer().setVisibleRegion(visibleRegion.getOffset(), visibleRegion.getLength());
-
-					getViewer().getTextWidget().setStyleRanges(mimicSourceViewer.getTextWidget().getStyleRanges());
+					setContentFrom(mimicSourceViewer);
 				}
 			}
 

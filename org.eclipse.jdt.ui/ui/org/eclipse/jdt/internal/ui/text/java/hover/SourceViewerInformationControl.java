@@ -53,6 +53,7 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.IInformationControlExtension3;
 import org.eclipse.jface.text.IInformationControlExtension5;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
@@ -136,19 +137,16 @@ public class SourceViewerInformationControl
 	 */
 	private final int fOrientation;
 
+	private Color fForegroundColor;
 	private Color fBackgroundColor;
 
 	private JavaSourceViewerConfiguration fViewerConfiguration;
 	private Map<String, JavaSourceViewerConfiguration> fKindToViewerConfiguration= new HashMap<>();
 
-	/** Parent java editor from which source viewer is shown */
-	private JavaEditor fParentJavaEditor;
+	/** Hidden source viewer used to prepare semantic highlighting of displayed source viewer content */
+	private JavaSourceViewer fSemanticHighlightingViewer;
 	/** Semantic highlighting manager doing semantic coloring of source content */
-	private SemanticHighlightingManager fSemanticHighlightingManager;
-	/** Java source information input from Java source hover for semantic coloring */
-	private volatile JavaSourceSemanticInformationInput fJavaSourceSemanticInformationInput;
-	/** Root element passed to semantic highlighting reconciler */
-	private volatile ITypeRoot fHoverElementTypeRoot;
+	private SourceViewerSemanticHighlightingManager fSemanticHighlightingManager;
 
 	/**
 	 * Creates a source viewer information control with the given shell as parent. The given
@@ -189,7 +187,6 @@ public class SourceViewerInformationControl
 		int textStyle= isResizable ? SWT.V_SCROLL | SWT.H_SCROLL : SWT.NONE;
 
 		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
-		Display display= fShell.getDisplay();
 
 		initializeColors();
 
@@ -210,7 +207,7 @@ public class SourceViewerInformationControl
 			composite.setLayout(layout);
 			gd= new GridData(GridData.FILL_BOTH);
 			composite.setLayoutData(gd);
-			composite.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+			composite.setForeground(fForegroundColor);
 			composite.setBackground(fBackgroundColor);
 		}
 
@@ -225,7 +222,7 @@ public class SourceViewerInformationControl
 		fText= fViewer.getTextWidget();
 		gd= new GridData(GridData.BEGINNING | GridData.FILL_BOTH);
 		fText.setLayoutData(gd);
-		fText.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		fText.setForeground(fForegroundColor);
 		fText.setBackground(fBackgroundColor);
 
 		initializeFont();
@@ -270,16 +267,22 @@ public class SourceViewerInformationControl
 
 		addDisposeListener(this);
 
-		if (editor instanceof JavaEditor) {
-			fParentJavaEditor= (JavaEditor) editor;
-		}
-		setupSemanticColoring(store);
+		setupSemanticColoring(editor, store);
 	}
 
-	private void setupSemanticColoring(IPreferenceStore preferenceStore) {
-		if (fParentJavaEditor != null && SemanticHighlightings.isEnabled(preferenceStore)) {
+	private void setupSemanticColoring(IEditorPart editor, IPreferenceStore preferenceStore) {
+		if (editor instanceof JavaEditor && SemanticHighlightings.isEnabled(preferenceStore)) {
+			fSemanticHighlightingViewer= new JavaSourceViewer(fShell, null, null, false, SWT.NONE, preferenceStore);
+			fSemanticHighlightingViewer.configure(fViewerConfiguration);
+			fSemanticHighlightingViewer.setEditable(false);
+			StyledText textWidget= fSemanticHighlightingViewer.getTextWidget();
+			textWidget.setForeground(fForegroundColor);
+			textWidget.setBackground(fBackgroundColor);
+			GridData gd= new GridData(GridData.FILL_BOTH);
+			gd.exclude= true; // do not consider hidden viewer when computing displayed shell size
+			textWidget.setLayoutData(gd);
 			fSemanticHighlightingManager= new SourceViewerSemanticHighlightingManager();
-			fSemanticHighlightingManager.install(fParentJavaEditor, fViewer, JavaPlugin.getDefault().getJavaTextTools().getColorManager(), preferenceStore);
+			fSemanticHighlightingManager.install((JavaEditor) editor, fSemanticHighlightingViewer, JavaPlugin.getDefault().getJavaTextTools().getColorManager(), preferenceStore);
 		}
 	}
 
@@ -288,9 +291,6 @@ public class SourceViewerInformationControl
 			fSemanticHighlightingManager.uninstall();
 		}
 		fSemanticHighlightingManager= null;
-		fParentJavaEditor= null;
-		fHoverElementTypeRoot= null;
-		fJavaSourceSemanticInformationInput= null;
 	}
 
 	/**
@@ -333,6 +333,7 @@ public class SourceViewerInformationControl
 		} else {
 			fBackgroundColor= fShell.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
 		}
+		fForegroundColor= fShell.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND);
 	}
 
 	/**
@@ -380,12 +381,20 @@ public class SourceViewerInformationControl
 		} else if (input instanceof JavaSourceInformationInput) {
 			content= ((JavaSourceInformationInput) input).getHoverInfo();
 			if (input instanceof JavaSourceSemanticInformationInput && fSemanticHighlightingManager != null) {
-				fJavaSourceSemanticInformationInput= (JavaSourceSemanticInformationInput) input;
-				fHoverElementTypeRoot= fJavaSourceSemanticInformationInput.getViewerContentTypeRoot();
-				// source viewer size will be computed based on final text that will be displayed (getHoverInfo())
+				JavaSourceSemanticInformationInput semanticInfoInput= (JavaSourceSemanticInformationInput) input;
+				setContentToViewer(content, fSemanticHighlightingViewer);
+				if (semanticInfoInput.shouldTriggerSemanticColoring(fSemanticHighlightingViewer)) {
+					fSemanticHighlightingManager.fInput= semanticInfoInput;
+					fSemanticHighlightingManager.getReconciler().refresh(); // triggers semantic coloring job
+				} else {
+					setContentFrom(fSemanticHighlightingViewer);
+				}
 			}
 		}
-		setInformation(content);
+
+		if (fViewer.getDocument() == null) {
+			setInformation(content);
+		} // else document already set to content of fSemanticHighlightingViewer
 
 		if (fShell != null && !fShell.isDisposed()) {
 			Display display= fShell.getDisplay();
@@ -403,14 +412,18 @@ public class SourceViewerInformationControl
 
 	@Override
 	public void setInformation(String content) {
+		setContentToViewer(content, fViewer);
+	}
+
+	private void setContentToViewer(String content, JavaSourceViewer viewer) {
 		if (content == null) {
-			fViewer.setInput(null);
+			viewer.setInput(null);
 			return;
 		}
 
 		IDocument doc= new Document(content);
 		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc, IJavaPartitions.JAVA_PARTITIONING);
-		fViewer.setInput(doc);
+		viewer.setInput(doc);
 	}
 
 	private void updateViewerConfiguration(IJavaElement input) {
@@ -439,12 +452,6 @@ public class SourceViewerInformationControl
 	@Override
 	public void setVisible(boolean visible) {
 		fShell.setVisible(visible);
-		// at this moment viewer size is already computed from final text (getHoverInfo()) that will be displayed in viewer,
-		// so we can now replace content (done inside prepareSemanticColoring()) in preparation for semantic coloring
-		if (visible && fJavaSourceSemanticInformationInput != null && fJavaSourceSemanticInformationInput.prepareSemanticColoring(fViewer)) {
-			fSemanticHighlightingManager.getReconciler().refresh(); // triggers semantic coloring job
-			fHoverElementTypeRoot= null; // not needed once job is triggered
-		}
 	}
 
 	/**
@@ -659,7 +666,7 @@ public class SourceViewerInformationControl
 	 */
 	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		return parent -> new SourceViewerInformationControl(parent, fParentJavaEditor, true, fOrientation, null);
+		return parent -> new SourceViewerInformationControl(parent, null, true, fOrientation, null);
 	}
 
 	/*
@@ -701,14 +708,25 @@ public class SourceViewerInformationControl
 		return new Point(widthInChars * width, heightInChars * height);
 	}
 
+	protected void setContentFrom(ISourceViewer other) {
+		fViewer.setDocument(other.getDocument());
+		// replicating previously set range indication with workaround for getRangeIndication() returning null
+		IRegion visibleRegion= other.getVisibleRegion();
+		fViewer.setRangeIndication(other.getSelectedRange().x, visibleRegion.getLength(), true);
+		fViewer.setVisibleRegion(visibleRegion.getOffset(), visibleRegion.getLength());
+		fViewer.getTextWidget().setStyleRanges(other.getTextWidget().getStyleRanges());
+	}
+
 	private class SourceViewerSemanticHighlightingManager extends SemanticHighlightingManager {
+		volatile JavaSourceSemanticInformationInput fInput;
+
 		@Override
 		protected SemanticHighlightingReconciler createSemanticHighlightingReconciler() {
 			return new SemanticHighlightingReconciler() {
 
 				@Override
 				protected ITypeRoot getElement() {
-					return fHoverElementTypeRoot;
+					return fInput.fRootElement;
 				}
 
 				@Override
@@ -725,15 +743,16 @@ public class SourceViewerInformationControl
 				@Override
 				public Runnable createUpdateRunnable(TextPresentation textPresentation, List<Position> addedPositions, List<Position> removedPositions) {
 					Runnable parentRunnable= super.createUpdateRunnable(textPresentation, addedPositions, removedPositions);
-					if (parentRunnable == null || fJavaSourceSemanticInformationInput == null) {
+					if (parentRunnable == null) {
 						return null;
 					}
 					return () -> {
 						if (!fShell.isVisible()) {
 							return;
 						}
-						parentRunnable.run(); // applies semantic highlighting
-						fJavaSourceSemanticInformationInput.postSemanticColoring(); // then modifies source viewer content (preserving highlighting)
+						parentRunnable.run(); // applies semantic coloring
+						fInput.postSemanticColoring(fSemanticHighlightingViewer); // then finalizes hidden source viewer content (preserving coloring)
+						setContentFrom(fSemanticHighlightingViewer); // then replaces content of displayed viewer (with coloring)
 					};
 				}
 			};
