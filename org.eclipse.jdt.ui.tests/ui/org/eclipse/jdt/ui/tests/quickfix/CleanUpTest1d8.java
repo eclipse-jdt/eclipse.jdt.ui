@@ -5539,7 +5539,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "}\n"; //
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+		pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		sample= "" //
 				+ "package test;\n" //
