@@ -54,19 +54,16 @@ public class JavaConstantHover extends AbstractJavaEditorTextHover {
 
 					}
 					if (prevChar == '-' || prevChar == '+') {
-						String t = document.get(offset, length);
 						if (offset > 4 && document.get(offset - 2, 1).toLowerCase().charAt(0) == 'p') {
 							char prevPrevChar= document.getChar(offset - 3);
 							if (prevPrevChar == '.' || Character.digit(prevPrevChar, 16) != -1) {
 								prevChar= ' ';
 								offset -= 2;
 							    length += 2;
-							    t = document.get(offset, length);
-								while (offset > 0 && (document.getChar(offset - 1) == '.' || Character.digit(document.getChar(offset - 1), 16) != -1)) {
+							    while (offset > 0 && (document.getChar(offset - 1) == '.' || Character.digit(document.getChar(offset - 1), 16) != -1)) {
 									--offset;
 									++length;
 								}
-								t = document.get(offset, length);
 								if (offset > 2 && document.get(offset - 2, 2).toLowerCase().equals("0x")) { //$NON-NLS-1$
 									offset -= 2;
 									length += 2;
