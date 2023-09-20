@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -158,8 +158,9 @@ public class ExtractTempWizard extends RefactoringWizard {
 		private void addReplaceAllInFileCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.ExtractTempInputPage_replace_all_in_file;
 			boolean defaultValue= false;
-			checkBoxForAllInFile= createCheckbox(result, title, defaultValue, layouter);
+			checkBoxForAllInFile= createCheckboxIndented(result, title, defaultValue, layouter);
 			getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBoxForAllInFile.getSelection());
+			checkBoxForAllInFile.setEnabled(getExtractTempRefactoring().replaceAllOccurrences());
 			checkBoxForAllInFile.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -224,6 +225,17 @@ public class ExtractTempWizard extends RefactoringWizard {
 
 		private static Button createCheckbox(Composite parent, String title, boolean value, RowLayouter layouter){
 			Button checkBox= new Button(parent, SWT.CHECK);
+			checkBox.setText(title);
+			checkBox.setSelection(value);
+			layouter.perform(checkBox);
+			return checkBox;
+		}
+
+		private static Button createCheckboxIndented(Composite parent, String title, boolean value, RowLayouter layouter){
+			Button checkBox= new Button(parent, SWT.CHECK);
+			GridData gd= new GridData();
+			gd.horizontalIndent= 20;
+			checkBox.setLayoutData(gd);
 			checkBox.setText(title);
 			checkBox.setSelection(value);
 			layouter.perform(checkBox);
