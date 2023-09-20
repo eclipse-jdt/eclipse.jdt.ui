@@ -81,7 +81,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_20; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_21; // make sure it is not inlined
 	}
 
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
@@ -863,6 +863,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_20);
 	}
 
+	public static boolean is21OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_21);
+	}
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.2 or greater.
 	 *
@@ -1036,6 +1040,17 @@ public final class JavaModelUtil {
 		return is20OrHigher(getSourceCompliance(project));
 	}
 
+	/**
+	 * Checks if the given project or workspace has source compliance 21 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 21 or
+	 *         greater.
+	 */
+	public static boolean is21OrHigher(IJavaProject project) {
+		return is21OrHigher(getSourceCompliance(project));
+	}
+
 	public static String getSourceCompliance(IJavaProject project) {
 		return project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 	}
@@ -1086,6 +1101,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_21)) {
+			return JavaCore.VERSION_21;
 		} else if (version.startsWith(JavaCore.VERSION_20)) {
 			return JavaCore.VERSION_20;
 		} else if (version.startsWith(JavaCore.VERSION_19)) {
@@ -1138,7 +1155,9 @@ public final class JavaModelUtil {
 
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_20) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_21) != -1) {
+			return JavaCore.VERSION_21;
+		} else if (desc.indexOf(JavaCore.VERSION_20) != -1) {
 			return JavaCore.VERSION_20;
 		} else if (desc.indexOf(JavaCore.VERSION_19) != -1) {
 			return JavaCore.VERSION_19;

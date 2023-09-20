@@ -14,14 +14,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-
-import java.text.MessageFormat;
 
 import org.osgi.service.prefs.Preferences;
 
@@ -156,6 +155,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_18 = JavaCore.VERSION_18;
 	private static final String VERSION_19 = JavaCore.VERSION_19;
 	private static final String VERSION_20 = JavaCore.VERSION_20;
+	private static final String VERSION_21 = JavaCore.VERSION_21;
 	private static final String VERSION_LATEST = JavaCore.latestSupportedJavaVersion();
 	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
@@ -313,7 +313,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createComplianceTabContent(Composite folder) {
 
 		final String[] complianceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21 };
 		final String[] complianceLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -332,11 +332,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version_17,
 			PreferencesMessages.ComplianceConfigurationBlock_version_18,
 			PreferencesMessages.ComplianceConfigurationBlock_version_19,
-			PreferencesMessages.ComplianceConfigurationBlock_version_20
+			PreferencesMessages.ComplianceConfigurationBlock_version_20,
+			PreferencesMessages.ComplianceConfigurationBlock_version_21
 		};
 
 		String[] targetVersions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21 };
 		String[] targetLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
 				PreferencesMessages.ComplianceConfigurationBlock_version11,
@@ -358,7 +359,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version_17,
 				PreferencesMessages.ComplianceConfigurationBlock_version_18,
 				PreferencesMessages.ComplianceConfigurationBlock_version_19,
-				PreferencesMessages.ComplianceConfigurationBlock_version_20
+				PreferencesMessages.ComplianceConfigurationBlock_version_20,
+				PreferencesMessages.ComplianceConfigurationBlock_version_21
 		};
 		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
 			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_JSR14);
@@ -366,7 +368,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 
 		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21 };
 		String[] sourceLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_version13,
 				PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -385,7 +387,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version_17,
 				PreferencesMessages.ComplianceConfigurationBlock_version_18,
 				PreferencesMessages.ComplianceConfigurationBlock_version_19,
-				PreferencesMessages.ComplianceConfigurationBlock_version_20
+				PreferencesMessages.ComplianceConfigurationBlock_version_20,
+				PreferencesMessages.ComplianceConfigurationBlock_version_21
 		};
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
@@ -845,9 +848,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 
-			//TODO: Comment once Java SE 20 has been shipped:
+//			//TODO: Comment once Java SE 21 has been shipped:
 //			String selectedCompliance= getValue(PREF_COMPLIANCE);
-//			if (VERSION_20.equals(selectedCompliance)) {
+//			if (VERSION_21.equals(selectedCompliance)) {
 //				fJRE50InfoText.setText(
 //						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
 //				isVisible= true;

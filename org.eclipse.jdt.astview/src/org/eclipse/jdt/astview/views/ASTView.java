@@ -138,6 +138,7 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 
 	static final int JLS_LATEST= AST.getJLSLatest();
+	private static final int JLS21= ASTHelper.JLS21;
 	private static final int JLS20= ASTHelper.JLS20;
 	private static final int JLS19= ASTHelper.JLS19;
 	private static final int JLS18= ASTHelper.JLS18;
@@ -517,6 +518,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				case JLS18:
 				case JLS19:
 				case JLS20:
+				case JLS21:
 					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
@@ -1142,7 +1144,8 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				new ASTLevelToggle("AST Level 1&7 (17)", JLS17), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&8 (18)", JLS18), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&9 (19)", JLS19), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &20 (20)", JLS20), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level 2&0 (20)", JLS20), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level 2&1 (21)", JLS21), //$NON-NLS-1$
 		};
 
 		fAddToTrayAction= new Action() {
