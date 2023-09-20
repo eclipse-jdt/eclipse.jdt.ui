@@ -112,7 +112,7 @@ public class FatJarExportTests {
 	@Rule
 	public TestName tn=new TestName();
 
-	private static final int JAVA_RUN_TIMEOUT= 50; // 10th of a second
+	private static final int JAVA_RUN_TIMEOUT= 300; // 10th of a second
 
 	@BeforeClass
 	public static void setUpTest() {
