@@ -26,17 +26,17 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * good citizen problems - wizard is only valid after constructor (when the pages toggle
@@ -90,7 +90,7 @@ public class ExternalizeWizard extends RefactoringWizard {
 						NLSUIMessages.ExternalizeWizard_error_message);
 			}
 			if (refactoring != null)
-				new RefactoringStarter().activate(new ExternalizeWizard(refactoring), shell, ActionMessages.ExternalizeStringsAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+				new RefactoringStarter().activate(new ExternalizeWizard(refactoring), shell, ActionMessages.ExternalizeStringsAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
 		});
 	}
 }

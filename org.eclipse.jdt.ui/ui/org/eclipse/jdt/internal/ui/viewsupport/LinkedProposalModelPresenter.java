@@ -46,8 +46,12 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.PositionInformation;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.ProposalCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -64,21 +68,21 @@ public class LinkedProposalModelPresenter {
 	public LinkedProposalModelPresenter() {
 	}
 
-	public void enterLinkedMode(ITextViewer viewer, IEditorPart editor, boolean switchedEditor, LinkedProposalModel linkedProposalModel) throws BadLocationException {
+	public void enterLinkedMode(ITextViewer viewer, IEditorPart editor, boolean switchedEditor, LinkedProposalModelCore linkedProposalModel) throws BadLocationException {
 		IDocument document= viewer.getDocument();
 
 		LinkedModeModel model= new LinkedModeModel();
 		boolean added= false;
 
-		Iterator<LinkedProposalPositionGroup> iterator= linkedProposalModel.getPositionGroupIterator();
+		Iterator<LinkedProposalPositionGroupCore> iterator= linkedProposalModel.getPositionGroupCoreIterator();
 		while (iterator.hasNext()) {
-			LinkedProposalPositionGroup curr= iterator.next();
+			LinkedProposalPositionGroupCore curr= iterator.next();
 
 			LinkedPositionGroup group= new LinkedPositionGroup();
 
 			LinkedProposalPositionGroup.PositionInformation[] positions= curr.getPositions();
 			if (positions.length > 0) {
-				LinkedProposalPositionGroup.Proposal[] linkedModeProposals= curr.getProposals();
+				ProposalCore[] linkedModeProposals= curr.getProposals();
 				if (linkedModeProposals.length <= 1) {
 					for (PositionInformation pos : positions) {
 						if (pos.getOffset() != -1) {
@@ -130,11 +134,11 @@ public class LinkedProposalModelPresenter {
 
 	private static class LinkedPositionProposalImpl implements ICompletionProposalExtension2, IJavaCompletionProposal {
 
-		private final LinkedProposalPositionGroup.Proposal fProposal;
+		private final ProposalCore fProposal;
 		private final LinkedModeModel fLinkedPositionModel;
 
 
-		public LinkedPositionProposalImpl(LinkedProposalPositionGroup.Proposal proposal, LinkedModeModel model) {
+		public LinkedPositionProposalImpl(ProposalCore proposal, LinkedModeModel model) {
 			fProposal= proposal;
 			fLinkedPositionModel= model;
 		}
@@ -166,7 +170,7 @@ public class LinkedProposalModelPresenter {
 
 		@Override
 		public Image getImage() {
-			return fProposal.getImage();
+			return fProposal instanceof Proposal ? ((Proposal)fProposal).getImage() : null;
 		}
 
 		@Override

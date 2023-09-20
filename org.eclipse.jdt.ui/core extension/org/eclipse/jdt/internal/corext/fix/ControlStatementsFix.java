@@ -182,7 +182,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			String label;
 			ASTNode expression= null;
@@ -277,7 +277,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
 			Block block= (Block)fStatement.getStructuralProperty(fChild);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -96,7 +97,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -123,9 +124,8 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -221,12 +221,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.RENAME_TYPE_PROCESSOR;
+		return IRefactoringProcessorIdsCore.RENAME_TYPE_PROCESSOR;
 	}
 
 	@Override
 	public boolean isApplicable() throws CoreException {
-		return RefactoringAvailabilityTester.isRenameAvailable(fType);
+		return RefactoringAvailabilityTesterCore.isRenameAvailable(fType);
 	}
 
 	@Override
@@ -332,7 +332,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 	@Override
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_REFACTORING;
+		return IRefactoringSaveModes.SAVE_REFACTORING;
 	}
 
 	//---- ITextUpdating -------------------------------------------------
@@ -465,7 +465,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		IType primary= (IType) fType.getPrimaryElement();
 		if (primary == null || !primary.exists()) {
-			String qualifiedTypeName= JavaElementLabels.getElementLabel(fType, JavaElementLabels.F_FULLY_QUALIFIED);
+			String qualifiedTypeName= JavaElementLabelsCore.getElementLabel(fType, JavaElementLabelsCore.F_FULLY_QUALIFIED);
 			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_does_not_exist, new String[] { BasicElementLabels.getJavaElementName(qualifiedTypeName), BasicElementLabels.getFileName(fType.getCompilationUnit())});
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
@@ -796,7 +796,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		if (type == null || ! type.exists())
 			return null;
 		String msg= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_exists,
-				new String[] {getNewElementLabel(), JavaElementLabels.getElementLabel(fType.getPackageFragment(), JavaElementLabels.ALL_DEFAULT)});
+				new String[] {getNewElementLabel(), JavaElementLabelsCore.getElementLabel(fType.getPackageFragment(), JavaElementLabelsCore.ALL_DEFAULT)});
 		return RefactoringStatus.createErrorStatus(msg, JavaStatusContext.create(type));
 	}
 
@@ -932,7 +932,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			//could this be a problem (same package imports)?
 			if (JdtFlags.isPublic(type) && type.getElementName().equals(getNewElementName())){
 				String msg= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_name_conflict1,
-																			new Object[]{ JavaElementLabels.getElementLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED), BasicElementLabels.getPathLabel(getCompilationUnit(imp).getPath(), false)});
+																			new Object[]{ JavaElementLabelsCore.getElementLabel(type, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), BasicElementLabels.getPathLabel(getCompilationUnit(imp).getPath(), false)});
 				result.addError(msg, JavaStatusContext.create(imp));
 			}
 		}
@@ -1062,7 +1062,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				JavaPlugin.log(exception);
 			}
 			final String description= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description_short, BasicElementLabels.getJavaElementName(fType.getElementName()));
-			final String header= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementLabel()});
+			final String header= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabelsCore.getElementLabel(fType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), getNewElementLabel()});
 			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
 			final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
 			descriptor.setProject(project);
@@ -1562,15 +1562,15 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			final IMethod[] elements= warning.getRipple();
 			if (warning.isSelectionWarning()) {
 				String message= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_deselected_method_is_overridden,
-						new String[] { JavaElementLabels.getElementLabel(elements[0], JavaElementLabels.ALL_DEFAULT),
-								JavaElementLabels.getElementLabel(elements[0].getDeclaringType(), JavaElementLabels.ALL_DEFAULT) });
+						new String[] { JavaElementLabelsCore.getElementLabel(elements[0], JavaElementLabelsCore.ALL_DEFAULT),
+								JavaElementLabelsCore.getElementLabel(elements[0].getDeclaringType(), JavaElementLabelsCore.ALL_DEFAULT) });
 				status.addWarning(message);
 			}
 			if (warning.isNameWarning()) {
 				String message= Messages.format(
 						RefactoringCoreMessages.RenameTypeProcessor_renamed_method_is_overridden, new String[] {
-								JavaElementLabels.getElementLabel(elements[0], JavaElementLabels.ALL_DEFAULT),
-								JavaElementLabels.getElementLabel(elements[0].getDeclaringType(), JavaElementLabels.ALL_DEFAULT) });
+								JavaElementLabelsCore.getElementLabel(elements[0], JavaElementLabelsCore.ALL_DEFAULT),
+								JavaElementLabelsCore.getElementLabel(elements[0].getDeclaringType(), JavaElementLabelsCore.ALL_DEFAULT) });
 				status.addWarning(message);
 			}
 			for (IMethod element : elements)

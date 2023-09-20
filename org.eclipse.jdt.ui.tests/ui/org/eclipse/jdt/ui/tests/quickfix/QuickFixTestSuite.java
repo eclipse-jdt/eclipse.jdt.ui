@@ -35,6 +35,7 @@ import org.junit.runners.Suite;
 	LocalCorrectionsQuickFixTest.class,
 	LocalCorrectionsQuickFixTest1d7.class,
 	LocalCorrectionsQuickFixTest1d8.class,
+	LocalCorrectionsQuickFixTest10.class,
 	LocalCorrectionsQuickFixTest15.class,
 	TypeMismatchQuickFixTests.class,
 	ReorgQuickFixTest.class,
@@ -69,6 +70,7 @@ import org.junit.runners.Suite;
 	NullAnnotationsQuickFixTest.class,
 	NullAnnotationsQuickFixTest1d8.class,
 	NullAnnotationsQuickFixTest1d8Mix.class,
+	NullAnnotationsQuickFixTest9.class,
 	AnnotateAssistTest1d5.class,
 	AnnotateAssistTest1d8.class,
 	TypeAnnotationQuickFixTest.class

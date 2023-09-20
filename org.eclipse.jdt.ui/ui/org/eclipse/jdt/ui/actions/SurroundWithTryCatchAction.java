@@ -121,7 +121,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 	}
 
 	SurroundWithTryCatchRefactoring createRefactoring(ITextSelection selection, ICompilationUnit cu) {
-		return SurroundWithTryCatchRefactoring.create(cu, selection);
+		return SurroundWithTryCatchRefactoring.create(cu, selection.getOffset(), selection.getLength());
 	}
 
 	@Override

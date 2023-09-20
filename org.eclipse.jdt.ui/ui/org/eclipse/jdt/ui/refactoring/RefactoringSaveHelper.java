@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -69,23 +69,23 @@ public class RefactoringSaveHelper {
 	/**
 	 * Save mode to save all dirty editors (always ask).
 	 */
-	public static final int SAVE_ALL_ALWAYS_ASK= 1;
+	public static final int SAVE_ALL_ALWAYS_ASK= IRefactoringSaveModes.SAVE_ALL_ALWAYS_ASK;
 
 	/**
 	 * Save mode to save all dirty editors.
 	 */
-	public static final int SAVE_ALL= 2;
+	public static final int SAVE_ALL= IRefactoringSaveModes.SAVE_ALL;
 
 	/**
 	 * Save mode to not save any editors.
 	 */
-	public static final int SAVE_NOTHING= 3;
+	public static final int SAVE_NOTHING= IRefactoringSaveModes.SAVE_NOTHING;
 
 	/**
 	 * Save mode to save all editors that are known to cause trouble for Java refactorings, e.g.
 	 * editors on compilation units that are not in working copy mode.
 	 */
-	public static final int SAVE_REFACTORING= 4;
+	public static final int SAVE_REFACTORING= IRefactoringSaveModes.SAVE_REFACTORING;
 
 	/**
 	 * Creates a refactoring save helper with the given save mode.

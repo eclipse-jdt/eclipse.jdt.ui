@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2019 IBM Corporation and others.
+ * Copyright (c) 2006, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -202,8 +202,8 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 	}
 
 	private void handleDropMove(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException {
-		IJavaElement[] javaElements = ReorgUtils.getJavaElements(fElements);
-		IResource[] resources = ReorgUtils.getResources(fElements);
+		IJavaElement[] javaElements = ReorgUtilsCore.getJavaElements(fElements);
+		IResource[] resources = ReorgUtilsCore.getResources(fElements);
 		ReorgMoveStarter starter= ReorgMoveStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target));
 
 		if (starter != null)
@@ -211,8 +211,8 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 	}
 
 	private void handleDropCopy(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException {
-		IJavaElement[] javaElements = ReorgUtils.getJavaElements(fElements);
-		IResource[] resources = ReorgUtils.getResources(fElements);
+		IJavaElement[] javaElements = ReorgUtilsCore.getJavaElements(fElements);
+		IResource[] resources = ReorgUtilsCore.getResources(fElements);
 		ReorgCopyStarter starter = ReorgCopyStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target));
 
 		if (starter != null)
@@ -221,7 +221,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 
 	private int handleValidateCopy(Object target) throws JavaModelException {
 
-		final ICopyPolicy policy= ReorgPolicyFactory.createCopyPolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+		final ICopyPolicy policy= ReorgPolicyFactory.createCopyPolicy(ReorgUtilsCore.getResources(fElements), ReorgUtilsCore.getJavaElements(fElements));
 		fCopyProcessor= policy.canEnable() ? new JavaCopyProcessor(policy) : null;
 
 		if (!canCopyElements())
@@ -247,7 +247,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		if (target == null)
 			return DND.DROP_NONE;
 
-		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(ReorgUtilsCore.getResources(fElements), ReorgUtilsCore.getJavaElements(fElements));
 		fMoveProcessor= (policy.canEnable()) ? new JavaMoveProcessor(policy) : null;
 
 		if (!canMoveElements())

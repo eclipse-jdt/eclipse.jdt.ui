@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -43,6 +43,7 @@ import org.eclipse.ui.actions.DeleteResourceAction;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -90,7 +91,7 @@ public class DeleteAction extends SelectionDispatchAction {
 	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
-		if (ReorgUtils.containsOnlyProjects(selection.toList())) {
+		if (ReorgUtilsCore.containsOnlyProjects(selection.toList())) {
 			setEnabled(createWorkbenchAction(selection).isEnabled());
 			return;
 		}
@@ -192,7 +193,7 @@ public class DeleteAction extends SelectionDispatchAction {
 
 	@Override
 	public void run(IStructuredSelection selection) {
-		if (ReorgUtils.containsOnlyProjects(selection.toList())) {
+		if (ReorgUtilsCore.containsOnlyProjects(selection.toList())) {
 			createWorkbenchAction(selection).run();
 			return;
 		}

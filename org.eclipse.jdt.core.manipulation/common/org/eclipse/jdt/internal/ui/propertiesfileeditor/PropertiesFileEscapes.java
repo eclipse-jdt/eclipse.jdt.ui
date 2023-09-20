@@ -167,7 +167,7 @@ public class PropertiesFileEscapes {
 					// Read the xxxx
 					int value= 0;
 					if (x > len - 4) {
-						String exceptionMessage= Messages.format(PropertiesFileEditorMessages.PropertiesFileHover_MalformedEncoding, outBuffer.toString() + s.substring(x - 2));
+						String exceptionMessage= Messages.format(PropertiesFileEditorCoreMessages.PropertiesFileHover_MalformedEncoding, outBuffer.toString() + s.substring(x - 2));
 						throw new CoreException(new StatusInfo(IStatus.WARNING, exceptionMessage));
 					}
 					StringBuilder buf= new StringBuilder("\\u"); //$NON-NLS-1$
@@ -207,7 +207,7 @@ public class PropertiesFileEscapes {
 		if (isValidEscapedString) {
 			return outBuffer.toString();
 		} else {
-			String exceptionMessage= Messages.format(PropertiesFileEditorMessages.PropertiesFileHover_MalformedEncoding, outBuffer.toString());
+			String exceptionMessage= Messages.format(PropertiesFileEditorCoreMessages.PropertiesFileHover_MalformedEncoding, outBuffer.toString());
 			throw new CoreException(new StatusInfo(IStatus.WARNING, exceptionMessage));
 		}
 	}

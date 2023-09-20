@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 
 /**
@@ -117,7 +117,7 @@ public class TypedSource {
 	}
 	public static TypedSource[] createTypedSources(IJavaElement[] javaElements) throws CoreException {
 		//Map<ICompilationUnit, List<IJavaElement>>
-		Map<ICompilationUnit, List<IJavaElement>> grouped= ReorgUtils.groupByCompilationUnit(Arrays.asList(javaElements));
+		Map<ICompilationUnit, List<IJavaElement>> grouped= ReorgUtilsCore.groupByCompilationUnit(Arrays.asList(javaElements));
 		List<TypedSource> result= new ArrayList<>(javaElements.length);
 		for (Map.Entry<ICompilationUnit, List<IJavaElement>> entry : grouped.entrySet()) {
 			ICompilationUnit cu= entry.getKey();
@@ -132,7 +132,7 @@ public class TypedSource {
 	}
 
 	private static TypedSource[] createTypedSources(IJavaElement elem, SourceTuple tuple) throws CoreException {
-		if (! ReorgUtils.isInsideCompilationUnit(elem))
+		if (! ReorgUtilsCore.isInsideCompilationUnit(elem))
 			return null;
 		if (elem.getElementType() == IJavaElement.IMPORT_CONTAINER)
 			return createTypedSourcesForImportContainer(tuple, (IImportContainer)elem);

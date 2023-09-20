@@ -72,7 +72,6 @@ public final class PropertiesFileEditorMessages extends NLS {
 	public static String PropertiesCorrectionProcessor_rename_in_workspace_description;
 	public static String PropertiesFileAutoEditStrategy_showQuickAssist;
 	public static String PropertiesFileEditor_find_accessor_type;
-	public static String PropertiesFileHover_MalformedEncoding;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, PropertiesFileEditorMessages.class);

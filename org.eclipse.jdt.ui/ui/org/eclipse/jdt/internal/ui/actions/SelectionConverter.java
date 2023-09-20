@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,12 +33,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -49,6 +46,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.JavaProjectUtilities;
 
 public class SelectionConverter {
 
@@ -305,35 +303,7 @@ public class SelectionConverter {
 	}
 
 	public static IJavaElement resolveEnclosingElement(IJavaElement input, ITextSelection selection) throws JavaModelException {
-		IJavaElement atOffset= null;
-		if (input instanceof ICompilationUnit) {
-			ICompilationUnit cunit= (ICompilationUnit)input;
-			JavaModelUtil.reconcile(cunit);
-			atOffset= cunit.getElementAt(selection.getOffset());
-		} else if (input instanceof IClassFile) {
-			IClassFile cfile= (IClassFile)input;
-			atOffset= cfile.getElementAt(selection.getOffset());
-		} else {
-			return null;
-		}
-		if (atOffset == null) {
-			return input;
-		} else {
-			int selectionEnd= selection.getOffset() + selection.getLength();
-			IJavaElement result= atOffset;
-			if (atOffset instanceof ISourceReference) {
-				ISourceRange range= ((ISourceReference)atOffset).getSourceRange();
-				while (range.getOffset() + range.getLength() < selectionEnd) {
-					result= result.getParent();
-					if (! (result instanceof ISourceReference)) {
-						result= input;
-						break;
-					}
-					range= ((ISourceReference)result).getSourceRange();
-				}
-			}
-			return result;
-		}
+		return JavaProjectUtilities.resolveEnclosingElement(input, selection.getOffset(), selection.getLength());
 	}
 
 	/**

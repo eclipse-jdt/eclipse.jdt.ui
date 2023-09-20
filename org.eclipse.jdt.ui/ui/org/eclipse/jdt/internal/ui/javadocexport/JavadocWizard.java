@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -166,7 +167,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		fStore.updateDialogSettings(getDialogSettings(), checkedProjects);
 
 		// Wizard should not run with dirty editors
-		if (!new RefactoringSaveHelper(RefactoringSaveHelper.SAVE_ALL_ALWAYS_ASK).saveEditors(getShell())) {
+		if (!new RefactoringSaveHelper(IRefactoringSaveModes.SAVE_ALL_ALWAYS_ASK).saveEditors(getShell())) {
 			return false;
 		}
 

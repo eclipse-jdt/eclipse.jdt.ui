@@ -43,7 +43,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.model.JavaModelProvider;
 
@@ -117,7 +118,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			try {
 				projects= fJavaModel.getJavaProjects();
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaManipulationPlugin.log(e);
 				return new IProject[0];
 			}
 			IProject[] result= new IProject[projects.length];

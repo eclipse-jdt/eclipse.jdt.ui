@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1622,5 +1623,275 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testBug531511_unconfigurable_decl() throws Exception {
 		runBug531511Test(false, "@NNBDUnconfigurable", false, false);
+	}
+	@Test
+	public void testGH1294() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final String refPrefix,
+							final boolean errorOnEmptyName) {
+						return new IInputValidator() {
+							@Override
+							public String isValid(String newText) {
+								String validationStatus = validateNewRefName(newText, this,
+										refPrefix, errorOnEmptyName);
+								return validationStatus;
+							}
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(String refNameInput,
+							@NonNull Object repo, @NonNull String refPrefix,
+							final boolean errorOnEmptyName) {
+						return "";
+					}
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 5);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 'refPrefix' to '@NonNull'");
+
+		String preview= getPreviewContent(proposal);
+
+		assertEqualString(preview,
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final @NonNull String refPrefix,
+							final boolean errorOnEmptyName) {
+						return new IInputValidator() {
+							@Override
+							public String isValid(String newText) {
+								String validationStatus = validateNewRefName(newText, this,
+										refPrefix, errorOnEmptyName);
+								return validationStatus;
+							}
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(String refNameInput,
+							@NonNull Object repo, @NonNull String refPrefix,
+							final boolean errorOnEmptyName) {
+						return "";
+					}
+				}
+				""");
+	}
+
+	@Test
+	public void testGH1294_noQuickfix() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				import java.util.List;
+				interface IInputValidator {
+					public String isValid(String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final List<String> refPrefix,
+							final boolean errorOnEmptyName) {
+						return new IInputValidator() {
+							@Override
+							public String isValid(String newText) {
+								String validationStatus = validateNewRefName(newText, this,
+										refPrefix, errorOnEmptyName);
+								return validationStatus;
+							}
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(String refNameInput,
+							@NonNull Object repo, List<@NonNull String> refPrefix,
+							final boolean errorOnEmptyName) {
+						return "";
+					}
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		String actualProposals = proposals.stream().map(IJavaCompletionProposal::getDisplayString).sorted().collect(Collectors.joining("\n"));
+		assertEquals("proposals:",
+				"""
+				Add @SuppressWarnings 'null' to 'isValid()'
+				Add @SuppressWarnings 'null' to 'validationStatus'
+				Configure problem severity""",
+				actualProposals);
+	}
+
+	@Test
+	public void testGH1294_lambda() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final String refPrefix,
+							final boolean errorOnEmptyName) {
+						return (String newText) -> {
+								String validationStatus = validateNewRefName(newText, new Object(),
+										refPrefix, errorOnEmptyName);
+								return validationStatus;
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(String refNameInput,
+							@NonNull Object repo, @NonNull String refPrefix,
+							final boolean errorOnEmptyName) {
+						return "";
+					}
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 5);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 'refPrefix' to '@NonNull'");
+
+		String preview= getPreviewContent(proposal);
+
+		assertEqualString(preview,
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final @NonNull String refPrefix,
+							final boolean errorOnEmptyName) {
+						return (String newText) -> {
+								String validationStatus = validateNewRefName(newText, new Object(),
+										refPrefix, errorOnEmptyName);
+								return validationStatus;
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(String refNameInput,
+							@NonNull Object repo, @NonNull String refPrefix,
+							final boolean errorOnEmptyName) {
+						return "";
+					}
+				}
+				""");
+	}
+
+	@Test
+	public void testGH1294_varargs() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(@NonNull String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final String refPrefix,
+							final boolean errorOnEmptyName) {
+						return new IInputValidator() {
+							public String isValid(@NonNull String newText) {
+								String validationStatus = validateNewRefName(newText, refPrefix);
+								return validationStatus;
+							}
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(@NonNull String... refPrefix) {
+						return "";
+					}
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		// should not propose to change signature of varargs method validateNewRefName(String...)
+		assertNumberOfProposals(proposals, 4);
+		String actualProposals = proposals.stream().map(IJavaCompletionProposal::getDisplayString).sorted().collect(Collectors.joining("\n"));
+		assertEquals("proposals:",
+				"""
+				Add @SuppressWarnings 'null' to 'isValid()'
+				Add @SuppressWarnings 'null' to 'validationStatus'
+				Change parameter 'refPrefix' to '@NonNull'
+				Configure problem severity""",
+				actualProposals);
+	}
+
+	@Test
+	public void testGH1294_varargs_ok() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				interface IInputValidator {
+					public String isValid(@NonNull String newText);
+				}
+				public class Test {
+					public static IInputValidator getRefNameInputValidator(
+							final Object repo, final String refPrefix,
+							final boolean errorOnEmptyName) {
+						return new IInputValidator() {
+							public String isValid(@NonNull String newText) {
+								String validationStatus = validateNewRefName(newText, refPrefix);
+								return validationStatus;
+							}
+						};
+					}
+					@NonNull
+					public static String validateNewRefName(String s1, @NonNull String s2, @NonNull String... refPrefix) {
+						return "";
+					}
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		// should propose to change signature of validateNewRefName(String...) since non-varargs parameter is concerned
+		assertNumberOfProposals(proposals, 5);
+		String actualProposals = proposals.stream().map(IJavaCompletionProposal::getDisplayString).sorted().collect(Collectors.joining("\n"));
+		assertEquals("proposals:",
+				"""
+				Add @SuppressWarnings 'null' to 'isValid()'
+				Add @SuppressWarnings 'null' to 'validationStatus'
+				Change parameter 'refPrefix' to '@NonNull'
+				Change parameter of 'validateNewRefName(..)' to '@Nullable'
+				Configure problem severity""",
+				actualProposals);
 	}
 }

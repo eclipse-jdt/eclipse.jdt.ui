@@ -31,8 +31,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.ProposalCore;
 
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 
@@ -51,7 +53,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 
-	private LinkedProposalModel fLinkedProposalModel;
+	private LinkedProposalModelCore fLinkedProposalModel;
 
 	/**
 	 * Constructs a linked correction proposal.
@@ -69,14 +71,14 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	}
 
 	/* public only for tests. */
-	public LinkedProposalModel getLinkedProposalModel() {
+	public LinkedProposalModelCore getLinkedProposalModel() {
 		if (fLinkedProposalModel == null) {
-			fLinkedProposalModel= new LinkedProposalModel();
+			fLinkedProposalModel= new LinkedProposalModelCore();
 		}
 		return fLinkedProposalModel;
 	}
 
-	public void setLinkedProposalModel(LinkedProposalModel model) {
+	public void setLinkedProposalModel(LinkedProposalModelCore model) {
 		fLinkedProposalModel= model;
 	}
 
@@ -120,7 +122,8 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * no image is desired.
 	 */
 	public void addLinkedPositionProposal(String groupID, String proposal, Image image) {
-		getLinkedProposalModel().getPositionGroup(groupID, true).addProposal(proposal, image, 10);
+		ProposalCore p = new Proposal(proposal, image, 10);
+		getLinkedProposalModel().getPositionGroup(groupID, true).addProposal(p);
 	}
 
 	/**

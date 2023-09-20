@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2021, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -39,12 +40,17 @@ import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IDocElement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -54,6 +60,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
@@ -64,11 +72,13 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 
 public class QuickAssistProcessorUtil {
 
@@ -487,6 +497,135 @@ public class QuickAssistProcessorUtil {
 			}
 		}
 		return statements.size();
+	}
+
+	public static boolean isDeprecatedMethodCallWithReplacement(ASTNode node) {
+		if (!(node instanceof MethodInvocation)) {
+			node= node.getParent();
+			if (!(node instanceof MethodInvocation)) {
+				return false;
+			}
+		}
+		MethodInvocation methodInvocation= (MethodInvocation) node;
+		IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+		if (methodBinding == null) {
+			return false;
+		}
+		IMethod method= (IMethod)methodBinding.getJavaElement();
+		if (method == null) {
+			return false;
+		}
+		IAnnotationBinding[] annotations= methodBinding.getAnnotations();
+		for (IAnnotationBinding annotation : annotations) {
+			if (annotation.getAnnotationType().getQualifiedName().equals("java.lang.Deprecated")) { //$NON-NLS-1$
+				CompilationUnit sourceCu= (CompilationUnit)node.getRoot();
+				CompilationUnit cu= findCUForMethod(sourceCu, (ICompilationUnit)sourceCu.getJavaElement(), methodBinding);
+				if (cu == null) {
+					return false;
+				}
+				try {
+					MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cu);
+					Javadoc javadoc= methodDeclaration.getJavadoc();
+					if (javadoc == null) {
+						return false;
+					}
+					List<TagElement> tags= javadoc.tags();
+					for (TagElement tag : tags) {
+						if (tag.getTagName().equals("@deprecated")) { //$NON-NLS-1$
+							List<IDocElement> fragments= tag.fragments();
+							if (fragments.size() < 2) {
+								return false;
+							}
+							if (fragments.get(0) instanceof TextElement textElement) {
+								String text= textElement.getText().toLowerCase().trim();
+								if (text.endsWith("use") || text.endsWith("replace by")) { //$NON-NLS-1$ //$NON-NLS-2$
+									if (fragments.get(1) instanceof TagElement tagElement) {
+										if (tagElement.getTagName().equals("@link")) { //$NON-NLS-1$
+											List<IDocElement> linkFragments= tagElement.fragments();
+											if (linkFragments.size() == 1) {
+												IDocElement linkFragment= linkFragments.get(0);
+												if (linkFragment instanceof MethodRef methodRef) {
+													IMethodBinding refBinding= (IMethodBinding) methodRef.resolveBinding();
+													if (refBinding != null) {
+														class FindNewMethodVisitor extends ASTVisitor {
+															private boolean useMethodIsUsed= false;
+															private boolean referencesPrivate= false;
+															@Override
+															public boolean visit(MethodInvocation invocation) {
+																IMethodBinding binding= invocation.resolveMethodBinding();
+																if (binding != null) {
+																	if (binding.isEqualTo(refBinding)) {
+																		useMethodIsUsed= true;
+																	}
+																}
+																return false;
+															}
+															@Override
+															public boolean visit(SimpleName name) {
+																IBinding binding= name.resolveBinding();
+																if (binding instanceof IVariableBinding varBinding
+																		&& varBinding.isField()) {
+																	int modifiers= varBinding.getModifiers();
+																	if (Modifier.isPrivate(modifiers)) {
+																		referencesPrivate= true;
+																	}
+																}
+																return false;
+															}
+														public boolean isUseMethodUsed() {
+																return useMethodIsUsed;
+															}
+															public boolean referencesPrivateField() {
+																return referencesPrivate;
+															}
+														}
+														FindNewMethodVisitor findNewMethodVisitor= new FindNewMethodVisitor();
+														methodDeclaration.accept(findNewMethodVisitor);
+														if (!findNewMethodVisitor.isUseMethodUsed()) {
+															return false;
+														}
+														if (findNewMethodVisitor.referencesPrivateField()) {
+															if (methodInvocation.getRoot() != methodDeclaration.getRoot()) {
+																return false;
+															}
+														}
+														return true;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				} catch (JavaModelException e) {
+					// ignore
+				}
+			}
+		}
+		return false;
+
+	}
+
+	private static CompilationUnit findCUForMethod(CompilationUnit compilationUnit, ICompilationUnit cu, IMethodBinding methodBinding) {
+		ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getMethodDeclaration());
+		if (methodDecl == null) {
+			// is methodDecl defined in another CU?
+			ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getTypeDeclaration();
+			if (declaringTypeDecl.isFromSource()) {
+				ICompilationUnit targetCU= null;
+				try {
+					targetCU= ASTResolving.findCompilationUnitForBinding(cu, compilationUnit, declaringTypeDecl);
+				} catch (JavaModelException e) { /* can't do better */
+				}
+				if (targetCU != null) {
+					return ASTResolving.createQuickFixAST(targetCU, null);
+				}
+			}
+			return null;
+		}
+		return compilationUnit;
 	}
 
 }

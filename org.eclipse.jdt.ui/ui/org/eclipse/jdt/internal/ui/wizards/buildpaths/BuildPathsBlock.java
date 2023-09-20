@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,7 +47,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -74,7 +73,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -89,6 +87,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.util.JavaProjectUtilities;
+import org.eclipse.jdt.internal.ui.util.ResourcesUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -704,50 +704,11 @@ public class BuildPathsBlock {
 	// -------- creation -------------------------------
 
 	public static void createProject(IProject project, URI locationURI, IProgressMonitor monitor) throws CoreException {
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}
-		monitor.beginTask(NewWizardMessages.BuildPathsBlock_operationdesc_project, 10);
-
-		// create the project
-		try {
-			if (!project.exists()) {
-				IProjectDescription desc= project.getWorkspace().newProjectDescription(project.getName());
-				if (locationURI != null && ResourcesPlugin.getWorkspace().getRoot().getLocationURI().equals(locationURI)) {
-					locationURI= null;
-				}
-				desc.setLocationURI(locationURI);
-				project.create(desc, monitor);
-				monitor= null;
-			}
-			if (!project.isOpen()) {
-				project.open(monitor);
-				monitor= null;
-			}
-		} finally {
-			if (monitor != null) {
-				monitor.done();
-			}
-		}
+		ResourcesUtility.createProject(project, locationURI, monitor);
 	}
 
 	public static void addJavaNature(IProject project, IProgressMonitor monitor) throws CoreException {
-		if (monitor != null && monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		if (!project.hasNature(JavaCore.NATURE_ID)) {
-			IProjectDescription description = project.getDescription();
-			String[] prevNatures= description.getNatureIds();
-			String[] newNatures= new String[prevNatures.length + 1];
-			System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
-			newNatures[prevNatures.length]= JavaCore.NATURE_ID;
-			description.setNatureIds(newNatures);
-			project.setDescription(description, monitor);
-		} else {
-			if (monitor != null) {
-				monitor.worked(1);
-			}
-		}
+		JavaProjectUtilities.addJavaNature(project, monitor);;
 	}
 
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, OperationCanceledException {

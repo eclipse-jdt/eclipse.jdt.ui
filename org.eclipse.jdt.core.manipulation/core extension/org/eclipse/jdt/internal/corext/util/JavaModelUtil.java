@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.resources.ResourceAttributes;
 
 import org.eclipse.text.edits.TextEdit;
 
@@ -529,7 +530,8 @@ public final class JavaModelUtil {
 	public static boolean isEditable(ICompilationUnit cu)  {
 		Assert.isNotNull(cu);
 		IResource resource= cu.getPrimary().getResource();
-		return (resource.exists() && !resource.getResourceAttributes().isReadOnly());
+		ResourceAttributes ra= resource.exists() ? resource.getResourceAttributes() : null;
+		return (ra != null && !ra.isReadOnly());
 	}
 
 	/**

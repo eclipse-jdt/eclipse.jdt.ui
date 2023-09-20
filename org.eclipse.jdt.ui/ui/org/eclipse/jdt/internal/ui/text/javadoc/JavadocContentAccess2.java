@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2022 IBM Corporation and others.
+ * Copyright (c) 2008, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1482,15 +1482,62 @@ public class JavadocContentAccess2 {
 
 	private void handleText(String text) {
 		if (fLiteralContent == 0) {
-			fBuf.append(text);
+			handleUnicode(fBuf, text);
 		} else {
-			appendEscaped(fBuf, text);
+			text= appendEscaped(text);
+			handleUnicode(fBuf, text);
 		}
 	}
 
-	private static void appendEscaped(StringBuffer buf, String text) {
+	private static void handleUnicode(StringBuffer buf, String text) {
 		int nextToCopy= 0;
 		int length= text.length();
+		boolean seenBackSlash= false;
+		for (int i= 0; i < length; i++) {
+			char ch= text.charAt(i);
+			String rep= null;
+			switch (ch) {
+				case '\\':
+					seenBackSlash= true;
+					break;
+				case 'u':
+					if (seenBackSlash) {
+						seenBackSlash= false;
+						char ch1, ch2, ch3, ch4;
+						if (i + 4 < length) {
+							ch1= text.charAt(i+1);
+							ch2= text.charAt(i+2);
+							ch3= text.charAt(i+3);
+							ch4= text.charAt(i+4);
+							if (Character.digit(ch1, 16) != -1 &&
+									Character.digit(ch2, 16) != -1 &&
+									Character.digit(ch3, 16) != -1 &&
+									Character.digit(ch4, 16) != -1) {
+								rep="&#x" + ch1 + ch2 + ch3 + ch4 + ";"; //$NON-NLS-1$ //$NON-NLS-2$
+							}
+						}
+					}
+					break;
+				default:
+					seenBackSlash= false;
+					break;
+			}
+			if (rep != null) {
+				if (nextToCopy < i)
+					buf.append(text.substring(nextToCopy, i - 1));
+				buf.append(rep);
+				i += 4;
+				nextToCopy= i + 1;
+			}
+		}
+		if (nextToCopy < length)
+			buf.append(text.substring(nextToCopy));
+	}
+
+	private String appendEscaped(String text) {
+		int nextToCopy= 0;
+		int length= text.length();
+		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < length; i++) {
 			char ch= text.charAt(i);
 			String rep= null;
@@ -1517,6 +1564,7 @@ public class JavadocContentAccess2 {
 		}
 		if (nextToCopy < length)
 			buf.append(text.substring(nextToCopy));
+		return buf.toString();
 	}
 
 	private void handleInlineTagElement(TagElement node) {

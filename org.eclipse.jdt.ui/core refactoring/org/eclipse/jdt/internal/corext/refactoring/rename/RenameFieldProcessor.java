@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -66,6 +66,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
@@ -75,7 +76,7 @@ import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -101,9 +102,8 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
+import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -198,12 +198,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	@Override
 	public String getIdentifier() {
-		return IRefactoringProcessorIds.RENAME_FIELD_PROCESSOR;
+		return IRefactoringProcessorIdsCore.RENAME_FIELD_PROCESSOR;
 	}
 
 	@Override
 	public boolean isApplicable() throws CoreException {
-		return RefactoringAvailabilityTester.isRenameFieldAvailable(fField);
+		return RefactoringAvailabilityTesterCore.isRenameFieldAvailable(fField);
 	}
 
 	@Override
@@ -295,7 +295,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 
 	private String getDeclaringTypeLabel() {
-		return JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_DEFAULT);
+		return JavaElementLabelsCore.getElementLabel(fField.getDeclaringType(), JavaElementLabelsCore.ALL_DEFAULT);
 	}
 
 	@Override
@@ -483,7 +483,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	public int getDelegateCount() {
 		int count= 0;
 		try {
-			if (RefactoringAvailabilityTester.isDelegateCreationAvailable(getField()))
+			if (RefactoringAvailabilityTesterCore.isDelegateCreationAvailable(getField()))
 				count++;
 			if (fRenameGetter && getGetter() != null)
 				count++;
@@ -499,7 +499,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	@Override
 	public int getSaveMode() {
-		return RefactoringSaveHelper.SAVE_REFACTORING;
+		return IRefactoringSaveModes.SAVE_REFACTORING;
 	}
 
 	@Override
@@ -798,7 +798,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			JavaPlugin.log(exception);
 		}
 		final String description= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fField.getElementName()));
-		final String header= Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fField.getElementName()), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
+		final String header= Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fField.getElementName()), JavaElementLabelsCore.getElementLabel(fField.getParent(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED), getNewElementName()});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		if (fRenameGetter)
 			comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_getter);
@@ -857,7 +857,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		if (fIsRecordComponent) {
 			addAccessorOccurrences(new SubProgressMonitor(pm, 1), result);
 			if (fRenameLocalVariableProcessor != null) {
-				addLocalVariableOccurrences(new SubProgressMonitor(pm, 1), getNewElementName(), result);
+				addLocalVariableOccurrences(getNewElementName(), result);
 			}
 		} else {
 			pm.worked(1);
@@ -887,7 +887,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		rewrite.setResolveBindings(true);
 
 		// add delegate for the field
-		if (RefactoringAvailabilityTester.isDelegateCreationAvailable(fField)) {
+		if (RefactoringAvailabilityTesterCore.isDelegateCreationAvailable(fField)) {
 			FieldDeclaration fieldDeclaration= ASTNodeSearchUtil.getFieldDeclarationNode(fField, rewrite.getRoot());
 			if (fieldDeclaration.fragments().size() > 1) {
 				status.addWarning(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_more_than_one_fragment, BasicElementLabels.getJavaElementName(fField.getElementName())),
@@ -1000,7 +1000,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		}
 	}
 
-	private void addLocalVariableOccurrences(IProgressMonitor pm, String newName, RefactoringStatus status) throws CoreException {
+	private void addLocalVariableOccurrences(String newName, RefactoringStatus status) throws CoreException {
 		Assert.isTrue(this.fRenameLocalVariableProcessor != null);
 
 		int current= 0;
@@ -1114,7 +1114,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return new SearchResultGroup[0];
 
 		CollectingSearchRequestor requestor= null;
-		if (fDelegateUpdating && RefactoringAvailabilityTester.isDelegateCreationAvailable(getField())) {
+		if (fDelegateUpdating && RefactoringAvailabilityTesterCore.isDelegateCreationAvailable(getField())) {
 			// There will be two new matches inside the delegate (the invocation
 			// and the javadoc) which are OK and must not be reported.
 			final IField oldField= getFieldInWorkingCopy(declaringCuWorkingCopy, getCurrentElementName());

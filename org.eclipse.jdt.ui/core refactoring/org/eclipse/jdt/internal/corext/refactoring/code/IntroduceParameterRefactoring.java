@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,8 +28,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -86,7 +84,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComme
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
@@ -96,11 +94,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManagerCore;
+import org.eclipse.jdt.internal.ui.util.JavaProjectUtilities;
 
 
 public class IntroduceParameterRefactoring extends Refactoring implements IDelegateUpdating {
@@ -189,7 +187,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			if (! fSourceCU.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_syntax_error);
 
-			IJavaElement enclosingElement= SelectionConverter.resolveEnclosingElement(fSourceCU, new TextSelection(fSelectionStart, fSelectionLength));
+			IJavaElement enclosingElement= JavaProjectUtilities.resolveEnclosingElement(fSourceCU, fSelectionStart, fSelectionLength);
 			if (! (enclosingElement instanceof IMethod))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
 
@@ -212,7 +210,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 				}
 			} else {
 				// first try:
-				fChangeSignatureProcessor= RefactoringAvailabilityTester.isChangeSignatureAvailable(fMethod) ? new ChangeSignatureProcessor(fMethod) : null;
+				fChangeSignatureProcessor= RefactoringAvailabilityTesterCore.isChangeSignatureAvailable(fMethod) ? new ChangeSignatureProcessor(fMethod) : null;
 				if (fChangeSignatureProcessor == null)
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
 				fChangeSignatureRefactoring= new ProcessorBasedRefactoring(fChangeSignatureProcessor);
@@ -223,7 +221,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 					if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
 						// second try:
 						IMethod method= (IMethod) entry.getData();
-						fChangeSignatureProcessor= RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureProcessor(method) : null;
+						fChangeSignatureProcessor= RefactoringAvailabilityTesterCore.isChangeSignatureAvailable(method) ? new ChangeSignatureProcessor(method) : null;
 						if (fChangeSignatureProcessor == null) {
 							String msg= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_cannot_introduce, entry.getMessage());
 							return RefactoringStatus.createFatalErrorStatus(msg);
@@ -290,7 +288,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 				Type type= importRewrite.addImport(typeBinding, ast, importRewriteContext);
 				classInstanceCreation.setType(type);    // Should not touch the original AST ...
 				defaultValue= ASTNodes.asFormattedString(classInstanceCreation, 0, StubUtility.getLineDelimiterUsed(cuRewrite.getCu()),
-						FormatterProfileManager.getProjectSettings(cuRewrite.getCu().getJavaProject()));
+						FormatterProfileManagerCore.getProjectSettings(cuRewrite.getCu().getJavaProject()));
 				classInstanceCreation.setType(cicType); // ... so let's restore it right away.
 			}
 		}
@@ -580,8 +578,8 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		final String description= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fChangeSignatureProcessor.getMethod().getElementName()));
 		final String header= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fParameter.getNewName()), signature, BasicElementLabels.getJavaCodeString(ASTNodes.asString(fSelectedExpression))});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(extended.getProject(), this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureProcessor.getMethod(),
-				JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabelsCore.getTextLabel(fChangeSignatureProcessor.getMethod(),
+				JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, BasicElementLabels.getJavaCodeString(ASTNodes.asString(fSelectedExpression))));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, BasicElementLabels.getJavaElementName(getAddedParameterInfo().getNewName())));
 		return RefactoringSignatureDescriptorFactory.createIntroduceParameterDescriptor(extended.getProject(), description, comment.asString(), arguments, extended.getFlags());

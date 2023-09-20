@@ -52,7 +52,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
-				+ "    public void testSimple() {\n"
+				+ "    static String str = \"\" + //$NON-NLS-1$\n" //
+				+ "            \"public class B { \\n\" + //$NON-NLS-1$\n" //
+				+ "            \"   public \\nvoid foo() {\\n\" + //$NON-NLS-1$\n" //
+				+ "            \"       System.out.println(\\\"abc\\\");\\n\" + //$NON-NLS-1$\n" //
+				+ "            \"   }\\n\" + //$NON-NLS-1$\n" //
+				+ "            \"}\"; //$NON-NLS-1$\n" //
+				+ "\n" //
+				+ "    public void testSimple() {\n" //
 				+ "        // comment 1\n" //
 				+ "        String x = \"\" + //$NON-NLS-1$\n" //
     	        + "            \"public void foo() {\\n\" + //$NON-NLS-1$\n" //
@@ -91,6 +98,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "package test1;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
+				+ "    static String str = \"\"\"\n" //
+				+ "    \tpublic class B {\\s\n" //
+				+ "    \t   public\\s\n" //
+				+ "    \tvoid foo() {\n" //
+				+ "    \t       System.out.println(\"abc\");\n" //
+				+ "    \t   }\n" //
+				+ "    \t}\"\"\"; //$NON-NLS-1$\n" //
+				+ "\n" //
 				+ "    public void testSimple() {\n" //
 				+ "        // comment 1\n" //
 				+ "        String x = \"\"\"\n" //
@@ -269,6 +284,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            \"abcdef\" +\n" //
     	        + "            \"ghijkl\" + //$NON-NLS-1$\n" //
     	        + "            \"mnop\";\n" //
+    	        + "    }\n" //
+    	        + "\n" //
+   	            + "    public void testArrayInitializer() {\n" //
+				+ "        String[] x = { \"\" +\n" //
+    	        + "            \"abcdef\" +\n" //
+    	        + "            \"ghijkl\" + //$NON-NLS-1$\n" //
+    	        + "            \"mnop\"};\n" //
     	        + "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);

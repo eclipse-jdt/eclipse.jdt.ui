@@ -5446,4 +5446,65 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
+
+	@Test
+	public void testDoNotAddFinalForFieldUsedInLambdaFieldInitializer() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/769
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    interface I {\n" //
+				+ "        void run( //\n" //
+				+ "    }\n" //
+				+ "    private String f;\n" //
+				+ "    private String g;\n" //
+				+ "    I x = () -> {\n" //
+				+ "        g.concat(\"abc\");\n" //
+				+ "    };\n" //
+				+ "    public E() {\n" //
+				+ "        this.f= \"abc\";\n" //
+				+ "        this.g= \"def\";\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        x.run( //\n" //
+				+ "        System.out.println(f //\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n" //
+				+ "\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    interface I {\n" //
+				+ "        void run( //\n" //
+				+ "    }\n" //
+				+ "    private final String f;\n" //
+				+ "    private String g;\n" //
+				+ "    I x = () -> {\n" //
+				+ "        g.concat(\"abc\");\n" //
+				+ "    };\n" //
+				+ "    public E() {\n" //
+				+ "        this.f= \"abc\";\n" //
+				+ "        this.g= \"def\";\n" //
+				+ "    }\n" //
+				+ "    public void foo() {\n" //
+				+ "        x.run( //\n" //
+				+ "        System.out.println(f //\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n" //
+				+ "\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1},
+				new HashSet<>(Arrays.asList(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description)));
+	}
+
 }

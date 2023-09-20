@@ -64,9 +64,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.ProposalCore;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -602,13 +602,13 @@ public class QuickFixTest {
 		assertTrue("Not a LinkedCorrectionProposal", proposal instanceof LinkedCorrectionProposal);
 		LinkedCorrectionProposal linkedProposal = (LinkedCorrectionProposal)proposal;
 
-		LinkedProposalModel linkedProposalModel = linkedProposal.getLinkedProposalModel();
-		LinkedProposalPositionGroup positionGroup = linkedProposalModel.getPositionGroup(linkedGroup, false);
-		Proposal[] choices = positionGroup.getProposals();
+		LinkedProposalModelCore linkedProposalModel = linkedProposal.getLinkedProposalModel();
+		LinkedProposalPositionGroupCore positionGroup = linkedProposalModel.getPositionGroup(linkedGroup, false);
+		ProposalCore[] choices = positionGroup.getProposals();
 		assertEquals("Not same number of choices", expectedChoices.length, choices.length);
 		Arrays.sort(expectedChoices);
 		List<String> sortedChoices= Arrays.stream(choices)
-									.map(Proposal::getDisplayString)
+									.map(ProposalCore::getDisplayString)
 									.sorted()
 									.collect(Collectors.toList());
 		for (int i=0; i<expectedChoices.length; i++) {
@@ -619,12 +619,12 @@ public class QuickFixTest {
 		assertTrue("Not a LinkedCorrectionProposal", proposal instanceof LinkedCorrectionProposal);
 		LinkedCorrectionProposal linkedProposal = (LinkedCorrectionProposal)proposal;
 		linkedProposal.getChange(); // force computing the proposal details
-		LinkedProposalModel linkedProposalModel = linkedProposal.getLinkedProposalModel();
-		LinkedProposalPositionGroup positionGroup = linkedProposalModel.getPositionGroup(linkedGroup, false);
-		Proposal[] choices = positionGroup.getProposals();
+		LinkedProposalModelCore linkedProposalModel = linkedProposal.getLinkedProposalModel();
+		LinkedProposalPositionGroupCore positionGroup = linkedProposalModel.getPositionGroup(linkedGroup, false);
+		ProposalCore[] choices = positionGroup.getProposals();
 		assertTrue("Contains less number of choices", choices.length >= expectedChoices.length);
 		List<String> sortedChoices= Arrays.stream(choices)
-									.map(Proposal::getDisplayString)
+									.map(ProposalCore::getDisplayString)
 									.sorted()
 									.collect(Collectors.toList());
 		for (int i=0; i<expectedChoices.length; i++) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2021 IBM Corporation and others.
+ * Copyright (c) 2013, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
@@ -2662,6 +2663,212 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected});
+	}
+
+	@Test
+	public void testIssue721_fixDeprecatedCall1() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo(int a, int b) {\n");
+		buf.append("        return a + b;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /**\n");
+		buf.append("     * @deprecated use {@link #foo(int, int)} instead\n");
+		buf.append("     * @param x - x\n");
+		buf.append("     * @param y - y\n");
+		buf.append("     * @param z - z\n");
+		buf.append("     */\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public int foo(int x, int y, int z) {\n");
+		buf.append("        int k = 2 * y + 3 * z;\n");
+		buf.append("        return foo(x, k);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+
+		pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("    public int callfoo(int a, int b, int c) {\n");
+		buf.append("        E1 e1 = new E1();\n");
+		buf.append("        return e1.foo(a, b, c);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("    public int callfoo(int a, int b, int c) {\n");
+		buf.append("        E1 e1 = new E1();\n");
+		buf.append("        int k = 2 * b + 3 * c;\n");
+		buf.append("        return e1.foo(a, k);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected});
+	}
+
+	@Test
+	public void testIssue721_fixDeprecatedCall2() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int k = 4;\n");
+		buf.append("    public int foo(int a, int b) {\n");
+		buf.append("        return a + b;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /**\n");
+		buf.append("     * @deprecated use {@link #foo(int, int)} instead\n");
+		buf.append("     * @param x - x\n");
+		buf.append("     * @param y - y\n");
+		buf.append("     * @param z - z\n");
+		buf.append("     */\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public int foo(int x, int y, int z) {\n");
+		buf.append("        int k = 2 * y + 3 * z + k;\n");
+		buf.append("        return foo(x, k);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+
+		pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("    public int callfoo(int a, int b, int c) {\n");
+		buf.append("        E1 e1 = new E1();\n");
+		buf.append("        return e1.foo(a, b, c);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertProposalDoesNotExist(proposals, FixMessages.InlineDeprecatedMethod_msg);
+	}
+
+	// issue 717 : support import quick fix for annotations
+	@Test
+	public void testIssue717_1() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java1d8ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Documented;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@Documented\n");
+		buf.append("@interface NonCritical { }\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Documented;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@Documented\n");
+		buf.append("@interface NonCritical { }\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		String expected1 = buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
+	// issue 717 : support import quick fix for annotations
+	@Test
+	public void testIssue717_2() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java1d8ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Documented;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(value=ElementType.TYPE_USE)\n");
+		buf.append("@Documented\n");
+		buf.append("@interface NonCritical { }\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.Documented;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(value=ElementType.TYPE_USE)\n");
+		buf.append("@Documented\n");
+		buf.append("@interface NonCritical { }\n");
+		buf.append("class E {\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		String expected1 = buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
 }
