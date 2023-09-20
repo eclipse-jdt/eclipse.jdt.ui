@@ -27,10 +27,10 @@ import java.util.zip.ZipEntry;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 
 import org.eclipse.equinox.frameworkadmin.BundleInfo;
 import org.eclipse.jdt.junit.JUnitCore;
-import org.eclipse.osgi.service.resolver.VersionRange;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -252,7 +252,7 @@ public class BuildPathSupport {
 				if (bundleLocation != null) {
 					// Try exact version
 					Version version= new Version(resolvedVersion);
-					srcLocation= getBundleLocation(sourceBundleId, new VersionRange(version, true, version, true), true);
+					srcLocation= getBundleLocation(sourceBundleId, new VersionRange(VersionRange.LEFT_CLOSED, version,  version, VersionRange.RIGHT_CLOSED), true);
 				}
 				if (srcLocation == null) {
 					// Try version range
