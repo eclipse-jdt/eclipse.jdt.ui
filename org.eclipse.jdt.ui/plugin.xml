@@ -7227,7 +7227,7 @@
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp"
             id="org.eclipse.jdt.ui.cleanup.reduce_indentation"
-            runAfter="org.eclipse.jdt.ui.cleanup.variables">
+            runAfter="org.eclipse.jdt.ui.cleanup.else_if">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp"
