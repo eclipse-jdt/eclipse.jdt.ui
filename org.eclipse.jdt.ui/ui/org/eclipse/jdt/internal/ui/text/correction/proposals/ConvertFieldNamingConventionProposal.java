@@ -14,6 +14,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import java.text.MessageFormat;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -33,7 +35,6 @@ import org.eclipse.jdt.core.IField;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
@@ -45,9 +46,6 @@ public class ConvertFieldNamingConventionProposal implements IJavaCompletionProp
 
 	private int offset;
 
-	@SuppressWarnings("unused")
-	private int fLength;
-
 	private int cursorPosition;
 
 	private int fRelevance;
@@ -58,18 +56,15 @@ public class ConvertFieldNamingConventionProposal implements IJavaCompletionProp
 
 	private IField fSelectedField;
 
-	@SuppressWarnings("unused")
-	private IInvocationContext context;
+	private String convertFieldUsingConstantNamingAdditionalInfo= "Rename the field {0} to {1}"; //$NON-NLS-1$
 
-	public ConvertFieldNamingConventionProposal(String replacement, int offset, int length, int cursorPosition, Image image, IField selectedField, IInvocationContext context) {
+	public ConvertFieldNamingConventionProposal(String replacement, int offset, int cursorPosition, Image image, IField selectedField) {
 		this.replacement= replacement;
 		this.offset= offset;
-		this.fLength= length;
 		this.cursorPosition= cursorPosition;
 		this.fRelevance= IProposalRelevance.FIELD_NAMING_CONVENTION;
 		this.image= image;
 		this.fSelectedField= selectedField;
-		this.context= context;
 	}
 
 	@Override
@@ -103,7 +98,7 @@ public class ConvertFieldNamingConventionProposal implements IJavaCompletionProp
 
 	@Override
 	public String getAdditionalProposalInfo() {
-		return null;
+		return MessageFormat.format(convertFieldUsingConstantNamingAdditionalInfo, fSelectedField.getElementName(), replacement);
 	}
 
 	@Override

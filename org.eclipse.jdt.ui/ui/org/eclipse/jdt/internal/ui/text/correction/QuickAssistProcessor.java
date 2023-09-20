@@ -281,6 +281,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	public static final String FIELD_NAMING_CONVENTION_ID= "org.eclipse.jdt.ui.correction.convertToConstantNamingConvention.assist"; //$NON-NLS-1$
 
+	public static final String FIELD_NAMING_PATTERN= "^[A-Z0-9]+(_[A-Z0-9]+)*$"; //$NON-NLS-1$
 	public QuickAssistProcessor() {
 		super();
 	}
@@ -4539,7 +4540,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		SimpleName simpleName= (SimpleName) node;
 		String selectedField= simpleName.toString();
 		int offset= node.getStartPosition();
-		int length= node.getLength();
 		if (simpleName.getAST().apiLevel() >= ASTHelper.JLS10 && simpleName.isVar()) {
 			return false;
 		}
@@ -4555,6 +4555,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		CompilationUnit cu= context.getASTRoot();
 		VariableDeclarationFragment vdf= (VariableDeclarationFragment) ASTNodes.findDeclaration(binding, cu);
+		if (vdf == null) {
+			return false;
+		}
 		FieldDeclaration fd= (FieldDeclaration) vdf.getParent();
 		int modifier= fd.getModifiers();
 		if (!Flags.isStatic(modifier) || !Flags.isFinal(modifier)) {
@@ -4564,24 +4567,31 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
+		String newName= convertToConstantName(selectedField);
+		AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration) fd.getParent();
+		if (typeDecl == null) {
+			return false;
+		}
+		FieldDeclarationChecker fdChecker= new FieldDeclarationChecker();
+		typeDecl.accept(fdChecker);
+		if (fdChecker.getFieldDeclarationList().contains(newName)) {
+			return false;
+		}
+
 		if (resultingCollections == null) {
 			return true;
 		}
 
-		String newName= convertToConstantName(selectedField);
-		if (!newName.equals(selectedField)) {
-			IField iField= (IField) binding.getJavaElement();
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
-			ConvertFieldNamingConventionProposal proposal= new ConvertFieldNamingConventionProposal(newName, offset, length, offset, image, iField, context);
-			proposal.setCommandId(FIELD_NAMING_CONVENTION_ID);
-			resultingCollections.add(proposal);
-		}
-
+		IField iField= (IField) binding.getJavaElement();
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
+		ConvertFieldNamingConventionProposal proposal= new ConvertFieldNamingConventionProposal(newName, offset, offset, image, iField);
+		proposal.setCommandId(FIELD_NAMING_CONVENTION_ID);
+		resultingCollections.add(proposal);
 		return true;
 	}
 
 	private boolean isValidConstantName(String identifier) {
-		Pattern pattern= Pattern.compile("^[A-Z0-9]+(_[A-Z0-9]+)*$"); //$NON-NLS-1$
+		Pattern pattern= Pattern.compile(FIELD_NAMING_PATTERN);
 		Matcher matcher= pattern.matcher(identifier);
 		return matcher.matches();
 	}
@@ -4602,5 +4612,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		return constantNaming.toString().replaceAll("_{2,}", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+}
+
+final class FieldDeclarationChecker extends ASTVisitor {
+	private final List<String> fieldDeclarationList= new ArrayList<>();
+	@Override
+	public boolean visit(FieldDeclaration fieldDecl) {
+		for (Object fragment : fieldDecl.fragments()) {
+			if (fragment instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment varDecl= (VariableDeclarationFragment) fragment;
+				fieldDeclarationList.add(varDecl.getName().toString());
+			}
+		}
+		return true;
+	}
+	public List<String> getFieldDeclarationList() {
+		return fieldDeclarationList;
 	}
 }
