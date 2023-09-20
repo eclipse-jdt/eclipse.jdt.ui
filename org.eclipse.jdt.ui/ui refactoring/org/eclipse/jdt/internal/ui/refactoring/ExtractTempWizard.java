@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
 public class ExtractTempWizard extends RefactoringWizard {
 
 	/* package */ static final String DIALOG_SETTING_SECTION= "ExtractTempWizard"; //$NON-NLS-1$
+	private static Button checkBoxForAllInFile= null;
 
 	public ExtractTempWizard(ExtractTempRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
@@ -105,8 +106,9 @@ public class ExtractTempWizard extends RefactoringWizard {
 
 			addReplaceAllCheckbox(result, layouter);
 			addReplaceAllInFileCheckbox(result, layouter);
-			addDeclareTypeVarCheckbox(result, layouter);
 			addDeclareFinalCheckbox(result, layouter);
+			addDeclareTypeVarCheckbox(result, layouter);
+
 
 
 
@@ -141,27 +143,32 @@ public class ExtractTempWizard extends RefactoringWizard {
 				public void widgetSelected(SelectionEvent e) {
 					fSettings.put(REPLACE_ALL, checkBox.getSelection());
 					getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
+					if (checkBox.getSelection()) {
+						checkBoxForAllInFile.setEnabled(true);
+					} else {
+						checkBoxForAllInFile.setEnabled(false);
+						checkBoxForAllInFile.setSelection(false);
+						fSettings.put(REPLACE_ALL_IN_FILE, checkBoxForAllInFile.getSelection());
+						getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBoxForAllInFile.getSelection());
+					}
 				}
 			});
 		}
 
 		private void addReplaceAllInFileCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.ExtractTempInputPage_replace_all_in_file;
-			boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrencesInThisFile();
-			final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
-			getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBox.getSelection());
-			checkBox.addSelectionListener(new SelectionAdapter() {
+			boolean defaultValue= false;
+			checkBoxForAllInFile= createCheckbox(result, title, defaultValue, layouter);
+			getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBoxForAllInFile.getSelection());
+			checkBoxForAllInFile.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					fSettings.put(REPLACE_ALL_IN_FILE, checkBox.getSelection());
-					if (checkBox.getSelection()) {
-						fSettings.put(REPLACE_ALL, true);
-						getExtractTempRefactoring().setReplaceAllOccurrences(true);
-					}
-					getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBox.getSelection());
+					fSettings.put(REPLACE_ALL_IN_FILE, checkBoxForAllInFile.getSelection());
+					getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBoxForAllInFile.getSelection());
 				}
 			});
 		}
+
 
 		private void addDeclareFinalCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.ExtractTempInputPage_declare_final;
