@@ -424,9 +424,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				 */
 				@Override
 				public boolean isExpandable(Object element) {
-					if (isExpandableNode(element)) {
-						return false;
-					}
 					if (hasFilters()) {
 						return getFilteredChildren(element).length > 0;
 					}

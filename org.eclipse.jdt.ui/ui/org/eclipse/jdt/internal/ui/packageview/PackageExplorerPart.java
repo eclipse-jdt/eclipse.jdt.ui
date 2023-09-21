@@ -285,9 +285,6 @@ public class PackageExplorerPart extends ViewPart
 			if (parent instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) parent).isArchive()) {
 				return false;
 			}
-			if(isExpandableNode(parent)) {
-				return false;
-			}
 			return true;
 		}
 
