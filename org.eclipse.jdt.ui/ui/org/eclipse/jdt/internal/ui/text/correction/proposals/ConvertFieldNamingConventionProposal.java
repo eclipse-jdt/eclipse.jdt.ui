@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
 public class ConvertFieldNamingConventionProposal implements IJavaCompletionProposal, ICommandAccess {
@@ -55,8 +56,6 @@ public class ConvertFieldNamingConventionProposal implements IJavaCompletionProp
 	private Image image;
 
 	private IField fSelectedField;
-
-	private String convertFieldUsingConstantNamingAdditionalInfo= "Rename the field {0} to {1}"; //$NON-NLS-1$
 
 	public ConvertFieldNamingConventionProposal(String replacement, int offset, int cursorPosition, Image image, IField selectedField) {
 		this.replacement= replacement;
@@ -98,12 +97,12 @@ public class ConvertFieldNamingConventionProposal implements IJavaCompletionProp
 
 	@Override
 	public String getAdditionalProposalInfo() {
-		return MessageFormat.format(convertFieldUsingConstantNamingAdditionalInfo, fSelectedField.getElementName(), replacement);
+		return MessageFormat.format(CorrectionMessages.QuickAssistProcessor_convert_constant_name_description, fSelectedField.getElementName(), replacement);
 	}
 
 	@Override
 	public String getDisplayString() {
-		return "Convert to Constant Naming Convention"; //$NON-NLS-1$
+		return CorrectionMessages.QuickAssistProcessor_convert_constant_name;
 	}
 
 	@Override

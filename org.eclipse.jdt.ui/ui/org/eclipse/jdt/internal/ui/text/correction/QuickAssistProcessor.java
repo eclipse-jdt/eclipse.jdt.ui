@@ -281,7 +281,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	public static final String FIELD_NAMING_CONVENTION_ID= "org.eclipse.jdt.ui.correction.convertToConstantNamingConvention.assist"; //$NON-NLS-1$
 
-	public static final String FIELD_NAMING_PATTERN= "^[A-Z0-9]+(_[A-Z0-9]+)*$"; //$NON-NLS-1$
+	public static final Pattern FIELD_NAMING_PATTERN= Pattern.compile("^[A-Z0-9]+(_[A-Z0-9]+)*$"); //$NON-NLS-1$
+
 	public QuickAssistProcessor() {
 		super();
 	}
@@ -4591,7 +4592,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private boolean isValidConstantName(String identifier) {
-		Pattern pattern= Pattern.compile(FIELD_NAMING_PATTERN);
+		Pattern pattern= FIELD_NAMING_PATTERN;
 		Matcher matcher= pattern.matcher(identifier);
 		return matcher.matches();
 	}
