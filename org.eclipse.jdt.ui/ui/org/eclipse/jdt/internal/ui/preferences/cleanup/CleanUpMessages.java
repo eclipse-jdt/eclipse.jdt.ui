@@ -171,10 +171,13 @@ public class CleanUpMessages extends NLS {
 	public static String SourceFixingTabPage_warning;
 
 	public static String SourceFixingTabPage_GroupName_standardCode;
+	public static String SourceFixingTabPage_GroupName_deprecated;
 
 	public static String SourceFixingTabPage_CheckboxName_InvertEquals;
 	public static String SourceFixingTabPage_CheckboxName_CheckSignOfBitwiseOperation;
 	public static String SourceFixingTabPage_CheckboxName_StandardComparison;
+
+	public static String SourceFixingTabPage_CheckboxName_ReplaceDeprecatedMethodCall;
 
 	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
 
