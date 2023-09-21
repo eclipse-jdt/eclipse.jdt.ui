@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
@@ -44,6 +45,7 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
 public class ExtractTempWizard extends RefactoringWizard {
 
 	/* package */ static final String DIALOG_SETTING_SECTION= "ExtractTempWizard"; //$NON-NLS-1$
+	private static Button checkBoxForAllInFile= null;
 
 	public ExtractTempWizard(ExtractTempRefactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
@@ -66,6 +68,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 
 		private static final String DECLARE_FINAL= "declareFinal";  //$NON-NLS-1$
 		private static final String REPLACE_ALL= "replaceOccurrences";  //$NON-NLS-1$
+		private static final String REPLACE_ALL_IN_FILE= "replaceOccurrencesInThisFile";  //$NON-NLS-1$
 		private static final String DECLARE_TYPE_VAR= "declarevariableTypeVar"; //$NON-NLS-1$
 
 		private final boolean fInitialValid;
@@ -102,8 +105,12 @@ public class ExtractTempWizard extends RefactoringWizard {
 			layouter.perform(label, text, 1);
 
 			addReplaceAllCheckbox(result, layouter);
+			addReplaceAllInFileCheckbox(result, layouter);
 			addDeclareFinalCheckbox(result, layouter);
 			addDeclareTypeVarCheckbox(result, layouter);
+
+
+
 
 			validateTextField(text.getText());
 
@@ -118,32 +125,58 @@ public class ExtractTempWizard extends RefactoringWizard {
 				fSettings.put(DECLARE_FINAL, false);
 				fSettings.put(DECLARE_TYPE_VAR, false);
 				fSettings.put(REPLACE_ALL, true);
+				fSettings.put(REPLACE_ALL_IN_FILE, false);
 			}
 			getExtractTempRefactoring().setDeclareFinal(fSettings.getBoolean(DECLARE_FINAL));
 			getExtractTempRefactoring().setDeclareVarType(fSettings.getBoolean(DECLARE_TYPE_VAR));
 			getExtractTempRefactoring().setReplaceAllOccurrences(fSettings.getBoolean(REPLACE_ALL));
+			getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(fSettings.getBoolean(REPLACE_ALL_IN_FILE));
 		}
 
 		private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.ExtractTempInputPage_replace_all;
 			boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrences();
-			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+			final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
 			getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
-			checkBox.addSelectionListener(new SelectionAdapter(){
+			checkBox.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fSettings.put(REPLACE_ALL, checkBox.getSelection());
 					getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
+					if (checkBox.getSelection()) {
+						checkBoxForAllInFile.setEnabled(true);
+					} else {
+						checkBoxForAllInFile.setEnabled(false);
+						checkBoxForAllInFile.setSelection(false);
+						fSettings.put(REPLACE_ALL_IN_FILE, checkBoxForAllInFile.getSelection());
+						getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBoxForAllInFile.getSelection());
+					}
 				}
 			});
 		}
 
+		private void addReplaceAllInFileCheckbox(Composite result, RowLayouter layouter) {
+			String title= RefactoringMessages.ExtractTempInputPage_replace_all_in_file;
+			boolean defaultValue= false;
+			checkBoxForAllInFile= createCheckboxIndented(result, title, defaultValue, layouter);
+			getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBoxForAllInFile.getSelection());
+			checkBoxForAllInFile.setEnabled(getExtractTempRefactoring().replaceAllOccurrences());
+			checkBoxForAllInFile.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					fSettings.put(REPLACE_ALL_IN_FILE, checkBoxForAllInFile.getSelection());
+					getExtractTempRefactoring().setReplaceAllOccurrencesInThisFile(checkBoxForAllInFile.getSelection());
+				}
+			});
+		}
+
+
 		private void addDeclareFinalCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.ExtractTempInputPage_declare_final;
 			boolean defaultValue= getExtractTempRefactoring().declareFinal();
-			final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+			final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
 			getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
-			checkBox.addSelectionListener(new SelectionAdapter(){
+			checkBox.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					fSettings.put(DECLARE_FINAL, checkBox.getSelection());
@@ -156,9 +189,9 @@ public class ExtractTempWizard extends RefactoringWizard {
 			if (getExtractTempRefactoring().isVarTypeAllowed()) {
 				String title= RefactoringMessages.ExtractTempInputPage_declare_type_var;
 				boolean defaultValue= getExtractTempRefactoring().declareVarType();
-				final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+				final Button checkBox= createCheckbox(result, title, defaultValue, layouter);
 				getExtractTempRefactoring().setDeclareVarType(checkBox.getSelection());
-				checkBox.addSelectionListener(new SelectionAdapter(){
+				checkBox.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						fSettings.put(DECLARE_TYPE_VAR, checkBox.getSelection());
@@ -192,6 +225,17 @@ public class ExtractTempWizard extends RefactoringWizard {
 
 		private static Button createCheckbox(Composite parent, String title, boolean value, RowLayouter layouter){
 			Button checkBox= new Button(parent, SWT.CHECK);
+			checkBox.setText(title);
+			checkBox.setSelection(value);
+			layouter.perform(checkBox);
+			return checkBox;
+		}
+
+		private static Button createCheckboxIndented(Composite parent, String title, boolean value, RowLayouter layouter){
+			Button checkBox= new Button(parent, SWT.CHECK);
+			GridData gd= new GridData();
+			gd.horizontalIndent= 20;
+			checkBox.setLayoutData(gd);
 			checkBox.setText(title);
 			checkBox.setSelection(value);
 			layouter.perform(checkBox);
