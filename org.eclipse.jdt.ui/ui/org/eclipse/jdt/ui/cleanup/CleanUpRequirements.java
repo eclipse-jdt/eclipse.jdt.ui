@@ -103,4 +103,14 @@ public final class CleanUpRequirements {
 		return requirementsCore.requiresChangedRegions();
 	}
 
+	/**
+	 * Convert to a core element
+	 * @return the underlying core element
+	 *
+	 * @since 3.31
+	 */
+	public CleanUpRequirementsCore toCore() {
+		return requirementsCore;
+	}
+
 }

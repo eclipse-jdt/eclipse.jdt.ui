@@ -10,9 +10,16 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - moved constants from org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper
  *******************************************************************************/
 package org.eclipse.jdt.ui.refactoring;
 
+/**
+ * Constants moved from RefactoringSaveHelper for the purposes of making them
+ * available to non-UI bundles.
+ *
+ * @since 1.20
+ */
 public interface IRefactoringSaveModes {
 
 	/**
