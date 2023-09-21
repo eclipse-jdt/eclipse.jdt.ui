@@ -23,6 +23,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 
 /**
@@ -53,7 +54,7 @@ public class MyQuickFixProcessor implements IQuickFixProcessor {
 
 	@Override
 	public IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
-		for (IProblemLocation location : locations) {
+		for (IProblemLocationCore location : locations) {
 			if (location.getProblemId() == IProblem.NumericValueOutOfRange) {
 				return getNumericValueOutOfRangeCorrection(context, location);
 			}
@@ -61,7 +62,7 @@ public class MyQuickFixProcessor implements IQuickFixProcessor {
 		return null;
 	}
 
-	private IJavaCompletionProposal[] getNumericValueOutOfRangeCorrection(IInvocationContext context, IProblemLocation location) {
+	private IJavaCompletionProposal[] getNumericValueOutOfRangeCorrection(IInvocationContext context, IProblemLocationCore location) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal("Change to 0", cu, location.getOffset(), location.getLength(), "0", 5);

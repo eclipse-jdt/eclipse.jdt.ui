@@ -17,14 +17,14 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.TypeAnnotationRewriteOperations.MoveTypeAnnotationRewriteOperation;
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 public class TypeAnnotationFix extends CompilationUnitRewriteOperationsFix {
 	public TypeAnnotationFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation operation) {
 		super(name, compilationUnit, operation);
 	}
 
-	public static TypeAnnotationFix createMoveAnnotationsToTypeAnnotationsFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+	public static TypeAnnotationFix createMoveAnnotationsToTypeAnnotationsFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
 		MoveTypeAnnotationRewriteOperation operation= new MoveTypeAnnotationRewriteOperation(compilationUnit, problem);
 		return new TypeAnnotationFix(operation.isMove() ? FixMessages.TypeAnnotationFix_move : FixMessages.TypeAnnotationFix_remove, compilationUnit, operation);
 	}

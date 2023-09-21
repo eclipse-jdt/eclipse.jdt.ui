@@ -61,7 +61,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -2100,8 +2100,8 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 			IInvocationContext context= new AssistContext(cu,  0, 0);
 			IEditorInput input= EditorUtility.getEditorInput(cu);
-			IProblemLocation location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
-			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+			IProblemLocationCore location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocationCore[] { location }, proposals);
 			assertStatusOk(status);
 
 			assertNumberOfProposals(proposals, 2);
@@ -2172,14 +2172,14 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 			IInvocationContext context= new AssistContext(cu, 0, 0);
 			IEditorInput input= EditorUtility.getEditorInput(cu);
-			IProblemLocation location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
-			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+			IProblemLocationCore location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocationCore[] { location }, proposals);
 			assertStatusOk(status);
 
 			IInvocationContext context2= new AssistContext(cu, 0, 0);
 			IEditorInput input2= EditorUtility.getEditorInput(cu);
-			IProblemLocation location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input2, markers2[0]);
-			status= JavaCorrectionProcessor.collectCorrections(context2, new IProblemLocation[] { location2 }, proposals);
+			IProblemLocationCore location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input2, markers2[0]);
+			status= JavaCorrectionProcessor.collectCorrections(context2, new IProblemLocationCore[] { location2 }, proposals);
 			assertStatusOk(status);
 
 			assertNumberOfProposals(proposals, 4);
@@ -2264,14 +2264,14 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 			IInvocationContext context= new AssistContext(cu1, 0, 0);
 			IEditorInput input= EditorUtility.getEditorInput(cu1);
-			IProblemLocation location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
-			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+			IProblemLocationCore location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocationCore[] { location }, proposals);
 			assertStatusOk(status);
 
 			IInvocationContext context2= new AssistContext(cu2, 0, 0);
 			IEditorInput input2= EditorUtility.getEditorInput(cu2);
-			IProblemLocation location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input2, markers2[0]);
-			status= JavaCorrectionProcessor.collectCorrections(context2, new IProblemLocation[] { location2 }, proposals);
+			IProblemLocationCore location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input2, markers2[0]);
+			status= JavaCorrectionProcessor.collectCorrections(context2, new IProblemLocationCore[] { location2 }, proposals);
 			assertStatusOk(status);
 
 			assertNumberOfProposals(proposals, 4);
@@ -2360,14 +2360,14 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 			IInvocationContext context= new AssistContext(cu1, 0, 0);
 			IEditorInput input= EditorUtility.getEditorInput(cu1);
-			IProblemLocation location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
-			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+			IProblemLocationCore location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocationCore[] { location }, proposals);
 			assertStatusOk(status);
 
 			IInvocationContext context2= new AssistContext(cu2, 0, 0);
 			IEditorInput input2= EditorUtility.getEditorInput(cu2);
-			IProblemLocation location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input2, markers2[0]);
-			status= JavaCorrectionProcessor.collectCorrections(context2, new IProblemLocation[] { location2 }, proposals);
+			IProblemLocationCore location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input2, markers2[0]);
+			status= JavaCorrectionProcessor.collectCorrections(context2, new IProblemLocationCore[] { location2 }, proposals);
 			assertStatusOk(status);
 
 			assertNumberOfProposals(proposals, 4);

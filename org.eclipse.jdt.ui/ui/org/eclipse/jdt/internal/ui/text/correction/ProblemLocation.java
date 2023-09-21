@@ -34,6 +34,10 @@ public class ProblemLocation extends ProblemLocationCore implements IProblemLoca
 						annotation.getMarkerType() != null ? annotation.getMarkerType() : IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 	}
 
+	public ProblemLocation(IProblemLocationCore core) {
+		super(core.getOffset(), core.getLength(), core.getProblemId(), core.getProblemArguments(), core.isError(), core.getMarkerType());
+	}
+
 	public ProblemLocation(int offset, int length, int id, String[] arguments, boolean isError, String markerType) {
 		super(offset, length, id, arguments, isError, markerType);
 	}

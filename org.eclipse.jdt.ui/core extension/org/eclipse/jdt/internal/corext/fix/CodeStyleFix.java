@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.corext.fix;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 import org.eclipse.jdt.internal.ui.fix.CleanUpFixWrapper;
 
@@ -39,7 +39,7 @@ public class CodeStyleFix {
 				changeIndirectStaticAccessToDirect, qualifyMethodAccess, qualifyStaticMethodAccess, removeFieldQualifier, removeMethodQualifier));
 	}
 
-	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocationCore[] problems,
 			boolean addThisQualifier,
 			boolean changeNonStaticAccessToStatic,
 			boolean changeIndirectStaticAccessToDirect) {

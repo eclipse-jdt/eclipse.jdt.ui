@@ -21,11 +21,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 /**
  * Fix which removes unused code.
@@ -64,28 +62,28 @@ public class UnusedCodeFix implements IProposableFix {
 		return cleanUpFixCore.getStatus();
 	}
 
-	public static UnusedCodeFix createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		return wrap(UnusedCodeFixCore.createRemoveUnusedImportFix(compilationUnit, (ProblemLocation)problem));
+	public static UnusedCodeFix createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+		return wrap(UnusedCodeFixCore.createRemoveUnusedImportFix(compilationUnit, problem));
 	}
 
 	private static UnusedCodeFix wrap(UnusedCodeFixCore coreFix) {
 		return coreFix == null ? null : new UnusedCodeFix(coreFix);
 	}
 
-	public static UnusedCodeFix createUnusedMemberFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean removeAllAssignements) {
-		return wrap(UnusedCodeFixCore.createUnusedMemberFix(compilationUnit, (ProblemLocation)problem, removeAllAssignements));
+	public static UnusedCodeFix createUnusedMemberFix(CompilationUnit compilationUnit, IProblemLocationCore problem, boolean removeAllAssignements) {
+		return wrap(UnusedCodeFixCore.createUnusedMemberFix(compilationUnit, problem, removeAllAssignements));
 	}
 
-	public static UnusedCodeFix createUnusedParameterFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		return wrap(UnusedCodeFixCore.createUnusedParameterFix(compilationUnit, (ProblemLocation)problem));
+	public static UnusedCodeFix createUnusedParameterFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+		return wrap(UnusedCodeFixCore.createUnusedParameterFix(compilationUnit, problem));
 	}
 
-	public static UnusedCodeFix createUnusedTypeParameterFix(CompilationUnit compilationUnit, IProblemLocation problemLoc) {
-		return wrap(UnusedCodeFixCore.createUnusedTypeParameterFix(compilationUnit, (ProblemLocation)problemLoc));
+	public static UnusedCodeFix createUnusedTypeParameterFix(CompilationUnit compilationUnit, IProblemLocationCore problemLoc) {
+		return wrap(UnusedCodeFixCore.createUnusedTypeParameterFix(compilationUnit, problemLoc));
 	}
 
-	public static UnusedCodeFix createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		return wrap(UnusedCodeFixCore.createRemoveUnusedCastFix(compilationUnit, (ProblemLocation)problem));
+	public static UnusedCodeFix createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+		return wrap(UnusedCodeFixCore.createRemoveUnusedCastFix(compilationUnit, problem));
 	}
 
 }

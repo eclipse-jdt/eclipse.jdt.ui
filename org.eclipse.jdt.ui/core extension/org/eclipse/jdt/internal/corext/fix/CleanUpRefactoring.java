@@ -84,7 +84,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -109,14 +109,14 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 	public static class MultiFixTarget extends CleanUpTarget {
 
-		private final IProblemLocation[] fProblems;
+		private final IProblemLocationCore[] fProblems;
 
-		public MultiFixTarget(ICompilationUnit unit, IProblemLocation[] problems) {
+		public MultiFixTarget(ICompilationUnit unit, IProblemLocationCore[] problems) {
 			super(unit);
 			fProblems= problems;
 		}
 
-		public IProblemLocation[] getProblems() {
+		public IProblemLocationCore[] getProblems() {
 			return fProblems;
 		}
 	}

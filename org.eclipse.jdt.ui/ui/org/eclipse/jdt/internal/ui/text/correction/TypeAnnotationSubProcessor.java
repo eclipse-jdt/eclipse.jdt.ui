@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.corext.fix.TypeAnnotationFix;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -33,7 +32,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 
 public class TypeAnnotationSubProcessor {
 
-	public static void addMoveTypeAnnotationToTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void addMoveTypeAnnotationToTypeProposal(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		TypeAnnotationFix fix= TypeAnnotationFix.createMoveAnnotationsToTypeAnnotationsFix(context.getASTRoot(), problem);
 		if (fix == null)
 			return;

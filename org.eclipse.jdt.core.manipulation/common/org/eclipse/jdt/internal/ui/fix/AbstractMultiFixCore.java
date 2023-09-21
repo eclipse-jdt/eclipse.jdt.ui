@@ -75,7 +75,7 @@ public abstract class AbstractMultiFixCore extends AbstractCleanUpCore implement
 	}
 
 	/**
-	 * Convert set of IProblems to IProblemLocations
+	 * Convert set of IProblems to IProblemLocationCore
 	 * @param problems the problems to convert
 	 * @return the converted set
 	 */

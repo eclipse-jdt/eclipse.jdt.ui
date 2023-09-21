@@ -33,14 +33,13 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal;
 
 public class UnInitializedFinalFieldSubProcessor {
 
-	public static void getProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();

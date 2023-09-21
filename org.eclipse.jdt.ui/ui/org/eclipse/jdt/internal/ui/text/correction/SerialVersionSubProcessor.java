@@ -27,7 +27,6 @@ import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -85,7 +84,7 @@ public final class SerialVersionSubProcessor {
 	 * @param proposals
 	 *        the proposal collection to extend
 	 */
-	public static void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection<ICommandAccess> proposals) {
+	public static void getSerialVersionProposals(final IInvocationContext context, final IProblemLocationCore location, final Collection<ICommandAccess> proposals) {
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(location);

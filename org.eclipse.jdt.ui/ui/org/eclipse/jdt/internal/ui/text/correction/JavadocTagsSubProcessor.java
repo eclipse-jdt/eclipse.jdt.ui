@@ -87,7 +87,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
@@ -560,7 +559,7 @@ public class JavadocTagsSubProcessor {
 
 	}
 
-	public static void getMissingJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void getMissingJavadocTagProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 	 	ASTNode node= problem.getCoveringNode(context.getASTRoot());
 	 	ASTNode parentDeclaration= null;
 	 	if (node == null) {
@@ -626,7 +625,7 @@ public class JavadocTagsSubProcessor {
 	 	}
 	}
 
-	public static void getUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void getUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		IJavaProject project= cu.getJavaProject();
 
@@ -666,7 +665,7 @@ public class JavadocTagsSubProcessor {
 		proposals.add(proposal);
 	}
 
-	public static void getMissingJavadocCommentProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getMissingJavadocCommentProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (node == null) {
 			return;
@@ -967,7 +966,7 @@ public class JavadocTagsSubProcessor {
 		return null;
 	}
 
-	public static void getRemoveJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void getRemoveJavadocTagProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		while (node != null && !(node instanceof TagElement)) {
 			node= node.getParent();
@@ -983,7 +982,7 @@ public class JavadocTagsSubProcessor {
 		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_TAG, image));
 	}
 
-	public static void getRemoveDuplicateModuleJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void getRemoveDuplicateModuleJavadocTagProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (node instanceof ModuleDeclaration) {
 			node= findModuleJavadocTag((ModuleDeclaration)node, problem);
@@ -1011,7 +1010,7 @@ public class JavadocTagsSubProcessor {
 		}
 	}
 
-	private static ASTNode findModuleJavadocTag(ModuleDeclaration decl, IProblemLocation problem) {
+	private static ASTNode findModuleJavadocTag(ModuleDeclaration decl, IProblemLocationCore problem) {
 		ASTNode result= null;
 		CompilationUnit cu= (CompilationUnit)decl.getParent();
 		int problemLocationStart= problem.getOffset();
@@ -1036,7 +1035,7 @@ public class JavadocTagsSubProcessor {
 		return result;
 	}
 
-	public static void getInvalidQualificationProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void getInvalidQualificationProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (!(node instanceof Name)) {
 			return;

@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -304,10 +304,10 @@ public class NullAnnotationsRewriteOperations {
 
 	static class RemoveRedundantAnnotationRewriteOperation extends CompilationUnitRewriteOperation {
 
-		private IProblemLocation fProblem;
+		private IProblemLocationCore fProblem;
 		private CompilationUnit fCompilationUnit;
 
-		public RemoveRedundantAnnotationRewriteOperation(CompilationUnit compilationUnit, IProblemLocation problem) {
+		public RemoveRedundantAnnotationRewriteOperation(CompilationUnit compilationUnit, IProblemLocationCore problem) {
 			fCompilationUnit= compilationUnit;
 			fProblem= problem;
 		}
@@ -360,10 +360,10 @@ public class NullAnnotationsRewriteOperations {
 
 	static class AddMissingDefaultNullnessRewriteOperation extends CompilationUnitRewriteOperation {
 
-		private IProblemLocation fProblem;
+		private IProblemLocationCore fProblem;
 		private CompilationUnit fCompilationUnit;
 
-		public AddMissingDefaultNullnessRewriteOperation(CompilationUnit compilationUnit, IProblemLocation problem) {
+		public AddMissingDefaultNullnessRewriteOperation(CompilationUnit compilationUnit, IProblemLocationCore problem) {
 			fCompilationUnit= compilationUnit;
 			fProblem= problem;
 		}
@@ -393,7 +393,7 @@ public class NullAnnotationsRewriteOperations {
 
 	public static class Builder {
 
-		IProblemLocation fProblem;
+		IProblemLocationCore fProblem;
 		ChangeKind fChangeKind;
 		CompilationUnit fUnit;
 		String fAnnotationToAdd;
@@ -402,7 +402,7 @@ public class NullAnnotationsRewriteOperations {
 		boolean fAffectsParameter;
 		boolean fUseNullTypeAnnotations;
 
-		public Builder(IProblemLocation problem, CompilationUnit unit, String annotationToAdd, String annotationToRemove,
+		public Builder(IProblemLocationCore problem, CompilationUnit unit, String annotationToAdd, String annotationToRemove,
 				boolean allowRemove, boolean affectsParameter, ChangeKind changeKind)
 		{
 			fChangeKind= changeKind;
