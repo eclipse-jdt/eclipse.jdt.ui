@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -99,12 +99,12 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		if (element instanceof ICompilationUnit) {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			ICompilationUnit unit= (ICompilationUnit)element;
-			saveCUnitIfNeeded(unit, new SubProgressMonitor(pm, 1));
+			saveCUnitIfNeeded(unit, SubMonitor.convert(pm, 1));
 
 			IResource resource= unit.getResource();
-			IResourceSnapshot resourceDescription = ResourceSnapshotFactory.fromResource(resource);
-			element.delete(false, new SubProgressMonitor(pm, 1));
-			resourceDescription.recordStateFromHistory(resource, new SubProgressMonitor(pm, 1));
+			IResourceSnapshot<IResource> resourceDescription = ResourceSnapshotFactory.fromResource(resource);
+			element.delete(false, SubMonitor.convert(pm, 1));
+			resourceDescription.recordStateFromHistory(resource, SubMonitor.convert(pm, 1));
 			return new UndoDeleteResourceChange(resourceDescription);
 
 		} else if (element instanceof IPackageFragment) {
@@ -112,9 +112,9 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 			pm.beginTask("", units.length + 1); //$NON-NLS-1$
 			for (ICompilationUnit unit : units) {
 				// fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
-				saveCUnitIfNeeded(unit, new SubProgressMonitor(pm, 1));
+				saveCUnitIfNeeded(unit, SubMonitor.convert(pm, 1));
 			}
-			element.delete(false, new SubProgressMonitor(pm, 1));
+			element.delete(false, SubMonitor.convert(pm, 1));
 			return new NullChange(); // caveat: real undo implemented by UndoablePackageDeleteChange
 
 		} else {

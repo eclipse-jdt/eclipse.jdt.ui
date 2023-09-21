@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.undo.snapshot.IResourceSnapshot;
@@ -32,9 +32,9 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class UndoDeleteResourceChange extends Change {
 
-	private final IResourceSnapshot fResourceDescription;
+	private final IResourceSnapshot<? extends IResource> fResourceDescription;
 
-	public UndoDeleteResourceChange(IResourceSnapshot resourceDescription) {
+	public UndoDeleteResourceChange(IResourceSnapshot<? extends IResource> resourceDescription) {
 		fResourceDescription= resourceDescription;
 	}
 
@@ -75,7 +75,7 @@ public class UndoDeleteResourceChange extends Change {
 	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		IResource created= fResourceDescription.createResource(pm);
-		created.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(pm, 1));
+		created.refreshLocal(IResource.DEPTH_INFINITE, SubMonitor.convert(pm, 1));
 		return new DeleteResourceChange(created.getFullPath(), true);
 	}
 

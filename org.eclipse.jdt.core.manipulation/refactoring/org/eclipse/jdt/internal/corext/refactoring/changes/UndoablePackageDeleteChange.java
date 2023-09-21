@@ -14,6 +14,7 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -39,10 +40,10 @@ public class UndoablePackageDeleteChange extends DynamicValidationStateChange {
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		int count= fPackageDeletes.size();
 		pm.beginTask("", count * 3); //$NON-NLS-1$
-		IResourceSnapshot[] packageDeleteDescriptions= new IResourceSnapshot[fPackageDeletes.size()];
+		List<IResourceSnapshot<IResource>> snapshots = new ArrayList<>();
 		for (int i= 0; i < fPackageDeletes.size(); i++) {
 			IResource resource= fPackageDeletes.get(i);
-			packageDeleteDescriptions[i]= ResourceSnapshotFactory.fromResource(resource);
+			snapshots.add(ResourceSnapshotFactory.fromResource(resource));
 			pm.worked(1);
 		}
 
@@ -50,7 +51,7 @@ public class UndoablePackageDeleteChange extends DynamicValidationStateChange {
 
 		for (int i= 0; i < fPackageDeletes.size(); i++) {
 			IResource resource= fPackageDeletes.get(i);
-			IResourceSnapshot resourceDescription= packageDeleteDescriptions[i];
+			IResourceSnapshot<IResource> resourceDescription= snapshots.get(i);
 			resourceDescription.recordStateFromHistory(resource, new SubProgressMonitor(pm, 1));
 			result.add(new UndoDeleteResourceChange(resourceDescription));
 		}

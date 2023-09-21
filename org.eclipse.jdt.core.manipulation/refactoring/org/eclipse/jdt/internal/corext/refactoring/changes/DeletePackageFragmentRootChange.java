@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -113,7 +113,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		IResource rootResource= root.getResource();
 		CompositeChange result= new CompositeChange(getName());
 
-		IResourceSnapshot rootDescription = ResourceSnapshotFactory.fromResource(rootResource);
+		IResourceSnapshot<IResource> rootDescription = ResourceSnapshotFactory.fromResource(rootResource);
 		HashMap<IFile, String> classpathFilesContents= new HashMap<>();
 		for (IJavaProject javaProject : JavaElementUtil.getReferencingProjects(root)) {
 			IFile classpathFile= javaProject.getProject().getFile(".classpath"); //$NON-NLS-1$
@@ -122,9 +122,9 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 			}
 		}
 
-		root.delete(resourceUpdateFlags, jCoreUpdateFlags, new SubProgressMonitor(pm, 1));
+		root.delete(resourceUpdateFlags, jCoreUpdateFlags, SubMonitor.convert(pm, 1));
 
-		rootDescription.recordStateFromHistory(rootResource, new SubProgressMonitor(pm, 1));
+		rootDescription.recordStateFromHistory(rootResource, SubMonitor.convert(pm, 1));
 		for (Entry<IFile, String> entry : classpathFilesContents.entrySet()) {
 			IFile file= entry.getKey();
 			String contents= entry.getValue();
