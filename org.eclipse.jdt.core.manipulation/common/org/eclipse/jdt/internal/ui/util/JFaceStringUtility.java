@@ -14,6 +14,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
+/**
+ * Copied from org.eclipse.jface.util.Util
+ * @since 1.20
+ */
 public class JFaceStringUtility {
 
 	/**
