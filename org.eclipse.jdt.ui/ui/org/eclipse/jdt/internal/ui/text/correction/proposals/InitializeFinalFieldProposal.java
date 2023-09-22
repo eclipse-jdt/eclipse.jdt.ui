@@ -53,14 +53,14 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
-	private IProblemLocation fProblem;
+	private IProblemLocationCore fProblem;
 
 	private ASTNode fAstNode;
 
@@ -74,7 +74,7 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 
 	public static final int UPDATE_CONSTRUCTOR_NEW_PARAMETER= 2;
 
-	public InitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit cu, ASTNode astNode, IVariableBinding variableBinding, int relevance) {
+	public InitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit cu, ASTNode astNode, IVariableBinding variableBinding, int relevance) {
 		super(Messages.format(CorrectionMessages.InitializeFieldAtDeclarationCorrectionProposal_description, problem.getProblemArguments()[0]), cu, null, relevance, null);
 
 		fProblem= problem;
@@ -84,7 +84,7 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 	}
 
-	public InitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit cu, ASTNode astNode, int relevance, int updateType) {
+	public InitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit cu, ASTNode astNode, int relevance, int updateType) {
 		super(Messages.format(CorrectionMessages.InitializeFieldInConstructorCorrectionProposal_description, problem.getProblemArguments()[0]), cu, null, relevance, null);
 		if (updateType == UPDATE_CONSTRUCTOR_NEW_PARAMETER) {
 			setDisplayName(Messages.format(CorrectionMessages.InitializeFieldWithConstructorParameterCorrectionProposal_description, problem.getProblemArguments()[0]));

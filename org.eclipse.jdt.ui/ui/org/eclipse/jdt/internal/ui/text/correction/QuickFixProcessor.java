@@ -371,7 +371,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 
 		HashSet<Integer> handledProblems= new HashSet<>(locations.length);
 		ArrayList<ICommandAccess> resultingCollections= new ArrayList<>();
-		for (IProblemLocation curr : locations) {
+		for (IProblemLocationCore curr : locations) {
 			Integer id= curr.getProblemId();
 			if (handledProblems.add(id)) {
 				process(context, curr, resultingCollections);
@@ -380,7 +380,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 	}
 
-	private void process(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+	private void process(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
 		int id= problem.getProblemId();
 		if (id == 0) { // no proposals for none-problem locations
 			return;

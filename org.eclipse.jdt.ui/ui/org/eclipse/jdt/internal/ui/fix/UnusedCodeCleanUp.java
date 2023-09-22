@@ -28,10 +28,8 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Create fixes which can remove unused code
@@ -71,12 +69,12 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
         IProblemLocationCore[] problemsCore= null;
 		if (problems != null) {
 			List<IProblemLocationCore> problemsList= new ArrayList<>();
-			for (IProblemLocation problem : problems) {
-				problemsList.add((ProblemLocation)problem);
+			for (IProblemLocationCore problem : problems) {
+				problemsList.add(problem);
 			}
 			problemsCore= problemsList.toArray(new IProblemLocationCore[0]);
 		}
@@ -95,8 +93,8 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
-		IProblemLocationCore problemLocation= (ProblemLocation)problem;
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+		IProblemLocationCore problemLocation= problem;
 		return cleanUpCore.canFix(compilationUnit, problemLocation);
 	}
 

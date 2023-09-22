@@ -19,15 +19,15 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 public interface IMultiFix extends ICleanUp {
 
 	public static class MultiFixContext extends CleanUpContext {
 
-		private final IProblemLocation[] fLocations;
+		private final IProblemLocationCore[] fLocations;
 
-		public MultiFixContext(ICompilationUnit unit, CompilationUnit ast, IProblemLocation[] locations) {
+		public MultiFixContext(ICompilationUnit unit, CompilationUnit ast, IProblemLocationCore[] locations) {
 			super(unit, ast);
 			fLocations= locations;
 		}
@@ -35,7 +35,7 @@ public interface IMultiFix extends ICleanUp {
 		/**
 		 * @return locations of problems to fix.
 		 */
-		public IProblemLocation[] getProblemLocations() {
+		public IProblemLocationCore[] getProblemLocations() {
 			return fLocations;
 		}
 	}
@@ -53,7 +53,7 @@ public interface IMultiFix extends ICleanUp {
 	 *            The location of the problem to fix
 	 * @return True if problem can be fixed
 	 */
-	boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem);
+	boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem);
 
 	/**
 	 * Maximal number of problems this clean up will fix in compilation unit.

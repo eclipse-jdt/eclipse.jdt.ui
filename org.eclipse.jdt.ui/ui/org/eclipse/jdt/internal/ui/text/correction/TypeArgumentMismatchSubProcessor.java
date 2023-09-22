@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
@@ -35,7 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TypeArgumentMismatchSubProcessor {
 
-//	public static void getTypeParameterMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+//	public static void getTypeParameterMismatchProposals(IInvocationContext context, IProblemLocationCore problem, Collection proposals) {
 //	CompilationUnit astRoot= context.getASTRoot();
 //	ASTNode selectedNode= problem.getCoveredNode(astRoot);
 //	if (!(selectedNode instanceof SimpleName)) {
@@ -51,7 +50,7 @@ public class TypeArgumentMismatchSubProcessor {
 
 //	}
 
-	public static void removeMismatchedArguments(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals){
+	public static void removeMismatchedArguments(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals){
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveredNode(context.getASTRoot());
 		if (!(selectedNode instanceof SimpleName)) {
@@ -71,7 +70,7 @@ public class TypeArgumentMismatchSubProcessor {
 		}
 	}
 
-	public static void getInferDiamondArgumentsProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void getInferDiamondArgumentsProposal(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		ASTNode selectedNode= problem.getCoveredNode(context.getASTRoot());
 		if (!(selectedNode instanceof SimpleName)) {
 			return;

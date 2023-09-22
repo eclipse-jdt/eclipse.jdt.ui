@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -43,9 +43,9 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class TaskMarkerProposal extends CUCorrectionProposal {
 
-	private IProblemLocation fLocation;
+	private IProblemLocationCore fLocation;
 
-	public TaskMarkerProposal(ICompilationUnit cu, IProblemLocation location, int relevance) {
+	public TaskMarkerProposal(ICompilationUnit cu, IProblemLocationCore location, int relevance) {
 		super("", cu, relevance, null); //$NON-NLS-1$
 		fLocation= location;
 

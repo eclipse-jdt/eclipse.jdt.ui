@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewRecordCreationWizard;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
 import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
@@ -85,7 +85,7 @@ import org.eclipse.ui.PlatformUI;
  * If selected, this proposal will open a {@link NewClassCreationWizard},
  * {@link NewInterfaceCreationWizard}, {@link NewEnumCreationWizard} or {@link NewAnnotationCreationWizard}.
  *
- * @see UnresolvedElementsSubProcessor#getTypeProposals(IInvocationContext, IProblemLocation, Collection)
+ * @see UnresolvedElementsSubProcessor#getTypeProposals(IInvocationContext, IProblemLocationCore, Collection)
  */
 public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 

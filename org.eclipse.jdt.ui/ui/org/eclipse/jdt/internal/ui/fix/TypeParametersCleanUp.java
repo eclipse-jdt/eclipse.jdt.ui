@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 public class TypeParametersCleanUp extends AbstractMultiFix {
 
@@ -72,7 +72,7 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
@@ -94,7 +94,7 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
 		int problemId= problem.getProblemId();
 
 		if (problemId == IProblem.RedundantSpecificationOfTypeArguments)

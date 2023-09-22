@@ -63,7 +63,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
@@ -90,7 +89,7 @@ public class SuppressWarningsSubProcessor {
 	}
 
 
-	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		if (problem.isError() && ! JavaCore.ENABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true))) {
 			return;
 		}
@@ -329,7 +328,7 @@ public class SuppressWarningsSubProcessor {
 	 * @param problem the problem
 	 * @param proposals the resulting proposals
 	 */
-	public static void addUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void addUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 
 		ASTNode coveringNode= context.getCoveringNode();
 		if (!(coveringNode instanceof StringLiteral))
@@ -355,7 +354,7 @@ public class SuppressWarningsSubProcessor {
 	}
 
 
-	public static void addRemoveUnusedSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void addRemoveUnusedSuppressWarningProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		if (!(coveringNode instanceof StringLiteral))
 			return;

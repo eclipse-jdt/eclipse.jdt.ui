@@ -17,6 +17,8 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -57,7 +59,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
@@ -279,7 +280,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		}
 		MultiStatus resStatus= null;
 
-		IProblemLocation[] problemLocations= problems.toArray(new IProblemLocation[problems.size()]);
+		IProblemLocationCore[] problemLocations= problems.toArray(new IProblemLocationCore[problems.size()]);
 		if (addQuickFixes) {
 			IStatus status= collectCorrections(context, problemLocations, proposals);
 			if (!status.isOK()) {
@@ -363,14 +364,14 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 	private static class SafeCorrectionCollector extends SafeCorrectionProcessorAccess {
 		private final IInvocationContext fContext;
 		private final Collection<IJavaCompletionProposal> fProposals;
-		private IProblemLocation[] fLocations;
+		private IProblemLocationCore[] fLocations;
 
 		public SafeCorrectionCollector(IInvocationContext context, Collection<IJavaCompletionProposal> proposals) {
 			fContext= context;
 			fProposals= proposals;
 		}
 
-		public void setProblemLocations(IProblemLocation[] locations) {
+		public void setProblemLocations(IProblemLocationCore[] locations) {
 			fLocations= locations;
 		}
 
@@ -378,7 +379,9 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
 			IQuickFixProcessor curr= (IQuickFixProcessor) desc.getProcessor(fContext.getCompilationUnit(), IQuickFixProcessor.class);
 			if (curr != null) {
-				IJavaCompletionProposal[] res= curr.getCorrections(fContext, fLocations);
+				List<ProblemLocation> wrapped = Arrays.asList(fLocations).stream().map(x -> new ProblemLocation(x)).collect(Collectors.toList());
+				ProblemLocation[] asArr = wrapped.toArray(new ProblemLocation[wrapped.size()]);
+				IJavaCompletionProposal[] res= curr.getCorrections(fContext, asArr);
 				if (res != null) {
 					fProposals.addAll(Arrays.asList(res));
 				}
@@ -388,10 +391,10 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 
 	private static class SafeAssistCollector extends SafeCorrectionProcessorAccess {
 		private final IInvocationContext fContext;
-		private final IProblemLocation[] fLocations;
+		private final IProblemLocationCore[] fLocations;
 		private final Collection<IJavaCompletionProposal> fProposals;
 
-		public SafeAssistCollector(IInvocationContext context, IProblemLocation[] locations, Collection<IJavaCompletionProposal> proposals) {
+		public SafeAssistCollector(IInvocationContext context, IProblemLocationCore[] locations, Collection<IJavaCompletionProposal> proposals) {
 			fContext= context;
 			fLocations= locations;
 			fProposals= proposals;
@@ -401,7 +404,9 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
 			IQuickAssistProcessor curr= (IQuickAssistProcessor) desc.getProcessor(fContext.getCompilationUnit(), IQuickAssistProcessor.class);
 			if (curr != null) {
-				IJavaCompletionProposal[] res= curr.getAssists(fContext, fLocations);
+				List<ProblemLocation> wrapped = Arrays.asList(fLocations).stream().map(x -> new ProblemLocation(x)).collect(Collectors.toList());
+				ProblemLocation[] asArr = wrapped.toArray(new ProblemLocation[wrapped.size()]);
+				IJavaCompletionProposal[] res= curr.getAssists(fContext, asArr);
 				if (res != null) {
 					fProposals.addAll(Arrays.asList(res));
 				}
@@ -456,10 +461,10 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 	}
 
 
-	public static IStatus collectCorrections(IInvocationContext context, IProblemLocation[] locations, Collection<IJavaCompletionProposal> proposals) {
+	public static IStatus collectCorrections(IInvocationContext context, IProblemLocationCore[] locations, Collection<IJavaCompletionProposal> proposals) {
 		SafeCorrectionCollector collector= new SafeCorrectionCollector(context, proposals);
 		for (ContributedProcessorDescriptor curr : getCorrectionProcessors()) {
-			IProblemLocation[] handled= getHandledProblems(locations, curr);
+			IProblemLocationCore[] handled= getHandledProblems(locations, curr);
 			if (handled != null) {
 				collector.setProblemLocations(handled);
 				collector.process(curr);
@@ -468,12 +473,12 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		return collector.getStatus();
 	}
 
-	private static IProblemLocation[] getHandledProblems(IProblemLocation[] locations, ContributedProcessorDescriptor processor) {
+	private static IProblemLocationCore[] getHandledProblems(IProblemLocationCore[] locations, ContributedProcessorDescriptor processor) {
 		// implementation tries to avoid creating a new array
 		boolean allHandled= true;
-		ArrayList<IProblemLocation> res= null;
+		ArrayList<IProblemLocationCore> res= null;
 		for (int i= 0; i < locations.length; i++) {
-			IProblemLocation curr= locations[i];
+			IProblemLocationCore curr= locations[i];
 			if (processor.canHandleMarkerType(curr.getMarkerType())) {
 				if (!allHandled) { // first handled problem
 					if (res == null) {
@@ -497,10 +502,10 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		if (res == null) {
 			return null;
 		}
-		return res.toArray(new IProblemLocation[res.size()]);
+		return res.toArray(new IProblemLocationCore[res.size()]);
 	}
 
-	public static IStatus collectAssists(IInvocationContext context, IProblemLocation[] locations, Collection<IJavaCompletionProposal> proposals) {
+	public static IStatus collectAssists(IInvocationContext context, IProblemLocationCore[] locations, Collection<IJavaCompletionProposal> proposals) {
 		ContributedProcessorDescriptor[] processors= getAssistProcessors();
 		SafeAssistCollector collector= new SafeAssistCollector(context, locations, proposals);
 		collector.process(processors);

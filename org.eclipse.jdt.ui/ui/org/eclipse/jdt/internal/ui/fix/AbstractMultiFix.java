@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
@@ -52,7 +52,7 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 
 	protected abstract ICleanUpFix createFix(CompilationUnit unit) throws CoreException;
 
-	protected abstract ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException;
+	protected abstract ICleanUpFix createFix(CompilationUnit unit, IProblemLocationCore[] problems) throws CoreException;
 
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
@@ -76,12 +76,12 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 	}
 
 	/**
-	 * Convert set of IProblems to IProblemLocations
+	 * Convert set of IProblems to IProblemLocationCore
 	 * @param problems the problems to convert
 	 * @return the converted set
 	 */
-	protected static IProblemLocation[] convertProblems(IProblem[] problems) {
-		IProblemLocation[] result= new IProblemLocation[problems.length];
+	protected static IProblemLocationCore[] convertProblems(IProblem[] problems) {
+		IProblemLocationCore[] result= new IProblemLocationCore[problems.length];
 
 		for (int i= 0; i < problems.length; i++) {
 			result[i]= new ProblemLocation(problems[i]);
@@ -98,20 +98,20 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 	 * @param problemIds the ids of the resulting problem locations
 	 * @return problem locations
 	 */
-	protected static IProblemLocation[] filter(IProblemLocation[] problems, int[] problemIds) {
-		ArrayList<IProblemLocation> result= new ArrayList<>();
+	protected static IProblemLocationCore[] filter(IProblemLocationCore[] problems, int[] problemIds) {
+		ArrayList<IProblemLocationCore> result= new ArrayList<>();
 
-		for (IProblemLocation problem : problems) {
+		for (IProblemLocationCore problem : problems) {
 			if (contains(problemIds, problem.getProblemId()) && !contains(result, problem)) {
 				result.add(problem);
 			}
 		}
 
-		return result.toArray(new IProblemLocation[result.size()]);
+		return result.toArray(new IProblemLocationCore[result.size()]);
 	}
 
-	private static boolean contains(ArrayList<IProblemLocation> problems, IProblemLocation problem) {
-		for (IProblemLocation existing : problems) {
+	private static boolean contains(ArrayList<IProblemLocationCore> problems, IProblemLocationCore problem) {
+		for (IProblemLocationCore existing : problems) {
 			if (existing.getProblemId() == problem.getProblemId() && existing.getOffset() == problem.getOffset() && existing.getLength() == problem.getLength()) {
 				return true;
 			}

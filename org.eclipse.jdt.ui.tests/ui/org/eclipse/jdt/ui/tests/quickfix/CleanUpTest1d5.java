@@ -52,7 +52,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d5ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 import org.eclipse.jdt.internal.ui.fix.IMultiFix;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
@@ -4306,8 +4306,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertEquals(2, markers.length);
 
 		IEditorInput input= EditorUtility.getEditorInput(cu1);
-		IProblemLocation location1= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
-		IProblemLocation location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[1]);
+		IProblemLocationCore location1= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+		IProblemLocationCore location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[1]);
 
 		CleanUpOptions cleanUpOptions= new CleanUpOptions();
 		cleanUpOptions.setOption(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
@@ -4323,7 +4323,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		parser.setSource(cu1);
 		CompilationUnit ast= (CompilationUnit)parser.createAST(null);
 
-		ICleanUpFix cleanUpFix= cleanUp.createFix(new IMultiFix.MultiFixContext(cu1, ast, new IProblemLocation[] {location1, location2}));
+		ICleanUpFix cleanUpFix= cleanUp.createFix(new IMultiFix.MultiFixContext(cu1, ast, new IProblemLocationCore[] {location1, location2}));
 		CompilationUnitChange change= cleanUpFix.createChange(new NullProgressMonitor());
 		change.perform(new NullProgressMonitor());
 		assertEquals(expected1, cu1.getBuffer().getContents());

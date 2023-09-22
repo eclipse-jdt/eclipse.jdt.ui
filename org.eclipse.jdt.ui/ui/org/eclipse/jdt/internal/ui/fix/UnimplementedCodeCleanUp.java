@@ -36,7 +36,6 @@ import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
@@ -100,18 +99,18 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
-		IProblemLocation[] problemLocations= convertProblems(unit.getProblems());
+		IProblemLocationCore[] problemLocations= convertProblems(unit.getProblems());
 		return createFix(unit, problemLocations);
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
-		IProblemLocation[] problemLocations= filter(problems, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
+	protected ICleanUpFix createFix(CompilationUnit unit, IProblemLocationCore[] problems) throws CoreException {
+		IProblemLocationCore[] problemLocations= filter(problems, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
 		return CleanUpFixWrapper.create(problemLocations, problemsCore->UnimplementedCodeFixCore.createCleanUp(unit, isEnabled(CleanUpConstants.ADD_MISSING_METHODES), isEnabled(MAKE_TYPE_ABSTRACT), problemsCore));
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
 		int id= problem.getProblemId();
 		if (id == IProblem.AbstractMethodMustBeImplemented || id == IProblem.EnumConstantMustImplementAbstractMethod)
 			return isEnabled(CleanUpConstants.ADD_MISSING_METHODES) || isEnabled(MAKE_TYPE_ABSTRACT);
@@ -124,11 +123,11 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 		if (!isEnabled(CleanUpConstants.ADD_MISSING_METHODES) && !isEnabled(MAKE_TYPE_ABSTRACT))
 			return 0;
 
-		IProblemLocation[] locations= filter(convertProblems(compilationUnit.getProblems()), new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
+		IProblemLocationCore[] locations= filter(convertProblems(compilationUnit.getProblems()), new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
 
 		HashSet<ASTNode> types= new HashSet<>();
-		for (IProblemLocation location : locations) {
-			ASTNode type= UnimplementedCodeFixCore.getSelectedTypeNode(compilationUnit, (IProblemLocationCore) location);
+		for (IProblemLocationCore location : locations) {
+			ASTNode type= UnimplementedCodeFixCore.getSelectedTypeNode(compilationUnit, location);
 			if (type != null) {
 				types.add(type);
 			}

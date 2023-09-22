@@ -44,7 +44,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
@@ -88,7 +87,7 @@ public class VarargsWarningsSubProcessor {
 
 	}
 
-	public static void addAddSafeVarargsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void addAddSafeVarargsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 
 		MethodDeclaration methodDeclaration= ASTResolving.findParentMethodDeclaration(coveringNode);
@@ -108,7 +107,7 @@ public class VarargsWarningsSubProcessor {
 		proposals.add(proposal);
 	}
 
-	public static void addAddSafeVarargsToDeclarationProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void addAddSafeVarargsToDeclarationProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
 			return;
 
@@ -141,7 +140,7 @@ public class VarargsWarningsSubProcessor {
 		}
 	}
 
-	public static void addRemoveSafeVarargsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void addRemoveSafeVarargsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		if (!(coveringNode instanceof MethodDeclaration))
 			return;

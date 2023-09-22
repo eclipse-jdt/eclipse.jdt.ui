@@ -430,9 +430,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 
-	static boolean noErrorsAtLocation(IProblemLocation[] locations) {
+	static boolean noErrorsAtLocation(IProblemLocationCore[] locations) {
 		if (locations != null) {
-			for (IProblemLocation location : locations) {
+			for (IProblemLocationCore location : locations) {
 				if (location.isError()) {
 					if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())
 							&& JavaCore.getOptionForConfigurableSeverity(location.getProblemId()) != null) {
@@ -624,7 +624,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
-	private static boolean getDeprecatedProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> proposals) {
+	private static boolean getDeprecatedProposal(IInvocationContext context, ASTNode node, IProblemLocationCore[] locations, Collection<ICommandAccess> proposals) {
 		// don't add if already added as quick fix
 		if (containsMatchingProblem(locations, IProblem.UsingDeprecatedMethod))
 			return false;
@@ -1827,7 +1827,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		typeParameters.add(newTypeParameter);
 	}
 
-	public static boolean getInferDiamondArgumentsProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
+	public static boolean getInferDiamondArgumentsProposal(IInvocationContext context, ASTNode node, IProblemLocationCore[] locations, Collection<ICommandAccess> resultingCollections) {
 		// don't add if already added as quick fix
 		if (containsMatchingProblem(locations, IProblem.DiamondNotBelow17))
 			return false;
@@ -1912,7 +1912,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
-	public static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
+	public static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocationCore[] locations, Collection<ICommandAccess> resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {
 			return false;
@@ -1962,9 +1962,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	}
 
-	private static boolean containsMatchingProblem(IProblemLocation[] locations, int problemId) {
+	private static boolean containsMatchingProblem(IProblemLocationCore[] locations, int problemId) {
 		if (locations != null) {
-			for (IProblemLocation location : locations) {
+			for (IProblemLocationCore location : locations) {
 				if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())
 						&& location.getProblemId() == problemId) {
 					return true;
@@ -2493,7 +2493,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 	}
 
-	private static boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocationCore[] locations, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof SimpleName)) {
 			return false;
 		}
@@ -2523,7 +2523,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getRenameRefactoringProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections)
+	private static boolean getRenameRefactoringProposal(IInvocationContext context, ASTNode node, IProblemLocationCore[] locations, Collection<ICommandAccess> resultingCollections)
 			throws CoreException {
 		if (!(context instanceof AssistContext)) {
 			return false;
@@ -2586,9 +2586,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return isAccessor;
 	}
 
-	private static boolean containsQuickFixableRenameLocal(IProblemLocation[] locations) {
+	private static boolean containsQuickFixableRenameLocal(IProblemLocationCore[] locations) {
 		if (locations != null) {
-			for (IProblemLocation location : locations) {
+			for (IProblemLocationCore location : locations) {
 				if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())) {
 					switch (location.getProblemId()) {
 						case IProblem.LocalVariableHidingLocalVariable:
@@ -2770,9 +2770,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
-	public static boolean getTryWithResourceAssistProposals(IProblemLocation[] locations, IInvocationContext context, ASTNode node,
+	public static boolean getTryWithResourceAssistProposals(IProblemLocationCore[] locations, IInvocationContext context, ASTNode node,
 			ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) throws IllegalArgumentException, CoreException {
-		for (IProblemLocation location : locations) {
+		for (IProblemLocationCore location : locations) {
 			if ((location.getProblemId() == IProblem.UnclosedCloseable ||
 					location.getProblemId() == IProblem.PotentiallyUnclosedCloseable)) {
 				return false;
@@ -3865,7 +3865,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
+	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocationCore[] locations, Collection<ICommandAccess> resultingCollections) {
 //		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
 //			return false;
 

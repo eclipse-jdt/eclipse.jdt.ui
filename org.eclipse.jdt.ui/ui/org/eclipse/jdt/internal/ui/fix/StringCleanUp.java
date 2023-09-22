@@ -32,10 +32,8 @@ import org.eclipse.jdt.internal.corext.fix.StringFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Create fixes which can solve problems in connection with Strings
@@ -78,13 +76,13 @@ public class StringCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
 		List<IProblemLocationCore> coreProblems= new ArrayList<>();
-		for (IProblemLocation problem : problems) {
-			coreProblems.add((ProblemLocation)problem);
+		for (IProblemLocationCore problem : problems) {
+			coreProblems.add(problem);
 		}
 		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
@@ -125,7 +123,7 @@ public class StringCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
 		if (problem.getProblemId() == IProblem.UnnecessaryNLSTag)
 			return isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 
