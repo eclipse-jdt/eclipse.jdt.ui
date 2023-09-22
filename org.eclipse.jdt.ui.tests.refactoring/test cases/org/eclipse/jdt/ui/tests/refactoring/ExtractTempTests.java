@@ -19,6 +19,7 @@
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Recommend variable name for Extracted Local Variable Refactoring when the extracted expression is a method invocation. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/684
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
