@@ -4549,8 +4549,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (!(editor instanceof JavaEditor))
 			return false;
 
-		IVariableBinding binding= (IVariableBinding) simpleName.resolveBinding();
-		if (binding == null || !binding.isField()) {
+		if (!(simpleName.resolveBinding() instanceof IVariableBinding binding) || !binding.isField()) {
 			return false;
 		}
 
