@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class A {
     public static void main(String [] args) {
-        JPanel serverPanel= Util.createServerPanel();
+    	JPanel serverPanel= Util.createServerPanel();
         Util.configPanel(serverPanel);
     }
 }
