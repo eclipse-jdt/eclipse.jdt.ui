@@ -19,6 +19,7 @@
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Recommend variable name for Extracted Local Variable Refactoring when the extracted expression is a method invocation. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/684
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -1116,6 +1117,12 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	public void test160() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
 		helper2(5, 21, 5, 26, true, true, false, "i", "i");
+	}
+
+	@Test
+	public void test161() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/684
+		helper1(7, 26, 7, 50, true, false, "serverPanel", "serverPanel");
 	}
 
 	@Test

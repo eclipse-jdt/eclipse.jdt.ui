@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
+ *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Recommend variable name for Extracted Local Variable Refactoring when the extracted expression is a method invocation. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/684
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.manipulation;
 
@@ -1219,7 +1220,8 @@ public class StubUtility {
 	}
 
 
-	private static final String[] KNOWN_METHOD_NAME_PREFIXES= { "get", "is", "to" }; //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-1$
+	private static final String[] KNOWN_METHOD_NAME_PREFIXES= { "get", "is", "to", "create", "load", "find",  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			"build", "generate", "prepare", "parse", "current", "read", "resolve", "retrieve", "make", "add", "extract" }; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$//$NON-NLS-9$//$NON-NLS-10$//$NON-NLS-11$
 
 
 	private static void add(String[] names, Set<String> result) {
