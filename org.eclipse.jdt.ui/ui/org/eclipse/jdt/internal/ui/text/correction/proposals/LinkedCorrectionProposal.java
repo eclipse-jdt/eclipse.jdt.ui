@@ -53,8 +53,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 
-	private LinkedProposalModelCore fLinkedProposalModel;
-
 	/**
 	 * Constructs a linked correction proposal.
 	 * @param name The display name of the proposal.
@@ -67,19 +65,17 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 */
 	public LinkedCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, rewrite, relevance, image);
-		fLinkedProposalModel= null;
+		setDelegate(new LinkedCorrectionProposalCore(name, cu, rewrite, relevance));
 	}
+
 
 	/* public only for tests. */
 	public LinkedProposalModelCore getLinkedProposalModel() {
-		if (fLinkedProposalModel == null) {
-			fLinkedProposalModel= new LinkedProposalModelCore();
-		}
-		return fLinkedProposalModel;
+		return ((LinkedCorrectionProposalCore)getDelegate()).getLinkedProposalModel();
 	}
 
 	public void setLinkedProposalModel(LinkedProposalModelCore model) {
-		fLinkedProposalModel= model;
+		((LinkedCorrectionProposalCore)getDelegate()).setLinkedProposalModel(model);
 	}
 
 	/**
@@ -91,7 +87,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * are linked.
 	 */
 	public void addLinkedPosition(ITrackedNodePosition position, boolean isFirst, String groupID) {
-		getLinkedProposalModel().getPositionGroup(groupID, true).addPosition(position, isFirst);
+		((LinkedCorrectionProposalCore)getDelegate()).addLinkedPosition(position, isFirst, groupID);
 	}
 
 	/**
@@ -103,7 +99,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * are linked.
 	 */
 	public void addLinkedPosition(ITrackedNodePosition position, int sequenceRank, String groupID) {
-		getLinkedProposalModel().getPositionGroup(groupID, true).addPosition(position, sequenceRank);
+		((LinkedCorrectionProposalCore)getDelegate()).addLinkedPosition(position, sequenceRank, groupID);
 	}
 
 	/**
@@ -111,7 +107,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * @param position The position that describes the end position of the linked mode.
 	 */
 	public void setEndPosition(ITrackedNodePosition position) {
-		getLinkedProposalModel().setEndPosition(position);
+		((LinkedCorrectionProposalCore)getDelegate()).setEndPosition(position);
 	}
 
 	/**
@@ -124,6 +120,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	public void addLinkedPositionProposal(String groupID, String proposal, Image image) {
 		ProposalCore p = new Proposal(proposal, image, 10);
 		getLinkedProposalModel().getPositionGroup(groupID, true).addProposal(p);
+	}
+
+	public void addLinkedPositionProposal(String groupID, String proposal) {
+		((LinkedCorrectionProposalCore)getDelegate()).addLinkedPositionProposal(groupID, proposal);
 	}
 
 	/**
@@ -157,13 +157,13 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				return;
 			}
 
-			if (fLinkedProposalModel != null) {
-				if (fLinkedProposalModel.hasLinkedPositions() && part instanceof JavaEditor) {
+			if (getLinkedProposalModel() != null) {
+				if (getLinkedProposalModel().hasLinkedPositions() && part instanceof JavaEditor) {
 					// enter linked mode
 					ITextViewer viewer= ((JavaEditor) part).getViewer();
-					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, didOpenEditor(), fLinkedProposalModel);
+					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, didOpenEditor(), getLinkedProposalModel());
 				} else if (part instanceof ITextEditor) {
-					LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalModel.getEndPosition();
+					LinkedProposalPositionGroup.PositionInformation endPosition= getLinkedProposalModel().getEndPosition();
 					if (endPosition != null) {
 						// select a result
 						int pos= endPosition.getOffset() + endPosition.getLength();
@@ -175,4 +175,5 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		}
 	}
+
 }

@@ -152,17 +152,18 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCo
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddTypeParameterProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CastCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.EditDescription;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.SwapDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.ChangeDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.EditDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.InsertDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.RemoveDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.SwapDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewAbstractMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewAnnotationMemberProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.QualifyTypeProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameNodeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
@@ -339,13 +340,13 @@ public class UnresolvedElementsSubProcessor {
 			int relevance= StubUtility.hasParameterName(cu.getJavaProject(), name) ? IProposalRelevance.CREATE_PARAMETER_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_PARAMETER;
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createparameter_description, BasicElementLabels.getJavaElementName(name));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.PARAM, simpleName, null, relevance, image));
+			proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposalCore.PARAM, simpleName, null, relevance, image));
 		}
 		if (type == ASTNode.INITIALIZER || type == ASTNode.METHOD_DECLARATION && !ASTResolving.isInsideConstructorInvocation((MethodDeclaration) bodyDeclaration, node)) {
 			int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? IProposalRelevance.CREATE_LOCAL_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_LOCAL;
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createlocal_description, BasicElementLabels.getJavaElementName(name));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.LOCAL, simpleName, null, relevance, image));
+			proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposalCore.LOCAL, simpleName, null, relevance, image));
 		}
 
 		if (node.getParent().getNodeType() == ASTNode.ASSIGNMENT) {
@@ -412,7 +413,7 @@ public class UnresolvedElementsSubProcessor {
 		if (senderDeclBinding.isEnum() && !isWriteAccess) {
 			label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createenum_description, new Object[] { nameLabel, org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getTypeSignature(senderDeclBinding) });
 			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
-			proposals.add(new NewVariableCorrectionProposal(label, targetCU, NewVariableCorrectionProposal.ENUM_CONST, simpleName, senderDeclBinding, 10, image));
+			proposals.add(new NewVariableCorrectionProposal(label, targetCU, NewVariableCorrectionProposalCore.ENUM_CONST, simpleName, senderDeclBinding, 10, image));
 		} else {
 			if (!mustBeConst) {
 				if (binding == null) {
@@ -423,7 +424,7 @@ public class UnresolvedElementsSubProcessor {
 					image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 				}
 				int fieldRelevance= StubUtility.hasFieldName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_FIELD_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_FIELD;
-				proposals.add(new NewVariableCorrectionProposal(label, targetCU, NewVariableCorrectionProposal.FIELD, simpleName, senderDeclBinding, fieldRelevance, image));
+				proposals.add(new NewVariableCorrectionProposal(label, targetCU, NewVariableCorrectionProposalCore.FIELD, simpleName, senderDeclBinding, fieldRelevance, image));
 			}
 
 			if (!isWriteAccess && !senderDeclBinding.isAnonymous()) {
@@ -435,7 +436,7 @@ public class UnresolvedElementsSubProcessor {
 					image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 				}
 				int constRelevance= StubUtility.hasConstantName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_CONSTANT_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_CONSTANT;
-				proposals.add(new NewVariableCorrectionProposal(label, targetCU, NewVariableCorrectionProposal.CONST_FIELD, simpleName, senderDeclBinding, constRelevance, image));
+				proposals.add(new NewVariableCorrectionProposal(label, targetCU, NewVariableCorrectionProposalCore.CONST_FIELD, simpleName, senderDeclBinding, constRelevance, image));
 			}
 		}
 	}
@@ -734,7 +735,7 @@ public class UnresolvedElementsSubProcessor {
 						String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_create_loop_variable_description, BasicElementLabels.getJavaElementName(name));
 						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 
-						proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.LOCAL, simpleName, null, relevance, image));
+						proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposalCore.LOCAL, simpleName, null, relevance, image));
 						return simpleName;
 					}
 				}

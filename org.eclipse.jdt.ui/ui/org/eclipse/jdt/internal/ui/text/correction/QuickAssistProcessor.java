@@ -232,6 +232,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewInterfaceImplementationProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
@@ -553,13 +554,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			} else {
 				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL;
 			}
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoring, relevance, image) {
-				@Override
-				protected void init(Refactoring refactoring) throws CoreException {
-					ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
-					etr.setTempName(etr.guessTempName()); // expensive
-				}
-			};
+			ExtractTempRefactoringProposalCore core = new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoring, relevance);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, extractTempRefactoring, relevance, image, core);
+
 			proposal.setCommandId(EXTRACT_LOCAL_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
@@ -582,13 +579,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			} else {
 				relevance= IProposalRelevance.EXTRACT_LOCAL;
 			}
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoringSelectedOnly, relevance, image) {
-				@Override
-				protected void init(Refactoring refactoring) throws CoreException {
-					ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
-					etr.setTempName(etr.guessTempName()); // expensive
-				}
-			};
+			ExtractTempRefactoringProposalCore core = new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoringSelectedOnly, relevance);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, extractTempRefactoringSelectedOnly, relevance, image, core);
+
 			proposal.setCommandId(EXTRACT_LOCAL_NOT_REPLACE_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
@@ -610,13 +603,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			} else {
 				relevance= IProposalRelevance.EXTRACT_CONSTANT;
 			}
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractConstRefactoring, relevance, image) {
-				@Override
-				protected void init(Refactoring refactoring) throws CoreException {
-					ExtractConstantRefactoring etr= (ExtractConstantRefactoring) refactoring;
-					etr.setConstantName(etr.guessConstantName()); // expensive
-				}
-			};
+
+			ExtractConstantRefactoringProposalCore core = new ExtractConstantRefactoringProposalCore(label, cu, extractConstRefactoring, relevance);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, extractConstRefactoring, relevance, image, core);
 			proposal.setCommandId(EXTRACT_CONSTANT_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
@@ -624,10 +613,41 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	private static class ExtractTempRefactoringProposalCore extends RefactoringCorrectionProposalCore {
+		public ExtractTempRefactoringProposalCore(String name, ICompilationUnit cu, Refactoring refactoring, int relevance) {
+			super(name, cu, refactoring, relevance);
+		}
+		@Override
+		protected void init(Refactoring refactoring) throws CoreException {
+			ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
+			etr.setTempName(etr.guessTempName()); // expensive
+		}
+	}
+
+
+	private static class ExtractConstantRefactoringProposalCore extends RefactoringCorrectionProposalCore {
+		public ExtractConstantRefactoringProposalCore(String name, ICompilationUnit cu, Refactoring refactoring, int relevance) {
+			super(name, cu, refactoring, relevance);
+		}
+		@Override
+		protected void init(Refactoring refactoring) throws CoreException {
+			ExtractConstantRefactoring etr= (ExtractConstantRefactoring) refactoring;
+			etr.setConstantName(etr.guessConstantName()); // expensive
+		}
+	}
+
+	private static class RefactoringCorrectionProposalExtension extends RefactoringCorrectionProposal {
+		public RefactoringCorrectionProposalExtension(String name, ICompilationUnit cu, Refactoring refactoring, int relevance, Image image, RefactoringCorrectionProposalCore delegate) {
+			super(name, cu, refactoring, relevance, image);
+			setDelegate(delegate);
+		}
+	}
+
 	private static boolean getDeprecatedProposal(IInvocationContext context, ASTNode node, IProblemLocationCore[] locations, Collection<ICommandAccess> proposals) {
 		// don't add if already added as quick fix
 		if (containsMatchingProblem(locations, IProblem.UsingDeprecatedMethod))
 			return false;
+
 		if (!(node instanceof MethodInvocation)) {
 			node= node.getParent();
 			if (!(node instanceof MethodInvocation)) {
