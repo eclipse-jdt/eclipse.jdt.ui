@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2023 IBM Corporation and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - add module-info support
+ *     Microsoft Corporation - read formatting options from the compilation unit
+ *     Red Hat Inc. - body copied from JavadocTagsSubProcessor
+ *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.List;
