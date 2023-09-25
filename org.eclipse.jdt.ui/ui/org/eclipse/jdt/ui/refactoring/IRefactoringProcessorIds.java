@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
  * @noextend This interface is not intended to be extended by clients.
  * @deprecated Please use IRefactoringProcessorIdsCore. Do not update this file.
  */
-public interface IRefactoringProcessorIds extends IRefactoringProcessorIdsCore {
+public interface IRefactoringProcessorIds {
 	// All constants have been moved to the IRefactoringProcessorIdsCore interface
 
 	/**

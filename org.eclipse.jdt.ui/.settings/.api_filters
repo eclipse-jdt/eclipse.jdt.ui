@@ -1,30 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
-    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
-        <filter id="571519004">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring.createChange(IProgressMonitor)"/>
-                <message_argument value="JavaRefactoringDescriptor"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/scripting/JavaUIRefactoringContribution.java" type="org.eclipse.jdt.internal.corext.refactoring.scripting.JavaUIRefactoringContribution">
-        <filter id="571473929">
-            <message_arguments>
-                <message_argument value="JavaRefactoringContribution"/>
-                <message_argument value="JavaUIRefactoringContribution"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/surround/SurroundWithTryCatchAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchAnalyzer">
-        <filter comment="Support new TypePattern" id="640712815">
-            <message_arguments>
-                <message_argument value="TypePattern"/>
-                <message_argument value="SurroundWithTryCatchAnalyzer"/>
-                <message_argument value="getPatternVariable()"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="internal compatibility/org/eclipse/jdt/internal/corext/SourceRange.java" type="org.eclipse.jdt.internal.corext.SourceRange">
         <filter id="574619656">
             <message_arguments>
@@ -175,6 +150,22 @@
             <message_arguments>
                 <message_argument value="ITextEditorActionDefinitionIds"/>
                 <message_argument value="IJavaEditorActionDefinitionIds"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/text/java/IInvocationContext.java" type="org.eclipse.jdt.ui.text.java.IInvocationContext">
+        <filter id="576720909">
+            <message_arguments>
+                <message_argument value="IInvocationContextCore"/>
+                <message_argument value="IInvocationContext"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/text/java/IProblemLocation.java" type="org.eclipse.jdt.ui.text.java.IProblemLocation">
+        <filter id="576720909">
+            <message_arguments>
+                <message_argument value="IProblemLocationCore"/>
+                <message_argument value="IProblemLocation"/>
             </message_arguments>
         </filter>
     </resource>

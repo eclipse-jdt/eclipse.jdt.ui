@@ -112,5 +112,4 @@ public final class CleanUpRequirements {
 	public CleanUpRequirementsCore toCore() {
 		return requirementsCore;
 	}
-
 }

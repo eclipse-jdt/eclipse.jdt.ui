@@ -19,14 +19,11 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -37,7 +34,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -53,38 +49,10 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionPro
 public class VarargsWarningsSubProcessor {
 
 	private static class AddSafeVarargsProposal extends LinkedCorrectionProposal {
-
-		private IMethodBinding fMethodBinding;
-
-		private MethodDeclaration fMethodDeclaration;
-
 		public AddSafeVarargsProposal(String label, ICompilationUnit cu, MethodDeclaration methodDeclaration, IMethodBinding methodBinding, int relevance) {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
-			fMethodDeclaration= methodDeclaration;
-			fMethodBinding= methodBinding;
+			setDelegate(new AddSafeVarargsProposalCore(label, cu, methodDeclaration, methodBinding, relevance));
 		}
-
-		@Override
-		protected ASTRewrite getRewrite() throws CoreException {
-			if (fMethodDeclaration == null) {
-				CompilationUnit astRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
-				fMethodDeclaration= (MethodDeclaration) astRoot.findDeclaringNode(fMethodBinding.getKey());
-			}
-			AST ast= fMethodDeclaration.getAST();
-			ASTRewrite rewrite= ASTRewrite.create(ast);
-			ListRewrite listRewrite= rewrite.getListRewrite(fMethodDeclaration, MethodDeclaration.MODIFIERS2_PROPERTY);
-
-			MarkerAnnotation annotation= ast.newMarkerAnnotation();
-			String importString= createImportRewrite((CompilationUnit) fMethodDeclaration.getRoot()).addImport("java.lang.SafeVarargs"); //$NON-NLS-1$
-			annotation.setTypeName(ast.newName(importString));
-			listRewrite.insertFirst(annotation, null);
-
-			// set up linked mode
-			addLinkedPosition(rewrite.track(annotation), true, "annotation"); //$NON-NLS-1$
-
-			return rewrite;
-		}
-
 	}
 
 	public static void addAddSafeVarargsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {

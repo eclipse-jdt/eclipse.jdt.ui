@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+
 import org.eclipse.jdt.internal.ui.util.JavaProjectUtilities;
 import org.eclipse.jdt.internal.ui.util.ResourcesUtility;
 

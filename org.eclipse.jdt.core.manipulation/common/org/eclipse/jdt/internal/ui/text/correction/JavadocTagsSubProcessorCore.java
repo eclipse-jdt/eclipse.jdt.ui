@@ -23,8 +23,10 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -34,7 +36,25 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
  *
  */
 public class JavadocTagsSubProcessorCore {
+	static Set<String> getPreviousExceptionNames(List<Type> list, ASTNode missingNode) {
+		Set<String> previousNames=  new HashSet<>();
+		for (int i= 0; i < list.size() && missingNode != list.get(i); i++) {
+			Type curr= list.get(i);
+			previousNames.add(ASTNodes.getTypeName(curr));
+		}
+		return previousNames;
+	}
 
+	static Set<String> getPreviousParamNames(List<SingleVariableDeclaration> params, ASTNode missingNode) {
+		Set<String> previousNames=  new HashSet<>();
+		for (SingleVariableDeclaration curr : params) {
+			if (curr == missingNode) {
+				return previousNames;
+			}
+			previousNames.add(curr.getName().getIdentifier());
+		}
+		return previousNames;
+	}
 
 	public static Set<String> getPreviousTypeParamNames(List<TypeParameter> typeParams, ASTNode missingNode) {
 		Set<String> previousNames=  new HashSet<>();
@@ -177,6 +197,10 @@ public class JavadocTagsSubProcessorCore {
 				} else if (text.startsWith(String.valueOf('<')) && text.endsWith(String.valueOf('>')) && text.length() > 2) {
 					return text.substring(1, text.length() - 1);
 				}
+			} else if (first instanceof TextElement && (TagElement.TAG_USES.equals(curr.getTagName())
+					|| TagElement.TAG_PROVIDES.equals(curr.getTagName()))) {
+				String text= ((TextElement) first).getText();
+				return text.trim();
 			}
 		}
 		return null;

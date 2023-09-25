@@ -35,6 +35,14 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
  */
 public final class JavaModelProvider extends ModelProvider {
 
+	/*
+	 * This constant seems only used in jdt.ui plugin, and oddly enough it's only used
+	 * in a org.eclipse.team.ui.teamContentProviders extension point.
+	 *
+	 * This class here, JavaModelProvider, is actually used in a
+	 * org.eclipse.core.resources.modelProviders extension point,
+	 * and no ID is provided for this specific provider.
+	 */
 	/** The model provider id */
 	public static final String JAVA_MODEL_PROVIDER_ID= "org.eclipse.jdt.ui.modelProvider"; //$NON-NLS-1$
 
