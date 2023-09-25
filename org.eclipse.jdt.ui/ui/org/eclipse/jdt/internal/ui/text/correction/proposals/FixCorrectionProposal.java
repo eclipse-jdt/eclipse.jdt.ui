@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -116,8 +116,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	}
 
 	public ICleanUp getCleanUp() {
-		ICleanUpCore ret = ((FixCorrectionProposalCore)getDelegate()).getCleanUp();
-		return CleanUpCoreWrapper.wrap(ret);
+		return fCleanUp;
 	}
 
 	public IStatus getFixStatus() {
@@ -170,11 +169,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 	@Override
 	public String getStatusMessage() {
-		ICleanUpCore cleanup = ((FixCorrectionProposalCore)getDelegate()).getCleanUp();
-		if (cleanup == null)
-			return null;
-
-		int count= computeNumberOfFixesForCleanUp(cleanup);
+		int count= computeNumberOfFixesForCleanUp(fCleanUp);
 
 		if (count == -1) {
 			return CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description;
@@ -192,7 +187,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	 * @return the maximum number of fixes or -1 if unknown
 	 * @since 3.6
 	 */
-	public int computeNumberOfFixesForCleanUp(ICleanUpCore cleanUp) {
+	public int computeNumberOfFixesForCleanUp(ICleanUp cleanUp) {
 		CompilationUnit cu = ((FixCorrectionProposalCore)getDelegate()).getAstCompilationUnit();
 		return cleanUp instanceof IMultiFix ? ((IMultiFix)cleanUp).computeNumberOfFixes(cu) : -1;
 	}
