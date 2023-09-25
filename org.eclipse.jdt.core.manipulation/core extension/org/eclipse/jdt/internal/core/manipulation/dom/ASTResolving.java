@@ -87,6 +87,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.manipulation.TypeKinds;
 
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -103,6 +107,77 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 // @see JDTUIHelperClasses
 // @see org.eclipse.jdt.internal.ui.text.correction.ASTResolving (subclass of this one)
 public class ASTResolving {
+	public static String getMethodSignature(IMethodBinding binding) {
+		return BindingLabelProviderCore.getBindingLabel(binding, BindingLabelProviderCore.DEFAULT_TEXTFLAGS);
+	}
+
+	public static String getMethodSignature(String name, ITypeBinding[] params, boolean isVarArgs) {
+		StringBuilder buf= new StringBuilder();
+		buf.append(name).append('(');
+		for (int i= 0; i < params.length; i++) {
+			if (i > 0) {
+				buf.append(JavaElementLabelsCore.COMMA_STRING);
+			}
+			if (isVarArgs && i == params.length - 1) {
+				buf.append(getTypeSignature(params[i].getElementType()));
+				buf.append("..."); //$NON-NLS-1$
+			} else {
+				buf.append(getTypeSignature(params[i]));
+			}
+		}
+		buf.append(')');
+		return BasicElementLabels.getJavaElementName(buf.toString());
+	}
+
+	public static String getTypeSignature(ITypeBinding type) {
+		return BindingLabelProviderCore.getBindingLabel(type, BindingLabelProviderCore.DEFAULT_TEXTFLAGS);
+	}
+
+	public static Type guessTypeForReference(AST ast, ASTNode node) {
+		ASTNode parent= node.getParent();
+		while (parent != null) {
+			switch (parent.getNodeType()) {
+				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+				case ASTNode.SINGLE_VARIABLE_DECLARATION:
+					if (((VariableDeclarationFragment) parent).getInitializer() == node) {
+						return ASTNodeFactory.newType(ast, (VariableDeclaration) parent);
+					}
+					return null;
+				case ASTNode.ARRAY_ACCESS:
+					if (!((ArrayAccess) parent).getIndex().equals(node)) {
+						Type type= guessTypeForReference(ast, parent);
+						if (type != null) {
+							return ASTNodeFactory.newArrayType(type);
+						}
+					}
+					return null;
+				case ASTNode.FIELD_ACCESS:
+					if (node.equals(((FieldAccess) parent).getName())) {
+						node= parent;
+						parent= parent.getParent();
+					} else {
+						return null;
+					}
+					break;
+				case ASTNode.SUPER_FIELD_ACCESS:
+				case ASTNode.PARENTHESIZED_EXPRESSION:
+					node= parent;
+					parent= parent.getParent();
+					break;
+				case ASTNode.QUALIFIED_NAME:
+					if (node.equals(((QualifiedName) parent).getName())) {
+						node= parent;
+						parent= parent.getParent();
+					} else {
+						return null;
+					}
+					break;
+				default:
+					return null;
+			}
+		}
+		return null;
+	}
 
 	public static ITypeBinding guessBindingForReference(ASTNode node) {
 		return Bindings.normalizeTypeBinding(getPossibleReferenceBinding(node));

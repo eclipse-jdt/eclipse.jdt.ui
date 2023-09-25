@@ -21,17 +21,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Modifier;
 
 public class NewAbstractMethodCorrectionProposal extends NewMethodCorrectionProposal {
 
 	public NewAbstractMethodCorrectionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, List<Expression> arguments, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, invocationNode, arguments, binding, relevance, image);
+		setDelegate(new NewAbstractMethodCorrectionProposalCore(label, targetCU, invocationNode, arguments, binding, relevance));
 	}
-
-	@Override
-	protected int evaluateModifiers(ASTNode targetTypeDecl) {
-		return Modifier.ABSTRACT | Modifier.PROTECTED;
-	}
-
 }

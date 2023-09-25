@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.ui.text.correction.IInvocationContextCore;
+
 /**
  * Context information for quick fix and quick assist processors.
  * <p>
@@ -28,21 +30,24 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * @noimplement This interface is not intended to be implemented by clients.
  * @noextend This interface is not intended to be extended by clients.
  */
-public interface IInvocationContext {
+public interface IInvocationContext extends IInvocationContextCore {
 
 	/**
 	 * @return the current compilation unit
 	 */
+	@Override
 	ICompilationUnit getCompilationUnit();
 
 	/**
 	 * @return the offset of the current selection
 	 */
+	@Override
 	int getSelectionOffset();
 
 	/**
 	 * @return the length of the current selection
 	 */
+	@Override
 	int getSelectionLength();
 
 	/**
@@ -55,6 +60,7 @@ public interface IInvocationContext {
 	 * @see org.eclipse.jdt.core.dom.AST#apiLevel()
 	 * @return the root of the AST corresponding to the current compilation unit
 	 */
+	@Override
 	CompilationUnit getASTRoot();
 
 	/**
@@ -63,6 +69,7 @@ public interface IInvocationContext {
 	 *
 	 * @return the covered node, or <code>null</code> if the selection is empty or too short to cover an entire node
 	 */
+	@Override
 	ASTNode getCoveredNode();
 
 	/**
@@ -74,6 +81,7 @@ public interface IInvocationContext {
 	 *
 	 * @return the covering node
 	 */
+	@Override
 	ASTNode getCoveringNode();
 
 }

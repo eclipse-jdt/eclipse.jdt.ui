@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper;
 
 
 /**
@@ -396,7 +397,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				list.add(createCompletionProposalLink(composite, prop, 1)); // Original link for single fix, hence pass 1 for count
 				if (prop instanceof FixCorrectionProposal) {
 					FixCorrectionProposal proposal= (FixCorrectionProposal) prop;
-					int count= proposal.computeNumberOfFixesForCleanUp(proposal.getCleanUp());
+					int count= proposal.computeNumberOfFixesForCleanUp(CleanUpCoreWrapper.wrap(proposal.getCleanUp()));
 					if (count > 1) {
 						list.add(createCompletionProposalLink(composite, prop, count));
 					}

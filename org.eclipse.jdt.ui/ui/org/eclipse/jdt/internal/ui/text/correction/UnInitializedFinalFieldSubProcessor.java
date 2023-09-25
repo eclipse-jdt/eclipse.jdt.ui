@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposalCore;
 
 public class UnInitializedFinalFieldSubProcessor {
 
@@ -66,9 +67,9 @@ public class UnInitializedFinalFieldSubProcessor {
 			ITypeBinding targetDecl= targetBinding.getDeclaringClass();
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 
-			proposals.add(new InitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposal.UPDATE_AT_CONSTRUCTOR));
+			proposals.add(new InitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposalCore.UPDATE_AT_CONSTRUCTOR));
 
-			InitializeFinalFieldProposal initializeFinalFieldProposal= new InitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposal.UPDATE_CONSTRUCTOR_NEW_PARAMETER);
+			InitializeFinalFieldProposal initializeFinalFieldProposal= new InitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposalCore.UPDATE_CONSTRUCTOR_NEW_PARAMETER);
 			if(initializeFinalFieldProposal.hasProposal()) {
 				proposals.add(initializeFinalFieldProposal);
 			}
