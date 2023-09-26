@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -180,11 +181,14 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				return false;
 			}
 			boolean isTagged= false;
-			if (hasComments) {
+			if (hasComments && ASTNodes.getFirstAncestorOrNull(visited, Annotation.class) == null) {
 				// we must ensure that NLS comments are consistent for all string literals in concatenation
 				ICompilationUnit cu= (ICompilationUnit)((CompilationUnit)leftHand.getRoot()).getJavaElement();
 				try {
 				   NLSLine nlsLine= NLSUtil.scanCurrentLine(cu, leftHand.getStartPosition());
+				   if (nlsLine == null) {
+					   return false;
+				   }
 				   isTagged= nlsLine.getElements()[0].hasTag();
 				   if (!isConsistent(nlsLine, isTagged)) {
 					   return false;

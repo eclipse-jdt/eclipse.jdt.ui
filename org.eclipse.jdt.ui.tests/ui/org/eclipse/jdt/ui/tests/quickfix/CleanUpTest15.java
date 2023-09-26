@@ -16,7 +16,10 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import org.junit.Rule;
 import org.junit.Test;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -241,6 +244,138 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        \t\"\"\";\n" //
 				+ "    }\n" //
 				+ "}";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testConcatInAnnotation1() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/824
+		IJavaProject project1= getProject();
+		JavaProjectHelper.addLibrary(project1, new Path(Java15ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import static java.lang.annotation.ElementType.TYPE;\n"
+				+ "import static java.lang.annotation.RetentionPolicy.RUNTIME;\n"
+				+ "\n"
+				+ "import java.lang.annotation.Retention;\n"
+				+ "import java.lang.annotation.Target;\n"
+				+ "\n"
+				+ "@Target({TYPE}) \n"
+				+ "@Retention(RUNTIME)\n"
+				+ "public @interface SampleAnnotation { \n"
+				+ "\n"
+				+ "    String name();\n"
+				+ "\n"
+				+ "    String query();\n"
+				+ "\n"
+				+ "}\n";
+		pack1.createCompilationUnit("SampleAnnotation.java", sample, false, null);
+
+		String sample2= "" //
+				+ "package test1;\n"
+				+ "\n"
+				+ "@SampleAnnotation(name = \"testQuery\",\n"
+				+ " query = \"select * \" +\n"
+				+ " \"from test_entities \" +  \n"
+				+ " \"where test = :test\" ) //comment 1\n"
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        final String foo =  \n"
+				+ "            (\"Line1\"+ \n"
+				+ "            \"Line2\"+  \n"
+				+ "            \"Line3\"+\n"
+				+ "            \"Line4\"//comment2\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample2, false, null);
+
+		enable(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK);
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "@SampleAnnotation(name = \"testQuery\",\n"
+				+ " query = \"\"\"\n"
+				+ "\tselect *\\s\\\n"
+				+ "\tfrom test_entities\\s\\\n"
+				+ "\twhere test = :test\"\"\" ) //comment 1\n"
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        final String foo =  \n"
+				+ "            (\"\"\"\n"
+				+ "            \tLine1\\\n"
+				+ "            \tLine2\\\n"
+				+ "            \tLine3\\\n"
+				+ "            \tLine4\"\"\"//comment2\n"
+				+ "    }\n"
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testConcatInAnnotation2() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/824
+		IJavaProject project1= getProject();
+		JavaProjectHelper.addLibrary(project1, new Path(Java15ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import static java.lang.annotation.ElementType.TYPE;\n"
+				+ "import static java.lang.annotation.RetentionPolicy.RUNTIME;\n"
+				+ "\n"
+				+ "import java.lang.annotation.Retention;\n"
+				+ "import java.lang.annotation.Target;\n"
+				+ "\n"
+				+ "@Target({TYPE}) \n"
+				+ "@Retention(RUNTIME)\n"
+				+ "public @interface SampleAnnotation { \n"
+				+ "\n"
+				+ "    String[] value ();\n"
+				+ "\n"
+				+ "}\n";
+		pack1.createCompilationUnit("SampleAnnotation.java", sample, false, null);
+
+		String sample2= "" //
+				+ "package test1;\n"
+				+ "\n"
+				+ "@SampleAnnotation({\n"
+				+ "\"select * \" +\n"
+				+ " \"from test_entities \" +  \n"
+				+ " \"where test = :test\"}) //comment 1\n"
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        final String foo =  \n"
+				+ "            (\"Line1\"+ \n"
+				+ "            \"Line2\"+  \n"
+				+ "            \"Line3\"+\n"
+				+ "            \"Line4\"//comment2\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample2, false, null);
+
+		enable(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK);
+
+		String expected1= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "@SampleAnnotation({\n"
+				+ "\"\"\"\n"
+				+ "\tselect *\\s\\\n"
+				+ "\tfrom test_entities\\s\\\n"
+				+ "\twhere test = :test\"\"\"}) //comment 1\n"
+				+ "public class E {\n"
+				+ "    public static void main(String[] args) {\n"
+				+ "        final String foo =  \n"
+				+ "            (\"\"\"\n"
+				+ "            \tLine1\\\n"
+				+ "            \tLine2\\\n"
+				+ "            \tLine3\\\n"
+				+ "            \tLine4\"\"\"//comment2\n"
+				+ "    }\n"
+				+ "}\n";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
