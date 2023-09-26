@@ -146,8 +146,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @since 3.31
 	 * @param delegate to set
 	 */
-	protected void setDelegate(CUCorrectionProposalCore del) {
-		fProposalCore = del;
+	protected void setDelegate(CUCorrectionProposalCore delegate) {
+		fProposalCore = delegate;
 	}
 
 	/**
