@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,9 +17,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.rules;
 
+import java.io.File;
+
+import org.osgi.framework.Bundle;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -28,6 +33,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.core.ClasspathEntry;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class Java15ProjectTestSetup extends ProjectTestSetup {
 
@@ -55,5 +62,16 @@ public class Java15ProjectTestSetup extends ProjectTestSetup {
 		JavaProjectHelper.set15CompilerOptions(javaProject, enable_preview_feature);
 		return javaProject;
 	}
+
+	public static String getJdtAnnotations20Path() {
+		Bundle[] annotationsBundles= JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", "2.0.0"); //$NON-NLS-1$
+		File bundleFile= FileLocator.getBundleFileLocation(annotationsBundles[0]).get();
+		String path= bundleFile.getPath();
+		if (bundleFile.isDirectory()) {
+			path= bundleFile.getPath() + "/bin";
+		}
+		return path;
+	}
+
 
 }
