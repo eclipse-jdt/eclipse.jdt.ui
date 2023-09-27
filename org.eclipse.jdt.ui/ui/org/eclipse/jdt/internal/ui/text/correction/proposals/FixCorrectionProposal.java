@@ -37,7 +37,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -157,17 +156,6 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		return false;
 	}
-
-	@Override
-	protected TextChange createTextChange() throws CoreException {
-		return ((FixCorrectionProposalCore)getDelegate()).createTextChange();
-	}
-
-	@Override
-	public int getRelevance() {
-		return ((FixCorrectionProposalCore)getDelegate()).getRelevance();
-	}
-
 	@Override
 	public String getStatusMessage() {
 		ICleanUpCore cleanup = ((FixCorrectionProposalCore)getDelegate()).getCleanUp();
