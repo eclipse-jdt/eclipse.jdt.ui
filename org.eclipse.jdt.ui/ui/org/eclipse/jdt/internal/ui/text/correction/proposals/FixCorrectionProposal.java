@@ -37,12 +37,15 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
-import org.eclipse.jdt.internal.corext.fix.ICleanUpCore;
+import org.eclipse.jdt.internal.corext.fix.ILinkedFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -58,7 +61,6 @@ import org.eclipse.jdt.internal.ui.fix.IMultiFix;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.IStatusLineProposal;
-import org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
 /**
@@ -68,11 +70,115 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  */
 public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2, IStatusLineProposal {
 
-	private ICleanUp fCleanUp;
+	private final IProposableFix fFix;
+	private final ICleanUp fCleanUp;
+	private CompilationUnit fCompilationUnit;
+
 	public FixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context) {
 		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance, image);
-		this.fCleanUp = cleanUp;
-		setDelegate(new FixCorrectionProposalCore(fix, CleanUpCoreWrapper.wrap(cleanUp), relevance, context));
+		fFix= fix;
+		fCleanUp= cleanUp;
+		fCompilationUnit= context.getASTRoot();
+	}
+
+	public ICleanUp getCleanUp() {
+		return fCleanUp;
+	}
+
+	@Override
+	public Image getImage() {
+		IStatus status= getFixStatus();
+		if (status != null && !status.isOK()) {
+			ImageImageDescriptor image= new ImageImageDescriptor(super.getImage());
+
+			int flag= JavaElementImageDescriptor.WARNING;
+			if (status.getSeverity() == IStatus.ERROR) {
+				flag= JavaElementImageDescriptor.ERROR;
+			} else if (status.getSeverity() == IStatus.INFO) {
+				flag= JavaElementImageDescriptor.INFO;
+			}
+
+			ImageDescriptor composite= new JavaElementImageDescriptor(image, flag, new Point(image.getImageData().width, image.getImageData().height));
+			return composite.createImage();
+		} else {
+			return super.getImage();
+		}
+	}
+
+	public IStatus getFixStatus() {
+		return fFix.getStatus();
+	}
+
+	@Override
+	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+		StringBuilder result= new StringBuilder();
+
+		IStatus status= getFixStatus();
+		if (status != null && !status.isOK()) {
+			result.append("<b>"); //$NON-NLS-1$
+			if (status.getSeverity() == IStatus.WARNING) {
+				result.append(CorrectionMessages.FixCorrectionProposal_WarningAdditionalProposalInfo);
+			} else if (status.getSeverity() == IStatus.ERROR) {
+				result.append(CorrectionMessages.FixCorrectionProposal_ErrorAdditionalProposalInfo);
+			}
+			result.append("</b>"); //$NON-NLS-1$
+			result.append(status.getMessage());
+			result.append("<br><br>"); //$NON-NLS-1$
+		}
+
+		String info= fFix.getAdditionalProposalInfo();
+		if (info != null) {
+			result.append(info);
+		} else {
+			result.append(super.getAdditionalProposalInfo(monitor));
+		}
+
+		return result.toString();
+	}
+
+	@Override
+	public int getRelevance() {
+		IStatus status= getFixStatus();
+		if (status != null && !status.isOK()) {
+			return super.getRelevance() - 100;
+		} else {
+			return super.getRelevance();
+		}
+	}
+
+	@Override
+	protected TextChange createTextChange() throws CoreException {
+		CompilationUnitChange createChange= fFix.createChange(null);
+		createChange.setSaveMode(TextFileChange.LEAVE_DIRTY);
+
+		if (fFix instanceof ILinkedFix) {
+			setLinkedProposalModel(((ILinkedFix) fFix).getLinkedPositions());
+		}
+
+		return createChange;
+	}
+
+	@Override
+	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+		if ((stateMask & SWT.MODIFIER_MASK) == SWT.CONTROL && fCleanUp != null) {
+			CleanUpRefactoring refactoring= new CleanUpRefactoring();
+			refactoring.addCompilationUnit(getCompilationUnit());
+			refactoring.addCleanUp(fCleanUp);
+			refactoring.setLeaveFilesDirty(true);
+
+			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, IRefactoringSaveModes.SAVE_NOTHING, shell, context);
+			try {
+				executer.perform(true, true);
+			} catch (InterruptedException e) {
+			} catch (InvocationTargetException e) {
+				JavaPlugin.log(e);
+			}
+			return;
+		}
+		apply(viewer.getDocument());
 	}
 
 	public void resolve(MultiFixTarget[] targets, final IProgressMonitor monitor) throws CoreException {
@@ -114,36 +220,6 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		}
 	}
 
-	public ICleanUp getCleanUp() {
-		ICleanUpCore ret = ((FixCorrectionProposalCore)getDelegate()).getCleanUp();
-		return CleanUpCoreWrapper.wrap(ret);
-	}
-
-	public IStatus getFixStatus() {
-		return ((FixCorrectionProposalCore)getDelegate()).getFixStatus();
-	}
-
-	@Override
-	public Image getImage() {
-		FixCorrectionProposalCore d = ((FixCorrectionProposalCore)getDelegate());
-		IStatus status= d == null ? Status.OK_STATUS : d.getFixStatus();
-		if (status != null && !status.isOK()) {
-			ImageImageDescriptor image= new ImageImageDescriptor(super.getImage());
-
-			int flag= JavaElementImageDescriptor.WARNING;
-			if (status.getSeverity() == IStatus.ERROR) {
-				flag= JavaElementImageDescriptor.ERROR;
-			} else if (status.getSeverity() == IStatus.INFO) {
-				flag= JavaElementImageDescriptor.INFO;
-			}
-
-			ImageDescriptor composite= new JavaElementImageDescriptor(image, flag, new Point(image.getImageData().width, image.getImageData().height));
-			return composite.createImage();
-		} else {
-			return super.getImage();
-		}
-	}
-
 	@Override
 	public void selected(ITextViewer viewer, boolean smartToggle) {
 	}
@@ -156,13 +232,13 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		return false;
 	}
+
 	@Override
 	public String getStatusMessage() {
-		ICleanUpCore cleanup = ((FixCorrectionProposalCore)getDelegate()).getCleanUp();
-		if (cleanup == null)
+		if (fCleanUp == null)
 			return null;
 
-		int count= computeNumberOfFixesForCleanUp(cleanup);
+		int count= computeNumberOfFixesForCleanUp(fCleanUp);
 
 		if (count == -1) {
 			return CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description;
@@ -180,32 +256,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	 * @return the maximum number of fixes or -1 if unknown
 	 * @since 3.6
 	 */
-	public int computeNumberOfFixesForCleanUp(ICleanUpCore cleanUp) {
-		CompilationUnit cu = ((FixCorrectionProposalCore)getDelegate()).getAstCompilationUnit();
-		return cleanUp instanceof IMultiFix ? ((IMultiFix)cleanUp).computeNumberOfFixes(cu) : -1;
-	}
-
-	@Override
-	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-		ICleanUpCore cleanup = ((FixCorrectionProposalCore)getDelegate()).getCleanUp();
-		if ((stateMask & SWT.MODIFIER_MASK) == SWT.CONTROL && cleanup != null) {
-			CleanUpRefactoring refactoring= new CleanUpRefactoring();
-			refactoring.addCompilationUnit(getCompilationUnit());
-			refactoring.addCleanUp(CleanUpCoreWrapper.wrap(cleanup));
-			refactoring.setLeaveFilesDirty(true);
-
-			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
-			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, IRefactoringSaveModes.SAVE_NOTHING, shell, context);
-			try {
-				executer.perform(true, true);
-			} catch (InterruptedException e) {
-			} catch (InvocationTargetException e) {
-				JavaPlugin.log(e);
-			}
-			return;
-		}
-		apply(viewer.getDocument());
+	public int computeNumberOfFixesForCleanUp(ICleanUp cleanUp) {
+		return cleanUp instanceof IMultiFix ? ((IMultiFix)cleanUp).computeNumberOfFixes(fCompilationUnit) : -1;
 	}
 }

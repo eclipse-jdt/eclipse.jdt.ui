@@ -16,10 +16,11 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public final class CreateCompilationUnitChange extends CreateTextFileChange {
 

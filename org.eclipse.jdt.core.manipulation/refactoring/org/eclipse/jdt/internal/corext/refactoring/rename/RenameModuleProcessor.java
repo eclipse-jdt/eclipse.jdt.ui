@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -78,6 +77,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public class RenameModuleProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating {
 
