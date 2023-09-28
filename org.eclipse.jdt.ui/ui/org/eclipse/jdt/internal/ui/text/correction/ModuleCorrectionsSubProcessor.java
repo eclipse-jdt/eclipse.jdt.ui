@@ -47,7 +47,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.manipulation.CUCorrectionProposalCore;
 import org.eclipse.jdt.core.provisional.JavaModelAccess;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -96,31 +95,13 @@ public class ModuleCorrectionsSubProcessor {
 		}
 	}
 
-
-	public static class ModulepathFixCorrectionProposalCore extends CUCorrectionProposalCore {
+	private static class ModulepathFixCorrectionProposal extends CUCorrectionProposal {
 
 		private final String fModuleSearchStr;
 
-		protected ModulepathFixCorrectionProposalCore(ICompilationUnit cu, String moduleSearchStr) {
-			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10);
-			fModuleSearchStr= DefaultModulepathFixProcessor.MODULE_SEARCH + moduleSearchStr;
-		}
-
-		@Override
-		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_info, BasicElementLabels.getJavaElementName(getModuleSearchStr()));
-		}
-
-		public String getModuleSearchStr() {
-			return fModuleSearchStr;
-		}
-	}
-
-	private static class ModulepathFixCorrectionProposal extends CUCorrectionProposal {
-
 		protected ModulepathFixCorrectionProposal(ICompilationUnit cu, String moduleSearchStr) {
 			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-			setDelegate(new ModulepathFixCorrectionProposalCore(cu, moduleSearchStr));
+			fModuleSearchStr= DefaultModulepathFixProcessor.MODULE_SEARCH + moduleSearchStr;
 		}
 
 		@Override
@@ -130,8 +111,12 @@ public class ModuleCorrectionsSubProcessor {
 				context= new BusyIndicatorRunnableContext();
 			}
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			String search = ((ModulepathFixCorrectionProposalCore)getDelegate()).getModuleSearchStr();
-			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), search, context);
+			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), fModuleSearchStr, context);
+		}
+
+		@Override
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_info, BasicElementLabels.getJavaElementName(fModuleSearchStr));
 		}
 	}
 

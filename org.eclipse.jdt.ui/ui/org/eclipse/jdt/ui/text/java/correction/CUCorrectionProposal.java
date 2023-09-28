@@ -32,7 +32,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -65,7 +64,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 
 	private boolean fSwitchedEditor;
 	private CUCorrectionProposalCore fProposalCore;
-	private ICompilationUnit cu;
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit with a given text change.
@@ -81,22 +79,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image) {
 		super(name, change, relevance, image);
-		this.cu = cu;
 		if (cu == null) {
 			throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
 		}
-	}
-
-	/**
-	 * @since 3.31
-	 * @param name
-	 * @param cu
-	 * @param change
-	 * @param relevance
-	 * @return
-	 */
-	protected CUCorrectionProposalCore createDelegate(String name, ICompilationUnit cu, TextChange change, int relevance) {
-		return new CUCorrectionProposalCore(this, name, cu, change, relevance);
+		fProposalCore = new CUCorrectionProposalCore(this, name, cu, change, relevance);
 	}
 
 	/**
@@ -132,25 +118,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	}
 
 	/**
-	 * @since 3.31
-	 * @return the delegate
-	 */
-	protected CUCorrectionProposalCore getDelegate() {
-		if( fProposalCore == null ) {
-			fProposalCore = createDelegate(fName, this.cu, fChange instanceof NullChange ? null : (TextChange)fChange, fRelevance);
-		}
-		return fProposalCore;
-	}
-
-	/**
-	 * @since 3.31
-	 * @param delegate to set
-	 */
-	protected void setDelegate(CUCorrectionProposalCore delegate) {
-		fProposalCore = delegate;
-	}
-
-	/**
 	 * Called when the {@link CompilationUnitChange} is initialized. Subclasses can override to add
 	 * text edits to the root edit of the change. Implementors must not access the proposal, e.g.
 	 * not call {@link #getChange()}.
@@ -163,12 +130,12 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @throws CoreException can be thrown if adding the edits is failing.
 	 */
 	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
-		getDelegate().addEdits(document, editRoot);
+		// empty default implementation
 	}
 
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		return getDelegate().getAdditionalProposalInfo(monitor);
+		return fProposalCore.getAdditionalProposalInfo(monitor);
 	}
 
 	@Override
@@ -226,14 +193,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		TextChange change = fProposalCore.getNewChange();
 		// initialize text change
 		IDocument document= change.getCurrentDocument(new NullProgressMonitor());
-		getDelegate().addEdits(document, change.getEdit());
+		addEdits(document, change.getEdit());
 		return change;
 	}
 
 
-	/**
-	 * Clients should not override this method
-	 */
 	@Override
 	protected final Change createChange() throws CoreException {
 		return createTextChange(); // make sure that only text changes are allowed here
@@ -247,7 +211,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 */
 	@Override
 	public final TextChange getTextChange() throws CoreException {
-		return (TextChange) getDelegate().getChange();
+		return (TextChange) getChange();
 	}
 
 	/**
@@ -256,7 +220,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @return the compilation unit on which the change works
 	 */
 	public final ICompilationUnit getCompilationUnit() {
-		return getDelegate().getCompilationUnit();
+		return fProposalCore.getCompilationUnit();
 	}
 
 	/**
@@ -267,25 +231,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
-	public final String getPreviewContent() throws CoreException {
-		return getDelegate().getTextChange().getPreviewContent(new NullProgressMonitor());
+	public String getPreviewContent() throws CoreException {
+		return getTextChange().getPreviewContent(new NullProgressMonitor());
 	}
 
-	@Override
-	public String getName() {
-		if( super.getName() == null || super.getName().isEmpty()) {
-			return getDelegate().getName();
-		}
-		return super.getName();
-	}
-
-	@Override
-	public String getCommandId() {
-		if( super.getCommandId() == null || super.getCommandId().isEmpty()) {
-			return getDelegate().getCommandId();
-		}
-		return super.getCommandId();
-	}
 	@Override
 	public String toString() {
 		try {

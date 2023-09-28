@@ -11,7 +11,7 @@
  * Contributors:
  *     Red Hat Inc - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.util;
+package org.eclipse.jdt.ui.cleanup;
 
 import java.util.Set;
 
@@ -29,12 +29,6 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.fix.ICleanUpCore;
-
-import org.eclipse.jdt.ui.cleanup.CleanUpContext;
-import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
-import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
-import org.eclipse.jdt.ui.cleanup.ICleanUp;
-import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 /**
  * A utility class for wrapping ICleanUp objects to be used by

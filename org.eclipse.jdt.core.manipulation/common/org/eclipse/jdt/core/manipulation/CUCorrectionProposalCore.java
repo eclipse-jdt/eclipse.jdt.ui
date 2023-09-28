@@ -117,12 +117,11 @@ public class CUCorrectionProposalCore extends ChangeCorrectionProposalCore imple
 	 * The default implementation does not add any edits
 	 * </p>
 	 *
-	 * @since 1.20
 	 * @param document content of the underlying compilation unit. To be accessed read only.
 	 * @param editRoot The root edit to add all edits to
 	 * @throws CoreException can be thrown if adding the edits is failing.
 	 */
-	public void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
+	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
 		// empty default implementation
 	}
 

@@ -39,25 +39,32 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
-import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ModuleCorrectionsSubProcessor;
 
 public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 
-	static String JAVA_BASE= "java.base"; //$NON-NLS-1$
+	private final String fTypeName;
+	private final String fQualifierName;
+
+	private static String JAVA_BASE= "java.base"; //$NON-NLS-1$
+
+	protected AddModuleRequiresCorrectionProposal fAdditionalProposal= null;
+
 	public AddImportCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image, String qualifierName, String typeName, SimpleName node) {
 		super(name, cu, ASTRewrite.create(node.getAST()), relevance, image);
-		setDelegate(new AddImportCorrectionProposalCore(name, cu, relevance, qualifierName, typeName, node));
+		fTypeName= typeName;
+		fQualifierName= qualifierName;
+		fAdditionalProposal= getAdditionalChangeCorrectionProposal();
 	}
 
 	public String getQualifiedTypeName() {
-		return ((AddImportCorrectionProposalCore)getDelegate()).getQualifiedTypeName();
+		return fQualifierName + '.' + fTypeName;
 	}
 
 	public AddModuleRequiresCorrectionProposal getAdditionalProposal() {
-		return ((AddImportCorrectionProposalCore)getDelegate()).getAdditionalChangeCorrectionProposal();
+		return fAdditionalProposal;
 	}
 
 	@Override
@@ -70,72 +77,52 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 		QualifiedTypeNameHistory.remember(getQualifiedTypeName());
 	}
 
-	public static class AddImportCorrectionProposalCore extends ASTRewriteCorrectionProposalCore {
-		private final String fTypeName;
-		private final String fQualifierName;
-
-		protected AddModuleRequiresCorrectionProposal fAdditionalProposal= null;
-		public AddImportCorrectionProposalCore(String name, ICompilationUnit cu, int relevance, String qualifierName, String typeName, SimpleName node) {
-			super(name, cu, ASTRewrite.create(node.getAST()), relevance);
-			fTypeName= typeName;
-			fQualifierName= qualifierName;
-			fAdditionalProposal= getAdditionalChangeCorrectionProposal();
+	private AddModuleRequiresCorrectionProposal getAdditionalChangeCorrectionProposal() {
+		ICompilationUnit cu= getCompilationUnit();
+		AddModuleRequiresCorrectionProposal additionalChangeCorrectionProposal= null;
+		IJavaProject currentJavaProject= cu.getJavaProject();
+		if (currentJavaProject == null || !JavaModelUtil.is9OrHigher(currentJavaProject)) {
+			return null;
+		}
+		IModuleDescription currentModuleDescription= null;
+		try {
+			currentModuleDescription= currentJavaProject.getModuleDescription();
+		} catch (JavaModelException e1) {
+			//DO NOTHING
+		}
+		if (currentModuleDescription == null) {
+			return null;
+		}
+		ICompilationUnit currentModuleCompilationUnit= currentModuleDescription.getCompilationUnit();
+		if (currentModuleCompilationUnit == null || !currentModuleCompilationUnit.exists()) {
+			return null;
 		}
 
-		public String getQualifiedTypeName() {
-			return fQualifierName + '.' + fTypeName;
+		String qualifiedName= getQualifiedTypeName();
+		List<IPackageFragment> packageFragments= AddModuleRequiresCorrectionProposal.getPackageFragmentsOfMatchingTypes(qualifiedName, IJavaSearchConstants.TYPE, currentJavaProject);
+		IPackageFragment enclosingPackage= null;
+		if (packageFragments.size() == 1) {
+			enclosingPackage= packageFragments.get(0);
 		}
-
-		public AddModuleRequiresCorrectionProposal getAdditionalProposal() {
-			return fAdditionalProposal;
+		if (enclosingPackage != null) {
+			IModuleDescription projectModule= null;
+			if (enclosingPackage.isReadOnly()) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot) enclosingPackage.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				projectModule= ModuleCorrectionsSubProcessor.getModuleDescription(root);
+			} else {
+				IJavaProject project= enclosingPackage.getJavaProject();
+				projectModule= ModuleCorrectionsSubProcessor.getModuleDescription(project);
+			}
+			if (projectModule != null && ((projectModule.exists() && !projectModule.equals(currentModuleDescription))
+					|| projectModule.isAutoModule()) && !JAVA_BASE.equals(projectModule.getElementName())) {
+				String moduleName= projectModule.getElementName();
+				String[] args= { moduleName };
+				final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
+				final String changeDescription= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_description, args);
+				additionalChangeCorrectionProposal= new AddModuleRequiresCorrectionProposal(moduleName, changeName, changeDescription, currentModuleCompilationUnit, getRelevance());
+			}
 		}
-
-		AddModuleRequiresCorrectionProposal getAdditionalChangeCorrectionProposal() {
-			ICompilationUnit cu= getCompilationUnit();
-			AddModuleRequiresCorrectionProposal additionalChangeCorrectionProposal= null;
-			IJavaProject currentJavaProject= cu.getJavaProject();
-			if (currentJavaProject == null || !JavaModelUtil.is9OrHigher(currentJavaProject)) {
-				return null;
-			}
-			IModuleDescription currentModuleDescription= null;
-			try {
-				currentModuleDescription= currentJavaProject.getModuleDescription();
-			} catch (JavaModelException e1) {
-				//DO NOTHING
-			}
-			if (currentModuleDescription == null) {
-				return null;
-			}
-			ICompilationUnit currentModuleCompilationUnit= currentModuleDescription.getCompilationUnit();
-			if (currentModuleCompilationUnit == null || !currentModuleCompilationUnit.exists()) {
-				return null;
-			}
-
-			String qualifiedName= getQualifiedTypeName();
-			List<IPackageFragment> packageFragments= AddModuleRequiresCorrectionProposal.getPackageFragmentsOfMatchingTypes(qualifiedName, IJavaSearchConstants.TYPE, currentJavaProject);
-			IPackageFragment enclosingPackage= null;
-			if (packageFragments.size() == 1) {
-				enclosingPackage= packageFragments.get(0);
-			}
-			if (enclosingPackage != null) {
-				IModuleDescription projectModule= null;
-				if (enclosingPackage.isReadOnly()) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot) enclosingPackage.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-					projectModule= ModuleCorrectionsSubProcessor.getModuleDescription(root);
-				} else {
-					IJavaProject project= enclosingPackage.getJavaProject();
-					projectModule= ModuleCorrectionsSubProcessor.getModuleDescription(project);
-				}
-				if (projectModule != null && ((projectModule.exists() && !projectModule.equals(currentModuleDescription))
-						|| projectModule.isAutoModule()) && !AddImportCorrectionProposal.JAVA_BASE.equals(projectModule.getElementName())) {
-					String moduleName= projectModule.getElementName();
-					String[] args= { moduleName };
-					final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
-					final String changeDescription= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_description, args);
-					additionalChangeCorrectionProposal= new AddModuleRequiresCorrectionProposal(moduleName, changeName, changeDescription, currentModuleCompilationUnit, getRelevance());
-				}
-			}
-			return additionalChangeCorrectionProposal;
-		}
+		return additionalChangeCorrectionProposal;
 	}
+
 }

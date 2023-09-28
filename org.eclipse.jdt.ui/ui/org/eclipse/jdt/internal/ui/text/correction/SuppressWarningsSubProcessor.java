@@ -19,21 +19,28 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -48,9 +55,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -62,9 +71,23 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 /**
  *
  */
-public class SuppressWarningsSubProcessor extends SuppressWarningsSubProcessorCore {
+public class SuppressWarningsSubProcessor {
 
-	static final String ADD_SUPPRESSWARNINGS_ID= SuppressWarningsSubProcessorCore.ADD_SUPPRESSWARNINGS_ID;
+	private static final String ADD_SUPPRESSWARNINGS_ID= "org.eclipse.jdt.ui.correction.addSuppressWarnings"; //$NON-NLS-1$
+
+	public static final boolean hasSuppressWarningsProposal(IJavaProject javaProject, int problemId) {
+		if (CorrectionEngine.getWarningToken(problemId) != null && JavaModelUtil.is50OrHigher(javaProject)) {
+			String optionId= JavaCore.getOptionForConfigurableSeverity(problemId);
+			if (optionId != null) {
+				String optionValue= javaProject.getOption(optionId, true);
+				return JavaCore.INFO.equals(optionValue)
+						|| JavaCore.WARNING.equals(optionValue)
+						|| (JavaCore.ERROR.equals(optionValue) && JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true)));
+			}
+		}
+		return false;
+	}
+
 
 	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		if (problem.isError() && ! JavaCore.ENABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true))) {
@@ -116,14 +139,110 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsSubProcessorCo
 
 
 	private static class SuppressWarningsProposal extends ASTRewriteCorrectionProposal {
+
+		private final String fWarningToken;
+		private final ASTNode fNode;
+		private final ChildListPropertyDescriptor fProperty;
+
 		public SuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance) {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
-			setDelegate(new SuppressWarningsProposalCore(warningToken, label, cu, node, property, relevance));
+			fWarningToken= warningToken;
+			fNode= node;
+			fProperty= property;
+			setCommandId(ADD_SUPPRESSWARNINGS_ID);
 		}
+
+		/**
+		 * @return Returns the warningToken.
+		 */
 		public String getWarningToken() {
-			return ((SuppressWarningsProposalCore) getDelegate()).getWarningToken();
+			return fWarningToken;
+		}
+
+		@Override
+		protected ASTRewrite getRewrite() throws CoreException {
+			AST ast= fNode.getAST();
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+
+			StringLiteral newStringLiteral= ast.newStringLiteral();
+			newStringLiteral.setLiteralValue(fWarningToken);
+
+			Annotation existing= findExistingAnnotation(ASTNodes.getChildListProperty(fNode, fProperty));
+			if (existing == null) {
+				ListRewrite listRewrite= rewrite.getListRewrite(fNode, fProperty);
+
+				SingleMemberAnnotation newAnnot= ast.newSingleMemberAnnotation();
+				String importString= createImportRewrite((CompilationUnit) fNode.getRoot()).addImport("java.lang.SuppressWarnings"); //$NON-NLS-1$
+				newAnnot.setTypeName(ast.newName(importString));
+
+				newAnnot.setValue(newStringLiteral);
+
+				listRewrite.insertFirst(newAnnot, null);
+			} else if (existing instanceof SingleMemberAnnotation) {
+				SingleMemberAnnotation annotation= (SingleMemberAnnotation) existing;
+				Expression value= annotation.getValue();
+				if (!addSuppressArgument(rewrite, value, newStringLiteral)) {
+					rewrite.set(existing, SingleMemberAnnotation.VALUE_PROPERTY, newStringLiteral, null);
+				}
+			} else if (existing instanceof NormalAnnotation) {
+				NormalAnnotation annotation= (NormalAnnotation) existing;
+				Expression value= findValue(annotation.values());
+				if (!addSuppressArgument(rewrite, value, newStringLiteral)) {
+					ListRewrite listRewrite= rewrite.getListRewrite(annotation, NormalAnnotation.VALUES_PROPERTY);
+					MemberValuePair pair= ast.newMemberValuePair();
+					pair.setName(ast.newSimpleName("value")); //$NON-NLS-1$
+					pair.setValue(newStringLiteral);
+					listRewrite.insertFirst(pair, null);
+				}
+			}
+			return rewrite;
+		}
+
+		private static boolean addSuppressArgument(ASTRewrite rewrite, Expression value, StringLiteral newStringLiteral) {
+			if (value instanceof ArrayInitializer) {
+				ListRewrite listRewrite= rewrite.getListRewrite(value, ArrayInitializer.EXPRESSIONS_PROPERTY);
+				listRewrite.insertLast(newStringLiteral, null);
+			} else if (value instanceof StringLiteral) {
+				ArrayInitializer newArr= rewrite.getAST().newArrayInitializer();
+				newArr.expressions().add(rewrite.createMoveTarget(value));
+				newArr.expressions().add(newStringLiteral);
+				rewrite.replace(value, newArr, null);
+			} else {
+				return false;
+			}
+			return true;
+		}
+
+		private static Expression findValue(List<MemberValuePair> keyValues) {
+			for (MemberValuePair curr : keyValues) {
+				if ("value".equals(curr.getName().getIdentifier())) { //$NON-NLS-1$
+					return curr.getValue();
+				}
+			}
+			return null;
+		}
+
+		private static Annotation findExistingAnnotation(List<? extends ASTNode> modifiers) {
+			for (ASTNode curr : modifiers) {
+				if (curr instanceof NormalAnnotation || curr instanceof SingleMemberAnnotation) {
+					Annotation annotation= (Annotation) curr;
+					ITypeBinding typeBinding= annotation.resolveTypeBinding();
+					if (typeBinding != null) {
+						if ("java.lang.SuppressWarnings".equals(typeBinding.getQualifiedName())) { //$NON-NLS-1$
+							return annotation;
+						}
+					} else {
+						String fullyQualifiedName= annotation.getTypeName().getFullyQualifiedName();
+						if ("SuppressWarnings".equals(fullyQualifiedName) || "java.lang.SuppressWarnings".equals(fullyQualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
+							return annotation;
+						}
+					}
+				}
+			}
+			return null;
 		}
 	}
+
 	/**
 	 * Adds a SuppressWarnings proposal if possible and returns whether parent nodes should be processed or not (and with what relevance).
 	 *
