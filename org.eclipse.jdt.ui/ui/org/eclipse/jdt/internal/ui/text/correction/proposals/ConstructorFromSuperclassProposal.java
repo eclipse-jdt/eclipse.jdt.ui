@@ -17,9 +17,12 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
@@ -38,5 +41,15 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 	public ConstructorFromSuperclassProposal(ICompilationUnit cu, TypeDeclaration typeNode, IMethodBinding superConstructor, int relevance) {
 		super("", cu, null, relevance, getProposalImage()); //$NON-NLS-1$
 		setDelegate(new ConstructorFromSuperclassProposalCore(cu, typeNode, superConstructor, relevance));
+	}
+
+	@Override
+	public String getName() {
+		return ((ConstructorFromSuperclassProposalCore)getDelegate()).getName();
+	}
+
+	@Override
+	protected ASTRewrite getRewrite() throws CoreException {
+		return ((ConstructorFromSuperclassProposalCore)getDelegate()).getRewrite();
 	}
 }

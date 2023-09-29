@@ -25,7 +25,10 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -93,6 +96,11 @@ public class JavadocTagsSubProcessor {
 			super(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
 			setDelegate(new AddJavadocCommentProposalCore(name, cu, relevance, insertPosition, comment));
 		}
+		@Override
+		protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
+			((AddJavadocCommentProposalCore)getDelegate()).addEdits(document, editRoot);
+		}
+
 	}
 
 
@@ -101,12 +109,20 @@ public class JavadocTagsSubProcessor {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
 			setDelegate(new AddMissingModuleJavadocTagProposalCore(label, cu, decl, missingNode, relevance));
 		}
+		@Override
+		protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
+			((AddMissingModuleJavadocTagProposalCore)getDelegate()).addEdits(document, editRoot);
+		}
 	}
 
 	private static final class AddAllMissingModuleJavadocTagsProposal extends CUCorrectionProposal {
 		public AddAllMissingModuleJavadocTagsProposal(String label, ICompilationUnit cu, ModuleDeclaration decl, ASTNode missingNode, int relevance) {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
 			setDelegate(new AddAllMissingModuleJavadocTagsProposalCore(label, cu, decl, missingNode, relevance));
+		}
+		@Override
+		protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
+			((AddAllMissingModuleJavadocTagsProposalCore)getDelegate()).addEdits(document, editRoot);
 		}
 	}
 
@@ -115,6 +131,10 @@ public class JavadocTagsSubProcessor {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
 			setDelegate(new AddMissingJavadocTagProposalCore(label, cu, decl, missingNode, relevance));
 		}
+		@Override
+		protected ASTRewrite getRewrite() throws CoreException {
+			return ((AddMissingJavadocTagProposalCore)getDelegate()).getRewrite();
+		}
 	}
 
 	private static final class AddAllMissingJavadocTagsProposal extends LinkedCorrectionProposal {
@@ -122,6 +142,10 @@ public class JavadocTagsSubProcessor {
 		public AddAllMissingJavadocTagsProposal(String label, ICompilationUnit cu, ASTNode decl, int relevance) {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
 			setDelegate(new AddAllMissingJavadocTagsProposalCore(label, cu, decl, relevance) );
+		}
+		@Override
+		protected ASTRewrite getRewrite() throws CoreException {
+			return ((AddAllMissingJavadocTagsProposalCore)getDelegate()).getRewrite();
 		}
 	}
 

@@ -15,9 +15,12 @@
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -38,5 +41,10 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST));
 		setCommandId(ADD_CAST_ID);
 		setDelegate(new CastCorrectionProposalCore(label, targetCU, nodeToCast, castType, relevance));
+	}
+
+	@Override
+	protected ASTRewrite getRewrite() throws CoreException {
+		return ((CastCorrectionProposalCore)getDelegate()).getRewrite();
 	}
 }

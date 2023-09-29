@@ -133,6 +133,11 @@ public class ModuleCorrectionsSubProcessor {
 			String search = ((ModulepathFixCorrectionProposalCore)getDelegate()).getModuleSearchStr();
 			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), search, context);
 		}
+
+		@Override
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return ((ModulepathFixCorrectionProposalCore)getDelegate()).getAdditionalProposalInfo(monitor);
+		}
 	}
 
 

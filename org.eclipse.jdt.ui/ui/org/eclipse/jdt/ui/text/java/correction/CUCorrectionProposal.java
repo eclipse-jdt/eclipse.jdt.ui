@@ -89,11 +89,13 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 
 	/**
 	 * @since 3.31
-	 * @param name
-	 * @param cu
-	 * @param change
-	 * @param relevance
-	 * @return
+	 * @param name the name that is displayed in the proposal selection dialog
+	 * @param cu the compilation unit to which the change can be applied
+	 * @param change the change that is executed when the proposal is applied or <code>null</code>
+	 *            if implementors override {@link #addEdits(IDocument, TextEdit)} to provide the
+	 *            text edits or {@link #createTextChange()} to provide a text change
+	 * @param relevance the relevance of this proposal
+	 * @return new CUCorrectionProposalCore
 	 */
 	protected CUCorrectionProposalCore createDelegate(String name, ICompilationUnit cu, TextChange change, int relevance) {
 		return new CUCorrectionProposalCore(this, name, cu, change, relevance);
@@ -163,7 +165,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @throws CoreException can be thrown if adding the edits is failing.
 	 */
 	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
-		getDelegate().addEdits(document, editRoot);
+		// default empty implementation
 	}
 
 	@Override
@@ -226,7 +228,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		TextChange change = fProposalCore.getNewChange();
 		// initialize text change
 		IDocument document= change.getCurrentDocument(new NullProgressMonitor());
-		getDelegate().addEdits(document, change.getEdit());
+		addEdits(document, change.getEdit());
 		return change;
 	}
 
@@ -247,7 +249,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 */
 	@Override
 	public final TextChange getTextChange() throws CoreException {
-		return (TextChange) getDelegate().getChange();
+		return (TextChange)getChange();
 	}
 
 	/**

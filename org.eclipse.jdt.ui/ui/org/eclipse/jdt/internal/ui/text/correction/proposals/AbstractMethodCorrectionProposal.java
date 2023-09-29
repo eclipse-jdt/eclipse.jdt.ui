@@ -17,10 +17,23 @@
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import java.util.List;
+
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionProposal {
 
@@ -31,4 +44,36 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 	protected ASTNode getInvocationNode() {
 		return ((AbstractMethodCorrectionProposalCore)getDelegate()).getInvocationNode();
 	}
+
+	/**
+	 * @return The binding of the type declaration (generic type)
+	 */
+	protected ITypeBinding getSenderBinding() {
+		return ((AbstractMethodCorrectionProposalCore)getDelegate()).getSenderBinding();
+	}
+
+	@Override
+	protected ASTRewrite getRewrite() throws CoreException {
+		// TODO Auto-generated method stub
+		return ((AbstractMethodCorrectionProposalCore)getDelegate()).getRewrite();
+	}
+	protected abstract boolean isConstructor();
+
+	protected abstract void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers);
+	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException;
+	protected abstract void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException;
+	protected abstract void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException;
+
+	/**
+	 * Add implementation in sub classes.
+	 * @param rewrite  The rewrite node
+	 * @param decl The method declaration to add JavaDoc to
+	 * @throws CoreException Might throw Exception
+	 */
+	protected void addNewJavaDoc(ASTRewrite rewrite, MethodDeclaration decl) throws CoreException {
+		// no default action
+	}
+
+	protected abstract SimpleName getNewName(ASTRewrite rewrite);
+	protected abstract Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException;
 }

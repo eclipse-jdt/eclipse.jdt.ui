@@ -15,6 +15,8 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -38,4 +40,8 @@ public class ASTRewriteRemoveImportsCorrectionProposal extends ASTRewriteCorrect
 		((ASTRewriteRemoveImportsCorrectionProposalCore)getDelegate()).setImportRemover(remover);
 	}
 
+	@Override
+	protected ASTRewrite getRewrite() throws CoreException {
+		return ((ASTRewriteRemoveImportsCorrectionProposalCore)getDelegate()).getRewrite();
+	}
 }

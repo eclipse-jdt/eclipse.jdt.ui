@@ -16,9 +16,12 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.ChangeDescription;
 
@@ -39,5 +42,10 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 
 	public String getExceptionTypeGroupId(int idx) {
 		return ((ChangeMethodSignatureProposalCore)getDelegate()).getExceptionTypeGroupId(idx);
+	}
+
+	@Override
+	protected ASTRewrite getRewrite() throws CoreException {
+		return ((ChangeMethodSignatureProposalCore)getDelegate()).getRewrite();
 	}
 }
