@@ -169,6 +169,9 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 	@Override
 	public String getStatusMessage() {
+		if (fCleanUp == null) {
+			return null;
+		}
 		int count= computeNumberOfFixesForCleanUp(fCleanUp);
 
 		if (count == -1) {

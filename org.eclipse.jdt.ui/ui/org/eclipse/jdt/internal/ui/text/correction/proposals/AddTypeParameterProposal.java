@@ -13,10 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -25,5 +28,10 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 	public AddTypeParameterProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, String name, ITypeBinding[] bounds, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC)); //$NON-NLS-1$
 		setDelegate(new AddTypeParameterProposalCore(targetCU, binding, astRoot, name, bounds, relevance));
+	}
+
+	@Override
+	protected ASTRewrite getRewrite() throws CoreException {
+		return ((AddTypeParameterProposalCore)getDelegate()).getRewrite();
 	}
 }

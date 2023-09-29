@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
@@ -39,6 +40,14 @@ public final class SerialVersionSubProcessor {
 			setDelegate(new SerialVersionProposalCore(fix, relevance, context, isDefault));
 		}
 
+		public boolean isDefaultProposal() {
+			return ((SerialVersionProposalCore)getDelegate()).isDefaultProposal();
+		}
+
+		@Override
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return ((SerialVersionProposalCore)getDelegate()).getAdditionalProposalInfo(monitor);
+		}
 	}
 
 	/**

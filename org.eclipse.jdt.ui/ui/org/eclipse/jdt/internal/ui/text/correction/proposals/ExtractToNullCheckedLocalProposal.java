@@ -13,11 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
@@ -63,5 +70,21 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 	public ExtractToNullCheckedLocalProposal(ICompilationUnit cu, CompilationUnit compilationUnit, SimpleName fieldReference, ASTNode enclosingMethod) {
 		super(FixMessages.ExtractToNullCheckedLocalProposal_extractToCheckedLocal_proposalName, cu, null, 100, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		setDelegate(new ExtractToNullCheckedLocalProposalCore(cu, compilationUnit, fieldReference, enclosingMethod));
+	}
+
+	@Override
+	protected ASTRewrite getRewrite() throws CoreException {
+		return ((ExtractToNullCheckedLocalProposalCore)getDelegate()).getRewrite();
+	}
+
+	/**
+	 * Create a fresh type reference
+	 * @param typeBinding the type we want to refer to
+	 * @param ast AST for creating new nodes
+	 * @param imports use this for optimal type names
+	 * @return a fully features non-null type reference (can be parameterized and/or array).
+	 */
+	public static Type newType(ITypeBinding typeBinding, AST ast, ImportRewrite imports) {
+		return ExtractToNullCheckedLocalProposalCore.newType(typeBinding, ast, imports);
 	}
 }

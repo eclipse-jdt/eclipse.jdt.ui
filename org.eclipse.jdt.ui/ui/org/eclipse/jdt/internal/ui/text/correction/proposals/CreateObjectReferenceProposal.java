@@ -15,9 +15,12 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
@@ -46,5 +49,15 @@ public class CreateObjectReferenceProposal extends LinkedCorrectionProposal {
 
 	public boolean hasProposal() {
 		return ((CreateObjectReferenceProposalCore)getDelegate()).hasProposal();
+	}
+
+	@Override
+	public String getName() {
+		return ((CreateObjectReferenceProposalCore)getDelegate()).getName();
+	}
+
+	@Override
+	protected ASTRewrite getRewrite() throws CoreException {
+		return ((CreateObjectReferenceProposalCore)getDelegate()).getRewrite();
 	}
 }

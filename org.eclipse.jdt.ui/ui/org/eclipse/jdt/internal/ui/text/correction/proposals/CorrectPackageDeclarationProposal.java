@@ -14,6 +14,12 @@
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
@@ -26,5 +32,19 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	public CorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocationCore location, int relevance) {
 		super(CorrectionMessages.CorrectPackageDeclarationProposal_name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL));
 		setDelegate(new CorrectPackageDeclarationProposalCore(cu, location, relevance));
+	}
+
+	@Override
+	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
+		((CorrectPackageDeclarationProposalCore)getDelegate()).addEdits(document, editRoot);
+	}
+
+	@Override
+	public String getName() {
+		return ((CorrectPackageDeclarationProposalCore)getDelegate()).getName();
+	}
+
+	public static boolean isValidProposal(ICompilationUnit cu) {
+		return CorrectPackageDeclarationProposalCore.isValidProposal(cu);
 	}
 }

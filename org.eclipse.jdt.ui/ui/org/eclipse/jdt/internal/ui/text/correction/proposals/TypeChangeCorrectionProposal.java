@@ -14,10 +14,13 @@
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -36,5 +39,10 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
 		setDelegate(new TypeChangeCorrectionProposalCore(targetCU, binding, astRoot, newType, isNewTypeVar, offerSuperTypeProposals, relevance));
+	}
+
+	@Override
+	protected ASTRewrite getRewrite() throws CoreException {
+		return ((TypeChangeCorrectionProposalCore)getDelegate()).getRewrite();
 	}
 }
