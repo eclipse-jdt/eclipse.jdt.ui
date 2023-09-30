@@ -311,6 +311,66 @@ public class CleanUpTest16 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPatternMatchingForInstanceof2() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/780
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    \n" //
+				+ "    static class InternalStaticClass {\n" //
+				+ "        private int k;\n" //
+				+ "        \n" //
+				+ "        public InternalStaticClass(int val) {\n" //
+				+ "            this.k= val;\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        public int getK() {\n" //
+				+ "            return k;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		pack.createCompilationUnit("E1.java", sample, false, null);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import test1.E1.InternalStaticClass;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    \n" //
+				+ "    public void foo(Object x) {\n" //
+				+ "        if (x instanceof E1.InternalStaticClass) {\n" //
+				+ "            // comment 1\n" //
+				+ "            InternalStaticClass t = (InternalStaticClass)x;\n" //
+				+ "            System.out.println(t.getK());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF);
+
+		String expected= "" //
+		+ "package test1;\n" //
+		+ "\n" //
+		+ "public class E {\n" //
+		+ "    \n" //
+		+ "    public void foo(Object x) {\n" //
+		+ "        if (x instanceof E1.InternalStaticClass t) {\n" //
+		+ "            // comment 1\n" //
+		+ "            System.out.println(t.getK());\n" //
+		+ "        }\n" //
+		+ "    }\n" //
+		+ "\n" //
+		+ "}\n"; //
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PatternMatchingForInstanceofCleanup_description)));
+	}
+
+	@Test
 	public void testDoNotMatchPatternForInstanceof() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
