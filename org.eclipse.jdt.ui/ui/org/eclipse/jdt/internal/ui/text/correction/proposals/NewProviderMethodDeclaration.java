@@ -33,7 +33,14 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -79,5 +86,40 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 			}
 		}
 		super.performChange(part, document);
+	}
+
+	@Override
+	protected boolean isConstructor() {
+		return ((NewProviderMethodDeclarationCore)getDelegate()).isConstructor();
+	}
+
+	@Override
+	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers) {
+		((NewProviderMethodDeclarationCore)getDelegate()).addNewModifiers(rewrite, targetTypeDecl, modifiers);
+	}
+
+	@Override
+	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
+		((NewProviderMethodDeclarationCore)getDelegate()).addNewTypeParameters(rewrite, takenNames, params, context);
+	}
+
+	@Override
+	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException {
+		((NewProviderMethodDeclarationCore)getDelegate()).addNewParameters(rewrite, takenNames, params, context);
+	}
+
+	@Override
+	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
+		((NewProviderMethodDeclarationCore)getDelegate()).addNewExceptions(rewrite, exceptions, context);
+	}
+
+	@Override
+	protected SimpleName getNewName(ASTRewrite rewrite) {
+		return ((NewProviderMethodDeclarationCore)getDelegate()).getNewName(rewrite);
+	}
+
+	@Override
+	protected Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException {
+		return ((NewProviderMethodDeclarationCore)getDelegate()).getNewMethodType(rewrite, context);
 	}
 }

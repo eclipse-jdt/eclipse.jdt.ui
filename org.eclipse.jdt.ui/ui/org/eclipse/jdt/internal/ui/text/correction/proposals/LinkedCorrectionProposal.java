@@ -157,13 +157,13 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				return;
 			}
 
-			if (getLinkedProposalModel() != null) {
-				if (getLinkedProposalModel().hasLinkedPositions() && part instanceof JavaEditor) {
+			if (((LinkedCorrectionProposalCore)getDelegate()).fLinkedProposalModel != null) {
+				if (((LinkedCorrectionProposalCore)getDelegate()).fLinkedProposalModel.hasLinkedPositions() && part instanceof JavaEditor) {
 					// enter linked mode
 					ITextViewer viewer= ((JavaEditor) part).getViewer();
-					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, didOpenEditor(), getLinkedProposalModel());
+					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, didOpenEditor(), ((LinkedCorrectionProposalCore)getDelegate()).fLinkedProposalModel);
 				} else if (part instanceof ITextEditor) {
-					LinkedProposalPositionGroup.PositionInformation endPosition= getLinkedProposalModel().getEndPosition();
+					LinkedProposalPositionGroup.PositionInformation endPosition= ((LinkedCorrectionProposalCore)getDelegate()).fLinkedProposalModel.getEndPosition();
 					if (endPosition != null) {
 						// select a result
 						int pos= endPosition.getOffset() + endPosition.getLength();
