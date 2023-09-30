@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -34,11 +36,17 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -101,5 +109,45 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 		} catch (MalformedTreeException | BadLocationException e) {
 			JavaPlugin.log(e);
 		}
+	}
+
+	@Override
+	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
+		((NewDefiningMethodProposalCore)getDelegate()).addNewExceptions(rewrite, exceptions, context);
+	}
+
+	@Override
+	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException {
+		((NewDefiningMethodProposalCore)getDelegate()).addNewParameters(rewrite, takenNames, params, context);
+	}
+
+	@Override
+	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
+		((NewDefiningMethodProposalCore)getDelegate()).addNewTypeParameters(rewrite, takenNames, params, context);
+	}
+
+	@Override
+	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers) {
+		((NewDefiningMethodProposalCore)getDelegate()).addNewModifiers(rewrite, targetTypeDecl, modifiers);
+	}
+
+	@Override
+	protected void addNewJavaDoc(ASTRewrite rewrite, MethodDeclaration decl) throws CoreException {
+		((NewDefiningMethodProposalCore)getDelegate()).addNewJavaDoc(rewrite, decl);
+	}
+
+	@Override
+	protected SimpleName getNewName(ASTRewrite rewrite) {
+		return ((NewDefiningMethodProposalCore)getDelegate()).getNewName(rewrite);
+	}
+
+	@Override
+	protected Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException {
+		return ((NewDefiningMethodProposalCore)getDelegate()).getNewMethodType(rewrite, context);
+	}
+
+	@Override
+	protected boolean isConstructor() {
+		return ((NewDefiningMethodProposalCore)getDelegate()).isConstructor();
 	}
 }

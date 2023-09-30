@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.Propo
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 
 public class LinkedCorrectionProposalCore extends ASTRewriteCorrectionProposalCore {
-	private LinkedProposalModelCore fLinkedProposalModel;
+	public LinkedProposalModelCore fLinkedProposalModel;
 
 	public LinkedCorrectionProposalCore(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
 		super(name, cu, rewrite, relevance);

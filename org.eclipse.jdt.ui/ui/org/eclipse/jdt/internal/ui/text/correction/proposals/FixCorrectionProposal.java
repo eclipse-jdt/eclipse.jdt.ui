@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
-import org.eclipse.jdt.internal.corext.fix.ICleanUpCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -159,6 +158,9 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 	@Override
 	protected TextChange createTextChange() throws CoreException {
+		if (((FixCorrectionProposalCore)getDelegate()).getCurrentChange() instanceof TextChange currChange) {
+			return currChange;
+		}
 		return ((FixCorrectionProposalCore)getDelegate()).createTextChange();
 	}
 
@@ -197,11 +199,10 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 	@Override
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-		ICleanUpCore cleanup = ((FixCorrectionProposalCore)getDelegate()).getCleanUp();
-		if ((stateMask & SWT.MODIFIER_MASK) == SWT.CONTROL && cleanup != null) {
+		if ((stateMask & SWT.MODIFIER_MASK) == SWT.CONTROL && fCleanUp != null) {
 			CleanUpRefactoring refactoring= new CleanUpRefactoring();
 			refactoring.addCompilationUnit(getCompilationUnit());
-			refactoring.addCleanUp(CleanUpCoreWrapper.wrap(cleanup));
+			refactoring.addCleanUp(fCleanUp);
 			refactoring.setLeaveFilesDirty(true);
 
 			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
