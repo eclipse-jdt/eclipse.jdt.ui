@@ -15,7 +15,10 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -24,5 +27,13 @@ public class RefactoringCorrectionProposal extends LinkedCorrectionProposal {
 	public RefactoringCorrectionProposal(String name, ICompilationUnit cu, Refactoring refactoring, int relevance, Image image) {
 		super(name, cu, null, relevance, image);
 		setDelegate(new RefactoringCorrectionProposalCore(name, cu, refactoring, relevance));
+	}
+
+	@Override
+	protected TextChange createTextChange() throws CoreException {
+		if (((RefactoringCorrectionProposalCore)getDelegate()).getCurrentChange() instanceof TextChange change) {
+			return change;
+		}
+		return ((RefactoringCorrectionProposalCore)getDelegate()).createTextChange();
 	}
 }
