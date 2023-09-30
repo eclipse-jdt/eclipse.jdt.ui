@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.text.edits.InsertEdit;
 
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -47,6 +48,10 @@ public class RefactoringCorrectionProposalCore extends LinkedCorrectionProposalC
 	 */
 	protected void init(Refactoring refactoring) throws CoreException {
 		// empty default implementation
+	}
+
+	public Change getCurrentChange() {
+		return fChange;
 	}
 
 	@Override
