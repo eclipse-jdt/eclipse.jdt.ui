@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 
-class MethodOccurenceCollector extends CuCollectingSearchRequestor {
+public class MethodOccurenceCollector extends CuCollectingSearchRequestor {
 
 	/**
 	 * Warning-free alias for <code>ITerminalSymbols.TokenNameIdentifier</code>.

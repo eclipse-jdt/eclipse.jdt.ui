@@ -32,13 +32,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
-abstract class PackageReorgChange extends ResourceChange {
+public abstract class PackageReorgChange extends ResourceChange {
 
 	private String fPackageHandle;
 	private String fDestinationHandle;
 	private INewNameQuery fNameQuery;
 
-	PackageReorgChange(IPackageFragment pack, IPackageFragmentRoot dest, INewNameQuery nameQuery) {
+	protected PackageReorgChange(IPackageFragment pack, IPackageFragmentRoot dest, INewNameQuery nameQuery) {
 		fPackageHandle= pack.getHandleIdentifier();
 		fDestinationHandle= dest.getHandleIdentifier();
 		fNameQuery= nameQuery;
@@ -51,7 +51,7 @@ abstract class PackageReorgChange extends ResourceChange {
 		setValidationMethod(VALIDATE_DEFAULT);
 	}
 
-	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException, OperationCanceledException;
+	protected abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException, OperationCanceledException;
 
 	@Override
 	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
@@ -81,15 +81,15 @@ abstract class PackageReorgChange extends ResourceChange {
 		return null;
 	}
 
-	IPackageFragmentRoot getDestination() {
+	protected IPackageFragmentRoot getDestination() {
 		return (IPackageFragmentRoot)JavaCore.create(fDestinationHandle);
 	}
 
-	IPackageFragment getPackage() {
+	protected IPackageFragment getPackage() {
 		return (IPackageFragment)JavaCore.create(fPackageHandle);
 	}
 
-	String getNewName() throws OperationCanceledException {
+	protected String getNewName() throws OperationCanceledException {
 		if (fNameQuery == null)
 			return null;
 		return fNameQuery.getNewName();
