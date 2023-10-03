@@ -32,6 +32,7 @@ public class WhileLoopToChangeHit {
 	public boolean nextFound;
 	public String iteratorName;
 	public boolean isInvalid;
+	public boolean loopVarNameIsVariable;
 
 	public WhileLoopToChangeHit(boolean isInvalid) {
 		this.isInvalid= isInvalid;
