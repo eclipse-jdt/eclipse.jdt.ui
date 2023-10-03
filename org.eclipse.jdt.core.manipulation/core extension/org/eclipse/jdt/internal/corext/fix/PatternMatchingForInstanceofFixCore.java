@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -186,6 +187,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			ImportRemover importRemover= cuRewrite.getImportRemover();
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.PatternMatchingForInstanceofCleanup_description, cuRewrite);
 			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
@@ -222,6 +224,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			} else {
 				ASTNodes.replaceButKeepComment(rewrite, statementToRemove, ast.newBlock(), group);
 			}
+			importRemover.registerRemovedNode(statementToRemove);
 		}
 	}
 
