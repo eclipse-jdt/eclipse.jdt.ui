@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -36,29 +37,25 @@ public final class SerialVersionSubProcessor {
 
 	public static final class SerialVersionProposal extends FixCorrectionProposal {
 		public SerialVersionProposal(IProposableFix fix, int relevance, IInvocationContext context, boolean isDefault) {
-			super(fix, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD), context);
-			setDelegate(new SerialVersionProposalCore(fix, relevance, context, isDefault));
+			super(fix, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD), context, new SerialVersionProposalCore(fix, relevance, context, isDefault));
 		}
 
 		public boolean isDefaultProposal() {
-			return ((SerialVersionProposalCore)getDelegate()).isDefaultProposal();
+			return ((SerialVersionProposalCore) getDelegate()).isDefaultProposal();
 		}
 
 		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			return ((SerialVersionProposalCore)getDelegate()).getAdditionalProposalInfo(monitor);
+			return ((SerialVersionProposalCore) getDelegate()).getAdditionalProposalInfo(monitor);
 		}
 	}
 
 	/**
 	 * Determines the serial version quickfix proposals.
 	 *
-	 * @param context
-	 *        the invocation context
-	 * @param location
-	 *        the problem location
-	 * @param proposals
-	 *        the proposal collection to extend
+	 * @param context the invocation context
+	 * @param location the problem location
+	 * @param proposals the proposal collection to extend
 	 */
 	public static void getSerialVersionProposals(final IInvocationContext context, final IProblemLocationCore location, final Collection<ICommandAccess> proposals) {
 

@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -62,17 +63,22 @@ import org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
 /**
- * A correction proposal which uses an {@link ICleanUpFix} to
- * fix a problem. A fix correction proposal may have an {@link ICleanUp}
- * attached which can be executed instead of the provided IFix.
+ * A correction proposal which uses an {@link ICleanUpFix} to fix a problem. A fix correction
+ * proposal may have an {@link ICleanUp} attached which can be executed instead of the provided
+ * IFix.
  */
 public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2, IStatusLineProposal {
 
 	private ICleanUp fCleanUp;
+
 	public FixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context) {
-		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance, image);
-		this.fCleanUp = cleanUp;
-		setDelegate(new FixCorrectionProposalCore(fix, CleanUpCoreWrapper.wrap(cleanUp), relevance, context));
+		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance, image, new FixCorrectionProposalCore(fix, CleanUpCoreWrapper.wrap(cleanUp), relevance, context));
+		this.fCleanUp= cleanUp;
+	}
+
+	public FixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context, FixCorrectionProposalCore delegate) {
+		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance, image, delegate);
+		this.fCleanUp= cleanUp;
 	}
 
 	public void resolve(MultiFixTarget[] targets, final IProgressMonitor monitor) throws CoreException {
@@ -107,7 +113,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		} catch (InvocationTargetException e) {
 			Throwable cause= e.getCause();
 			if (cause instanceof CoreException) {
-				throw (CoreException)cause;
+				throw (CoreException) cause;
 			} else {
 				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, cause.getLocalizedMessage(), cause));
 			}
@@ -119,12 +125,12 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	}
 
 	public IStatus getFixStatus() {
-		return ((FixCorrectionProposalCore)getDelegate()).getFixStatus();
+		return ((FixCorrectionProposalCore) getDelegate()).getFixStatus();
 	}
 
 	@Override
 	public Image getImage() {
-		FixCorrectionProposalCore d = ((FixCorrectionProposalCore)getDelegate());
+		FixCorrectionProposalCore d= ((FixCorrectionProposalCore) getDelegate());
 		IStatus status= d == null ? Status.OK_STATUS : d.getFixStatus();
 		if (status != null && !status.isOK()) {
 			ImageImageDescriptor image= new ImageImageDescriptor(super.getImage());
@@ -158,15 +164,15 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 	@Override
 	protected TextChange createTextChange() throws CoreException {
-		if (((FixCorrectionProposalCore)getDelegate()).getCurrentChange() instanceof TextChange currChange) {
+		if (((FixCorrectionProposalCore) getDelegate()).getCurrentChange() instanceof TextChange currChange) {
 			return currChange;
 		}
-		return ((FixCorrectionProposalCore)getDelegate()).createTextChange();
+		return ((FixCorrectionProposalCore) getDelegate()).createTextChange();
 	}
 
 	@Override
 	public int getRelevance() {
-		return ((FixCorrectionProposalCore)getDelegate()).getRelevance();
+		return ((FixCorrectionProposalCore) getDelegate()).getRelevance();
 	}
 
 	@Override
@@ -193,8 +199,8 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	 * @since 3.6
 	 */
 	public int computeNumberOfFixesForCleanUp(ICleanUp cleanUp) {
-		CompilationUnit cu = ((FixCorrectionProposalCore)getDelegate()).getAstCompilationUnit();
-		return cleanUp instanceof IMultiFix ? ((IMultiFix)cleanUp).computeNumberOfFixes(cu) : -1;
+		CompilationUnit cu= ((FixCorrectionProposalCore) getDelegate()).getAstCompilationUnit();
+		return cleanUp instanceof IMultiFix ? ((IMultiFix) cleanUp).computeNumberOfFixes(cu) : -1;
 	}
 
 	@Override

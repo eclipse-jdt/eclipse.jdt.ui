@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -37,8 +38,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public class CreateObjectReferenceProposal extends LinkedCorrectionProposal {
 
 	public CreateObjectReferenceProposal(ICompilationUnit cu, ASTNode selectedNode, ITypeBinding typeNode, int relevance) {
-		super("", cu, null, relevance, null); //$NON-NLS-1$
-		setDelegate(new CreateObjectReferenceProposalCore(cu, selectedNode, typeNode, relevance));
+		super("", cu, null, relevance, null, new CreateObjectReferenceProposalCore(cu, selectedNode, typeNode, relevance)); //$NON-NLS-1$
 	}
 
 	@Override
@@ -48,16 +48,16 @@ public class CreateObjectReferenceProposal extends LinkedCorrectionProposal {
 	}
 
 	public boolean hasProposal() {
-		return ((CreateObjectReferenceProposalCore)getDelegate()).hasProposal();
+		return ((CreateObjectReferenceProposalCore) getDelegate()).hasProposal();
 	}
 
 	@Override
 	public String getName() {
-		return ((CreateObjectReferenceProposalCore)getDelegate()).getName();
+		return ((CreateObjectReferenceProposalCore) getDelegate()).getName();
 	}
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		return ((CreateObjectReferenceProposalCore)getDelegate()).getRewrite();
+		return ((CreateObjectReferenceProposalCore) getDelegate()).getRewrite();
 	}
 }

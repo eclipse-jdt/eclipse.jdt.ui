@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *     Benjamin Muskalla - [quick fix] Create Method in void context should 'box' void. - https://bugs.eclipse.org/bugs/show_bug.cgi?id=107985
  *     Jerome Cambon <jerome.cambon@oracle.com> - [code style] don't generate redundant modifiers "public static final abstract" for interface members - https://bugs.eclipse.org/71627
  *     Microsoft Corporation - read preferences from the compilation unit
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -41,32 +42,41 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		super(label, targetCU, null, relevance, image);
 	}
 
+	public AbstractMethodCorrectionProposal(String label, ICompilationUnit targetCU, int relevance, Image image, AbstractMethodCorrectionProposalCore core) {
+		super(label, targetCU, null, relevance, image, core);
+	}
+
 	protected ASTNode getInvocationNode() {
-		return ((AbstractMethodCorrectionProposalCore)getDelegate()).getInvocationNode();
+		return ((AbstractMethodCorrectionProposalCore) getDelegate()).getInvocationNode();
 	}
 
 	/**
 	 * @return The binding of the type declaration (generic type)
 	 */
 	protected ITypeBinding getSenderBinding() {
-		return ((AbstractMethodCorrectionProposalCore)getDelegate()).getSenderBinding();
+		return ((AbstractMethodCorrectionProposalCore) getDelegate()).getSenderBinding();
 	}
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		// TODO Auto-generated method stub
-		return ((AbstractMethodCorrectionProposalCore)getDelegate()).getRewrite();
+		return ((AbstractMethodCorrectionProposalCore) getDelegate()).getRewrite();
 	}
+
 	protected abstract boolean isConstructor();
 
 	protected abstract void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers);
+
 	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException;
+
 	protected abstract void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException;
+
 	protected abstract void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException;
 
 	/**
 	 * Add implementation in sub classes.
-	 * @param rewrite  The rewrite node
+	 *
+	 * @param rewrite The rewrite node
 	 * @param decl The method declaration to add JavaDoc to
 	 * @throws CoreException Might throw Exception
 	 */
@@ -75,5 +85,6 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 	}
 
 	protected abstract SimpleName getNewName(ASTRewrite rewrite);
+
 	protected abstract Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException;
 }

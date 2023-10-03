@@ -32,7 +32,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -116,6 +115,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		this(name, cu, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 
+
+
 	/**
 	 * Constructs a correction proposal working on a compilation unit.
 	 * <p>
@@ -133,23 +134,57 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		this(name, cu, null, relevance, image);
 	}
 
+
+
+	/**
+	 * Constructs a correction proposal working on a compilation unit.
+	 * <p>
+	 * Users have to override {@link #addEdits(IDocument, TextEdit)} to provide the text edits or
+	 * {@link #createTextChange()} to provide a text change.
+	 * </p>
+	 *
+	 * @param name the name that is displayed in the proposal selection dialog
+	 * @param cu the compilation unit on that the change works
+	 * @param relevance the relevance of this proposal
+	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
+	 *            is desired
+	 * @param delegate The delegate instance
+	 */
+	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image, CUCorrectionProposalCore delegate) {
+		this(name, cu, null, relevance, image, delegate);
+	}
+
+	/**
+	 * Constructs a correction proposal working on a compilation unit.
+	 * <p>
+	 * Users have to override {@link #addEdits(IDocument, TextEdit)} to provide the text edits or
+	 * {@link #createTextChange()} to provide a text change.
+	 * </p>
+	 *
+	 * @param name the name that is displayed in the proposal selection dialog
+	 * @param cu the compilation unit on that the change works
+	 * @param change The text change to be applied
+	 * @param relevance the relevance of this proposal
+	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
+	 *            is desired
+	 * @param delegate The delegate proposal underlying this proposal
+	 */
+	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image, CUCorrectionProposalCore delegate) {
+		super(name, change, relevance, image);
+		if (cu == null) {
+			throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
+		}
+		this.fProposalCore = delegate != null ? delegate : new CUCorrectionProposalCore(this, name, cu, change, relevance);
+	}
+
+
+
 	/**
 	 * @since 3.31
 	 * @return the delegate
 	 */
 	protected CUCorrectionProposalCore getDelegate() {
-		if( fProposalCore == null ) {
-			fProposalCore = createDelegate(fName, this.cu, fChange instanceof NullChange ? null : (TextChange)fChange, fRelevance);
-		}
 		return fProposalCore;
-	}
-
-	/**
-	 * @since 3.31
-	 * @param delegate to set
-	 */
-	protected void setDelegate(CUCorrectionProposalCore delegate) {
-		fProposalCore = delegate;
 	}
 
 	/**
@@ -171,6 +206,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		return getDelegate().getAdditionalProposalInfo(monitor);
+	}
+
+	protected ICompilationUnit getInitialCompilationUnit() {
+		return this.cu;
 	}
 
 	@Override

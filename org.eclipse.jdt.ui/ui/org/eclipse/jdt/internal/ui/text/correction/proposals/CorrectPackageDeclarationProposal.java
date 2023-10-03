@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -30,18 +31,18 @@ import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	public CorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocationCore location, int relevance) {
-		super(CorrectionMessages.CorrectPackageDeclarationProposal_name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL));
-		setDelegate(new CorrectPackageDeclarationProposalCore(cu, location, relevance));
+		super(CorrectionMessages.CorrectPackageDeclarationProposal_name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL),
+				new CorrectPackageDeclarationProposalCore(cu, location, relevance));
 	}
 
 	@Override
 	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
-		((CorrectPackageDeclarationProposalCore)getDelegate()).addEdits(document, editRoot);
+		((CorrectPackageDeclarationProposalCore) getDelegate()).addEdits(document, editRoot);
 	}
 
 	@Override
 	public String getName() {
-		return ((CorrectPackageDeclarationProposalCore)getDelegate()).getName();
+		return ((CorrectPackageDeclarationProposalCore) getDelegate()).getName();
 	}
 
 	public static boolean isValidProposal(ICompilationUnit cu) {

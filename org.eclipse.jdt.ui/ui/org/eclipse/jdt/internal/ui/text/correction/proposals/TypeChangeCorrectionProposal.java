@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -37,12 +38,12 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 
 	private TypeChangeCorrectionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean isNewTypeVar, boolean offerSuperTypeProposals,
 			int relevance) {
-		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
-		setDelegate(new TypeChangeCorrectionProposalCore(targetCU, binding, astRoot, newType, isNewTypeVar, offerSuperTypeProposals, relevance));
+		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), //$NON-NLS-1$
+				new TypeChangeCorrectionProposalCore(targetCU, binding, astRoot, newType, isNewTypeVar, offerSuperTypeProposals, relevance));
 	}
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		return ((TypeChangeCorrectionProposalCore)getDelegate()).getRewrite();
+		return ((TypeChangeCorrectionProposalCore) getDelegate()).getRewrite();
 	}
 }

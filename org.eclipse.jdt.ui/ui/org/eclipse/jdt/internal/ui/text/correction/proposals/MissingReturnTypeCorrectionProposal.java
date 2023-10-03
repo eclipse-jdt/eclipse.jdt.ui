@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -21,7 +22,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposal {
 	public MissingReturnTypeCorrectionProposal(ICompilationUnit cu, MethodDeclaration decl, ReturnStatement existingReturn, int relevance) {
-		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
-		setDelegate(new MissingReturnTypeCorrectionProposalCore(cu, decl, existingReturn, relevance));
+		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), new MissingReturnTypeCorrectionProposalCore(cu, decl, existingReturn, relevance)); //$NON-NLS-1$
+	}
+
+	public MissingReturnTypeCorrectionProposal(ICompilationUnit cu, int relevance,
+			MissingReturnTypeCorrectionProposalCore delegate) {
+		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), delegate); //$NON-NLS-1$	}
 	}
 }

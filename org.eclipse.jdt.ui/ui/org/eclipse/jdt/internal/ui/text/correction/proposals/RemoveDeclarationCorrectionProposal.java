@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -84,8 +85,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 
 
 	public RemoveDeclarationCorrectionProposal(ICompilationUnit cu, SimpleName name, int relevance) {
-		super("", cu, null, relevance, PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE)); //$NON-NLS-1$
-		setDelegate(new RemoveDeclarationCorrectionProposalCore(cu, name, relevance));
+		super("", cu, null, relevance, PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE), new RemoveDeclarationCorrectionProposalCore(cu, name, relevance)); //$NON-NLS-1$
 		super.getDisplayString();
 	}
 }

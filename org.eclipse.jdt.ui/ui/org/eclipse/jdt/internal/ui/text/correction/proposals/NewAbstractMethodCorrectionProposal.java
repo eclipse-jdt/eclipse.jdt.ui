@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Red Hat Inc and others.
+ * Copyright (c) 2023 Red Hat Inc and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Jens Reimann - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -25,7 +26,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 public class NewAbstractMethodCorrectionProposal extends NewMethodCorrectionProposal {
 
 	public NewAbstractMethodCorrectionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, List<Expression> arguments, ITypeBinding binding, int relevance, Image image) {
-		super(label, targetCU, invocationNode, arguments, binding, relevance, image);
-		setDelegate(new NewAbstractMethodCorrectionProposalCore(label, targetCU, invocationNode, arguments, binding, relevance));
+		super(label, targetCU, relevance, image, new NewAbstractMethodCorrectionProposalCore(label, targetCU, invocationNode, arguments, binding, relevance));
 	}
 }

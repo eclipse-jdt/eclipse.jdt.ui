@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -119,8 +120,8 @@ public class ModuleCorrectionsSubProcessor {
 	private static class ModulepathFixCorrectionProposal extends CUCorrectionProposal {
 
 		protected ModulepathFixCorrectionProposal(ICompilationUnit cu, String moduleSearchStr) {
-			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-			setDelegate(new ModulepathFixCorrectionProposalCore(cu, moduleSearchStr));
+			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE),
+					new ModulepathFixCorrectionProposalCore(cu, moduleSearchStr));
 		}
 
 		@Override
@@ -130,13 +131,13 @@ public class ModuleCorrectionsSubProcessor {
 				context= new BusyIndicatorRunnableContext();
 			}
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			String search = ((ModulepathFixCorrectionProposalCore)getDelegate()).getModuleSearchStr();
+			String search= ((ModulepathFixCorrectionProposalCore) getDelegate()).getModuleSearchStr();
 			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), search, context);
 		}
 
 		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			return ((ModulepathFixCorrectionProposalCore)getDelegate()).getAdditionalProposalInfo(monitor);
+			return ((ModulepathFixCorrectionProposalCore) getDelegate()).getAdditionalProposalInfo(monitor);
 		}
 	}
 
@@ -202,7 +203,7 @@ public class ModuleCorrectionsSubProcessor {
 				int oldCount= proposals.size();
 				addModifyClassPathProposals(proposals, javaProject, node);
 				if (oldCount == proposals.size()) {
-					proposals.add(new ModulepathFixCorrectionProposal(context.getCompilationUnit(),  node.getFullyQualifiedName()));
+					proposals.add(new ModulepathFixCorrectionProposal(context.getCompilationUnit(), node.getFullyQualifiedName()));
 				}
 			}
 		}

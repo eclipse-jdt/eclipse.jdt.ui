@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -30,24 +31,29 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
- * Proposals for 'Assign to variable' quick assist
- * - Assign an expression from an ExpressionStatement to a local or field
- * - Assign single or all parameter(s) to field(s)
- * */
+ * Proposals for 'Assign to variable' quick assist - Assign an expression from an
+ * ExpressionStatement to a local or field - Assign single or all parameter(s) to field(s)
+ */
 public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	public static final int LOCAL= 1;
+
 	public static final int FIELD= 2;
+
 	public static final int TRY_WITH_RESOURCES= 3;
 
-	static final String KEY_NAME= "name";  //$NON-NLS-1$
-	static final String KEY_TYPE= "type";  //$NON-NLS-1$
+	static final String KEY_NAME= "name"; //$NON-NLS-1$
+
+	static final String KEY_TYPE= "type"; //$NON-NLS-1$
+
 	static final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
+
 	static final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
-	static final String VAR_TYPE= "var";  //$NON-NLS-1$
+
+	static final String VAR_TYPE= "var"; //$NON-NLS-1$
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
-		super("", cu, null, relevance, null); //$NON-NLS-1$
+		super("", cu, null, relevance, null, new AssignToVariableAssistProposalCore(cu, variableKind, node, typeBinding, relevance)); //$NON-NLS-1$
 		if (variableKind == LOCAL) {
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
 		} else if (variableKind == FIELD) {
@@ -55,24 +61,19 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		} else {
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		}
-		setDelegate(new AssignToVariableAssistProposalCore(cu, variableKind, node, typeBinding, relevance));
 	}
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, VariableDeclarationFragment existingFragment, ITypeBinding typeBinding, int relevance) {
-		super("", cu, null, relevance, null); //$NON-NLS-1$
-		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
-		setDelegate(new AssignToVariableAssistProposalCore(cu, parameter, existingFragment, typeBinding, relevance));
+		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new AssignToVariableAssistProposalCore(cu, parameter, existingFragment, typeBinding, relevance)); //$NON-NLS-1$
 	}
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, List<SingleVariableDeclaration> parameters, int relevance) {
-		super("", cu, null, relevance, null); //$NON-NLS-1$
-		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
-		setDelegate(new AssignToVariableAssistProposalCore(cu, parameters, relevance));
+		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new AssignToVariableAssistProposalCore(cu, parameters, relevance)); //$NON-NLS-1$
 	}
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		return ((AssignToVariableAssistProposalCore)getDelegate()).getRewrite();
+		return ((AssignToVariableAssistProposalCore) getDelegate()).getRewrite();
 	}
 
 	protected LinkedProposalModelCore createProposalModel() {
@@ -80,7 +81,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	}
 
 	public int getVariableKind() {
-		return ((AssignToVariableAssistProposalCore)getDelegate()).getVariableKind();
+		return ((AssignToVariableAssistProposalCore) getDelegate()).getVariableKind();
 	}
 
 }

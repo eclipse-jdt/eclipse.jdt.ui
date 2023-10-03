@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [quick fix] proposes wrong cast from Object to primitive int - https://bugs.eclipse.org/bugs/show_bug.cgi?id=100593
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -38,13 +39,12 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 	 * @param relevance the relevance of this proposal
 	 */
 	public CastCorrectionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, ITypeBinding castType, int relevance) {
-		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST));
+		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST), new CastCorrectionProposalCore(label, targetCU, nodeToCast, castType, relevance));
 		setCommandId(ADD_CAST_ID);
-		setDelegate(new CastCorrectionProposalCore(label, targetCU, nodeToCast, castType, relevance));
 	}
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		return ((CastCorrectionProposalCore)getDelegate()).getRewrite();
+		return ((CastCorrectionProposalCore) getDelegate()).getRewrite();
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Microsoft Corporation - read preferences from the compilation unit
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -34,22 +35,20 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 
 	private static Image getProposalImage() {
 		return JavaPlugin.getImageDescriptorRegistry().get(
-				new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE)
-		);
+				new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE));
 	}
 
 	public ConstructorFromSuperclassProposal(ICompilationUnit cu, TypeDeclaration typeNode, IMethodBinding superConstructor, int relevance) {
-		super("", cu, null, relevance, getProposalImage()); //$NON-NLS-1$
-		setDelegate(new ConstructorFromSuperclassProposalCore(cu, typeNode, superConstructor, relevance));
+		super("", cu, null, relevance, getProposalImage(), new ConstructorFromSuperclassProposalCore(cu, typeNode, superConstructor, relevance)); //$NON-NLS-1$
 	}
 
 	@Override
 	public String getName() {
-		return ((ConstructorFromSuperclassProposalCore)getDelegate()).getName();
+		return ((ConstructorFromSuperclassProposalCore) getDelegate()).getName();
 	}
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		return ((ConstructorFromSuperclassProposalCore)getDelegate()).getRewrite();
+		return ((ConstructorFromSuperclassProposalCore) getDelegate()).getRewrite();
 	}
 }

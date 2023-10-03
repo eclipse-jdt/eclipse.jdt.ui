@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -47,17 +48,17 @@ import org.eclipse.jdt.internal.ui.text.correction.ModuleCorrectionsSubProcessor
 public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 
 	static String JAVA_BASE= "java.base"; //$NON-NLS-1$
+
 	public AddImportCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image, String qualifierName, String typeName, SimpleName node) {
-		super(name, cu, ASTRewrite.create(node.getAST()), relevance, image);
-		setDelegate(new AddImportCorrectionProposalCore(name, cu, relevance, qualifierName, typeName, node));
+		super(name, cu, ASTRewrite.create(node.getAST()), relevance, image, new AddImportCorrectionProposalCore(name, cu, relevance, qualifierName, typeName, node));
 	}
 
 	public String getQualifiedTypeName() {
-		return ((AddImportCorrectionProposalCore)getDelegate()).getQualifiedTypeName();
+		return ((AddImportCorrectionProposalCore) getDelegate()).getQualifiedTypeName();
 	}
 
 	public AddModuleRequiresCorrectionProposal getAdditionalProposal() {
-		return ((AddImportCorrectionProposalCore)getDelegate()).getAdditionalChangeCorrectionProposal();
+		return ((AddImportCorrectionProposalCore) getDelegate()).getAdditionalChangeCorrectionProposal();
 	}
 
 	@Override
@@ -72,9 +73,11 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 
 	public static class AddImportCorrectionProposalCore extends ASTRewriteCorrectionProposalCore {
 		private final String fTypeName;
+
 		private final String fQualifierName;
 
 		protected AddModuleRequiresCorrectionProposal fAdditionalProposal= null;
+
 		public AddImportCorrectionProposalCore(String name, ICompilationUnit cu, int relevance, String qualifierName, String typeName, SimpleName node) {
 			super(name, cu, ASTRewrite.create(node.getAST()), relevance);
 			fTypeName= typeName;

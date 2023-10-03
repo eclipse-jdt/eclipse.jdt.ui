@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2019 Red Hat and others.
+ * Copyright (c) 2018, 2023 Red Hat and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -49,10 +49,10 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class NewProviderMethodDeclaration extends AbstractMethodCorrectionProposal {
 	private IType fReturnType;
+
 	public NewProviderMethodDeclaration(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, int relevance, Image image, IType returnType) {
-		super(label, targetCU, relevance, image);
+		super(label, targetCU, relevance, image, new NewProviderMethodDeclarationCore(label, targetCU, invocationNode, binding, relevance, returnType));
 		this.fReturnType= returnType;
-		setDelegate(new NewProviderMethodDeclarationCore(label, targetCU, invocationNode, binding, relevance, returnType));
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 		ITypeHierarchy th= fReturnType.newTypeHierarchy(compilationUnit.getJavaProject(), null);
 		IType[] subTypes= th.getAllSubtypes(fReturnType);
 
-		List<IType> typeProposals= new ArrayList<> (Arrays.asList(fReturnType));
+		List<IType> typeProposals= new ArrayList<>(Arrays.asList(fReturnType));
 		typeProposals.addAll(Arrays.asList(subTypes));
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 
@@ -72,10 +72,10 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 		parser.setSource(compilationUnit);
 		parser.setUnitName(compilationUnit.getPath().toOSString());
 		parser.setResolveBindings(true);
-		IBinding [] typeBindings= parser.createBindings(typeProposals.toArray(new IJavaElement[0]), null);
+		IBinding[] typeBindings= parser.createBindings(typeProposals.toArray(new IJavaElement[0]), null);
 
 		IPackageFragment pack= (IPackageFragment) compilationUnit.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
-		for (int i=0; i < typeProposals.size(); i++) {
+		for (int i= 0; i < typeProposals.size(); i++) {
 			IType t= typeProposals.get(i);
 			if (compilationUnit.equals(t.getCompilationUnit()) || JavaModelUtil.isVisible(t, pack)) {
 				if (typeBindings[i] instanceof ITypeBinding) {
@@ -90,36 +90,36 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 
 	@Override
 	protected boolean isConstructor() {
-		return ((NewProviderMethodDeclarationCore)getDelegate()).isConstructor();
+		return ((NewProviderMethodDeclarationCore) getDelegate()).isConstructor();
 	}
 
 	@Override
 	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers) {
-		((NewProviderMethodDeclarationCore)getDelegate()).addNewModifiers(rewrite, targetTypeDecl, modifiers);
+		((NewProviderMethodDeclarationCore) getDelegate()).addNewModifiers(rewrite, targetTypeDecl, modifiers);
 	}
 
 	@Override
 	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
-		((NewProviderMethodDeclarationCore)getDelegate()).addNewTypeParameters(rewrite, takenNames, params, context);
+		((NewProviderMethodDeclarationCore) getDelegate()).addNewTypeParameters(rewrite, takenNames, params, context);
 	}
 
 	@Override
 	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException {
-		((NewProviderMethodDeclarationCore)getDelegate()).addNewParameters(rewrite, takenNames, params, context);
+		((NewProviderMethodDeclarationCore) getDelegate()).addNewParameters(rewrite, takenNames, params, context);
 	}
 
 	@Override
 	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
-		((NewProviderMethodDeclarationCore)getDelegate()).addNewExceptions(rewrite, exceptions, context);
+		((NewProviderMethodDeclarationCore) getDelegate()).addNewExceptions(rewrite, exceptions, context);
 	}
 
 	@Override
 	protected SimpleName getNewName(ASTRewrite rewrite) {
-		return ((NewProviderMethodDeclarationCore)getDelegate()).getNewName(rewrite);
+		return ((NewProviderMethodDeclarationCore) getDelegate()).getNewName(rewrite);
 	}
 
 	@Override
 	protected Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException {
-		return ((NewProviderMethodDeclarationCore)getDelegate()).getNewMethodType(rewrite, context);
+		return ((NewProviderMethodDeclarationCore) getDelegate()).getNewMethodType(rewrite, context);
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction;
@@ -69,7 +70,7 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsSubProcessorCo
 	static final String ADD_SUPPRESSWARNINGS_ID= SuppressWarningsSubProcessorCore.ADD_SUPPRESSWARNINGS_ID;
 
 	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
-		if (problem.isError() && ! JavaCore.ENABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true))) {
+		if (problem.isError() && !JavaCore.ENABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true))) {
 			return;
 		}
 		if (JavaCore.DISABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, true))) {
@@ -119,26 +120,30 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsSubProcessorCo
 
 	private static class SuppressWarningsProposal extends ASTRewriteCorrectionProposal {
 		public SuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance) {
-			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
-			setDelegate(new SuppressWarningsProposalCore(warningToken, label, cu, node, property, relevance));
+			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), new SuppressWarningsProposalCore(warningToken, label, cu, node, property, relevance));
 		}
+
 		public String getWarningToken() {
 			return ((SuppressWarningsProposalCore) getDelegate()).getWarningToken();
 		}
+
 		@Override
 		protected ASTRewrite getRewrite() throws CoreException {
-			return ((SuppressWarningsProposalCore)getDelegate()).getRewrite();
+			return ((SuppressWarningsProposalCore) getDelegate()).getRewrite();
 		}
 	}
+
 	/**
-	 * Adds a SuppressWarnings proposal if possible and returns whether parent nodes should be processed or not (and with what relevance).
+	 * Adds a SuppressWarnings proposal if possible and returns whether parent nodes should be
+	 * processed or not (and with what relevance).
 	 *
 	 * @param cu the compilation unit
 	 * @param node the node on which to add a SuppressWarning token
 	 * @param warningToken the warning token to add
 	 * @param relevance the proposal's relevance
 	 * @param proposals collector to which the proposal should be added
-	 * @return <code>0</code> if no further proposals should be added to parent nodes, or the relevance of the next proposal
+	 * @return <code>0</code> if no further proposals should be added to parent nodes, or the
+	 *         relevance of the next proposal
 	 *
 	 * @since 3.6
 	 */
@@ -149,7 +154,7 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsSubProcessorCo
 		boolean isLocalVariable= false;
 		switch (node.getNodeType()) {
 			case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				if(node.getParent() instanceof PatternInstanceofExpression && warningToken.equals("preview")) //$NON-NLS-1$
+				if (node.getParent() instanceof PatternInstanceofExpression && warningToken.equals("preview")) //$NON-NLS-1$
 					return relevance;
 				property= SingleVariableDeclaration.MODIFIERS2_PROPERTY;
 				name= ((SingleVariableDeclaration) node).getName().getIdentifier();
@@ -211,6 +216,7 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsSubProcessorCo
 
 	/**
 	 * Adds a proposal to correct the name of the SuppressWarning annotation
+	 *
 	 * @param context the context
 	 * @param problem the problem
 	 * @param proposals the resulting proposals

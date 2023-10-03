@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -22,7 +23,6 @@ import org.eclipse.jdt.core.dom.IBinding;
 public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 
 	public ModifierChangeCorrectionProposal(String label, ICompilationUnit targetCU, IBinding binding, ASTNode node, int includedModifiers, int excludedModifiers, int relevance, Image image) {
-		super(label, targetCU, null, relevance, image);
-		setDelegate(new ModifierChangeCorrectionProposalCore(label, targetCU, binding, node, includedModifiers, excludedModifiers, relevance));
+		super(label, targetCU, null, relevance, image, new ModifierChangeCorrectionProposalCore(label, targetCU, binding, node, includedModifiers, excludedModifiers, relevance));
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -59,15 +60,16 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal {
 
 	private boolean fAddOverrideAnnotation;
+
 	private final IMethodBinding fMethod;
 
-	public NewDefiningMethodProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, IMethodBinding method, String[] paramNames, boolean addOverride, int relevance) {
-		super(label, targetCU, relevance, null);
+	public NewDefiningMethodProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, IMethodBinding method, String[] paramNames, boolean addOverride,
+			int relevance) {
+		super(label, targetCU, relevance, null, new NewDefiningMethodProposalCore(label, targetCU, invocationNode, binding, method, paramNames, addOverride, relevance));
 		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(binding.isInterface() || binding.isAnnotation(), method.getModifiers());
 		setImage(JavaPlugin.getImageDescriptorRegistry().get(desc));
-		fAddOverrideAnnotation = addOverride;
-		fMethod = method;
-		setDelegate(new NewDefiningMethodProposalCore(label, targetCU, invocationNode, binding, method, paramNames, addOverride, relevance));
+		fAddOverrideAnnotation= addOverride;
+		fMethod= method;
 	}
 
 
@@ -113,41 +115,41 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 
 	@Override
 	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
-		((NewDefiningMethodProposalCore)getDelegate()).addNewExceptions(rewrite, exceptions, context);
+		((NewDefiningMethodProposalCore) getDelegate()).addNewExceptions(rewrite, exceptions, context);
 	}
 
 	@Override
 	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException {
-		((NewDefiningMethodProposalCore)getDelegate()).addNewParameters(rewrite, takenNames, params, context);
+		((NewDefiningMethodProposalCore) getDelegate()).addNewParameters(rewrite, takenNames, params, context);
 	}
 
 	@Override
 	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
-		((NewDefiningMethodProposalCore)getDelegate()).addNewTypeParameters(rewrite, takenNames, params, context);
+		((NewDefiningMethodProposalCore) getDelegate()).addNewTypeParameters(rewrite, takenNames, params, context);
 	}
 
 	@Override
 	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers) {
-		((NewDefiningMethodProposalCore)getDelegate()).addNewModifiers(rewrite, targetTypeDecl, modifiers);
+		((NewDefiningMethodProposalCore) getDelegate()).addNewModifiers(rewrite, targetTypeDecl, modifiers);
 	}
 
 	@Override
 	protected void addNewJavaDoc(ASTRewrite rewrite, MethodDeclaration decl) throws CoreException {
-		((NewDefiningMethodProposalCore)getDelegate()).addNewJavaDoc(rewrite, decl);
+		((NewDefiningMethodProposalCore) getDelegate()).addNewJavaDoc(rewrite, decl);
 	}
 
 	@Override
 	protected SimpleName getNewName(ASTRewrite rewrite) {
-		return ((NewDefiningMethodProposalCore)getDelegate()).getNewName(rewrite);
+		return ((NewDefiningMethodProposalCore) getDelegate()).getNewName(rewrite);
 	}
 
 	@Override
 	protected Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException {
-		return ((NewDefiningMethodProposalCore)getDelegate()).getNewMethodType(rewrite, context);
+		return ((NewDefiningMethodProposalCore) getDelegate()).getNewMethodType(rewrite, context);
 	}
 
 	@Override
 	protected boolean isConstructor() {
-		return ((NewDefiningMethodProposalCore)getDelegate()).isConstructor();
+		return ((NewDefiningMethodProposalCore) getDelegate()).isConstructor();
 	}
 }

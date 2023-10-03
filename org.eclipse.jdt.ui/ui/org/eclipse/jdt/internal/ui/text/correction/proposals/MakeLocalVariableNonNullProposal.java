@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Till Brychcy and others.
+ * Copyright (c) 2023 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Till Brychcy - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -25,8 +26,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class MakeLocalVariableNonNullProposal extends ASTRewriteCorrectionProposal {
 
 	public MakeLocalVariableNonNullProposal(ICompilationUnit targetCU, IVariableBinding varBinding, CompilationUnit astRoot, int relevance, String nonNullAnnotationName) {
-		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
-		setDelegate(new MakeLocalVariableNonNullProposalCore(targetCU, varBinding, astRoot, relevance, nonNullAnnotationName));
+		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), //$NON-NLS-1$
+				new MakeLocalVariableNonNullProposalCore(targetCU, varBinding, astRoot, relevance, nonNullAnnotationName));
 	}
 
 }

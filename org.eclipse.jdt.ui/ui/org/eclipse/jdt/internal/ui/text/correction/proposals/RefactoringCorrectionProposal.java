@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -25,15 +26,18 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 public class RefactoringCorrectionProposal extends LinkedCorrectionProposal {
 	public RefactoringCorrectionProposal(String name, ICompilationUnit cu, Refactoring refactoring, int relevance, Image image) {
-		super(name, cu, null, relevance, image);
-		setDelegate(new RefactoringCorrectionProposalCore(name, cu, refactoring, relevance));
+		super(name, cu, null, relevance, image, new RefactoringCorrectionProposalCore(name, cu, refactoring, relevance));
+	}
+
+	public RefactoringCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image, RefactoringCorrectionProposalCore delegate) {
+		super(name, cu, null, relevance, image, delegate);
 	}
 
 	@Override
 	protected TextChange createTextChange() throws CoreException {
-		if (((RefactoringCorrectionProposalCore)getDelegate()).getCurrentChange() instanceof TextChange change) {
+		if (((RefactoringCorrectionProposalCore) getDelegate()).getCurrentChange() instanceof TextChange change) {
 			return change;
 		}
-		return ((RefactoringCorrectionProposalCore)getDelegate()).createTextChange();
+		return ((RefactoringCorrectionProposalCore) getDelegate()).createTextChange();
 	}
 }

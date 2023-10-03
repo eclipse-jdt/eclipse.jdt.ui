@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -23,8 +24,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class OptionalCorrectionProposal extends ASTRewriteCorrectionProposal {
 	public static final String ADD_OPTIONAL_ID= OptionalCorrectionProposalCore.ADD_OPTIONAL_ID;
+
 	public static final int OPTIONAL_EMPTY= OptionalCorrectionProposalCore.OPTIONAL_EMPTY;
+
 	public static final int OPTIONAL_OF= OptionalCorrectionProposalCore.OPTIONAL_OF;
+
 	public static final int OPTIONAL_OF_NULLABLE= OptionalCorrectionProposalCore.OPTIONAL_OF_NULLABLE;
 
 	/**
@@ -37,7 +41,6 @@ public class OptionalCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * @param correctionType 0= Optional.empty(), 1= Optional.of(), 2= Optional.ofNullable()
 	 */
 	public OptionalCorrectionProposal(String label, ICompilationUnit targetCU, Expression nodeToWrap, int relevance, int correctionType) {
-		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST));
-		setDelegate(new OptionalCorrectionProposalCore(label, targetCU, nodeToWrap, relevance, correctionType));
+		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST), new OptionalCorrectionProposalCore(label, targetCU, nodeToWrap, relevance, correctionType));
 	}
 }

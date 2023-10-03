@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 IBM Corporation and others.
+ * Copyright (c) 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -37,8 +38,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public class CreateVariableReferenceProposal extends LinkedCorrectionProposal {
 
 	public CreateVariableReferenceProposal(ICompilationUnit cu, VariableDeclarationFragment selectedNode, ITypeBinding typeNode, int relevance) {
-		super("", cu, null, relevance, null); //$NON-NLS-1$
-		setDelegate(new CreateVariableReferenceProposalCore(cu, selectedNode, typeNode, relevance));
+		super("", cu, null, relevance, null, new CreateVariableReferenceProposalCore(cu, selectedNode, typeNode, relevance)); //$NON-NLS-1$
 	}
 
 	@Override
@@ -48,11 +48,11 @@ public class CreateVariableReferenceProposal extends LinkedCorrectionProposal {
 	}
 
 	public boolean hasProposal() {
-		return ((CreateVariableReferenceProposalCore)getDelegate()).hasProposal();
+		return ((CreateVariableReferenceProposalCore) getDelegate()).hasProposal();
 	}
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		return ((CreateVariableReferenceProposalCore)getDelegate()).getRewrite();
+		return ((CreateVariableReferenceProposalCore) getDelegate()).getRewrite();
 	}
 }

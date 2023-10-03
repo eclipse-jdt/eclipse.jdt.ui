@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 IBM Corporation and others.
+ * Copyright (c) 2011, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction;
@@ -52,12 +53,12 @@ public class VarargsWarningsSubProcessor {
 
 	private static class AddSafeVarargsProposal extends LinkedCorrectionProposal {
 		public AddSafeVarargsProposal(String label, ICompilationUnit cu, MethodDeclaration methodDeclaration, IMethodBinding methodBinding, int relevance) {
-			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
-			setDelegate(new AddSafeVarargsProposalCore(label, cu, methodDeclaration, methodBinding, relevance));
+			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), new AddSafeVarargsProposalCore(label, cu, methodDeclaration, methodBinding, relevance));
 		}
+
 		@Override
 		protected ASTRewrite getRewrite() throws CoreException {
-			return ((AddSafeVarargsProposalCore)getDelegate()).getRewrite();
+			return ((AddSafeVarargsProposalCore) getDelegate()).getRewrite();
 		}
 	}
 
@@ -73,7 +74,7 @@ public class VarargsWarningsSubProcessor {
 			return;
 
 		int modifiers= methodBinding.getModifiers();
-		if (!Modifier.isStatic(modifiers) && !Modifier.isFinal(modifiers) && !Modifier.isPrivate(modifiers) && ! methodBinding.isConstructor())
+		if (!Modifier.isStatic(modifiers) && !Modifier.isFinal(modifiers) && !Modifier.isPrivate(modifiers) && !methodBinding.isConstructor())
 			return;
 
 		String label= CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_label;
@@ -122,7 +123,7 @@ public class VarargsWarningsSubProcessor {
 		MethodDeclaration methodDeclaration= (MethodDeclaration) coveringNode;
 		MarkerAnnotation annotation= null;
 
-		for (ASTNode node : (List<? extends ASTNode>)methodDeclaration.modifiers()) {
+		for (ASTNode node : (List<? extends ASTNode>) methodDeclaration.modifiers()) {
 			if (node instanceof MarkerAnnotation) {
 				annotation= (MarkerAnnotation) node;
 				if ("SafeVarargs".equals(annotation.resolveAnnotationBinding().getName())) { //$NON-NLS-1$

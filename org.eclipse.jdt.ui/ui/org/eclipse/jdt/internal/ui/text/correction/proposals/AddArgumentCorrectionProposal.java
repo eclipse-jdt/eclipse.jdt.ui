@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -24,12 +25,12 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	public AddArgumentCorrectionProposal(String label, ICompilationUnit cu, ASTNode callerNode, int[] insertIdx, ITypeBinding[] expectedTypes, int relevance) {
-		super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-		setDelegate(new AddArgumentCorrectionProposalCore(label, cu, callerNode, insertIdx, expectedTypes, relevance));
+		super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE),
+				new AddArgumentCorrectionProposalCore(label, cu, callerNode, insertIdx, expectedTypes, relevance));
 	}
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		return ((AddArgumentCorrectionProposalCore)getDelegate()).getRewrite();
+		return ((AddArgumentCorrectionProposalCore) getDelegate()).getRewrite();
 	}
 }
