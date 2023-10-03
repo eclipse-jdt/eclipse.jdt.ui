@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
@@ -125,11 +123,6 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsSubProcessorCo
 
 		public String getWarningToken() {
 			return ((SuppressWarningsProposalCore) getDelegate()).getWarningToken();
-		}
-
-		@Override
-		protected ASTRewrite getRewrite() throws CoreException {
-			return ((SuppressWarningsProposalCore) getDelegate()).getRewrite();
 		}
 	}
 

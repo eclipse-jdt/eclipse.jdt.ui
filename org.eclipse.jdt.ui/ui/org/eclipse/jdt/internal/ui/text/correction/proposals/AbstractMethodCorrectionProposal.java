@@ -57,12 +57,6 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		return ((AbstractMethodCorrectionProposalCore) getDelegate()).getSenderBinding();
 	}
 
-	@Override
-	protected ASTRewrite getRewrite() throws CoreException {
-		// TODO Auto-generated method stub
-		return ((AbstractMethodCorrectionProposalCore) getDelegate()).getRewrite();
-	}
-
 	protected abstract boolean isConstructor();
 
 	protected abstract void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers);

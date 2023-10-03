@@ -79,25 +79,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 *            is desired
 	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image) {
-		super(name, change, relevance, image);
-		this.cu = cu;
-		if (cu == null) {
-			throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
-		}
-	}
-
-	/**
-	 * @since 3.31
-	 * @param name the name that is displayed in the proposal selection dialog
-	 * @param cunit the compilation unit to which the change can be applied
-	 * @param change the change that is executed when the proposal is applied or <code>null</code>
-	 *            if implementors override {@link #addEdits(IDocument, TextEdit)} to provide the
-	 *            text edits or {@link #createTextChange()} to provide a text change
-	 * @param relevance the relevance of this proposal
-	 * @return new CUCorrectionProposalCore
-	 */
-	protected CUCorrectionProposalCore createDelegate(String name, ICompilationUnit cunit, TextChange change, int relevance) {
-		return new CUCorrectionProposalCore(this, name, cunit, change, relevance);
+		this(name, cu, change, relevance, image, null);
 	}
 
 	/**
@@ -171,6 +153,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image, CUCorrectionProposalCore delegate) {
 		super(name, change, relevance, image);
+		this.cu = cu;
 		if (cu == null) {
 			throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
 		}

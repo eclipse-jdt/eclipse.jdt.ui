@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
@@ -54,11 +52,6 @@ public class VarargsWarningsSubProcessor {
 	private static class AddSafeVarargsProposal extends LinkedCorrectionProposal {
 		public AddSafeVarargsProposal(String label, ICompilationUnit cu, MethodDeclaration methodDeclaration, IMethodBinding methodBinding, int relevance) {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), new AddSafeVarargsProposalCore(label, cu, methodDeclaration, methodBinding, relevance));
-		}
-
-		@Override
-		protected ASTRewrite getRewrite() throws CoreException {
-			return ((AddSafeVarargsProposalCore) getDelegate()).getRewrite();
 		}
 	}
 

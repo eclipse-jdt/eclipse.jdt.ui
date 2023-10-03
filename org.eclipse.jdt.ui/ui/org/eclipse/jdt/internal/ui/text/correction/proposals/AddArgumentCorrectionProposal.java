@@ -14,12 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -27,10 +24,5 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	public AddArgumentCorrectionProposal(String label, ICompilationUnit cu, ASTNode callerNode, int[] insertIdx, ITypeBinding[] expectedTypes, int relevance) {
 		super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE),
 				new AddArgumentCorrectionProposalCore(label, cu, callerNode, insertIdx, expectedTypes, relevance));
-	}
-
-	@Override
-	protected ASTRewrite getRewrite() throws CoreException {
-		return ((AddArgumentCorrectionProposalCore) getDelegate()).getRewrite();
 	}
 }

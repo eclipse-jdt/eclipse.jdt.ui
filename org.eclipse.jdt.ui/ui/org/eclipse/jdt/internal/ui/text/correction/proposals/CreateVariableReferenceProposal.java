@@ -16,12 +16,9 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
@@ -49,10 +46,5 @@ public class CreateVariableReferenceProposal extends LinkedCorrectionProposal {
 
 	public boolean hasProposal() {
 		return ((CreateVariableReferenceProposalCore) getDelegate()).hasProposal();
-	}
-
-	@Override
-	protected ASTRewrite getRewrite() throws CoreException {
-		return ((CreateVariableReferenceProposalCore) getDelegate()).getRewrite();
 	}
 }

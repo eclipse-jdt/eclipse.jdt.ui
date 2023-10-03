@@ -17,14 +17,11 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 
@@ -69,11 +66,6 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, List<SingleVariableDeclaration> parameters, int relevance) {
 		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new AssignToVariableAssistProposalCore(cu, parameters, relevance)); //$NON-NLS-1$
-	}
-
-	@Override
-	protected ASTRewrite getRewrite() throws CoreException {
-		return ((AssignToVariableAssistProposalCore) getDelegate()).getRewrite();
 	}
 
 	protected LinkedProposalModelCore createProposalModel() {

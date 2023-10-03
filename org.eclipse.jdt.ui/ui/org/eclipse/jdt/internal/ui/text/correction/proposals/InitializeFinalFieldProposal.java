@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -41,10 +40,5 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 
 	public boolean hasProposal() throws CoreException {
 		return ((InitializeFinalFieldProposalCore) getDelegate()).getRewrite() != null;
-	}
-
-	@Override
-	protected ASTRewrite getRewrite() throws CoreException {
-		return ((InitializeFinalFieldProposalCore) getDelegate()).getRewrite();
 	}
 }

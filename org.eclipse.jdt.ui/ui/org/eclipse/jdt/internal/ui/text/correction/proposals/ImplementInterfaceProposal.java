@@ -14,12 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -27,10 +24,5 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 
 	public ImplementInterfaceProposal(ICompilationUnit targetCU, ITypeBinding binding, CompilationUnit astRoot, ITypeBinding newInterface, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), new ImplementInterfaceProposalCore(targetCU, binding, astRoot, newInterface, relevance)); //$NON-NLS-1$
-	}
-
-	@Override
-	protected ASTRewrite getRewrite() throws CoreException {
-		return ((ImplementInterfaceProposalCore) getDelegate()).getRewrite();
 	}
 }

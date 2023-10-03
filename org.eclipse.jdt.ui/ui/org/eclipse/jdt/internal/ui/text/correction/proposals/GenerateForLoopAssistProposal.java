@@ -15,11 +15,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
@@ -52,10 +49,5 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	public GenerateForLoopAssistProposal(ICompilationUnit cu, ExpressionStatement currentStatement, int loopTypeToGenerate) {
 		super("", cu, null, IProposalRelevance.GENERATE_FOR_LOOP, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), //$NON-NLS-1$
 				new GenerateForLoopAssistProposalCore(cu, currentStatement, loopTypeToGenerate));
-	}
-
-	@Override
-	protected ASTRewrite getRewrite() throws CoreException {
-		return ((GenerateForLoopAssistProposalCore) getDelegate()).getRewrite();
 	}
 }

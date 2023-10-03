@@ -14,10 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -47,10 +44,5 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		super("", cu, null, relevance, null, new CorrectMainTypeNameProposalCore("", cu, null, context, oldTypeName, newTypeName, relevance)); //$NON-NLS-1$ //$NON-NLS-2$
 		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, BasicElementLabels.getJavaElementName(newTypeName)));
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-	}
-
-	@Override
-	protected ASTRewrite getRewrite() throws CoreException {
-		return ((CorrectMainTypeNameProposalCore) getDelegate()).getRewrite();
 	}
 }
