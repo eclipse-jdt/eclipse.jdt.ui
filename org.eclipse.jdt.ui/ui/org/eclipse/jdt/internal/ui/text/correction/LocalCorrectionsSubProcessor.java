@@ -1162,6 +1162,11 @@ public class LocalCorrectionsSubProcessor {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
 				CUCorrectionProposal proposal= new CUCorrectionProposal(label, context.getCompilationUnit(), IProposalRelevance.INVALID_OPERATOR, image) {
 					@Override
+					protected boolean useDelegateToCreateTextChange() {
+						return false;
+					}
+
+					@Override
 					protected void addEdits(IDocument document, TextEdit edit) throws CoreException {
 						InfixExpression compareExpression= opFinder.getCompareExpression();
 						InfixExpression expression= opFinder.getParentInfixExpression();

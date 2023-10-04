@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
@@ -49,10 +48,6 @@ public class FixCorrectionProposalCore extends LinkedCorrectionProposalCore {
 	}
 	public CompilationUnit getAstCompilationUnit() {
 		return this.fCompilationUnit;
-	}
-
-	public Change getCurrentChange() {
-		return fChange;
 	}
 
 	public IStatus getFixStatus() {

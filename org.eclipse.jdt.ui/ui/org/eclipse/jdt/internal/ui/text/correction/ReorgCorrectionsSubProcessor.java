@@ -282,6 +282,11 @@ public class ReorgCorrectionsSubProcessor {
 		}
 
 		@Override
+		protected boolean useDelegateToCreateTextChange() {
+			return false;
+		}
+
+		@Override
 		protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
 			if (fResultingEdit != null) {
 				editRoot.addChild(fResultingEdit);

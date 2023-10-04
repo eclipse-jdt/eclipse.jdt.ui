@@ -155,6 +155,11 @@ public class ChangeCorrectionProposalCore {
 		return fChange;
 	}
 
+	public Change getCurrentChange() {
+		return fChange;
+	}
+
+
 	/**
 	 * Creates the change for this proposal.
 	 * This method is only called once and only when no change has been passed in

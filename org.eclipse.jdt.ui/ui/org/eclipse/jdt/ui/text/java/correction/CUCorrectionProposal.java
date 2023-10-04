@@ -246,7 +246,19 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @return the created text change
 	 * @throws CoreException if the creation of the text change failed
 	 */
-	protected TextChange createTextChange() throws CoreException {
+	protected synchronized TextChange createTextChange() throws CoreException {
+		if( useDelegateToCreateTextChange() ) {
+			return createTextChangeViaDelegate();
+		} else {
+			return createTextChangeLocal();
+		}
+	}
+
+	protected boolean useDelegateToCreateTextChange() {
+		return true;
+	}
+
+	protected TextChange createTextChangeLocal() throws CoreException {
 		TextChange change = fProposalCore.getNewChange();
 		// initialize text change
 		IDocument document= change.getCurrentDocument(new NullProgressMonitor());
@@ -254,6 +266,12 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		return change;
 	}
 
+	protected TextChange createTextChangeViaDelegate() throws CoreException {
+		if ((getDelegate()).getCurrentChange() instanceof TextChange change) {
+			return change;
+		}
+		return (getDelegate()).createTextChange();
+	}
 
 	/**
 	 * Clients should not override this method
