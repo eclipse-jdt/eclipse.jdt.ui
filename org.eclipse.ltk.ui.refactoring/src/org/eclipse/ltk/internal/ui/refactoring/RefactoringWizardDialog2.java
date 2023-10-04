@@ -331,6 +331,7 @@ public class RefactoringWizardDialog2 extends TrayDialog implements IWizardConta
 		}
 	}
 
+
 	private Map<String, Object> aboutToStart(boolean cancelable) {
 		Map<String, Object> savedState = null;
 		Shell shell= getShell();

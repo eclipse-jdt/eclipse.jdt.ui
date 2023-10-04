@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -40,6 +41,7 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.CompareViewerSwitchingPane;
+import org.eclipse.compare.ICompareContainer;
 import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.IResourceProvider;
 import org.eclipse.compare.ITypedElement;
@@ -55,6 +57,7 @@ import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 public class TextEditChangePreviewViewer implements IChangePreviewViewer {
 
 	private ComparePreviewer fViewer;
+	private ICompareContainer fContainer;
 
 	private static class TextEditBasedChangeInput extends ChangePreviewViewerInput {
 		TextEditBasedChangeGroup group;
@@ -73,9 +76,10 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
 		private String fLabel;
 		private ImageDescriptor fDescriptor;
 		private Image fImage;
-		public ComparePreviewer(Composite parent) {
+		public ComparePreviewer(Composite parent, ICompareContainer container) {
 			super(parent, SWT.BORDER | SWT.FLAT, true);
 			fCompareConfiguration= new CompareConfiguration();
+			fCompareConfiguration.setContainer(container);
 			fCompareConfiguration.setLeftEditable(false);
 			fCompareConfiguration.setLeftLabel(RefactoringUIMessages.ComparePreviewer_original_source);
 			fCompareConfiguration.setRightEditable(false);
@@ -84,6 +88,8 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
 				if (fImage != null && !fImage.isDisposed())
 					fImage.dispose();
 			});
+			FormData gd= new FormData(parent.getClientArea().width, parent.getClientArea().height);
+			setLayoutData(gd);
 			Dialog.applyDialogFont(this);
 		}
 		public void setLabel(String label) {
@@ -181,7 +187,7 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
 
 	@Override
 	public void createControl(Composite parent) {
-		fViewer= new ComparePreviewer(parent);
+		fViewer= new ComparePreviewer(parent, fContainer);
 	}
 
 	@Override
@@ -225,6 +231,11 @@ public class TextEditChangePreviewViewer implements IChangePreviewViewer {
 
 	public void refresh() {
 		fViewer.getViewer().refresh();
+	}
+
+	@Override
+	public void initialize(ICompareContainer container) {
+		this.fContainer= container;
 	}
 
 	private void setInput(TextEditBasedChange change, String left, String right, String type) {

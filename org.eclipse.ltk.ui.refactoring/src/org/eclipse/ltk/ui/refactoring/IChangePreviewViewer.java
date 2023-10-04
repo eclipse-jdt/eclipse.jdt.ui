@@ -16,6 +16,8 @@ package org.eclipse.ltk.ui.refactoring;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.compare.ICompareContainer;
+
 /**
  * Viewer to present the preview for a {@link org.eclipse.ltk.core.refactoring.Change}.
  * <p>
@@ -36,6 +38,15 @@ import org.eclipse.swt.widgets.Control;
  * @since 3.0
  */
 public interface IChangePreviewViewer {
+
+	/**
+	 * @param container connected to this viewer
+	 *
+	 * @since 3.14
+	 */
+	default void initialize(ICompareContainer container) {
+		// do nothing
+	}
 
 	/**
 	 * Creates the preview viewer's widget hierarchy. This method

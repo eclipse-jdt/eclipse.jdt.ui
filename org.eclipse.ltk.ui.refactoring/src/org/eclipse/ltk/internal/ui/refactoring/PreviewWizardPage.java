@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.ltk.internal.ui.refactoring;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -39,35 +40,51 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.wizard.ProgressMonitorPart;
 
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.PageBook;
+import org.eclipse.ui.services.IServiceLocator;
 
 import org.eclipse.compare.CompareUI;
+import org.eclipse.compare.ICompareContainer;
+import org.eclipse.compare.ICompareNavigator;
+import org.eclipse.compare.structuremergeviewer.ICompareInput;
+import org.eclipse.compare.structuremergeviewer.ICompareInputChangeListener;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -91,6 +108,76 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	private static final String PREVIEW_WIZARD_PAGE_HIDE_DERIVED= "PreviewWizardPage.hide.derived"; //$NON-NLS-1$
 	protected static final String PREVIOUS_CHANGE_ID= "org.eclipse.ltk.ui.refactoring.previousChange"; //$NON-NLS-1$
 	protected static final String NEXT_CHANGE_ID= "org.eclipse.ltk.ui.refactoring.nextChange"; //$NON-NLS-1$
+
+	private class WizardCompareContainer implements ICompareContainer {
+
+		@Override
+		public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
+			getWizard().getContainer().run(fork, cancelable, runnable);
+		}
+
+		@Override
+		public void addCompareInputChangeListener(ICompareInput input, ICompareInputChangeListener listener) {
+			input.addCompareInputChangeListener(listener);
+
+		}
+
+		@Override
+		public void removeCompareInputChangeListener(ICompareInput input, ICompareInputChangeListener listener) {
+			input.removeCompareInputChangeListener(listener);
+
+		}
+
+		@Override
+		public void registerContextMenu(MenuManager menu, ISelectionProvider selectionProvider) {
+
+		}
+
+		@Override
+		public void setStatusMessage(String message) {
+
+		}
+
+		@Override
+		public IActionBars getActionBars() {
+			return null;
+		}
+
+		@Override
+		public IServiceLocator getServiceLocator() {
+			return null;
+		}
+
+		@Override
+		public ICompareNavigator getNavigator() {
+			return null;
+		}
+
+		@Override
+		public void runAsynchronously(IRunnableWithProgress runnable) {
+			new Job(getClass().getName()) {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						getWizard().getContainer().run(true, false, runnable);
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+					}
+
+					return Status.OK_STATUS;
+				}
+			}.schedule();
+		}
+
+		@Override
+		public IWorkbenchPart getWorkbenchPart() {
+			return null;
+		}
+
+	}
 
 	private static class NullPreviewer implements IChangePreviewViewer {
 		private Label fLabel;
@@ -284,16 +371,19 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	protected Action fPreviousAction;
 	protected ViewerPane fTreeViewerPane;
 	protected ChangeElementTreeViewer fTreeViewer;
+	protected ProgressMonitorPart fProgressPart;
 	private PageBook fPreviewContainer;
 	private ChangePreviewViewerDescriptor fCurrentDescriptor;
 	private IChangePreviewViewer fCurrentPreviewViewer;
 	private IChangePreviewViewer fNullPreviewer;
+	private ICompareContainer fCompareContainer;
 
 	/**
 	 * Creates a new preview wizard page.
 	 */
 	public PreviewWizardPage() {
 		this(false);
+		this.fCompareContainer = new WizardCompareContainer();
 	}
 
 	/**
@@ -427,6 +517,9 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		result.setLayout(layout);
 
 		SashForm sashForm= new SashForm(result, SWT.VERTICAL);
+		GridLayout pmlayout= new GridLayout();
+		pmlayout.numColumns= 1;
+		pmlayout.marginHeight= 0;
 
 		fTreeViewerPane= new ViewerPane(sashForm, SWT.BORDER | SWT.FLAT);
 		ToolBarManager tbm= fTreeViewerPane.getToolBarManager();
@@ -460,7 +553,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		fTreeViewer.setContentProvider(createTreeContentProvider());
 		fTreeViewer.setLabelProvider(createTreeLabelProvider());
 		fTreeViewer.setComparator(createTreeComparator());
-		fTreeViewer.addSelectionChangedListener(createSelectionChangedListener());
+		fTreeViewer.addPostSelectionChangedListener(createSelectionChangedListener());
 		fTreeViewer.addCheckStateListener(createCheckStateListener());
 		fTreeViewerPane.setContent(fTreeViewer.getControl());
 		fTreeViewer.getControl().getAccessible().addAccessibleListener(new AccessibleAdapter() {
@@ -474,8 +567,11 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		setTreeViewerInput();
 		updateTreeViewerPaneTitle();
 
+		fProgressPart = new ProgressMonitorPart(parent, pmlayout, true);
+
 		fPreviewContainer= new PageBook(sashForm, SWT.NONE);
 		fNullPreviewer= new NullPreviewer();
+		fNullPreviewer.initialize(fCompareContainer);
 		fNullPreviewer.createControl(fPreviewContainer);
 		fPreviewContainer.showPage(fNullPreviewer.getControl());
 		fCurrentPreviewViewer= fNullPreviewer;
@@ -618,18 +714,33 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 				ChangePreviewViewerDescriptor descriptor= element.getChangePreviewViewerDescriptor();
 				if (fCurrentDescriptor != descriptor) {
 					IChangePreviewViewer newViewer;
-					if (descriptor != null) {
-						newViewer= descriptor.createViewer();
-						newViewer.createControl(fPreviewContainer);
-					} else {
-						newViewer= fNullPreviewer;
+
+					Shell shell = getShell();
+					int d= 0;
+					for (; shell.isLayoutDeferred(); d++)
+						shell.setLayoutDeferred(false);
+					try {
+						if (descriptor != null) {
+							newViewer= descriptor.createViewer();
+							newViewer.initialize(fCompareContainer);
+							newViewer.createControl(fPreviewContainer);
+						} else {
+							newViewer= fNullPreviewer;
+						}
+						fCurrentDescriptor= descriptor;
+
+						element.feedInput(newViewer, fActiveGroupCategories);
+						if (fCurrentPreviewViewer != null && fCurrentPreviewViewer != fNullPreviewer)
+							fCurrentPreviewViewer.getControl().dispose();
+						fCurrentPreviewViewer= newViewer;
+						fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
+						fPreviewContainer.update();
+					} finally {
+						for (; d > 0; d--)
+							shell.setLayoutDeferred(true);
 					}
-					fCurrentDescriptor= descriptor;
-					element.feedInput(newViewer, fActiveGroupCategories);
-					if (fCurrentPreviewViewer != null && fCurrentPreviewViewer != fNullPreviewer)
-						fCurrentPreviewViewer.getControl().dispose();
-					fCurrentPreviewViewer= newViewer;
-					fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
+
+
 				} else {
 					element.feedInput(fCurrentPreviewViewer, fActiveGroupCategories);
 				}
