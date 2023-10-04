@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	/**
 	 * Constructs an AST rewrite correction proposal.
-	 *
 	 * @param name the display name of the proposal
 	 * @param cu the compilation unit that is modified
 	 * @param rewrite the AST rewrite that is invoked when the proposal is applied or
@@ -43,6 +42,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
 	 *            is desired
 	 * @param delegate The delegate instance
+	 * @since 3.31
 	 */
 	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image, ASTRewriteCorrectionProposalCore delegate) {
 		super(name, cu, relevance, image, delegate);

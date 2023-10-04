@@ -131,6 +131,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
 	 *            is desired
 	 * @param delegate The delegate instance
+	 * @since 3.31
 	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image, CUCorrectionProposalCore delegate) {
 		this(name, cu, null, relevance, image, delegate);
@@ -150,6 +151,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
 	 *            is desired
 	 * @param delegate The delegate proposal underlying this proposal
+	 * @since 3.31
 	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image, CUCorrectionProposalCore delegate) {
 		super(name, change, relevance, image);
@@ -191,6 +193,10 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		return getDelegate().getAdditionalProposalInfo(monitor);
 	}
 
+	/**
+	 * @since 3.31
+	 * @return the compilation unit
+	 */
 	protected ICompilationUnit getInitialCompilationUnit() {
 		return this.cu;
 	}
@@ -254,10 +260,19 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		}
 	}
 
+	/**
+	 * @since 3.31
+	 * @return
+	 */
 	protected boolean useDelegateToCreateTextChange() {
 		return true;
 	}
 
+	/**
+	 * @since 3.31
+	 * @return the text change
+	 * @throws CoreException
+	 */
 	protected TextChange createTextChangeLocal() throws CoreException {
 		TextChange change = fProposalCore.getNewChange();
 		// initialize text change
@@ -266,6 +281,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		return change;
 	}
 
+	/**
+	 * @since 3.31
+	 * @return a text change created via the delegate
+	 * @throws CoreException
+	 */
 	protected TextChange createTextChangeViaDelegate() throws CoreException {
 		if ((getDelegate()).getCurrentChange() instanceof TextChange change) {
 			return change;

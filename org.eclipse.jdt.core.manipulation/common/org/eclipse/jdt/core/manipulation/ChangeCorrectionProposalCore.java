@@ -155,6 +155,10 @@ public class ChangeCorrectionProposalCore {
 		return fChange;
 	}
 
+	/**
+	 * @since 1.20
+	 * @return The current change, or null if not initialized yet
+	 */
 	public Change getCurrentChange() {
 		return fChange;
 	}
