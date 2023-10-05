@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -71,12 +71,12 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 		try {
 			pm.beginTask(getName(), 2);
 			if (fUpdateReferences)
-				modifyClassPaths(new SubProgressMonitor(pm, 1));
+				modifyClassPaths(SubMonitor.convert(pm, 1));
 			IProject project= getProject();
 			if (project != null) {
 				IProjectDescription description= project.getDescription();
 				description.setName(getNewName());
-				project.move(description, IResource.FORCE | IResource.SHALLOW, new SubProgressMonitor(pm, 1));
+				project.move(description, IResource.FORCE | IResource.SHALLOW, SubMonitor.convert(pm, 1));
 			}
 		} finally {
 			pm.done();
@@ -128,7 +128,7 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 		for (IProject p : referencing) {
 			IJavaProject jp= JavaCore.create(p);
 			if (jp != null && jp.exists()) {
-				modifyClassPath(jp, new SubProgressMonitor(pm, 1));
+				modifyClassPath(jp, SubMonitor.convert(pm, 1));
 			} else {
 				pm.worked(1);
 			}

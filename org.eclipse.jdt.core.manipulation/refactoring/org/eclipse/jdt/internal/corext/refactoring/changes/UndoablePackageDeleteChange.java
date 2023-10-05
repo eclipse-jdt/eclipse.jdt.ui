@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.undo.snapshot.IResourceSnapshot;
@@ -47,12 +47,11 @@ public class UndoablePackageDeleteChange extends DynamicValidationStateChange {
 			pm.worked(1);
 		}
 
-		DynamicValidationStateChange result= (DynamicValidationStateChange) super.perform(new SubProgressMonitor(pm, count));
+		DynamicValidationStateChange result= (DynamicValidationStateChange) super.perform(SubMonitor.convert(pm, count));
 
 		for (int i= 0; i < fPackageDeletes.size(); i++) {
-			IResource resource= fPackageDeletes.get(i);
 			IResourceSnapshot<IResource> resourceDescription= snapshots.get(i);
-			resourceDescription.recordStateFromHistory(resource, new SubProgressMonitor(pm, 1));
+			resourceDescription.recordStateFromHistory(SubMonitor.convert(pm, 1));
 			result.add(new UndoDeleteResourceChange(resourceDescription));
 		}
 		return result;

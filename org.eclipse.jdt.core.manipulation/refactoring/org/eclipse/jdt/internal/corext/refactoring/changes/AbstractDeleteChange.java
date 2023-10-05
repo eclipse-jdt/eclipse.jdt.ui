@@ -15,7 +15,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -48,8 +48,8 @@ abstract class AbstractDeleteChange extends ResourceChange {
 		ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath(), LocationKind.IFILE);
 		if (buffer != null && buffer.isDirty() &&  buffer.isStateValidated() && buffer.isSynchronized()) {
 			pm.beginTask("", 2); //$NON-NLS-1$
-			buffer.commit(new SubProgressMonitor(pm, 1), false);
-			file.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(pm, 1));
+			buffer.commit(SubMonitor.convert(pm, 1), false);
+			file.refreshLocal(IResource.DEPTH_ONE, SubMonitor.convert(pm, 1));
 		}
 		pm.done();
 	}

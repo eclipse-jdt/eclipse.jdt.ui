@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -134,7 +134,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 			try {
 				for (int i= 0; i < count; i++) {
 					IPackageFragment currentPackage= allPackages[insideOut ? count - i - 1 : i];
-					renamePackage(currentPackage, new SubProgressMonitor(pm, 1), createNewPath(currentPackage), getNewName(currentPackage));
+					renamePackage(currentPackage, SubMonitor.convert(pm, 1), createNewPath(currentPackage), getNewName(currentPackage));
 				}
 			} finally {
 				pm.done();
@@ -166,14 +166,14 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 			IJavaElement element= (IJavaElement) getModifiedElement();
 			// don't check for read-only since we don't go through
 			// validate edit.
-			result.merge(super.isValid(new SubProgressMonitor(pm, 1)));
+			result.merge(super.isValid(SubMonitor.convert(pm, 1)));
 			if (result.hasFatalError())
 				return result;
 			if (element != null && element.exists() && element instanceof IPackageFragment) {
 				IPackageFragment pack= (IPackageFragment) element;
 				if (fRenameSubpackages) {
 					IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
-					SubProgressMonitor subPm= new SubProgressMonitor(pm, 1);
+					SubMonitor subPm= SubMonitor.convert(pm, 1);
 					subPm.beginTask("", allPackages.length); //$NON-NLS-1$
 					for (IPackageFragment pckg : allPackages) {
 						// don't check for read-only since we don't go through
@@ -181,10 +181,10 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 						checkIfModifiable(result, pckg.getResource(), VALIDATE_NOT_DIRTY);
 						if (result.hasFatalError())
 							return result;
-						isValid(result, pckg, new SubProgressMonitor(subPm, 1));
+						isValid(result, pckg, SubMonitor.convert(subPm, 1));
 					}
 				} else {
-					isValid(result, pack, new SubProgressMonitor(pm, 1));
+					isValid(result, pack, SubMonitor.convert(pm, 1));
 				}
 			}
 		} finally {

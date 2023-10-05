@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -72,11 +72,11 @@ public class CopyResourceChange extends ResourceChange {
 
 			String newName= getNewResourceName();
 			IResource resource= getResource();
-			boolean performReorg= deleteIfAlreadyExists(new SubProgressMonitor(pm, 1), newName);
+			boolean performReorg= deleteIfAlreadyExists(SubMonitor.convert(pm, 1), newName);
 			if (!performReorg)
 				return null;
 
-			getResource().copy(getDestinationPath(newName), getReorgFlags(), new SubProgressMonitor(pm, 1));
+			getResource().copy(getDestinationPath(newName), getReorgFlags(), SubMonitor.convert(pm, 1));
 
 			markAsExecuted(resource);
 			return null;
@@ -112,9 +112,9 @@ public class CopyResourceChange extends ResourceChange {
 			return false;
 
 		if (current instanceof IFile)
-			((IFile)current).delete(false, true, new SubProgressMonitor(pm, 1));
+			((IFile)current).delete(false, true, SubMonitor.convert(pm, 1));
 		else if (current instanceof IFolder)
-			((IFolder)current).delete(false, true, new SubProgressMonitor(pm, 1));
+			((IFolder)current).delete(false, true, SubMonitor.convert(pm, 1));
 		else
 			Assert.isTrue(false);
 

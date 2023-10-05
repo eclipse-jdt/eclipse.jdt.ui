@@ -104,7 +104,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 			IResource resource= unit.getResource();
 			IResourceSnapshot<IResource> resourceDescription = ResourceSnapshotFactory.fromResource(resource);
 			element.delete(false, SubMonitor.convert(pm, 1));
-			resourceDescription.recordStateFromHistory(resource, SubMonitor.convert(pm, 1));
+			resourceDescription.recordStateFromHistory(SubMonitor.convert(pm, 1));
 			return new UndoDeleteResourceChange(resourceDescription);
 
 		} else if (element instanceof IPackageFragment) {
