@@ -124,7 +124,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 
 		root.delete(resourceUpdateFlags, jCoreUpdateFlags, SubMonitor.convert(pm, 1));
 
-		rootDescription.recordStateFromHistory(rootResource, SubMonitor.convert(pm, 1));
+		rootDescription.recordStateFromHistory(SubMonitor.convert(pm, 1));
 		for (Entry<IFile, String> entry : classpathFilesContents.entrySet()) {
 			IFile file= entry.getKey();
 			String contents= entry.getValue();

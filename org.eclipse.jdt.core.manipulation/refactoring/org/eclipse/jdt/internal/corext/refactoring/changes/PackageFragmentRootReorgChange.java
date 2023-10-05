@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
@@ -70,7 +70,7 @@ abstract class PackageFragmentRootReorgChange extends ResourceChange {
 			String newName= getNewResourceName();
 			IPackageFragmentRoot root= getRoot();
 			ResourceMapping mapping= JavaElementResourceMapping.create(root);
-			final Change result= doPerformReorg(getDestinationProjectPath().append(newName), new SubProgressMonitor(pm, 1));
+			final Change result= doPerformReorg(getDestinationProjectPath().append(newName), SubMonitor.convert(pm, 1));
 			markAsExecuted(root, mapping);
 			return result;
 		} finally {
