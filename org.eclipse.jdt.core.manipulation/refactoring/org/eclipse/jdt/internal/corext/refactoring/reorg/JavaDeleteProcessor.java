@@ -71,7 +71,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.DeleteDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
@@ -90,6 +89,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public final class JavaDeleteProcessor extends DeleteProcessor {
 

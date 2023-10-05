@@ -29,9 +29,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 abstract class CompilationUnitReorgChange extends ResourceChange {
 

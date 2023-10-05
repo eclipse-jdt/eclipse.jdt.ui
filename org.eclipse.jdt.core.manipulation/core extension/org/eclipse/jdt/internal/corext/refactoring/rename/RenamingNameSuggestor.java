@@ -13,9 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.text.BreakIterator;
 
 import org.eclipse.core.runtime.Assert;
 

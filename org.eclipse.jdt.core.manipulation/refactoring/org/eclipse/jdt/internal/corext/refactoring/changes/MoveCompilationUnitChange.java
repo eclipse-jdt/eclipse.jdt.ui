@@ -28,9 +28,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 

@@ -50,8 +50,6 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -70,6 +68,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 
 /**

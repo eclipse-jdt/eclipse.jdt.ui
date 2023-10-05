@@ -107,8 +107,6 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -136,7 +134,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRang
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.

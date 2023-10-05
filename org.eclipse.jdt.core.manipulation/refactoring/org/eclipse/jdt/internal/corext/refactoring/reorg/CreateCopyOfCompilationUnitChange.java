@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.IRefactoringSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -55,6 +54,8 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 

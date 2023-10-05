@@ -15,11 +15,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -81,8 +82,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
-import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -102,6 +101,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 
 /* package */ class ExtractMethodAnalyzer extends CodeAnalyzer {
 
