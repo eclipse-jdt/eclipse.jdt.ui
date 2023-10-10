@@ -62,7 +62,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 	}
 
 	@Override
-	Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+	protected Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		String name;
 		String newName= getNewName();
 		if (newName == null)

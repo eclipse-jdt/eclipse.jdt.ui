@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.NullChange;
@@ -34,6 +35,7 @@ public class ChangeCorrectionProposalCore {
 	protected Change fChange;
 	protected String fName;
 	protected int fRelevance;
+	private String fCommandId;
 
 	/**
 	 * Constructs a change correction proposal.
@@ -154,6 +156,15 @@ public class ChangeCorrectionProposalCore {
 	}
 
 	/**
+	 * @since 1.20
+	 * @return The current change, or null if not initialized yet
+	 */
+	public Change getCurrentChange() {
+		return fChange;
+	}
+
+
+	/**
 	 * Creates the change for this proposal.
 	 * This method is only called once and only when no change has been passed in
 	 * {#ChangeCorrectionProposal(String, Change, int, Image)}.
@@ -194,4 +205,22 @@ public class ChangeCorrectionProposalCore {
 		fRelevance= relevance;
 	}
 
+	/**
+	 * @since 1.20
+	 * @return the command id
+	 */
+	public String getCommandId() {
+		return fCommandId;
+	}
+
+	/**
+	 * Set the proposal id to allow assigning a shortcut to the correction proposal.
+	 *
+	 * @since 1.20
+	 * @param commandId The proposal id for this proposal or <code>null</code> if no command
+	 * should be assigned to this proposal.
+	 */
+	public void setCommandId(String commandId) {
+		fCommandId= commandId;
+	}
 }

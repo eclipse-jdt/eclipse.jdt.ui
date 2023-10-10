@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 IBM Corporation and others.
+ * Copyright (c) 2011, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction;
@@ -19,14 +20,11 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -37,7 +35,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -53,38 +50,9 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionPro
 public class VarargsWarningsSubProcessor {
 
 	private static class AddSafeVarargsProposal extends LinkedCorrectionProposal {
-
-		private IMethodBinding fMethodBinding;
-
-		private MethodDeclaration fMethodDeclaration;
-
 		public AddSafeVarargsProposal(String label, ICompilationUnit cu, MethodDeclaration methodDeclaration, IMethodBinding methodBinding, int relevance) {
-			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
-			fMethodDeclaration= methodDeclaration;
-			fMethodBinding= methodBinding;
+			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), new AddSafeVarargsProposalCore(label, cu, methodDeclaration, methodBinding, relevance));
 		}
-
-		@Override
-		protected ASTRewrite getRewrite() throws CoreException {
-			if (fMethodDeclaration == null) {
-				CompilationUnit astRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
-				fMethodDeclaration= (MethodDeclaration) astRoot.findDeclaringNode(fMethodBinding.getKey());
-			}
-			AST ast= fMethodDeclaration.getAST();
-			ASTRewrite rewrite= ASTRewrite.create(ast);
-			ListRewrite listRewrite= rewrite.getListRewrite(fMethodDeclaration, MethodDeclaration.MODIFIERS2_PROPERTY);
-
-			MarkerAnnotation annotation= ast.newMarkerAnnotation();
-			String importString= createImportRewrite((CompilationUnit) fMethodDeclaration.getRoot()).addImport("java.lang.SafeVarargs"); //$NON-NLS-1$
-			annotation.setTypeName(ast.newName(importString));
-			listRewrite.insertFirst(annotation, null);
-
-			// set up linked mode
-			addLinkedPosition(rewrite.track(annotation), true, "annotation"); //$NON-NLS-1$
-
-			return rewrite;
-		}
-
 	}
 
 	public static void addAddSafeVarargsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
@@ -99,7 +67,7 @@ public class VarargsWarningsSubProcessor {
 			return;
 
 		int modifiers= methodBinding.getModifiers();
-		if (!Modifier.isStatic(modifiers) && !Modifier.isFinal(modifiers) && !Modifier.isPrivate(modifiers) && ! methodBinding.isConstructor())
+		if (!Modifier.isStatic(modifiers) && !Modifier.isFinal(modifiers) && !Modifier.isPrivate(modifiers) && !methodBinding.isConstructor())
 			return;
 
 		String label= CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_label;
@@ -148,7 +116,7 @@ public class VarargsWarningsSubProcessor {
 		MethodDeclaration methodDeclaration= (MethodDeclaration) coveringNode;
 		MarkerAnnotation annotation= null;
 
-		for (ASTNode node : (List<? extends ASTNode>)methodDeclaration.modifiers()) {
+		for (ASTNode node : (List<? extends ASTNode>) methodDeclaration.modifiers()) {
 			if (node instanceof MarkerAnnotation) {
 				annotation= (MarkerAnnotation) node;
 				if ("SafeVarargs".equals(annotation.resolveAnnotationBinding().getName())) { //$NON-NLS-1$

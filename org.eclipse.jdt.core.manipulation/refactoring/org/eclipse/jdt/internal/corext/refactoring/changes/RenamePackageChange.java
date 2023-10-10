@@ -157,6 +157,10 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		return (IPackageFragment) getModifiedElement();
 	}
 
+	public boolean getRenameSubpackages() {
+		return fRenameSubpackages;
+	}
+
 	@Override
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$

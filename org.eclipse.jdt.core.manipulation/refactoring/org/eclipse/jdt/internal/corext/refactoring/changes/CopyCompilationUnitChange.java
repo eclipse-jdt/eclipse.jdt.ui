@@ -39,7 +39,7 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	}
 
 	@Override
-	Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+	protected Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		getCu().copy(getDestinationPackage(), null, getNewName(), true, pm);
 		return null;
 	}

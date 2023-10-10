@@ -41,13 +41,6 @@
             <message_arguments>
                 <message_argument value="RecordPattern"/>
                 <message_argument value="ASTFlattener"/>
-                <message_argument value="getPatternName()"/>
-            </message_arguments>
-        </filter>
-        <filter id="640712815">
-            <message_arguments>
-                <message_argument value="RecordPattern"/>
-                <message_argument value="ASTFlattener"/>
                 <message_argument value="getPatternType()"/>
             </message_arguments>
         </filter>
@@ -72,6 +65,15 @@
                 <message_argument value="TypePattern"/>
                 <message_argument value="PatternMatchingForInstanceofFixOperation"/>
                 <message_argument value="setPatternVariable(SingleVariableDeclaration)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="refactoring/org/eclipse/jdt/internal/corext/refactoring/surround/SurroundWithTryCatchAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchAnalyzer">
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="TypePattern"/>
+                <message_argument value="SurroundWithTryCatchAnalyzer"/>
+                <message_argument value="getPatternVariable()"/>
             </message_arguments>
         </filter>
     </resource>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -47,6 +48,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.manipulation.CUCorrectionProposalCore;
 import org.eclipse.jdt.core.provisional.JavaModelAccess;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -95,13 +97,31 @@ public class ModuleCorrectionsSubProcessor {
 		}
 	}
 
-	private static class ModulepathFixCorrectionProposal extends CUCorrectionProposal {
+
+	public static class ModulepathFixCorrectionProposalCore extends CUCorrectionProposalCore {
 
 		private final String fModuleSearchStr;
 
-		protected ModulepathFixCorrectionProposal(ICompilationUnit cu, String moduleSearchStr) {
-			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+		protected ModulepathFixCorrectionProposalCore(ICompilationUnit cu, String moduleSearchStr) {
+			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10);
 			fModuleSearchStr= DefaultModulepathFixProcessor.MODULE_SEARCH + moduleSearchStr;
+		}
+
+		@Override
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_info, BasicElementLabels.getJavaElementName(getModuleSearchStr()));
+		}
+
+		public String getModuleSearchStr() {
+			return fModuleSearchStr;
+		}
+	}
+
+	private static class ModulepathFixCorrectionProposal extends CUCorrectionProposal {
+
+		protected ModulepathFixCorrectionProposal(ICompilationUnit cu, String moduleSearchStr) {
+			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE),
+					new ModulepathFixCorrectionProposalCore(cu, moduleSearchStr));
 		}
 
 		@Override
@@ -111,12 +131,13 @@ public class ModuleCorrectionsSubProcessor {
 				context= new BusyIndicatorRunnableContext();
 			}
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), fModuleSearchStr, context);
+			String search= ((ModulepathFixCorrectionProposalCore) getDelegate()).getModuleSearchStr();
+			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), search, context);
 		}
 
 		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_info, BasicElementLabels.getJavaElementName(fModuleSearchStr));
+			return ((ModulepathFixCorrectionProposalCore) getDelegate()).getAdditionalProposalInfo(monitor);
 		}
 	}
 
@@ -182,7 +203,7 @@ public class ModuleCorrectionsSubProcessor {
 				int oldCount= proposals.size();
 				addModifyClassPathProposals(proposals, javaProject, node);
 				if (oldCount == proposals.size()) {
-					proposals.add(new ModulepathFixCorrectionProposal(context.getCompilationUnit(),  node.getFullyQualifiedName()));
+					proposals.add(new ModulepathFixCorrectionProposal(context.getCompilationUnit(), node.getFullyQualifiedName()));
 				}
 			}
 		}

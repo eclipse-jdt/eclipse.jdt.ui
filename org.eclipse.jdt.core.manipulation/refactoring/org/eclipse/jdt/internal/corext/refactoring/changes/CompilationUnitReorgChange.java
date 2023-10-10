@@ -73,7 +73,7 @@ abstract class CompilationUnitReorgChange extends ResourceChange {
 		}
 	}
 
-	abstract Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException;
+	protected abstract Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException;
 
 	@Override
 	public Object getModifiedElement() {
@@ -89,19 +89,19 @@ abstract class CompilationUnitReorgChange extends ResourceChange {
 		return null;
 	}
 
-	ICompilationUnit getCu() {
+	public ICompilationUnit getCu() {
 		return (ICompilationUnit)JavaCore.create(fCuHandle);
 	}
 
-	IPackageFragment getOldPackage() {
+	public IPackageFragment getOldPackage() {
 		return (IPackageFragment)JavaCore.create(fOldPackageHandle);
 	}
 
-	IPackageFragment getDestinationPackage() {
+	public IPackageFragment getDestinationPackage() {
 		return (IPackageFragment)JavaCore.create(fNewPackageHandle);
 	}
 
-	String getNewName() throws OperationCanceledException {
+	public String getNewName() throws OperationCanceledException {
 		if (fNewNameQuery == null)
 			return null;
 		return fNewNameQuery.getNewName();

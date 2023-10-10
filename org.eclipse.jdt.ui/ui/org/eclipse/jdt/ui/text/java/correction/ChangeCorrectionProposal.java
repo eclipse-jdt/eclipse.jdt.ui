@@ -72,7 +72,6 @@ public class ChangeCorrectionProposal extends ChangeCorrectionProposalCore imple
 	private static final NullChange COMPUTING_CHANGE= new NullChange("ChangeCorrectionProposal computing..."); //$NON-NLS-1$
 
 	private Image fImage;
-	private String fCommandId;
 
 	/**
 	 * Constructs a change correction proposal.
@@ -87,7 +86,6 @@ public class ChangeCorrectionProposal extends ChangeCorrectionProposalCore imple
 	public ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
 		super(name, change, relevance);
 		fImage= image;
-		fCommandId= null;
 	}
 
 	/**
@@ -344,20 +342,4 @@ public class ChangeCorrectionProposal extends ChangeCorrectionProposalCore imple
 		}
 		return fChange;
 	}
-
-	@Override
-	public String getCommandId() {
-		return fCommandId;
-	}
-
-	/**
-	 * Set the proposal id to allow assigning a shortcut to the correction proposal.
-	 *
-	 * @param commandId The proposal id for this proposal or <code>null</code> if no command
-	 * should be assigned to this proposal.
-	 */
-	public void setCommandId(String commandId) {
-		fCommandId= commandId;
-	}
-
 }

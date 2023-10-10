@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2019 Red Hat and others.
+ * Copyright (c) 2018, 2023 Red Hat and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,13 +30,11 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -50,21 +48,21 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class NewProviderMethodDeclaration extends AbstractMethodCorrectionProposal {
-
 	private IType fReturnType;
 
 	public NewProviderMethodDeclaration(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, int relevance, Image image, IType returnType) {
-		super(label, targetCU, invocationNode, binding, relevance, image);
+		super(label, targetCU, relevance, image, new NewProviderMethodDeclarationCore(label, targetCU, invocationNode, binding, relevance, returnType));
 		this.fReturnType= returnType;
 	}
 
 	@Override
 	protected void performChange(IEditorPart part, IDocument document) throws CoreException {
+		// Should this really be done in the UI api call and not in the core API call?
 		ICompilationUnit compilationUnit= getCompilationUnit();
 		ITypeHierarchy th= fReturnType.newTypeHierarchy(compilationUnit.getJavaProject(), null);
 		IType[] subTypes= th.getAllSubtypes(fReturnType);
 
-		List<IType> typeProposals= new ArrayList<> (Arrays.asList(fReturnType));
+		List<IType> typeProposals= new ArrayList<>(Arrays.asList(fReturnType));
 		typeProposals.addAll(Arrays.asList(subTypes));
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 
@@ -74,10 +72,10 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 		parser.setSource(compilationUnit);
 		parser.setUnitName(compilationUnit.getPath().toOSString());
 		parser.setResolveBindings(true);
-		IBinding [] typeBindings= parser.createBindings(typeProposals.toArray(new IJavaElement[0]), null);
+		IBinding[] typeBindings= parser.createBindings(typeProposals.toArray(new IJavaElement[0]), null);
 
 		IPackageFragment pack= (IPackageFragment) compilationUnit.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
-		for (int i=0; i < typeProposals.size(); i++) {
+		for (int i= 0; i < typeProposals.size(); i++) {
 			IType t= typeProposals.get(i);
 			if (compilationUnit.equals(t.getCompilationUnit()) || JavaModelUtil.isVisible(t, pack)) {
 				if (typeBindings[i] instanceof ITypeBinding) {
@@ -92,43 +90,36 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 
 	@Override
 	protected boolean isConstructor() {
-		return false;
+		return ((NewProviderMethodDeclarationCore) getDelegate()).isConstructor();
 	}
 
 	@Override
 	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers) {
-		modifiers.addAll(rewrite.getAST().newModifiers(Modifier.PUBLIC | Modifier.STATIC));
+		((NewProviderMethodDeclarationCore) getDelegate()).addNewModifiers(rewrite, targetTypeDecl, modifiers);
 	}
 
 	@Override
 	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
-		// No type parameters needed, void type
+		((NewProviderMethodDeclarationCore) getDelegate()).addNewTypeParameters(rewrite, takenNames, params, context);
 	}
 
 	@Override
 	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException {
-		// no parameters needed, void type
+		((NewProviderMethodDeclarationCore) getDelegate()).addNewParameters(rewrite, takenNames, params, context);
 	}
 
 	@Override
 	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
-		// no exceptions thrown
+		((NewProviderMethodDeclarationCore) getDelegate()).addNewExceptions(rewrite, exceptions, context);
 	}
 
 	@Override
 	protected SimpleName getNewName(ASTRewrite rewrite) {
-		AST ast= rewrite.getAST();
-		SimpleName nameNode= ast.newSimpleName("provider"); //$NON-NLS-1$ // TypeConstants.PROVIDER
-		return nameNode;
+		return ((NewProviderMethodDeclarationCore) getDelegate()).getNewName(rewrite);
 	}
 
 	@Override
 	protected Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException {
-		getImportRewrite().addImport(fReturnType.getFullyQualifiedName());
-		AST ast= rewrite.getAST();
-		Type type= ast.newSimpleType(ast.newSimpleName(fReturnType.getElementName()));
-		addLinkedPosition(rewrite.track(type), true, "return_type"); //$NON-NLS-1$
-		return type;
+		return ((NewProviderMethodDeclarationCore) getDelegate()).getNewMethodType(rewrite, context);
 	}
-
 }

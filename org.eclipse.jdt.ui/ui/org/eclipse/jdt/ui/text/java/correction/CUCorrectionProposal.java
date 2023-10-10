@@ -64,6 +64,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 
 	private boolean fSwitchedEditor;
 	private CUCorrectionProposalCore fProposalCore;
+	private ICompilationUnit cu;
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit with a given text change.
@@ -78,11 +79,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 *            is desired
 	 */
 	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image) {
-		super(name, change, relevance, image);
-		if (cu == null) {
-			throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
-		}
-		fProposalCore = new CUCorrectionProposalCore(this, name, cu, change, relevance);
+		this(name, cu, change, relevance, image, null);
 	}
 
 	/**
@@ -99,6 +96,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance) {
 		this(name, cu, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
+
+
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit.
@@ -117,6 +116,62 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		this(name, cu, null, relevance, image);
 	}
 
+
+
+	/**
+	 * Constructs a correction proposal working on a compilation unit.
+	 * <p>
+	 * Users have to override {@link #addEdits(IDocument, TextEdit)} to provide the text edits or
+	 * {@link #createTextChange()} to provide a text change.
+	 * </p>
+	 *
+	 * @param name the name that is displayed in the proposal selection dialog
+	 * @param cu the compilation unit on that the change works
+	 * @param relevance the relevance of this proposal
+	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
+	 *            is desired
+	 * @param delegate The delegate instance
+	 * @since 3.31
+	 */
+	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image, CUCorrectionProposalCore delegate) {
+		this(name, cu, null, relevance, image, delegate);
+	}
+
+	/**
+	 * Constructs a correction proposal working on a compilation unit.
+	 * <p>
+	 * Users have to override {@link #addEdits(IDocument, TextEdit)} to provide the text edits or
+	 * {@link #createTextChange()} to provide a text change.
+	 * </p>
+	 *
+	 * @param name the name that is displayed in the proposal selection dialog
+	 * @param cu the compilation unit on that the change works
+	 * @param change The text change to be applied
+	 * @param relevance the relevance of this proposal
+	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
+	 *            is desired
+	 * @param delegate The delegate proposal underlying this proposal
+	 * @since 3.31
+	 */
+	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image, CUCorrectionProposalCore delegate) {
+		super(name, change, relevance, image);
+		this.cu = cu;
+		if (cu == null) {
+			throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
+		}
+		this.fProposalCore = delegate != null ? delegate : new CUCorrectionProposalCore(this, name, cu, change, relevance);
+	}
+
+
+
+	/**
+	 * @since 3.31
+	 * @return the delegate
+	 */
+	protected CUCorrectionProposalCore getDelegate() {
+		return fProposalCore;
+	}
+
 	/**
 	 * Called when the {@link CompilationUnitChange} is initialized. Subclasses can override to add
 	 * text edits to the root edit of the change. Implementors must not access the proposal, e.g.
@@ -130,12 +185,20 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @throws CoreException can be thrown if adding the edits is failing.
 	 */
 	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
-		// empty default implementation
+		getDelegate().addEdits(document, editRoot);
 	}
 
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		return fProposalCore.getAdditionalProposalInfo(monitor);
+		return getDelegate().getAdditionalProposalInfo(monitor);
+	}
+
+	/**
+	 * @since 3.31
+	 * @return the compilation unit
+	 */
+	protected ICompilationUnit getInitialCompilationUnit() {
+		return this.cu;
 	}
 
 	@Override
@@ -189,7 +252,28 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @return the created text change
 	 * @throws CoreException if the creation of the text change failed
 	 */
-	protected TextChange createTextChange() throws CoreException {
+	protected synchronized TextChange createTextChange() throws CoreException {
+		if( useDelegateToCreateTextChange() ) {
+			return createTextChangeViaDelegate();
+		} else {
+			return createTextChangeLocal();
+		}
+	}
+
+	/**
+	 * @since 3.31
+	 * @return
+	 */
+	protected boolean useDelegateToCreateTextChange() {
+		return true;
+	}
+
+	/**
+	 * @since 3.31
+	 * @return the text change
+	 * @throws CoreException
+	 */
+	protected TextChange createTextChangeLocal() throws CoreException {
 		TextChange change = fProposalCore.getNewChange();
 		// initialize text change
 		IDocument document= change.getCurrentDocument(new NullProgressMonitor());
@@ -197,7 +281,21 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		return change;
 	}
 
+	/**
+	 * @since 3.31
+	 * @return a text change created via the delegate
+	 * @throws CoreException
+	 */
+	protected TextChange createTextChangeViaDelegate() throws CoreException {
+		if ((getDelegate()).getCurrentChange() instanceof TextChange change) {
+			return change;
+		}
+		return (getDelegate()).createTextChange();
+	}
 
+	/**
+	 * Clients should not override this method
+	 */
 	@Override
 	protected final Change createChange() throws CoreException {
 		return createTextChange(); // make sure that only text changes are allowed here
@@ -211,7 +309,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 */
 	@Override
 	public final TextChange getTextChange() throws CoreException {
-		return (TextChange) getChange();
+		return (TextChange)getChange();
 	}
 
 	/**
@@ -220,7 +318,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @return the compilation unit on which the change works
 	 */
 	public final ICompilationUnit getCompilationUnit() {
-		return fProposalCore.getCompilationUnit();
+		return getDelegate().getCompilationUnit();
 	}
 
 	/**
@@ -231,10 +329,25 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
-	public String getPreviewContent() throws CoreException {
-		return getTextChange().getPreviewContent(new NullProgressMonitor());
+	public final String getPreviewContent() throws CoreException {
+		return getDelegate().getTextChange().getPreviewContent(new NullProgressMonitor());
 	}
 
+	@Override
+	public String getName() {
+		if( super.getName() == null || super.getName().isEmpty()) {
+			return getDelegate().getName();
+		}
+		return super.getName();
+	}
+
+	@Override
+	public String getCommandId() {
+		if( super.getCommandId() == null || super.getCommandId().isEmpty()) {
+			return getDelegate().getCommandId();
+		}
+		return super.getCommandId();
+	}
 	@Override
 	public String toString() {
 		try {

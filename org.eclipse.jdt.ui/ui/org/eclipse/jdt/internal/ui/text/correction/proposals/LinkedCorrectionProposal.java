@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - separate core logic from UI images
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -44,95 +45,115 @@ import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
 
 
 /**
- * A proposal for quick fixes and quick assists that works on a AST rewriter and enters the
- * linked mode when the proposal is set up.
- * Either a rewriter is directly passed in the constructor or method {@link #getRewrite()} is overridden
- * to provide the AST rewriter that is evaluated to the document when the proposal is
- * applied.
+ * A proposal for quick fixes and quick assists that works on a AST rewriter and enters the linked
+ * mode when the proposal is set up. Either a rewriter is directly passed in the constructor or
+ * method {@link #getRewrite()} is overridden to provide the AST rewriter that is evaluated to the
+ * document when the proposal is applied.
+ *
  * @since 3.0
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 
-	private LinkedProposalModelCore fLinkedProposalModel;
 
 	/**
 	 * Constructs a linked correction proposal.
+	 *
 	 * @param name The display name of the proposal.
 	 * @param cu The compilation unit that is modified.
-	 * @param rewrite The AST rewrite that is invoked when the proposal is applied
-	 *  <code>null</code> can be passed if {@link #getRewrite()} is overridden.
+	 * @param rewrite The AST rewrite that is invoked when the proposal is applied <code>null</code>
+	 *            can be passed if {@link #getRewrite()} is overridden.
 	 * @param relevance The relevance of this proposal.
 	 * @param image The image that is displayed for this proposal or <code>null</code> if no
-	 * image is desired.
+	 * @param delegate The delegate instance image is desired.
+	 */
+	public LinkedCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image, LinkedCorrectionProposalCore delegate) {
+		super(name, cu, rewrite, relevance, image, delegate);
+	}
+
+	/**
+	 * Constructs a linked correction proposal.
+	 *
+	 * @param name The display name of the proposal.
+	 * @param cu The compilation unit that is modified.
+	 * @param rewrite The AST rewrite that is invoked when the proposal is applied <code>null</code>
+	 *            can be passed if {@link #getRewrite()} is overridden.
+	 * @param relevance The relevance of this proposal.
+	 * @param image The image that is displayed for this proposal or <code>null</code> if no image
+	 *            is desired.
 	 */
 	public LinkedCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
-		super(name, cu, rewrite, relevance, image);
-		fLinkedProposalModel= null;
+		super(name, cu, rewrite, relevance, image, new LinkedCorrectionProposalCore(name, cu, rewrite, relevance));
 	}
 
 	/* public only for tests. */
 	public LinkedProposalModelCore getLinkedProposalModel() {
-		if (fLinkedProposalModel == null) {
-			fLinkedProposalModel= new LinkedProposalModelCore();
-		}
-		return fLinkedProposalModel;
+		return ((LinkedCorrectionProposalCore) getDelegate()).getLinkedProposalModel();
 	}
 
 	public void setLinkedProposalModel(LinkedProposalModelCore model) {
-		fLinkedProposalModel= model;
+		((LinkedCorrectionProposalCore) getDelegate()).setLinkedProposalModel(model);
 	}
 
 	/**
-	 * Adds a linked position to be shown when the proposal is applied. All positions with the
-	 * same group id are linked.
+	 * Adds a linked position to be shown when the proposal is applied. All positions with the same
+	 * group id are linked.
+	 *
 	 * @param position The position to add.
 	 * @param isFirst If set, the proposal is jumped to first.
 	 * @param groupID The id of the group the proposal belongs to. All proposals in the same group
-	 * are linked.
+	 *            are linked.
 	 */
 	public void addLinkedPosition(ITrackedNodePosition position, boolean isFirst, String groupID) {
-		getLinkedProposalModel().getPositionGroup(groupID, true).addPosition(position, isFirst);
+		((LinkedCorrectionProposalCore) getDelegate()).addLinkedPosition(position, isFirst, groupID);
 	}
 
 	/**
-	 * Adds a linked position to be shown when the proposal is applied. All positions with the
-	 * same group id are linked.
+	 * Adds a linked position to be shown when the proposal is applied. All positions with the same
+	 * group id are linked.
+	 *
 	 * @param position The position to add.
 	 * @param sequenceRank The sequence rank, see TODO.
 	 * @param groupID The id of the group the proposal belongs to. All proposals in the same group
-	 * are linked.
+	 *            are linked.
 	 */
 	public void addLinkedPosition(ITrackedNodePosition position, int sequenceRank, String groupID) {
-		getLinkedProposalModel().getPositionGroup(groupID, true).addPosition(position, sequenceRank);
+		((LinkedCorrectionProposalCore) getDelegate()).addLinkedPosition(position, sequenceRank, groupID);
 	}
 
 	/**
 	 * Sets the end position of the linked mode to the end of the passed range.
+	 *
 	 * @param position The position that describes the end position of the linked mode.
 	 */
 	public void setEndPosition(ITrackedNodePosition position) {
-		getLinkedProposalModel().setEndPosition(position);
+		((LinkedCorrectionProposalCore) getDelegate()).setEndPosition(position);
 	}
 
 	/**
 	 * Adds a linked position proposal to the group with the given id.
+	 *
 	 * @param groupID The id of the group that should present the proposal
 	 * @param proposal The string to propose.
-	 * @param image The image to show for the position proposal or <code>null</code> if
-	 * no image is desired.
+	 * @param image The image to show for the position proposal or <code>null</code> if no image is
+	 *            desired.
 	 */
 	public void addLinkedPositionProposal(String groupID, String proposal, Image image) {
-		ProposalCore p = new Proposal(proposal, image, 10);
+		ProposalCore p= new Proposal(proposal, image, 10);
 		getLinkedProposalModel().getPositionGroup(groupID, true).addProposal(p);
 	}
 
+	public void addLinkedPositionProposal(String groupID, String proposal) {
+		((LinkedCorrectionProposalCore) getDelegate()).addLinkedPositionProposal(groupID, proposal);
+	}
+
 	/**
 	 * Adds a linked position proposal to the group with the given id.
+	 *
 	 * @param groupID The id of the group that should present the proposal
-	 * 	@param displayString The name of the proposal
+	 * @param displayString The name of the proposal
 	 * @param proposal The string to insert.
-	 * @param image The image to show for the position proposal or <code>null</code> if
-	 * no image is desired.
+	 * @param image The image to show for the position proposal or <code>null</code> if no image is
+	 *            desired.
 	 * @deprecated use {@link #addLinkedPositionProposal(String, String, Image)} instead
 	 */
 	@Deprecated
@@ -142,6 +163,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 
 	/**
 	 * Adds a linked position proposal to the group with the given id.
+	 *
 	 * @param groupID The id of the group that should present the proposal
 	 * @param type The binding to use as type name proposal.
 	 */
@@ -157,13 +179,13 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				return;
 			}
 
-			if (fLinkedProposalModel != null) {
-				if (fLinkedProposalModel.hasLinkedPositions() && part instanceof JavaEditor) {
+			if (((LinkedCorrectionProposalCore) getDelegate()).fLinkedProposalModel != null) {
+				if (((LinkedCorrectionProposalCore) getDelegate()).fLinkedProposalModel.hasLinkedPositions() && part instanceof JavaEditor) {
 					// enter linked mode
 					ITextViewer viewer= ((JavaEditor) part).getViewer();
-					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, didOpenEditor(), fLinkedProposalModel);
+					new LinkedProposalModelPresenter().enterLinkedMode(viewer, part, didOpenEditor(), ((LinkedCorrectionProposalCore) getDelegate()).fLinkedProposalModel);
 				} else if (part instanceof ITextEditor) {
-					LinkedProposalPositionGroup.PositionInformation endPosition= fLinkedProposalModel.getEndPosition();
+					LinkedProposalPositionGroup.PositionInformation endPosition= ((LinkedCorrectionProposalCore) getDelegate()).fLinkedProposalModel.getEndPosition();
 					if (endPosition != null) {
 						// select a result
 						int pos= endPosition.getOffset() + endPosition.getLength();
@@ -175,4 +197,5 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		}
 	}
+
 }
