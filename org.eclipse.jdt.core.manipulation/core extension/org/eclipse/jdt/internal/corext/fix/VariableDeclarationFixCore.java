@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -372,6 +373,31 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 	            ITypeBinding declaringClass2= constructor.getDeclaringClass();
 	            if (!declaringClass.equals(declaringClass2))
 	            	return false;
+
+	            final IBinding writtenBinding= name.resolveBinding();
+	            if (writtenBinding == null) {
+	            	return false;
+	            }
+	            ASTVisitor visitor= new ASTVisitor() {
+
+	            	@Override
+	            	public boolean visit(SimpleName node) {
+	            		IBinding nodeBinding= node.resolveBinding();
+	            		if (nodeBinding == null) {
+	            			throw new AbortSearchException();
+	            		}
+	            		if (nodeBinding.isEqualTo(writtenBinding) && node.getStartPosition() < name.getStartPosition()) {
+	            			throw new AbortSearchException();
+	            		}
+	            		return false;
+	            	}
+
+	            };
+	            try {
+	            	methodDeclaration.accept(visitor);
+	            } catch (AbortSearchException e) {
+	            	return false;
+	            }
             }
 
 	        return true;
