@@ -5508,6 +5508,70 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoNotAddFinalForFieldUsedBeforeInitialized() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/769
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    \n" //
+				+ "    public interface I1 {\n" //
+				+ "        public void run();\n" //
+				+ "    }\n" //
+				+ "    private class E1 {\n" //
+				+ "        public void foo2(I1 k) {}\n" //
+				+ "    }\n" //
+				+ "    private E1 fField;\n" //
+				+ "    private List<String> fList;\n" //
+				+ "    \n" //
+				+ "    public E() {\n" //
+				+ "        fField = new E1();\n" //
+				+ "        fField.foo2(() -> {\n" //
+				+ "            fList.clear();\n" //
+				+ "        });\n" //
+				+ "        fList = new ArrayList<>();\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    \n" //
+				+ "    public interface I1 {\n" //
+				+ "        public void run();\n" //
+				+ "    }\n" //
+				+ "    private class E1 {\n" //
+				+ "        public void foo2(final I1 k) {}\n" //
+				+ "    }\n" //
+				+ "    private final E1 fField;\n" //
+				+ "    private List<String> fList;\n" //
+				+ "    \n" //
+				+ "    public E() {\n" //
+				+ "        fField = new E1();\n" //
+				+ "        fField.foo2(() -> {\n" //
+				+ "            fList.clear();\n" //
+				+ "        });\n" //
+				+ "        fList = new ArrayList<>();\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1},
+				new HashSet<>(Arrays.asList(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description)));
+	}
+
+	@Test
 	public void testDoNotAddFinalForFieldUsedInLambdaFieldInitializer() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/769
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
