@@ -340,6 +340,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnclosedCloseable:
 			case IProblem.PotentiallyUnclosedCloseable:
 			case IProblem.EnhancedSwitchMissingDefault:
+			case IProblem.IllegalTotalPatternWithDefault:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -829,6 +830,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
 			case IProblem.EnhancedSwitchMissingDefault:
 				LocalCorrectionsSubProcessor.addMissingDefaultCaseProposal(context, problem, proposals);
+				break;
+			case IProblem.IllegalTotalPatternWithDefault:
+				LocalCorrectionsSubProcessor.removeDefaultCaseProposal(context, problem, proposals);
 				break;
 			case IProblem.MissingEnumConstantCaseDespiteDefault:
 				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
