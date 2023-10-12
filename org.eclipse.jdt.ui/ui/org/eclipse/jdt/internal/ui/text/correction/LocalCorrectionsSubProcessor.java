@@ -2239,6 +2239,46 @@ public class LocalCorrectionsSubProcessor {
 		return newThrowStatement;
 	}
 
+	public static void removeDefaultCaseProposal(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+
+		if (selectedNode instanceof SwitchCase && ((SwitchCase) selectedNode).isDefault()) {
+			ASTNode parent= selectedNode.getParent();
+			List<Statement> statements;
+			if (parent instanceof SwitchStatement) {
+				statements= ((SwitchStatement) parent).statements();
+			} else if (parent instanceof SwitchExpression) {
+				statements= ((SwitchExpression) parent).statements();
+			} else {
+				return;
+			}
+
+			ASTRewrite astRewrite= ASTRewrite.create(parent.getAST());
+			ListRewrite listRewrite;
+			if (parent instanceof SwitchStatement) {
+				listRewrite= astRewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
+			} else {
+				listRewrite= astRewrite.getListRewrite(parent, SwitchExpression.STATEMENTS_PROPERTY);
+			}
+
+			int indexOfDefaultCase= statements.indexOf(selectedNode);
+			if (indexOfDefaultCase != -1) {
+				listRewrite.remove(statements.get(indexOfDefaultCase), null);
+				int indexOfDefaultStatement= indexOfDefaultCase + 1;
+				if (indexOfDefaultStatement < statements.size()) {
+					listRewrite.remove(statements.get(indexOfDefaultStatement), null);
+				}
+			} else {
+				return;
+			}
+
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_default_case_description;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_DEFAULT_CASE, image);
+			proposals.add(proposal);
+		}
+	}
+
 	public static void addMissingDefaultCaseProposal(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode instanceof Expression) {
