@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 
-/* package */ class SnippetFinder extends GenericVisitor {
+public class SnippetFinder extends GenericVisitor {
 
 	public static class Match {
 		private List<ASTNode> fNodes;

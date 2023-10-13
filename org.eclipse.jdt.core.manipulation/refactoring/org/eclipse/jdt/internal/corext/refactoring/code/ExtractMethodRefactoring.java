@@ -40,6 +40,9 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
@@ -51,6 +54,7 @@ import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -107,6 +111,8 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -134,10 +140,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRang
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
-import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
@@ -172,6 +175,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	// either of type TypeDeclaration or AnonymousClassDeclaration
 	private ASTNode[] fDestinations;
 	private LinkedProposalModelCore fLinkedProposalModel;
+	private Map<String,String> fFormatterOptions;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
 
@@ -252,12 +256,17 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @param selectionLength selection end
 	 */
 	public ExtractMethodRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
+		this(unit, selectionStart, selectionLength, null);
+	}
+
+	public ExtractMethodRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength, Map<String,String> formatterOptions) {
 		fCUnit= unit;
 		fRoot= null;
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fVisibility= -1;
+		fFormatterOptions = formatterOptions;
 	}
 
 	public ExtractMethodRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
@@ -266,6 +275,10 @@ public class ExtractMethodRefactoring extends Refactoring {
    		status.merge(initializeStatus);
 	}
 
+	public ExtractMethodRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength, Map<String,String> formatterOptions) {
+		this((ICompilationUnit) astRoot.getTypeRoot(), selectionStart, selectionLength, formatterOptions);
+		fRoot = astRoot;
+	}
 	/**
 	 * Creates a new extract method refactoring
 	 * @param astRoot the AST root of an AST created from a compilation unit
@@ -548,7 +561,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 					new TextEdit[] {edit}
 				));
 			}
-			root.addChild(fRewriter.rewriteAST());
+			try {
+				Map<String,String> formatter = this.fFormatterOptions == null ? fCUnit.getOptions(true) : this.fFormatterOptions;
+				IDocument document = new Document(fCUnit.getSource());
+				root.addChild(fRewriter.rewriteAST(document, formatter));
+			} catch (JavaModelException e) {
+				root.addChild(fRewriter.rewriteAST());
+			}
 			return result;
 		} finally {
 			pm.done();
@@ -779,7 +798,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	private void initializeDuplicates() {
 		ASTNode start= fAnalyzer.getEnclosingBodyDeclaration();
-		while (!(start instanceof AbstractTypeDeclaration)) {
+		while (!(start instanceof AbstractTypeDeclaration )) {
 			start= start.getParent();
 		}
 

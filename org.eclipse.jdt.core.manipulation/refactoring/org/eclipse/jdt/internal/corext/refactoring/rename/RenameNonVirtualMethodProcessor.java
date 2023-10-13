@@ -59,7 +59,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	 * @param manager the change manager
 	 * @param categorySet the group category set
 	 */
-	RenameNonVirtualMethodProcessor(IMethod method, TextChangeManager manager, GroupCategorySet categorySet) {
+	public RenameNonVirtualMethodProcessor(IMethod method, TextChangeManager manager, GroupCategorySet categorySet) {
 		super(method, manager, categorySet);
 	}
 

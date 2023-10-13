@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
@@ -104,8 +105,6 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegateUpdating {
 
@@ -168,7 +167,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	 * @param manager the change manager
 	 * @param categorySet the group category set
 	 */
-	RenameFieldProcessor(IField field, TextChangeManager manager, GroupCategorySet categorySet) {
+	public RenameFieldProcessor(IField field, TextChangeManager manager, GroupCategorySet categorySet) {
 		initialize(field);
 		fChangeManager= manager;
 		fCategorySet= categorySet;

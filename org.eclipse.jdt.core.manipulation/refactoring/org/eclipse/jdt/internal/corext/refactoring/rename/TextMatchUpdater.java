@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner.Tex
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
-class TextMatchUpdater {
+public class TextMatchUpdater {
 
 	private static final String TEXT_EDIT_LABEL= RefactoringCoreMessages.TextMatchUpdater_update;
 
@@ -84,11 +84,11 @@ class TextMatchUpdater {
 		fScanner= new RefactoringScanner(currentName, currentQualifier);
 	}
 
-	static void perform(IProgressMonitor pm, IJavaSearchScope scope, String currentName, String currentQualifier, String newName, TextChangeManager manager, SearchResultGroup[] references, boolean onlyQualified) throws JavaModelException{
+	public static void perform(IProgressMonitor pm, IJavaSearchScope scope, String currentName, String currentQualifier, String newName, TextChangeManager manager, SearchResultGroup[] references, boolean onlyQualified) throws JavaModelException{
 		new TextMatchUpdater(manager, scope, currentName, currentQualifier, newName, references, onlyQualified).updateTextMatches(pm);
 	}
 
-	static void perform(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdating processor, TextChangeManager manager, SearchResultGroup[] references) throws JavaModelException{
+	public static void perform(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdating processor, TextChangeManager manager, SearchResultGroup[] references) throws JavaModelException{
 		new TextMatchUpdater(manager, scope, processor.getCurrentElementName(), processor.getCurrentElementQualifier(), processor.getNewElementName(), references, false).updateTextMatches(pm);
 	}
 

@@ -27,7 +27,7 @@ import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
-abstract class AbstractDeleteChange extends ResourceChange {
+public abstract class AbstractDeleteChange extends ResourceChange {
 
 	protected abstract Change doDelete(IProgressMonitor pm) throws CoreException;
 

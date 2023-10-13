@@ -23,32 +23,32 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-class ArrayTypeConverter {
+public class ArrayTypeConverter {
 
 	private ArrayTypeConverter() {
 	}
 
-	static IFile[] toFileArray(Object[] objects){
+	public static IFile[] toFileArray(Object[] objects){
 		List<?> l= Arrays.asList(objects);
 		return l.toArray(new IFile[l.size()]);
 	}
 
-	static IFolder[] toFolderArray(Object[] objects){
+	public static IFolder[] toFolderArray(Object[] objects){
 		List<?> l= Arrays.asList(objects);
 		return l.toArray(new IFolder[l.size()]);
 	}
 
-	static ICompilationUnit[] toCuArray(Object[] objects){
+	public static ICompilationUnit[] toCuArray(Object[] objects){
 		List<?> l= Arrays.asList(objects);
 		return l.toArray(new ICompilationUnit[l.size()]);
 	}
 
-	static IPackageFragmentRoot[] toPackageFragmentRootArray(Object[] objects){
+	public static IPackageFragmentRoot[] toPackageFragmentRootArray(Object[] objects){
 		List<?> l= Arrays.asList(objects);
 		return l.toArray(new IPackageFragmentRoot[l.size()]);
 	}
 
-	static IPackageFragment[] toPackageArray(Object[] objects){
+	public static IPackageFragment[] toPackageArray(Object[] objects){
 		List<?> l= Arrays.asList(objects);
 		return l.toArray(new IPackageFragment[l.size()]);
 	}
