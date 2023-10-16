@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
  * Analyzer to find all references to the field and to determine how to convert
  * them into setter or getter calls.
  */
-class AccessAnalyzer extends ASTVisitor {
+public class AccessAnalyzer extends ASTVisitor {
 
 	private ICompilationUnit fCUnit;
 	private IVariableBinding fFieldBinding;

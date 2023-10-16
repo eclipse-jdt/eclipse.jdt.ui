@@ -83,7 +83,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	 * methods.
 	 *
 	 */
-	RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, ITypeHierarchy hierarchy, GroupCategorySet categorySet) {
+	public RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, ITypeHierarchy hierarchy, GroupCategorySet categorySet) {
 		super(topLevel, changeManager, categorySet);
 		fOriginalMethod= getMethod();
 		fActivationChecked= true; // is top level

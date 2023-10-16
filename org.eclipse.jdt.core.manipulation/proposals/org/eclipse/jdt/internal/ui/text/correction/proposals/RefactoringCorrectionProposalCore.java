@@ -39,6 +39,10 @@ public class RefactoringCorrectionProposalCore extends LinkedCorrectionProposalC
 		fRefactoring= refactoring;
 	}
 
+	public Refactoring getRefactoring() {
+		return fRefactoring;
+	}
+
 	/**
 	 * Can be overridden by clients to perform expensive initializations of the refactoring
 	 *

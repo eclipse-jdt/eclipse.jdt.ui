@@ -540,6 +540,8 @@ public class ExtractTempRefactoring extends Refactoring {
 	private String fEnclosingKey;
 	private HashSet<String> fEnclosingKeySet;
 
+	private Map<String,String> fFormatterOptions;
+
 	/**
 	 * Creates a new extract temp refactoring
 	 *
@@ -548,6 +550,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	 * @param selectionLength length of selection
 	 */
 	public ExtractTempRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
+		this(unit, selectionStart, selectionLength, null);
+	}
+
+	public ExtractTempRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength, Map<String,String> formatterOptions) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		fSelectionStart= selectionStart;
@@ -567,9 +573,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		fEndPoint= -1; // default
 		fEnclosingKey= null;
 		fEnclosingKeySet= new HashSet<>();
+		fFormatterOptions = formatterOptions;
 	}
 
 	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
+		this(astRoot, selectionStart, selectionLength, null);
+	}
+
+	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength, Map<String,String> formatterOptions) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(astRoot.getTypeRoot() instanceof ICompilationUnit);
@@ -592,6 +603,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		fEndPoint= -1; // default
 		fEnclosingKey= null;
 		fEnclosingKeySet= new HashSet<>();
+		fFormatterOptions = formatterOptions;
 	}
 
 	public ExtractTempRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
@@ -696,7 +708,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 4);
 
-			fCURewrite= new CompilationUnitRewrite(fCu, fCompilationUnitNode);
+			fCURewrite= new CompilationUnitRewrite(null, fCu, fCompilationUnitNode, fFormatterOptions);
 			fCURewrite.getASTRewrite().setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 
 			RefactoringStatus result= new RefactoringStatus();
