@@ -442,7 +442,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		return null;
 	}
 
-	private static SimpleType getRawReference(SimpleName name, CompilationUnit compilationUnit) {
+	public static SimpleType getRawReference(SimpleName name, CompilationUnit compilationUnit) {
 		for (SimpleName n : LinkedNodeFinder.findByNode(compilationUnit, name)) {
 			if (n.getParent() instanceof VariableDeclarationFragment) {
 				VariableDeclarationFragment fragment= (VariableDeclarationFragment) n.getParent();

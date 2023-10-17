@@ -124,4 +124,38 @@ public class LocalCorrectionsQuickFixTest10 extends QuickFixTest {
     		assertProposalExists(proposals, "Add @SuppressWarnings 'unchecked' to 'f()'");
     }
 
+	@Test
+    public void testTypeParametersToRawTypeReferenceIssue774() throws Exception {
+            Hashtable<String, String> options= JavaCore.getOptions();
+            options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+            options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
+            JavaCore.setOptions(options);
+
+            IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+            StringBuilder buf= new StringBuilder();
+            buf.append("package test1;\n");
+            buf.append("import java.util.List;\n");
+            buf.append("import java.util.ArrayList;\n");
+            buf.append("\n");
+            buf.append("class E1 {\n");
+            buf.append("    void f() {\n");
+            buf.append("        var list = new ArrayList(); // (1)\n");
+            buf.append("        doSomethingWith(list);      // (2)\n");
+            buf.append("    }\n");
+            buf.append("    void doSomethingWith(List<String> list) {}\n");
+            buf.append("}\n");
+
+            ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+            CompilationUnit astRoot= getASTRoot(cu);
+            ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+    		assertNumberOfProposals(proposals, 4);
+
+    		assertProposalDoesNotExist(proposals, "Add type arguments to 'var'");
+    		assertProposalDoesNotExist(proposals, "Infer Generic Type Arguments...");
+    		assertProposalExists(proposals, "Configure problem severity");
+    		assertProposalExists(proposals, "Add @SuppressWarnings 'rawtypes' to 'f()'");
+    }
+
 }

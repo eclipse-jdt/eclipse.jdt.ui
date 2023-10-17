@@ -97,7 +97,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -1810,13 +1809,28 @@ public class LocalCorrectionsSubProcessor {
 		if (node instanceof ClassInstanceCreation) {
 			Type rawReference= (Type)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
 			return rawReference.isVar();
-		} else if (node instanceof SimpleName) {
-			ASTNode rawReference= node.getParent();
-			if (Java50FixCore.isRawTypeReference(rawReference)) {
-				ASTNode parent= rawReference.getParent();
-				if (!(parent instanceof ArrayType)
-						&& !(parent instanceof ParameterizedType)) {
-					return ((SimpleType)rawReference).isVar();
+		} else if (node instanceof SimpleName simpleName) {
+			SimpleType rawReference= Java50FixCore.getRawReference(simpleName, compilationUnit);
+			if (rawReference != null) {
+				return rawReference.isVar();
+			}
+			ASTNode ancestor= ASTNodes.getFirstAncestorOrNull(node, VariableDeclarationStatement.class, FieldDeclaration.class, SingleVariableDeclaration.class, MethodDeclaration.class);
+			if (ancestor != null) {
+				if (ancestor instanceof VariableDeclarationStatement varStmt) {
+					ASTNode result= (ASTNode)varStmt.getStructuralProperty(VariableDeclarationStatement.TYPE_PROPERTY);
+					if (Java50FixCore.isRawTypeReference(result)) {
+						return ((SimpleType) result).isVar();
+					}
+				} else if (ancestor instanceof FieldDeclaration fieldDecl) {
+					ASTNode result= (ASTNode)fieldDecl.getStructuralProperty(FieldDeclaration.TYPE_PROPERTY);
+					if (Java50FixCore.isRawTypeReference(result)) {
+						return ((SimpleType) result).isVar();
+					}
+				} else if (ancestor instanceof SingleVariableDeclaration singleVarDecl) {
+					ASTNode result= (ASTNode)singleVarDecl.getStructuralProperty(SingleVariableDeclaration.TYPE_PROPERTY);
+					if (Java50FixCore.isRawTypeReference(result)) {
+						return ((SimpleType) result).isVar();
+					}
 				}
 			}
 		} else if (node instanceof MethodInvocation) {

@@ -361,6 +361,10 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		if (node instanceof Name && node.getParent() instanceof Type) {
 			Type originalType= (Type) node.getParent();
 
+			if (originalType.isVar()) {
+				return null;
+			}
+
 			if (types != null && !has(types, originalType))
 				return null;
 
