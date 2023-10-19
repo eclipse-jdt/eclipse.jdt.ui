@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2022 IBM Corporation and others.
+ * Copyright (c) 2015, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.core.source;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -112,6 +113,41 @@ public class AddUnimplementedMethodsTest1d8 {
 		IMethod[] methods= testClass.getMethods();
 		checkMethods(new String[] { "foo", "hashCode", "equals", "clone", "toString", "finalize" }, methods);
 		assertTrue("Optional.empty method not found", cu2.getSource().contains("return Optional.empty();"));
+	}
+
+	@Test
+	public void testIssue863() throws Exception {
+		StringBuilder buf= new StringBuilder();
+		buf.append("abstract class C1<T> {\n");
+		buf.append("    public void a(T x) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		fPackage.createCompilationUnit("C1.java", buf.toString(), true, null);
+
+		StringBuilder buf2= new StringBuilder();
+		buf2.append("interface I1 {\n");
+		buf2.append("    void a(String x);\n");
+		buf2.append("}\n");
+		fPackage.createCompilationUnit("I1.java", buf2.toString(), true, null);
+
+		StringBuilder buf3= new StringBuilder();
+		buf3.append("abstract class C2 extends C1<String> implements I1 {\n");
+		buf3.append("    abstract void b();\n");
+		buf3.append("}\n");
+		fPackage.createCompilationUnit("C2.java", buf3.toString(), true, null);
+
+		StringBuilder buf4= new StringBuilder();
+		buf4.append("class C3 extends C2 {\n");
+		buf4.append("}\n");
+		ICompilationUnit cu2= fPackage.createCompilationUnit("C3.java", buf4.toString(), true, null);
+		IType testClass= cu2.createType(buf4.toString(), null, true, null);
+
+		testHelper(testClass, -1, true);
+
+		IMethod[] methods= testClass.getMethods();
+		checkMethods(new String[] { "b", "a", "hashCode", "equals", "clone", "toString", "finalize" }, methods);
+		assertTrue("method b not added to C3", cu2.getSource().contains("void b() {"));
+		assertFalse("method a should not be added to C3", cu2.getSource().contains("void a()"));
 	}
 
 	private void testHelper(IType testClass, int insertionPos, boolean implementAllOverridable) throws JavaModelException, CoreException {

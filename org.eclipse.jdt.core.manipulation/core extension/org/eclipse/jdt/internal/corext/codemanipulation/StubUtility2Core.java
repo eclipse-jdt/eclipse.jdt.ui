@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 IBM Corporation and others.
+ * Copyright (c) 2018, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -941,7 +941,8 @@ public final class StubUtility2Core {
 			for (IMethodBinding method : interfaceMethods[i]) {
 				if (isDefault(method) || isAbstract(method)) {
 					IMethodBinding previouslyFound= findSubSignatureMethod(method, allMethods);
-					if (previouslyFound == null) {
+					IMethodBinding overridingFound= findOverridingMethod(method, allMethods);
+					if (previouslyFound == null && (overridingFound == null || !isConcrete(overridingFound))) {
 						IMethodBinding subSigMethod= findSubSignatureMethod(method, allInterfaceMethods);
 						IMethodBinding superSigMethod= findSuperSignatureMethod(method, allInterfaceMethods);
 
