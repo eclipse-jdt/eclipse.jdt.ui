@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3032,6 +3032,62 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");
 		buf.append("class Bar {\n");
 		buf.append("    public void testMethod(int something) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	@Test
+	public void testIssue853() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import static test.StaticImportBug.Test.*;\n");
+		buf.append("\n");
+		buf.append("public class StaticImportBug {\n");
+		buf.append("    static public void methodWithBreakOuter () {\n");
+		buf.append("        outer:\n");
+		buf.append("        while (true)\n");
+		buf.append("            break outer;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    static public void main (String[] args) throws Throwable {\n");
+		buf.append("        System.out.println(field);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    static public class Test {\n");
+		buf.append("        static public boolean field;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("StaticImportBug.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "", "#"};
+		IChooseImportQuery query= createQuery("StaticImportBug", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 1, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import static test.StaticImportBug.Test.*;\n");
+		buf.append("\n");
+		buf.append("public class StaticImportBug {\n");
+		buf.append("    static public void methodWithBreakOuter () {\n");
+		buf.append("        outer:\n");
+		buf.append("        while (true)\n");
+		buf.append("            break outer;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    static public void main (String[] args) throws Throwable {\n");
+		buf.append("        System.out.println(field);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    static public class Test {\n");
+		buf.append("        static public boolean field;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
