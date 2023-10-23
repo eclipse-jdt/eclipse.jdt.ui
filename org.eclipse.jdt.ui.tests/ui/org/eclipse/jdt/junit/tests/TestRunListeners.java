@@ -29,7 +29,7 @@ import org.eclipse.jdt.junit.tests.AbstractTestRunListenerTest.TestRunLog;
 public class TestRunListeners {
 
 	public static class SequenceTest extends TestRunListener {
-		private TestRunLog fLog;
+		private final TestRunLog fLog;
 		public SequenceTest(TestRunLog log) {
 			fLog= log;
 		}
@@ -53,7 +53,7 @@ public class TestRunListeners {
 	}
 
 	public static class TreeTest extends TestRunListener {
-		private TestRunLog fLog;
+		private final TestRunLog fLog;
 		private int fStep;
 		public TreeTest(TestRunLog log, int step) {
 			fLog= log;

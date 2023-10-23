@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.core.BufferManager;
  */
 public class JavaReconcileStep extends AbstractReconcileStep {
 
-	private AnnotationTypeLookup fAnnotationTypeLookup= EditorsUI.getAnnotationTypeLookup();
+	private final AnnotationTypeLookup fAnnotationTypeLookup= EditorsUI.getAnnotationTypeLookup();
 
 	private static class TemporaryWorkingCopyOwner extends WorkingCopyOwner  {
 
@@ -81,7 +81,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 
 	private class ProblemAdapter extends AnnotationAdapter  {
 
-		private IProblem fProblem;
+		private final IProblem fProblem;
 		private Position fPosition;
 
 		ProblemAdapter(IProblem problem)  {
@@ -221,7 +221,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 	 */
 	static class CompilationUnitAdapter implements IReconcilableModel {
 
-		private ICompilationUnit fCompilationUnit;
+		private final ICompilationUnit fCompilationUnit;
 
 		CompilationUnitAdapter(ICompilationUnit cu) {
 			fCompilationUnit= cu;
@@ -234,7 +234,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 
 	private CompilationUnitAdapter fWorkingCopy;
 	private ProblemRequestor fProblemRequestor;
-	private WorkingCopyOwner fTemporaryWorkingCopyOwner;
+	private final WorkingCopyOwner fTemporaryWorkingCopyOwner;
 
 	/**
 	 * Creates the last reconcile step of the pipe.

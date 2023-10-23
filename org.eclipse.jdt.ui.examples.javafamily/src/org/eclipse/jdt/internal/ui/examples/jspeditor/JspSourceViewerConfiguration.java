@@ -34,7 +34,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public class JspSourceViewerConfiguration extends SourceViewerConfiguration {
 
-	private ITextEditor fTextEditor;
+	private final ITextEditor fTextEditor;
 
 	/**
 	 * Creates a new JSP source viewer configuration that behaves according to

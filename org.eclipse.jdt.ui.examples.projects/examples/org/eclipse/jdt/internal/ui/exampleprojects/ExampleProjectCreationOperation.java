@@ -48,8 +48,8 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 
 	private IResource fElementToOpen;
 
-	private ExampleProjectCreationWizardPage fPage;
-	private IOverwriteQuery fOverwriteQuery;
+	private final ExampleProjectCreationWizardPage fPage;
+	private final IOverwriteQuery fOverwriteQuery;
 
 	/*
 	 * Constructor for ExampleProjectCreationOperation

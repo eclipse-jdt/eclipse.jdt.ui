@@ -64,8 +64,8 @@ public class MarkerResolutionTest extends QuickFixTest {
 
 	private static final class TextViewerContext implements IQuickAssistInvocationContext {
 
-		private ISourceViewer fSourceViewer;
-		private int fOffset;
+		private final ISourceViewer fSourceViewer;
+		private final int fOffset;
 
 		TextViewerContext(ISourceViewer sourceViewer, int offset) {
 			fSourceViewer= sourceViewer;
@@ -101,7 +101,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	private boolean BUG_46227= true;
+	private final boolean BUG_46227= true;
 
 	@Before
 	public void setUp() throws Exception {

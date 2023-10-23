@@ -25,7 +25,7 @@ import org.eclipse.jface.text.source.translation.ITagHandlerFactory;
  */
 public class Jsp2JavaTagHandlerFactory implements ITagHandlerFactory {
 
-	private ITagHandler fTagHandler= new Jsp2JavaTagHandler();
+	private final ITagHandler fTagHandler= new Jsp2JavaTagHandler();
 
 	/*
 	 * @see org.eclipse.jface.text.source.IHandlerFactory#getHandler(java.lang.String)

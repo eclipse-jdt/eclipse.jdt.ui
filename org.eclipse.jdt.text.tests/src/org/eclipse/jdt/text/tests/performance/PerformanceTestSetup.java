@@ -40,7 +40,7 @@ public class PerformanceTestSetup extends TestSetup {
 
 	private static final String PROJECT_ZIP= "/testResources/org.eclipse.swt-R3_0.zip";
 
-	private boolean fSetPerspective;
+	private final boolean fSetPerspective;
 
 	public PerformanceTestSetup(Test test) {
 		this(test, true);

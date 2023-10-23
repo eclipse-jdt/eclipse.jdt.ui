@@ -73,7 +73,7 @@ public class TypeEnvironmentTests extends AbstractJunit4CUTestCase {
 	}
 
 	private static class CreationChecker extends HierarchicalASTVisitor {
-		private TypeEnvironment fTypeEnvironment;
+		private final TypeEnvironment fTypeEnvironment;
 		public CreationChecker() {
 			fTypeEnvironment= new TypeEnvironment();
 		}
@@ -103,8 +103,8 @@ public class TypeEnvironmentTests extends AbstractJunit4CUTestCase {
 	}
 
 	private static class TypeBindingCollector extends ASTVisitor {
-		private List<ITypeBinding> fResult= new ArrayList<>();
-		private List<ITypeBinding> fWildcards= new ArrayList<>();
+		private final List<ITypeBinding> fResult= new ArrayList<>();
+		private final List<ITypeBinding> fWildcards= new ArrayList<>();
 		@Override
 		public boolean visit(FieldDeclaration node) {
 			List<VariableDeclarationFragment> fragments= node.fragments();
@@ -137,7 +137,7 @@ public class TypeEnvironmentTests extends AbstractJunit4CUTestCase {
 	}
 
 	private static class CaptureTypeBindingCollector extends ASTVisitor {
-		private List<ITypeBinding> fResult= new ArrayList<>();
+		private final List<ITypeBinding> fResult= new ArrayList<>();
 		@Override
 		public boolean visit(Assignment node) {
 			Expression expression= node.getRightHandSide();

@@ -45,7 +45,7 @@ import java.lang.reflect.*;
  */
 public class TestSuite implements Test {
 
-	private Vector<Test> fTests = new Vector<Test>(10);
+	private final Vector<Test> fTests = new Vector<Test>(10);
 	private String fName;
 
 	/**

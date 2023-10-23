@@ -38,7 +38,7 @@ public class SearchEngine {
 
 	static class MyIndex implements IIndex {
 
-		private HashMap fMap= new HashMap();
+		private final HashMap fMap= new HashMap();
 
 		@Override
 		public void addRef(String word, String path) {
@@ -84,7 +84,7 @@ public class SearchEngine {
 
 	private static SearchEngine fgSearchEngine;
 
-	private HashMap fIndexes= new HashMap();
+	private final HashMap fIndexes= new HashMap();
 
 	private SearchEngine() {
 	}

@@ -30,9 +30,9 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 
 	public static class Setup extends TestSetup {
 
-		private boolean fTearDown;
+		private final boolean fTearDown;
 
-		private boolean fSetUp;
+		private final boolean fSetUp;
 
 		public Setup(Test test) {
 			this(test, true, true);

@@ -23,8 +23,8 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.BuildpathMod
  */
 public class PackageExplorerActionEvent {
 
-    private String[] fEnabledActionsDescriptions;
-    private BuildpathModifierAction[] fEnabledActions;
+    private final String[] fEnabledActionsDescriptions;
+    private final BuildpathModifierAction[] fEnabledActions;
 
     /**
      * Create a package explorer action event containing actions

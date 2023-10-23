@@ -31,7 +31,7 @@ public class LeakTestExample extends LeakTestCase {
 
 	private Object fGlobalReference;
 
-	private ArrayList<Object> fGlobalList= new ArrayList<>();
+	private final ArrayList<Object> fGlobalList= new ArrayList<>();
 
 	@Test
 	public void testLeakGlobalReference() throws Exception {

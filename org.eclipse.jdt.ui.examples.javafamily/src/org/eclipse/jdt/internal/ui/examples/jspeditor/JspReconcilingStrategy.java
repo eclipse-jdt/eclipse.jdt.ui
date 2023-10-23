@@ -47,8 +47,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
-	private IReconcileStep fFirstStep;
-	private ITextEditor fTextEditor;
+	private final IReconcileStep fFirstStep;
+	private final ITextEditor fTextEditor;
 	private IProgressMonitor fProgressMonitor;
 
 	public JspReconcilingStrategy(ISourceViewer sourceViewer, ITextEditor textEditor) {

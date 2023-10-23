@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Display;
 //have to create this class because of bug 40095
 public class MockClipboard extends Clipboard{
 
-	private Map<Transfer, Object> fContents; //Transfer -> Object
+	private final Map<Transfer, Object> fContents; //Transfer -> Object
 
 	public MockClipboard(Display display) {
 		super(display);

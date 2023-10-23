@@ -25,8 +25,8 @@ import junit.framework.*;
  * A tree model for a Test.
  */
 class TestTreeModel implements TreeModel {
-	private Test fRoot;
-	private Vector fModelListeners = new Vector();
+	private final Test fRoot;
+	private final Vector fModelListeners = new Vector();
 	private Hashtable fFailures = new Hashtable();
 	private Hashtable fErrors = new Hashtable();
 	private Hashtable fRunTests = new Hashtable();

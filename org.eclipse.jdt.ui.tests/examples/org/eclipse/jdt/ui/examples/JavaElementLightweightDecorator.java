@@ -97,11 +97,11 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 	}
 
 	private Font fBold;
-	private FileBufferListener fListener;
+	private final FileBufferListener fListener;
 
 	private UIJob fNotifierJob;
 
-	private Set<IFile> fChangedResources;
+	private final Set<IFile> fChangedResources;
 
 	public JavaElementLightweightDecorator() {
 		final FontRegistry fontRegistry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry();

@@ -36,9 +36,9 @@ public class Java17ProjectTestSetup extends ProjectTestSetup {
 
 	public static final String PROJECT_NAME17= "TestSetupProject17";
 
-	private String projectName;
+	private final String projectName;
 
-	private boolean enable_preview_feature;
+	private final boolean enable_preview_feature;
 
 	@Override
 	public IJavaProject getProject() {

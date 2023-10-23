@@ -56,7 +56,7 @@ public class TestRunner extends BaseTestRunner implements TestRunContext {
 	private FailureDetailView fFailureView;
 	private JTabbedPane fTestViewTab;
 	private JCheckBox fUseLoadingRunner;
-	private Vector fTestRunViews = new Vector(); // view associated with tab in tabbed pane
+	private final Vector fTestRunViews = new Vector(); // view associated with tab in tabbed pane
 
 	private static final String TESTCOLLECTOR_KEY = "TestCollectorClass";
 	private static final String FAILUREDETAILVIEW_KEY = "FailureViewClass";

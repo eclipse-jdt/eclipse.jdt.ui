@@ -60,7 +60,7 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 
 	enum TestMode { VALID_SELECTION, INVALID_SELECTION, COMPARE_WITH_OUTPUT }
 
-	private boolean fIgnoreSelectionMarker;
+	private final boolean fIgnoreSelectionMarker;
 	private int[] fSelection;
 	protected boolean fIsPreDeltaTest;
 

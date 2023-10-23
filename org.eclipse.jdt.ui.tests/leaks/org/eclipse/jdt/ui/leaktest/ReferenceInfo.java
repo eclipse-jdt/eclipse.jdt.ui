@@ -27,8 +27,8 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
 
 public class ReferenceInfo {
 
-	private Object fReference;
-	private BacklinkNode[] fBacklinkNodes;
+	private final Object fReference;
+	private final BacklinkNode[] fBacklinkNodes;
 	private boolean fIsPosibleLeak;
 
 	public ReferenceInfo(ReferencedObject ref) {
@@ -90,7 +90,7 @@ public class ReferenceInfo {
 
 	private static class BacklinkNode {
 
-		private Object fValue;
+		private final Object fValue;
 		private final String fBackStrings;
 
 		public BacklinkNode(String str, Object value) {

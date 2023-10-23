@@ -40,10 +40,10 @@ public class MockPluginView extends PackagesView {
 	private boolean fRemoveHappened;
 	private boolean fAddHappened;
 
-	private List<Object> fRemovedObject;
-	private List<Object> fAddedObject;
-	private List<Object> fAddedParentObject;
-	private List<Object> fRefreshedObject;
+	private final List<Object> fRemovedObject;
+	private final List<Object> fAddedObject;
+	private final List<Object> fAddedParentObject;
+	private final List<Object> fRefreshedObject;
 
 	private boolean fRefreshLogging;
 

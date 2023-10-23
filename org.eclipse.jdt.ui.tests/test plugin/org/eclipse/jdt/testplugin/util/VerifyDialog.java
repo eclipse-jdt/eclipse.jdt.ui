@@ -42,13 +42,13 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
  * or accessibility.
  */
 public class VerifyDialog extends TitleAreaDialog {
-	private int SIZING_WIDTH = 400;
+	private final int SIZING_WIDTH = 400;
 
 	private static int      TEST_TYPE;
 	public static final int TEST_SIZING = 0;
 	public static final int TEST_FOCUS  = 1;
 	public static final int TEST_ACCESS = 2;
-	private IDialogTestPass _dialogTests[] = new IDialogTestPass[3];
+	private final IDialogTestPass _dialogTests[] = new IDialogTestPass[3];
 
 
 	private Dialog _testDialog; //the dialog to test

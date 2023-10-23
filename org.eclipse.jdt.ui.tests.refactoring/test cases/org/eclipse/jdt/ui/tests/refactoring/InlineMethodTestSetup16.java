@@ -24,9 +24,9 @@ public class InlineMethodTestSetup16 extends Java16Setup {
 
 	private IPackageFragment fDefault;
 
-	private String simplePkgInName= "simple14_in";
+	private final String simplePkgInName= "simple14_in";
 
-	private String simplePkgOutName= "simple14_out";
+	private final String simplePkgOutName= "simple14_out";
 
 	@Override
 	public void before() throws Exception {

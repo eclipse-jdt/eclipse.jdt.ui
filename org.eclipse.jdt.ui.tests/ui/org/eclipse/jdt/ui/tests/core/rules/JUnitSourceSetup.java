@@ -39,7 +39,7 @@ public class JUnitSourceSetup extends ExternalResource {
 	public static final String SRC_CONTAINER= "src";
 
 	private IJavaProject fProject;
-	private SearchParticipantsExtensionPoint fExtensionPoint;
+	private final SearchParticipantsExtensionPoint fExtensionPoint;
 
 	static class NullExtensionPoint extends SearchParticipantsExtensionPoint {
 		@Override

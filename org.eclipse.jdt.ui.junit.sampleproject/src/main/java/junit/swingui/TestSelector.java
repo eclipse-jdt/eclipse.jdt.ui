@@ -26,11 +26,11 @@ import junit.runner.*;
  * A test class selector. A simple dialog to pick the name of a test suite.
  */
 class TestSelector extends JDialog {
-	private JButton fCancel;
-	private JButton fOk;
-	private JList fList;
-	private JScrollPane fScrolledList;
-	private JLabel fDescription;
+	private final JButton fCancel;
+	private final JButton fOk;
+	private final JList fList;
+	private final JScrollPane fScrolledList;
+	private final JLabel fDescription;
 	private String fSelectedItem;
 
 	/**

@@ -70,7 +70,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	public class EventReader implements Runnable {
 
 		/** Event queue */
-		private EventQueue fEventQueue;
+		private final EventQueue fEventQueue;
 
 		/** Background thread */
 		private Thread fThread;
@@ -219,7 +219,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	public static class Results {
 
 		/** The result map */
-		private Map<Object, Map<Object, Integer>> fResultsMap= new HashMap<>();
+		private final Map<Object, Map<Object, Integer>> fResultsMap= new HashMap<>();
 
 		/**
 		 * Updates the results for the given pair of keys.
@@ -314,7 +314,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	private Constructor<?>[] fConstructors;
 
 	/** Timestamp */
-	private long fStartTime;
+	private final long fStartTime;
 
 	/** Total number of invocations */
 	private long fInvocationCount;
@@ -323,7 +323,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	private BreakpointRequest[] fBreakpointRequests;
 
 	/** <code>true</code> iff additional information should be collected and printed */
-	private boolean fVerbose;
+	private final boolean fVerbose;
 
 	/** <code>true</code> iff additional information should be collected per instance */
 	private boolean fCollectInstanceResults= true;

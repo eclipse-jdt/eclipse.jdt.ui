@@ -58,7 +58,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	private static JspUIPlugin fgDefault;
 	private static boolean fgJSPIndexingIsEnabled= false;
 
-	private SearchEngine fSearchEngine;
+	private final SearchEngine fSearchEngine;
 
 	public JspUIPlugin() {
 		super();

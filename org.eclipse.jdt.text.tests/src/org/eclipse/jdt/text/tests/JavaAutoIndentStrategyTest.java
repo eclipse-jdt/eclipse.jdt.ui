@@ -42,17 +42,17 @@ import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
  * @since 3.6
  */
 public class JavaAutoIndentStrategyTest implements ILogListener {
-	private FastPartitioner fPartitioner;
+	private final FastPartitioner fPartitioner;
 
-	private Document fDocument;
+	private final Document fDocument;
 
-	private DocumentCommand fDocumentCommand;
+	private final DocumentCommand fDocumentCommand;
 
-	private Accessor fAccessor;
+	private final Accessor fAccessor;
 
-	private Accessor fCommandAccessor;
+	private final Accessor fCommandAccessor;
 
-	private JavaAutoIndentStrategy fJavaAutoIndentStrategy;
+	private final JavaAutoIndentStrategy fJavaAutoIndentStrategy;
 
 	public JavaAutoIndentStrategyTest() {
 		fDocument= new Document();
