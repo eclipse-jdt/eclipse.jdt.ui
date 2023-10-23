@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2023 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -73,8 +73,12 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOperationsFixCore {
 
-	private static final String STRINGBUFFER_NAME= StringBuffer.class.getCanonicalName();
-	private static final String OBJECT_NAME= Object.class.getCanonicalName();
+	private static final String STRINGBUFFER_CLASS_NAME= StringBuffer.class.getCanonicalName();
+	private static final String STRINGWRITER_CLASS_NAME= "java.io.StringWriter"; //$NON-NLS-1$
+	private static final String OBJECT_CLASS_NAME= Object.class.getCanonicalName();
+	private static final String GETBUFFER_NAME= "getBuffer"; //$NON-NLS-1$
+	private static final String TOSTRING_NAME= "toString"; //$NON-NLS-1$
+	private static final String STRINGBUIDER_NAME= "StringBuilder"; //$NON-NLS-1$
 
 	private static boolean isStringBufferType(ITypeBinding typeBinding) {
 		if (typeBinding == null) {
@@ -83,7 +87,17 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 		if (typeBinding.isArray()) {
 			typeBinding= typeBinding.getElementType();
 		}
-		return typeBinding.getQualifiedName().equals(STRINGBUFFER_NAME);
+		return typeBinding.getQualifiedName().equals(STRINGBUFFER_CLASS_NAME);
+	}
+
+	private static boolean isStringWriterType(ITypeBinding typeBinding) {
+		if (typeBinding == null) {
+			throw new AbortSearchException();
+		}
+		if (typeBinding.isArray()) {
+			typeBinding= typeBinding.getElementType();
+		}
+		return typeBinding.getQualifiedName().equals(STRINGWRITER_CLASS_NAME);
 	}
 
 	private static boolean isObjectType(ITypeBinding typeBinding) {
@@ -93,7 +107,7 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 		if (typeBinding.isArray()) {
 			typeBinding= typeBinding.getElementType();
 		}
-		return typeBinding.getQualifiedName().equals(OBJECT_NAME);
+		return typeBinding.getQualifiedName().equals(OBJECT_CLASS_NAME);
 	}
 
 	public static final class StringBufferFinder extends ASTVisitor {
@@ -110,7 +124,7 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 				type= ((ArrayType)type).getElementType();
 			}
 			ITypeBinding typeBinding= type.resolveBinding();
-			if (typeBinding != null && typeBinding.getQualifiedName().equals(STRINGBUFFER_NAME)) {
+			if (typeBinding != null && typeBinding.getQualifiedName().equals(STRINGBUFFER_CLASS_NAME)) {
 				fOperations.add(new ChangeStringBufferToStringBuilder(type));
 			}
 		}
@@ -119,6 +133,18 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 		public boolean visit(final VariableDeclarationStatement visited) {
 			Type type= visited.getType();
 			checkType(type);
+			return true;
+		}
+
+		@Override
+		public boolean visit(final MethodInvocation node) {
+			String name= node.getName().getFullyQualifiedName();
+			if (name.equals(GETBUFFER_NAME)) {
+				IMethodBinding methodBinding= node.resolveMethodBinding();
+				if (isStringWriterType(methodBinding.getDeclaringClass())) {
+					fOperations.add(new ChangeStringBufferToStringBuilder(node));
+				}
+			}
 			return true;
 		}
 
@@ -347,6 +373,8 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 														return true;
 													}
 												}
+											} else if (isStringBufferType(methodInvocationBinding.getDeclaringClass())) {
+													return true;
 											}
 											throw new AbortSearchException();
 										}
@@ -790,15 +818,24 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 
 		private final Type fType;
 		private final SimpleName fName;
+		private final MethodInvocation fInvocation;
 
 		public ChangeStringBufferToStringBuilder(final Type type) {
 			this.fType= type;
 			this.fName= null;
+			this.fInvocation= null;
 		}
 
 		public ChangeStringBufferToStringBuilder(final SimpleName name) {
 			this.fType= null;
 			this.fName= name;
+			this.fInvocation= null;
+		}
+
+		public ChangeStringBufferToStringBuilder(final MethodInvocation node) {
+			this.fType= null;
+			this.fName= null;
+			this.fInvocation= node;
 		}
 
 		@Override
@@ -820,9 +857,18 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 
 			importRewrite.addImport(StringBuilder.class.getCanonicalName());
 			if (fType != null) {
-				rewrite.replace(fType, ast.newSimpleType(ast.newName("StringBuilder")), group); //$NON-NLS-1$
+				rewrite.replace(fType, ast.newSimpleType(ast.newName(STRINGBUIDER_NAME)), group);
+			} else if (fName != null) {
+				rewrite.replace(fName, ast.newSimpleName(STRINGBUIDER_NAME), group);
 			} else {
-				rewrite.replace(fName, ast.newSimpleName("StringBuilder"), group); //$NON-NLS-1$
+				ClassInstanceCreation cic= ast.newClassInstanceCreation();
+				cic.setType(ast.newSimpleType(ast.newSimpleName(STRINGBUIDER_NAME)));
+				MethodInvocation copy= (MethodInvocation)rewrite.createCopyTarget(fInvocation);
+				MethodInvocation newMethodInvocation= ast.newMethodInvocation();
+				newMethodInvocation.setExpression(copy);
+				newMethodInvocation.setName(ast.newSimpleName(TOSTRING_NAME));
+				cic.arguments().add(newMethodInvocation);
+				rewrite.replace(fInvocation, cic, group);
 			}
 		}
 	}
