@@ -23,7 +23,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 public class SimpleSelectionProvider implements ISelectionProvider {
-	private ISelection fSelection;
+	private final ISelection fSelection;
 
 	public SimpleSelectionProvider(Collection<?> collection) {
 		this(collection.toArray());

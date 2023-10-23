@@ -27,7 +27,7 @@ import java.util.*;
  * constructors to create a MoneyBag.
  */
 class MoneyBag implements IMoney {
-	private Vector fMonies = new Vector(5);
+	private final Vector fMonies = new Vector(5);
 
 	static IMoney create(IMoney m1, IMoney m2) {
 		MoneyBag result = new MoneyBag();

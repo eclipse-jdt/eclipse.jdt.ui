@@ -51,12 +51,12 @@ public class SmartSemicolonAutoEditStrategyTest {
 		}
 	}
 
-	private FastPartitioner fPartitioner;
+	private final FastPartitioner fPartitioner;
 
 	private static final char SEMI= ';';
 	private static final char BRACE= '{';
 
-	private Document fDocument;
+	private final Document fDocument;
 
 	public SmartSemicolonAutoEditStrategyTest() {
 		fDocument= new Document();

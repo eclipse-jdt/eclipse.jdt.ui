@@ -25,8 +25,8 @@ import junit.framework.*;
  * A Panel showing a test suite as a tree.
  */
 class TestSuitePanel extends JPanel implements TestListener {
-	private JTree fTree;
-	private JScrollPane fScrollTree;
+	private final JTree fTree;
+	private final JScrollPane fScrollTree;
 	private TestTreeModel fModel;
 
 	static class TestTreeCellRenderer extends DefaultTreeCellRenderer {

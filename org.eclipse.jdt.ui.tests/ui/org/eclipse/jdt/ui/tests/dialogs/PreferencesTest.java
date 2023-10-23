@@ -62,7 +62,7 @@ public class PreferencesTest extends TestCase {
 		return suite;
 	}
 
-	private boolean fIsInteractive= true;
+	private final boolean fIsInteractive= true;
 
 	private static final String PROJECT_NAME = "DummyProject";
 

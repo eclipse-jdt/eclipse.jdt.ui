@@ -20,8 +20,8 @@ package junit.samples.money;
  */
 public class Money implements IMoney {
 
-	private int fAmount;
-	private String fCurrency;
+	private final int fAmount;
+	private final String fCurrency;
 
 	/**
 	 * Constructs a money from the given amount and currency.

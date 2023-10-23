@@ -20,8 +20,8 @@ package junit.framework;
  * Inspired by a patch from Alex Chaffee mailto:alex@purpletech.com
  */
 public class ComparisonFailure extends AssertionFailedError {
-	private String fExpected;
-	private String fActual;
+	private final String fExpected;
+	private final String fActual;
 
 	/**
 	 * Constructs a comparison failure.

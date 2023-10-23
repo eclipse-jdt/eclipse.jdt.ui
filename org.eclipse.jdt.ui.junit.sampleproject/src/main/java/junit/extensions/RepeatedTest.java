@@ -21,7 +21,7 @@ import junit.framework.*;
  *
  */
 public class RepeatedTest extends TestDecorator {
-	private int fTimesRepeat;
+	private final int fTimesRepeat;
 
 	public RepeatedTest(Test test, int repeat) {
 		super(test);

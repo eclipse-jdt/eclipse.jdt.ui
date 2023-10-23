@@ -122,7 +122,7 @@ public class SpellCheckingTest extends TextPerformanceTestCase {
 	private static class SpellingProblemCollector implements ISpellingProblemCollector {
 
 		private int fProblemCount;
-		private boolean fPrintCount;
+		private final boolean fPrintCount;
 
 
 		public SpellingProblemCollector(boolean printCount) {

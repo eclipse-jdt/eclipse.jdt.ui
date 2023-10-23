@@ -75,8 +75,8 @@ public class PropertiesFileQuickAssistTest {
 	private IJavaProject fJProject;
 	private IPackageFragmentRoot fSourceFolder;
 
-	private String REMOVE_KEY= PropertiesFileEditorMessages.PropertiesCorrectionProcessor_remove_property_label;
-	private String REMOVE_KEYS= PropertiesFileEditorMessages.PropertiesCorrectionProcessor_remove_properties_label;
+	private final String REMOVE_KEY= PropertiesFileEditorMessages.PropertiesCorrectionProcessor_remove_property_label;
+	private final String REMOVE_KEYS= PropertiesFileEditorMessages.PropertiesCorrectionProcessor_remove_properties_label;
 
 	@Before
 	public void setUp() throws Exception {

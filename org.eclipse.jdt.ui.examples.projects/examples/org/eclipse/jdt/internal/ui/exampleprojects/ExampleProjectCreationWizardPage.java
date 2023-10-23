@@ -38,9 +38,9 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 
 	private boolean fPageVisible;
 
-	private IConfigurationElement fConfigurationElement;
+	private final IConfigurationElement fConfigurationElement;
 
-	private String fNameLabel;
+	private final String fNameLabel;
 	private String fProjectName;
 
 	private Text fTextControl;

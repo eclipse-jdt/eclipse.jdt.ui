@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants
 public class AbstractTestRunListenerTest {
 
 	public static class TestRunLog {
-		private ArrayList<String> fLog;
+		private final ArrayList<String> fLog;
 		private boolean fIsDone;
 
 		public TestRunLog() {

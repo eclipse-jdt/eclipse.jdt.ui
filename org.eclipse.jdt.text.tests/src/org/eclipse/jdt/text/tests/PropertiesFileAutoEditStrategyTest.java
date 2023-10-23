@@ -54,7 +54,7 @@ public class PropertiesFileAutoEditStrategyTest {
 	private static final String UTF_8= "UTF-8";
 	private static final String ISO_8859_1= "ISO-8859-1";
 
-	private DocumentCommand fDocumentCommand;
+	private final DocumentCommand fDocumentCommand;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;

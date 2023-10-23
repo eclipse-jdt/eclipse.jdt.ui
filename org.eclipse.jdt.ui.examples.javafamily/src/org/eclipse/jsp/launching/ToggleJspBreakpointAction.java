@@ -38,8 +38,8 @@ import org.eclipse.debug.core.model.IBreakpoint;
  */
 public class ToggleJspBreakpointAction extends Action {
 
-	private ITextEditor fEditor;
-	private IVerticalRulerInfo fRulerInfo;
+	private final ITextEditor fEditor;
+	private final IVerticalRulerInfo fRulerInfo;
 
 	@Override
 	public void run() {

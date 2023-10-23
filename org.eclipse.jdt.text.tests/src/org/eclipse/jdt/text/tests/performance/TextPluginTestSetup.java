@@ -34,7 +34,7 @@ public class TextPluginTestSetup extends TestSetup {
 
 	private String fPreviousPerspective;
 
-	private String fPerspective;
+	private final String fPerspective;
 
 	public TextPluginTestSetup(Test test) {
 		this(test, null);

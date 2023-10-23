@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.JavaCore;
  */
 public class JspTypeQuery implements IIndexQuery {
 
-	private IType fType;
+	private final IType fType;
 	private JspMatchLocatorParser fParser;
 
 	public JspTypeQuery(IType type) {

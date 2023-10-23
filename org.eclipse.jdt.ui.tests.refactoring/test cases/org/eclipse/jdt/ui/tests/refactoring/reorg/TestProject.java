@@ -24,8 +24,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 public class TestProject {
 
-	private IJavaProject fTestProject;
-	private IPackageFragmentRoot fSourceFolder;
+	private final IJavaProject fTestProject;
+	private final IPackageFragmentRoot fSourceFolder;
 
 	public TestProject() throws Exception {
 		this("TestProject");

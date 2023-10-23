@@ -26,19 +26,19 @@ import org.eclipse.jdt.internal.ui.examples.jspeditor.JspTranslatorResultCollect
 
 public class JspTranslator extends AbstractJspParser implements ITranslator {
 
-	private StringBuffer fDeclarations= new StringBuffer();
-	private StringBuffer fContent= new StringBuffer();
-	private StringBuffer fLocalDeclarations= new StringBuffer();
+	private final StringBuffer fDeclarations= new StringBuffer();
+	private final StringBuffer fContent= new StringBuffer();
+	private final StringBuffer fLocalDeclarations= new StringBuffer();
 
-	private ArrayList fContentLines= new ArrayList();
-	private ArrayList fDeclarationLines= new ArrayList();
-	private ArrayList fLocalDeclarationLines= new ArrayList();
+	private final ArrayList fContentLines= new ArrayList();
+	private final ArrayList fDeclarationLines= new ArrayList();
+	private final ArrayList fLocalDeclarationLines= new ArrayList();
 	private int[] fSmap;
 
 	private ITagHandlerFactory fTagHandlerFactor;
 	private ITagHandler fCurrentTagHandler;
 
-	private JspTranslatorResultCollector fResultCollector;
+	private final JspTranslatorResultCollector fResultCollector;
 
 
 	public JspTranslator() {

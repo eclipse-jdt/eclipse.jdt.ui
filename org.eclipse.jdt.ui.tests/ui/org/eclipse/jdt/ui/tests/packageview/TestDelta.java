@@ -29,8 +29,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  */
 public class TestDelta implements IJavaElementDelta {
 
-	private int fKind;
-	private IJavaElement fElement;
+	private final int fKind;
+	private final IJavaElement fElement;
 
 	private IJavaElementDelta[] fAffectedChildren;
 

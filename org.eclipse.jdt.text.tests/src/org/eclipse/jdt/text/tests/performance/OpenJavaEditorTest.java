@@ -34,7 +34,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 
 	public static class Setup extends TestSetup {
 
-		private boolean fTearDown;
+		private final boolean fTearDown;
 
 		public Setup(Test test) {
 			this(test, true);

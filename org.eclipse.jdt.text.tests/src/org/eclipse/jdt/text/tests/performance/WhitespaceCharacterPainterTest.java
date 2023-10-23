@@ -38,7 +38,7 @@ public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
 
 	private static final Class<WhitespaceCharacterPainterTest> THIS= WhitespaceCharacterPainterTest.class;
 
-	private IPreferenceStore fPreferenceStore= EditorsPlugin.getDefault().getPreferenceStore();
+	private final IPreferenceStore fPreferenceStore= EditorsPlugin.getDefault().getPreferenceStore();
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));

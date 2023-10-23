@@ -22,11 +22,11 @@ import javax.swing.*;
  * A panel with test run counters
  */
 public class CounterPanel extends JPanel {
-	private JTextField fNumberOfErrors;
-	private JTextField fNumberOfFailures;
-	private JTextField fNumberOfRuns;
-	private Icon fFailureIcon = TestRunner.getIconResource(getClass(), "icons/failure.gif");
-	private Icon fErrorIcon = TestRunner.getIconResource(getClass(), "icons/error.gif");
+	private final JTextField fNumberOfErrors;
+	private final JTextField fNumberOfFailures;
+	private final JTextField fNumberOfRuns;
+	private final Icon fFailureIcon = TestRunner.getIconResource(getClass(), "icons/failure.gif");
+	private final Icon fErrorIcon = TestRunner.getIconResource(getClass(), "icons/error.gif");
 
 	private int fTotal;
 

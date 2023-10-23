@@ -56,8 +56,8 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 
 	private static class RefactoringTestFileModificationValidator extends FileModificationValidator {
 
-		private ArrayList<IPath> fValidatedEditPaths;
-		private ArrayList<IPath> fValidatedSavePaths;
+		private final ArrayList<IPath> fValidatedEditPaths;
+		private final ArrayList<IPath> fValidatedSavePaths;
 
 		public RefactoringTestFileModificationValidator() {
 			fValidatedEditPaths= new ArrayList<>();
@@ -107,7 +107,7 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 		}
 	}
 
-	private RefactoringTestFileModificationValidator fValidator;
+	private final RefactoringTestFileModificationValidator fValidator;
 
 	public RefactoringTestRepositoryProvider() {
 		fValidator= new RefactoringTestFileModificationValidator();

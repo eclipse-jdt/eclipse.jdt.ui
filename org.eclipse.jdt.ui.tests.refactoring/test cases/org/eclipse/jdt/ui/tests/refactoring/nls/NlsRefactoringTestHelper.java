@@ -46,7 +46,7 @@ public class NlsRefactoringTestHelper {
     NullProgressMonitor fNpm;
 
     private HashMap<String, IAdaptable> fWorkSpaceElements = new HashMap<>();
-    private IJavaProject fJavaProject;
+    private final IJavaProject fJavaProject;
 
     public NlsRefactoringTestHelper(IJavaProject javaProject) throws Exception {
         fJavaProject = javaProject;

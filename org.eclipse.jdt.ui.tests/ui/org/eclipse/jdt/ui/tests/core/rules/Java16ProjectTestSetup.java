@@ -36,7 +36,7 @@ public class Java16ProjectTestSetup extends ProjectTestSetup {
 
 	public static final String PROJECT_NAME16= "TestSetupProject16";
 
-	private boolean enable_preview_feature;
+	private final boolean enable_preview_feature;
 
 	@Override
 	public IJavaProject getProject() {

@@ -23,7 +23,7 @@ import org.eclipse.jdt.junit.tests.AbstractTestRunListenerTest.TestRunLog;
 @Deprecated
 public class LegacyTestRunListener implements ITestRunListener {
 
-	private TestRunLog fLog;
+	private final TestRunLog fLog;
 
 	public LegacyTestRunListener(TestRunLog log) {
 		fLog= log;

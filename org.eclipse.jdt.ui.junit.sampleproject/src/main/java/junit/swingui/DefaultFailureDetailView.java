@@ -31,7 +31,7 @@ public class DefaultFailureDetailView implements FailureDetailView {
 	 * A ListModel representing the scanned failure stack trace.
 	 */
 	static class StackTraceListModel extends AbstractListModel {
-		private Vector fLines = new Vector(20);
+		private final Vector fLines = new Vector(20);
 
 		public Object getElementAt(int index) {
 			return fLines.elementAt(index);

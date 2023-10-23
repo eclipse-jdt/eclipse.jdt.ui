@@ -24,7 +24,7 @@ import org.eclipse.jface.text.reconciler.IReconcilableModel;
  */
 public class DocumentAdapter implements IReconcilableModel {
 
-	private IDocument fDocument;
+	private final IDocument fDocument;
 
 	/**
 	 * Creates a text model adapter for the given document.

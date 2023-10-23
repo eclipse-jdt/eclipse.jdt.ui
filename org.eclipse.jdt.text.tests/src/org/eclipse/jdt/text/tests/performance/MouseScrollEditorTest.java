@@ -105,11 +105,11 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 
 	private Error fBackgroundError;
 
-	private Runnable fThreadRunnable= new Runnable() {
+	private final Runnable fThreadRunnable= new Runnable() {
 		private volatile int fTopPixel;
 		private int fOldTopPixel;
-		private Runnable fRunnable= () -> fTopPixel= fText.getTopPixel();
-		private Condition fCondition= new Condition() {
+		private final Runnable fRunnable= () -> fTopPixel= fText.getTopPixel();
+		private final Condition fCondition= new Condition() {
 			@Override
 			public boolean isTrue() {
 				fDisplay.syncExec(fRunnable);

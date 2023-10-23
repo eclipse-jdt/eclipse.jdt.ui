@@ -21,7 +21,7 @@ import java.net.URL;
 import junit.runner.BaseTestRunner;
 
 public class Logo extends Canvas {
-	private Image fImage;
+	private final Image fImage;
 	private int fWidth;
 	private int fHeight;
 

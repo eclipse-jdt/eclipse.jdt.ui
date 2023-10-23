@@ -40,7 +40,7 @@ public final class ReferenceTracker {
 	private FIFOQueue fQueue;
 	private MultiStatus fStatus;
 
-	private boolean fSkipWeakOrSoft;
+	private final boolean fSkipWeakOrSoft;
 
 	public ReferenceTracker(ReferenceVisitor visitor) {
 		fReferenceVisitor= visitor;
