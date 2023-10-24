@@ -398,7 +398,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * Action definition ID of the refactor -> make static action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.make.static"</code>).
 	 *
-	 * @since 3.30
+	 * @since 3.31
 	 */
 	String MAKE_STATIC= "org.eclipse.jdt.ui.edit.text.java.make.static"; //$NON-NLS-1$
 
