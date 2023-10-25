@@ -138,11 +138,14 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 
 		@Override
 		public boolean visit(final MethodInvocation node) {
-			String name= node.getName().getFullyQualifiedName();
-			if (name.equals(GETBUFFER_NAME)) {
+			ITypeBinding returnBinding= node.resolveTypeBinding();
+			if (isStringBufferType(returnBinding)) {
 				IMethodBinding methodBinding= node.resolveMethodBinding();
-				if (isStringWriterType(methodBinding.getDeclaringClass())) {
-					fOperations.add(new ChangeStringBufferToStringBuilder(node));
+				if (methodBinding != null) {
+					ITypeBinding type= methodBinding.getDeclaringClass();
+					if (type != null && !type.isFromSource() && !type.getQualifiedName().equals(STRINGBUFFER_CLASS_NAME)) {
+						fOperations.add(new ChangeStringBufferToStringBuilder(node));
+					}
 				}
 			}
 			return true;
