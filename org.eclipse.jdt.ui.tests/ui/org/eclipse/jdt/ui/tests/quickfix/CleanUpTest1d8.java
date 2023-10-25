@@ -4208,6 +4208,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String sample= "" //
 				+ "package test1;\n" //
+				+ "import java.io.StringWriter;\n"
 				+ "\n" //
 				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
 				+ "    StringBuffer field1;\n" //
@@ -4247,6 +4248,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "            a.append(\"abc\");\n" //
 				+ "        };\n" //
 				+ "    }\n" //
+				+ "    public void changeStringWriterInLambda(StringBuffer parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringWriter a = new StringWriter();\n" //
+				+ "            StringBuffer k = a.getBuffer().append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("TestStringBuilderCleanup.java", sample, false, null);
 
@@ -4265,6 +4272,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected1= "" //
 				+ "package test1;\n" //
+				+ "import java.io.StringWriter;\n"
 				+ "\n" //
 				+ "public class TestStringBuilderCleanup extends SuperClass {\n" //
 				+ "    StringBuilder field1;\n" //
@@ -4302,6 +4310,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "            StringBuilder a = new StringBuilder();\n" //
 				+ "            super.method0(a);\n" //
 				+ "            a.append(\"abc\");\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "    public void changeStringWriterInLambda(StringBuilder parm) {\n" //
+				+ "        Runnable r = () -> {\n" //
+				+ "            StringWriter a = new StringWriter();\n" //
+				+ "            StringBuilder k = new StringBuilder(a.getBuffer().toString()).append(\"abc\");\n" //
 				+ "        };\n" //
 				+ "    }\n" //
 				+ "}\n";
