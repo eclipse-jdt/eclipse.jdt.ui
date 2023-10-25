@@ -74,9 +74,7 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 	private static final String STRINGBUFFER_CLASS_NAME= StringBuffer.class.getCanonicalName();
-	private static final String STRINGWRITER_CLASS_NAME= "java.io.StringWriter"; //$NON-NLS-1$
 	private static final String OBJECT_CLASS_NAME= Object.class.getCanonicalName();
-	private static final String GETBUFFER_NAME= "getBuffer"; //$NON-NLS-1$
 	private static final String TOSTRING_NAME= "toString"; //$NON-NLS-1$
 	private static final String STRINGBUIDER_NAME= "StringBuilder"; //$NON-NLS-1$
 
@@ -88,16 +86,6 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 			typeBinding= typeBinding.getElementType();
 		}
 		return typeBinding.getQualifiedName().equals(STRINGBUFFER_CLASS_NAME);
-	}
-
-	private static boolean isStringWriterType(ITypeBinding typeBinding) {
-		if (typeBinding == null) {
-			throw new AbortSearchException();
-		}
-		if (typeBinding.isArray()) {
-			typeBinding= typeBinding.getElementType();
-		}
-		return typeBinding.getQualifiedName().equals(STRINGWRITER_CLASS_NAME);
 	}
 
 	private static boolean isObjectType(ITypeBinding typeBinding) {
