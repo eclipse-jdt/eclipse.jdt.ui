@@ -2026,14 +2026,35 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			// assign to existing fields
 			CompilationUnit root= context.getASTRoot();
 			boolean isStaticContext= ASTResolving.isInStaticContext(node);
+			boolean hasFieldWithSameName= false;
 			for (IVariableBinding curr : parentType.getDeclaredFields()) {
 				if (isStaticContext == Modifier.isStatic(curr.getModifiers()) && typeBinding.isAssignmentCompatible(curr.getType())) {
 					ASTNode fieldDeclFrag= root.findDeclaringNode(curr);
 					if (fieldDeclFrag instanceof VariableDeclarationFragment) {
 						VariableDeclarationFragment fragment= (VariableDeclarationFragment) fieldDeclFrag;
 						if (fragment.getInitializer() == null) {
-							resultingCollections
+							if (curr.getName().equals(paramDecl.getName().getFullyQualifiedName())) {
+								hasFieldWithSameName= true;
+							}
+						}
+					}
+				}
+			}
+			for (IVariableBinding curr : parentType.getDeclaredFields()) {
+				if (isStaticContext == Modifier.isStatic(curr.getModifiers()) && typeBinding.isAssignmentCompatible(curr.getType())) {
+					ASTNode fieldDeclFrag= root.findDeclaringNode(curr);
+					if (fieldDeclFrag instanceof VariableDeclarationFragment) {
+						VariableDeclarationFragment fragment= (VariableDeclarationFragment) fieldDeclFrag;
+						if (fragment.getInitializer() == null) {
+							if (curr.getName().equals(paramDecl.getName().getFullyQualifiedName())) {
+								resultingCollections
+								.add(new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, fragment, typeBinding, IProposalRelevance.ASSIGN_PARAM_TO_MATCHING_FIELD));
+							} else {
+								if (!hasFieldWithSameName) {
+									resultingCollections
 									.add(new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, fragment, typeBinding, IProposalRelevance.ASSIGN_PARAM_TO_EXISTING_FIELD));
+								}
+							}
 						}
 					}
 				}
