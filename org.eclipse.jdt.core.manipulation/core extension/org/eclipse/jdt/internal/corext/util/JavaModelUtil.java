@@ -19,6 +19,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -27,16 +31,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.resources.ResourceAttributes;
-
-import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.ltk.core.refactoring.resource.Resources;
-
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
@@ -61,13 +55,13 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
-
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
-
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.ltk.core.refactoring.resource.Resources;
+import org.eclipse.text.edits.TextEdit;
 
 /**
  * Utility methods for the Java Model.
@@ -450,7 +444,7 @@ public final class JavaModelUtil {
 	 */
 	public static boolean hasMainMethod(IType type) throws JavaModelException {
 		for (IMethod method : type.getMethods()) {
-			if (method.isMainMethod()) {
+			if (method.isMainMethodCandidate()) {
 				return true;
 			}
 		}
