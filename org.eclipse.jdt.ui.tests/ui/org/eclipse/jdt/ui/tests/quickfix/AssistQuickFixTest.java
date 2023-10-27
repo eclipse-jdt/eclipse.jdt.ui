@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1518,6 +1518,64 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        this.p1 = p1;\n");
 		buf.append("        this.p22 = p2;\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testBug538832() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    public void foo(Float p1, Integer p2) {\n");
+		buf.append("    }\n");
+		buf.append("    private Float p1;\n");
+		buf.append("    private Number p2;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("Float p1");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    public void foo(Float p1, Integer p2) {\n");
+		buf.append("        this.p1 = p1;\n");
+		buf.append("    }\n");
+		buf.append("    private Float p1;\n");
+		buf.append("    private Number p2;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private Float p12;\n");
+		buf.append("    public void foo(Float p1, Integer p2) {\n");
+		buf.append("        this.p12 = p1;\n");
+		buf.append("    }\n");
+		buf.append("    private Float p1;\n");
+		buf.append("    private Number p2;\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 

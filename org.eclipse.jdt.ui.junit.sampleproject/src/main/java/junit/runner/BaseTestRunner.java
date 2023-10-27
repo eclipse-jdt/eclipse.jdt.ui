@@ -90,6 +90,7 @@ public abstract class BaseTestRunner implements TestListener {
 	 * Returns the Test corresponding to the given suite. This is a template method,
 	 * subclasses override runFailed(), clearStatus().
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Test getTest(String suiteClassName) {
 		if (suiteClassName.length() <= 0) {
 			clearStatus();
@@ -110,7 +111,7 @@ public abstract class BaseTestRunner implements TestListener {
 		}
 		Method suiteMethod = null;
 		try {
-			suiteMethod = testClass.getMethod(SUITE_METHODNAME, new Class[0]);
+			suiteMethod = testClass.getMethod(SUITE_METHODNAME, new Class<?>[0]);
 		} catch (Exception e) {
 			// try to extract a test suite automatically
 			clearStatus();
@@ -122,7 +123,7 @@ public abstract class BaseTestRunner implements TestListener {
 		}
 		Test test = null;
 		try {
-			test = (Test) suiteMethod.invoke(null, new Class[0]); // static method
+			test = (Test) suiteMethod.invoke(null, new Object[0]); // static method
 			if (test == null)
 				return test;
 		} catch (InvocationTargetException e) {
@@ -201,6 +202,7 @@ public abstract class BaseTestRunner implements TestListener {
 	/**
 	 * Returns the loaded Class for a suite name.
 	 */
+	@SuppressWarnings("rawtypes")
 	protected Class loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
 		return getLoader().load(suiteClassName);
 	}
