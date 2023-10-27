@@ -27,7 +27,7 @@
 	<packaging>jar</packaging>
 	<properties>
 		<!-- Compiler properties -->
-		<maven.compiler.release>8</maven.compiler.release>
+		<maven.compiler.release>1.8</maven.compiler.release>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
 		<encoding>UTF-8</encoding>
 		<project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
