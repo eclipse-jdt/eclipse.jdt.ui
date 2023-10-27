@@ -173,7 +173,7 @@ public abstract class TestCase extends Assert implements Test {
 			// methods. getDeclaredMethods returns all
 			// methods of this class but excludes the
 			// inherited ones.
-			runMethod = getClass().getMethod(fName, null);
+			runMethod = getClass().getMethod(fName, new Class<?>[0]);
 		} catch (NoSuchMethodException e) {
 			fail("Method \"" + fName + "\" not found");
 		}
@@ -182,7 +182,7 @@ public abstract class TestCase extends Assert implements Test {
 		}
 
 		try {
-			runMethod.invoke(this, new Class[0]);
+			runMethod.invoke(this, new Object[0]);
 		} catch (InvocationTargetException e) {
 			e.fillInStackTrace();
 			throw e.getTargetException();
