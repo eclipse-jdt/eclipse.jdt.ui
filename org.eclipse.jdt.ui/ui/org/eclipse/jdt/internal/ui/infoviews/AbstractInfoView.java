@@ -125,21 +125,6 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 			if (!ref.getId().equals(getSite().getId()))
 				computeAndSetInput(ref.getPart(false));
 		}
-		@Override
-		public void partActivated(IWorkbenchPartReference ref) {
-		}
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference ref) {
-		}
-		@Override
-		public void partClosed(IWorkbenchPartReference ref) {
-		}
-		@Override
-		public void partDeactivated(IWorkbenchPartReference ref) {
-		}
-		@Override
-		public void partOpened(IWorkbenchPartReference ref) {
-		}
 	};
 
 
