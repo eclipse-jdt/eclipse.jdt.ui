@@ -101,7 +101,7 @@ public class ImportOrganizeTest extends CoreTests {
 		};
 	}
 
-	private void assertImports(ICompilationUnit cu, String[] imports) throws Exception {
+	protected void assertImports(ICompilationUnit cu, String[] imports) throws Exception {
 		IImportDeclaration[] desc= cu.getImports();
 		assertEquals(cu.getElementName() + "-count", imports.length, desc.length);
 		for (int i= 0; i < imports.length; i++) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -1217,7 +1218,8 @@ public class Bindings {
 				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) node;
 				if (lastLocation == decl.getBodyDeclarationsProperty()
 						|| lastLocation == decl.getJavadocProperty()
-						|| (decl instanceof EnumDeclaration && lastLocation == EnumDeclaration.ENUM_CONSTANTS_PROPERTY)) {
+						|| (decl instanceof EnumDeclaration && lastLocation == EnumDeclaration.ENUM_CONSTANTS_PROPERTY)
+						|| (decl instanceof RecordDeclaration && lastLocation == RecordDeclaration.RECORD_COMPONENTS_PROPERTY)) {
 					return decl.resolveBinding();
 				}
 			} else if (node instanceof AnonymousClassDeclaration) {
