@@ -91,6 +91,12 @@ public class JUnitCore {
 	public final static IPath JUNIT5_CONTAINER_PATH= new Path(JUNIT_CONTAINER_ID).append("5"); //$NON-NLS-1$
 
 	/**
+	 * Attribute to control if <a href="https://junit.org/junit5/docs/current/user-guide/#migrating-from-junit4">junit-vintage</a> engine should be used for JUnit 5, defaults to true if not specified.
+	 * @since 3.13
+	 */
+	public static final String VINTAGE_ATTRIBUTE= "vintage"; //$NON-NLS-1$
+
+	/**
 	 * Adds a listener for test runs.
 	 *
 	 * @param listener listener to be added
