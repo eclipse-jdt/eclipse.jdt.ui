@@ -31,6 +31,8 @@ import org.eclipse.jdt.internal.junit.runner.TestIdMap;
 
 public class JUnit5TestReference implements ITestReference {
 
+	public static final String STOP_REQUESTED_VM_PROPERTY_NAME = "JDT_JUNIT5_RUNNER_STOP_REQUESTED"; //$NON-NLS-1$
+
 	private LauncherDiscoveryRequest fRequest;
 
 	private Launcher fLauncher;
@@ -87,6 +89,7 @@ public class JUnit5TestReference implements ITestReference {
 
 	@Override
 	public void run(TestExecution execution) {
+		execution.addStopListener(() -> System.setProperty(STOP_REQUESTED_VM_PROPERTY_NAME, Boolean.TRUE.toString()));
 		boolean foundMethodThatAvoidsRedundantDiscovery;
 		try {
 			fLauncher.getClass().getMethod("execute", TestPlan.class, TestExecutionListener[].class); //$NON-NLS-1$
