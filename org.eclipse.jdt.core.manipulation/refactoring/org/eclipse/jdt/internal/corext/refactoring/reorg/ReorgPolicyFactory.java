@@ -36,7 +36,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -113,6 +113,8 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
@@ -153,10 +155,7 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public final class ReorgPolicyFactory {
 
@@ -1317,10 +1316,10 @@ public final class ReorgPolicyFactory {
 				pm.beginTask("", fUpdateQualifiedNames ? 7 : 3); //$NON-NLS-1$
 				RefactoringStatus result= new RefactoringStatus();
 				confirmMovingReadOnly(reorgQueries);
-				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 2), result);
+				fChangeManager= createChangeManager(SubMonitor.convert(pm, 2), result);
 				if (fUpdateQualifiedNames)
-					computeQualifiedNameMatches(new SubProgressMonitor(pm, 4));
-				result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 1), context, reorgQueries));
+					computeQualifiedNameMatches(SubMonitor.convert(pm, 4));
+				result.merge(super.checkFinalConditions(SubMonitor.convert(pm, 1), context, reorgQueries));
 				return result;
 			} catch (JavaModelException e) {
 				throw e;
@@ -1352,10 +1351,10 @@ public final class ReorgPolicyFactory {
 				pm.subTask(RefactoringCoreMessages.MoveRefactoring_scanning_qualified_names);
 				for (ICompilationUnit cu : cus) {
 					IType[] types= cu.getTypes();
-					IProgressMonitor typesMonitor= new SubProgressMonitor(pm, 1);
+					IProgressMonitor typesMonitor= SubMonitor.convert(pm, 1);
 					typesMonitor.beginTask("", types.length); //$NON-NLS-1$
 					for (IType type : types) {
-						handleType(type, destination, new SubProgressMonitor(typesMonitor, 1));
+						handleType(type, destination, SubMonitor.convert(typesMonitor, 1));
 						if (typesMonitor.isCanceled())
 							throw new OperationCanceledException();
 					}
@@ -1405,7 +1404,7 @@ public final class ReorgPolicyFactory {
 				IPackageFragment packageDest= getDestinationAsPackageFragment();
 				if (packageDest != null) {
 					MoveCuUpdateCreator creator= new MoveCuUpdateCreator(getCus(), packageDest);
-					return creator.createChangeManager(new SubProgressMonitor(pm, 1), status);
+					return creator.createChangeManager(SubMonitor.convert(pm, 1), status);
 				} else
 					return new TextChangeManager();
 			} finally {
@@ -1428,7 +1427,7 @@ public final class ReorgPolicyFactory {
 				// XX workaround for bug 13558
 				// <workaround>
 				if (fChangeManager == null) {
-					fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), new RefactoringStatus());
+					fChangeManager= createChangeManager(SubMonitor.convert(pm, 1), new RefactoringStatus());
 					// TODO: non-CU matches silently dropped
 					RefactoringStatus status;
 					try {
@@ -1443,7 +1442,7 @@ public final class ReorgPolicyFactory {
 
 				composite.merge(new CompositeChange(RefactoringCoreMessages.MoveRefactoring_reorganize_elements, fChangeManager.getAllChanges()));
 
-				Change fileMove= createSimpleMoveChange(new SubProgressMonitor(pm, 1));
+				Change fileMove= createSimpleMoveChange(SubMonitor.convert(pm, 1));
 				if (fileMove instanceof CompositeChange) {
 					composite.merge(((CompositeChange) fileMove));
 				} else {
@@ -2219,7 +2218,7 @@ public final class ReorgPolicyFactory {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			try {
 				final ICompilationUnit sourceCu= getSourceCu();
-				CompilationUnit sourceCuNode= RefactoringASTParser.parseWithASTProvider(sourceCu, true, new SubProgressMonitor(pm, 1));
+				CompilationUnit sourceCuNode= RefactoringASTParser.parseWithASTProvider(sourceCu, true, SubMonitor.convert(pm, 1));
 				CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(sourceCu, sourceCuNode);
 				ICompilationUnit destinationCu= getEnclosingCompilationUnit(getJavaElementDestination());
 				CompilationUnitRewrite targetRewriter;
@@ -2227,7 +2226,7 @@ public final class ReorgPolicyFactory {
 					targetRewriter= sourceRewriter;
 					pm.worked(1);
 				} else {
-					CompilationUnit destinationCuNode= RefactoringASTParser.parseWithASTProvider(destinationCu, true, new SubProgressMonitor(pm, 1));
+					CompilationUnit destinationCuNode= RefactoringASTParser.parseWithASTProvider(destinationCu, true, SubMonitor.convert(pm, 1));
 					targetRewriter= new CompilationUnitRewrite(destinationCu, destinationCuNode);
 				}
 				IJavaElement[] javaElements= getJavaElements();

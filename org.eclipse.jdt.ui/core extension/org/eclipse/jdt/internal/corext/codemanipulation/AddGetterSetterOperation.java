@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -371,7 +371,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			}
 			fEdit= astRewrite.rewriteAST();
 			if (fApply) {
-				JavaModelUtil.applyEdit(unit, fEdit, fSave, new SubProgressMonitor(monitor, 1));
+				JavaModelUtil.applyEdit(unit, fEdit, fSave, SubMonitor.convert(monitor, 1));
 			}
 		} finally {
 			monitor.done();

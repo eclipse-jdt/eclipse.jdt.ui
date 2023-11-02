@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -195,10 +195,10 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 				}
 				fResultingEdit= new MultiTextEdit();
 				fResultingEdit.addChild(astRewrite.rewriteAST());
-				fResultingEdit.addChild(importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1)));
+				fResultingEdit.addChild(importRewrite.rewriteImports(SubMonitor.convert(monitor, 1)));
 
 				if (fApply) {
-					JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, new SubProgressMonitor(monitor, 1));
+					JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, SubMonitor.convert(monitor, 1));
 				}
 			}
 		} finally {

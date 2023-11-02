@@ -15,7 +15,7 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -104,7 +104,7 @@ public class MethodChecks {
 
 	public static IMethod isDeclaredInInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isTrue(isVirtual(method));
-		IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
+		IProgressMonitor subMonitor= SubMonitor.convert(monitor, 1);
 		try {
 			IType[] classes= hierarchy.getAllClasses();
 			subMonitor.beginTask("", classes.length); //$NON-NLS-1$
@@ -113,7 +113,7 @@ public class MethodChecks {
 				if (clazz.equals(hierarchy.getType()))
 					superinterfaces= hierarchy.getAllSuperInterfaces(clazz);
 				else
-					superinterfaces= clazz.newSupertypeHierarchy(new SubProgressMonitor(subMonitor, 1)).getAllSuperInterfaces(clazz);
+					superinterfaces= clazz.newSupertypeHierarchy(SubMonitor.convert(subMonitor, 1)).getAllSuperInterfaces(clazz);
 				for (IType superinterface : superinterfaces) {
 					IMethod found= Checks.findSimilarMethod(method, superinterface);
 					if (found != null && !found.equals(method))

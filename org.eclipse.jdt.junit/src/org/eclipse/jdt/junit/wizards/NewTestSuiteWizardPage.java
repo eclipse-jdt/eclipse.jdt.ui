@@ -28,8 +28,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -402,7 +401,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			/* find TestClasses already in Test Suite */
 			IAnnotation suiteClasses= suiteType.getAnnotation("SuiteClasses"); //$NON-NLS-1$
 			if (suiteClasses.exists()) {
-				UpdateTestSuite.updateTestCasesInJunit4Suite(new SubProgressMonitor(monitor, 5), cu, suiteClasses, fClassesInSuiteTable.getCheckedElements());
+				UpdateTestSuite.updateTestCasesInJunit4Suite(SubMonitor.convert(monitor, 5), cu, suiteClasses, fClassesInSuiteTable.getCheckedElements());
 			} else {
 				cannotUpdateSuiteError();
 			}
@@ -410,7 +409,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			/* find TestClasses already in Test Suite */
 			IAnnotation selectClasses= suiteType.getAnnotation("SelectClasses"); //$NON-NLS-1$
 			if (selectClasses.exists()) {
-				UpdateTestSuite.updateTestCasesInJunit5Suite(new SubProgressMonitor(monitor, 5), cu, selectClasses, fClassesInSuiteTable.getCheckedElements());
+				UpdateTestSuite.updateTestCasesInJunit5Suite(SubMonitor.convert(monitor, 5), cu, selectClasses, fClassesInSuiteTable.getCheckedElements());
 			} else {
 				cannotUpdateSuiteError();
 			}
@@ -444,7 +443,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 				String formattedContent= JUnitStubUtility.formatCompilationUnit(cu.getJavaProject(), originalContent, lineDelimiter);
 				cu.getBuffer().setContents(formattedContent);
 				monitor.worked(1);
-				cu.save(new SubProgressMonitor(monitor, 1), false);
+				cu.save(SubMonitor.convert(monitor, 1), false);
 			}
 
 		}

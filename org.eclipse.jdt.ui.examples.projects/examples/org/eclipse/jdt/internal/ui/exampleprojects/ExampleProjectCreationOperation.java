@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -106,7 +106,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		IProject proj= configNewProject(root, name, natureIds, referencedProjects, encoding, monitor);
 
 		for (int i= 0; i < nImports; i++) {
-			doImports(proj, imports[i], new SubProgressMonitor(monitor, 1));
+			doImports(proj, imports[i], SubMonitor.convert(monitor, 1));
 		}
 
 		String open= desc.getAttribute("open"); //$NON-NLS-1$
@@ -133,10 +133,10 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			desc.setNatureIds(natureIds);
 			desc.setReferencedProjects(referencedProjects);
 
-			project.setDescription(desc, new SubProgressMonitor(monitor, 1));
+			project.setDescription(desc, SubMonitor.convert(monitor, 1));
 
 			if (encoding != null) {
-				project.setDefaultCharset(encoding, new SubProgressMonitor(monitor, 1));
+				project.setDefaultCharset(encoding, SubMonitor.convert(monitor, 1));
 			}
 
 			return project;
@@ -166,7 +166,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			}
 
 			ZipFile zipFile= getZipFileFromPluginDir(importPath, getContributingPlugin(curr));
-			importFilesFromZip(zipFile, destPath, new SubProgressMonitor(monitor, 1));
+			importFilesFromZip(zipFile, destPath, SubMonitor.convert(monitor, 1));
 		} catch (CoreException e) {
 			throw new InvocationTargetException(e);
 		}

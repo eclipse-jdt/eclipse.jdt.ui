@@ -20,7 +20,7 @@ import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IOrdinaryClassFile;
@@ -90,7 +90,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 	protected void run(final IClassFile file, final IFileStore parent, final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 2);
-			SubProgressMonitor subProgressMonitor= new SubProgressMonitor(monitor, 1);
+			IProgressMonitor subProgressMonitor= SubMonitor.convert(monitor, 1);
 			if (file instanceof IOrdinaryClassFile) {
 				final IType type= ((IOrdinaryClassFile) file).getType();
 				if (type.isAnonymous() || type.isLocal() || type.isMember())

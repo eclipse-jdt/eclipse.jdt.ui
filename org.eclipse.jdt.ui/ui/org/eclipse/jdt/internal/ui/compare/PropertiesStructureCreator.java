@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -346,7 +346,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 	private IProgressMonitor beginWork(IProgressMonitor monitor) {
 		if (monitor == null)
 			return new NullProgressMonitor();
-		return new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN);
+		return SubMonitor.convert(monitor, IProgressMonitor.UNKNOWN);
 	}
 
 }

@@ -28,8 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -145,12 +144,12 @@ public class ChangeExceptionHandler {
 		IWorkspaceRunnable runnable= monitor -> {
 			monitor.beginTask("", 11);  //$NON-NLS-1$
 			try {
-				undo.initializeValidationData(new NotCancelableProgressMonitor(new SubProgressMonitor(monitor, 1)));
-				if (undo.isValid(new SubProgressMonitor(monitor,1)).hasFatalError()) {
+				undo.initializeValidationData(new NotCancelableProgressMonitor(SubMonitor.convert(monitor, 1)));
+				if (undo.isValid(SubMonitor.convert(monitor,1)).hasFatalError()) {
 					monitor.done();
 					return;
 				}
-				undo.perform(new SubProgressMonitor(monitor, 9));
+				undo.perform(SubMonitor.convert(monitor, 9));
 			} finally {
 				undo.dispose();
 			}

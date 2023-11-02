@@ -17,7 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -91,7 +91,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 					pm.beginTask(ActionMessages.RemoveFromClasspathAction_Removing, roots.length);
 					for (IPackageFragmentRoot root : roots) {
 						int jCoreFlags= IPackageFragmentRoot.NO_RESOURCE_MODIFICATION | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
-						root.delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(pm, 1));
+						root.delete(IResource.NONE, jCoreFlags, SubMonitor.convert(pm, 1));
 					}
 				} finally {
 					pm.done();

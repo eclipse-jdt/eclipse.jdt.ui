@@ -176,7 +176,7 @@ public class Implementors {
         IProgressMonitor progressMonitor) {
         Collection<IMethod> foundMethods = new ArrayList<>();
 
-        SubProgressMonitor subProgressMonitor = new SubProgressMonitor(progressMonitor,
+        IProgressMonitor subProgressMonitor = new SubProgressMonitor(progressMonitor,
                 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
         subProgressMonitor.beginTask("", types.length); //$NON-NLS-1$
 

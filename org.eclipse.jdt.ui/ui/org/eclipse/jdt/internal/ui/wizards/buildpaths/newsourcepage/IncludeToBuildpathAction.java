@@ -19,8 +19,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -39,13 +38,13 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
@@ -127,14 +126,14 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 			List<CPListElement> entries= ClasspathModifier.getExistingEntries(project);
 			for (Object element : elements) {
 				IResource resource= (IResource) element;
-				IPackageFragmentRoot root= ClasspathModifier.getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 1));
+				IPackageFragmentRoot root= ClasspathModifier.getFragmentRoot(resource, project, SubMonitor.convert(monitor, 1));
 				if (root != null) {
 					CPListElement entry= ClasspathModifier.getClasspathEntry(entries, root);
-					ClasspathModifier.unExclude(resource, entry, project, new SubProgressMonitor(monitor, 1));
+					ClasspathModifier.unExclude(resource, entry, project, SubMonitor.convert(monitor, 1));
 				}
 			}
 
-			ClasspathModifier.commitClassPath(entries, project, new SubProgressMonitor(monitor, 4));
+			ClasspathModifier.commitClassPath(entries, project, SubMonitor.convert(monitor, 4));
 
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
         	delta.setNewEntries(entries.toArray(new CPListElement[entries.size()]));

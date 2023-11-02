@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
@@ -434,12 +434,12 @@ public class ReorgCorrectionsSubProcessor {
 						IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
 						if (defaultVM != null && !defaultVM.equals(install)) {
 							IPath newPath= new Path(JavaRuntime.JRE_CONTAINER);
-							ClasspathVMUtil.updateClasspath(newPath, fProject, new SubProgressMonitor(monitor, 1));
+							ClasspathVMUtil.updateClasspath(newPath, fProject, SubMonitor.convert(monitor, 1));
 						} else {
 							monitor.worked(1);
 						}
 						if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
-							JavaRuntime.setDefaultVMInstall(vmInstall, new SubProgressMonitor(monitor, 3), true);
+							JavaRuntime.setDefaultVMInstall(vmInstall, SubMonitor.convert(monitor, 3), true);
 							return false;
 						}
 						return true;

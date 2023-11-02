@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -639,7 +640,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(member));
 		engine.setStatus(status);
-		engine.searchPattern(new SubProgressMonitor(monitor, 1));
+		engine.searchPattern(SubMonitor.convert(monitor, 1));
 		return (SearchResultGroup[]) engine.getResults();
 	}
 
@@ -732,7 +733,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 		try {
 			Map<IMember, IncomingMemberVisibilityAdjustment> adjustments= new HashMap<>();
-			SubProgressMonitor sub= new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
+			IProgressMonitor sub= new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, fMembersToMove.length);
 			Set<IMember> rewritten= new HashSet<>();
 			for (IMember member : fMembersToMove) {
@@ -799,7 +800,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 			modifiedCus.addAll(Arrays.asList(units));
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, fDestinationType);
-			sub= new SubProgressMonitor(monitor, 1);
+			sub= SubMonitor.convert(monitor, 1);
 			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, units.length);
 			for (ICompilationUnit unit : units) {
 				CompilationUnitRewrite rewrite= getCuRewrite(unit);

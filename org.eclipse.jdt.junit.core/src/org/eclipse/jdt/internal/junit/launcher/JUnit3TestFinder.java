@@ -20,7 +20,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -60,11 +60,11 @@ public class JUnit3TestFinder implements ITestFinder {
 					}
 				}
 			} else {
-				findTestCases(element, result, new SubProgressMonitor(pm, 7));
+				findTestCases(element, result, SubMonitor.convert(pm, 7));
 				if (pm.isCanceled()) {
 					return;
 				}
-				CoreTestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 3));
+				CoreTestSearchEngine.findSuiteMethods(element, result, SubMonitor.convert(pm, 3));
 			}
 			if (pm.isCanceled()) {
 				return;

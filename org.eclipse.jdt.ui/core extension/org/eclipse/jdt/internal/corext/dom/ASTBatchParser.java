@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -79,7 +79,7 @@ public class ASTBatchParser {
 
 			for (ICompilationUnit[] units : splitByProject(compilationUnits)) {
 				if (units.length <= MAX_AT_ONCE) {
-					createParser(units[0].getJavaProject()).createASTs(units, bindingKeys, requestor, new SubProgressMonitor(monitor, units.length));
+					createParser(units[0].getJavaProject()).createASTs(units, bindingKeys, requestor, SubMonitor.convert(monitor, units.length));
 				} else {
 					List<ICompilationUnit> list= Arrays.asList(units);
 					int end= 0;
@@ -89,7 +89,7 @@ public class ASTBatchParser {
 						List<ICompilationUnit> toParse= list.subList(cursor, end);
 
 						createParser(units[0].getJavaProject()).createASTs(toParse.toArray(new ICompilationUnit[toParse.size()]), bindingKeys, requestor,
-							new SubProgressMonitor(monitor, toParse.size()));
+							SubMonitor.convert(monitor, toParse.size()));
 						cursor= end;
 					}
 				}

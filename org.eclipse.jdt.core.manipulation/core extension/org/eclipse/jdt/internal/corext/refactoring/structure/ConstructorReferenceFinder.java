@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -171,8 +171,8 @@ public class ConstructorReferenceFinder {
 
 	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm, WorkingCopyOwner owner, RefactoringStatus status) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		List<SearchMatch> searchMatches= new ArrayList<>(getImplicitConstructorReferencesFromHierarchy(owner, new SubProgressMonitor(pm, 1)));
-		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(owner, new SubProgressMonitor(pm, 1), status));
+		List<SearchMatch> searchMatches= new ArrayList<>(getImplicitConstructorReferencesFromHierarchy(owner, SubMonitor.convert(pm, 1)));
+		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(owner, SubMonitor.convert(pm, 1), status));
 		pm.done();
 		return RefactoringSearchEngine.groupByCu(searchMatches.toArray(new SearchMatch[searchMatches.size()]), status);
 	}

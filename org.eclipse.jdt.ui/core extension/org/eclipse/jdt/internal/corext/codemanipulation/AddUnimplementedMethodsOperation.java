@@ -23,7 +23,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -228,7 +228,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			}
 			MultiTextEdit edit= new MultiTextEdit();
 
-			TextEdit importEdits= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
+			TextEdit importEdits= importRewrite.rewriteImports(SubMonitor.convert(monitor, 1));
 			fCreatedImports= importRewrite.getCreatedImports();
 			if (fImports) {
 				edit.addChild(importEdits);
@@ -236,7 +236,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			edit.addChild(astRewrite.rewriteAST());
 
 			if (fApply) {
-				JavaModelUtil.applyEdit(cu, edit, fSave, new SubProgressMonitor(monitor, 1));
+				JavaModelUtil.applyEdit(cu, edit, fSave, SubMonitor.convert(monitor, 1));
 			}
 		} finally {
 			monitor.done();

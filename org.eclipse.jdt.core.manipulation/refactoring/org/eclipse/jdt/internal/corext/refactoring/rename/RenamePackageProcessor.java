@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -71,6 +71,8 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
@@ -106,10 +108,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.ui.util.JFaceStringUtility;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements
@@ -425,27 +425,27 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			fChangeManager= new TextChangeManager();
 			fImportsManager= new ImportsManager();
 
-			SubProgressMonitor subPm= new SubProgressMonitor(pm, 16);
+			IProgressMonitor subPm= SubMonitor.convert(pm, 16);
 			if (fRenameSubpackages) {
 				IPackageFragment[] allSubpackages= JavaElementUtil.getPackageAndSubpackages(fPackage);
 				subPm.beginTask("", allSubpackages.length); //$NON-NLS-1$
 				for (IPackageFragment pack : allSubpackages) {
-					new PackageRenamer(pack, this, fChangeManager, fImportsManager).doRename(new SubProgressMonitor(subPm, 1), result);
+					new PackageRenamer(pack, this, fChangeManager, fImportsManager).doRename(SubMonitor.convert(subPm, 1), result);
 				}
 				subPm.done();
 			} else {
 				new PackageRenamer(fPackage, this, fChangeManager, fImportsManager).doRename(subPm, result);
 			}
 
-			fImportsManager.rewriteImports(fChangeManager, new SubProgressMonitor(pm, 3));
+			fImportsManager.rewriteImports(fChangeManager, SubMonitor.convert(pm, 3));
 
 			if (fUpdateTextualMatches) {
 				pm.subTask(RefactoringCoreMessages.RenamePackageRefactoring_searching_text);
-				TextMatchUpdater.perform(new SubProgressMonitor(pm, 10), RefactoringScopeFactory.create(fPackage), this, fChangeManager, new SearchResultGroup[0]);
+				TextMatchUpdater.perform(SubMonitor.convert(pm, 10), RefactoringScopeFactory.create(fPackage), this, fChangeManager, new SearchResultGroup[0]);
 			}
 
 			if (fUpdateQualifiedNames)
-				computeQualifiedNameMatches(new SubProgressMonitor(pm, 10));
+				computeQualifiedNameMatches(SubMonitor.convert(pm, 10));
 
 			return result;
 		} finally{
@@ -708,9 +708,9 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getElementLabel(fPackage));
 				ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 
-				fOccurrences= getReferences(new SubProgressMonitor(pm, 4), binaryRefs, result);
-				fReferencesToTypesInNamesakes= getReferencesToTypesInNamesakes(new SubProgressMonitor(pm, 4), result);
-				fReferencesToTypesInPackage= getReferencesToTypesInPackage(new SubProgressMonitor(pm, 4), binaryRefs, result);
+				fOccurrences= getReferences(SubMonitor.convert(pm, 4), binaryRefs, result);
+				fReferencesToTypesInNamesakes= getReferencesToTypesInNamesakes(SubMonitor.convert(pm, 4), result);
+				fReferencesToTypesInPackage= getReferencesToTypesInPackage(SubMonitor.convert(pm, 4), binaryRefs, result);
 				binaryRefs.addErrorIfNecessary(result);
 
 				pm.setTaskName(RefactoringCoreMessages.RenamePackageRefactoring_checking);
@@ -725,7 +725,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				return;
 
 			if (fProcessor.getUpdateReferences())
-				addReferenceUpdates(new SubProgressMonitor(pm, 3));
+				addReferenceUpdates(SubMonitor.convert(pm, 3));
 			else
 				pm.worked(3);
 
@@ -847,7 +847,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			}
 			elements[fOccurrences.length]= fPackage;
 			IJavaSearchScope namesakePackagesScope= RefactoringScopeFactory.createReferencedScope(elements);
-			IPackageFragment[] namesakePackages= getNamesakePackages(namesakePackagesScope, new SubProgressMonitor(pm, 1));
+			IPackageFragment[] namesakePackages= getNamesakePackages(namesakePackagesScope, SubMonitor.convert(pm, 1));
 			if (namesakePackages.length == 0) {
 				pm.done();
 				return new ArrayList<>(0);
@@ -863,7 +863,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			}
 			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
 			IJavaSearchScope scope= getPackageAndOccurrencesWithoutNamesakesScope();
-			SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1), status);
+			SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, SubMonitor.convert(pm, 1), status);
 			pm.done();
 			return new ArrayList<>(Arrays.asList(results));
 		}
@@ -871,7 +871,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		private List<SearchResultGroup> getReferencesToTypesInPackage(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs, RefactoringStatus status) throws CoreException {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			IJavaSearchScope referencedFromNamesakesScope= RefactoringScopeFactory.create(fPackage, true, false);
-			IPackageFragment[] namesakePackages= getNamesakePackages(referencedFromNamesakesScope, new SubProgressMonitor(pm, 1));
+			IPackageFragment[] namesakePackages= getNamesakePackages(referencedFromNamesakesScope, SubMonitor.convert(pm, 1));
 			if (namesakePackages.length == 0) {
 				pm.done();
 				return new ArrayList<>(0);
@@ -885,7 +885,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			}
 			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
 			CollectingSearchRequestor requestor= new CuCollectingSearchRequestor(binaryRefs);
-			SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, requestor, new SubProgressMonitor(pm, 1), status);
+			SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, requestor, SubMonitor.convert(pm, 1), status);
 			pm.done();
 			return new ArrayList<>(Arrays.asList(results));
 		}

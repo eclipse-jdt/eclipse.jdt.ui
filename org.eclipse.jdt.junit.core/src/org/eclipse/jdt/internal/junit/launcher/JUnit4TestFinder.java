@@ -23,7 +23,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
@@ -131,7 +131,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			pm.beginTask(JUnitMessages.JUnit4TestFinder_searching_description, 4);
 
 			IRegion region= CoreTestSearchEngine.getRegion(element);
-			ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, new SubProgressMonitor(pm, 1));
+			ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, SubMonitor.convert(pm, 1));
 			IType[] allClasses= hierarchy.getAllClasses();
 
 			// filter out anonymous classes which have no name
@@ -154,7 +154,7 @@ public class JUnit4TestFinder implements ITestFinder {
 
 			SearchPattern annotationsPattern= SearchPattern.createOrPattern(runWithPattern, testPattern);
 			SearchParticipant[] searchParticipants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
-			new SearchEngine().search(annotationsPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 2));
+			new SearchEngine().search(annotationsPattern, searchParticipants, scope, requestor, SubMonitor.convert(pm, 2));
 
 			// find all classes in the region
 			for (IType curr : candidates) {
@@ -170,7 +170,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			}
 
 			//JUnit 4.3 can also run JUnit-3.8-style public static Test suite() methods:
-			CoreTestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 1));
+			CoreTestSearchEngine.findSuiteMethods(element, result, SubMonitor.convert(pm, 1));
 		} finally {
 			pm.done();
 		}

@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.RangeMarker;
@@ -930,7 +930,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		engine.setScope(RefactoringScopeFactory.create(fField));
 		engine.setStatus(status);
 		engine.setRequestor(match -> match.isInsideDocComment() ? null : match);
-		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		engine.searchPattern(SubMonitor.convert(pm, 1));
 		return (SearchResultGroup[]) engine.getResults();
 	}
 

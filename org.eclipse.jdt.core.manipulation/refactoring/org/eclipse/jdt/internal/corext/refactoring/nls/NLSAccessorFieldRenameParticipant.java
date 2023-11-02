@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
@@ -52,9 +52,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Modifier;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
  * @since 3.4
@@ -101,7 +100,7 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			try {
-				manager.connect(propertyFilePath, LocationKind.IFILE, new SubProgressMonitor(pm, 25));
+				manager.connect(propertyFilePath, LocationKind.IFILE, SubMonitor.convert(pm, 25));
 
 				IDocument document= manager.getTextFileBuffer(propertyFilePath, LocationKind.IFILE).getDocument();
 				PropertyFileDocumentModel model= new PropertyFileDocumentModel(document);
@@ -126,7 +125,7 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 				IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 				deltaFactory.change((IFile) resourceBundle);
 			} finally {
-				manager.disconnect(propertyFilePath, LocationKind.IFILE, new SubProgressMonitor(pm, 25));
+				manager.disconnect(propertyFilePath, LocationKind.IFILE, SubMonitor.convert(pm, 25));
 			}
 		} catch (CoreException e) {
 			JavaManipulationPlugin.log(e);

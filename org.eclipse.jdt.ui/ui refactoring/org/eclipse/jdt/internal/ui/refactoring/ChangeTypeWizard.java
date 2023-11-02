@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -48,12 +48,12 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
@@ -196,7 +196,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 					ChangeTypeRefactoring ct= (ChangeTypeRefactoring)ChangeTypeWizard.this.getRefactoring();
 					fInvalidTypes = new HashSet<>();
 					fInvalidTypes.addAll(fCT.getAllSuperTypes(ct.getOriginalType()));
-					fValidTypes= ct.computeValidTypes(new SubProgressMonitor(pm, 950));
+					fValidTypes= ct.computeValidTypes(SubMonitor.convert(pm, 950));
 					fInvalidTypes.add(ct.getOriginalType());
 					fInvalidTypes.removeAll(fValidTypes);
 					pm.worked(50);

@@ -36,7 +36,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -237,16 +237,16 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			int elementType= element.getElementType();
 
 			if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
-				return analyze((IPackageFragment) element, new SubProgressMonitor(pm, 1));
+				return analyze((IPackageFragment) element, SubMonitor.convert(pm, 1));
 			} else if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
 				if (!root.isExternal() && !ReorgUtilsCore.isClassFolder(root)) {
-					return analyze((IPackageFragmentRoot) element, new SubProgressMonitor(pm, 1));
+					return analyze((IPackageFragmentRoot) element, SubMonitor.convert(pm, 1));
 				} else {
 					pm.worked(1);
 				}
 			} else if (elementType == IJavaElement.JAVA_PROJECT) {
-				return analyze((IJavaProject) element, new SubProgressMonitor(pm, 1));
+				return analyze((IJavaProject) element, SubMonitor.convert(pm, 1));
 			} else if (elementType == IJavaElement.COMPILATION_UNIT) {
 				ICompilationUnit cu= (ICompilationUnit)element;
 				if (cu.exists()) {
@@ -351,7 +351,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 				if (iJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
 					IPackageFragment pack= (IPackageFragment)iJavaElement;
 					if (! pack.isReadOnly())
-						result.addAll(analyze(pack, new SubProgressMonitor(pm, 1)));
+						result.addAll(analyze(pack, SubMonitor.convert(pm, 1)));
 					else
 						pm.worked(1);
 				} else
@@ -373,7 +373,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			List<NonNLSElement> result= new ArrayList<>();
 			for (IPackageFragment pack : packs) {
 				if (!pack.isReadOnly()) {
-					result.addAll(analyze(pack, new SubProgressMonitor(pm, 1)));
+					result.addAll(analyze(pack, SubMonitor.convert(pm, 1)));
 				} else {
 					pm.worked(1);
 				}

@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -87,7 +87,7 @@ public class ClasspathChange extends ResourceChange {
 				IClasspathEntry[] oldClasspath= fProject.getRawClasspath();
 				IPath oldOutputLocation= fProject.getOutputLocation();
 
-				fProject.setRawClasspath(fNewClasspath, fOutputLocation, new SubProgressMonitor(pm, 1));
+				fProject.setRawClasspath(fNewClasspath, fOutputLocation, SubMonitor.convert(pm, 1));
 
 				return new ClasspathChange(fProject, oldClasspath, oldOutputLocation);
 			} else {

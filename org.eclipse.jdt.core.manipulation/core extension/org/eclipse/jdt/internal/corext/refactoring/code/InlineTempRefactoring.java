@@ -31,7 +31,7 @@ import java.util.StringTokenizer;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.RangeMarker;
@@ -333,7 +333,7 @@ public class InlineTempRefactoring extends Refactoring {
 			inlineTemp(cuRewrite);
 			removeTemp(cuRewrite);
 
-			fChange= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, new SubProgressMonitor(pm, 1));
+			fChange= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, SubMonitor.convert(pm, 1));
 
 			return fCheckResultForCompileProblems ? RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fASTRoot, pm) : new RefactoringStatus();
 		} finally {

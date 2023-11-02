@@ -20,8 +20,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.operation.IRunnableContext;
@@ -137,13 +136,13 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 				CPListElement entry= ClasspathModifier.getClasspathEntry(existingEntries, root);
 
-				IResource resource= ClasspathModifier.exclude(javaElement, entry, project, new SubProgressMonitor(monitor, 1));
+				IResource resource= ClasspathModifier.exclude(javaElement, entry, project, SubMonitor.convert(monitor, 1));
 				if (resource != null) {
 					resources.add(resource);
 				}
 			}
 
-			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 4));
+			ClasspathModifier.commitClassPath(existingEntries, project, SubMonitor.convert(monitor, 4));
 
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
         	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));

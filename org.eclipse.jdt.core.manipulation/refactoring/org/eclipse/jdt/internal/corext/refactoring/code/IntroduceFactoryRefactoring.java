@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -89,6 +89,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
@@ -117,11 +119,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodsSourcePositionComparator;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 
 /**
  * Refactoring class that permits the substitution of a factory method
@@ -384,7 +383,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (!fCUHandle.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_syntaxError);
 
-			return checkSelection(new SubProgressMonitor(pm, 1));
+			return checkSelection(SubMonitor.convert(pm, 1));
 		} finally {
 			pm.done();
 		}
@@ -490,7 +489,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		engine.setFiltering(true, true);
 		engine.setScope(createSearchScope(method, methodBinding));
 		engine.setStatus(status);
-		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		engine.searchPattern(SubMonitor.convert(pm, 1));
 		return (SearchResultGroup[]) engine.getResults();
 	}
 
@@ -523,7 +522,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(fCtorBinding.getDeclaringClass().getJavaElement().getJavaProject()));
 		engine.setStatus(status);
-		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		engine.searchPattern(SubMonitor.convert(pm, 1));
 
 		SearchResultGroup[] groups= (SearchResultGroup[]) engine.getResults();
 

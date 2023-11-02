@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -50,6 +50,8 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -68,10 +70,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 
 /**
@@ -176,7 +174,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		try {
 			monitor.beginTask("", 200); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_checking);
-			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 200), status);
+			fChangeManager= createChangeManager(SubMonitor.convert(monitor, 200), status);
 			if (!status.hasFatalError()) {
 				Checks.addModifiedFilesToChecker(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), context);
 			}
@@ -277,11 +275,11 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			parser.setProject(project);
 			parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
 			if (fSubType.isBinary() || fSubType.isReadOnly()) {
-				final IBinding[] bindings= parser.createBindings(new IJavaElement[] { fSubType, fSuperType }, new SubProgressMonitor(monitor, 50));
+				final IBinding[] bindings= parser.createBindings(new IJavaElement[] { fSubType, fSuperType }, SubMonitor.convert(monitor, 50));
 				if (bindings != null && bindings.length == 2 && bindings[0] instanceof ITypeBinding && bindings[1] instanceof ITypeBinding) {
-					solveSuperTypeConstraints(null, null, fSubType, (ITypeBinding) bindings[0], (ITypeBinding) bindings[1], new SubProgressMonitor(monitor, 100), status);
+					solveSuperTypeConstraints(null, null, fSubType, (ITypeBinding) bindings[0], (ITypeBinding) bindings[1], SubMonitor.convert(monitor, 100), status);
 					if (!status.hasFatalError())
-						rewriteTypeOccurrences(manager, null, null, null, null, new HashSet<String>(), status, new SubProgressMonitor(monitor, 150));
+						rewriteTypeOccurrences(manager, null, null, null, null, new HashSet<String>(), status, SubMonitor.convert(monitor, 150));
 				}
 			} else {
 				parser.createASTs(new ICompilationUnit[] { fSubType.getCompilationUnit() }, new String[0], new ASTRequestor() {
@@ -296,9 +294,9 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 								if (subBinding != null) {
 									final ITypeBinding superBinding= findTypeInHierarchy(subBinding, fSuperType.getFullyQualifiedName('.'));
 									if (superBinding != null) {
-										solveSuperTypeConstraints(subRewrite.getCu(), subRewrite.getRoot(), fSubType, subBinding, superBinding, new SubProgressMonitor(monitor, 100), status);
+										solveSuperTypeConstraints(subRewrite.getCu(), subRewrite.getRoot(), fSubType, subBinding, superBinding, SubMonitor.convert(monitor, 100), status);
 										if (!status.hasFatalError()) {
-											rewriteTypeOccurrences(manager, this, subRewrite, subRewrite.getCu(), subRewrite.getRoot(), new HashSet<String>(), status, new SubProgressMonitor(monitor, 200));
+											rewriteTypeOccurrences(manager, this, subRewrite, subRewrite.getCu(), subRewrite.getRoot(), new HashSet<String>(), status, SubMonitor.convert(monitor, 200));
 											final TextChange change= subRewrite.createChange(true);
 											if (change != null)
 												manager.manage(subRewrite.getCu(), change);
@@ -434,7 +432,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			final Collection<ITypeConstraintVariable> collection= fTypeOccurrences.get(unit);
 			if (collection != null && !collection.isEmpty()) {
-				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
+				final IProgressMonitor subMonitor= SubMonitor.convert(monitor, 100);
 				try {
 					subMonitor.beginTask("", collection.size() * 10); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);

@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IRegion;
@@ -204,7 +204,7 @@ public class RippleMethodFinder2 {
 	private IMethod[] findAllRippleMethods(IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 
-		findAllDeclarations(new SubProgressMonitor(pm, 1), owner);
+		findAllDeclarations(SubMonitor.convert(pm, 1), owner);
 
 		//TODO: report assertion as error status and fall back to only return fMethod
 		//check for bug 81058:
@@ -216,7 +216,7 @@ public class RippleMethodFinder2 {
 			}
 		}
 
-		createHierarchyOfDeclarations(new SubProgressMonitor(pm, 1), owner);
+		createHierarchyOfDeclarations(SubMonitor.convert(pm, 1), owner);
 		addMissedSuperTypes();
 		createTypeToMethod();
 		createUnionFind();
@@ -401,9 +401,9 @@ public class RippleMethodFinder2 {
 
 	private ITypeHierarchy hierarchy(IProgressMonitor pm, WorkingCopyOwner owner, IType type)
 			throws JavaModelException {
-		ITypeHierarchy hierarchy= getCachedHierarchy(type, owner, new SubProgressMonitor(pm, 1));
+		ITypeHierarchy hierarchy= getCachedHierarchy(type, owner, SubMonitor.convert(pm, 1));
 		if (hierarchy == null)
-			hierarchy= type.newTypeHierarchy(owner, new SubProgressMonitor(pm, 1));
+			hierarchy= type.newTypeHierarchy(owner, SubMonitor.convert(pm, 1));
 		return hierarchy;
 	}
 
@@ -423,7 +423,7 @@ public class RippleMethodFinder2 {
 			for (IType root : fRootReps.get(rep)) {
 				ITypeHierarchy hierarchy= fRootHierarchies.get(root);
 				if (hierarchy == null) {
-					hierarchy= root.newTypeHierarchy(owner, new SubProgressMonitor(monitor, 1));
+					hierarchy= root.newTypeHierarchy(owner, SubMonitor.convert(monitor, 1));
 					fRootHierarchies.put(root, hierarchy);
 				}
 				if (hierarchy.contains(type))

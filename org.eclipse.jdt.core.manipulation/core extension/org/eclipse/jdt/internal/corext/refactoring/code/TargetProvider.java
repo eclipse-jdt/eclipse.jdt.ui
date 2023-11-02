@@ -28,7 +28,7 @@ import java.util.Stack;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -480,7 +480,7 @@ public abstract class TargetProvider {
 					}
 				}
 			};
-			new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, new SubProgressMonitor(pm, 1));
+			new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, SubMonitor.convert(pm, 1));
 			return affectedCompilationUnits.toArray(new ICompilationUnit[affectedCompilationUnits.size()]);
 		}
 

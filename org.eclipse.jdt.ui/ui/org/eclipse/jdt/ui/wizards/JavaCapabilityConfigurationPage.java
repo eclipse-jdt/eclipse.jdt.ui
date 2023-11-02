@@ -29,8 +29,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -279,8 +278,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 
 		try {
 			IProject project= getJavaProject().getProject();
-			BuildPathsBlock.addJavaNature(project, new SubProgressMonitor(monitor, 1));
-			getBuildPathsBlock().configureJavaProject(newProjectCompliance, new SubProgressMonitor(monitor, 5));
+			BuildPathsBlock.addJavaNature(project, SubMonitor.convert(monitor, 1));
+			getBuildPathsBlock().configureJavaProject(newProjectCompliance, SubMonitor.convert(monitor, 5));
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException();
 		} finally {

@@ -22,8 +22,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
@@ -147,9 +146,9 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 					}
 
 					BuildpathDelta delta= ClasspathModifier.removeFromBuildpath(toRemove, cpProject);
-					ClasspathModifier.commitClassPath(cpProject, new SubProgressMonitor(monitor, 10));
+					ClasspathModifier.commitClassPath(cpProject, SubMonitor.convert(monitor, 10));
 
-					deleteFolders(foldersToDelete, new SubProgressMonitor(monitor, foldersToDelete.size()));
+					deleteFolders(foldersToDelete, SubMonitor.convert(monitor, foldersToDelete.size()));
 
 					informListeners(delta);
 
@@ -185,7 +184,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, folders.size());
 
 			for (IFolder folder : folders) {
-				folder.delete(true, true, new SubProgressMonitor(monitor, 1));
+				folder.delete(true, true, SubMonitor.convert(monitor, 1));
 			}
 		} finally {
 			monitor.done();

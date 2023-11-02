@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -531,7 +531,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 			if (fUpdateReferences){
 				pm.setTaskName(RefactoringCoreMessages.RenameFieldRefactoring_searching);
-				fReferences= getReferences(new SubProgressMonitor(pm, 3), result);
+				fReferences= getReferences(SubMonitor.convert(pm, 3), result);
 				pm.setTaskName(RefactoringCoreMessages.RenameFieldRefactoring_checking);
 			} else {
 				fReferences= new SearchResultGroup[0];
@@ -544,36 +544,36 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				Checks.checkCompileErrorsInAffectedFile(result, fField.getResource());
 
 			if (getGetter() != null && fRenameGetter){
-				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getGetter(), getNewGetterName()));
+				result.merge(checkAccessor(SubMonitor.convert(pm, 1), getGetter(), getNewGetterName()));
 				result.merge(Checks.checkIfConstructorName(getGetter(), getNewGetterName(), fField.getDeclaringType().getElementName()));
 			} else {
 				pm.worked(1);
 			}
 
 			if (getSetter() != null && fRenameSetter){
-				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getSetter(), getNewSetterName()));
+				result.merge(checkAccessor(SubMonitor.convert(pm, 1), getSetter(), getNewSetterName()));
 				result.merge(Checks.checkIfConstructorName(getSetter(), getNewSetterName(), fField.getDeclaringType().getElementName()));
 			} else {
 				pm.worked(1);
 			}
 
 			if (fIsRecordComponent){
-				result.merge(checkRecordComponentAccessor(new SubProgressMonitor(pm, 1), getAccessor(), getNewElementName()));
+				result.merge(checkRecordComponentAccessor(SubMonitor.convert(pm, 1), getAccessor(), getNewElementName()));
 				result.merge(Checks.checkIfConstructorName(getAccessor(), getNewElementName(), fField.getDeclaringType().getElementName()));
 			} else {
 				pm.worked(1);
 			}
 
 			if (fRenameLocalVariableProcessor != null && fIsRecordComponent) {
-				result.merge(fRenameLocalVariableProcessor.checkInitialConditions(new SubProgressMonitor(pm, 1)));
+				result.merge(fRenameLocalVariableProcessor.checkInitialConditions(SubMonitor.convert(pm, 1)));
 				if (result.hasFatalError())
 					return result;
-				result.merge(fRenameLocalVariableProcessor.checkFinalConditions(new SubProgressMonitor(pm, 1), context));
+				result.merge(fRenameLocalVariableProcessor.checkFinalConditions(SubMonitor.convert(pm, 1), context));
 				if (result.hasFatalError())
 					return result;
 			}
 
-			result.merge(createChanges(new SubProgressMonitor(pm, 10)));
+			result.merge(createChanges(SubMonitor.convert(pm, 10)));
 			if (result.hasFatalError())
 				return result;
 
@@ -833,8 +833,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		addDeclarationUpdate();
 
 		if (fUpdateReferences) {
-			addReferenceUpdates(new SubProgressMonitor(pm, 1));
-			result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 2)));
+			addReferenceUpdates(SubMonitor.convert(pm, 1));
+			result.merge(analyzeRenameChanges(SubMonitor.convert(pm, 2)));
 			if (result.hasFatalError())
 				return result;
 		} else {
@@ -842,19 +842,19 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		}
 
 		if (getGetter() != null && fRenameGetter) {
-			addGetterOccurrences(new SubProgressMonitor(pm, 1), result);
+			addGetterOccurrences(SubMonitor.convert(pm, 1), result);
 		} else {
 			pm.worked(1);
 		}
 
 		if (getSetter() != null && fRenameSetter) {
-			addSetterOccurrences(new SubProgressMonitor(pm, 1), result);
+			addSetterOccurrences(SubMonitor.convert(pm, 1), result);
 		} else {
 			pm.worked(1);
 		}
 
 		if (fIsRecordComponent) {
-			addAccessorOccurrences(new SubProgressMonitor(pm, 1), result);
+			addAccessorOccurrences(SubMonitor.convert(pm, 1), result);
 			if (fRenameLocalVariableProcessor != null) {
 				addLocalVariableOccurrences(getNewElementName(), result);
 			}
@@ -863,7 +863,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		}
 
 		if (fUpdateTextualMatches) {
-			addTextMatches(new SubProgressMonitor(pm, 5));
+			addTextMatches(SubMonitor.convert(pm, 5));
 		} else {
 			pm.worked(5);
 		}
@@ -1087,9 +1087,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			}
 
 			newWorkingCopies= RenameAnalyzeUtil.createNewWorkingCopies(compilationUnitsToModify.toArray(new ICompilationUnit[compilationUnitsToModify.size()]),
-					fChangeManager, newWCOwner, new SubProgressMonitor(pm, 1));
+					fChangeManager, newWCOwner, SubMonitor.convert(pm, 1));
 
-			SearchResultGroup[] newReferences= getNewReferences(new SubProgressMonitor(pm, 1), result, newWCOwner, newWorkingCopies);
+			SearchResultGroup[] newReferences= getNewReferences(SubMonitor.convert(pm, 1), result, newWCOwner, newWorkingCopies);
 			result.merge(RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, oldReferences, newReferences, getNewElementName()));
 			return result;
 		} finally{
@@ -1132,7 +1132,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return new SearchResultGroup[0];
 		}
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fField, true, true);
-		return RefactoringSearchEngine.search(newPattern, owner, scope, requestor, new SubProgressMonitor(pm, 1), status);
+		return RefactoringSearchEngine.search(newPattern, owner, scope, requestor, SubMonitor.convert(pm, 1), status);
 	}
 
 	private IField getFieldInWorkingCopy(ICompilationUnit newWorkingCopyOfDeclaringCu, String elementName) {

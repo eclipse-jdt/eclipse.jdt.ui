@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -386,7 +386,7 @@ public class VariableBlock {
 				paths[k]= null;
 				k++;
 			}
-			JavaCore.setClasspathVariables(names, paths, new SubProgressMonitor(monitor, 1));
+			JavaCore.setClasspathVariables(names, paths, SubMonitor.convert(monitor, 1));
 		}
 	}
 

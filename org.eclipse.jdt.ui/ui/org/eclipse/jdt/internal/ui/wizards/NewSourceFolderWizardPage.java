@@ -34,8 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -513,13 +512,13 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 			IFolder folder= fCurrJProject.getProject().getFolder(relPath);
 			if (!folder.exists()) {
-				CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+				CoreUtility.createFolder(folder, true, true, SubMonitor.convert(monitor, 1));
 			}
 			if (monitor.isCanceled()) {
 				throw new InterruptedException();
 			}
 
-			fCurrJProject.setRawClasspath(fNewEntries, fNewOutputLocation, new SubProgressMonitor(monitor, 2));
+			fCurrJProject.setRawClasspath(fNewEntries, fNewOutputLocation, SubMonitor.convert(monitor, 2));
 
 			fCreatedRoot= fCurrJProject.getPackageFragmentRoot(folder);
 		} finally {

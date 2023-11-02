@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -175,8 +175,8 @@ public class RefreshAction extends SelectionDispatchAction {
 
 		WrappedWorkbenchRefreshAction workbenchAction= new WrappedWorkbenchRefreshAction(getSite());
 		workbenchAction.selectionChanged(selection);
-		workbenchAction.run(new SubProgressMonitor(monitor, 1));
-		refreshJavaElements(selection, new SubProgressMonitor(monitor, 1));
+		workbenchAction.run(SubMonitor.convert(monitor, 1));
+		refreshJavaElements(selection, SubMonitor.convert(monitor, 1));
 	}
 
 	private void refreshJavaElements(IStructuredSelection selection, IProgressMonitor monitor) throws JavaModelException {

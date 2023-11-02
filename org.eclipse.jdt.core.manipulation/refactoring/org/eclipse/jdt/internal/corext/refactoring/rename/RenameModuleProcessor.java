@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -77,8 +78,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public class RenameModuleProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating {
 
@@ -231,7 +230,7 @@ public class RenameModuleProcessor extends JavaRenameProcessor implements IRefer
 
 			if (fUpdateReferences){
 				pm.setTaskName(RefactoringCoreMessages.RenameFieldRefactoring_searching);
-				fReferences= getReferences(new SubProgressMonitor(pm, 3), result);
+				fReferences= getReferences(SubMonitor.convert(pm, 3), result);
 				pm.setTaskName(RefactoringCoreMessages.RenameFieldRefactoring_checking);
 			} else {
 				fReferences= new SearchResultGroup[0];
@@ -243,7 +242,7 @@ public class RenameModuleProcessor extends JavaRenameProcessor implements IRefer
 			else
 				Checks.checkCompileErrorsInAffectedFile(result, fModule.getResource());
 
-			result.merge(createChanges(new SubProgressMonitor(pm, 4)));
+			result.merge(createChanges(SubMonitor.convert(pm, 4)));
 			if (result.hasFatalError())
 				return result;
 
@@ -260,8 +259,8 @@ public class RenameModuleProcessor extends JavaRenameProcessor implements IRefer
 		addDeclarationUpdate();
 
 		if (fUpdateReferences) {
-			addReferenceUpdates(new SubProgressMonitor(pm, 1));
-			result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 2)));
+			addReferenceUpdates(SubMonitor.convert(pm, 1));
+			result.merge(analyzeRenameChanges(SubMonitor.convert(pm, 2)));
 			if (result.hasFatalError())
 				return result;
 		} else {
@@ -284,8 +283,8 @@ public class RenameModuleProcessor extends JavaRenameProcessor implements IRefer
 			List<ICompilationUnit> compilationUnitsToModify= new ArrayList<>();
 			compilationUnitsToModify.addAll(Arrays.asList(fChangeManager.getAllCompilationUnits()));
 			newWorkingCopies= RenameAnalyzeUtil.createNewWorkingCopies(compilationUnitsToModify.toArray(new ICompilationUnit[compilationUnitsToModify.size()]),
-					fChangeManager, newWCOwner, new SubProgressMonitor(pm, 1));
-			SearchResultGroup[] newReferences= getNewReferences(new SubProgressMonitor(pm, 1), result, newWCOwner, newWorkingCopies);
+					fChangeManager, newWCOwner, SubMonitor.convert(pm, 1));
+			SearchResultGroup[] newReferences= getNewReferences(SubMonitor.convert(pm, 1), result, newWCOwner, newWorkingCopies);
 			result.merge(RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, oldReferences, newReferences, getNewElementName()));
 			return result;
 		} finally{
@@ -315,7 +314,7 @@ public class RenameModuleProcessor extends JavaRenameProcessor implements IRefer
 			return new SearchResultGroup[0];
 		}
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fModule, true, true);
-		return RefactoringSearchEngine.search(newPattern, owner, scope, requestor, new SubProgressMonitor(pm, 1), status);
+		return RefactoringSearchEngine.search(newPattern, owner, scope, requestor, SubMonitor.convert(pm, 1), status);
 	}
 
 	private IModuleDescription getModuleInWorkingCopy() {

@@ -23,7 +23,7 @@ import java.util.TreeMap;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotatable;
@@ -207,7 +207,7 @@ public class StubCreator {
 				if (child instanceof IType) {
 					if (stub || "java.lang.invoke.MethodHandle".equals(type.getFullyQualifiedName()) //$NON-NLS-1$
 						|| "java.util.concurrent.ConcurrentHashMap$CollectionView".equals(((IType) child).getFullyQualifiedName())) //$NON-NLS-1$
-						appendTypeDeclaration((IType) child, new SubProgressMonitor(monitor, 1));
+						appendTypeDeclaration((IType) child, SubMonitor.convert(monitor, 1));
 				} else if (child instanceof IField) {
 					if (stub && !Flags.isEnum(flags) && !Flags.isSynthetic(flags))
 						appendFieldDeclaration((IField) child);
@@ -419,7 +419,7 @@ public class StubCreator {
 				fBuffer.append(" @interface "); //$NON-NLS-1$
 				fBuffer.append(type.getElementName());
 				fBuffer.append("{\n"); //$NON-NLS-1$
-				appendMembers(type, new SubProgressMonitor(monitor, 1));
+				appendMembers(type, SubMonitor.convert(monitor, 1));
 				fBuffer.append("}"); //$NON-NLS-1$
 			} else if (type.isInterface()) {
 				appendFlags(type);
@@ -428,7 +428,7 @@ public class StubCreator {
 				appendTypeParameters(type.getTypeParameters());
 				appendSuperInterfaceTypes(type);
 				fBuffer.append("{\n"); //$NON-NLS-1$
-				appendMembers(type, new SubProgressMonitor(monitor, 1));
+				appendMembers(type, SubMonitor.convert(monitor, 1));
 				fBuffer.append("}"); //$NON-NLS-1$
 			} else if (type.isClass()) {
 				appendFlags(type);
@@ -442,7 +442,7 @@ public class StubCreator {
 				}
 				appendSuperInterfaceTypes(type);
 				fBuffer.append("{\n"); //$NON-NLS-1$
-				appendMembers(type, new SubProgressMonitor(monitor, 1));
+				appendMembers(type, SubMonitor.convert(monitor, 1));
 				fBuffer.append("}"); //$NON-NLS-1$
 			} else if (type.isEnum()) {
 				appendFlags(type);
@@ -451,7 +451,7 @@ public class StubCreator {
 				appendSuperInterfaceTypes(type);
 				fBuffer.append("{\n"); //$NON-NLS-1$
 				appendEnumConstants(type);
-				appendMembers(type, new SubProgressMonitor(monitor, 1));
+				appendMembers(type, SubMonitor.convert(monitor, 1));
 				fBuffer.append("}"); //$NON-NLS-1$
 			}
 		} finally {

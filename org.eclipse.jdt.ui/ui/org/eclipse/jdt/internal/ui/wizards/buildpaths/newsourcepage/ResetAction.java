@@ -21,7 +21,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -142,7 +142,7 @@ public class ResetAction extends BuildpathModifierAction {
         			else
         				root= (IPackageFragmentRoot) element;
         			CPListElement entry= ClasspathModifier.getClasspathEntry(entries, root);
-        			ClasspathModifier.resetFilters(javaElement, entry, project, new SubProgressMonitor(monitor, 1));
+        			ClasspathModifier.resetFilters(javaElement, entry, project, SubMonitor.convert(monitor, 1));
         			result.add(javaElement);
         		} else {
         			CPListElement selElement= ((CPListElementAttribute) element).getParent();

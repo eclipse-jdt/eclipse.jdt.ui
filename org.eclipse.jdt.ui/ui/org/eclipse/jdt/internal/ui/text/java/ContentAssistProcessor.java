@@ -41,7 +41,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.bindings.TriggerSequence;
@@ -330,7 +330,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		List<ICompletionProposal> proposals= new ArrayList<>();
 		List<CompletionProposalCategory> providers= getCategories();
 		for (CompletionProposalCategory cat : providers) {
-			List<ICompletionProposal> computed= cat.computeCompletionProposals(context, fPartition, new SubProgressMonitor(monitor, 1));
+			List<ICompletionProposal> computed= cat.computeCompletionProposals(context, fPartition, SubMonitor.convert(monitor, 1));
 			proposals.addAll(computed);
 			needsSortingAfterFiltering= needsSortingAfterFiltering || (cat.isSortingAfterFilteringNeeded() && !computed.isEmpty());
 			if (fErrorMessage == null) {
@@ -387,7 +387,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 		List<CompletionProposalCategory> providers= getCategories();
 		for (CompletionProposalCategory cat : providers) {
-			List<IContextInformation> computed= cat.computeContextInformation(context, fPartition, new SubProgressMonitor(monitor, 1));
+			List<IContextInformation> computed= cat.computeContextInformation(context, fPartition, SubMonitor.convert(monitor, 1));
 			proposals.addAll(computed);
 			if (fErrorMessage == null) {
 				fErrorMessage= cat.getErrorMessage();

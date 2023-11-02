@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -102,6 +103,8 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractSuperclassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
@@ -126,9 +129,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManagerCore;
 
@@ -276,7 +276,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			status.merge(checkExtractedCompilationUnit());
 			if (status.hasFatalError())
 				return status;
-			return super.checkFinalConditions(new SubProgressMonitor(monitor, 1), context);
+			return super.checkFinalConditions(SubMonitor.convert(monitor, 1), context);
 		} finally {
 			monitor.done();
 		}
@@ -748,7 +748,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (imports != null && !"".equals(imports)) { //$NON-NLS-1$
 				buffer.append(imports);
 			}
-			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, declaringRewrite, typeComment, buffer, status, new SubProgressMonitor(monitor, 1));
+			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, declaringRewrite, typeComment, buffer, status, SubMonitor.convert(monitor, 1));
 			source= createTypeTemplate(extractedWorkingCopy, "", fileComment, "", buffer.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 			if (source == null) {
 				if (!declaring.getPackageFragment().isDefaultPackage()) {
@@ -1047,7 +1047,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					parser.setResolveBindings(true);
 					parser.setProject(project);
 					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-					final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
+					final IProgressMonitor subsubMonitor= SubMonitor.convert(subMonitor, 1);
 					try {
 						subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
 						subsubMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);

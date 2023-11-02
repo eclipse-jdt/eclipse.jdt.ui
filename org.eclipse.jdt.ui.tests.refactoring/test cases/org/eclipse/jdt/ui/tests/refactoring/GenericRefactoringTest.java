@@ -40,8 +40,9 @@ import org.junit.rules.TestName;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.core.tests.harness.FussyProgressMonitor;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -297,7 +298,9 @@ public abstract class GenericRefactoringTest {
 			final CreateChangeOperation create= new CreateChangeOperation(
 					new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
 					RefactoringStatus.FATAL);
-			create.run(new NullProgressMonitor());
+			FussyProgressMonitor pm= new FussyProgressMonitor();
+			create.run(pm);
+			pm.assertUsedUp();
 			RefactoringStatus checkingStatus= create.getConditionCheckingStatus();
 			if (!checkingStatus.isOK())
 				return checkingStatus;
@@ -364,7 +367,7 @@ public abstract class GenericRefactoringTest {
 	}
 
 	protected void executePerformOperation(final PerformChangeOperation perform, IWorkspace workspace) throws CoreException {
-		workspace.run(perform, new NullProgressMonitor());
+		workspace.run(perform, new FussyProgressMonitor());
 	}
 
 	public RefactoringStatus performRefactoringWithStatus(Refactoring ref) throws Exception, CoreException {
@@ -380,14 +383,18 @@ public abstract class GenericRefactoringTest {
 		if (storeUndo) {
 			perform.setUndoManager(getUndoManager(), refactoring.getName());
 		}
-		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
+		FussyProgressMonitor pm= new FussyProgressMonitor();
+		ResourcesPlugin.getWorkspace().run(perform, pm);
+		pm.assertUsedUp();
 		assertTrue("Change wasn't executed", perform.changeExecuted());
 		return perform.getUndoChange();
 	}
 
 	protected final Change performChange(final Change change) throws Exception {
 		PerformChangeOperation perform= new PerformChangeOperation(change);
-		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
+		FussyProgressMonitor pm= new FussyProgressMonitor();
+		ResourcesPlugin.getWorkspace().run(perform, pm);
+		pm.assertUsedUp();
 		assertTrue("Change wasn't executed", perform.changeExecuted());
 		return perform.getUndoChange();
 	}

@@ -43,10 +43,11 @@ import org.junit.runners.MethodSorters;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
+import org.eclipse.core.tests.harness.FussyProgressMonitor;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
@@ -426,7 +427,9 @@ public class RenamePackageTests extends GenericRefactoringTest {
 	private void performUndo() throws Exception {
 		IUndoManager um= RefactoringCore.getUndoManager();
 		assertTrue(um.anythingToUndo());
-		um.performUndo(null, new NullProgressMonitor());
+		FussyProgressMonitor monitor= new FussyProgressMonitor();
+		um.performUndo(null, monitor);
+		monitor.assertUsedUp();
 		assertFalse(um.anythingToUndo());
 		assertTrue(um.anythingToRedo());
 	}
@@ -989,7 +992,9 @@ public class RenamePackageTests extends GenericRefactoringTest {
 			RefactoringStatus.FATAL);
 		PerformChangeOperation perform= new PerformChangeOperation(create);
 		perform.setUndoManager(undoManager, ref.getName());
-		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
+		FussyProgressMonitor monitor= new FussyProgressMonitor();
+		ResourcesPlugin.getWorkspace().run(perform, monitor);
+		monitor.assertUsedUp();
 		RefactoringStatus status= create.getConditionCheckingStatus();
 		assertTrue("Change wasn't executed", perform.changeExecuted());
 		Change undo= perform.getUndoChange();
@@ -1011,7 +1016,9 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		ParticipantTesting.testRename(renameHandles, renameArguments);
 
 		PerformChangeOperation performUndo= new PerformChangeOperation(undo);
-		ResourcesPlugin.getWorkspace().run(performUndo, new NullProgressMonitor());
+		FussyProgressMonitor monitor2= new FussyProgressMonitor();
+		ResourcesPlugin.getWorkspace().run(performUndo, monitor2);
+		monitor2.assertUsedUp();
 
 		assertFalse("new package still exists", newPackage.exists());
 		assertTrue("original package does not exist: " + rename.fPackageNames[0], src.getPackageFragment(rename.fPackageNames[0]).exists());
@@ -1130,8 +1137,12 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		});
 
 		RenameRefactoring refactoring= (RenameRefactoring)processor.getRefactoring();
-		refactoring.checkFinalConditions(new NullProgressMonitor());
-		refactoring.createChange(new NullProgressMonitor());
+		FussyProgressMonitor monitor= new FussyProgressMonitor();
+		refactoring.checkFinalConditions(monitor);
+		monitor.assertUsedUp();
+		FussyProgressMonitor monitor2= new FussyProgressMonitor();
+		refactoring.createChange(monitor2);
+		monitor2.assertUsedUp();
 
 		ParticipantTesting.testRename(renameHandles, new RenameArguments[] {
 				new RenameArguments(secondName, true),

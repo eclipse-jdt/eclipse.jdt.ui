@@ -34,8 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -166,10 +165,10 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 				}
 				monitor.beginTask(WizardMessages.NewTestCaseCreationWizard_create_progress, 4);
 				try {
-					Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
-					new PerformChangeOperation(change).run(new SubProgressMonitor(monitor, 1));
+					Change change= fix.createChange(SubMonitor.convert(monitor, 1));
+					new PerformChangeOperation(change).run(SubMonitor.convert(monitor, 1));
 
-					runnable.run(new SubProgressMonitor(monitor, 2));
+					runnable.run(SubMonitor.convert(monitor, 2));
 				} catch (OperationCanceledException e) {
 					throw new InterruptedException();
 				} catch (CoreException e) {

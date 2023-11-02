@@ -15,7 +15,7 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.text.edits.ReplaceEdit;
 
@@ -96,7 +96,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		try{
 			pm.beginTask("", 3); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(super.doCheckFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
+			result.merge(super.doCheckFinalConditions(SubMonitor.convert(pm, 1), checkContext));
 			if (result.hasFatalError())
 				return result;
 
@@ -104,7 +104,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			final IType declaring= method.getDeclaringType();
 			final String name= getNewElementName();
 			IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(
-				new SubProgressMonitor(pm, 1), declaring.newTypeHierarchy(new SubProgressMonitor(pm, 1)), method, name);
+				SubMonitor.convert(pm, 1), declaring.newTypeHierarchy(SubMonitor.convert(pm, 1)), method, name);
 
 			for (IMethod hierarchyMethod : hierarchyMethods) {
 				RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);

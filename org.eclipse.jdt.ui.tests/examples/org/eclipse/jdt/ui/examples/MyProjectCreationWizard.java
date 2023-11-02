@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -138,11 +138,11 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 			if (!fMainPage.useDefaults()) {
 				desc.setLocation(locationPath);
 			}
-			project.create(desc, new SubProgressMonitor(monitor, 1));
-			project.open(new SubProgressMonitor(monitor, 1));
+			project.create(desc, SubMonitor.convert(monitor, 1));
+			project.open(SubMonitor.convert(monitor, 1));
 
 			updatePage();
-			fJavaPage.configureJavaProject(new SubProgressMonitor(monitor, 1));
+			fJavaPage.configureJavaProject(SubMonitor.convert(monitor, 1));
 			// TODO: configure your page / nature
 
 			// change to the perspective specified in the plugin.xml

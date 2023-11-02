@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.content.IContentType;
 
 import org.eclipse.core.resources.IFile;
@@ -152,22 +152,22 @@ public class CreateFileChange extends ResourceChange {
 			pm.beginTask(NLSChangesMessages.createFile_creating_resource, 3);
 
 			initializeEncoding();
-			IFile file= getOldFile(new SubProgressMonitor(pm, 1));
+			IFile file= getOldFile(SubMonitor.convert(pm, 1));
 			/*
 			if (file.exists()) {
 				CompositeChange composite= new CompositeChange(getName());
 				composite.add(new DeleteFileChange(file));
 				composite.add(new CreateFileChange(fPath, fSource, fEncoding, fStampToRestore, fExplicitEncoding));
 				pm.worked(1);
-				return composite.perform(new SubProgressMonitor(pm, 1));
+				return composite.perform(SubMonitor.convert(pm, 1));
 			} else { */
 			try (InputStream is= new ByteArrayInputStream(fSource.getBytes(fEncoding))) {
-				file.create(is, false, new SubProgressMonitor(pm, 1));
+				file.create(is, false, SubMonitor.convert(pm, 1));
 				if (fStampToRestore != IResource.NULL_STAMP) {
 					file.revertModificationStamp(fStampToRestore);
 				}
 				if (fExplicitEncoding) {
-					file.setCharset(fEncoding, new SubProgressMonitor(pm, 1));
+					file.setCharset(fEncoding, SubMonitor.convert(pm, 1));
 				} else {
 					pm.worked(1);
 				}

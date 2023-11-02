@@ -34,7 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -1304,7 +1304,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			status.merge(Checks.checkIfCuBroken(fMethod));
 			if (!status.hasError()) {
-				checkGenericTarget(new SubProgressMonitor(monitor, 1), status);
+				checkGenericTarget(SubMonitor.convert(monitor, 1), status);
 				if (status.isOK()) {
 					final IType type= getTargetType();
 					if (type != null) {
@@ -1315,14 +1315,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							if (!status.hasError()) {
 								if (!type.exists() || type.isBinary() || type.isReadOnly())
 									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_binary, JavaStatusContext.create(fMethod)));
-								checkConflictingTarget(new SubProgressMonitor(monitor, 1), status);
-								checkConflictingMethod(new SubProgressMonitor(monitor, 1), status);
+								checkConflictingTarget(SubMonitor.convert(monitor, 1), status);
+								checkConflictingMethod(SubMonitor.convert(monitor, 1), status);
 
 								Checks.addModifiedFilesToChecker(computeModifiedFiles(fMethod.getCompilationUnit(), type.getCompilationUnit()), context);
 
 								monitor.worked(1);
 								if (!status.hasFatalError())
-									fChangeManager= createChangeManager(status, new SubProgressMonitor(monitor, 1));
+									fChangeManager= createChangeManager(status, SubMonitor.convert(monitor, 1));
 							}
 						}
 					} else
@@ -1396,12 +1396,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			status.merge(Checks.checkIfCuBroken(fMethod));
 			if (!status.hasError()) {
-				checkMethodDeclaration(new SubProgressMonitor(monitor, 1), status);
+				checkMethodDeclaration(SubMonitor.convert(monitor, 1), status);
 				if (status.isOK()) {
 					final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
-					checkGenericTypes(new SubProgressMonitor(monitor, 1), declaration, status);
-					checkMethodBody(new SubProgressMonitor(monitor, 1), declaration, status);
-					checkPossibleTargets(new SubProgressMonitor(monitor, 1), declaration, status);
+					checkGenericTypes(SubMonitor.convert(monitor, 1), declaration, status);
+					checkMethodBody(SubMonitor.convert(monitor, 1), declaration, status);
+					checkPossibleTargets(SubMonitor.convert(monitor, 1), declaration, status);
 				}
 			}
 		} finally {
@@ -1548,7 +1548,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(fMethod.getElementName()));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs);
-			SearchResultGroup[] result= RefactoringSearchEngine.search(pattern, scope, requestor, new SubProgressMonitor(monitor, 1), status);
+			SearchResultGroup[] result= RefactoringSearchEngine.search(pattern, scope, requestor, SubMonitor.convert(monitor, 1), status);
 			binaryRefs.addErrorIfNecessary(status);
 
 			return result;
@@ -1815,7 +1815,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			final TextChangeManager manager= new TextChangeManager();
 			final CompilationUnitRewrite targetRewrite= fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()) ? fSourceRewrite : new CompilationUnitRewrite(getTargetType().getCompilationUnit());
 			final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
-			final SearchResultGroup[] references= computeMethodReferences(new SubProgressMonitor(monitor, 1), status);
+			final SearchResultGroup[] references= computeMethodReferences(SubMonitor.convert(monitor, 1), status);
 			final Map<ICompilationUnit, CompilationUnitRewrite> rewrites= new HashMap<>(2);
 			rewrites.put(fSourceRewrite.getCu(), fSourceRewrite);
 			if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
@@ -1827,17 +1827,17 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			adjustor.setFailureSeverity(RefactoringStatus.WARNING);
 			adjustor.setRewrites(rewrites);
 			adjustor.setRewrite(sourceRewrite, fSourceRewrite.getRoot());
-			adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
+			adjustor.adjustVisibility(SubMonitor.convert(monitor, 1));
 			final IDocument document= new Document(fMethod.getCompilationUnit().getBuffer().getContents());
-			createMethodCopy(document, declaration, sourceRewrite, rewrites, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
-			createMethodJavadocReferences(rewrites, declaration, references, status, new SubProgressMonitor(monitor, 1));
+			createMethodCopy(document, declaration, sourceRewrite, rewrites, adjustor.getAdjustments(), status, SubMonitor.convert(monitor, 1));
+			createMethodJavadocReferences(rewrites, declaration, references, status, SubMonitor.convert(monitor, 1));
 			if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
-				createMethodImports(targetRewrite, declaration, new SubProgressMonitor(monitor, 1), status);
+				createMethodImports(targetRewrite, declaration, SubMonitor.convert(monitor, 1), status);
 			boolean removable= false;
 			if (fInline) {
 				String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getMethod().getElementName()));
 				ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
-				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), binaryRefs, status, new SubProgressMonitor(monitor, 1));
+				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), binaryRefs, status, SubMonitor.convert(monitor, 1));
 				binaryRefs.addErrorIfNecessary(status);
 				if (fRemove && removable) {
 					fSourceRewrite.getASTRewrite().remove(declaration, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_remove_original_method));
@@ -1846,7 +1846,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				}
 			}
 			if (!fRemove || !removable)
-				createMethodDelegation(declaration, rewrites, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
+				createMethodDelegation(declaration, rewrites, adjustor.getAdjustments(), status, SubMonitor.convert(monitor, 1));
 
 			// Do not adjust visibility of a target field; references to the
 			// field will be removed anyway.
@@ -1857,7 +1857,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					adjustor.getAdjustments().remove(targetElement);
 			}
 
-			adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
+			adjustor.rewriteVisibility(SubMonitor.convert(monitor, 1));
 			sourceRewrite.rewriteAST(document, fMethod.getCompilationUnit().getOptions(true));
 			createMethodSignature(document, declaration, sourceRewrite, rewrites);
 			ICompilationUnit unit= null;
@@ -2416,7 +2416,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			try {
 				boolean result= true;
 				boolean found= false;
-				final ITypeHierarchy hierarchy= fMethod.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+				final ITypeHierarchy hierarchy= fMethod.getDeclaringType().newTypeHierarchy(SubMonitor.convert(monitor, 1));
 				IType type= null;
 				IMethod method= null;
 				IType[] types= hierarchy.getAllSubtypes(fMethod.getDeclaringType());

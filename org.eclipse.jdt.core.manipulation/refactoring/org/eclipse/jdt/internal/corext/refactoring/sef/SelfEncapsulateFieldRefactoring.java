@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -90,6 +90,9 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
@@ -117,11 +120,6 @@ import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
-import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 
 /**
  * Encapsulates a field into getter and setter calls.
@@ -361,7 +359,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_searching_for_cunits);
-		final SubProgressMonitor subPm= new SubProgressMonitor(pm, 5);
+		final IProgressMonitor subPm= SubMonitor.convert(pm, 5);
 		SearchPattern pattern= SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES);
 		if (pattern == null) {
 			return result;
@@ -378,7 +376,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return result;
 
 		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_analyzing);
-		IProgressMonitor sub= new SubProgressMonitor(pm, 5);
+		IProgressMonitor sub= SubMonitor.convert(pm, 5);
 		sub.beginTask(NO_NAME, affectedCUs.length);
 		IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
 		ITypeBinding declaringClass=
@@ -429,7 +427,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		result.merge(Checks.validateModifiesFiles(filesToBeModified, getValidationContext(), pm));
 		if (result.hasFatalError())
 			return result;
-		ResourceChangeChecker.checkFilesToBeChanged(filesToBeModified, new SubProgressMonitor(pm, 1));
+		ResourceChangeChecker.checkFilesToBeChanged(filesToBeModified, SubMonitor.convert(pm, 1));
 		return result;
 	}
 

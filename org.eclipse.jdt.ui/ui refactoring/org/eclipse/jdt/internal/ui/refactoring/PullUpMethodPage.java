@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -65,11 +65,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -474,8 +474,8 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	private void initializeTreeViewer(final IProgressMonitor pm) {
 		try {
 			pm.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 2);
-			final IMember[] matchingMethods= fProcessor.getMatchingElements(new SubProgressMonitor(pm, 1), false);
-			final ITypeHierarchy hierarchy= fProcessor.getDestinationTypeHierarchy(new SubProgressMonitor(pm, 1));
+			final IMember[] matchingMethods= fProcessor.getMatchingElements(SubMonitor.convert(pm, 1), false);
+			final ITypeHierarchy hierarchy= fProcessor.getDestinationTypeHierarchy(SubMonitor.convert(pm, 1));
 			removeAllTreeViewFilters();
 			fTreeViewer.addFilter(new PullUpFilter(hierarchy, matchingMethods));
 			fTreeViewer.setContentProvider(new PullUpHierarchyContentProvider(fProcessor.getDeclaringType(), matchingMethods));

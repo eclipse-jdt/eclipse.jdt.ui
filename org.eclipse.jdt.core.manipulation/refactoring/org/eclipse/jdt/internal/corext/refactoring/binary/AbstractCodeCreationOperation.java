@@ -30,8 +30,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -84,7 +83,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 	protected void createCompilationUnit(final IFileStore store, final String name, final String content, final IProgressMonitor monitor) throws CoreException {
 		OutputStream stream= null;
 		try {
-			stream= new BufferedOutputStream(store.getChild(name).openOutputStream(EFS.NONE, new SubProgressMonitor(monitor, 1)));
+			stream= new BufferedOutputStream(store.getChild(name).openOutputStream(EFS.NONE, SubMonitor.convert(monitor, 1)));
 			try {
 				stream.write(content.getBytes());
 			} catch (IOException exception) {
@@ -146,7 +145,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 		try {
 			final StringBuilder builder= new StringBuilder(128);
 			for (IPackageFragment fragment : fPackages) {
-				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
+				final IProgressMonitor subMonitor= SubMonitor.convert(monitor, 100);
 				final IClassFile[] files= fragment.getClassFiles(); // safe, but implies this operation cannot create module-info CU, which it probably should.
 				final int size= files.length;
 				subMonitor.beginTask(getOperationLabel(), size * 50);
@@ -163,16 +162,16 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 					}
 					store= store.getFileStore(new Path(builder.toString()));
 					if (!pack.startsWith(".")) //$NON-NLS-1$
-						createPackageFragment(store, pack, new SubProgressMonitor(subMonitor, 10));
+						createPackageFragment(store, pack, SubMonitor.convert(subMonitor, 10));
 				} else
-					createPackageFragment(store, "", new SubProgressMonitor(subMonitor, 10)); //$NON-NLS-1$
-				final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 30);
+					createPackageFragment(store, "", SubMonitor.convert(subMonitor, 10)); //$NON-NLS-1$
+				final IProgressMonitor subsubMonitor= SubMonitor.convert(subMonitor, 30);
 				try {
 					subsubMonitor.beginTask(getOperationLabel(), size * 100);
 					for (IClassFile file : files) {
 						if (subMonitor.isCanceled())
 							throw new OperationCanceledException();
-						run(file, store, new SubProgressMonitor(subsubMonitor, 100));
+						run(file, store, SubMonitor.convert(subsubMonitor, 100));
 					}
 				} finally {
 					subsubMonitor.done();

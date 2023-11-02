@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -317,9 +317,9 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 				IPath locationPath= getLocationPath();
 				BuildPathsBlock.createProject(getProjectHandle(),
 					locationPath != null ? URIUtil.toURI(locationPath) : null,
-					new SubProgressMonitor(monitor, 2));
-				BuildPathsBlock.addJavaNature(getProjectHandle(), new SubProgressMonitor(monitor, 2));
-				fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 6));
+					SubMonitor.convert(monitor, 2));
+				BuildPathsBlock.addJavaNature(getProjectHandle(), SubMonitor.convert(monitor, 2));
+				fBuildPathsBlock.configureJavaProject(SubMonitor.convert(monitor, 6));
 			} catch (CoreException e1) {
 				throw new InvocationTargetException(e1);
 			} catch (OperationCanceledException e2) {
