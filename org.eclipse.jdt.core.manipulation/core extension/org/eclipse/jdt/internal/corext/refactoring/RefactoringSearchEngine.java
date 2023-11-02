@@ -167,7 +167,7 @@ public class RefactoringSearchEngine {
 			if (searchMatch.getAccuracy() == SearchMatch.A_INACCURATE)
 				hasPotentialMatches= true;
 			if (! grouped.containsKey(searchMatch.getResource()))
-				grouped.put(searchMatch.getResource(), new ArrayList<SearchMatch>(1));
+				grouped.put(searchMatch.getResource(), new ArrayList<>(1));
 			grouped.get(searchMatch.getResource()).add(searchMatch);
 		}
 

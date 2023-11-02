@@ -923,7 +923,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 						if (parent != null) {
 							ASTNode varDecl= parent.getParent();
 							if (!variableDeclarations.containsKey(varDecl)) {
-								variableDeclarations.put(varDecl, new ArrayList<SimpleName>());
+								variableDeclarations.put(varDecl, new ArrayList<>());
 							}
 							variableDeclarations.get(varDecl).add(name);
 						} else {

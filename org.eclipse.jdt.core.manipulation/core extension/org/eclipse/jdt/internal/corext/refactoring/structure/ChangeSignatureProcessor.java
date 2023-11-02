@@ -1426,7 +1426,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				continue;
 			ICompilationUnit cu= subclass.getCompilationUnit();
 			if (! result.containsKey(cu))
-				result.put(cu, new HashSet<IType>());
+				result.put(cu, new HashSet<>());
 			result.get(cu).add(subclass);
 		}
 		return result;

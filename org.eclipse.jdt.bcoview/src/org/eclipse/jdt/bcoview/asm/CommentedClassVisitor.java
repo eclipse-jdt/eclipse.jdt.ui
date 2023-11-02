@@ -160,7 +160,7 @@ public class CommentedClassVisitor extends Textifier implements ICommentedClassV
 		}
 		assert meth != null;
 
-		currMethod = new DecompiledMethod(className, new HashMap<Label, Integer>(), meth, options, access);
+		currMethod = new DecompiledMethod(className, new HashMap<>(), meth, options, access);
 		Textifier textifier = super.visitMethod(access, name, desc, signature, exceptions);
 		TraceMethodVisitor tm = new TraceMethodVisitor(textifier);
 		meth.accept(tm);

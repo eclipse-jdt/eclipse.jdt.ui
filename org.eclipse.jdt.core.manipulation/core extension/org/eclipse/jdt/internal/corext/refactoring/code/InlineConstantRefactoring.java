@@ -581,7 +581,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			HashSet<SimpleName> staticImportsInReference= new HashSet<>();
 			final IJavaProject project= fCuRewrite.getCu().getJavaProject();
 			if (fIs15)
-				ImportReferencesCollector.collect(location, project, null, new ArrayList<SimpleName>(), staticImportsInReference);
+				ImportReferencesCollector.collect(location, project, null, new ArrayList<>(), staticImportsInReference);
 
 			InitializerTraversal traversal= new InitializerTraversal(fInitializer, fStaticImportsInInitializer, location, staticImportsInReference, fCuRewrite);
 			ASTRewrite initializerRewrite= traversal.getInitializerRewrite();
@@ -838,7 +838,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			fDeclarationCuRewrite.clearASTAndImportRewrites();
 			List<CompilationUnitChange>changes= new ArrayList<>();
 			HashSet<SimpleName> staticImportsInInitializer= new HashSet<>();
-			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList<SimpleName>(), staticImportsInInitializer);
+			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList<>(), staticImportsInInitializer);
 
 			if (getReplaceAllReferences()) {
 				for (SearchResultGroup group : getReferences(pm, result)) {

@@ -133,7 +133,7 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 
 				@Override
 				public boolean visit(final IfStatement visited) {
-					return !result || maybePullUpExpression(visited, visited.getExpression(), new ArrayList<Expression>());
+					return !result || maybePullUpExpression(visited, visited.getExpression(), new ArrayList<>());
 				}
 
 				private boolean maybePullUpExpression(final IfStatement visited, final Expression expression, final List<Expression> evaluatedExpression) {

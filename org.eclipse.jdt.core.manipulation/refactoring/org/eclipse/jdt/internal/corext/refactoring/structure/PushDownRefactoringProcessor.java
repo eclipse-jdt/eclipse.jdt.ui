@@ -732,14 +732,14 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 							if (oldField != null) {
 								FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldField);
 								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, BodyDeclarationRewrite.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN));
-								ImportRewriteUtil.addImports(unitRewriter, context, oldField.getParent(), new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+								ImportRewriteUtil.addImports(unitRewriter, context, oldField.getParent(), new HashMap<>(), new HashMap<>(), false);
 							}
 						} else {
 							final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldMethod != null) {
 								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], mapping, unitRewriter, oldMethod);
 								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, BodyDeclarationRewrite.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN));
-								ImportRewriteUtil.addImports(unitRewriter, context, oldMethod, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+								ImportRewriteUtil.addImports(unitRewriter, context, oldMethod, new HashMap<>(), new HashMap<>(), false);
 							}
 						}
 					}

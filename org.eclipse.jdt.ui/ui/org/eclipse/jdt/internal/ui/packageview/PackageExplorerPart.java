@@ -317,11 +317,9 @@ public class PackageExplorerPart extends ViewPart
 		@Override
 		protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
 			IStructuredSelection is= (IStructuredSelection)invalidSelection;
-			List<Object> ns= null;
+			List<Object> ns= new ArrayList<>();
 			if (newSelection instanceof IStructuredSelection) {
-				ns= new ArrayList<Object>(((IStructuredSelection) newSelection).toList());
-			} else {
-				ns= new ArrayList<>();
+				ns.addAll(((IStructuredSelection) newSelection).toList());
 			}
 			boolean changed= false;
 			for (Object element : is) {

@@ -631,7 +631,7 @@ public class Bindings {
 				}
 				return visitor.visit(t);
 			}
-		}, new HashSet<ITypeBinding>());
+		}, new HashSet<>());
 	}
 
 	private static boolean visitSuperTypes(ITypeBinding type, TypeBindingVisitor visitor, HashSet<ITypeBinding> visited) {
@@ -662,7 +662,7 @@ public class Bindings {
 	 *         method returned <code>false</code> for a type
 	 */
 	public static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor) {
-		return visitInterfaces(type, visitor, new HashSet<ITypeBinding>());
+		return visitInterfaces(type, visitor, new HashSet<>());
 	}
 
 	private static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor, HashSet<ITypeBinding> visited) {

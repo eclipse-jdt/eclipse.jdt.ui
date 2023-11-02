@@ -533,7 +533,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 		if (!isNonStaticAccess(problem))
 			return null;
 
-		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap<ASTNode, Block>(), problem, false);
+		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap<>(), problem, false);
 		if (operations == null)
 			return null;
 
@@ -564,7 +564,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 		if (!isIndirectStaticAccess(problem))
 			return null;
 
-		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap<ASTNode, Block>(), problem, false);
+		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap<>(), problem, false);
 		if (operations == null)
 			return null;
 

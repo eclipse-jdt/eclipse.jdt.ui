@@ -39,7 +39,7 @@ public class MapCleanUpOptionsCore extends CleanUpOptionsCore {
 	}
 
 	public MapCleanUpOptionsCore() {
-		this(new Hashtable<String, String>());
+		this(new Hashtable<>());
 	}
 
 	/**

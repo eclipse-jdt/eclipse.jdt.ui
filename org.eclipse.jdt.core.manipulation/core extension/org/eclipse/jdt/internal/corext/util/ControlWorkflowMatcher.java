@@ -252,7 +252,7 @@ public final class ControlWorkflowMatcher implements ControlWorkflowMatcherCompl
 		List<NodeMatcher<Expression>> conditions= new ArrayList<>();
 		conditions.add(condition);
 		conditionsByWorkflow.add(conditions);
-		statementsByWorkflow.add(new ArrayList<NodeMatcher<Statement>>());
+		statementsByWorkflow.add(new ArrayList<>());
 		returnedValuesByWorkflow.add(null);
 
 		return this;

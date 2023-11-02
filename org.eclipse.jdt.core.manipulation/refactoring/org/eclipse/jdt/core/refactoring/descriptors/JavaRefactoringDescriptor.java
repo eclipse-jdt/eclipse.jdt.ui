@@ -261,7 +261,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *            the unique id of the refactoring
 	 */
 	protected JavaRefactoringDescriptor(final String id) {
-		this(id, null, DescriptorMessages.JavaRefactoringDescriptor_not_available, null, new HashMap<String, String>(), RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+		this(id, null, DescriptorMessages.JavaRefactoringDescriptor_not_available, null, new HashMap<>(), RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 	}
 
 	/**

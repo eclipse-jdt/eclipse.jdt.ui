@@ -242,7 +242,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		for (IMember member : members) {
 			final IType type= member.getDeclaringType();
 			if (!typeToMemberSet.containsKey(type))
-				typeToMemberSet.put(type, new HashSet<IMember>());
+				typeToMemberSet.put(type, new HashSet<>());
 			typeToMemberSet.get(type).add(member);
 		}
 		return typeToMemberSet;

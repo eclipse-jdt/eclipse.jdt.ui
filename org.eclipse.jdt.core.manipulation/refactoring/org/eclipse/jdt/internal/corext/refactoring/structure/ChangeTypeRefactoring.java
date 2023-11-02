@@ -652,7 +652,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				icu= ((IMethod) mb.getJavaElement()).getCompilationUnit();
 			}
 			if (!relevantVarsByUnit.containsKey(icu)){
-				relevantVarsByUnit.put(icu, new HashSet<ConstraintVariable>());
+				relevantVarsByUnit.put(icu, new HashSet<>());
 			}
 			relevantVarsByUnit.get(icu).add(cv);
 		}

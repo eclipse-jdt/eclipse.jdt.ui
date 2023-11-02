@@ -526,7 +526,7 @@ public class ReorgUtilsCore {
 			ICompilationUnit cu= ReorgUtilsCore.getCompilationUnit(element);
 			if (cu != null){
 				if (! result.containsKey(cu))
-					result.put(cu, new ArrayList<IJavaElement>(1));
+					result.put(cu, new ArrayList<>(1));
 				result.get(cu).add(element);
 			}
 		}
