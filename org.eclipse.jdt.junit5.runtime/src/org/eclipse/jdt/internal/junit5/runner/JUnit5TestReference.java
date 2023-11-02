@@ -15,6 +15,7 @@
 package org.eclipse.jdt.internal.junit5.runner;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -30,8 +31,6 @@ import org.eclipse.jdt.internal.junit.runner.TestExecution;
 import org.eclipse.jdt.internal.junit.runner.TestIdMap;
 
 public class JUnit5TestReference implements ITestReference {
-
-	public static final String STOP_REQUESTED_VM_PROPERTY_NAME = "JDT_JUNIT5_RUNNER_STOP_REQUESTED"; //$NON-NLS-1$
 
 	private LauncherDiscoveryRequest fRequest;
 
@@ -89,7 +88,7 @@ public class JUnit5TestReference implements ITestReference {
 
 	@Override
 	public void run(TestExecution execution) {
-		execution.addStopListener(() -> System.setProperty(STOP_REQUESTED_VM_PROPERTY_NAME, Boolean.TRUE.toString()));
+		registerStopListener(fLauncher, execution);
 		boolean foundMethodThatAvoidsRedundantDiscovery;
 		try {
 			fLauncher.getClass().getMethod("execute", TestPlan.class, TestExecutionListener[].class); //$NON-NLS-1$
@@ -128,4 +127,19 @@ public class JUnit5TestReference implements ITestReference {
 		return fRequest.toString();
 	}
 
+	// XXX: hack for stopping JUnit 5 tests, use API from https://github.com/junit-team/junit5/issues/1880 once available
+	private static void registerStopListener(Launcher launcher, TestExecution execution) {
+		AtomicBoolean stopped = new AtomicBoolean(false);
+		execution.addStopListener(() -> stopped.set(true));
+		launcher.registerTestExecutionListeners(new TestExecutionListener() {
+			@Override
+			public void executionStarted(TestIdentifier testIdentifier) {
+				if (stopped.get()) {
+					// fake an OOM, since this is the only type of exception that JUnit 5 doesn't swallow
+					// This exception and exact message is handled in RemoteTestRunnerClient
+					throw new OutOfMemoryError("Junit5 test stopped by user"); //$NON-NLS-1$
+				}
+			}
+		});
+	}
 }

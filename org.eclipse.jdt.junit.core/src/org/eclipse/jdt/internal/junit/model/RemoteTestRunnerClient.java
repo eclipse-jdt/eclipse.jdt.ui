@@ -177,7 +177,16 @@ public class RemoteTestRunnerClient {
 	    @Override
 		ProcessingState readMessage(String message) {
 	        if (message.startsWith(MessageIds.TRACE_END)) {
-	            notifyTestFailed();
+	        	// Workaround for JUnit 5 test execution stop
+	        	// triggered by user: see JUnit5TestReference
+	        	String trace = fFailedTrace.toString();
+				if(trace.startsWith("java.lang.OutOfMemoryError: Junit5 test stopped by user")) {//$NON-NLS-1$
+					// Faked JUnit5 test error, just stop the test
+					notifyTestRunStopped(0);
+				} else {
+					// default Junit4 handling
+					notifyTestFailed();
+				}
 	            fFailedTrace.setLength(0);
 	            fActualResult.setLength(0);
 	            fExpectedResult.setLength(0);
