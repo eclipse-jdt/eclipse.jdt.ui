@@ -100,7 +100,6 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -113,6 +112,8 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
@@ -153,10 +154,7 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public final class ReorgPolicyFactory {
 
@@ -3770,7 +3768,7 @@ public final class ReorgPolicyFactory {
 			}
 			if (decl != null) {
 				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(destinationContainer, targetRewriter.getImportRewrite());
-				ImportRewriteUtil.addImports(targetRewriter, context, decl, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+				ImportRewriteUtil.addImports(targetRewriter, context, decl, new HashMap<>(), new HashMap<>(), false);
 			}
 		}
 

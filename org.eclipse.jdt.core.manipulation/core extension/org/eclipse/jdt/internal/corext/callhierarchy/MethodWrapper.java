@@ -67,7 +67,7 @@ public abstract class MethodWrapper extends PlatformObject {
         Assert.isNotNull(methodCall);
 
         if (parent == null) {
-            setMethodCache(new HashMap<String, Map<String, MethodCall>>());
+            setMethodCache(new HashMap<>());
             fLevel = 1;
         } else {
             setMethodCache(parent.getMethodCache());

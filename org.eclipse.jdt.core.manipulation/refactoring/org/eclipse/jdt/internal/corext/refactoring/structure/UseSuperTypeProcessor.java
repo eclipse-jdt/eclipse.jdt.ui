@@ -281,7 +281,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				if (bindings != null && bindings.length == 2 && bindings[0] instanceof ITypeBinding && bindings[1] instanceof ITypeBinding) {
 					solveSuperTypeConstraints(null, null, fSubType, (ITypeBinding) bindings[0], (ITypeBinding) bindings[1], new SubProgressMonitor(monitor, 100), status);
 					if (!status.hasFatalError())
-						rewriteTypeOccurrences(manager, null, null, null, null, new HashSet<String>(), status, new SubProgressMonitor(monitor, 150));
+						rewriteTypeOccurrences(manager, null, null, null, null, new HashSet<>(), status, new SubProgressMonitor(monitor, 150));
 				}
 			} else {
 				parser.createASTs(new ICompilationUnit[] { fSubType.getCompilationUnit() }, new String[0], new ASTRequestor() {
@@ -298,7 +298,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 									if (superBinding != null) {
 										solveSuperTypeConstraints(subRewrite.getCu(), subRewrite.getRoot(), fSubType, subBinding, superBinding, new SubProgressMonitor(monitor, 100), status);
 										if (!status.hasFatalError()) {
-											rewriteTypeOccurrences(manager, this, subRewrite, subRewrite.getCu(), subRewrite.getRoot(), new HashSet<String>(), status, new SubProgressMonitor(monitor, 200));
+											rewriteTypeOccurrences(manager, this, subRewrite, subRewrite.getCu(), subRewrite.getRoot(), new HashSet<>(), status, new SubProgressMonitor(monitor, 200));
 											final TextChange change= subRewrite.createChange(true);
 											if (change != null)
 												manager.manage(subRewrite.getCu(), change);

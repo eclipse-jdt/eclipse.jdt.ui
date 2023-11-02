@@ -118,7 +118,7 @@ public abstract class OpenEditorAction extends Action {
 		try {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> {
 				try {
-					result[0] = internalFindType(project, dottedName, new HashSet<IJavaProject>(), monitor);
+					result[0] = internalFindType(project, dottedName, new HashSet<>(), monitor);
 					if (result[0] == null) {
 						int lastDot = dottedName.lastIndexOf('.');
 						TypeNameMatchRequestor nameMatchRequestor = new TypeNameMatchRequestor() {

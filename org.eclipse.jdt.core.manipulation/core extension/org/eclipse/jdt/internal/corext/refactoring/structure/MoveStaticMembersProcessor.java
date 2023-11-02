@@ -81,7 +81,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -930,7 +929,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				typeRefs.addAll(TypeReferenceFinder.perform(declaration));
 			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fMemberBindings, fSourceBinding, target);
 			declaration.accept(analyzer);
-			ImportRewriteUtil.addImports(fTarget, context, declaration, new HashMap<Name, String>(), new HashMap<Name, String>(), exclude, false);
+			ImportRewriteUtil.addImports(fTarget, context, declaration, new HashMap<>(), new HashMap<>(), exclude, false);
 			if (getDeclaringType().isInterface() && !fDestinationType.isInterface()) {
 				if (declaration instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;

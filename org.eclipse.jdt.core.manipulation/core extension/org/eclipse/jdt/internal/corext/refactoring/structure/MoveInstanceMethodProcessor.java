@@ -484,7 +484,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			fRewrite= rewrite;
 			fDeclaration= sourceDeclaration;
 			fStaticImports.clear();
-			ImportRewriteUtil.collectImports(fMethod.getJavaProject(), sourceDeclaration, new HashSet<ITypeBinding>(), fStaticImports, false);
+			ImportRewriteUtil.collectImports(fMethod.getJavaProject(), sourceDeclaration, new HashSet<>(), fStaticImports, false);
 		}
 
 		private boolean isParameterName(String name) {
@@ -2494,7 +2494,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		monitor.beginTask("", 1); //$NON-NLS-1$
 		monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_creating);
 		try {
-			ImportRewriteUtil.addImports(rewrite, null, declaration, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+			ImportRewriteUtil.addImports(rewrite, null, declaration, new HashMap<>(), new HashMap<>(), false);
 		} finally {
 			monitor.done();
 		}

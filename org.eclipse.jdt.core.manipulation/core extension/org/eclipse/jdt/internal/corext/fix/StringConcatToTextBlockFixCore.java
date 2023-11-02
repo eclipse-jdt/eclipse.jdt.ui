@@ -829,7 +829,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		StringConcatFinder finder= new StringConcatFinder(operations, true);
 		exp.accept(finder);
 		if (operations.isEmpty()) {
-			StringBufferFinder finder2= new StringBufferFinder(operations, new HashSet<String>());
+			StringBufferFinder finder2= new StringBufferFinder(operations, new HashSet<>());
 			exp.accept(finder2);
 		}
 		if (operations.isEmpty()) {

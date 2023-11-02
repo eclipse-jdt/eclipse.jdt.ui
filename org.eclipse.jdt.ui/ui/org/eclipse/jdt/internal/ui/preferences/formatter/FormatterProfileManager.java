@@ -40,7 +40,7 @@ public class FormatterProfileManager extends ProfileManager {
 	public final static String DEFAULT_PROFILE= ECLIPSE_PROFILE;
 
 	private final static KeySet[] KEY_SETS= new KeySet[] {
-		new KeySet(JavaCore.PLUGIN_ID, new ArrayList<String>(DefaultCodeFormatterConstants.getJavaConventionsSettings().keySet())),
+		new KeySet(JavaCore.PLUGIN_ID, new ArrayList<>(DefaultCodeFormatterConstants.getJavaConventionsSettings().keySet())),
 		new KeySet(JavaUI.ID_PLUGIN, Collections.<String>emptyList())
 	};
 

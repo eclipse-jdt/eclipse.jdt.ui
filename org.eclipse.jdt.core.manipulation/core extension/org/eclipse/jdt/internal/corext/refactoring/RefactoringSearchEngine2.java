@@ -367,7 +367,7 @@ public final class RefactoringSearchEngine2 {
 			match= (SearchMatch) name;
 			resource= match.getResource();
 			if (!grouped.containsKey(resource))
-				grouped.put(resource, new ArrayList<SearchMatch>(4));
+				grouped.put(resource, new ArrayList<>(4));
 			matches= grouped.get(resource);
 			matches.add(match);
 		}

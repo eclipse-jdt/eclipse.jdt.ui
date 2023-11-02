@@ -532,7 +532,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 		IJavaProject javaProject= target.getCompilationUnit().getJavaProject();
 		if (!fProjects.containsKey(javaProject))
-			fProjects.put(javaProject, new ArrayList<CleanUpTarget>());
+			fProjects.put(javaProject, new ArrayList<>());
 
 		List<CleanUpTarget> targets= fProjects.get(javaProject);
 		targets.add(target);

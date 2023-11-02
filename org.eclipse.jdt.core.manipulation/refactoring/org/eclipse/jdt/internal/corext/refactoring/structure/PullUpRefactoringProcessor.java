@@ -952,7 +952,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		newMethod.setJavadoc(createJavadocForStub(typeToCreateStubIn.getName().getIdentifier(), methodToCreateStubFor, newMethod, newCu, astRewrite));
 		ImportRewrite importRewrite= rewriter.getImportRewrite();
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(typeToCreateStubIn, importRewrite);
-		ImportRewriteUtil.addImports(rewriter, context, methodToCreateStubFor, new HashMap<Name, String>(), new HashMap<Name, String>(), true);
+		ImportRewriteUtil.addImports(rewriter, context, methodToCreateStubFor, new HashMap<>(), new HashMap<>(), true);
 		IJavaProject javaProject= newCu.getJavaProject();
 		CodeGenerationSettings codeGenerationSettings= JavaPreferencesSettings.getCodeGenerationSettings(javaProject);
 		StubUtility2Core.addOverrideAnnotation(codeGenerationSettings, javaProject, astRewrite, importRewrite, newMethod, getDeclaringType().isInterface(),
@@ -1471,7 +1471,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		copyThrownExceptions(oldMethod, newMethod);
 		copyTypeParameters(oldMethod, newMethod);
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(destination, targetRewrite.getImportRewrite());
-		ImportRewriteUtil.addImports(targetRewrite, context, oldMethod, new HashMap<Name, String>(), new HashMap<Name, String>(), true);
+		ImportRewriteUtil.addImports(targetRewrite, context, oldMethod, new HashMap<>(), new HashMap<>(), true);
 		targetRewrite.getASTRewrite().getListRewrite(destination, destination.getBodyDeclarationsProperty()).insertAt(newMethod, org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite.getInsertionIndex(newMethod, destination.bodyDeclarations()), targetRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_abstract_method, SET_PULL_UP));
 	}
 
@@ -1592,7 +1592,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 									int flags= getModifiersWithUpdatedVisibility(member, member.getFlags(), adjustments, new SubProgressMonitor(subsub, 1), true, status);
 									final FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, new SubProgressMonitor(subsub, 1), status, flags);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite.getInsertionIndex(newField, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
-									ImportRewriteUtil.addImports(rewrite, context, oldField.getParent(), new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+									ImportRewriteUtil.addImports(rewrite, context, oldField.getParent(), new HashMap<>(), new HashMap<>(), false);
 
 									if (oldField.getParent() instanceof FieldDeclaration) {
 										// set fully qualified type name for pulled up types
@@ -1647,14 +1647,14 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 										status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_moving_static_method_to_interface, new String[] { JavaElementLabelsCore.getTextLabel(member, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(member)));
 									final MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewriter, rewrite, ((IMethod) member), oldMethod, mapping, adjustments, newArgumentMap,  new SubProgressMonitor(subsub, 1), status);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite.getInsertionIndex(newMethod, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
-									ImportRewriteUtil.addImports(rewrite, context, oldMethod, new HashMap<Name, String>(), new HashMap<Name, String>(), newMethod.getBody() == null);
+									ImportRewriteUtil.addImports(rewrite, context, oldMethod, new HashMap<>(), new HashMap<>(), newMethod.getBody() == null);
 								}
 							} else if (member instanceof IType) {
 								final AbstractTypeDeclaration oldType= ASTNodeSearchUtil.getAbstractTypeDeclarationNode((IType) member, root);
 								if (oldType != null) {
 									final BodyDeclaration newType= createNewTypeDeclarationNode(((IType) member), oldType, root, mapping, rewriter);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newType, org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite.getInsertionIndex(newType, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
-									ImportRewriteUtil.addImports(rewrite, context, oldType, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+									ImportRewriteUtil.addImports(rewrite, context, oldType, new HashMap<>(), new HashMap<>(), false);
 								}
 							} else
 								Assert.isTrue(false);

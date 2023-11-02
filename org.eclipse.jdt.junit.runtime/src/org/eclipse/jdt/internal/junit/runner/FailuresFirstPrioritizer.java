@@ -37,7 +37,7 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 
 	@Override
 	public Test prioritize(Test suite) {
-		doPrioritize(suite, new ArrayList<Test>());
+		doPrioritize(suite, new ArrayList<>());
 		return suite;
 	}
 

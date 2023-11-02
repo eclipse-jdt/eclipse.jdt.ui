@@ -38,7 +38,7 @@ public class MapCleanUpOptions extends CleanUpOptions {
 	}
 
 	public MapCleanUpOptions() {
-		this(new Hashtable<String, String>());
+		this(new Hashtable<>());
 	}
 
 	/**

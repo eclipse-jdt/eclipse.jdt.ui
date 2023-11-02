@@ -90,7 +90,7 @@ public class ClasspathModifier {
 		}
 
 		if (outputPath != null)
-			exclude(outputPath, cpProject.getCPListElements(), new ArrayList<CPListElement>(), cpProject.getJavaProject(), null);
+			exclude(outputPath, cpProject.getCPListElements(), new ArrayList<>(), cpProject.getJavaProject(), null);
 
 		IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
         if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1 && !oldOutputLocation.equals(cpProject.getDefaultOutputLocation())) {
@@ -143,7 +143,7 @@ public class ClasspathModifier {
 			result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.OutputLocationDialog_removeProjectFromBP, BasicElementLabels.getPathLabel(cpProject.getDefaultOutputLocation(), false)));
 		}
 
-		exclude(outputPath, cpProject.getCPListElements(), new ArrayList<CPListElement>(), cpProject.getJavaProject(), null);
+		exclude(outputPath, cpProject.getCPListElements(), new ArrayList<>(), cpProject.getJavaProject(), null);
 
 		IPath oldOutputLocation= (IPath)elementToChange.getAttribute(CPListElement.OUTPUT);
         if (oldOutputLocation != null && oldOutputLocation.segmentCount() > 1 && !oldOutputLocation.equals(cpProject.getDefaultOutputLocation())) {
@@ -1323,7 +1323,7 @@ public class ClasspathModifier {
 			}
 
 			if (!isExternal && !entry.getPath().equals(project.getPath()))
-				exclude(entry.getPath(), existingEntries, new ArrayList<CPListElement>(), project, null);
+				exclude(entry.getPath(), existingEntries, new ArrayList<>(), project, null);
 
 			IPath outputLocation= project.getOutputLocation();
 			insertAtEndOfCategory(entry, existingEntries);

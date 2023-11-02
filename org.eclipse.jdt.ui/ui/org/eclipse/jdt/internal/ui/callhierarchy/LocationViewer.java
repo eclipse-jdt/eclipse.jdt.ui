@@ -40,10 +40,6 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.actions.ActionFactory;
 
-import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
-
-
-
 class LocationViewer extends TableViewer {
     private final String columnHeaders[] = {
         CallHierarchyMessages.LocationViewer_ColumnIcon_header,
@@ -61,7 +57,7 @@ class LocationViewer extends TableViewer {
 
         setContentProvider(ArrayContentProvider.getInstance());
         setLabelProvider(new LocationLabelProvider());
-        setInput(new ArrayList<CallLocation>());
+        setInput(new ArrayList<>());
 
         createColumns();
     }
