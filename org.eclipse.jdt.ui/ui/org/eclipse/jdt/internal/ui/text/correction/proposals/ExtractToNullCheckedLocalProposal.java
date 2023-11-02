@@ -40,21 +40,18 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * and move the dereference into the then-block of this null-check:
  *
  * <pre>
- * {@code
- * @Nullable
+ * <code>@Nullable</code>
  * Exception e;
- * }
  * void test() {
  *     e.printStackTrace();
- * }</pre>
+ * }
+ * </pre>
  *
  * will be converted to:
  *
  * <pre>
- * {@code
- * @Nullable
+ * <code>@Nullable</code>
  * Exception e;
- * }
  * void test() {
  *     final Exception e2 = e;
  *     if (e2 != null) {
@@ -62,13 +59,14 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  *     } else {
  *         // TODO handle null value
  *     }
- * }</pre>
+ * }
+ * </pre>
  * <p>
  * The <code>final</code> keyword is added to remind the user that writing to the local variable has
  * no effect on the original field.
  * </p>
  * <p>
- * Rrespects scoping if the problem occurs inside the initialization of a local variable (by moving
+ * Respects scoping if the problem occurs inside the initialization of a local variable (by moving
  * statements into the new then block).
  * </p>
  *

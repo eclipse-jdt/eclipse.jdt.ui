@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 /**
  * Rewrite helper for {@link Dimension} node lists and {@link ArrayType}s.
  *
- * @see JDTUIHelperClasses
  * @since 3.10
  */
 public class DimensionRewrite {

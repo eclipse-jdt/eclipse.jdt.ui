@@ -50,7 +50,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 /**
  * Helper class to check if an expression requires parentheses.
  *
- * @see JDTUIHelperClasses
  * @since 3.7
  */
 public class NecessaryParenthesesChecker {

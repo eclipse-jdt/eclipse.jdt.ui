@@ -28,8 +28,6 @@ import org.eclipse.jdt.core.JavaCore;
  * the same element, please use {@link JavaConventions} directly (with the
  * arguments from {@link #getSourceComplianceLevels(IJavaElement)}).
  * </p>
- *
- * @see JDTUIHelperClasses
  */
 public class JavaConventionsUtil {
 

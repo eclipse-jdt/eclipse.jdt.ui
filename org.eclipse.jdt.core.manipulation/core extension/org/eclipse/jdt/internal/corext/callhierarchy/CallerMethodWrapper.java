@@ -94,7 +94,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 
 	/**
 	 * @return The result of the search for children
-	 * @see org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(IProgressMonitor)
 	 */
 	@Override
 	protected Map<String, MethodCall> findChildren(IProgressMonitor progressMonitor) {

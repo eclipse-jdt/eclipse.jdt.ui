@@ -44,8 +44,6 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.Posit
 
 /**
  * Rewrite helper for modifier lists.
- *
- * @see JDTUIHelperClasses
  */
 public class ModifierRewrite {
 
