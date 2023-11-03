@@ -1935,6 +1935,9 @@ public class LocalCorrectionsSubProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INSERT_BREAK_STATEMENT, image);
 			proposals.add(proposal);
 
+			if (problem.getProblemId() == IProblem.IllegalFallthroughToPattern)
+				return;
+
 			// insert //$FALL-THROUGH$:
 			rewrite= ASTRewrite.create(ast);
 			rewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
