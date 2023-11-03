@@ -16,11 +16,15 @@ package org.eclipse.jdt.internal.junit.buildpath;
 import org.eclipse.jdt.junit.JUnitCore;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.program.Program;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IPath;
@@ -31,6 +35,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.layout.PixelConverter;
 
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -60,6 +66,8 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 	private Combo fVersionCombo;
 	private Text fResolvedPath;
 	private Text fResolvedSourcePath;
+	private Button fVintage;
+	private Link fLink;
 
 	public JUnitContainerWizardPage() {
 		super("JUnitContainerPage"); //$NON-NLS-1$
@@ -119,9 +127,17 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		label.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
 		label.setText(JUnitMessages.JUnitContainerWizardPage_combo_label);
 
-		fVersionCombo= new Combo(composite, SWT.READ_ONLY);
+		Composite comboComposite= new Composite(composite, SWT.NONE);
+		comboComposite.setLayout(new GridLayout(3, false));
+		fVersionCombo= new Combo(comboComposite, SWT.READ_ONLY);
 		fVersionCombo.setItems(JUnitMessages.JUnitContainerWizardPage_option_junit3, JUnitMessages.JUnitContainerWizardPage_option_junit4, JUnitMessages.JUnitContainerWizardPage_option_junit5);
-		fVersionCombo.setFont(composite.getFont());
+		fVersionCombo.setFont(comboComposite.getFont());
+		fVintage = new Button(comboComposite, SWT.CHECK);
+		fLink= new Link(comboComposite, SWT.NONE);
+		fLink.setText(JUnitMessages.JUnitContainerWizardPage_enableVintage);
+		fLink.setToolTipText(JUnitMessages.JUnitContainerWizardPage_enableVintage_tooltip);
+		fVintage.setToolTipText(JUnitMessages.JUnitContainerWizardPage_enableVintage_tooltip);
+		fLink.addSelectionListener(SelectionListener.widgetSelectedAdapter(e->Program.launch("https://junit.org/junit5/docs/current/user-guide/#overview-what-is-junit-5"))); //$NON-NLS-1$
 
 		GridData data= new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1);
 		data.widthHint= converter.convertWidthInCharsToPixels(15);
@@ -133,8 +149,10 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 			fVersionCombo.select(1);
 		} else {
 			fVersionCombo.select(2);
+			fVintage.setSelection(fContainerEntryResult==null || JUnitCore.isVintage(fContainerEntryResult.getExtraAttributes()));
 		}
 		fVersionCombo.addModifyListener(e -> doSelectionChanged());
+		fVintage.addSelectionListener(SelectionListener.widgetSelectedAdapter(e->doSelectionChanged()));
 
 		label= new Label(composite, SWT.NONE);
 		label.setFont(composite.getFont());
@@ -178,17 +196,27 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 
 		IClasspathEntry libEntry;
 		IPath containerPath;
+		IClasspathAttribute[] extraAttributes;
 		if (fVersionCombo != null && fVersionCombo.getSelectionIndex() == 2) {
 			containerPath= JUnitCore.JUNIT5_CONTAINER_PATH;
 			libEntry= BuildPathSupport.getJUnitJupiterApiLibraryEntry();
+			fVintage.setVisible(true);
+			fLink.setVisible(true);
+			extraAttributes= new IClasspathAttribute[] {JavaCore.newClasspathAttribute(JUnitCore.VINTAGE_ATTRIBUTE, Boolean.toString(fVintage.getSelection()))};
 		} else if (fVersionCombo != null && fVersionCombo.getSelectionIndex() == 1) {
 			containerPath= JUnitCore.JUNIT4_CONTAINER_PATH;
 			libEntry= BuildPathSupport.getJUnit4LibraryEntry();
+			fVintage.setVisible(false);
+			fLink.setVisible(false);
+			extraAttributes= new IClasspathAttribute[0];
 		} else {
 			containerPath= JUnitCore.JUNIT3_CONTAINER_PATH;
 			libEntry= BuildPathSupport.getJUnit3LibraryEntry();
 			if (libEntry == null)
 				libEntry= BuildPathSupport.getJUnit4as3LibraryEntry(); // JUnit 4 includes most of JUnit 3, so let's cheat
+			fVintage.setVisible(false);
+			fLink.setVisible(false);
+			extraAttributes= new IClasspathAttribute[0];
 		}
 
 		if (libEntry == null) {
@@ -202,7 +230,8 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 				status.setWarning(JUnitMessages.JUnitContainerWizardPage_warning_java8_required);
 			}
 		}
-		fContainerEntryResult= JavaCore.newContainerEntry(containerPath);
+		fContainerEntryResult= JavaCore.newContainerEntry(containerPath, new IAccessRule[0],extraAttributes,
+				false);
 
 		if (fResolvedPath != null && !fResolvedPath.isDisposed()) {
 			if (libEntry != null) {

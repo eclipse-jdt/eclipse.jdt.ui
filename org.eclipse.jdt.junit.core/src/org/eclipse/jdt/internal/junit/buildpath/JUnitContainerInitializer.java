@@ -124,7 +124,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
 			break;
 		case JUNIT5:
-			boolean vintage = isVintage(attributes);
+			boolean vintage = JUnitCore.isVintage(attributes);
 			entriesList.add(BuildPathSupport.getJUnitJupiterApiLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterMigrationSupportLibraryEntry());
@@ -154,19 +154,6 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 		}
 		IClasspathEntry[] entries= entriesList.toArray(new IClasspathEntry[entriesList.size()]);
 		return new JUnitContainer(containerPath, entries);
-	}
-
-
-	private static boolean isVintage(IClasspathAttribute[] attributes) {
-		if (attributes != null) {
-			for (IClasspathAttribute attribute : attributes) {
-				if (JUnitCore.VINTAGE_ATTRIBUTE.equals(attribute.getName())) {
-					return Boolean.parseBoolean(attribute.getValue());
-				}
-			}
-		}
-		// default is true for backward compat
-		return true;
 	}
 
 	private static boolean isValidJUnitContainerPath(IPath path) {
