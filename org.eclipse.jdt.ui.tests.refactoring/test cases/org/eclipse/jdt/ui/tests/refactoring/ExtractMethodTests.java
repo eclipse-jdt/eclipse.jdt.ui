@@ -239,6 +239,8 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 		selectionTest(5, 14, 5, 19);
 	}
 
+
+
 	//=====================================================================================
 	// Testing invalid selections
 	//=====================================================================================
@@ -799,6 +801,23 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 	}
 
 
+	@Test
+	public void test3000() throws Exception {
+		invalidSelectionTest();//==https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/697
+	}
+
+	@Test
+	public void test3001() throws Exception {
+		invalidSelectionTest();//==https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/697
+	}
+
+	@Test
+	public void test3002() throws Exception {
+		invalidSelectionTest();//==https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/697
+	}
+
+
+
 	//====================================================================================
 	// Testing valid selections
 	//=====================================================================================
@@ -1095,6 +1114,7 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 	public void test353() throws Exception {
 		validSelectionTest();
 	}
+
 
 	@Test
 	public void test360() throws Exception {
@@ -2681,4 +2701,5 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 	public void testIssue671() throws Exception {
 		validSelectionTestChecked();
 	}
+
 }

@@ -515,6 +515,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractInterfaceRefactoring_name;
 
+	public static String ExtractMethodAnalyzer_multiple_exits;
+
 	public static String ExtractMethodAnalyzer_after_do_keyword;
 
 	public static String ExtractMethodAnalyzer_ambiguous_return_value;
