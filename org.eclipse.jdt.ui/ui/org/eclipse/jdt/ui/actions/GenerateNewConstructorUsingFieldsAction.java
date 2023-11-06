@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -287,10 +287,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				if (type != null) {
 					if (type.isRecord()) {
 						MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_record_not_applicable);
-					} else if (type.getFields().length > 0) {
-						run(type, new IField[0], true);
 					} else {
-						MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_typeContainsNoFields_message);
+						run(type, new IField[0], true);
 					}
 					return;
 				}
@@ -356,11 +354,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			if (allSelected.contains(javaElement)) {
 				selected.add(curr);
 			}
-		}
-		if (fieldsToBindings.isEmpty()) {
-			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_typeContainsNoFields_message);
-			notifyResult(false);
-			return;
 		}
 
 		ArrayList<IVariableBinding> fields= new ArrayList<>();

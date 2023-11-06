@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -706,6 +706,26 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	}\r\n" +
 				"}\r\n" +
 				"", unit.getSource());
+	}
+	@Test
+	public void test16() throws Exception {  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=552556
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"}", true, null);
+		IType typeA= a.getType("A");
+
+		runOperation(typeA, new IField[] {}, null, null, false, false, Modifier.PUBLIC);
+
+		compareSource("package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"\r\n" +
+				"	public A() {\r\n" +
+				"		super();\r\n" +
+				"	}\r\n" +
+				"}", a.getSource());
 	}
 
 	@Test
